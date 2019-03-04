@@ -1,0 +1,73 @@
+<html>
+<head>
+    <meta charset="UTF-8"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <link href="fhir.css" rel="stylesheet"/>
+
+    <!-- Bootstrap core CSS -->
+    <link href="dist/css/bootstrap.css" rel="stylesheet"/>
+    <link href="assets/css/bootstrap-fhir.css" rel="stylesheet"/>
+    <link href="assets/css/bootstrap-glyphicons.css" rel="stylesheet">
+
+    <!-- Project extras -->
+    <link href="assets/css/project.css" rel="stylesheet"/>
+    <link href="assets/css/pygments-manni.css" rel="stylesheet"/>
+    <link href="jquery-ui.css" rel="stylesheet"/>
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="assets/js/html5shiv.js"></script>
+    <script src="assets/js/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="assets/ico/apple-touch-icon-144-precomposed.png"/>
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/ico/apple-touch-icon-114-precomposed.png"/>
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/ico/apple-touch-icon-72-precomposed.png"/>
+    <link rel="apple-touch-icon-precomposed" href="assets/ico/apple-touch-icon-57-precomposed.png"/>
+    <link rel="shortcut icon" href="assets/ico/favicon.png"/>
+
+</head>
+<body>
+
+<div style="padding-left: 10px">
+    <a name='Quantity'> </a>
+    <h2> Quantity <a href='QUICK-Quantity.html#Quantity' title='link to here' class='self-link'> <img src='target.png' width='20' class='self-link' height='20'/></a></h2>
+    <p>A quantity is a number with an associated unit. For example:</p>
+    <p style="border: 1px solid">
+        6 'gm/cm3'
+        <br/>
+        80 'mm[Hg]'
+        <br/>
+        3 months
+    </p>
+    <p>CQL supports the following built-in units for time granularities:</p>
+    <p style="border: 1px solid">
+        years
+        <br/>
+        months
+        <br/>
+        weeks
+        <br/>
+        days
+        <br/>
+        hours
+        <br/>
+        minutes
+        <br/>
+        seconds
+        <br/>
+        milliseconds
+    </p>
+
+    <table class="table table-striped table-bordered">
+        <thead><tr><th>Field</th><th>Card.</th><th>Type</th><th>Description</th></tr></thead>
+        <tr><td>value</td><td>1..1</td><td><a href='QUICK-Decimal.html'>Decimal</a></td><td>The value of the Quantity. The value can be an Integer or Decimal. Note however that most operations involving time-based quantities ignore the decimal portion of a time-based quantity.</td></tr>
+        <tr><td>unit</td><td>1..1</td><td><a href='QUICK-String.html'>String</a></td><td>The unit of the Quantity. CQL supports any valid Unified Code for Units of Measure (UCUM) unit code using the String representation of the UCUM code immediately following the numeric value, as shown in the first example in this section. UCUM codes can be specified in the case-sensitive (c/s) or case-insenstive form (c/i).</td></tr>
+    </table>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,48 @@
+<html>
+<head>
+    <meta charset="UTF-8"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <link href="fhir.css" rel="stylesheet"/>
+
+    <!-- Bootstrap core CSS -->
+    <link href="dist/css/bootstrap.css" rel="stylesheet"/>
+    <link href="assets/css/bootstrap-fhir.css" rel="stylesheet"/>
+    <link href="assets/css/bootstrap-glyphicons.css" rel="stylesheet">
+
+    <!-- Project extras -->
+    <link href="assets/css/project.css" rel="stylesheet"/>
+    <link href="assets/css/pygments-manni.css" rel="stylesheet"/>
+    <link href="jquery-ui.css" rel="stylesheet"/>
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="assets/js/html5shiv.js"></script>
+    <script src="assets/js/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="assets/ico/apple-touch-icon-144-precomposed.png"/>
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/ico/apple-touch-icon-114-precomposed.png"/>
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/ico/apple-touch-icon-72-precomposed.png"/>
+    <link rel="apple-touch-icon-precomposed" href="assets/ico/apple-touch-icon-57-precomposed.png"/>
+    <link rel="shortcut icon" href="assets/ico/favicon.png"/>
+
+</head>
+<body>
+
+<div style="padding-left: 10px">
+    <a name='DateTime'> </a>
+    <h2> DateTime <a href='QUICK-DateTime.html#DateTime' title='link to here' class='self-link'> <img src='target.png' width='20' class='self-link' height='20'/></a></h2>
+    <p>CQL DateTime values are used to represent an instant along the timeline, known to at least the year precision, and potentially to the millisecond precision. CQL supports date and time values in the range @0001-01-01T00:00:00.0 to @9999-12-31T23:59:59.999 with a 1 millisecond step size. DateTime values are specified using an at-symbol (@) followed by an ISO-8601 textual representation of the DateTime value:</p>
+    <p style="border: 1px solid">
+        @2014-01-25
+        <br/>
+        @2014-01-25T14:30:14.559
+    </p>
+    <p>For DateTime values, timezone may be specified as either UTC time (Z), or as a timezone offset. If no timezone is specified, the timezone of the evaluation request timestamp is used. Specifically, because DateTime values may be specified to varying levels of precisions, operations such as comparison and duration calculation may result in null, rather than the true or false that would result from the same operation involving fully specified values.</p>
+</div>
+
+</body>
+</html>

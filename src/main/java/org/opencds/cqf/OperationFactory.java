@@ -1,0 +1,37 @@
+package org.opencds.cqf;
+
+//import org.opencds.cqf.jsonschema.SchemaGenerator;
+import org.opencds.cqf.library.LibraryGenerator;
+import org.opencds.cqf.qdm.QdmToQiCore;
+import org.opencds.cqf.quick.QuickPageGenerator;
+import org.opencds.cqf.terminology.GenericValueSetGenerator;
+import org.opencds.cqf.terminology.VSACValueSetGenerator;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+class OperationFactory {
+
+    static Operation createOperation(String operationName) {
+        switch (operationName) {
+            case "QdmToQiCore":
+                return new QdmToQiCore();
+            case "QiCoreQUICK":
+                return new QuickPageGenerator();
+            case "VsacXlsxToValueSet":
+                return new VSACValueSetGenerator();
+            case "XlsxToValueSet":
+                return new GenericValueSetGenerator();
+            case "CqlToLibrary":
+                return new LibraryGenerator();
+            case "JsonSchemaGenerator":
+//                return new SchemaGenerator();
+            case "CqlToMeasure":
+                throw new NotImplementedException();
+            case "BundlesToBundle":
+                throw new NotImplementedException();
+            case "BundleToResources":
+                throw new NotImplementedException();
+            default:
+                throw new IllegalArgumentException("Invalid operation: " + operationName);
+        }
+    }
+}

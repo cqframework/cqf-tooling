@@ -1,0 +1,58 @@
+package org.opencds.cqf.terminology;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Map;
+
+public class SpreadsheetHelper {
+
+    public static Workbook getWorkbook(String pathToSpreadsheet) {
+        try {
+            FileInputStream spreadsheetStream = new FileInputStream(new File(pathToSpreadsheet));
+            return new XSSFWorkbook(spreadsheetStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Error reading the spreadsheet: " + e.getMessage());
+        }
+    }
+
+    public static String getCellAsString(Cell cell) {
+        cell.setCellType(CellType.STRING);
+        return cell.getStringCellValue();
+    }
+
+    public static void resolveValueSet(org.hl7.fhir.dstu3.model.ValueSet vs, Map<Integer, ValueSet> codesBySystem) {
+        vs.setCompose(new org.hl7.fhir.dstu3.model.ValueSet.ValueSetComposeComponent());
+        for (Map.Entry<Integer, org.opencds.cqf.terminology.ValueSet> entry : codesBySystem.entrySet()) {
+            org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent component = new org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent();
+            component.setSystem(entry.getValue().getSystem()).setVersion(entry.getValue().getVersion()).setConcept(entry.getValue().getCodes());
+            vs.setCompose(vs.getCompose().addInclude(component));
+        }
+    }
+
+    public static void writeValueSetToFile(org.hl7.fhir.dstu3.model.ValueSet vs, String encoding, String outputPath) {
+        String fileName = vs.getTitle() != null ? vs.getTitle().replaceAll("\\s", "").concat("." + encoding) : "valueset".concat("." + encoding);
+        IParser parser =
+                encoding == null
+                        ? FhirContext.forDstu3().newJsonParser()
+                        : encoding.toLowerCase().startsWith("j")
+                        ? FhirContext.forDstu3().newJsonParser()
+                        : FhirContext.forDstu3().newXmlParser();
+        try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + fileName)) {
+            writer.write(parser.setPrettyPrint(true).encodeResourceToString(vs).getBytes());
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Error writing ValueSet to file: " + e.getMessage());
+        }
+    }
+}
