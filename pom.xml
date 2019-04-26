@@ -37,6 +37,13 @@
             <version>3.7.0</version>
         </dependency>
 
+        <!-- StructureDef to ModelInfo -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.5</version>
+        </dependency>
+
         <!-- Useful String ops -->
         <dependency>
             <groupId>commons-lang</groupId>
