@@ -318,9 +318,9 @@ public class GenericValueSetGenerator extends Operation {
                 throw new IllegalArgumentException("System not provided");
             }
             try {
-                system = system.startsWith("http") ? system : VSACDictionary.getUrlFromName(system);
+                system = system.startsWith("http") ? system : CodeSystemLookupDictionary.getUrlFromName(system);
             } catch (IllegalArgumentException e) {
-                system = VSACDictionary.getUrlFromOid(system);
+                system = CodeSystemLookupDictionary.getUrlFromOid(system);
             }
 
             if (versionIterator != null) {
