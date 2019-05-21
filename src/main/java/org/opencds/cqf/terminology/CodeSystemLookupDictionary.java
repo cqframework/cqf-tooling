@@ -146,6 +146,7 @@ public class CodeSystemLookupDictionary {
             case "CDCREC": return "http://www.cdc.gov/phin/resources/vocabulary/index.html";
             case "SOP": return "http://www.phdsc.org/standards/pdfs/SourceofPaymentTypologyVersion6FINALSeptember2015.pdf";
             case "MSDRG": return "MSDRG"; //TODO: CodeSystem.Oid = "NA". Get URL
+            case "Modifier": return "http://www.ama-assn.org/go/cpt";
             default: throw new IllegalArgumentException("Unknown CodeSystem name: " + name);
         }
     }
