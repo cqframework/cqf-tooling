@@ -1,6 +1,7 @@
 package org.opencds.cqf;
 
 //import org.opencds.cqf.jsonschema.SchemaGenerator;
+import org.opencds.cqf.igtools.IgBundler;
 import org.opencds.cqf.library.LibraryGenerator;
 import org.opencds.cqf.qdm.QdmToQiCore;
 import org.opencds.cqf.quick.QuickPageGenerator;
@@ -30,6 +31,8 @@ class OperationFactory {
                 return new LibraryGenerator();
             case "JsonSchemaGenerator":
 //                return new SchemaGenerator();
+            case "BundleIg":
+                return new IgBundler();
             case "CqlToMeasure":
                 throw new NotImplementedException();
             case "BundlesToBundle":
