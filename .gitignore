@@ -106,4 +106,8 @@ hs_err_pid*
 
 /src/main/resources/org/opencds/cqf/jsonschema/output/*
 !/src/main/resources/org/opencds/cqf/jsonschema/output/.gitkeep
+
+/src/main/resources/org/opencds/cqf/igtools/output/*
+!/src/main/resources/org/opencds/cqf/igtools/output/.gitkeep
+
 *.iml
