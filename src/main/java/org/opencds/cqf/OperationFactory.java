@@ -5,7 +5,9 @@ import org.opencds.cqf.library.LibraryGenerator;
 import org.opencds.cqf.qdm.QdmToQiCore;
 import org.opencds.cqf.quick.QuickPageGenerator;
 import org.opencds.cqf.terminology.GenericValueSetGenerator;
+import org.opencds.cqf.terminology.CMSFlatMultiValueSetGenerator;
 import org.opencds.cqf.terminology.VSACValueSetGenerator;
+import org.opencds.cqf.terminology.HEDISValueSetGenerator;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 class OperationFactory {
@@ -18,6 +20,10 @@ class OperationFactory {
                 return new QuickPageGenerator();
             case "VsacXlsxToValueSet":
                 return new VSACValueSetGenerator();
+            case "VsacMultiXlsxToValueSet":
+                return new CMSFlatMultiValueSetGenerator();
+            case "HedisXlsxToValueSet":
+                return new HEDISValueSetGenerator();
             case "XlsxToValueSet":
                 return new GenericValueSetGenerator();
             case "CqlToLibrary":

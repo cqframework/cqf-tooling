@@ -123,10 +123,10 @@ public class VSACValueSetGenerator extends Operation {
                 if (system == null) {
                     throw new IllegalArgumentException(String.format("No system value found on row: %d", row.getRowNum()));
                 }
-                system = VSACDictionary.getUrlFromOid(system);
+                system = CodeSystemLookupDictionary.getUrlFromOid(system);
             }
             else {
-                system = VSACDictionary.getUrlFromName(system);
+                system = CodeSystemLookupDictionary.getUrlFromName(system);
             }
 
             String version = SpreadsheetHelper.getCellAsString(row.getCell(versionCol));

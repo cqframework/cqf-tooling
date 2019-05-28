@@ -1,6 +1,6 @@
 package org.opencds.cqf.terminology;
 
-public class VSACDictionary {
+public class CodeSystemLookupDictionary {
 
     /*
     CodeSystem Name           | URL                                               | OID
@@ -86,6 +86,11 @@ public class VSACDictionary {
             case "2.16.840.1.113883.5.111": return "http://hl7.org/fhir/v3/RoleCode";
             case "2.16.840.1.113883.5.1068": return "http://hl7.org/fhir/v3/RoleStatus";
             case "2.16.840.1.113883.6.96": return "http://snomed.info/sct";
+            case "2.16.840.1.113883.6.301.3": return "http://www.nubc.org";
+            case "2.16.840.1.113883.6.50": return "https://www.cms.gov/Medicare/Coding/place-of-service-codes/index.html";
+            case "2.16.840.1.113883.6.301.1": return "http://www.nubc.org";
+            case "2.16.840.1.113883.6.238": return "http://www.cdc.gov/phin/resources/vocabulary/index.html";
+            case "2.16.840.1.113883.3.221.5": return "http://www.phdsc.org/standards/pdfs/SourceofPaymentTypologyVersion6FINALSeptember2015.pdf";
             default: throw new IllegalArgumentException("Unknown CodeSystem oid: " + oid);
         }
     }
@@ -102,6 +107,7 @@ public class VSACDictionary {
             case "AdministrativeGender": return "http://hl7.org/fhir/v3/AdministrativeGender";
             case "AdministrativeSex": return "http://hl7.org/fhir/v2/0001";
             case "CPT": return "http://www.ama-assn.org/go/cpt";
+            case "CPT-CAT-II": return "http://www.ama-assn.org/go/cpt";
             case "CVX": return "http://hl7.org/fhir/sid/cvx";
             case "Confidentiality": return "http://hl7.org/fhir/v3/Confidentiality";
             case "DischargeDisposition": return "http://hl7.org/fhir/discharge-disposition";
@@ -111,6 +117,7 @@ public class VSACDictionary {
             case "ICD10CM": return "http://hl7.org/fhir/sid/icd-10";
             case "ICD10PCS": return "http://www.icd10data.com/icd10pcs";
             case "ICD9CM": return "http://hl7.org/fhir/sid/icd-9-cm";
+            case "ICD9PCS": return "http://hl7.org/fhir/sid/icd-9-cm";
             case "LOINC": return "http://loinc.org";
             case "LanguageAbilityMode": return "http://hl7.org/fhir/v3/LanguageAbilityMode";
             case "LanguageAbilityProficiency": return "http://hl7.org/fhir/v3/LanguageAbilityProficiency";
@@ -131,6 +138,15 @@ public class VSACDictionary {
             case "RoleCode": return "http://hl7.org/fhir/v3/RoleCode";
             case "RoleStatus": return "http://hl7.org/fhir/v3/RoleStatus";
             case "SNOMEDCT": return "http://snomed.info/sct";
+            case "SNOMED CT US Edition": return "http://snomed.info/sct";
+            case "UBREV": return "http://www.nubc.org";
+            case "POS": return "https://www.cms.gov/Medicare/Coding/place-of-service-codes/index.html";
+            case "UBTOB": return "http://www.nubc.org";
+            case "HL7": return " http://terminology.hl7.org/CodeSystem/v2-/0001";
+            case "CDCREC": return "http://www.cdc.gov/phin/resources/vocabulary/index.html";
+            case "SOP": return "http://www.phdsc.org/standards/pdfs/SourceofPaymentTypologyVersion6FINALSeptember2015.pdf";
+            case "MSDRG": return "MSDRG"; //TODO: CodeSystem.Oid = "NA". Get URL
+            case "Modifier": return "http://www.ama-assn.org/go/cpt";
             default: throw new IllegalArgumentException("Unknown CodeSystem name: " + name);
         }
     }
