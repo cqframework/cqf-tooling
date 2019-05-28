@@ -227,7 +227,7 @@ public class IgBundler extends Operation
             {
                 resource = xmlParser.parseResource(new FileReader(new File(path.toString())));
             }
-            else if (path.endsWith(".json"))
+            else if (path.toString().endsWith(".json"))
             {
                 resource = jsonParser.parseResource(new FileReader(new File(path.toString())));
             }
