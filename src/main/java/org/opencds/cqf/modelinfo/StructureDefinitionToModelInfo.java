@@ -599,10 +599,12 @@ public class StructureDefinitionToModelInfo extends Operation {
     }
 
     private String resolveTypeName(String url) throws Exception {
+        if (url != null) {
+            String modelName = resolveModelName(url);
+            return getTypeName(modelName, getTail(url));
+        }
 
-        String modelName = resolveModelName(url);
-        return getTypeName(modelName, getTail(url));
-
+        return null;
     }
 
     private String getTypeName(String modelName, String typeName) {
@@ -673,23 +675,22 @@ public class StructureDefinitionToModelInfo extends Operation {
     // Builds a TypeSpecifier from the given list of TypeRefComponents
     private TypeSpecifier buildTypeSpecifier(String modelName, TypeRefComponent typeRef) {
         try {
-            if (typeRef.getProfile() != null) {
+            if (typeRef != null && typeRef.getProfile() != null) {
                 return this.buildTypeSpecifier(this.resolveTypeName(typeRef.getProfile()));
             }
             else {
 
-                    if (modelInfoSettings.get("UseCQLPrimitives")) {
-                        String typeName = cqlTypeMappings.get(modelName + "." + typeRef.getCode());
-                        return this.buildTypeSpecifier(typeName);
-                    }
-                    else {
-                        return this.buildTypeSpecifier(modelName, typeRef.getCode());
-                    }
-            
+                if (modelInfoSettings.get("UseCQLPrimitives") && typeRef != null) {
+                    String typeName = cqlTypeMappings.get(modelName + "." + typeRef.getCode());
+                    return this.buildTypeSpecifier(typeName);
+                }
+                else {
+                    return this.buildTypeSpecifier(modelName,  typeRef != null && typeRef.hasCode() ? typeRef.getCode() : null);
+                }
             }
         }
         catch (Exception e) {
-            System.out.println("Error building type specificer for " + modelName + "." + typeRef.getCode() +": "+  e.getMessage());
+            System.out.println("Error building type specificer for " + modelName + "." + (typeRef != null ? typeRef.getCode() : "<No Type>") +": "+  e.getMessage());
             return null;
         }
     }
@@ -770,7 +771,7 @@ public class StructureDefinitionToModelInfo extends Operation {
         String result  = path.substring(root.length());
 
         if (result.startsWith(".")) {
-            result = result.substring(0);
+            result = result.substring(1);
         }
 
         return result;
@@ -1061,7 +1062,6 @@ public class StructureDefinitionToModelInfo extends Operation {
 
     // Builds the type specifier for the given element
     private TypeSpecifier buildElementTypeSpecifier(String modelName, String root, ElementDefinition ed) {
-
         String typeCode = this.typeCode(ed);
         if (!modelInfoSettings.get("UseCQLPrimitives") && typeCode != null && typeCode.equals("code") && ed.hasBinding() && ed.getBinding().getStrength() == BindingStrength.REQUIRED) {
             String typeName = ((StringType)(this.extension(ed.getBinding(), "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName").getValue())).getValue();
@@ -1086,7 +1086,7 @@ public class StructureDefinitionToModelInfo extends Operation {
             return nts;
         }
         else {
-            TypeSpecifier ts = this.buildTypeSpecifier(modelName, ed.getType().get(0));
+            TypeSpecifier ts = this.buildTypeSpecifier(modelName, ed.hasType() ? ed.getType().get(0) : null);
             if (ts instanceof NamedTypeSpecifier && ((NamedTypeSpecifier)ts).getName() == null) {
                 ts = this.buildTypeSpecifier(primitiveTypeMappings.get(this.getTypeName(modelName, root)));
             }
