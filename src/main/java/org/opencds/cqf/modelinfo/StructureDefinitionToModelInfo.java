@@ -1,6 +1,5 @@
 package org.opencds.cqf.modelinfo;
 
-import org.hl7.elm.r1.Except;
 import org.hl7.elm_modelinfo.r1.ChoiceTypeSpecifier;
 import org.hl7.elm_modelinfo.r1.ClassInfoElement;
 import org.hl7.elm_modelinfo.r1.ListTypeSpecifier;
@@ -19,6 +18,7 @@ import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.dstu3.model.Enumerations.BindingStrength;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
+import org.hl7.fhir.dstu3.model.StructureDefinition.TypeDerivationRule;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.File;
@@ -28,7 +28,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,35 +36,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.lang.model.element.TypeElement;
-
-import org.antlr.v4.parse.ANTLRParser.ruleReturns_return;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.opencds.cqf.Operation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import guru.nidi.graphviz.attribute.RankDir;
-import guru.nidi.graphviz.attribute.Shape;
-import guru.nidi.graphviz.engine.Format;
-import guru.nidi.graphviz.engine.Graphviz;
-import guru.nidi.graphviz.model.Graph;
-import guru.nidi.graphviz.model.Link;
-import guru.nidi.graphviz.model.LinkSource;
-import guru.nidi.graphviz.model.MutableGraph;
-import guru.nidi.graphviz.model.MutableNode;
-import guru.nidi.graphviz.model.Node;
-import guru.nidi.graphviz.model.PortNode;
 
 import com.google.common.io.Files;
-import com.google.gson.*;
-
-import static guru.nidi.graphviz.model.Factory.*;
 
 public class StructureDefinitionToModelInfo extends Operation {
 
@@ -147,15 +131,15 @@ public class StructureDefinitionToModelInfo extends Operation {
         }
     };
 
-    private static Map<String, String> ranks = new HashMap<String, String>() {
-        {
-            put("System", "10");
-            put("FHIR-Primitive", "20"); // Special case for primitives
-            put("FHIR", "30");
-            put("USCore", "40");
-            put("QICore", "50");
-        }
-    };
+    // private static Map<String, String> ranks = new HashMap<String, String>() {
+    //     {
+    //         put("System", "10");
+    //         put("FHIR-Primitive", "20"); // Special case for primitives
+    //         put("FHIR", "30");
+    //         put("USCore", "40");
+    //         put("QICore", "50");
+    //     }
+    // };
 
     // private static Map<String, String> rankToColor = new HashMap<String,
     // String>() {
@@ -319,12 +303,52 @@ public class StructureDefinitionToModelInfo extends Operation {
         System.out.println("Indexing StructureDefinitions by Id");
         structureDefinitions = indexResources(resources);
 
-        System.out.println("Creating dependency graph for StructureDefinitions");
-        MutableGraph g = createDependencyGraph(structureDefinitions);
+        // System.out.println("Creating dependency graph for StructureDefinitions");
+        // MutableGraph g = createDependencyGraph(structureDefinitions);
+
+        System.out.println("Building Primitives");
+        for (StructureDefinition sd : structureDefinitions.values()) {
+            if (sd.getKind() == StructureDefinitionKind.PRIMITIVETYPE){
+                try {
+                    this.buildClassInfo("FHIR", sd);
+                }
+                catch (Exception e) {
+                    System.out.println("Error building ClassInfo for: " + sd.getId() + " - " + e.getMessage());
+                }
+            }
+        }
+
+        System.out.println("Building ComplexTypes");
+        for (StructureDefinition sd : structureDefinitions.values()) {
+            if (sd.getKind() == StructureDefinitionKind.COMPLEXTYPE && 
+                (sd.getBaseDefinition() == null || 
+                    !sd.getBaseDefinition().equals("http://hl7.org/fhir/StructureDefinition/Extension"))) {
+                try {
+                    this.buildClassInfo("FHIR", sd);
+                }
+                catch (Exception e) {
+                    System.out.println("Error building ClassInfo for: " + sd.getId() + " - " + e.getMessage());
+                }
+            }
+        }
+
+        System.out.println("Building Resources");
+        for (StructureDefinition sd : structureDefinitions.values()) {
+            if (sd.getKind() == StructureDefinitionKind.RESOURCE && 
+                (!sd.hasDerivation() || 
+                    sd.getDerivation() == TypeDerivationRule.SPECIALIZATION)) {
+                try {
+                    this.buildClassInfo("FHIR", sd);
+                }
+                catch (Exception e) {
+                    System.out.println("Error building ClassInfo for: " + sd.getId() + " - " + e.getMessage());
+                }
+            }
+        }
 
         try {
-            // writeOutput("bubba.txt", "test");
-            Graphviz.fromGraph(g).render(Format.SVG).toFile(new File("example/fhir-graph.svg"));
+            writeOutput("bubba.txt", "test");
+            // Graphviz.fromGraph(g).render(Format.SVG).toFile(new File("example/fhir-graph.svg"));
         } catch (IOException e) {
             System.err.println("Encountered the following exception while creating file " + "bubba" + e.getMessage());
             e.printStackTrace();
@@ -350,74 +374,74 @@ public class StructureDefinitionToModelInfo extends Operation {
 
     }
 
-    private MutableGraph createDependencyGraph(Map<String, StructureDefinition> resourcesById) {
+    // private MutableGraph createDependencyGraph(Map<String, StructureDefinition> resourcesById) {
 
-        Map<String, MutableNode> nodes = new HashMap<>();
+    //     Map<String, MutableNode> nodes = new HashMap<>();
 
-        // Add a few nodes for base spec
-        MutableNode system = mutNode("System").add(Shape.RECTANGLE);
-        MutableNode fhir = mutNode("FHIR").add(Shape.RECTANGLE);
-        MutableNode uscore = mutNode("USCore").add(Shape.RECTANGLE);
-        MutableNode qicore = mutNode("QICore").add(Shape.RECTANGLE);
+    //     // Add a few nodes for base spec
+    //     MutableNode system = mutNode("System").add(Shape.RECTANGLE);
+    //     MutableNode fhir = mutNode("FHIR").add(Shape.RECTANGLE);
+    //     MutableNode uscore = mutNode("USCore").add(Shape.RECTANGLE);
+    //     MutableNode qicore = mutNode("QICore").add(Shape.RECTANGLE);
 
-        fhir = fhir.addLink(system);
-        uscore = uscore.addLink(fhir);
-        qicore = qicore.addLink(uscore);
+    //     fhir = fhir.addLink(system);
+    //     uscore = uscore.addLink(fhir);
+    //     qicore = qicore.addLink(uscore);
 
-        nodes.put("System", system);
-        nodes.put("FHIR", fhir);
-        nodes.put("USCore", uscore);
-        nodes.put("QICore", qicore);
+    //     nodes.put("System", system);
+    //     nodes.put("FHIR", fhir);
+    //     nodes.put("USCore", uscore);
+    //     nodes.put("QICore", qicore);
 
-        // Add a node representing each Id;
-        for (Entry<String, StructureDefinition> entry : resourcesById.entrySet()) {
-            String key = entry.getKey();
-            // TODO: Set node properties...
-            nodes.put(key, mutNode(key).add(Shape.RECTANGLE));
-        }
+    //     // Add a node representing each Id;
+    //     for (Entry<String, StructureDefinition> entry : resourcesById.entrySet()) {
+    //         String key = entry.getKey();
+    //         // TODO: Set node properties...
+    //         nodes.put(key, mutNode(key).add(Shape.RECTANGLE));
+    //     }
 
-        for (Entry<String, StructureDefinition> entry : resourcesById.entrySet()) {
-            String key = entry.getKey();
-            StructureDefinition sd = entry.getValue();
-            MutableNode node = nodes.get(key);
+    //     for (Entry<String, StructureDefinition> entry : resourcesById.entrySet()) {
+    //         String key = entry.getKey();
+    //         StructureDefinition sd = entry.getValue();
+    //         MutableNode node = nodes.get(key);
 
-            if (sd.getKind() == StructureDefinitionKind.PRIMITIVETYPE) {
-                fhir = nodes.get("FHIR");
-                node.addLink(fhir);
-            }
+    //         if (sd.getKind() == StructureDefinitionKind.PRIMITIVETYPE) {
+    //             fhir = nodes.get("FHIR");
+    //             node.addLink(fhir);
+    //         }
 
-            if (sd.hasSnapshot()) {
-                List<ElementDefinition> elements = sd.getSnapshot().getElement();
+    //         if (sd.hasSnapshot()) {
+    //             List<ElementDefinition> elements = sd.getSnapshot().getElement();
 
-                for (ElementDefinition ed : elements) {
-                    PortNode p = node.port(ed.getPath());
-                    Set<String> dependencies = new HashSet<>();
+    //             for (ElementDefinition ed : elements) {
+    //                 PortNode p = node.port(ed.getPath());
+    //                 Set<String> dependencies = new HashSet<>();
 
-                    for (ElementDefinition.TypeRefComponent trc : ed.getType()) {
-                        if (trc.hasProfile()) {
-                            dependencies.add(trc.getProfile());
-                        }
+    //                 for (ElementDefinition.TypeRefComponent trc : ed.getType()) {
+    //                     if (trc.hasProfile()) {
+    //                         dependencies.add(trc.getProfile());
+    //                     }
 
-                        if (trc.hasTargetProfile()) {
-                            dependencies.add(trc.getTargetProfile());
-                        }
-                        // System.out.println(trc.getProfile());
-                    }
+    //                     if (trc.hasTargetProfile()) {
+    //                         dependencies.add(trc.getTargetProfile());
+    //                     }
+    //                     // System.out.println(trc.getProfile());
+    //                 }
 
-                    if (ed.hasExtension()) {
-                        dependencies.addAll(getExtensionRecursive(ed.getExtension()));
-                    }
+    //                 if (ed.hasExtension()) {
+    //                     dependencies.addAll(getExtensionRecursive(ed.getExtension()));
+    //                 }
 
-                    for (String url : dependencies) {
-                        String id = urlToId(url);
-                        if (nodes.containsKey(id)) {
-                            MutableNode dependency = nodes.get(id);
-                            node.addLink(dependency);
-                        }
-                    }
-                }
-            }
-        }
+    //                 for (String url : dependencies) {
+    //                     String id = urlToId(url);
+    //                     if (nodes.containsKey(id)) {
+    //                         MutableNode dependency = nodes.get(id);
+    //                         node.addLink(dependency);
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
 
         // return resourceDependenciesById
 
@@ -453,29 +477,29 @@ public class StructureDefinitionToModelInfo extends Operation {
         // nodes.put(key, node);
         // }
 
-        List<LinkSource> links = new ArrayList<>();
-        links.addAll(nodes.values());
+    //     List<LinkSource> links = new ArrayList<>();
+    //     links.addAll(nodes.values());
 
-        return mutGraph("FHIR").setDirected(true).add(links);
-    }
+    //     return mutGraph("FHIR").setDirected(true).add(links);
+    // }
 
-    private Set<String> getExtensionRecursive(List<Extension> extensions) {
-        Set<String> urls = new HashSet<>();
+    // private Set<String> getExtensionRecursive(List<Extension> extensions) {
+    //     Set<String> urls = new HashSet<>();
 
-        for (Extension ex : extensions) {
-            if (ex.hasUrl() && !urls.contains(ex.getUrl())) {
-                urls.add(ex.getUrl());
-            }
+    //     for (Extension ex : extensions) {
+    //         if (ex.hasUrl() && !urls.contains(ex.getUrl())) {
+    //             urls.add(ex.getUrl());
+    //         }
 
-            if (ex.hasExtension()) {
-                Set<String> dependencies = getExtensionRecursive(ex.getExtension());
+    //         if (ex.hasExtension()) {
+    //             Set<String> dependencies = getExtensionRecursive(ex.getExtension());
 
-                urls.addAll(dependencies);
-            }
-        }
+    //             urls.addAll(dependencies);
+    //         }
+    //     }
 
-        return urls;
-    }
+    //     return urls;
+    // }
 
     private Map<String, StructureDefinition> indexResources(List<StructureDefinition> resources) {
         Map<String, StructureDefinition> resourcesById = new HashMap<String, StructureDefinition>();
@@ -569,7 +593,6 @@ public class StructureDefinitionToModelInfo extends Operation {
             if (e.getValue().equals(model)) {
                 return e.getKey();
             }
-
         }
 
         throw new Exception("Couldn't resolve model name for url: " + url);
@@ -671,7 +694,7 @@ public class StructureDefinitionToModelInfo extends Operation {
         }
     }
 
-    // Gets the type specifier for the given class info element
+
     private TypeSpecifier buildTypeSpecifier(String modelName, List<TypeRefComponent> typeReferencRefComponents) throws Exception {
        List<TypeSpecifier> specifiers = typeReferencRefComponents.stream()
             .map(x -> this.buildTypeSpecifier(modelName, x))
@@ -690,7 +713,7 @@ public class StructureDefinitionToModelInfo extends Operation {
         }
     }
 
-    // Returns the given string with the first letter capitalized
+    // Gets the type specifier for the given class info element
     private TypeSpecifier getTypeSpecifier(ClassInfoElement classInfoElement) {
         if (classInfoElement.getType() != null) {
             return this.buildTypeSpecifier(
@@ -713,7 +736,7 @@ public class StructureDefinitionToModelInfo extends Operation {
         return null;
     }
 
-    // Returns the given path with the first letter of every path capitalized
+    // Returns the given string with the first letter capitalized
     private String capitalize(String name) {
         if (name.length() >= 1) {
             return name.substring(0, 1).toUpperCase() + name.substring(1);
@@ -722,7 +745,7 @@ public class StructureDefinitionToModelInfo extends Operation {
         return name;
     }
 
-    // Returns the name of the component type used to represent anonymous nested structures
+    // Returns the given path with the first letter of every path capitalized
     private String captitalizePath(String path) {
         return String.join(".", 
             Arrays.asList(path.split("."))
@@ -731,7 +754,7 @@ public class StructureDefinitionToModelInfo extends Operation {
                 .collect(Collectors.toList()));
     }
 
-
+    // Returns the name of the component type used to represent anonymous nested structures
     private String getComponentTypeName(String path) {
         return this.captitalizePath(path) + "Component";
     }
@@ -809,7 +832,6 @@ public class StructureDefinitionToModelInfo extends Operation {
     private Boolean isBackboneElement(TypeSpecifier typeSpecifier) {
         if (typeSpecifier instanceof NamedTypeSpecifier) {
             NamedTypeSpecifier nts = (NamedTypeSpecifier)typeSpecifier;
-            // TODO: There's no TypeName. Is it Name or ModelName?
             String typeName = this.getTypeName(nts);
             return typeName != null && typeName.endsWith(".BackboneElement");
         }
@@ -853,7 +875,7 @@ public class StructureDefinitionToModelInfo extends Operation {
     }
 
     // Returns the element with the given name, if it exists
-    private ClassInfoElement classInfoForName(List<ClassInfoElement> elements, String name) {
+    private ClassInfoElement element(List<ClassInfoElement> elements, String name) {
         if (elements != null) {
             for (ClassInfoElement cie : elements) {
                 if (cie.getName().equals(name)) {
@@ -866,11 +888,11 @@ public class StructureDefinitionToModelInfo extends Operation {
     }
 
     // Returns the element with the given path
-    private ClassInfoElement classInfoforPath(List<ClassInfoElement> elements, String path) {
+    private ClassInfoElement forPath(List<ClassInfoElement> elements, String path) {
         ClassInfoElement result = null;
         String[] segments = path.split(".");
         for (String p : segments) {
-            result = classInfoforPath(elements, p);
+            result = element(elements, p);
             if (result != null) {
                 TypeInfo elementType = resolveType(result);
                 elements = ((ClassInfo)elementType).getElements();
@@ -885,8 +907,8 @@ public class StructureDefinitionToModelInfo extends Operation {
         String elementPath = this.unQualify(this.stripRoot(path, "#"));
 
         TypeInfo rootType = this.resolveType(modelName + "." + root);
-        ClassInfoElement element = this.classInfoforPath(((ClassInfo)rootType).getElements(), elementPath);
-        return element.getTypeSpecifier();
+        ClassInfoElement element = this.forPath(((ClassInfo)rootType).getElements(), elementPath);
+        return this.getTypeSpecifier(element);
     }
 
     private Boolean isContentReferenceTypeSpecifier(TypeSpecifier typeSpecifier) {
@@ -1039,9 +1061,9 @@ public class StructureDefinitionToModelInfo extends Operation {
 
     // Builds the type specifier for the given element
     private TypeSpecifier buildElementTypeSpecifier(String modelName, String root, ElementDefinition ed) {
-        // TODO: The D4 doesn't assume a list..
-        String typeCode = ed.getTypeFirstRep().getCode();
-        if (!modelInfoSettings.get("UseCQLPrimitives") && typeCode.equals("code") && ed.hasBinding() && ed.getBinding().getStrength() == BindingStrength.REQUIRED) {
+
+        String typeCode = this.typeCode(ed);
+        if (!modelInfoSettings.get("UseCQLPrimitives") && typeCode != null && typeCode.equals("code") && ed.hasBinding() && ed.getBinding().getStrength() == BindingStrength.REQUIRED) {
             String typeName = ((StringType)(this.extension(ed.getBinding(), "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName").getValue())).getValue();
             
             if (!this.typeInfos.containsKey(this.getTypeName(modelName, typeName))) {
@@ -1064,8 +1086,8 @@ public class StructureDefinitionToModelInfo extends Operation {
             return nts;
         }
         else {
-            TypeSpecifier ts = this.buildTypeSpecifier(modelName, ed.getTypeFirstRep());
-            if (ts instanceof NamedTypeSpecifier) {
+            TypeSpecifier ts = this.buildTypeSpecifier(modelName, ed.getType().get(0));
+            if (ts instanceof NamedTypeSpecifier && ((NamedTypeSpecifier)ts).getName() == null) {
                 ts = this.buildTypeSpecifier(primitiveTypeMappings.get(this.getTypeName(modelName, root)));
             }
 
@@ -1104,18 +1126,18 @@ public class StructureDefinitionToModelInfo extends Operation {
         List<ElementDefinition> eds,
         String structureRoot,
         List<ElementDefinition> structureEds,
-        int index
+        AtomicReference<Integer> index
     ) throws Exception {
-        ElementDefinition ed = eds.get(index);
+        ElementDefinition ed = eds.get(index.get());
         String path = ed.getPath();
 
         TypeSpecifier typeSpecifier = this.buildElementTypeSpecifier(modelName, root, ed);
 
-        String typeCode = ed.getTypeFirstRep().getCode();
+        String typeCode = this.typeCode(ed);
         StructureDefinition typeDefinition = structureDefinitions.get(typeCode);
 
         List<ElementDefinition> typeEds;
-        if (typeCode.equals("ComplexType") && !typeDefinition.getId().equals("BackboneElement")) {
+        if (typeCode != null && typeCode.equals("ComplexType") && !typeDefinition.getId().equals("BackboneElement")) {
             typeEds = typeDefinition.getSnapshot().getElement();
         }
         else {
@@ -1123,19 +1145,19 @@ public class StructureDefinitionToModelInfo extends Operation {
         }
 
         String typeRoot;
-        if (typeCode.equals("ComplexType") && !typeDefinition.getId().equals("BackboneElement")) {
+        if (typeCode != null && typeCode.equals("ComplexType") && !typeDefinition.getId().equals("BackboneElement")) {
             typeRoot = typeDefinition.getId();
         }
         else {
             typeRoot = structureRoot;
         }
 
-        index = index + 1;
+        index.set(index.get() + 1);
         List<ClassInfoElement> elements = new ArrayList<>();
-        while (index < eds.size()) {
-            ElementDefinition e = eds.get(index);
+        while (index.get() < eds.size()) {
+            ElementDefinition e = eds.get(index.get());
             if (e.getPath().startsWith(path) && !e.getPath().equals(path)) {
-                ClassInfoElement cie = this.visitElementDefinition(modelName, root, eds, structureRoot, structureEds, index);
+                ClassInfoElement cie = this.visitElementDefinition(modelName, root, eds, typeRoot, structureEds, index);
                 if (cie != null) {
                     elements.add(cie);
                 }
@@ -1149,8 +1171,10 @@ public class StructureDefinitionToModelInfo extends Operation {
         if (elements.size() > 0) {
             if (typeDefinition.getId().equals("BackboneElement")) {
                 String typeName = this.getComponentTypeName(path);
-                ClassInfo info = new ClassInfo(typeName, null, modelName + ".BackboneElement", false, elements, null);
-                this.typeInfos.put(this.getTypeName(modelName, typeName), info);
+                ClassInfo componentClassInfo = new ClassInfo(typeName, null, modelName + ".BackboneElement", false, elements, null);
+                this.typeInfos.put(this.getTypeName(modelName, typeName), componentClassInfo);
+
+                typeSpecifier = this.buildTypeSpecifier(modelName, typeName);
 
             }
             else if (typeDefinition.getId().equals("Extension")) {
@@ -1162,7 +1186,7 @@ public class StructureDefinitionToModelInfo extends Operation {
             }
         }
 
-        ElementDefinition typeEd = this.elementForPath(typeEds, this.translate(ed.getPath(), root, typeRoot));
+        ElementDefinition typeEd = this.elementForPath(typeEds, ed.getPath());
 
         return this.buildClassInfoElement(root, ed, typeEd, typeSpecifier);
     }
@@ -1199,7 +1223,7 @@ public class StructureDefinitionToModelInfo extends Operation {
         }
 
         String typeName = sd.getId();
-        int index = 1;
+        AtomicReference<Integer> index = new AtomicReference<Integer>(1);
         List<ClassInfoElement> elements = new ArrayList<>();
         List<ElementDefinition> eds = sd.getSnapshot().getElement();
         String path = sd.getType(); // Type is used to navigate the elements, regardless of the baseDefinition
@@ -1214,8 +1238,8 @@ public class StructureDefinitionToModelInfo extends Operation {
             structureEds = structure.getSnapshot().getElement();
         }
 
-        while (index < eds.size()) {
-            ElementDefinition e = eds.get(index);
+        while (index.get() < eds.size()) {
+            ElementDefinition e = eds.get(index.get());
             if (e.getPath().startsWith(path) && !e.getPath().equals(path)) {
                 ClassInfoElement cie = this.visitElementDefinition(modelName, path, eds, structure.getId(), structureEds, index);
                 if (cie != null) {
@@ -1228,7 +1252,8 @@ public class StructureDefinitionToModelInfo extends Operation {
             }
         }
 
-        ClassInfo info = new ClassInfo(typeName,typeName, this.resolveTypeName(sd.getBaseDefinition()), sd.getKind() == StructureDefinitionKind.RESOURCE, elements, this.primaryCodePath(elements, typeName));
+        System.out.println("Building ClassInfo for " + typeName);
+        ClassInfo info = new ClassInfo(typeName, typeName, this.resolveTypeName(sd.getBaseDefinition()), sd.getKind() == StructureDefinitionKind.RESOURCE, elements, this.primaryCodePath(elements, typeName));
 
         this.typeInfos.put(this.getTypeName(modelName, typeName), info);
 
