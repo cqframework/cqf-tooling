@@ -1088,7 +1088,14 @@ public class StructureDefinitionToModelInfo extends Operation {
         else {
             TypeSpecifier ts = this.buildTypeSpecifier(modelName, ed.hasType() ? ed.getType().get(0) : null);
             if (ts instanceof NamedTypeSpecifier && ((NamedTypeSpecifier)ts).getName() == null) {
-                ts = this.buildTypeSpecifier(primitiveTypeMappings.get(this.getTypeName(modelName, root)));
+                String tn = this.getTypeName(modelName, root);
+                if (primitiveTypeMappings.containsKey(tn)) {
+                    ts = this.buildTypeSpecifier(primitiveTypeMappings.get(this.getTypeName(modelName, root)));
+                }
+                else 
+                {
+                    ts = null;
+                }
             }
 
             return ts;
