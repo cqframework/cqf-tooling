@@ -2,8 +2,9 @@ package org.opencds.cqf.quick;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.hl7.fhir.dstu3.model.ElementDefinition;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -16,8 +17,8 @@ import java.util.stream.Collectors;
 
 public class QuickPageGenerator extends Operation {
 
-    // Assuming STU3
-    private FhirContext context = FhirContext.forDstu3();
+    // Assuming R4
+    private FhirContext context = FhirContext.forR4();
     private String qicoreDirPath;
     private QuickAtlas atlas;
 
@@ -64,157 +65,156 @@ public class QuickPageGenerator extends Operation {
             System.out.println("Processing the " + entrySet.getKey() + " profile...");
 
             // Initialize HTML page
-            HtmlBuilder html = new HtmlBuilder(entrySet.getKey());
+            HtmlBuilder html = new HtmlBuilder(entrySet.getKey(), atlas);
 
             // store relative URL in QuickAtlas maps
             atlas.getLinkMap().put(entrySet.getKey(), html.getFileName());
             atlas.getProfileMap().put(entrySet.getKey(), html.getFileName());
 
-            // Each QiCore profile must have a differential and a snapshot with elements
-            if (entrySet.getValue().hasDifferential() && entrySet.getValue().getDifferential().hasElement()
-                    && entrySet.getValue().hasSnapshot() && entrySet.getValue().getSnapshot().hasElement())
-            {
-                html.buildHeader(entrySet.getKey());
-                Map<String, ElementDefinition> snapshotMap = resolveSnapshotElements(entrySet.getValue().getSnapshot());
-                Map<String, String> backboneElements = new HashMap<>();
-                Map<String, HtmlBuilder> backboneHtml = new HashMap<>();
+            try {
 
-                // Get the profile definition - check the differential first
-                if (entrySet.getValue().getDifferential().getElementFirstRep().hasDefinition()) {
-                    html.buildParagraph(entrySet.getValue().getDifferential().getElementFirstRep().getDefinition());
-                }
-                else {
-                    html.buildParagraph(entrySet.getValue().getSnapshot().getElementFirstRep().getDefinition());
-                }
+                // Each QiCore profile must have a differential and a snapshot with elements
+                if (entrySet.getValue().hasDifferential() && entrySet.getValue().getDifferential().hasElement()
+                        && entrySet.getValue().hasSnapshot() && entrySet.getValue().getSnapshot().hasElement()) {
+                    html.buildHeader(entrySet.getKey());
+                    Map<String, ElementDefinition> snapshotMap = resolveSnapshotElements(entrySet.getValue().getSnapshot());
+                    Map<String, String> backboneElements = new HashMap<>();
+                    Map<String, HtmlBuilder> backboneHtml = new HashMap<>();
 
-                // Begin building the table of profile elements
-                html.buildLegend().buildTableStart();
+                    // Get the profile definition - check the differential first
+                    if (entrySet.getValue().getDifferential().getElementFirstRep().hasDefinition()) {
+                        html.buildParagraph(entrySet.getValue().getDifferential().getElementFirstRep().getDefinition());
+                    } else {
+                        html.buildParagraph(entrySet.getValue().getSnapshot().getElementFirstRep().getDefinition());
+                    }
 
-                // Walk-through each element in the differential
-                for (ElementDefinition element : entrySet.getValue().getDifferential().getElement()) {
-                    // get the differential ElementDefinition
-                    ElementDefinition snapshotElement = snapshotMap.get(element.getPath());
-                    // If the differential is null, check to see if the path is for a choice type
-                    if (snapshotElement == null) {
-                        String path = element.getPath();
-                        if (path.endsWith("[x]")) {
-                            path = path.replace("[x]", "");
-                        }
-                        for (Map.Entry<String, ElementDefinition> set : snapshotMap.entrySet()) {
-                            if (set.getValue().getPath().startsWith(path)
-                                    && atlas.getFhirTypes().containsKey((set.getValue().getPath().replace(path, ""))))
-                            {
-                                snapshotElement = set.getValue();
+                    // Begin building the table of profile elements
+                    html.buildLegend().buildTableStart();
+
+                    // Walk-through each element in the differential
+                    for (ElementDefinition element : entrySet.getValue().getDifferential().getElement()) {
+                        // get the differential ElementDefinition
+                        ElementDefinition snapshotElement = snapshotMap.get(element.getPath());
+                        // If the differential is null, check to see if the path is for a choice type
+                        if (snapshotElement == null) {
+                            String path = element.getPath();
+
+                            if (path.endsWith("[x]")) {
+                                path = path.replace("[x]", "");
+                            }
+                            for (Map.Entry<String, ElementDefinition> set : snapshotMap.entrySet()) {
+                                if (set.getValue().getPath().startsWith(path)
+                                        && atlas.getFhirTypes().containsKey((set.getValue().getPath().replace(path, "")))) {
+                                    snapshotElement = set.getValue();
+                                }
+                            }
+
+                            // If the differential is still null, we will assume the differential element does not exist
+                            if (snapshotElement == null) {
+                                throw new IllegalArgumentException("Could not resolve snapshot element for path: " + element.getPath());
                             }
                         }
 
-                        // If the differential is still null, we will assume the differential element does not exist
-                        if (snapshotElement == null) {
-                            throw new IllegalArgumentException("Could not resolve snapshot element for path: " + element.getPath());
+                        // Resolve the required table elements - always preferring use of the differential element
+                        boolean mustSupport = element.hasMustSupport() ? element.getMustSupport() : snapshotElement.getMustSupport();
+                        // TODO - for some reason all the modifier values for qicore profile differential elements default to false
+                        boolean isModifier = snapshotElement.getIsModifier();
+                        // Default to false ... will check later
+                        boolean qicoreExtension = false;
+                        String field = element.hasSliceName() ? element.getSliceName() : element.getPath().replace(entrySet.getKey() + ".", "");
+                        if (field.equals(entrySet.getKey()) || field.equals("id") || field.equals("extension")) {
+                            continue;
                         }
-                    }
+                        String min = element.hasMin() ? Integer.toString(element.getMin()) : Integer.toString(snapshotElement.getMin());
+                        String max = element.hasMax() ? element.getMax() : snapshotElement.getMax();
+                        String card = min + ".." + max;
 
-                    // Resolve the required table elements - always preferring use of the differential element
-                    boolean mustSupport = element.hasMustSupport() ? element.getMustSupport() : snapshotElement.getMustSupport();
-                    // TODO - for some reason all the modifier values for qicore profile differential elements default to false
-                    boolean isModifier = snapshotElement.getIsModifier();
-                    // Default to false ... will check later
-                    boolean qicoreExtension = false;
-                    String field = element.hasSliceName() ? element.getSliceName() : element.getPath().replace(entrySet.getKey() + ".", "");
-                    if (field.equals(entrySet.getKey()) || field.equals("id") || field.equals("extension")) {
-                        continue;
-                    }
-                    String min = element.hasMin() ? Integer.toString(element.getMin()) : Integer.toString(snapshotElement.getMin());
-                    String max = element.hasMax() ? element.getMax() : snapshotElement.getMax();
-                    String card = min + ".." + max;
+                        String description = element.hasDefinition() ? element.getDefinition() : snapshotElement.getDefinition();
+                        String binding = "";
+                        if (element.hasBinding() && element.getBinding().hasValueSet()) {
+                            binding += HtmlBuilder.buildBinding(
+                                    element.getBinding().getValueSet(),
+                                    element.getBinding().hasDescription()
+                                            ? element.getBinding().getDescription()
+                                            : element.getBinding().getValueSet(),
+                                    element.getBinding().getStrength().toCode()
+                            );
+                        } else if (snapshotElement.hasBinding() && snapshotElement.getBinding().hasValueSet()) {
+                            binding += HtmlBuilder.buildBinding(
+                                    snapshotElement.getBinding().getValueSet(),
+                                    snapshotElement.getBinding().hasDescription()
+                                            ? snapshotElement.getBinding().getDescription()
+                                            : snapshotElement.getBinding().getValueSet(),
+                                    snapshotElement.getBinding().getStrength().toCode()
+                            );
+                        }
+                        description = StringEscapeUtils.escapeHtml(description) + binding;
 
-                    String description = element.hasDefinition() ? element.getDefinition() : snapshotElement.getDefinition();
-                    String binding = "";
-                    if (element.hasBinding() && element.getBinding().hasValueSetReference()) {
-                        binding += HtmlBuilder.buildBinding(
-                                element.getBinding().getValueSetReference().getReference(),
-                                element.getBinding().hasDescription()
-                                        ? element.getBinding().getDescription()
-                                        : element.getBinding().getValueSetReference().getReference(),
-                                element.getBinding().getStrength().toCode()
+                        String type;
+                        if (element.hasType()) {
+                            type = resolveType(element);
+                        } else if (snapshotElement.hasType()) {
+                            type = resolveType(snapshotElement);
+                        } else {
+                            String[] pathSplit = field.split("\\.");
+                            String path = pathSplit[pathSplit.length - 1];
+                            if (backboneElements.containsKey(path)) {
+                                type = HtmlBuilder.buildLink(atlas.getLinkMap().get(backboneElements.get(path)), path);
+                            } else {
+                                throw new IllegalArgumentException("Could not resolve type declaration for field " + field + " for the profile " + entrySet.getKey());
+                            }
+                        }
+                        // Backbone elements need their own page
+                        if (type.contains("BackboneElement")) {
+                            HtmlBuilder backboneHtmlPage = new HtmlBuilder(element.getPath(), atlas)
+                                    .buildHeader(element.getPath())
+                                    .buildParagraph(description)
+                                    .buildLegend()
+                                    .buildTableStart();
+                            atlas.getLinkMap().put(element.getPath(), backboneHtmlPage.getFileName());
+                            backboneElements.put(field, element.getPath());
+                            type = type.replace("''", atlas.getLinkMap().get(element.getPath())).replace("BackboneElement", field);
+                            backboneHtml.put(field, backboneHtmlPage);
+                        }
+
+                        // Check for max cardinality of many - represent as a List
+                        if (max.equals("*")) {
+                            type = "List&lt;" + type + "&gt;";
+                        }
+
+                        // Empty href are removed (this is for compound extensions)
+                        if (type.contains("href=''")) {
+                            type = type.replace("<a href=''>", "").replace("</a>", "");
+                        }
+                        // Check for QiCore defined extension
+                        if (type.contains("StructureDefinition-qicore")) {
+                            qicoreExtension = true;
+                        }
+                        if (field.contains(".")) {
+                            String base = field.substring(0, field.lastIndexOf("."));
+                            if (backboneHtml.containsKey(base)) {
+                                backboneHtml.get(base)
+                                        .buildRow(mustSupport, isModifier, qicoreExtension, field.replace(base + ".", ""), card, type, description);
+                            }
+                        } else {
+                            html.buildRow(mustSupport, isModifier, qicoreExtension, field, card, type, description);
+                        }
+
+                        System.out.println(
+                                String.format("Field: %s, Card: %s, Type: %s, Description: %s", field, card, type, description)
                         );
                     }
-                    else if (snapshotElement.hasBinding() && snapshotElement.getBinding().hasValueSetReference()) {
-                        binding += HtmlBuilder.buildBinding(
-                                snapshotElement.getBinding().getValueSetReference().getReference(),
-                                snapshotElement.getBinding().hasDescription()
-                                        ? snapshotElement.getBinding().getDescription()
-                                        : snapshotElement.getBinding().getValueSetReference().getReference(),
-                                snapshotElement.getBinding().getStrength().toCode()
-                        );
-                    }
-                    description = StringEscapeUtils.escapeHtml(description) + binding;
+                    html.buildTableEnd();
 
-                    String type;
-                    if (element.hasType()) {
-                        type = resolveType(element);
+                    for (Map.Entry<String, HtmlBuilder> backboneEntry : backboneHtml.entrySet()) {
+                        writeHtmlFile(backboneEntry.getValue().getFileName(), backboneEntry.getValue().buildTableEnd().build());
                     }
-                    else if (snapshotElement.hasType()) {
-                        type = resolveType(snapshotElement);
-                    }
-                    else {
-                        String[] pathSplit = field.split("\\.");
-                        String path = pathSplit[pathSplit.length - 1];
-                        if (backboneElements.containsKey(path)) {
-                            type = HtmlBuilder.buildLink(atlas.getLinkMap().get(backboneElements.get(path)), path);
-                        }
-                        else {
-                            throw new IllegalArgumentException("Could not resolve type declaration for field " + field + " for the profile " + entrySet.getKey());
-                        }
-                    }
-                    // Backbone elements need their own page
-                    if (type.contains("BackboneElement")) {
-                        HtmlBuilder backboneHtmlPage = new HtmlBuilder(element.getPath())
-                                .buildHeader(element.getPath())
-                                .buildParagraph(description)
-                                .buildLegend()
-                                .buildTableStart();
-                        atlas.getLinkMap().put(element.getPath(), backboneHtmlPage.getFileName());
-                        backboneElements.put(field, element.getPath());
-                        type = type.replace("''", atlas.getLinkMap().get(element.getPath())).replace("BackboneElement", field);
-                        backboneHtml.put(field, backboneHtmlPage);
-                    }
-
-                    // Check for max cardinality of many - represent as a List
-                    if (max.equals("*")) {
-                        type = "List&lt;" + type + "&gt;";
-                    }
-
-                    // Empty href are removed (this is for compound extensions)
-                    if (type.contains("href=''")) {
-                        type = type.replace("<a href=''>", "").replace("</a>", "");
-                    }
-                    // Check for QiCore defined extension
-                    if (type.contains("StructureDefinition-qicore")) {
-                        qicoreExtension = true;
-                    }
-                    if (field.contains(".")) {
-                        String base = field.substring(0, field.lastIndexOf("."));
-                        if (backboneHtml.containsKey(base)) {
-                            backboneHtml.get(base)
-                                    .buildRow(mustSupport, isModifier, qicoreExtension, field.replace(base + ".", ""), card, type, description);
-                        }
-                    }
-                    else {
-                        html.buildRow(mustSupport, isModifier, qicoreExtension, field, card, type, description);
-                    }
-
-                    System.out.println(
-                            String.format("Field: %s, Card: %s, Type: %s, Description: %s", field, card, type, description)
-                    );
                 }
-                html.buildTableEnd();
-
-                for (Map.Entry<String, HtmlBuilder> backboneEntry : backboneHtml.entrySet()) {
-                    writeHtmlFile(backboneEntry.getValue().getFileName(), backboneEntry.getValue().buildTableEnd().build());
-                }
+                writeHtmlFile(html.getFileName(), html.build());
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new IllegalArgumentException("QUICK generation failed in processQiCoreProfiles due to the following error: " + e.getMessage());
             }
-            writeHtmlFile(html.getFileName(), html.build());
         }
     }
 
@@ -228,7 +228,7 @@ public class QuickPageGenerator extends Operation {
             if (sd == null || atlas.getPrimitiveMap().containsKey(sd.getType()) || sd.getType().equals("Quantity")) {
                 continue;
             }
-            HtmlBuilder html = new HtmlBuilder(entry.getKey())
+            HtmlBuilder html = new HtmlBuilder(entry.getKey(), atlas)
                     .buildHeader(entry.getKey())
                     .buildParagraph(sd.getDifferential().getElementFirstRep().getDefinition())
                     .buildLegend()
@@ -302,7 +302,7 @@ public class QuickPageGenerator extends Operation {
      * @throws IOException
      */
     private void buildOverview() throws IOException {
-        HtmlBuilder overview = new HtmlBuilder("overview")
+        HtmlBuilder overview = new HtmlBuilder("overview", atlas)
                 .buildOverviewHeader("QUICK Data Model")
                 .buildParagraph("The QUICK data model provides a logical view of clinical data from the persepctive of representing quality measurement and decision support knowledge.")
                 .appendHtml("<h2>Relationship to FHIR and QI-Core</h2>\n" +
@@ -359,52 +359,88 @@ public class QuickPageGenerator extends Operation {
      */
     private String resolveType(ElementDefinition element) {
         List<String> types = new ArrayList<>();
-        for (ElementDefinition.TypeRefComponent typeRef : element.getType()) {
-            String cqlType = mapToCqlType(typeRef.getCode());
-            if (cqlType.startsWith("Interval")) {
-                types.add(cqlType);
-                continue;
-            }
+        try {
+            for (ElementDefinition.TypeRefComponent typeRef : element.getType()) {
+                String elementCQLType = mapToCqlType(typeRef.getCode());
+                if (elementCQLType.startsWith("Interval")) {
 
-            String href;
-            if (cqlType.equals("Reference") && typeRef.hasTargetProfile()) {
-                href = typeRef.getTargetProfile();
-                cqlType = atlas.getQicoreUrlToType().get(typeRef.getTargetProfile());
-                if (cqlType == null) {
-                    String[] urlSplit = typeRef.getTargetProfile().split("/");
-                    cqlType = urlSplit[urlSplit.length - 1];
-                }
-            }
-            else if (cqlType.equals("Extension")) {
-                href = typeRef.getProfile();
-                if (href != null && href.contains("us/core/StructureDefinition")) {
-                    href = href.replace("StructureDefinition/", "StructureDefinition-") + ".html";
-                }
-            }
-            else {
-                href = atlas.getLinkMap().get(cqlType);
-                if (href != null && href.contains("QUICK-Quantity")) {
-                    href = "http://cql.hl7.org/02-authorsguide.html#quantities";
-                }
-                if (atlas.getFhirTypes().containsKey(cqlType)) {
-                    atlas.getComplexMap().put(cqlType, href);
-                }
-            }
+                    //types.add(HtmlBuilder.build(href, elementCQLType));
 
-            if (href != null && href.contains("qicore")) {
-                if (atlas.getQicoreExtensions().containsKey(href)) {
-                    href = href.replace("http://hl7.org/fhir/us/qicore/", "").replace("StructureDefinition/", "../StructureDefinition-") + ".html";
-                    types.add(HtmlBuilder.buildNewTabLink(href, cqlType));
+                    types.add(elementCQLType);
                     continue;
                 }
+
+                String href;
+                if ((elementCQLType.equals("Reference") && typeRef.hasTargetProfile()) || (elementCQLType.equals("Extension") && typeRef.hasProfile())) {
+                    List<CanonicalType> profileList = new ArrayList<>();
+
+                    if (elementCQLType.equals("Reference")) {
+                        profileList = typeRef.getTargetProfile();
+                    } else if (elementCQLType.equals("Extension")) {
+                        profileList = typeRef.getProfile();
+                    }
+
+                    String canonicalTypeString;
+                    for (CanonicalType canonicalType : profileList) {
+                        canonicalTypeString = canonicalType.asStringValue();
+                        href = canonicalTypeString;
+                        String profileCQLType = elementCQLType;
+                        if (elementCQLType.equals("Reference")) {
+                            profileCQLType = atlas.getQicoreUrlToType().get(canonicalTypeString);
+                            if (profileCQLType == null) {
+                                String[] urlSplit = canonicalTypeString.split("/");
+                                profileCQLType = urlSplit[urlSplit.length - 1];
+                            }
+                        } else if (elementCQLType.equals("Extension")) {
+                            if (href != null && href.contains("us/core/StructureDefinition")) {
+                                href = href.replace("StructureDefinition/", "StructureDefinition-") + ".html";
+                            }
+                        }
+
+                        if (href != null && href.contains("qicore")) {
+                            if (atlas.getQicoreExtensions().containsKey(href)) {
+                                href = href.replace("http://hl7.org/fhir/us/qicore/", "").replace("StructureDefinition/", "../StructureDefinition-") + ".html";
+                                types.add(HtmlBuilder.buildNewTabLink(href, profileCQLType));
+                                continue;
+                            }
+                            else {
+                                href = "QUICK-" + profileCQLType + ".html";
+                            }
+                        }
+
+                        types.add(HtmlBuilder.buildLink(href, profileCQLType));
+                    }
+                }
                 else {
-                    href = "QUICK-" + cqlType + ".html";
+                    href = atlas.getLinkMap().get(elementCQLType);
+                    if (href != null && href.contains("QUICK-Quantity")) {
+                        href = "http://cql.hl7.org/02-authorsguide.html#quantities";
+                    }
+                    if (atlas.getFhirTypes().containsKey(elementCQLType)) {
+                        atlas.getComplexMap().put(elementCQLType, href);
+                    }
+
+                    if (href != null && href.contains("qicore")) {
+                        if (atlas.getQicoreExtensions().containsKey(href)) {
+                            href = href.replace("http://hl7.org/fhir/us/qicore/", "").replace("StructureDefinition/", "../StructureDefinition-") + ".html";
+                            types.add(HtmlBuilder.buildNewTabLink(href, elementCQLType));
+                            continue;
+                        }
+                        else {
+                            href = "QUICK-" + elementCQLType + ".html";
+                        }
+                    }
+
+                    types.add(HtmlBuilder.buildLink(href, elementCQLType));
                 }
             }
 
-            types.add(HtmlBuilder.buildLink(href, cqlType));
+            return types.stream().collect(Collectors.joining(" | "));
         }
-        return types.stream().collect(Collectors.joining(" | "));
+        catch (Exception e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("QUICK generation failed in resolveType due to the following error: " + e.getMessage());
+        }
     }
 
     /**
@@ -434,8 +470,8 @@ public class QuickPageGenerator extends Operation {
             // complex
             case "Coding": return "Code";
             case "CodeableConcept": return "Concept";
-            case "Period": return "Interval&lt;<a href='http://cql.hl7.org/02-authorsguide.html#datetime-and-time' target='_blank'>DateTime</a>&gt;";
-            case "Range": return "Interval&lt;<a href='http://cql.hl7.org/02-authorsguide.html#quantities' target='_blank'>Quantity</a>&gt;";
+            case "Period": return String.format("<a href='%s' target='_blank'>Interval</a>&lt;<a href='%s' target='_blank'>DateTime</a>&gt;", atlas.getCqlIntervalUrl(), atlas.getCqlDateTimeAndTimeUrl());
+            case "Range": return String.format("<a href='%s' target='_blank'>Interval</a>&lt;<a href='#s' target='_blank'>Quantity</a>&gt;", atlas.getCqlIntervalUrl(), atlas.getCqlQuantityUrl());
             default: return type;
         }
     }
