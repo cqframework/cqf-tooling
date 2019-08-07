@@ -9,6 +9,7 @@ import org.hl7.elm_modelinfo.r1.ModelSpecifier;
 import org.hl7.elm_modelinfo.r1.NamedTypeSpecifier;
 import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.hl7.elm_modelinfo.r1.TypeSpecifier;
+import org.hl7.elm_modelinfo.r1.ClassInfo;
 
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -48,6 +49,9 @@ import java.util.stream.Collectors;
 
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+
+import javax.xml.namespace.QName;
 
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.io.FileUtils;
@@ -61,43 +65,43 @@ import com.google.common.io.Files;
 
 public class StructureDefinitionToModelInfo extends Operation {
 
-    public class ClassInfo extends TypeInfo {
+    // public class ClassInfo extends TypeInfo {
 
-        private String name;
-        private String label;
-        private Boolean retriveable;
-        private List<ClassInfoElement> elements;
-        private String primaryCodePath;
+    //     private String name;
+    //     private String label;
+    //     private Boolean retriveable;
+    //     private List<ClassInfoElement> elements;
+    //     private String primaryCodePath;
 
-        ClassInfo(String name, String label, String baseType, Boolean retrievable, List<ClassInfoElement> elements, String primaryCodePath)  {
-            this.setBaseType(baseType);
-            this.name = name;
-            this.label = label;
-            this.retriveable = retrievable;
-            this.elements = elements;
-            this.primaryCodePath = primaryCodePath;
-        }
+    //     ClassInfo(String name, String label, String baseType, Boolean retrievable, List<ClassInfoElement> elements, String primaryCodePath)  {
+    //         this.setBaseType(baseType);
+    //         this.name = name;
+    //         this.label = label;
+    //         this.retriveable = retrievable;
+    //         this.elements = elements;
+    //         this.primaryCodePath = primaryCodePath;
+    //     }
 
-        public String getName() {
-            return this.name;
-        }
+    //     public String getName() {
+    //         return this.name;
+    //     }
 
-        public String getLabel() {
-            return this.label;
-        }
+    //     public String getLabel() {
+    //         return this.label;
+    //     }
 
-        public Boolean getRetriveable() {
-            return this.retriveable;
-        }
+    //     public Boolean getRetriveable() {
+    //         return this.retriveable;
+    //     }
 
-        public List<ClassInfoElement> getElements() {
-            return this.elements;
-        }
+    //     public List<ClassInfoElement> getElements() {
+    //         return this.elements;
+    //     }
 
-        private String getPrimaryCodePath() {
-            return this.primaryCodePath;
-        }
-    }
+    //     private String getPrimaryCodePath() {
+    //         return this.primaryCodePath;
+    //     }
+    // }
 
 
 
@@ -383,7 +387,9 @@ public class StructureDefinitionToModelInfo extends Operation {
 
         ModelInfo mi = new ModelInfo();
 
-        Collection<TypeInfo> modelTypeInfos = this.typeInfos.values().stream().filter(x -> ((ClassInfo)x).getName().contains("FHIR")).collect(Collectors.toList());
+        Collection<TypeInfo> modelTypeInfos = this.typeInfos.values().stream()
+            .map(x -> ((ClassInfo)x))
+            .collect(Collectors.toList());
 
         Collection<ConversionInfo> modelConversionInfos = new ArrayList<ConversionInfo>() {
             {
@@ -397,37 +403,37 @@ public class StructureDefinitionToModelInfo extends Operation {
 
         this.typeInfos.values().stream().map(x -> (ClassInfo)x)
             .filter(x -> x != null && x.getBaseType() != null && x.getBaseType().equals("FHIR.Element"))
-            .filter(x -> x.elements.size() == 1)
+            .filter(x -> x.getElement().size() == 1)
             .map(x -> new ConversionInfo()
             .withFromType(x.getName())
-            .withToType(x.elements.get(0).getType())
-            .withFunctionName("FHIRHelpers.To" + this.unQualify(x.elements.get(0).getType())))
+            .withToType(x.getElement().get(0).getType())
+            .withFunctionName("FHIRHelpers.To" + this.unQualify(x.getElement().get(0).getType())))
         .forEach(x -> modelConversionInfos.add(x));
 
 
-        mi.withRequiredModelInfo(new ModelSpecifier().withName("System").withVersion("1.0.0"))
+        mi = mi.withRequiredModelInfo(new ModelSpecifier().withName("System").withVersion("1.0.0"))
             .withTypeInfo(modelTypeInfos)
             .withConversionInfo(modelConversionInfos)
             .withName("FHIR")
             .withVersion("3.0.1")
             .withUrl(models.get("FHIR"))
             .withPatientClassName("FHIR.Patient")
-            .withPatientBirthDatePropertyName("birthDate.value");
+            .withPatientBirthDatePropertyName("birthDate.value")
+            .withTargetQualifier(new QName("fhir"));
 
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(ModelInfo.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(ModelInfo.class, TypeInfo.class, ClassInfo.class, ConversionInfo.class);
+
+            JAXBElement<ModelInfo> jbe = new JAXBElement<ModelInfo>(new QName("urn:hl7-org:elm-modelinfo:r1", "modelInfo", "ns4"), ModelInfo.class, null, mi);
                 
             //Create Marshaller
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-
-            //Required formatting??
-            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 
             //Print XML String to Console
             StringWriter sw = new StringWriter();
                 
             //Write XML to StringWriter
-            jaxbMarshaller.marshal(mi, sw);
+            jaxbMarshaller.marshal(jbe, sw);
         
 
 
@@ -987,7 +993,7 @@ public class StructureDefinitionToModelInfo extends Operation {
             result = element(elements, p);
             if (result != null) {
                 TypeInfo elementType = resolveType(result);
-                elements = ((ClassInfo)elementType).getElements();
+                elements = ((ClassInfo)elementType).getElement();
             }
         }
 
@@ -999,7 +1005,7 @@ public class StructureDefinitionToModelInfo extends Operation {
         String elementPath = this.unQualify(this.stripRoot(path, "#"));
 
         TypeInfo rootType = this.resolveType(modelName + "." + root);
-        ClassInfoElement element = this.forPath(((ClassInfo)rootType).getElements(), elementPath);
+        ClassInfoElement element = this.forPath(((ClassInfo)rootType).getElement(), elementPath);
         return this.getTypeSpecifier(element);
     }
 
@@ -1171,7 +1177,15 @@ public class StructureDefinitionToModelInfo extends Operation {
                 cie.setType("System.String");
 
                 elements.add(cie);
-                ClassInfo info = new ClassInfo(typeName, null, modelName + ".Element", false, elements, null);
+
+                ClassInfo info = new ClassInfo()
+                    .withName(typeName)
+                    .withLabel(null)
+                    .withBaseType(modelName + ".Element")
+                    .withRetrievable(false)
+                    .withElement(elements)
+                    .withPrimaryCodePath(null);
+                
                 this.typeInfos.put(this.getTypeName(modelName, typeName), info);
 
             }
@@ -1275,7 +1289,15 @@ public class StructureDefinitionToModelInfo extends Operation {
         if (elements.size() > 0) {
             if (typeDefinition != null && typeDefinition.getId().equals("BackboneElement")) {
                 String typeName = this.getComponentTypeName(path);
-                ClassInfo componentClassInfo = new ClassInfo(typeName, null, modelName + ".BackboneElement", false, elements, null);
+
+                ClassInfo componentClassInfo = new ClassInfo()
+                .withName(typeName)
+                .withLabel(null)
+                .withBaseType(modelName + ".BackboneElement")
+                .withRetrievable(false)
+                .withElement(elements)
+                .withPrimaryCodePath(null);
+
                 this.typeInfos.put(this.getTypeName(modelName, typeName), componentClassInfo);
 
                 typeSpecifier = this.buildTypeSpecifier(modelName, typeName);
@@ -1357,24 +1379,19 @@ public class StructureDefinitionToModelInfo extends Operation {
         }
 
         System.out.println("Building ClassInfo for " + typeName);
-        ClassInfo info = new ClassInfo(typeName, typeName, this.resolveTypeName(sd.getBaseDefinition()), sd.getKind() == StructureDefinitionKind.RESOURCE, elements, this.primaryCodePath(elements, typeName));
+
+        ClassInfo info = new ClassInfo()
+            .withName(typeName)
+            .withLabel(typeName)
+            .withBaseType(this.resolveTypeName(sd.getBaseDefinition()))
+            .withRetrievable(sd.getKind() == StructureDefinitionKind.RESOURCE)
+            .withElement(elements)
+            .withPrimaryCodePath(this.primaryCodePath(elements, typeName));
 
         this.typeInfos.put(this.getTypeName(modelName, typeName), info);
 
         return info;
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     public static void main(String[] args) {
