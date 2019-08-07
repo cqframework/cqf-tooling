@@ -2,7 +2,10 @@ package org.opencds.cqf.modelinfo;
 
 import org.hl7.elm_modelinfo.r1.ChoiceTypeSpecifier;
 import org.hl7.elm_modelinfo.r1.ClassInfoElement;
+import org.hl7.elm_modelinfo.r1.ConversionInfo;
 import org.hl7.elm_modelinfo.r1.ListTypeSpecifier;
+import org.hl7.elm_modelinfo.r1.ModelInfo;
+import org.hl7.elm_modelinfo.r1.ModelSpecifier;
 import org.hl7.elm_modelinfo.r1.NamedTypeSpecifier;
 import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.hl7.elm_modelinfo.r1.TypeSpecifier;
@@ -22,8 +25,10 @@ import org.hl7.fhir.dstu3.model.StructureDefinition.TypeDerivationRule;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +46,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.JAXBContext;
+
+import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.opencds.cqf.Operation;
@@ -314,6 +323,7 @@ public class StructureDefinitionToModelInfo extends Operation {
                 }
                 catch (Exception e) {
                     System.out.println("Error building ClassInfo for: " + sd.getId() + " - " + e.getMessage());
+                    e.printStackTrace();
                 }
             }
         }
@@ -328,6 +338,7 @@ public class StructureDefinitionToModelInfo extends Operation {
                 }
                 catch (Exception e) {
                     System.out.println("Error building ClassInfo for: " + sd.getId() + " - " + e.getMessage());
+                    e.printStackTrace();
                 }
             }
         }
@@ -342,19 +353,98 @@ public class StructureDefinitionToModelInfo extends Operation {
                 }
                 catch (Exception e) {
                     System.out.println("Error building ClassInfo for: " + sd.getId() + " - " + e.getMessage());
+                    e.printStackTrace();
                 }
             }
         }
 
-        try {
-            writeOutput("bubba.txt", "test");
-            // Graphviz.fromGraph(g).render(Format.SVG).toFile(new File("example/fhir-graph.svg"));
-        } catch (IOException e) {
-            System.err.println("Encountered the following exception while creating file " + "bubba" + e.getMessage());
-            e.printStackTrace();
-            return;
-        }
+        // System.out.println("Doing Fixups");
+        // for (Entry<String, TypeInfo> entry : this.typeInfos.entrySet()){
+        //     boolean hasFixups = false;
+        //     List<ClassInfoElement> elements = new ArrayList<>();
+        //     for (ClassInfoElement e : ((ClassInfo)entry.getValue()).elements) {
+        //         if (this.hasContentReferenceTypeSpecifier(e)) {
+        //             hasFixups = true;
+        //             ClassInfoElement cie = this.fixupContentRefererenceSpecifier("FHIR", e);
+        //             elements.add(cie);
+        //         }
+        //         else {
+        //             elements.add(e);
+        //         }
+        //     }
 
+        //     if (hasFixups) {
+        //         ClassInfo typeInfo = (ClassInfo)entry.getValue();
+        //         typeInfo.elements = elements;
+
+        //         // TODO: Insert into fixups table... but where is that used?
+        //     }
+        // }
+
+        ModelInfo mi = new ModelInfo();
+
+        Collection<TypeInfo> modelTypeInfos = this.typeInfos.values().stream().filter(x -> ((ClassInfo)x).getName().contains("FHIR")).collect(Collectors.toList());
+
+        Collection<ConversionInfo> modelConversionInfos = new ArrayList<ConversionInfo>() {
+            {
+                add(new ConversionInfo().withFromType("Coding").withToType("System.Code").withFunctionName("ToCode"));
+                add(new ConversionInfo().withFromType("CodeableConcept").withToType("System.Concept").withFunctionName("ToCode"));
+                add(new ConversionInfo().withFromType("Quantity").withToType("System.Quantity").withFunctionName("ToQuantity"));
+                add(new ConversionInfo().withFromType("Period").withToType("Interval<System.DateTime>").withFunctionName("ToInterval"));
+                add(new ConversionInfo().withFromType("Range").withToType("Interval<System.Quantity>").withFunctionName("ToInterval"));
+            }
+        };
+
+        this.typeInfos.values().stream().map(x -> (ClassInfo)x)
+            .filter(x -> x != null && x.getBaseType() != null && x.getBaseType().equals("FHIR.Element"))
+            .filter(x -> x.elements.size() == 1)
+            .map(x -> new ConversionInfo()
+            .withFromType(x.getName())
+            .withToType(x.elements.get(0).getType())
+            .withFunctionName("FHIRHelpers.To" + this.unQualify(x.elements.get(0).getType())))
+        .forEach(x -> modelConversionInfos.add(x));
+
+
+        mi.withRequiredModelInfo(new ModelSpecifier().withName("System").withVersion("1.0.0"))
+            .withTypeInfo(modelTypeInfos)
+            .withConversionInfo(modelConversionInfos)
+            .withName("FHIR")
+            .withVersion("3.0.1")
+            .withUrl(models.get("FHIR"))
+            .withPatientClassName("FHIR.Patient")
+            .withPatientBirthDatePropertyName("birthDate.value");
+
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(ModelInfo.class);
+                
+            //Create Marshaller
+            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+
+            //Required formatting??
+            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+
+            //Print XML String to Console
+            StringWriter sw = new StringWriter();
+                
+            //Write XML to StringWriter
+            jaxbMarshaller.marshal(mi, sw);
+        
+
+
+            try {
+                writeOutput("output.xml", sw.toString());
+                // Graphviz.fromGraph(g).render(Format.SVG).toFile(new File("example/fhir-graph.svg"));
+            } catch (IOException e) {
+                System.err.println("Encountered the following exception while creating file " + "output.xml" + e.getMessage());
+                e.printStackTrace();
+                return;
+            }
+
+        }
+        catch (Exception e) {
+            System.err.println("JAXB error" + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void writeOutput(String fileName, String content) throws IOException {
@@ -500,6 +590,7 @@ public class StructureDefinitionToModelInfo extends Operation {
 
     //     return urls;
     // }
+
 
     private Map<String, StructureDefinition> indexResources(List<StructureDefinition> resources) {
         Map<String, StructureDefinition> resourcesById = new HashMap<String, StructureDefinition>();
@@ -956,26 +1047,32 @@ public class StructureDefinitionToModelInfo extends Operation {
         return element.getType().startsWith("#") || this.isContentReferenceTypeSpecifier(element.getTypeSpecifier());
     }
 
-    private ClassInfoElement fixupContentRefererenceSpecifier(String modelName, ClassInfoElement element) throws Exception {
+    private ClassInfoElement fixupContentRefererenceSpecifier(String modelName, ClassInfoElement element) {
         ClassInfoElement result = null;
-        if (this.hasContentReferenceTypeSpecifier(element)) {
-            result = element;
-            if (element.getType().startsWith("#")) {
-                element.setType(this.getTypeName((NamedTypeSpecifier)this.resolveContentReference(modelName, element.getType())));
+        try {
+            if (this.hasContentReferenceTypeSpecifier(element)) {
+                result = element;
+                if (element.getType().startsWith("#")) {
+                    element.setType(this.getTypeName((NamedTypeSpecifier)this.resolveContentReference(modelName, element.getType())));
+                }
+                else if (element.getTypeSpecifier() instanceof ListTypeSpecifier) {
+                    ListTypeSpecifier lts = new ListTypeSpecifier();
+                    lts.setElementTypeSpecifier(this.resolveContentReference(
+                        modelName, 
+                        this.getContentReference(element.getTypeSpecifier())));
+                    
+                    element.setTypeSpecifier(lts);
+                }
+                else {
+                    element.setTypeSpecifier(this.resolveContentReference(
+                        modelName, 
+                        this.getContentReference(element.getTypeSpecifier())));
+                }
             }
-            else if (element.getTypeSpecifier() instanceof ListTypeSpecifier) {
-                ListTypeSpecifier lts = new ListTypeSpecifier();
-                lts.setElementTypeSpecifier(this.resolveContentReference(
-                    modelName, 
-                    this.getContentReference(element.getTypeSpecifier())));
-                
-                element.setTypeSpecifier(lts);
-            }
-            else {
-                element.setTypeSpecifier(this.resolveContentReference(
-                    modelName, 
-                    this.getContentReference(element.getTypeSpecifier())));
-            }
+        }
+        catch (Exception e) {
+            System.out.println("Error fixing up contentreferencetypespecifier: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return result;
@@ -1176,7 +1273,7 @@ public class StructureDefinitionToModelInfo extends Operation {
         }
 
         if (elements.size() > 0) {
-            if (typeDefinition.getId().equals("BackboneElement")) {
+            if (typeDefinition != null && typeDefinition.getId().equals("BackboneElement")) {
                 String typeName = this.getComponentTypeName(path);
                 ClassInfo componentClassInfo = new ClassInfo(typeName, null, modelName + ".BackboneElement", false, elements, null);
                 this.typeInfos.put(this.getTypeName(modelName, typeName), componentClassInfo);
@@ -1184,7 +1281,7 @@ public class StructureDefinitionToModelInfo extends Operation {
                 typeSpecifier = this.buildTypeSpecifier(modelName, typeName);
 
             }
-            else if (typeDefinition.getId().equals("Extension")) {
+            else if (typeDefinition != null && typeDefinition.getId().equals("Extension")) {
                 // If this is an extension, the elements will be constraints on the existing elements of an extension (i.e. url and value)
                 // Use the type of the value element
             }
