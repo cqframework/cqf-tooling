@@ -83,7 +83,7 @@ package org.opencds.cqf;
             - Accepts Bundles with .json or .xml extensions
 
         - Bundle decomposition
-            - mvn exec:java -Dexec.args="[-BundleToResources] [Bundle file path] (output encoding) (output directory path)"
+            - mvn exec:java -Dexec.args="[-BundleToResources] [Bundle file path] (output encoding)
             - Example: mvn exec:java -Dexec.args="-BundleToResources /Users/christopherschuler/Documents/workspace/Bundles/bundle-1.json json /Users/christopherschuler/Documents/workspace/resources"
             - This tooling decomposes a Bundle entry into separate resource files
             - Accepts Bundles with .json or .xml extensions
@@ -93,7 +93,8 @@ package org.opencds.cqf;
             - TODO
 
         - Generate ModelInfo from StructureDefinitions
-            - TODO
+             - command: mvn exec:java -Dexec.args="[-GenerateMIs] [path to structuredefinitions xml]  (output directory path)"
+             - TODO
 
         - Extension builder
             - TODO

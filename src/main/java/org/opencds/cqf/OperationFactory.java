@@ -3,6 +3,7 @@ package org.opencds.cqf;
 //import org.opencds.cqf.jsonschema.SchemaGenerator;
 import org.opencds.cqf.igtools.IgBundler;
 import org.opencds.cqf.library.LibraryGenerator;
+import org.opencds.cqf.modelinfo.StructureDefinitionToModelInfo;
 import org.opencds.cqf.qdm.QdmToQiCore;
 import org.opencds.cqf.quick.QuickPageGenerator;
 import org.opencds.cqf.terminology.GenericValueSetGenerator;
@@ -39,6 +40,8 @@ class OperationFactory {
                 throw new NotImplementedException();
             case "BundleToResources":
                 throw new NotImplementedException();
+            case "GenerateMIs":
+                return new StructureDefinitionToModelInfo();
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operationName);
         }
