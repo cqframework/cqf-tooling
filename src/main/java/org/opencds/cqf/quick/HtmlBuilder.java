@@ -5,6 +5,8 @@ import java.net.URISyntaxException;
 
 public class HtmlBuilder {
 
+    private QuickAtlas atlas;
+
     private final String header = "<html>\n" +
             "<head>\n" +
             "    <meta charset=\"UTF-8\"/>\n" +
@@ -54,8 +56,9 @@ public class HtmlBuilder {
         return fileName;
     }
 
-    public HtmlBuilder(String profileName) {
+    public HtmlBuilder(String profileName, QuickAtlas atlas) {
         this.profileName = profileName;
+        this.atlas = atlas;
         this.fileName = "QUICK-" + profileName + ".html";
         html.append(header);
     }
@@ -133,8 +136,9 @@ public class HtmlBuilder {
     }
 
     public HtmlBuilder buildOverviewRowWithInterval(String fhirType, String cqlType, String href) {
+        String intervalUrl = atlas.getCqlIntervalUrl();
         String row = String.format(
-                "<tr><th>%s</th><td>Interval&lt;<a href='%s' target='_blank'>%s</a>&gt;</td></tr>\n", fhirType, href, cqlType
+                "<tr><th>%s</th><td><a href='%s' target='_blank'>Interval</a>&lt;<a href='%s' target='_blank'>%s</a>&gt;</td></tr>\n", intervalUrl, fhirType, href, cqlType
         );
         html.append(row);
         return this;
