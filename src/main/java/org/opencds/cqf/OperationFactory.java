@@ -1,6 +1,7 @@
 package org.opencds.cqf;
 
 //import org.opencds.cqf.jsonschema.SchemaGenerator;
+import org.opencds.cqf.acceleratorkit.Processor;
 import org.opencds.cqf.igtools.IgBundler;
 import org.opencds.cqf.library.LibraryGenerator;
 import org.opencds.cqf.modelinfo.StructureDefinitionToModelInfo;
@@ -42,6 +43,8 @@ class OperationFactory {
                 throw new NotImplementedException();
             case "GenerateMIs":
                 return new StructureDefinitionToModelInfo();
+            case "ProcessAcceleratorKit":
+                return new Processor();
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operationName);
         }

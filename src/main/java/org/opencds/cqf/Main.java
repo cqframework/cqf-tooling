@@ -102,6 +102,11 @@ package org.opencds.cqf;
         - JsonSchema Generator
             - This tooling converts minimized FHIR profiles into JsonSchemas for form rendering (STU3 and DSTU2 support)
             - mvn exec:java -Dexec.args="-JsonSchemaGenerator"
+
+        - Accelerator Kit Processor
+            - This tooling converts a WHO accelerator kit data dictionary to a set of profiles, questionnaires, plan definitions, and libraries
+            - mvn exec:java -Dexec.args="-ProcessAcceleratorKit [-pathtospreadsheet | -pts] [-dataelementpages | -dep] (-outputpath | -op) (-encoding | -e)"
+            - Example: mvn exec:java -Dexec.args="-ProcessAcceleratorKit -pts=ANC-Primary-Data-Dictionary.xlsx -dep=""ANC Reg,Quick Check,Profile,S&F,PE,Tests,C&T"""
 */
 
 public class Main {
