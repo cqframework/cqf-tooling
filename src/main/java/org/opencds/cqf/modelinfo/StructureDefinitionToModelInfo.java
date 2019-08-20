@@ -22,6 +22,8 @@ import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
 
 import org.opencds.cqf.Operation;
+import org.opencds.cqf.modelinfo.fhir.FHIRClassInfoBuilder;
+import org.opencds.cqf.modelinfo.fhir.FHIRModelInfoBuilder;
 
 public class StructureDefinitionToModelInfo extends Operation {
     @Override
@@ -48,33 +50,17 @@ public class StructureDefinitionToModelInfo extends Operation {
 
         String modelVersion = "3.0.1";
         if (args.length > 5) {
-            modelName = args[5];
+            modelVersion = args[5];
         }
 
         ResourceLoader loader = new ResourceLoader();
         Map<String, StructureDefinition> structureDefinitions = loader.loadPaths(inputPath, resourcePaths);
 
-        Configuration config = Configuration.DefaultConfiguration;
+        ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(structureDefinitions);
+        Map<String, TypeInfo> typeInfos = ciBuilder.build();
 
-        ClassInfoBuilder classInfoBuilder = new ClassInfoBuilder(Configuration.DefaultConfiguration,
-                structureDefinitions);
-
-        // TODO: This build sequence is model specific. Need to refactor that.
-        System.out.println("Building Primitives");
-        classInfoBuilder.buildFor(modelName, (x -> x.getKind() == StructureDefinitionKind.PRIMITIVETYPE));
-
-        System.out.println("Building ComplexTypes");
-        classInfoBuilder.buildFor(modelName,
-                (x -> x.getKind() == StructureDefinitionKind.COMPLEXTYPE && (x.getBaseDefinition() == null
-                        || !x.getBaseDefinition().equals("http://hl7.org/fhir/StructureDefinition/Extension"))));
-
-        System.out.println("Building Resources");
-        classInfoBuilder.buildFor(modelName, (x -> x.getKind() == StructureDefinitionKind.RESOURCE
-                && (!x.hasDerivation() || x.getDerivation() == TypeDerivationRule.SPECIALIZATION)));
-
-        ModelInfoBuilder modelInfoBuilder = new ModelInfoBuilder();
-        ModelInfo mi = modelInfoBuilder.build(modelName, modelVersion, config,
-                classInfoBuilder.getTypeInfos().values());
+        ModelInfoBuilder miBuilder = new FHIRModelInfoBuilder(modelVersion, typeInfos.values(), "FHIRHelpers.cql");
+        ModelInfo mi = miBuilder.build();
 
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(ModelInfo.class, TypeInfo.class, ClassInfo.class,
@@ -106,7 +92,6 @@ public class StructureDefinitionToModelInfo extends Operation {
         }
     }
     
-
     public static void main(String[] args) {
         Operation op = new StructureDefinitionToModelInfo();
         op.execute(args);

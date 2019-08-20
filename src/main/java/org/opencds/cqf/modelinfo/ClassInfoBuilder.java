@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -29,13 +28,23 @@ import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
 
 public class ClassInfoBuilder {
-    private Configuration config;
     private Map<String, StructureDefinition> structureDefinitions;
     private Map<String, TypeInfo> typeInfos = new HashMap<String, TypeInfo>();
+    private ClassInfoSettings settings;
 
-    public ClassInfoBuilder(Configuration config, Map<String, StructureDefinition> structureDefinitions) {
-        this.config = config;
+    public ClassInfoBuilder(ClassInfoSettings settings, Map<String, StructureDefinition> structureDefinitions) {
         this.structureDefinitions = structureDefinitions;
+        this.settings = settings;
+    }
+
+    protected void innerBuild() {
+        // Intentionally empty;
+        // Add build steps to derived classes.
+    }
+
+    public Map<String, TypeInfo> build() {
+        this.innerBuild();
+        return this.getTypeInfos();
     }
 
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
@@ -68,10 +77,8 @@ public class ClassInfoBuilder {
     private String resolveModelName(String url) throws Exception {
         // Strips off the identifier and type name
         String model = getHead(getHead(url));
-        for (Entry<String, Configuration.ModelInfoSettings> e : config.modelInfoSettings.entrySet()) {
-            if (e.getValue().url.equals(model)) {
-                return e.getKey();
-            }
+        if (this.settings.urlToModel.containsKey(model)) {
+            return this.settings.urlToModel.get(model);
         }
 
         throw new Exception("Couldn't resolve model name for url: " + url);
@@ -156,8 +163,8 @@ public class ClassInfoBuilder {
                 return this.buildTypeSpecifier(this.resolveTypeName(typeRef.getProfile()));
             } else {
 
-                if (config.classInfoSettings.useCQLPrimitives && typeRef != null) {
-                    String typeName = config.cqlTypeMappings.get(modelName + "." + typeRef.getCode());
+                if (this.settings.useCQLPrimitives && typeRef != null) {
+                    String typeName = this.settings.cqlTypeMappings.get(modelName + "." + typeRef.getCode());
                     return this.buildTypeSpecifier(typeName);
                 } else {
                     return this.buildTypeSpecifier(modelName,
@@ -529,7 +536,7 @@ public class ClassInfoBuilder {
     // Builds the type specifier for the given element
     private TypeSpecifier buildElementTypeSpecifier(String modelName, String root, ElementDefinition ed) {
         String typeCode = this.typeCode(ed);
-        if (!config.classInfoSettings.useCQLPrimitives && typeCode != null && typeCode.equals("code") && ed.hasBinding()
+        if (!this.settings.useCQLPrimitives && typeCode != null && typeCode.equals("code") && ed.hasBinding()
                 && ed.getBinding().getStrength() == BindingStrength.REQUIRED) {
             String typeName = ((StringType) (this
                     .extension(ed.getBinding(), "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName")
@@ -560,8 +567,8 @@ public class ClassInfoBuilder {
             TypeSpecifier ts = this.buildTypeSpecifier(modelName, ed.hasType() ? ed.getType().get(0) : null);
             if (ts instanceof NamedTypeSpecifier && ((NamedTypeSpecifier) ts).getName() == null) {
                 String tn = this.getTypeName(modelName, root);
-                if (config.primitiveTypeMappings.containsKey(tn)) {
-                    ts = this.buildTypeSpecifier(config.primitiveTypeMappings.get(this.getTypeName(modelName, root)));
+                if (this.settings.primitiveTypeMappings.containsKey(tn)) {
+                    ts = this.buildTypeSpecifier(this.settings.primitiveTypeMappings.get(this.getTypeName(modelName, root)));
                 } else {
                     ts = null;
                 }
@@ -667,7 +674,7 @@ public class ClassInfoBuilder {
     // Returns true if the type is a "codeable" type (i.e. String, Code, Concept,
     // string, code, Coding, CodeableConcept)
     private Boolean isCodeable(String typeName) {
-        return config.codeableTypes.contains(typeName);
+        return this.settings.codeableTypes.contains(typeName);
     }
 
     // Returns the primary code path for the given type, based on the following:
@@ -676,8 +683,8 @@ public class ClassInfoBuilder {
     // If the type has an element named "code" with a type of "String", "Code",
     // "Coding", or "CodeableConcept", that element is used
     private String primaryCodePath(List<ClassInfoElement> elements, String typeName) {
-        if (config.primaryCodePath.containsKey(typeName)) {
-            return config.primaryCodePath.get(typeName);
+        if (this.settings.primaryCodePath.containsKey(typeName)) {
+            return this.settings.primaryCodePath.get(typeName);
         } else if (elements != null) {
             for (ClassInfoElement e : elements) {
                 if (e.getName().toLowerCase().equals("code") && this.isCodeable(e.getType())) {
@@ -740,7 +747,7 @@ public class ClassInfoBuilder {
         return info;
     }
 
-    public void buildFor(String model, Predicate<StructureDefinition> predicate) {
+    protected void buildFor(String model, Predicate<StructureDefinition> predicate) {
         for (StructureDefinition sd : structureDefinitions.values()) {
             if (predicate.test(sd)) {
                 try {
