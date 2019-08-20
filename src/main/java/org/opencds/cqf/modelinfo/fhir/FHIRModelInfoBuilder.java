@@ -3,7 +3,6 @@ package org.opencds.cqf.modelinfo.fhir;
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
 import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.opencds.cqf.modelinfo.ModelInfoBuilder;
-import org.opencds.cqf.modelinfo.ModelInfoSettings;
 import org.hl7.elm_modelinfo.r1.ClassInfo;
 
 import java.io.PrintWriter;
@@ -11,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class FHIRModelInfoBuilder extends ModelInfoBuilder {
     private String fhirHelpersPath;

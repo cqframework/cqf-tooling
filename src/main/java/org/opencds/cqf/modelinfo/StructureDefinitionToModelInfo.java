@@ -11,8 +11,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
 import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
-import org.hl7.fhir.dstu3.model.StructureDefinition.TypeDerivationRule;
 
 import java.util.Map;
 
