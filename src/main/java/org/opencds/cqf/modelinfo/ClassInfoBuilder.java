@@ -27,20 +27,17 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
 
-public class ClassInfoBuilder {
-    private Map<String, StructureDefinition> structureDefinitions;
-    private Map<String, TypeInfo> typeInfos = new HashMap<String, TypeInfo>();
-    private ClassInfoSettings settings;
+public abstract class ClassInfoBuilder {
+    protected Map<String, StructureDefinition> structureDefinitions;
+    protected Map<String, TypeInfo> typeInfos = new HashMap<String, TypeInfo>();
+    protected ClassInfoSettings settings;
 
     public ClassInfoBuilder(ClassInfoSettings settings, Map<String, StructureDefinition> structureDefinitions) {
         this.structureDefinitions = structureDefinitions;
         this.settings = settings;
     }
 
-    protected void innerBuild() {
-        // Intentionally empty;
-        // Add build steps to derived classes.
-    }
+    protected abstract void innerBuild();
 
     public Map<String, TypeInfo> build() {
         this.innerBuild();
@@ -126,7 +123,7 @@ public class ClassInfoBuilder {
         }
     }
 
-    private String getQualifier(String name) {
+    protected String getQualifier(String name) {
         int index = name.indexOf(".");
         if (index > 0) {
             return name.substring(0, index);
@@ -135,7 +132,7 @@ public class ClassInfoBuilder {
         return null;
     }
 
-    private String unQualify(String name) {
+    protected String unQualify(String name) {
         int index = name.indexOf(".");
         if (index > 0) {
             return name.substring(index + 1);
