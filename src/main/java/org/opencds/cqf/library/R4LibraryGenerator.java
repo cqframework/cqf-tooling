@@ -76,7 +76,7 @@ public class R4LibraryGenerator extends BaseLibraryGenerator<Library, R4Narrativ
         library.setVersion(version);
         library.setStatus(Enumerations.PublicationStatus.ACTIVE);
         library.setExperimental(true);
-        library.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://hl7.org/fhir/codesystem-library-type.html")));
+        library.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://terminology.hl7.org/CodeSystem/library-type")));
         return library;
     }
 
