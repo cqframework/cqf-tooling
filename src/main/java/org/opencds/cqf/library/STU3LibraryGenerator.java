@@ -67,6 +67,14 @@ public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3Narr
                 e.printStackTrace();
                 throw new IllegalArgumentException("Error outputting library: " + entry.getKey());
             }
+            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/elm-" + entry.getKey().replaceAll("_", "-").toLowerCase() + ".xml"))
+            {
+                writer.write(elmMap.get(entry.getKey()).getBytes());
+                writer.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new IllegalArgumentException("Error outputting elm for library: " + entry.getKey());
+            }
         }
     }
 

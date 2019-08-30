@@ -30,6 +30,7 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
 
     Map<String, CqlTranslator> translatorMap = new HashMap<>();
     Map<String, String> cqlMap = new HashMap<>();
+    Map<String, String> elmMap = new HashMap<>();
     Map<String, L> libraryMap = new HashMap<>();
 
     @Override
@@ -82,6 +83,7 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
             translator = translate(cqlFile);
             translatorMap.put(translator.toELM().getIdentifier().getId(), translator);
             cqlMap.put(translator.toELM().getIdentifier().getId(), getCql(cqlFile));
+            elmMap.put(translator.toELM().getIdentifier().getId(), translator.toXml());
         }
 
         for (Map.Entry<String, CqlTranslator> entry : translatorMap.entrySet()) {
