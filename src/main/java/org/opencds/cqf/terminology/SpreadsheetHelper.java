@@ -28,10 +28,18 @@ public class SpreadsheetHelper {
 
     public static String getCellAsString(Cell cell) {
         if (cell == null) {
-            throw new IllegalArgumentException("Cell is null");
+            return null;
         }
         cell.setCellType(CellType.STRING);
         return cell.getStringCellValue();
+    }
+
+    public static Integer getCellAsInteger(Cell cell) {
+        if (cell == null) {
+            return null;
+        }
+        cell.setCellType(CellType.NUMERIC);
+        return new Double(cell.getNumericCellValue()).intValue();
     }
 
     public static String getCellAsString(Row row, int cellIndex) {

@@ -69,6 +69,14 @@
             <version>3.15</version>
         </dependency>
 
+        <!-- Boilerplate code generation -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.4</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- CQL engine dependencies -->
         <dependency>
             <groupId>info.cqframework</groupId>

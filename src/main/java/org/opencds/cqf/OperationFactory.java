@@ -11,6 +11,7 @@ import org.opencds.cqf.terminology.GenericValueSetGenerator;
 import org.opencds.cqf.terminology.CMSFlatMultiValueSetGenerator;
 import org.opencds.cqf.terminology.VSACValueSetGenerator;
 import org.opencds.cqf.terminology.HEDISValueSetGenerator;
+import org.opencds.cqf.terminology.r4.OpioidValueSetGenerator;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 class OperationFactory {
@@ -29,6 +30,8 @@ class OperationFactory {
                 return new HEDISValueSetGenerator();
             case "XlsxToValueSet":
                 return new GenericValueSetGenerator();
+            case "OpioidXlsxToValueSet":
+                return new OpioidValueSetGenerator();
             case "CqlToLibrary":
                 return new LibraryGenerator();
             case "JsonSchemaGenerator":
