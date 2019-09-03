@@ -1,17 +1,27 @@
 package org.opencds.cqf.terminology.r4;
 
+import ca.uhn.fhir.context.FhirContext;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.Operation;
 import org.opencds.cqf.terminology.SpreadsheetHelper;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.*;
 
 public class OpioidValueSetGenerator extends Operation {
+
+    private FhirContext fhirContext;
+
+    public OpioidValueSetGenerator() {
+        this.fhirContext = FhirContext.forR4();
+    }
 
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
     private String encoding = "json"; // -encoding (-e)
@@ -41,14 +51,14 @@ public class OpioidValueSetGenerator extends Operation {
             if (pathToSpreadsheet == null) {
                 throw new IllegalArgumentException("The path to the spreadsheet is required");
             }
-
-            Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
-
-            OrganizationalMeta meta = resolveOrganizationalMeta(workbook.getSheetAt(0));
-            Map<String, Integer> vsMap = resolveVsMap(workbook.getSheetAt(0));
-
-
         }
+
+        Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
+
+        OrganizationalMeta organizationalMeta = resolveOrganizationalMeta(workbook.getSheetAt(0));
+        Map<String, Integer> vsMap = resolveVsMap(workbook.getSheetAt(0));
+        List<ValueSet> valueSets = resolveValueSets(organizationalMeta, vsMap, workbook);
+        output(valueSets);
     }
 
     private OrganizationalMeta resolveOrganizationalMeta(Sheet sheet) {
@@ -58,7 +68,7 @@ public class OpioidValueSetGenerator extends Operation {
             Row row = rowIterator.next();
             switch (SpreadsheetHelper.getCellAsString(row.getCell(0))) {
                 case "Canonical URL":
-                    organizationalMeta.setCanonicalUrl(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    organizationalMeta.setCanonicalUrlBase(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
                 case "Copyright":
                     organizationalMeta.setCopyright(SpreadsheetHelper.getCellAsString(row.getCell(1)));
@@ -72,11 +82,8 @@ public class OpioidValueSetGenerator extends Operation {
                 case "approvalDate":
                     organizationalMeta.setApprovalDate(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
-                case "effectivePeriod.start":
-                    organizationalMeta.setEffectivePeriodStart(SpreadsheetHelper.getCellAsString(row.getCell(1)));
-                    break;
-                case "effectivePeriod.end":
-                    organizationalMeta.setEffectivePeriodEnd(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                case "effectiveDate":
+                    organizationalMeta.setEffectiveDate(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
                 case "lastReviewDate":
                     organizationalMeta.setLastReviewDate(SpreadsheetHelper.getCellAsString(row.getCell(1)));
@@ -101,6 +108,83 @@ public class OpioidValueSetGenerator extends Operation {
         return organizationalMeta;
     }
 
+    private CPGMeta resolveCpgMeta(Sheet sheet) {
+        CPGMeta meta = new CPGMeta();
+        Iterator<Row> rowIterator = sheet.rowIterator();
+        while (rowIterator.hasNext()) {
+            Row row = rowIterator.next();
+            switch (SpreadsheetHelper.getCellAsString(row.getCell(0))) {
+                case "id":
+                    meta.setId(SpreadsheetHelper.getCellAsString(row.getCell(1)).toLowerCase());
+                    break;
+                case "keyword":
+                    meta.setKeyword(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "rules-text":
+                    meta.setRulesText(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "expression.description":
+                    meta.setExpressionDescription(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "expression.name":
+                    meta.setExpressionName(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "expression.language":
+                    meta.setExpressionLanguage(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "expression.expression":
+                    meta.setExpressionExpression(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "warning":
+                    meta.setWarning(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "version":
+                    meta.setVersion(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "name":
+                    meta.setName(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "title":
+                    meta.setTitle(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "status":
+                    meta.setStatus(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "experimental":
+                    meta.setExperimental(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "date":
+                    meta.setDate(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "description":
+                    meta.setDescription(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "purpose":
+                    meta.setPurpose(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "purpose.ClinicalFocus":
+                    meta.setPurposeClinicalFocus(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "purpose.DataElementScope":
+                    meta.setPurposeDataElementScope(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "purpose.InclusionCriteria":
+                    meta.setPurposeInclusionCriteria(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "purpose.ExclusionCriteria":
+                    meta.setPurposeExclusionCriteria(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                case "compose":
+                    meta.setCompose(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return meta;
+    }
+
     private Map<String, Integer> resolveVsMap(Sheet sheet) {
         Map<String, Integer> vsMap = new HashMap<>();
         Iterator<Row> rowIterator = sheet.rowIterator();
@@ -115,25 +199,95 @@ public class OpioidValueSetGenerator extends Operation {
         return vsMap;
     }
 
-    private List<ValueSet> resolveValueSets(OrganizationalMeta meta, Map<String, Integer> vsMap, Sheet sheet) {
+    private List<ValueSet> resolveValueSets(OrganizationalMeta meta, Map<String, Integer> vsMap, Workbook workbook) {
         List<ValueSet> valueSets = new ArrayList<>();
+        CPGMeta cpgMeta;
+        ValueSet vs;
         for (Map.Entry<String, Integer> entrySet : vsMap.entrySet()) {
+            cpgMeta = resolveCpgMeta(workbook.getSheetAt(entrySet.getValue()));
+            vs = cpgMeta.populate(fhirContext);
+            meta.populate(vs);
 
+            resolveCodeList(workbook.getSheetAt(entrySet.getValue() + 1), vs, meta.getSnomedVersion());
+
+            valueSets.add(vs);
         }
 
-        // TODO
-        return null;
+        return valueSets;
     }
 
-    private ValueSet getValueSetWithOrganizationalMeta(OrganizationalMeta meta) {
-        ValueSet valueSet = new ValueSet();
-        valueSet.setUrl(meta.getCanonicalUrl());
-        valueSet.setCopyright(meta.getCopyright());
-        valueSet.addJurisdiction(new CodeableConcept().addCoding(new Coding().setSystem("urn:iso:std:iso:3166").setCode(meta.getJurisdiction())));
-        valueSet.setPublisher(meta.getPublisher());
-//        valueSet.set
+    private void resolveCodeList(Sheet sheet, ValueSet vs, String snomedVersion) {
+        Iterator<Row> rowIterator = sheet.rowIterator();
 
-        // TODO
-        return null;
+        Boolean active = true;
+        String system = null;
+        String version = null;
+
+        while (rowIterator.hasNext()) {
+            Row row = rowIterator.next();
+
+            String code = SpreadsheetHelper.getCellAsString(row.getCell(0));
+
+            if (code.equals("Code")) continue;
+
+            if (code.equals("expansion")) {
+
+            }
+            else {
+                String description = SpreadsheetHelper.getCellAsString(row.getCell(1));
+                active = SpreadsheetHelper.getCellAsString(row.getCell(2)) == null ? active : Boolean.valueOf(SpreadsheetHelper.getCellAsString(row.getCell(2)));
+                system = SpreadsheetHelper.getCellAsString(row.getCell(3)) == null ? system : SpreadsheetHelper.getCellAsString(row.getCell(3));
+                if (system == null) {
+                    throw new RuntimeException("A system must be specified in the code list");
+                }
+                version = SpreadsheetHelper.getCellAsString(row.getCell(4)) == null ? version : SpreadsheetHelper.getCellAsString(row.getCell(4));
+
+                if (!vs.hasCompose()) {
+                    vs.setCompose(
+                            new ValueSet.ValueSetComposeComponent()
+                                    .addInclude(
+                                            new ValueSet.ConceptSetComponent()
+                                                    .setSystem(system)
+                                                    .setVersion(system.equals("http://snomed.info/sct") ? snomedVersion : version)
+                                    )
+                    );
+                }
+
+                boolean added = false;
+                for (ValueSet.ConceptSetComponent include : vs.getCompose().getInclude()) {
+                    if (include.getSystem().equals(system) && !include.hasFilter()) {
+                        include.addConcept(new ValueSet.ConceptReferenceComponent().setCode(code).setDisplay(description));
+                        added = true;
+                    }
+                }
+
+                if (!added) {
+                    vs.getCompose()
+                            .addInclude(
+                                    new ValueSet.ConceptSetComponent()
+                                    .setSystem(system)
+                                    .setVersion(system.equals("http://snomed.info/sct") ? snomedVersion : version)
+                                            .addConcept(new ValueSet.ConceptReferenceComponent().setCode(code).setDisplay(description))
+                            );
+                }
+
+            }
+        }
+    }
+
+    private void output(List<ValueSet> valueSets) {
+        for (ValueSet valueSet : valueSets) {
+            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + valueSet.getName() + "." + encoding)) {
+                writer.write(
+                        encoding.equals("json")
+                                ? fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet).getBytes()
+                                : fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(valueSet).getBytes()
+                );
+                writer.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new IllegalArgumentException("Error outputting ValueSet: " + valueSet.getId());
+            }
+        }
     }
 }
