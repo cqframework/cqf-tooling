@@ -53,9 +53,12 @@ public class R4LibraryGenerator extends BaseLibraryGenerator<Library, R4Narrativ
 
     @Override
     public void output() {
+        Bundle bundle = new Bundle();
+
         for (Map.Entry<String, Library> entry : libraryMap.entrySet()) {
             try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/library-" + entry.getKey().replaceAll("_", "-").toLowerCase() + "." + encoding))
             {
+                bundle.addEntry().setResource(entry.getValue()).setRequest(new Bundle.BundleEntryRequestComponent().setMethod(Bundle.HTTPVerb.PUT).setUrl("Library/" + entry.getValue().getId()));
                 writer.write(
                         encoding.equals("json")
                                 ? fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(entry.getValue()).getBytes()
@@ -74,6 +77,18 @@ public class R4LibraryGenerator extends BaseLibraryGenerator<Library, R4Narrativ
                 e.printStackTrace();
                 throw new IllegalArgumentException("Error outputting elm for library: " + entry.getKey());
             }
+        }
+
+        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/all-libraries-bundle." +  encoding)) {
+            writer.write(
+                    encoding.equals("json")
+                            ? fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle).getBytes()
+                            : fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle).getBytes()
+            );
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Error outputting library bundle");
         }
     }
 
