@@ -1,0 +1,552 @@
+{
+  "resourceType": "ValueSet",
+  "id": "buprenorphine-and-methadone-medications",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-rules-text",
+      "valueString": "https://mor.nlm.nih.gov/RxMix/ Script:\nStep 1 \nCreate Batch text input file (b-m.txt) with following ids for Buprenorphine and Methadone ingredients: \n6813\n1819\n352364\n\nStep2\nSubmit batch job using the above b-m.txt file to following workflow by uploading file (Ingredient-wf.config) with the following in the file: <WFE><filteredOutputs>RXCUI|name|term_type</filteredOutputs><input>NOINPUT</input><FS><service>NOINPUT</service><function>getRelatedByType</function><level>0</level><paramSize>2</paramSize><param order ='0'>?</param><param order ='1'>SBD,SCD,GPCK,BPCK</param></FS></WFE> "
+    },
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-clinical-focus",
+      "valueString": "All prescribable Buprenorphine and Methadone medications"
+    },
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-dataelement-scope",
+      "valueString": "Medication"
+    },
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-inclusion-criteria",
+      "valueString": "All prescribable Buprenorphine and Methadone medications"
+    },
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-exclusion-criteria",
+      "valueString": "None"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "MD Partners, Inc.",
+        "telecom": [
+          {
+            "system": "email",
+            "value": "info@mdpartners.com"
+          }
+        ]
+      }
+    }
+  ],
+  "url": "http://fhir.org/guides/cdc/opioid-cds/buprenorphine-and-methadone-medications",
+  "name": "buprenorphine_and_methadone_medications",
+  "title": "buprenorphine and methadone medications",
+  "status": "active",
+  "experimental": true,
+  "date": "2019-09-03T13:28:57-06:00",
+  "publisher": "Centers for Disease Control and Prevention (CDC)",
+  "description": "All prescribable Buprenorphine and Methadone medications",
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "urn:iso:std:iso:3166",
+          "code": "US"
+        }
+      ]
+    }
+  ],
+  "purpose": "Buprenorphine and Methadone medications for opioid management",
+  "copyright": "© CDC 2016+.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "version": "43678.0",
+        "concept": [
+          {
+            "code": "864737.0",
+            "display": "Methadone Hydrochloride 5 MG Oral Tablet [Methadose]"
+          },
+          {
+            "code": "864980.0",
+            "display": "Methadone Hydrochloride 40 MG Tablet for Oral Suspension [Methadose]"
+          },
+          {
+            "code": "991149.0",
+            "display": "Methadone Hydrochloride 10 MG/ML Oral Solution [Methadose]"
+          },
+          {
+            "code": "864712.0",
+            "display": "Methadone Hydrochloride 10 MG Oral Tablet [Methadose]"
+          },
+          {
+            "code": "864708.0",
+            "display": "Methadone Hydrochloride 10 MG Oral Tablet [Dolophine]"
+          },
+          {
+            "code": "864720.0",
+            "display": "Methadone Hydrochloride 5 MG Oral Tablet [Dolophine]"
+          },
+          {
+            "code": "1990745.0",
+            "display": "Methadone Hydrochloride 40 MG Tablet for Oral Suspension [Diskets]"
+          },
+          {
+            "code": "864706.0",
+            "display": "Methadone Hydrochloride 10 MG Oral Tablet"
+          },
+          {
+            "code": "864714.0",
+            "display": "Methadone Hydrochloride 10 MG/ML Injectable Solution"
+          },
+          {
+            "code": "864718.0",
+            "display": "Methadone Hydrochloride 5 MG Oral Tablet"
+          },
+          {
+            "code": "864761.0",
+            "display": "Methadone Hydrochloride 1 MG/ML Oral Solution"
+          },
+          {
+            "code": "864769.0",
+            "display": "Methadone Hydrochloride 2 MG/ML Oral Solution"
+          },
+          {
+            "code": "864984.0",
+            "display": "Methadone Hydrochloride 20 MG/ML Oral Solution"
+          },
+          {
+            "code": "991147.0",
+            "display": "Methadone Hydrochloride 10 MG/ML Oral Solution"
+          },
+          {
+            "code": "864978.0",
+            "display": "Methadone Hydrochloride 40 MG Tablet for Oral Suspension"
+          },
+          {
+            "code": "404414.0",
+            "display": "Buprenorphine 8 MG Sublingual Tablet [Subutex]"
+          },
+          {
+            "code": "205533.0",
+            "display": "1 ML Buprenorphine 0.3 MG/ML Injection [Buprenex]"
+          },
+          {
+            "code": "1010603.0",
+            "display": "Buprenorphine 2 MG / Naloxone 0.5 MG Oral Strip [Suboxone]"
+          },
+          {
+            "code": "1010606.0",
+            "display": "Buprenorphine 8 MG / Naloxone 2 MG Oral Strip [Suboxone]"
+          },
+          {
+            "code": "1010608.0",
+            "display": "Buprenorphine 2 MG / Naloxone 0.5 MG Sublingual Tablet [Suboxone]"
+          },
+          {
+            "code": "1010609.0",
+            "display": "Buprenorphine 8 MG / Naloxone 2 MG Sublingual Tablet [Suboxone]"
+          },
+          {
+            "code": "1307058.0",
+            "display": "Buprenorphine 4 MG / Naloxone 1 MG Oral Strip [Suboxone]"
+          },
+          {
+            "code": "1307063.0",
+            "display": "Buprenorphine 12 MG / Naloxone 3 MG Oral Strip [Suboxone]"
+          },
+          {
+            "code": "904874.0",
+            "display": "168 HR Buprenorphine 0.01 MG/HR Transdermal System [BuTrans]"
+          },
+          {
+            "code": "904878.0",
+            "display": "168 HR Buprenorphine 0.02 MG/HR Transdermal System [BuTrans]"
+          },
+          {
+            "code": "904882.0",
+            "display": "168 HR Buprenorphine 0.005 MG/HR Transdermal System [BuTrans]"
+          },
+          {
+            "code": "1432971.0",
+            "display": "168 HR Buprenorphine 0.015 MG/HR Transdermal System [BuTrans]"
+          },
+          {
+            "code": "1542999.0",
+            "display": "168 HR Buprenorphine 0.0075 MG/HR Transdermal System [BuTrans]"
+          },
+          {
+            "code": "1864414.0",
+            "display": "Buprenorphine 0.7 MG / Naloxone 0.18 MG Sublingual Tablet [Zubsolv]"
+          },
+          {
+            "code": "1431083.0",
+            "display": "Buprenorphine 1.4 MG / Naloxone 0.36 MG Sublingual Tablet [Zubsolv]"
+          },
+          {
+            "code": "1431104.0",
+            "display": "Buprenorphine 5.7 MG / Naloxone 1.4 MG Sublingual Tablet [Zubsolv]"
+          },
+          {
+            "code": "1597570.0",
+            "display": "Buprenorphine 11.4 MG / Naloxone 2.9 MG Sublingual Tablet [Zubsolv]"
+          },
+          {
+            "code": "1597575.0",
+            "display": "Buprenorphine 8.6 MG / Naloxone 2.1 MG Sublingual Tablet [Zubsolv]"
+          },
+          {
+            "code": "1666385.0",
+            "display": "Buprenorphine 2.9 MG / Naloxone 0.71 MG Sublingual Tablet [Zubsolv]"
+          },
+          {
+            "code": "1488639.0",
+            "display": "Buprenorphine hydrochloride 1.3 MG/ML Injectable Suspension [Animalgesics]"
+          },
+          {
+            "code": "1542396.0",
+            "display": "Buprenorphine 2.1 MG / Naloxone 0.3 MG Buccal Film [Bunavail]"
+          },
+          {
+            "code": "1544853.0",
+            "display": "Buprenorphine 4.2 MG / Naloxone 0.7 MG Buccal Film [Bunavail]"
+          },
+          {
+            "code": "1544856.0",
+            "display": "Buprenorphine 6.3 MG / Naloxone 1 MG Buccal Film [Bunavail]"
+          },
+          {
+            "code": "1594655.0",
+            "display": "Buprenorphine 1.8 MG/ML Injectable Solution [Simbadol]"
+          },
+          {
+            "code": "1716063.0",
+            "display": "Buprenorphine 0.15 MG Buccal Film [Belbuca]"
+          },
+          {
+            "code": "1716067.0",
+            "display": "Buprenorphine 0.3 MG Buccal Film [Belbuca]"
+          },
+          {
+            "code": "1716071.0",
+            "display": "Buprenorphine 0.45 MG Buccal Film [Belbuca]"
+          },
+          {
+            "code": "1716075.0",
+            "display": "Buprenorphine 0.6 MG Buccal Film [Belbuca]"
+          },
+          {
+            "code": "1716079.0",
+            "display": "Buprenorphine 0.075 MG Buccal Film [Belbuca]"
+          },
+          {
+            "code": "1716083.0",
+            "display": "Buprenorphine 0.75 MG Buccal Film [Belbuca]"
+          },
+          {
+            "code": "1716090.0",
+            "display": "Buprenorphine 0.9 MG Buccal Film [Belbuca]"
+          },
+          {
+            "code": "1797655.0",
+            "display": "Buprenorphine 74.2 MG Drug Implant [Probuphine]"
+          },
+          {
+            "code": "2106368.0",
+            "display": "Buprenorphine 16 MG / Naloxone 4 MG Oral Strip [Cassipa]"
+          },
+          {
+            "code": "1996189.0",
+            "display": "0.5 ML Buprenorphine 200 MG/ML Prefilled Syringe [Sublocade]"
+          },
+          {
+            "code": "1996193.0",
+            "display": "1.5 ML Buprenorphine 200 MG/ML Prefilled Syringe [Sublocade]"
+          },
+          {
+            "code": "2058257.0",
+            "display": "Buprenorphine 16 MG / Naloxone 4 MG Oral Strip"
+          },
+          {
+            "code": "1864412.0",
+            "display": "Buprenorphine 0.7 MG / Naloxone 0.18 MG Sublingual Tablet"
+          },
+          {
+            "code": "238129.0",
+            "display": "1 ML Buprenorphine 0.3 MG/ML Injection"
+          },
+          {
+            "code": "1655032.0",
+            "display": "1 ML Buprenorphine 0.3 MG/ML Cartridge"
+          },
+          {
+            "code": "246474.0",
+            "display": "Buprenorphine 0.2 MG Sublingual Tablet"
+          },
+          {
+            "code": "250426.0",
+            "display": "Buprenorphine 0.4 MG Sublingual Tablet"
+          },
+          {
+            "code": "1010600.0",
+            "display": "Buprenorphine 2 MG / Naloxone 0.5 MG Oral Strip"
+          },
+          {
+            "code": "1010604.0",
+            "display": "Buprenorphine 8 MG / Naloxone 2 MG Oral Strip"
+          },
+          {
+            "code": "351264.0",
+            "display": "Buprenorphine 2 MG Sublingual Tablet"
+          },
+          {
+            "code": "351265.0",
+            "display": "Buprenorphine 8 MG Sublingual Tablet"
+          },
+          {
+            "code": "351266.0",
+            "display": "Buprenorphine 2 MG / Naloxone 0.5 MG Sublingual Tablet"
+          },
+          {
+            "code": "351267.0",
+            "display": "Buprenorphine 8 MG / Naloxone 2 MG Sublingual Tablet"
+          },
+          {
+            "code": "904870.0",
+            "display": "168 HR Buprenorphine 0.01 MG/HR Transdermal System"
+          },
+          {
+            "code": "904876.0",
+            "display": "168 HR Buprenorphine 0.02 MG/HR Transdermal System"
+          },
+          {
+            "code": "904880.0",
+            "display": "168 HR Buprenorphine 0.005 MG/HR Transdermal System"
+          },
+          {
+            "code": "1431076.0",
+            "display": "Buprenorphine 1.4 MG / Naloxone 0.36 MG Sublingual Tablet"
+          },
+          {
+            "code": "1431102.0",
+            "display": "Buprenorphine 5.7 MG / Naloxone 1.4 MG Sublingual Tablet"
+          },
+          {
+            "code": "1432969.0",
+            "display": "168 HR Buprenorphine 0.015 MG/HR Transdermal System"
+          },
+          {
+            "code": "1488634.0",
+            "display": "Buprenorphine hydrochloride 1.3 MG/ML Injectable Suspension"
+          },
+          {
+            "code": "1542390.0",
+            "display": "Buprenorphine 2.1 MG / Naloxone 0.3 MG Buccal Film"
+          },
+          {
+            "code": "1542997.0",
+            "display": "168 HR Buprenorphine 0.0075 MG/HR Transdermal System"
+          },
+          {
+            "code": "1544851.0",
+            "display": "Buprenorphine 4.2 MG / Naloxone 0.7 MG Buccal Film"
+          },
+          {
+            "code": "1544854.0",
+            "display": "Buprenorphine 6.3 MG / Naloxone 1 MG Buccal Film"
+          },
+          {
+            "code": "1594650.0",
+            "display": "Buprenorphine 1.8 MG/ML Injectable Solution"
+          },
+          {
+            "code": "1597568.0",
+            "display": "Buprenorphine 11.4 MG / Naloxone 2.9 MG Sublingual Tablet"
+          },
+          {
+            "code": "1597573.0",
+            "display": "Buprenorphine 8.6 MG / Naloxone 2.1 MG Sublingual Tablet"
+          },
+          {
+            "code": "1666338.0",
+            "display": "Buprenorphine 2.9 MG / Naloxone 0.71 MG Sublingual Tablet"
+          },
+          {
+            "code": "1716057.0",
+            "display": "Buprenorphine 0.15 MG Buccal Film"
+          },
+          {
+            "code": "1716065.0",
+            "display": "Buprenorphine 0.3 MG Buccal Film"
+          },
+          {
+            "code": "1716069.0",
+            "display": "Buprenorphine 0.45 MG Buccal Film"
+          },
+          {
+            "code": "1716073.0",
+            "display": "Buprenorphine 0.6 MG Buccal Film"
+          },
+          {
+            "code": "1716077.0",
+            "display": "Buprenorphine 0.075 MG Buccal Film"
+          },
+          {
+            "code": "1716081.0",
+            "display": "Buprenorphine 0.75 MG Buccal Film"
+          },
+          {
+            "code": "1716086.0",
+            "display": "Buprenorphine 0.9 MG Buccal Film"
+          },
+          {
+            "code": "1797650.0",
+            "display": "Buprenorphine 74.2 MG Drug Implant"
+          },
+          {
+            "code": "1307056.0",
+            "display": "Buprenorphine 4 MG / Naloxone 1 MG Oral Strip"
+          },
+          {
+            "code": "1307061.0",
+            "display": "Buprenorphine 12 MG / Naloxone 3 MG Oral Strip"
+          },
+          {
+            "code": "1996184.0",
+            "display": "0.5 ML Buprenorphine 200 MG/ML Prefilled Syringe"
+          },
+          {
+            "code": "1996192.0",
+            "display": "1.5 ML Buprenorphine 200 MG/ML Prefilled Syringe"
+          },
+          {
+            "code": "1864414.0",
+            "display": "Buprenorphine 0.7 MG / Naloxone 0.18 MG Sublingual Tablet [Zubsolv]"
+          },
+          {
+            "code": "1010603.0",
+            "display": "Buprenorphine 2 MG / Naloxone 0.5 MG Oral Strip [Suboxone]"
+          },
+          {
+            "code": "1010606.0",
+            "display": "Buprenorphine 8 MG / Naloxone 2 MG Oral Strip [Suboxone]"
+          },
+          {
+            "code": "1010608.0",
+            "display": "Buprenorphine 2 MG / Naloxone 0.5 MG Sublingual Tablet [Suboxone]"
+          },
+          {
+            "code": "1010609.0",
+            "display": "Buprenorphine 8 MG / Naloxone 2 MG Sublingual Tablet [Suboxone]"
+          },
+          {
+            "code": "1431083.0",
+            "display": "Buprenorphine 1.4 MG / Naloxone 0.36 MG Sublingual Tablet [Zubsolv]"
+          },
+          {
+            "code": "1431104.0",
+            "display": "Buprenorphine 5.7 MG / Naloxone 1.4 MG Sublingual Tablet [Zubsolv]"
+          },
+          {
+            "code": "1542396.0",
+            "display": "Buprenorphine 2.1 MG / Naloxone 0.3 MG Buccal Film [Bunavail]"
+          },
+          {
+            "code": "1544853.0",
+            "display": "Buprenorphine 4.2 MG / Naloxone 0.7 MG Buccal Film [Bunavail]"
+          },
+          {
+            "code": "1544856.0",
+            "display": "Buprenorphine 6.3 MG / Naloxone 1 MG Buccal Film [Bunavail]"
+          },
+          {
+            "code": "1597570.0",
+            "display": "Buprenorphine 11.4 MG / Naloxone 2.9 MG Sublingual Tablet [Zubsolv]"
+          },
+          {
+            "code": "1597575.0",
+            "display": "Buprenorphine 8.6 MG / Naloxone 2.1 MG Sublingual Tablet [Zubsolv]"
+          },
+          {
+            "code": "1666385.0",
+            "display": "Buprenorphine 2.9 MG / Naloxone 0.71 MG Sublingual Tablet [Zubsolv]"
+          },
+          {
+            "code": "1307058.0",
+            "display": "Buprenorphine 4 MG / Naloxone 1 MG Oral Strip [Suboxone]"
+          },
+          {
+            "code": "1307063.0",
+            "display": "Buprenorphine 12 MG / Naloxone 3 MG Oral Strip [Suboxone]"
+          },
+          {
+            "code": "2106368.0",
+            "display": "Buprenorphine 16 MG / Naloxone 4 MG Oral Strip [Cassipa]"
+          },
+          {
+            "code": "2058257.0",
+            "display": "Buprenorphine 16 MG / Naloxone 4 MG Oral Strip"
+          },
+          {
+            "code": "1864412.0",
+            "display": "Buprenorphine 0.7 MG / Naloxone 0.18 MG Sublingual Tablet"
+          },
+          {
+            "code": "1010600.0",
+            "display": "Buprenorphine 2 MG / Naloxone 0.5 MG Oral Strip"
+          },
+          {
+            "code": "1010604.0",
+            "display": "Buprenorphine 8 MG / Naloxone 2 MG Oral Strip"
+          },
+          {
+            "code": "351266.0",
+            "display": "Buprenorphine 2 MG / Naloxone 0.5 MG Sublingual Tablet"
+          },
+          {
+            "code": "351267.0",
+            "display": "Buprenorphine 8 MG / Naloxone 2 MG Sublingual Tablet"
+          },
+          {
+            "code": "1431076.0",
+            "display": "Buprenorphine 1.4 MG / Naloxone 0.36 MG Sublingual Tablet"
+          },
+          {
+            "code": "1431102.0",
+            "display": "Buprenorphine 5.7 MG / Naloxone 1.4 MG Sublingual Tablet"
+          },
+          {
+            "code": "1542390.0",
+            "display": "Buprenorphine 2.1 MG / Naloxone 0.3 MG Buccal Film"
+          },
+          {
+            "code": "1544851.0",
+            "display": "Buprenorphine 4.2 MG / Naloxone 0.7 MG Buccal Film"
+          },
+          {
+            "code": "1544854.0",
+            "display": "Buprenorphine 6.3 MG / Naloxone 1 MG Buccal Film"
+          },
+          {
+            "code": "1597568.0",
+            "display": "Buprenorphine 11.4 MG / Naloxone 2.9 MG Sublingual Tablet"
+          },
+          {
+            "code": "1597573.0",
+            "display": "Buprenorphine 8.6 MG / Naloxone 2.1 MG Sublingual Tablet"
+          },
+          {
+            "code": "1666338.0",
+            "display": "Buprenorphine 2.9 MG / Naloxone 0.71 MG Sublingual Tablet"
+          },
+          {
+            "code": "1307056.0",
+            "display": "Buprenorphine 4 MG / Naloxone 1 MG Oral Strip"
+          },
+          {
+            "code": "1307061.0",
+            "display": "Buprenorphine 12 MG / Naloxone 3 MG Oral Strip"
+          }
+        ]
+      }
+    ]
+  }
+}

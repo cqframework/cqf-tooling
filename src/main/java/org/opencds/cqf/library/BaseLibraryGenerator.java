@@ -103,7 +103,7 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                cql.append(line);
+                cql.append(line).append("\n");
             }
         } catch (IOException e) {
             e.printStackTrace();

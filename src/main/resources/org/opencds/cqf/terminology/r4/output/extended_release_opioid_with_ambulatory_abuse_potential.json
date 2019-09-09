@@ -1,0 +1,980 @@
+{
+  "resourceType": "ValueSet",
+  "id": "extended-release-opioid-with-ambulatory-abuse-potential",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-rules-text",
+      "valueString": "https://mor.nlm.nih.gov/RxMix/ Script:\nSteps 1-4 replicate the process to create the main opioid value set:\nStep 1a \nCreate Batch text input file (ATC-Opioids.txt) with following two ATC1-4 class name inputs in the file: \nDrugs used in opioid dependence\nOPIOIDS \n\nStep 1b\nSubmit batch job using the above ATC-Opioids.txt file to following workflow by uploading file (ATC-Opioid-wf.config) with the following in the file: <WFE><filteredOutputs>RXCUI|name|term_type</filteredOutputs><input>NOINPUT</input><FS><service>NOINPUT</service><function>findClassByName</function><level>0</level><paramSize>2</paramSize><param order ='0'>?</param><param order ='1'>ATC1-4</param></FS><FS><service>NOINPUT</service><function>getClassMembers</function><level>1</level><paramSize>5</paramSize><param order ='0'>?</param><param order ='1'>ATC</param><param order ='2'>N/A</param><param order ='3'>0</param><param order ='4'>IN,MIN,PIN</param></FS><FS><service>NOINPUT</service><function>getRelatedByType</function><level>2</level><paramSize>2</paramSize><param order ='0'>?</param><param order ='1'>SBD,SCD,GPCK,BPCK</param></FS></WFE> \n\nStep 2a \nTo obtain the codeine concepts, create Batch text input file (codeines.txt) with following ids for codeine and hydrocodone: \n2670\n5489 \n\nStep2b\nSubmit batch job using the above codeines.txt file to following workflow by uploading file (Ingredient-wf.config) with the following in the file: <WFE><filteredOutputs>RXCUI|name|term_type</filteredOutputs><input>NOINPUT</input><FS><service>NOINPUT</service><function>getRelatedByType</function><level>0</level><paramSize>2</paramSize><param order ='0'>?</param><param order ='1'>SBD,SCD,GPCK,BPCK</param></FS></WFE> \n\nStep 3 \nUnion the output of step 1 and 2\n\nStep 4\nTo remove all cough and bowel transit formulation codes and to remove the injectable codes filter out all codes with the following strings:\nIngredient strings: \nGuaifenesin, Chlorpheniramine, Pseudoephedrine, Brompheniramine, Phenylephrine, Phenylpropanolamine, Promethazine, Bromodiphenhydramine, guaiacolsulfonate, homatropine\nForm strings:\ninject, cartridge, syringe\n\nStep 5 to restrict the main set to only those that are long acting:\nFilter the result to only select concepts that are a drug with Methadone Ingredient, or have one of the following dose forms: 316943 Extended Release Oral Capsule, 316945 Extended Release Oral Tablet, 316946 Extended Release Oral Tablet, 316987 Transdermal System. To do this filter the list by only including descriptions that have one of the following strings: \"Extended Release\" OR \"Transdermal\" OR \"Methadone\". "
+    },
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-clinical-focus",
+      "valueString": "All opioid clinical drugs except those restricted to surgical use only, and that are in an extended release dose form code"
+    },
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-dataelement-scope",
+      "valueString": "Medication"
+    },
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-inclusion-criteria",
+      "valueString": "All opioid clinical drugs except those used in anti-tussives or antispasmodics, or are restricted to surgical use only. "
+    },
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-exclusion-criteria",
+      "valueString": "For any drug other than methadone, any mediation that is not using a long acting formulation."
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "MD Partners, Inc.",
+        "telecom": [
+          {
+            "system": "email",
+            "value": "info@mdpartners.com"
+          }
+        ]
+      }
+    }
+  ],
+  "url": "http://fhir.org/guides/cdc/opioid-cds/extended-release-opioid-with-ambulatory-abuse-potential",
+  "name": "extended_release_opioid_with_ambulatory_abuse_potential",
+  "title": "extended release opioid with ambulatory abuse potential",
+  "status": "active",
+  "experimental": true,
+  "date": "2019-09-03T13:28:57-06:00",
+  "publisher": "Centers for Disease Control and Prevention (CDC)",
+  "description": "All opioid clinical drugs except those restricted to surgical use only, and that are in an extended release dose form code",
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "urn:iso:std:iso:3166",
+          "code": "US"
+        }
+      ]
+    }
+  ],
+  "purpose": "Identify medication orders for long-acting opioids",
+  "copyright": "© CDC 2016+.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "version": "http://snomed.info/sct/731000124108",
+        "concept": [
+          {
+            "code": "997280.0",
+            "display": "Codeine Phosphate 20 MG / Ibuprofen 300 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1860492.0",
+            "display": "12 HR Hydrocodone Bitartrate 10 MG Extended Release Oral Capsule [Zohydro]"
+          },
+          {
+            "code": "1860494.0",
+            "display": "12 HR Hydrocodone Bitartrate 15 MG Extended Release Oral Capsule [Zohydro]"
+          },
+          {
+            "code": "1860496.0",
+            "display": "12 HR Hydrocodone Bitartrate 20 MG Extended Release Oral Capsule [Zohydro]"
+          },
+          {
+            "code": "1860498.0",
+            "display": "12 HR Hydrocodone Bitartrate 30 MG Extended Release Oral Capsule [Zohydro]"
+          },
+          {
+            "code": "1860500.0",
+            "display": "12 HR Hydrocodone Bitartrate 40 MG Extended Release Oral Capsule [Zohydro]"
+          },
+          {
+            "code": "1860502.0",
+            "display": "12 HR Hydrocodone Bitartrate 50 MG Extended Release Oral Capsule [Zohydro]"
+          },
+          {
+            "code": "1595736.0",
+            "display": "Abuse-Deterrent 24 HR Hydrocodone Bitartrate 20 MG Extended Release Oral Tablet [Hysingla]"
+          },
+          {
+            "code": "1595742.0",
+            "display": "Abuse-Deterrent 24 HR Hydrocodone Bitartrate 30 MG Extended Release Oral Tablet [Hysingla]"
+          },
+          {
+            "code": "1595748.0",
+            "display": "Abuse-Deterrent 24 HR Hydrocodone Bitartrate 40 MG Extended Release Oral Tablet [Hysingla]"
+          },
+          {
+            "code": "1595754.0",
+            "display": "Abuse-Deterrent 24 HR Hydrocodone Bitartrate 60 MG Extended Release Oral Tablet [Hysingla]"
+          },
+          {
+            "code": "1595760.0",
+            "display": "Abuse-Deterrent 24 HR Hydrocodone Bitartrate 80 MG Extended Release Oral Tablet [Hysingla]"
+          },
+          {
+            "code": "1595766.0",
+            "display": "Abuse-Deterrent 24 HR Hydrocodone Bitartrate 100 MG Extended Release Oral Tablet [Hysingla]"
+          },
+          {
+            "code": "1595772.0",
+            "display": "Abuse-Deterrent 24 HR Hydrocodone Bitartrate 120 MG Extended Release Oral Tablet [Hysingla]"
+          },
+          {
+            "code": "1860491.0",
+            "display": "12 HR Hydrocodone Bitartrate 10 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1595730.0",
+            "display": "Abuse-Deterrent 24 HR Hydrocodone Bitartrate 20 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1595740.0",
+            "display": "Abuse-Deterrent 24 HR Hydrocodone Bitartrate 30 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1595746.0",
+            "display": "Abuse-Deterrent 24 HR Hydrocodone Bitartrate 40 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1860493.0",
+            "display": "12 HR Hydrocodone Bitartrate 15 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1860495.0",
+            "display": "12 HR Hydrocodone Bitartrate 20 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1860497.0",
+            "display": "12 HR Hydrocodone Bitartrate 30 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1860499.0",
+            "display": "12 HR Hydrocodone Bitartrate 40 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1860501.0",
+            "display": "12 HR Hydrocodone Bitartrate 50 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1595752.0",
+            "display": "Abuse-Deterrent 24 HR Hydrocodone Bitartrate 60 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1595758.0",
+            "display": "Abuse-Deterrent 24 HR Hydrocodone Bitartrate 80 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1595764.0",
+            "display": "Abuse-Deterrent 24 HR Hydrocodone Bitartrate 100 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1595770.0",
+            "display": "Abuse-Deterrent 24 HR Hydrocodone Bitartrate 120 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "904874.0",
+            "display": "168 HR Buprenorphine 0.01 MG/HR Transdermal System [BuTrans]"
+          },
+          {
+            "code": "904878.0",
+            "display": "168 HR Buprenorphine 0.02 MG/HR Transdermal System [BuTrans]"
+          },
+          {
+            "code": "904882.0",
+            "display": "168 HR Buprenorphine 0.005 MG/HR Transdermal System [BuTrans]"
+          },
+          {
+            "code": "1432971.0",
+            "display": "168 HR Buprenorphine 0.015 MG/HR Transdermal System [BuTrans]"
+          },
+          {
+            "code": "1542999.0",
+            "display": "168 HR Buprenorphine 0.0075 MG/HR Transdermal System [BuTrans]"
+          },
+          {
+            "code": "904870.0",
+            "display": "168 HR Buprenorphine 0.01 MG/HR Transdermal System"
+          },
+          {
+            "code": "904876.0",
+            "display": "168 HR Buprenorphine 0.02 MG/HR Transdermal System"
+          },
+          {
+            "code": "904880.0",
+            "display": "168 HR Buprenorphine 0.005 MG/HR Transdermal System"
+          },
+          {
+            "code": "1432969.0",
+            "display": "168 HR Buprenorphine 0.015 MG/HR Transdermal System"
+          },
+          {
+            "code": "1542997.0",
+            "display": "168 HR Buprenorphine 0.0075 MG/HR Transdermal System"
+          },
+          {
+            "code": "1236179.0",
+            "display": "dihydrocodeine bitartrate 120 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1236188.0",
+            "display": "dihydrocodeine bitartrate 60 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1236190.0",
+            "display": "dihydrocodeine bitartrate 90 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "261184.0",
+            "display": "72 HR Fentanyl 0.025 MG/HR Transdermal System [Duragesic]"
+          },
+          {
+            "code": "261185.0",
+            "display": "72 HR Fentanyl 0.05 MG/HR Transdermal System [Duragesic]"
+          },
+          {
+            "code": "261186.0",
+            "display": "72 HR Fentanyl 0.075 MG/HR Transdermal System [Duragesic]"
+          },
+          {
+            "code": "262071.0",
+            "display": "72 HR Fentanyl 0.1 MG/HR Transdermal System [Duragesic]"
+          },
+          {
+            "code": "583490.0",
+            "display": "72 HR Fentanyl 0.012 MG/HR Transdermal System [Duragesic]"
+          },
+          {
+            "code": "1666837.0",
+            "display": "80 ACTUAT Fentanyl 0.04 MG/ACTUAT Transdermal System [Ionsys]"
+          },
+          {
+            "code": "1666831.0",
+            "display": "80 ACTUAT Fentanyl 0.04 MG/ACTUAT Transdermal System"
+          },
+          {
+            "code": "197696.0",
+            "display": "72 HR Fentanyl 0.075 MG/HR Transdermal System"
+          },
+          {
+            "code": "245134.0",
+            "display": "72 HR Fentanyl 0.025 MG/HR Transdermal System"
+          },
+          {
+            "code": "245135.0",
+            "display": "72 HR Fentanyl 0.05 MG/HR Transdermal System"
+          },
+          {
+            "code": "245136.0",
+            "display": "72 HR Fentanyl 0.1 MG/HR Transdermal System"
+          },
+          {
+            "code": "577057.0",
+            "display": "72 HR Fentanyl 0.012 MG/HR Transdermal System"
+          },
+          {
+            "code": "1603495.0",
+            "display": "72 HR Fentanyl 0.0375 MG/HR Transdermal System"
+          },
+          {
+            "code": "1603498.0",
+            "display": "72 HR Fentanyl 0.0625 MG/HR Transdermal System"
+          },
+          {
+            "code": "1603501.0",
+            "display": "72 HR Fentanyl 0.0875 MG/HR Transdermal System"
+          },
+          {
+            "code": "902733.0",
+            "display": "24 HR Hydromorphone Hydrochloride 12 MG Extended Release Oral Tablet [Exalgo]"
+          },
+          {
+            "code": "902738.0",
+            "display": "24 HR Hydromorphone Hydrochloride 16 MG Extended Release Oral Tablet [Exalgo]"
+          },
+          {
+            "code": "902743.0",
+            "display": "24 HR Hydromorphone Hydrochloride 8 MG Extended Release Oral Tablet [Exalgo]"
+          },
+          {
+            "code": "1306900.0",
+            "display": "24 HR Hydromorphone Hydrochloride 32 MG Extended Release Oral Tablet [Exalgo]"
+          },
+          {
+            "code": "898611.0",
+            "display": "12 HR Hydromorphone Hydrochloride 2 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "898614.0",
+            "display": "12 HR Hydromorphone Hydrochloride 4 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "898618.0",
+            "display": "12 HR Hydromorphone Hydrochloride 8 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "898612.0",
+            "display": "12 HR Hydromorphone Hydrochloride 3 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "898624.0",
+            "display": "Hydromorphone Hydrochloride 30 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "902729.0",
+            "display": "24 HR Hydromorphone Hydrochloride 12 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "902736.0",
+            "display": "24 HR Hydromorphone Hydrochloride 16 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "902741.0",
+            "display": "24 HR Hydromorphone Hydrochloride 8 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1306898.0",
+            "display": "24 HR Hydromorphone Hydrochloride 32 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "892496.0",
+            "display": "Morphine Sulfate 10 MG Extended Release Oral Capsule [Kadian]"
+          },
+          {
+            "code": "892556.0",
+            "display": "Morphine Sulfate 100 MG Extended Release Oral Capsule [Kadian]"
+          },
+          {
+            "code": "892560.0",
+            "display": "Morphine Sulfate 100 MG Extended Release Oral Tablet [MS Contin]"
+          },
+          {
+            "code": "892574.0",
+            "display": "Morphine Sulfate 15 MG Extended Release Oral Tablet [MS Contin]"
+          },
+          {
+            "code": "892598.0",
+            "display": "Morphine Sulfate 20 MG Extended Release Oral Capsule [Kadian]"
+          },
+          {
+            "code": "892645.0",
+            "display": "Morphine Sulfate 200 MG Extended Release Oral Capsule [Kadian]"
+          },
+          {
+            "code": "892648.0",
+            "display": "Morphine Sulfate 200 MG Extended Release Oral Tablet [MS Contin]"
+          },
+          {
+            "code": "892658.0",
+            "display": "Morphine Sulfate 30 MG Extended Release Oral Capsule [Kadian]"
+          },
+          {
+            "code": "892660.0",
+            "display": "Morphine Sulfate 30 MG Extended Release Oral Tablet [MS Contin]"
+          },
+          {
+            "code": "894803.0",
+            "display": "Morphine Sulfate 50 MG Extended Release Oral Capsule [Kadian]"
+          },
+          {
+            "code": "894805.0",
+            "display": "Morphine Sulfate 60 MG Extended Release Oral Capsule [Kadian]"
+          },
+          {
+            "code": "894813.0",
+            "display": "Morphine Sulfate 60 MG Extended Release Oral Tablet [MS Contin]"
+          },
+          {
+            "code": "894816.0",
+            "display": "Morphine Sulfate 80 MG Extended Release Oral Capsule [Kadian]"
+          },
+          {
+            "code": "1303738.0",
+            "display": "Morphine Sulfate 40 MG Extended Release Oral Capsule [Kadian]"
+          },
+          {
+            "code": "892299.0",
+            "display": "24 HR Morphine Sulfate 120 MG Extended Release Oral Capsule [Avinza]"
+          },
+          {
+            "code": "892344.0",
+            "display": "24 HR Morphine Sulfate 30 MG Extended Release Oral Capsule [Avinza]"
+          },
+          {
+            "code": "892351.0",
+            "display": "24 HR Morphine Sulfate 60 MG Extended Release Oral Capsule [Avinza]"
+          },
+          {
+            "code": "892357.0",
+            "display": "24 HR Morphine Sulfate 90 MG Extended Release Oral Capsule [Avinza]"
+          },
+          {
+            "code": "863847.0",
+            "display": "Abuse-Deterrent Morphine Sulfate 100 MG / Naltrexone hydrochloride 4 MG Extended Release Oral Capsule [Embeda]"
+          },
+          {
+            "code": "863849.0",
+            "display": "Abuse-Deterrent Morphine Sulfate 20 MG / Naltrexone hydrochloride 0.8 MG Extended Release Oral Capsule [Embeda]"
+          },
+          {
+            "code": "863851.0",
+            "display": "Abuse-Deterrent Morphine Sulfate 30 MG / Naltrexone hydrochloride 1.2 MG Extended Release Oral Capsule [Embeda]"
+          },
+          {
+            "code": "863853.0",
+            "display": "Abuse-Deterrent Morphine Sulfate 50 MG / Naltrexone hydrochloride 2 MG Extended Release Oral Capsule [Embeda]"
+          },
+          {
+            "code": "863855.0",
+            "display": "Abuse-Deterrent Morphine Sulfate 60 MG / Naltrexone hydrochloride 2.4 MG Extended Release Oral Capsule [Embeda]"
+          },
+          {
+            "code": "863857.0",
+            "display": "Abuse-Deterrent Morphine Sulfate 80 MG / Naltrexone hydrochloride 3.2 MG Extended Release Oral Capsule [Embeda]"
+          },
+          {
+            "code": "1745881.0",
+            "display": "Abuse-Deterrent 12 HR Morphine Sulfate 15 MG Extended Release Oral Tablet [Morphabond]"
+          },
+          {
+            "code": "1745886.0",
+            "display": "Abuse-Deterrent 12 HR Morphine Sulfate 100 MG Extended Release Oral Tablet [Morphabond]"
+          },
+          {
+            "code": "1745889.0",
+            "display": "Abuse-Deterrent 12 HR Morphine Sulfate 30 MG Extended Release Oral Tablet [Morphabond]"
+          },
+          {
+            "code": "1745892.0",
+            "display": "Abuse-Deterrent 12 HR Morphine Sulfate 60 MG Extended Release Oral Tablet [Morphabond]"
+          },
+          {
+            "code": "1871440.0",
+            "display": "Abuse-Deterrent 12 HR Morphine Sulfate 15 MG Extended Release Oral Tablet [Arymo]"
+          },
+          {
+            "code": "1871443.0",
+            "display": "Abuse-Deterrent 12 HR Morphine Sulfate 30 MG Extended Release Oral Tablet [Arymo]"
+          },
+          {
+            "code": "1871446.0",
+            "display": "Abuse-Deterrent 12 HR Morphine Sulfate 60 MG Extended Release Oral Tablet [Arymo]"
+          },
+          {
+            "code": "894942.0",
+            "display": "24 HR Morphine Sulfate 45 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "894970.0",
+            "display": "24 HR Morphine Sulfate 75 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "863848.0",
+            "display": "Abuse-Deterrent Morphine Sulfate 20 MG / Naltrexone hydrochloride 0.8 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "863850.0",
+            "display": "Abuse-Deterrent Morphine Sulfate 30 MG / Naltrexone hydrochloride 1.2 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "863852.0",
+            "display": "Abuse-Deterrent Morphine Sulfate 50 MG / Naltrexone hydrochloride 2 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "891885.0",
+            "display": "12 HR Morphine Sulfate 30 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "891888.0",
+            "display": "Morphine Sulfate 30 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "892342.0",
+            "display": "24 HR Morphine Sulfate 30 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "892345.0",
+            "display": "Morphine Sulfate 30 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "892596.0",
+            "display": "Morphine Sulfate 20 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "894801.0",
+            "display": "Morphine Sulfate 50 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1871441.0",
+            "display": "Abuse-Deterrent 12 HR Morphine Sulfate 30 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1872234.0",
+            "display": "Abuse-Deterrent 12 HR Morphine Sulfate 100 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "863845.0",
+            "display": "Abuse-Deterrent Morphine Sulfate 100 MG / Naltrexone hydrochloride 4 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "863854.0",
+            "display": "Abuse-Deterrent Morphine Sulfate 60 MG / Naltrexone hydrochloride 2.4 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "863856.0",
+            "display": "Abuse-Deterrent Morphine Sulfate 80 MG / Naltrexone hydrochloride 3.2 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "891874.0",
+            "display": "Morphine Sulfate 100 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "891883.0",
+            "display": "12 HR Morphine Sulfate 100 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "891890.0",
+            "display": "12 HR Morphine Sulfate 60 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "891893.0",
+            "display": "Morphine Sulfate 60 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "892349.0",
+            "display": "24 HR Morphine Sulfate 60 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "892352.0",
+            "display": "Morphine Sulfate 60 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "892554.0",
+            "display": "Morphine Sulfate 100 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "894814.0",
+            "display": "Morphine Sulfate 80 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1871444.0",
+            "display": "Abuse-Deterrent 12 HR Morphine Sulfate 60 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "891878.0",
+            "display": "12 HR Morphine Sulfate 15 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "891881.0",
+            "display": "Morphine Sulfate 15 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "892297.0",
+            "display": "24 HR Morphine Sulfate 120 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "892355.0",
+            "display": "24 HR Morphine Sulfate 90 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "892494.0",
+            "display": "Morphine Sulfate 10 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "892643.0",
+            "display": "Morphine Sulfate 200 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "892646.0",
+            "display": "Morphine Sulfate 200 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "894918.0",
+            "display": "12 HR Morphine Sulfate 200 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "895217.0",
+            "display": "Morphine Sulfate 5 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1871434.0",
+            "display": "Abuse-Deterrent 12 HR Morphine Sulfate 15 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1303736.0",
+            "display": "Morphine Sulfate 40 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1545903.0",
+            "display": "12 HR Naloxone Hydrochloride 10 MG / Oxycodone Hydrochloride 20 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1545907.0",
+            "display": "12 HR Naloxone Hydrochloride 20 MG / Oxycodone Hydrochloride 40 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1545910.0",
+            "display": "12 HR Naloxone Hydrochloride 5 MG / Oxycodone Hydrochloride 10 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1806707.0",
+            "display": "12 HR Naltrexone hydrochloride 1.2 MG / Oxycodone Hydrochloride 10 MG Extended Release Oral Capsule [Troxyca]"
+          },
+          {
+            "code": "1806701.0",
+            "display": "12 HR Naltrexone hydrochloride 1.2 MG / Oxycodone Hydrochloride 10 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1806710.0",
+            "display": "12 HR Naltrexone hydrochloride 2.4 MG / Oxycodone Hydrochloride 20 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1806716.0",
+            "display": "12 HR Naltrexone hydrochloride 3.6 MG / Oxycodone Hydrochloride 30 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1806722.0",
+            "display": "12 HR Naltrexone hydrochloride 4.8 MG / Oxycodone Hydrochloride 40 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1806728.0",
+            "display": "12 HR Naltrexone hydrochloride 7.2 MG / Oxycodone Hydrochloride 60 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1806734.0",
+            "display": "12 HR Naltrexone hydrochloride 9.6 MG / Oxycodone Hydrochloride 80 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1049504.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone Hydrochloride 10 MG Extended Release Oral Tablet [Oxycontin]"
+          },
+          {
+            "code": "1049545.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone Hydrochloride 15 MG Extended Release Oral Tablet [Oxycontin]"
+          },
+          {
+            "code": "1049565.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone Hydrochloride 20 MG Extended Release Oral Tablet [Oxycontin]"
+          },
+          {
+            "code": "1049576.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone Hydrochloride 30 MG Extended Release Oral Tablet [Oxycontin]"
+          },
+          {
+            "code": "1049586.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone Hydrochloride 40 MG Extended Release Oral Tablet [Oxycontin]"
+          },
+          {
+            "code": "1049595.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone Hydrochloride 60 MG Extended Release Oral Tablet [Oxycontin]"
+          },
+          {
+            "code": "1049601.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone Hydrochloride 80 MG Extended Release Oral Tablet [Oxycontin]"
+          },
+          {
+            "code": "1491834.0",
+            "display": "12 HR Acetaminophen 325 MG / Oxycodone Hydrochloride 7.5 MG Extended Release Oral Tablet [Xartemis]"
+          },
+          {
+            "code": "1790533.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone 9 MG Extended Release Oral Capsule [Xtampza]"
+          },
+          {
+            "code": "1791560.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone 13.5 MG Extended Release Oral Capsule [Xtampza]"
+          },
+          {
+            "code": "1791569.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone 18 MG Extended Release Oral Capsule [Xtampza]"
+          },
+          {
+            "code": "1791576.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone 27 MG Extended Release Oral Capsule [Xtampza]"
+          },
+          {
+            "code": "1791582.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone 36 MG Extended Release Oral Capsule [Xtampza]"
+          },
+          {
+            "code": "1049502.0",
+            "display": "12 HR Oxycodone Hydrochloride 10 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1049727.0",
+            "display": "Oxycodone Hydrochloride 5 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1491832.0",
+            "display": "12 HR Acetaminophen 325 MG / Oxycodone Hydrochloride 7.5 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1860157.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone Hydrochloride 10 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1049543.0",
+            "display": "12 HR Oxycodone Hydrochloride 15 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1049557.0",
+            "display": "12 HR Oxycodone Hydrochloride 160 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1049563.0",
+            "display": "12 HR Oxycodone Hydrochloride 20 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1049574.0",
+            "display": "12 HR Oxycodone Hydrochloride 30 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1049584.0",
+            "display": "12 HR Oxycodone Hydrochloride 40 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1049593.0",
+            "display": "12 HR Oxycodone Hydrochloride 60 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1049599.0",
+            "display": "12 HR Oxycodone Hydrochloride 80 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1860127.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone Hydrochloride 60 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1860129.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone Hydrochloride 20 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1860137.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone Hydrochloride 40 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1860148.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone Hydrochloride 80 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1860151.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone Hydrochloride 30 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1860154.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone Hydrochloride 15 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1790527.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone 9 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1791558.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone 13.5 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1791567.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone 18 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1791574.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone 27 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1791580.0",
+            "display": "Abuse-Deterrent 12 HR Oxycodone 36 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "849303.0",
+            "display": "Acetaminophen 500 MG / propoxyphene napsylate 100 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1149367.0",
+            "display": "12 HR tapentadol 100 MG Extended Release Oral Tablet [Nucynta]"
+          },
+          {
+            "code": "1149370.0",
+            "display": "12 HR tapentadol 150 MG Extended Release Oral Tablet [Nucynta]"
+          },
+          {
+            "code": "1149373.0",
+            "display": "12 HR tapentadol 200 MG Extended Release Oral Tablet [Nucynta]"
+          },
+          {
+            "code": "1149376.0",
+            "display": "12 HR tapentadol 250 MG Extended Release Oral Tablet [Nucynta]"
+          },
+          {
+            "code": "1149378.0",
+            "display": "12 HR tapentadol 50 MG Extended Release Oral Tablet [Nucynta]"
+          },
+          {
+            "code": "1148800.0",
+            "display": "12 HR tapentadol 150 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1148803.0",
+            "display": "12 HR tapentadol 200 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1148807.0",
+            "display": "12 HR tapentadol 250 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1148797.0",
+            "display": "12 HR tapentadol 100 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1148809.0",
+            "display": "12 HR tapentadol 50 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1148482.0",
+            "display": "24 HR tramadol hydrochloride 100 MG Extended Release Oral Capsule [ConZip]"
+          },
+          {
+            "code": "1148487.0",
+            "display": "24 HR tramadol hydrochloride 200 MG Extended Release Oral Capsule [ConZip]"
+          },
+          {
+            "code": "1148491.0",
+            "display": "24 HR tramadol hydrochloride 300 MG Extended Release Oral Capsule [ConZip]"
+          },
+          {
+            "code": "845314.0",
+            "display": "24 HR tramadol hydrochloride 100 MG Extended Release Oral Tablet [Ultram]"
+          },
+          {
+            "code": "845315.0",
+            "display": "24 HR tramadol hydrochloride 200 MG Extended Release Oral Tablet [Ultram]"
+          },
+          {
+            "code": "845316.0",
+            "display": "24 HR tramadol hydrochloride 300 MG Extended Release Oral Tablet [Ultram]"
+          },
+          {
+            "code": "833710.0",
+            "display": "Matrix Delivery 24 HR tramadol hydrochloride 100 MG Extended Release Oral Tablet [Ryzolt]"
+          },
+          {
+            "code": "833712.0",
+            "display": "Matrix Delivery 24 HR tramadol hydrochloride 200 MG Extended Release Oral Tablet [Ryzolt]"
+          },
+          {
+            "code": "833714.0",
+            "display": "Matrix Delivery 24 HR tramadol hydrochloride 300 MG Extended Release Oral Tablet [Ryzolt]"
+          },
+          {
+            "code": "849561.0",
+            "display": "12 HR tramadol hydrochloride 150 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1148478.0",
+            "display": "24 HR tramadol hydrochloride 100 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1148485.0",
+            "display": "24 HR tramadol hydrochloride 200 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1148489.0",
+            "display": "24 HR tramadol hydrochloride 300 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "833709.0",
+            "display": "24 HR tramadol hydrochloride 100 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "833711.0",
+            "display": "24 HR tramadol hydrochloride 200 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "833713.0",
+            "display": "24 HR tramadol hydrochloride 300 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "849903.0",
+            "display": "tramadol hydrochloride 50 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1248115.0",
+            "display": "24 HR tramadol hydrochloride 150 MG Extended Release Oral Capsule"
+          },
+          {
+            "code": "1946525.0",
+            "display": "Matrix Delivery 24 HR tramadol hydrochloride 300 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1946527.0",
+            "display": "Matrix Delivery 24 HR tramadol hydrochloride 200 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "1946529.0",
+            "display": "Matrix Delivery 24 HR tramadol hydrochloride 100 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "849331.0",
+            "display": "tramadol hydrochloride 75 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "864737.0",
+            "display": "Methadone Hydrochloride 5 MG Oral Tablet [Methadose]"
+          },
+          {
+            "code": "864980.0",
+            "display": "Methadone Hydrochloride 40 MG Tablet for Oral Suspension [Methadose]"
+          },
+          {
+            "code": "991149.0",
+            "display": "Methadone Hydrochloride 10 MG/ML Oral Solution [Methadose]"
+          },
+          {
+            "code": "864712.0",
+            "display": "Methadone Hydrochloride 10 MG Oral Tablet [Methadose]"
+          },
+          {
+            "code": "864708.0",
+            "display": "Methadone Hydrochloride 10 MG Oral Tablet [Dolophine]"
+          },
+          {
+            "code": "864720.0",
+            "display": "Methadone Hydrochloride 5 MG Oral Tablet [Dolophine]"
+          },
+          {
+            "code": "1990745.0",
+            "display": "Methadone Hydrochloride 40 MG Tablet for Oral Suspension [Diskets]"
+          },
+          {
+            "code": "864706.0",
+            "display": "Methadone Hydrochloride 10 MG Oral Tablet"
+          },
+          {
+            "code": "864718.0",
+            "display": "Methadone Hydrochloride 5 MG Oral Tablet"
+          },
+          {
+            "code": "864761.0",
+            "display": "Methadone Hydrochloride 1 MG/ML Oral Solution"
+          },
+          {
+            "code": "864769.0",
+            "display": "Methadone Hydrochloride 2 MG/ML Oral Solution"
+          },
+          {
+            "code": "864984.0",
+            "display": "Methadone Hydrochloride 20 MG/ML Oral Solution"
+          },
+          {
+            "code": "991147.0",
+            "display": "Methadone Hydrochloride 10 MG/ML Oral Solution"
+          },
+          {
+            "code": "864978.0",
+            "display": "Methadone Hydrochloride 40 MG Tablet for Oral Suspension"
+          },
+          {
+            "code": "861578.0",
+            "display": "Meperidine Hydrochloride 50 MG / Promethazine Hydrochloride 25 MG Oral Capsule"
+          }
+        ]
+      }
+    ]
+  }
+}

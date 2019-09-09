@@ -1,0 +1,130 @@
+{
+  "resourceType": "ValueSet",
+  "id": "oncology-specialty-designations",
+  "extension": [
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-clinical-focus",
+      "valueString": "Provider type indentifiers for oncology care"
+    },
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-dataelement-scope",
+      "valueString": "provider type"
+    },
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-inclusion-criteria",
+      "valueString": "NUCC provider types with the word \"oncology\" in the description"
+    },
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-exclusion-criteria",
+      "valueString": "none"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "MD Partners, Inc.",
+        "telecom": [
+          {
+            "system": "email",
+            "value": "info@mdpartners.com"
+          }
+        ]
+      }
+    }
+  ],
+  "url": "http://fhir.org/guides/cdc/opioid-cds/oncology-specialty-designations",
+  "name": "oncology_specialty_designations",
+  "title": "oncology specialty designations",
+  "status": "active",
+  "experimental": true,
+  "date": "2019-09-03T13:28:57-06:00",
+  "publisher": "Centers for Disease Control and Prevention (CDC)",
+  "description": "Clinical providers delivering oncology care",
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "urn:iso:std:iso:3166",
+          "code": "US"
+        }
+      ]
+    }
+  ],
+  "purpose": "NUCC oncology provider types who may provide encounters to patients with cancer",
+  "copyright": "© CDC 2016+.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://nucc.org/provider-taxonomy",
+        "filter": [
+          {
+            "property": "display",
+            "op": "in",
+            "value": "oncology"
+          }
+        ]
+      },
+      {
+        "system": "http://nucc.org/provider-taxonomy",
+        "version": "19.1",
+        "concept": [
+          {
+            "code": "133VN1301X",
+            "display": "Dietary & Nutritional Service Providers; \"Dietitian, Registered\", \"Nutrition, Oncology\""
+          },
+          {
+            "code": "163WP0218X",
+            "display": "Nursing Service Providers; Registered Nurse, Pediatric Oncology"
+          },
+          {
+            "code": "163WX0200X",
+            "display": "Nursing Service Providers; Registered Nurse, Oncology"
+          },
+          {
+            "code": "1835X0200X",
+            "display": "Pharmacy Service Providers; Pharmacist, Oncology"
+          },
+          {
+            "code": "207RH0003X",
+            "display": "Allopathic & Osteopathic Physicians; Internal Medicine, Hematology & Oncology"
+          },
+          {
+            "code": "207RX0202X",
+            "display": "Allopathic & Osteopathic Physicians; Internal Medicine, Medical Oncology"
+          },
+          {
+            "code": "207VX0201X",
+            "display": "Allopathic & Osteopathic Physicians; Obstetrics & Gynecology, Gynecologic Oncology"
+          },
+          {
+            "code": "2080P0207X",
+            "display": "Allopathic & Osteopathic Physicians; Pediatrics, Pediatric Hematology-Oncology"
+          },
+          {
+            "code": "2085R0001X",
+            "display": "Allopathic & Osteopathic Physicians; Radiology, Radiation Oncology"
+          },
+          {
+            "code": "2086X0206X",
+            "display": "Allopathic & Osteopathic Physicians; Surgery, Surgical Oncology"
+          },
+          {
+            "code": "261QX0200X",
+            "display": "Ambulatory Health Care Facilities; Clinic/Center, Oncology"
+          },
+          {
+            "code": "261QX0203X",
+            "display": "Ambulatory Health Care Facilities; Clinic/Center, \"Oncology, Radiation\""
+          },
+          {
+            "code": "364SX0200X",
+            "display": "Physician Assistants & Advanced Practice Nursing Providers; Clinical Nurse Specialist, Oncology"
+          },
+          {
+            "code": "364SX0204X",
+            "display": "Physician Assistants & Advanced Practice Nursing Providers; Clinical Nurse Specialist, \"Oncology, Pediatrics\""
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "resourceType": "ValueSet",
+  "id": "substance-misuse-behavioral-counseling",
+  "extension": [
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-clinical-focus",
+      "valueString": "Counseling procedures for substance misuse"
+    },
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-dataelement-scope",
+      "valueString": "Procedure"
+    },
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-inclusion-criteria",
+      "valueString": "Counseling procedures for substance misuse"
+    },
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-exclusion-criteria",
+      "valueString": "none"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "MD Partners, Inc.",
+        "telecom": [
+          {
+            "system": "email",
+            "value": "info@mdpartners.com"
+          }
+        ]
+      }
+    }
+  ],
+  "url": "http://fhir.org/guides/cdc/opioid-cds/substance-misuse-behavioral-counseling",
+  "name": "substance_misuse_behavioral_counseling",
+  "title": "substance misuse behavioral counseling",
+  "status": "active",
+  "experimental": true,
+  "date": "2019-09-03T13:28:57-06:00",
+  "publisher": "Centers for Disease Control and Prevention (CDC)",
+  "description": "Counseling procedures for substance misuse",
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "urn:iso:std:iso:3166",
+          "code": "US"
+        }
+      ]
+    }
+  ],
+  "purpose": "Counseling procedures for substance misuse that may be used for opioid management",
+  "copyright": "© CDC 2016+.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "version": "http://snomed.info/sct/731000124108",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "313071005"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "http://snomed.info/sct/731000124108",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "60112009"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "http://snomed.info/sct/731000124108",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "424407005"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "version": "http://snomed.info/sct/731000124108",
+        "concept": [
+          {
+            "code": "3.13071005E8",
+            "display": "Counseling for substance abuse (procedure)"
+          },
+          {
+            "code": "4.24407005E8",
+            "display": "Substance use cessation education, guidance, and counseling (procedure)"
+          },
+          {
+            "code": "6.0112009E7",
+            "display": "Drug addiction counseling (procedure)"
+          }
+        ]
+      }
+    ]
+  }
+}

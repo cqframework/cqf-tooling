@@ -1,0 +1,834 @@
+{
+  "resourceType": "ValueSet",
+  "id": "cdc-malignant-cancer-conditions",
+  "extension": [
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-clinical-focus",
+      "valueString": "All neoplastic and malignant conditions, including Neoplasm related pain"
+    },
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-dataelement-scope",
+      "valueString": "Condition"
+    },
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-inclusion-criteria",
+      "valueString": "All C and D codes and G893 Neoplasm related pain (acute) (chronic)"
+    },
+    {
+      "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-exclusion-criteria",
+      "valueString": "All D50-D89 codes, D3A-D3A and descendants."
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "MD Partners, Inc.",
+        "telecom": [
+          {
+            "system": "email",
+            "value": "info@mdpartners.com"
+          }
+        ]
+      }
+    }
+  ],
+  "url": "http://fhir.org/guides/cdc/opioid-cds/cdc-malignant-cancer-conditions",
+  "name": "cdc_malignant_cancer_conditions",
+  "title": "cdc malignant cancer conditions",
+  "status": "active",
+  "experimental": true,
+  "date": "2019-09-03T13:28:56-06:00",
+  "publisher": "Centers for Disease Control and Prevention (CDC)",
+  "description": "All neoplastic and malignant conditions, including Neoplasm related pain.",
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "urn:iso:std:iso:3166",
+          "code": "US"
+        }
+      ]
+    }
+  ],
+  "purpose": "Cancer conditions to be used as an exclusion for opioid management review",
+  "copyright": "© CDC 2016+.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://hl7.org/fhir/sid/icd-10-cm",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "C00-C96"
+          }
+        ]
+      },
+      {
+        "system": "http://hl7.org/fhir/sid/icd-10-cm",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "D03"
+          }
+        ]
+      },
+      {
+        "system": "http://hl7.org/fhir/sid/icd-10-cm",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "D37-D48"
+          }
+        ]
+      },
+      {
+        "system": "http://hl7.org/fhir/sid/icd-10-cm",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "D49-D49"
+          }
+        ]
+      },
+      {
+        "system": "http://hl7.org/fhir/sid/icd-10-cm",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "G89.3"
+          }
+        ]
+      },
+      {
+        "system": "http://hl7.org/fhir/sid/icd-10-cm",
+        "version": "2020",
+        "concept": [
+          {
+            "code": "D03.0",
+            "display": "Melanoma in situ of lip"
+          },
+          {
+            "code": "D03.1",
+            "display": "Melanoma in situ of eyelid, including canthus"
+          },
+          {
+            "code": "D03.10",
+            "display": "Melanoma in situ of unspecified eyelid, including canthus"
+          },
+          {
+            "code": "D03.11",
+            "display": "Melanoma in situ of right eyelid, including canthus"
+          },
+          {
+            "code": "D03.111",
+            "display": "Melanoma in situ of right upper eyelid, including canthus"
+          },
+          {
+            "code": "D03.112",
+            "display": "Melanoma in situ of right lower eyelid, including canthus"
+          },
+          {
+            "code": "D03.12",
+            "display": "Melanoma in situ of left eyelid, including canthus"
+          },
+          {
+            "code": "D03.121",
+            "display": "Melanoma in situ of left upper eyelid, including canthus"
+          },
+          {
+            "code": "D03.122",
+            "display": "Melanoma in situ of left lower eyelid, including canthus"
+          },
+          {
+            "code": "D03.2",
+            "display": "Melanoma in situ of ear and external auricular canal"
+          },
+          {
+            "code": "D03.20",
+            "display": "Melanoma in situ of unspecified ear and external auricular canal"
+          },
+          {
+            "code": "D03.21",
+            "display": "Melanoma in situ of right ear and external auricular canal"
+          },
+          {
+            "code": "D03.22",
+            "display": "Melanoma in situ of left ear and external auricular canal"
+          },
+          {
+            "code": "D03.3",
+            "display": "Melanoma in situ of other and unspecified parts of face"
+          },
+          {
+            "code": "D03.30",
+            "display": "Melanoma in situ of unspecified part of face"
+          },
+          {
+            "code": "D03.39",
+            "display": "Melanoma in situ of other parts of face"
+          },
+          {
+            "code": "D03.4",
+            "display": "Melanoma in situ of scalp and neck"
+          },
+          {
+            "code": "D03.5",
+            "display": "Melanoma in situ of trunk"
+          },
+          {
+            "code": "D03.51",
+            "display": "Melanoma in situ of anal skin"
+          },
+          {
+            "code": "D03.52",
+            "display": "Melanoma in situ of breast (skin) (soft tissue)"
+          },
+          {
+            "code": "D03.59",
+            "display": "Melanoma in situ of other part of trunk"
+          },
+          {
+            "code": "D03.6",
+            "display": "Melanoma in situ of upper limb, including shoulder"
+          },
+          {
+            "code": "D03.60",
+            "display": "Melanoma in situ of unspecified upper limb, including shoulder"
+          },
+          {
+            "code": "D03.61",
+            "display": "Melanoma in situ of right upper limb, including shoulder"
+          },
+          {
+            "code": "D03.62",
+            "display": "Melanoma in situ of left upper limb, including shoulder"
+          },
+          {
+            "code": "D03.7",
+            "display": "Melanoma in situ of lower limb, including hip"
+          },
+          {
+            "code": "D03.70",
+            "display": "Melanoma in situ of unspecified lower limb, including hip"
+          },
+          {
+            "code": "D03.71",
+            "display": "Melanoma in situ of right lower limb, including hip"
+          },
+          {
+            "code": "D03.72",
+            "display": "Melanoma in situ of left lower limb, including hip"
+          },
+          {
+            "code": "D03.8",
+            "display": "Melanoma in situ of other sites"
+          },
+          {
+            "code": "D03.9",
+            "display": "Melanoma in situ, unspecified"
+          },
+          {
+            "code": "D37",
+            "display": "Neoplasm of uncertain behavior of oral cavity and digestive organs"
+          },
+          {
+            "code": "D37.0",
+            "display": "Neoplasm of uncertain behavior of lip, oral cavity and pharynx"
+          },
+          {
+            "code": "D37.01",
+            "display": "Neoplasm of uncertain behavior of lip"
+          },
+          {
+            "code": "D37.02",
+            "display": "Neoplasm of uncertain behavior of tongue"
+          },
+          {
+            "code": "D37.03",
+            "display": "Neoplasm of uncertain behavior of the major salivary glands"
+          },
+          {
+            "code": "D37.030",
+            "display": "Neoplasm of uncertain behavior of the parotid salivary glands"
+          },
+          {
+            "code": "D37.031",
+            "display": "Neoplasm of uncertain behavior of the sublingual salivary glands"
+          },
+          {
+            "code": "D37.032",
+            "display": "Neoplasm of uncertain behavior of the submandibular salivary glands"
+          },
+          {
+            "code": "D37.039",
+            "display": "Neoplasm of uncertain behavior of the major salivary glands, unspecified"
+          },
+          {
+            "code": "D37.04",
+            "display": "Neoplasm of uncertain behavior of the minor salivary glands"
+          },
+          {
+            "code": "D37.05",
+            "display": "Neoplasm of uncertain behavior of pharynx"
+          },
+          {
+            "code": "D37.09",
+            "display": "Neoplasm of uncertain behavior of other specified sites of the oral cavity"
+          },
+          {
+            "code": "D37.1",
+            "display": "Neoplasm of uncertain behavior of stomach"
+          },
+          {
+            "code": "D37.2",
+            "display": "Neoplasm of uncertain behavior of small intestine"
+          },
+          {
+            "code": "D37.3",
+            "display": "Neoplasm of uncertain behavior of appendix"
+          },
+          {
+            "code": "D37.4",
+            "display": "Neoplasm of uncertain behavior of colon"
+          },
+          {
+            "code": "D37.5",
+            "display": "Neoplasm of uncertain behavior of rectum"
+          },
+          {
+            "code": "D37.6",
+            "display": "Neoplasm of uncertain behavior of liver, gallbladder and bile ducts"
+          },
+          {
+            "code": "D37.8",
+            "display": "Neoplasm of uncertain behavior of other specified digestive organs"
+          },
+          {
+            "code": "D37.9",
+            "display": "Neoplasm of uncertain behavior of digestive organ, unspecified"
+          },
+          {
+            "code": "D38",
+            "display": "Neoplasm of uncertain behavior of middle ear and respiratory and intrathoracic organs"
+          },
+          {
+            "code": "D38.0",
+            "display": "Neoplasm of uncertain behavior of larynx"
+          },
+          {
+            "code": "D38.1",
+            "display": "Neoplasm of uncertain behavior of trachea, bronchus and lung"
+          },
+          {
+            "code": "D38.2",
+            "display": "Neoplasm of uncertain behavior of pleura"
+          },
+          {
+            "code": "D38.3",
+            "display": "Neoplasm of uncertain behavior of mediastinum"
+          },
+          {
+            "code": "D38.4",
+            "display": "Neoplasm of uncertain behavior of thymus"
+          },
+          {
+            "code": "D38.5",
+            "display": "Neoplasm of uncertain behavior of other respiratory organs"
+          },
+          {
+            "code": "D38.6",
+            "display": "Neoplasm of uncertain behavior of respiratory organ, unspecified"
+          },
+          {
+            "code": "D39",
+            "display": "Neoplasm of uncertain behavior of female genital organs"
+          },
+          {
+            "code": "D39.0",
+            "display": "Neoplasm of uncertain behavior of uterus"
+          },
+          {
+            "code": "D39.1",
+            "display": "Neoplasm of uncertain behavior of ovary"
+          },
+          {
+            "code": "D39.10",
+            "display": "Neoplasm of uncertain behavior of unspecified ovary"
+          },
+          {
+            "code": "D39.11",
+            "display": "Neoplasm of uncertain behavior of right ovary"
+          },
+          {
+            "code": "D39.12",
+            "display": "Neoplasm of uncertain behavior of left ovary"
+          },
+          {
+            "code": "D39.2",
+            "display": "Neoplasm of uncertain behavior of placenta"
+          },
+          {
+            "code": "D39.8",
+            "display": "Neoplasm of uncertain behavior of other specified female genital organs"
+          },
+          {
+            "code": "D39.9",
+            "display": "Neoplasm of uncertain behavior of female genital organ, unspecified"
+          },
+          {
+            "code": "D40",
+            "display": "Neoplasm of uncertain behavior of male genital organs"
+          },
+          {
+            "code": "D40.0",
+            "display": "Neoplasm of uncertain behavior of prostate"
+          },
+          {
+            "code": "D40.1",
+            "display": "Neoplasm of uncertain behavior of testis"
+          },
+          {
+            "code": "D40.10",
+            "display": "Neoplasm of uncertain behavior of unspecified testis"
+          },
+          {
+            "code": "D40.11",
+            "display": "Neoplasm of uncertain behavior of right testis"
+          },
+          {
+            "code": "D40.12",
+            "display": "Neoplasm of uncertain behavior of left testis"
+          },
+          {
+            "code": "D40.8",
+            "display": "Neoplasm of uncertain behavior of other specified male genital organs"
+          },
+          {
+            "code": "D40.9",
+            "display": "Neoplasm of uncertain behavior of male genital organ, unspecified"
+          },
+          {
+            "code": "D41",
+            "display": "Neoplasm of uncertain behavior of urinary organs"
+          },
+          {
+            "code": "D41.0",
+            "display": "Neoplasm of uncertain behavior of kidney"
+          },
+          {
+            "code": "D41.00",
+            "display": "Neoplasm of uncertain behavior of unspecified kidney"
+          },
+          {
+            "code": "D41.01",
+            "display": "Neoplasm of uncertain behavior of right kidney"
+          },
+          {
+            "code": "D41.02",
+            "display": "Neoplasm of uncertain behavior of left kidney"
+          },
+          {
+            "code": "D41.1",
+            "display": "Neoplasm of uncertain behavior of renal pelvis"
+          },
+          {
+            "code": "D41.10",
+            "display": "Neoplasm of uncertain behavior of unspecified renal pelvis"
+          },
+          {
+            "code": "D41.11",
+            "display": "Neoplasm of uncertain behavior of right renal pelvis"
+          },
+          {
+            "code": "D41.12",
+            "display": "Neoplasm of uncertain behavior of left renal pelvis"
+          },
+          {
+            "code": "D41.2",
+            "display": "Neoplasm of uncertain behavior of ureter"
+          },
+          {
+            "code": "D41.20",
+            "display": "Neoplasm of uncertain behavior of unspecified ureter"
+          },
+          {
+            "code": "D41.21",
+            "display": "Neoplasm of uncertain behavior of right ureter"
+          },
+          {
+            "code": "D41.22",
+            "display": "Neoplasm of uncertain behavior of left ureter"
+          },
+          {
+            "code": "D41.3",
+            "display": "Neoplasm of uncertain behavior of urethra"
+          },
+          {
+            "code": "D41.4",
+            "display": "Neoplasm of uncertain behavior of bladder"
+          },
+          {
+            "code": "D41.8",
+            "display": "Neoplasm of uncertain behavior of other specified urinary organs"
+          },
+          {
+            "code": "D41.9",
+            "display": "Neoplasm of uncertain behavior of unspecified urinary organ"
+          },
+          {
+            "code": "D42",
+            "display": "Neoplasm of uncertain behavior of meninges"
+          },
+          {
+            "code": "D42.0",
+            "display": "Neoplasm of uncertain behavior of cerebral meninges"
+          },
+          {
+            "code": "D42.1",
+            "display": "Neoplasm of uncertain behavior of spinal meninges"
+          },
+          {
+            "code": "D42.9",
+            "display": "Neoplasm of uncertain behavior of meninges, unspecified"
+          },
+          {
+            "code": "D43",
+            "display": "Neoplasm of uncertain behavior of brain and central nervous system"
+          },
+          {
+            "code": "D43.0",
+            "display": "Neoplasm of uncertain behavior of brain, supratentorial"
+          },
+          {
+            "code": "D43.1",
+            "display": "Neoplasm of uncertain behavior of brain, infratentorial"
+          },
+          {
+            "code": "D43.2",
+            "display": "Neoplasm of uncertain behavior of brain, unspecified"
+          },
+          {
+            "code": "D43.3",
+            "display": "Neoplasm of uncertain behavior of cranial nerves"
+          },
+          {
+            "code": "D43.4",
+            "display": "Neoplasm of uncertain behavior of spinal cord"
+          },
+          {
+            "code": "D43.8",
+            "display": "Neoplasm of uncertain behavior of other specified parts of central nervous system"
+          },
+          {
+            "code": "D43.9",
+            "display": "Neoplasm of uncertain behavior of central nervous system, unspecified"
+          },
+          {
+            "code": "D44",
+            "display": "Neoplasm of uncertain behavior of endocrine glands"
+          },
+          {
+            "code": "D44.0",
+            "display": "Neoplasm of uncertain behavior of thyroid gland"
+          },
+          {
+            "code": "D44.1",
+            "display": "Neoplasm of uncertain behavior of adrenal gland"
+          },
+          {
+            "code": "D44.10",
+            "display": "Neoplasm of uncertain behavior of unspecified adrenal gland"
+          },
+          {
+            "code": "D44.11",
+            "display": "Neoplasm of uncertain behavior of right adrenal gland"
+          },
+          {
+            "code": "D44.12",
+            "display": "Neoplasm of uncertain behavior of left adrenal gland"
+          },
+          {
+            "code": "D44.2",
+            "display": "Neoplasm of uncertain behavior of parathyroid gland"
+          },
+          {
+            "code": "D44.3",
+            "display": "Neoplasm of uncertain behavior of pituitary gland"
+          },
+          {
+            "code": "D44.4",
+            "display": "Neoplasm of uncertain behavior of craniopharyngeal duct"
+          },
+          {
+            "code": "D44.5",
+            "display": "Neoplasm of uncertain behavior of pineal gland"
+          },
+          {
+            "code": "D44.6",
+            "display": "Neoplasm of uncertain behavior of carotid body"
+          },
+          {
+            "code": "D44.7",
+            "display": "Neoplasm of uncertain behavior of aortic body and other paraganglia"
+          },
+          {
+            "code": "D44.9",
+            "display": "Neoplasm of uncertain behavior of unspecified endocrine gland"
+          },
+          {
+            "code": "D45",
+            "display": "Polycythemia vera"
+          },
+          {
+            "code": "D46",
+            "display": "Myelodysplastic syndromes"
+          },
+          {
+            "code": "D46.0",
+            "display": "Refractory anemia without ring sideroblasts, so stated"
+          },
+          {
+            "code": "D46.1",
+            "display": "Refractory anemia with ring sideroblasts"
+          },
+          {
+            "code": "D46.2",
+            "display": "Refractory anemia with excess of blasts [RAEB]"
+          },
+          {
+            "code": "D46.20",
+            "display": "Refractory anemia with excess of blasts, unspecified"
+          },
+          {
+            "code": "D46.21",
+            "display": "Refractory anemia with excess of blasts 1"
+          },
+          {
+            "code": "D46.22",
+            "display": "Refractory anemia with excess of blasts 2"
+          },
+          {
+            "code": "D46.4",
+            "display": "Refractory anemia, unspecified"
+          },
+          {
+            "code": "D46.9",
+            "display": "Myelodysplastic syndrome, unspecified"
+          },
+          {
+            "code": "D46.A",
+            "display": "Refractory cytopenia with multilineage dysplasia"
+          },
+          {
+            "code": "D46.B",
+            "display": "Refractory cytopenia with multilineage dysplasia and ring sideroblasts"
+          },
+          {
+            "code": "D46.C",
+            "display": "Myelodysplastic syndrome with isolated del(5q) chromosomal abnormality"
+          },
+          {
+            "code": "D46.Z",
+            "display": "Other myelodysplastic syndromes"
+          },
+          {
+            "code": "D47",
+            "display": "Other neoplasms of uncertain behavior of lymphoid, hematopoietic and related tissue"
+          },
+          {
+            "code": "D47.0",
+            "display": "Mast cell neoplasms of uncertain behavior"
+          },
+          {
+            "code": "D47.01",
+            "display": "Cutaneous mastocytosis"
+          },
+          {
+            "code": "D47.02",
+            "display": "Systemic mastocytosis"
+          },
+          {
+            "code": "D47.09",
+            "display": "Other mast cell neoplasms of uncertain behavior"
+          },
+          {
+            "code": "D47.1",
+            "display": "Chronic myeloproliferative disease"
+          },
+          {
+            "code": "D47.2",
+            "display": "Monoclonal gammopathy"
+          },
+          {
+            "code": "D47.3",
+            "display": "Essential (hemorrhagic) thrombocythemia"
+          },
+          {
+            "code": "D47.4",
+            "display": "Osteomyelofibrosis"
+          },
+          {
+            "code": "D47.9",
+            "display": "Neoplasm of uncertain behavior of lymphoid, hematopoietic and related tissue, unspecified"
+          },
+          {
+            "code": "D47.Z",
+            "display": "Other specified neoplasms of uncertain behavior of lymphoid, hematopoietic and related tissue"
+          },
+          {
+            "code": "D47.Z1",
+            "display": "Post-transplant lymphoproliferative disorder (PTLD)"
+          },
+          {
+            "code": "D47.Z2",
+            "display": "Castleman disease"
+          },
+          {
+            "code": "D47.Z9",
+            "display": "Other specified neoplasms of uncertain behavior of lymphoid, hematopoietic and related tissue"
+          },
+          {
+            "code": "D48",
+            "display": "Neoplasm of uncertain behavior of other and unspecified sites"
+          },
+          {
+            "code": "D48.0",
+            "display": "Neoplasm of uncertain behavior of bone and articular cartilage"
+          },
+          {
+            "code": "D48.1",
+            "display": "Neoplasm of uncertain behavior of connective and other soft tissue"
+          },
+          {
+            "code": "D48.2",
+            "display": "Neoplasm of uncertain behavior of peripheral nerves and autonomic nervous system"
+          },
+          {
+            "code": "D48.3",
+            "display": "Neoplasm of uncertain behavior of retroperitoneum"
+          },
+          {
+            "code": "D48.4",
+            "display": "Neoplasm of uncertain behavior of peritoneum"
+          },
+          {
+            "code": "D48.5",
+            "display": "Neoplasm of uncertain behavior of skin"
+          },
+          {
+            "code": "D48.6",
+            "display": "Neoplasm of uncertain behavior of breast"
+          },
+          {
+            "code": "D48.60",
+            "display": "Neoplasm of uncertain behavior of unspecified breast"
+          },
+          {
+            "code": "D48.61",
+            "display": "Neoplasm of uncertain behavior of right breast"
+          },
+          {
+            "code": "D48.62",
+            "display": "Neoplasm of uncertain behavior of left breast"
+          },
+          {
+            "code": "D48.7",
+            "display": "Neoplasm of uncertain behavior of other specified sites"
+          },
+          {
+            "code": "D48.9",
+            "display": "Neoplasm of uncertain behavior, unspecified"
+          },
+          {
+            "code": "D49",
+            "display": "Neoplasms of unspecified behavior"
+          },
+          {
+            "code": "D49.0",
+            "display": "Neoplasm of unspecified behavior of digestive system"
+          },
+          {
+            "code": "D49.1",
+            "display": "Neoplasm of unspecified behavior of respiratory system"
+          },
+          {
+            "code": "D49.2",
+            "display": "Neoplasm of unspecified behavior of bone, soft tissue, and skin"
+          },
+          {
+            "code": "D49.3",
+            "display": "Neoplasm of unspecified behavior of breast"
+          },
+          {
+            "code": "D49.4",
+            "display": "Neoplasm of unspecified behavior of bladder"
+          },
+          {
+            "code": "D49.5",
+            "display": "Neoplasm of unspecified behavior of other genitourinary organs"
+          },
+          {
+            "code": "D49.51",
+            "display": "Neoplasm of unspecified behavior of kidney"
+          },
+          {
+            "code": "D49.511",
+            "display": "Neoplasm of unspecified behavior of right kidney"
+          },
+          {
+            "code": "D49.512",
+            "display": "Neoplasm of unspecified behavior of left kidney"
+          },
+          {
+            "code": "D49.519",
+            "display": "Neoplasm of unspecified behavior of unspecified kidney"
+          },
+          {
+            "code": "D49.59",
+            "display": "Neoplasm of unspecified behavior of other genitourinary organ"
+          },
+          {
+            "code": "D49.6",
+            "display": "Neoplasm of unspecified behavior of brain"
+          },
+          {
+            "code": "D49.7",
+            "display": "Neoplasm of unspecified behavior of endocrine glands and other parts of nervous system"
+          },
+          {
+            "code": "D49.8",
+            "display": "Neoplasm of unspecified behavior of other specified sites"
+          },
+          {
+            "code": "D49.81",
+            "display": "Neoplasm of unspecified behavior of retina and choroid"
+          },
+          {
+            "code": "D49.89",
+            "display": "Neoplasm of unspecified behavior of other specified sites"
+          },
+          {
+            "code": "D49.9",
+            "display": "Neoplasm of unspecified behavior of unspecified site"
+          }
+        ]
+      }
+    ],
+    "exclude": [
+      {
+        "system": "http://hl7.org/fhir/sid/icd-10-cm",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "D3A-D3A"
+          }
+        ]
+      }
+    ]
+  }
+}
