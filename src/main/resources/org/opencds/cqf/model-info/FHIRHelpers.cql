@@ -221,16 +221,5 @@ define function ToString(value VisionBase): value.value
 define function ToString(value VisionEyes): value.value
 define function ToString(value VisionStatus): value.value
 define function ToString(value XPathUsageType): value.value
-define function ToString(value base64Binary): value.value
-define function ToBoolean(value boolean): value.value
-define function ToDateTime(value date): value.value
-define function ToDateTime(value dateTime): value.value
-define function ToDecimal(value decimal): value.value
-define function ToDateTime(value instant): value.value
-define function ToInteger(value integer): value.value
 define function ToString(value qualityType): value.value
 define function ToString(value repositoryType): value.value
-define function ToString(value string): value.value
-define function ToTime(value time): value.value
-define function ToString(value uri): value.value
-define function ToString(value xhtml): value.value
