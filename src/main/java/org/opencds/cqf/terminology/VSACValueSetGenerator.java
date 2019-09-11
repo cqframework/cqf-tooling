@@ -13,6 +13,8 @@ import java.util.*;
 
 public class VSACValueSetGenerator extends Operation {
 
+    private final String VSAC_BASE_URL = "http://cts.nlm.nih.gov/fhir/ValueSet/";
+
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
     private String encoding = "json"; // -encoding (-e)
 
@@ -102,6 +104,7 @@ public class VSACValueSetGenerator extends Operation {
         if (id != null) {
             vs.setId(id);
         }
+        vs.setUrl(VSAC_BASE_URL + id);
         String publisher = getSecondStringInRow(metaSheet, metaStewardRow);
         if (publisher != null) {
             vs.setPublisher(publisher);
