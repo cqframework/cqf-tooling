@@ -484,9 +484,9 @@ public abstract class ClassInfoBuilder {
             ClassInfoElement cie = new ClassInfoElement();
             cie.setName(name);
             if (typeSpecifier instanceof NamedTypeSpecifier) {
-                cie.setElementType(this.getTypeName((NamedTypeSpecifier) typeSpecifier));
+                cie.setType(this.getTypeName((NamedTypeSpecifier) typeSpecifier));
             } else {
-                cie.setElementTypeSpecifier(typeSpecifier);
+                cie.setTypeSpecifier(typeSpecifier);
             }
 
             return cie;
@@ -508,9 +508,9 @@ public abstract class ClassInfoBuilder {
             ClassInfoElement cie = new ClassInfoElement();
             cie.setName(name);
             if (typeSpecifier instanceof NamedTypeSpecifier) {
-                cie.setElementType(this.getTypeName((NamedTypeSpecifier) typeSpecifier));
+                cie.setType(this.getTypeName((NamedTypeSpecifier) typeSpecifier));
             } else {
-                cie.setElementTypeSpecifier(typeSpecifier);
+                cie.setTypeSpecifier(typeSpecifier);
             }
 
             return cie;
@@ -550,7 +550,7 @@ public abstract class ClassInfoBuilder {
 
                 ClassInfo info = new ClassInfo().withName(typeName).withLabel(null).withBaseType(modelName + ".Element")
                         .withRetrievable(false).withElement(elements).withPrimaryCodePath(null);
-
+                        
                 this.typeInfos.put(this.getTypeName(modelName, typeName), info);
 
             }
@@ -703,6 +703,7 @@ public abstract class ClassInfoBuilder {
         }
 
         String typeName = sd.getId();
+        String name = sd.getName();
         AtomicReference<Integer> index = new AtomicReference<Integer>(1);
         List<ClassInfoElement> elements = new ArrayList<>();
         List<ElementDefinition> eds = sd.getSnapshot().getElement();
@@ -716,6 +717,47 @@ public abstract class ClassInfoBuilder {
         List<ElementDefinition> structureEds = null;
         if (structure != null) {
             structureEds = structure.getSnapshot().getElement();
+        }
+
+        int indexer = 0;
+        int edsArraySize = eds.size();
+        while (indexer < edsArraySize)
+        {
+            if(eds.get(indexer).hasBase())
+            {
+                if(getQualifier(eds.get(indexer).getBase().getPath()) != null)
+                {
+                    if(getQualifier(eds.get(indexer).getBase().getPath()).matches("Element"))
+                    {
+                        eds.remove(eds.get(indexer));
+                        --edsArraySize;
+                    }
+                    else ++indexer;
+                }
+                else ++indexer;
+            }
+            
+            else ++indexer;
+        }
+
+        indexer = 0;
+        int structureEdsArraySize = structureEds.size();
+        while (indexer < structureEdsArraySize)
+        {
+            if(structureEds.get(indexer).hasBase())
+            {
+                if(getQualifier(eds.get(indexer).getBase().getPath()) != null)
+                {
+                    if(getQualifier(structureEds.get(indexer).getBase().getPath()).matches("Element"))
+                    {
+                        structureEds.remove(structureEds.get(indexer));
+                        --structureEdsArraySize;
+                    }
+                    else ++indexer;
+                }
+                else ++indexer;
+            }
+            else ++indexer;
         }
 
         while (index.get() < eds.size()) {
@@ -734,7 +776,7 @@ public abstract class ClassInfoBuilder {
 
         System.out.println("Building ClassInfo for " + typeName);
 
-        ClassInfo info = new ClassInfo().withName(typeName).withLabel(typeName)
+        ClassInfo info = new ClassInfo().withName(name).withLabel(typeName)
                 .withBaseType(this.resolveTypeName(sd.getBaseDefinition()))
                 .withRetrievable(sd.getKind() == StructureDefinitionKind.RESOURCE).withElement(elements)
                 .withPrimaryCodePath(this.primaryCodePath(elements, typeName));
