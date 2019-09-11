@@ -22,50 +22,79 @@ import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.opencds.cqf.Operation;
 import org.opencds.cqf.modelinfo.fhir.FHIRClassInfoBuilder;
 import org.opencds.cqf.modelinfo.fhir.FHIRModelInfoBuilder;
+import org.opencds.cqf.modelinfo.quick.QuickClassInfoBuilder;
+import org.opencds.cqf.modelinfo.quick.QuickModelInfoBuilder;
 
 public class StructureDefinitionToModelInfo extends Operation {
     @Override
     public void execute(String[] args) {
         String inputPath = "../FHIR-Spec";
         if (args.length > 1) {
-            inputPath = args[1];
+            inputPath = args[0];
         }
 
         if (args.length > 2) {
-            setOutputPath(args[2]);
+            setOutputPath(args[1]);
+        }
+        else {
+            setOutputPath("../cqf-tooling/src/main/resources/org/opencds/cqf/model-info");
         }
 
-        String resourcePaths = "/3.0.1";
+        String resourcePaths = "/3.0.1;/US-Core/1.0.1";
         if (args.length > 3) {
-            resourcePaths = args[3];
+            resourcePaths = args[2];
         }
 
         // TODO : Can we autodetect this from the structure defintions?
         String modelName = "FHIR";
         if (args.length > 4) {
-            modelName = args[4];
+            modelName = args[3];
         }
 
         String modelVersion = "3.0.1";
-        if (args.length > 5) {
-            modelVersion = args[5];
-        }
+        if (args.length >= 5) {
+            modelVersion = args[4];
+        }        
 
         ResourceLoader loader = new ResourceLoader();
         Map<String, StructureDefinition> structureDefinitions = loader.loadPaths(inputPath, resourcePaths);
 
-        ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(structureDefinitions);
-        Map<String, TypeInfo> typeInfos = ciBuilder.build();
+        ModelInfoBuilder miBuilder;
+        ModelInfo mi;
 
-        ModelInfoBuilder miBuilder = new FHIRModelInfoBuilder(modelVersion, typeInfos.values(), "FHIRHelpers.cql");
-        ModelInfo mi = miBuilder.build();
+        if(modelName.matches("FHIR"))
+        {
+            ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(structureDefinitions);
+            Map<String, TypeInfo> typeInfos = ciBuilder.build();
+
+            String fhirHelpersPath = this.getOutputPath() + "/" + modelName + "Helpers-" + modelVersion + ".cql";
+            miBuilder = new FHIRModelInfoBuilder(modelVersion, typeInfos.values(), fhirHelpersPath);
+            mi = miBuilder.build();
+        }
+        else if(modelName.matches("QUICK"))
+        {
+            ClassInfoBuilder ciBuilder = new QuickClassInfoBuilder(structureDefinitions);
+            Map<String, TypeInfo> typeInfos = ciBuilder.build();
+
+            miBuilder = new QuickModelInfoBuilder(modelVersion, typeInfos.values());
+            mi = miBuilder.build();
+        }
+        else
+        {
+            //should blowup
+            ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(structureDefinitions);
+            Map<String, TypeInfo> typeInfos = ciBuilder.build();
+            miBuilder = new ModelInfoBuilder(typeInfos.values());
+            mi = miBuilder.build();
+        }
+
 
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(ModelInfo.class, TypeInfo.class, ClassInfo.class,
                     ConversionInfo.class);
 
             JAXBElement<ModelInfo> jbe = new JAXBElement<ModelInfo>(
-                    new QName("urn:hl7-org:elm-modelinfo:r1", "modelInfo", "ns4"), ModelInfo.class, null, mi);
+                    new QName("urn:hl7-org:elm-modelinfo:r1", "modelInfo"), ModelInfo.class, null, mi);
 
             // Create Marshaller
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
@@ -73,10 +102,13 @@ public class StructureDefinitionToModelInfo extends Operation {
             // Print XML String to Console
             StringWriter sw = new StringWriter();
 
-            // Write XML to StringWriter
+            //Write XML to StringWriter
+
+            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             jaxbMarshaller.marshal(jbe, sw);
 
-            writeOutput("output.xml", sw.toString());
+            String fileName = modelName + "-" + "modelinfo" + "-" + modelVersion + ".xml";
+            writeOutput(fileName, sw.toString());
         } catch (Exception e) {
             System.err.println("error" + e.getMessage());
             e.printStackTrace();
