@@ -8,6 +8,7 @@ import org.hl7.elm_modelinfo.r1.ClassInfo;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,18 +26,21 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
         .filter(x -> x != null && x.getBaseType() != null && x.getBaseType().equals("FHIR.Element"))
         .filter(x -> x.getElement().size() == 1).collect(Collectors.toList());
     }
-
+    
     @Override
     protected void beforeBuild() {
         List<ClassInfo> fhirElementInfos = this.getFhirElementInfos();
-        fhirElementInfos.stream().map(x -> new ConversionInfo()
-            .withFromType(x.getName())
+        fhirElementInfos.stream().filter(x -> x.getElement().get(0).getType() != null)
+        .map(x -> new ConversionInfo()
+            .withFromType("FHIR." + x.getName())
             .withToType(x.getElement().get(0).getType())
             .withFunctionName("FHIRHelpers.To" + this.unQualify(x.getElement().get(0).getType())))
         .forEach(x -> this.settings.conversionInfos.add(x));
 
         List<String> statements = new ArrayList<>();
-        fhirElementInfos.stream().forEach(x -> {
+        fhirElementInfos.stream().filter(x -> x.getElement().get(0).getType() != null)
+        .sorted(Comparator.comparing(ClassInfo::getName))
+        .forEach(x -> {
             String sourceTypeName = x.getName();
             String targetTypeName = x.getElement().get(0).getType();
             String functionName = "To" + this.unQualify(targetTypeName);
