@@ -111,3 +111,5 @@ hs_err_pid*
 !/src/main/resources/org/opencds/cqf/igtools/output/.gitkeep
 
 *.iml
+/src/main/resources/org/opencds/cqf/bundle/output/
+!/src/main/resources/org/opencds/cqf/bundle/output/.gitkeep

@@ -97,6 +97,7 @@ public class VSACValueSetGenerator extends Operation {
     public void resolveMetaData(ValueSet vs, Workbook workbook) {
         Sheet metaSheet = workbook.getSheetAt(metaSheetNum);
         String title = getSecondStringInRow(metaSheet, metaNameRow);
+        if (title != null) title = title.replace("/", "");
         if (title != null) {
             vs.setTitle(title);
         }

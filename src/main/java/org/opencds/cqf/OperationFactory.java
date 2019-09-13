@@ -2,15 +2,13 @@ package org.opencds.cqf;
 
 //import org.opencds.cqf.jsonschema.SchemaGenerator;
 import org.opencds.cqf.acceleratorkit.Processor;
+import org.opencds.cqf.bundler.BundleResources;
 import org.opencds.cqf.igtools.IgBundler;
 import org.opencds.cqf.library.LibraryGenerator;
 import org.opencds.cqf.modelinfo.StructureDefinitionToModelInfo;
 import org.opencds.cqf.qdm.QdmToQiCore;
 import org.opencds.cqf.quick.QuickPageGenerator;
-import org.opencds.cqf.terminology.GenericValueSetGenerator;
-import org.opencds.cqf.terminology.CMSFlatMultiValueSetGenerator;
-import org.opencds.cqf.terminology.VSACValueSetGenerator;
-import org.opencds.cqf.terminology.HEDISValueSetGenerator;
+import org.opencds.cqf.terminology.*;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 class OperationFactory {
@@ -25,6 +23,8 @@ class OperationFactory {
                 return new VSACValueSetGenerator();
             case "VsacMultiXlsxToValueSet":
                 return new CMSFlatMultiValueSetGenerator();
+            case "VsacXlsxToValueSetBatch":
+                return new VSACBatchValueSetGenerator();
             case "HedisXlsxToValueSet":
                 return new HEDISValueSetGenerator();
             case "XlsxToValueSet":
@@ -47,6 +47,8 @@ class OperationFactory {
                 return new StructureDefinitionToModelInfo();
             case "ProcessAcceleratorKit":
                 return new Processor();
+            case "BundleResources":
+                return new BundleResources();
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operationName);
         }
