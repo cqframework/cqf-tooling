@@ -56,6 +56,10 @@ package org.opencds.cqf;
                 - content.contentType (both application/elm+xml and text/cql by default)
                 - content.data (base64 encoded String)
 
+        - Update CQL for an existing Library resource
+            - command: mvn exec:java -Dexec.args="[-UpdateCql] [-pathtolibrary | -ptl] [-pathtolibraryresource | -ptlr] (-encoding | -e) (-outputpath | -op)"
+            - Example: -UpdateCql -ptl="C:\Users\Bryn\Documents\Src\SS\Pilots\Opioid\opioid-cds\pages\cql\OpioidCDS_STU3_Common.cql" -ptlr="C:\Users\Bryn\Documents\Src\SS\Pilots\Opioid\opioid-cds\resources\library-opioidcds-stu3-common-0-1-0.xml"
+
         - CQL to FHIR Measure conversion
             - command: mvn exec:java -Dexec.args="[-CqlToMeasure] [path to CQL library] (id) (encoding) (contentType encoding) (-ip=initial population criteria) {-nX=numerator X criteria} {-dX=denominator X criteria} {sX=stratifier X criteria} (org.opencds.cqf.qdm.output directory path)"
             - NOTE: The 'X' for the numerator, denominator and stratifier params MUST be an Integer value

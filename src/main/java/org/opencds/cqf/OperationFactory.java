@@ -31,6 +31,8 @@ class OperationFactory {
                 return new GenericValueSetGenerator();
             case "CqlToLibrary":
                 return new LibraryGenerator();
+            case "UpdateCql":
+                return new LibraryGenerator();
             case "JsonSchemaGenerator":
 //                return new SchemaGenerator();
             case "BundleIg":
