@@ -85,7 +85,7 @@ public class LibraryGenerator extends Operation {
 
         File[] cqlFiles = null;
         if (isCreate) {
-            cqlFiles = libraryDir.listFiles();
+            cqlFiles = libraryDir.listFiles(pathname -> !pathname.isDirectory() && !pathname.isHidden());
             if (cqlFiles == null) {
                 return;
             }
@@ -226,26 +226,30 @@ public class LibraryGenerator extends Operation {
     public void processLibrary(String libraryName, CqlTranslator translator) {
         Library library = libraryResource != null ? libraryResource : createLibrary(libraryName);
         org.hl7.elm.r1.Library elm = translator.toELM();
-        if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
-            for (IncludeDef def : elm.getIncludes().getDef()) {
-                if (!libraryMap.containsKey(def.getPath())) {
-                    if (!translatorMap.containsKey(def.getPath())) {
-                        throw new IllegalArgumentException("Referenced library: " + def.getPath() + " not found");
+        // TODO: Fix this - skipping the includes as a hack to avoid having to pass in the
+        //  dependency context for a single library content refresh
+        if (isCreate) {
+            if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
+                for (IncludeDef def : elm.getIncludes().getDef()) {
+                    if (!libraryMap.containsKey(def.getPath())) {
+                        if (!translatorMap.containsKey(def.getPath())) {
+                            throw new IllegalArgumentException("Referenced library: " + def.getPath() + " not found");
+                        }
+                        processLibrary(def.getPath(), translatorMap.get(def.getPath()));
                     }
-                    processLibrary(def.getPath(), translatorMap.get(def.getPath()));
-                }
 
-                library.addRelatedArtifact(
-                        new RelatedArtifact()
-                                .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
-                                .setResource(new Reference().setReference("Library/" + def.getPath()))
-                );
+                    library.addRelatedArtifact(
+                            new RelatedArtifact()
+                                    .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                                    .setResource(new Reference().setReference("Library/" + def.getPath()))
+                    );
 
                 /* Data requirements should not be recursive, this shouldn't be here
                 for (DataRequirement req : libraryMap.get(def.getPath()).getDataRequirement()) {
                     library.addDataRequirement(req);
                 }
                 */
+                }
             }
         }
 
