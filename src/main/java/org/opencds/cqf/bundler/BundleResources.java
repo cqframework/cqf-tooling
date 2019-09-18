@@ -87,6 +87,9 @@ public class BundleResources extends Operation {
                     e.printStackTrace();
                     throw new RuntimeException(e.getMessage());
                 }
+                catch (Exception e) {
+                    continue;
+                }
             }
             else if (resource.getPath().endsWith(".json")) {
                 try {
@@ -94,6 +97,9 @@ public class BundleResources extends Operation {
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                     throw new RuntimeException(e.getMessage());
+                }
+                catch (Exception e) {
+                    continue;
                 }
             }
             else {

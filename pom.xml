@@ -62,6 +62,13 @@
             <version>2.6</version>
         </dependency>
 
+        <!-- BundleResources requirement -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.9</version>
+        </dependency>
+
         <!-- Excel spreadsheet parser -->
         <dependency>
             <groupId>org.apache.poi</groupId>
