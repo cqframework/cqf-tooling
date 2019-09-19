@@ -124,6 +124,10 @@ public abstract class ClassInfoBuilder {
     }
 
     protected String getQualifier(String name) {
+        if (name == null)
+        {
+            return null;
+        }
         int index = name.indexOf(".");
         if (index > 0) {
             return name.substring(0, index);
@@ -133,6 +137,10 @@ public abstract class ClassInfoBuilder {
     }
 
     protected String unQualify(String name) {
+        if(name == null)
+        {
+            return null;
+        }
         int index = name.indexOf(".");
         if (index > 0) {
             return name.substring(index + 1);
@@ -169,7 +177,7 @@ public abstract class ClassInfoBuilder {
                 }
             }
         } catch (Exception e) {
-            System.out.println("Error building type specificer for " + modelName + "."
+            System.out.println("Error building type specifier for " + modelName + "."
                     + (typeRef != null ? typeRef.getCode() : "<No Type>") + ": " + e.getMessage());
             return null;
         }
@@ -319,6 +327,7 @@ public abstract class ClassInfoBuilder {
     }
 
     // Returns the set of element definitions for the given type id
+    //maybe
     private List<ElementDefinition> getElementDefinitions(String typeId) {
         if (!structureDefinitions.containsKey(typeId)) {
             throw new RuntimeException("Could not retrieve element definitions for " + typeId);
@@ -610,6 +619,7 @@ public abstract class ClassInfoBuilder {
 
         TypeSpecifier typeSpecifier = this.buildElementTypeSpecifier(modelName, root, ed);
 
+        //maybe
         String typeCode = this.typeCode(ed);
         StructureDefinition typeDefinition = structureDefinitions.get(typeCode);
 
@@ -719,51 +729,51 @@ public abstract class ClassInfoBuilder {
             structureEds = structure.getSnapshot().getElement();
         }
 
-        int indexer = 0;
-        int edsArraySize = eds.size();
-        while (indexer < edsArraySize)
-        {
-            if(eds.get(indexer).hasBase())
-            {
-                if(getQualifier(eds.get(indexer).getBase().getPath()) != null)
-                {
-                    if(getQualifier(eds.get(indexer).getBase().getPath()).matches("Element"))
-                    {
-                        eds.remove(eds.get(indexer));
-                        --edsArraySize;
-                    }
-                    else ++indexer;
-                }
-                else ++indexer;
-            }
+        // int indexer = 0;
+        // int edsArraySize = eds.size();
+        // while (indexer < edsArraySize)
+        // {
+        //     if(eds.get(indexer).hasBase())
+        //     {
+        //         if(getQualifier(eds.get(indexer).getBase().getPath()) != null)
+        //         {
+        //             if(getQualifier(eds.get(indexer).getBase().getPath()).matches("Element"))
+        //             {
+        //                 eds.remove(eds.get(indexer));
+        //                 --edsArraySize;
+        //             }
+        //             else ++indexer;
+        //         }
+        //         else ++indexer;
+        //     }
             
-            else ++indexer;
-        }
+        //     else ++indexer;
+        // }
 
-        indexer = 0;
-        int structureEdsArraySize = structureEds.size();
-        while (indexer < structureEdsArraySize)
-        {
-            if(structureEds.get(indexer).hasBase())
-            {
-                if(getQualifier(eds.get(indexer).getBase().getPath()) != null)
-                {
-                    if(getQualifier(structureEds.get(indexer).getBase().getPath()).matches("Element"))
-                    {
-                        structureEds.remove(structureEds.get(indexer));
-                        --structureEdsArraySize;
-                    }
-                    else ++indexer;
-                }
-                else ++indexer;
-            }
-            else ++indexer;
-        }
+        // indexer = 0;
+        // int structureEdsArraySize = structureEds.size();
+        // while (indexer < structureEdsArraySize)
+        // {
+        //     if(structureEds.get(indexer).hasBase())
+        //     {
+        //         if(getQualifier(eds.get(indexer).getBase().getPath()) != null)
+        //         {
+        //             if(getQualifier(structureEds.get(indexer).getBase().getPath()).matches("Element"))
+        //             {
+        //                 structureEds.remove(structureEds.get(indexer));
+        //                 --structureEdsArraySize;
+        //             }
+        //             else ++indexer;
+        //         }
+        //         else ++indexer;
+        //     }
+        //     else ++indexer;
+        // }
 
         while (index.get() < eds.size()) {
             ElementDefinition e = eds.get(index.get());
             if (e.getPath().startsWith(path) && !e.getPath().equals(path)) {
-                ClassInfoElement cie = this.visitElementDefinition(modelName, path, eds, structure.getId(),
+                ClassInfoElement cie = this.visitElementDefinition(modelName, path, eds, structure == null? null: structure.getId(),
                         structureEds, index);
                 if (cie != null) {
                     elements.add(cie);
