@@ -327,7 +327,6 @@ public abstract class ClassInfoBuilder {
     }
 
     // Returns the set of element definitions for the given type id
-    //maybe
     private List<ElementDefinition> getElementDefinitions(String typeId) {
         if (!structureDefinitions.containsKey(typeId)) {
             throw new RuntimeException("Could not retrieve element definitions for " + typeId);
@@ -619,7 +618,6 @@ public abstract class ClassInfoBuilder {
 
         TypeSpecifier typeSpecifier = this.buildElementTypeSpecifier(modelName, root, ed);
 
-        //maybe
         String typeCode = this.typeCode(ed);
         StructureDefinition typeDefinition = structureDefinitions.get(typeCode);
 
