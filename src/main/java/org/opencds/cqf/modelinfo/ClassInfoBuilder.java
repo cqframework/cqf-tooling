@@ -711,7 +711,6 @@ public abstract class ClassInfoBuilder {
         }
 
         String typeName = sd.getId();
-        String name = sd.getName();
         AtomicReference<Integer> index = new AtomicReference<Integer>(1);
         List<ClassInfoElement> elements = new ArrayList<>();
         List<ElementDefinition> eds = sd.getSnapshot().getElement();
@@ -784,12 +783,12 @@ public abstract class ClassInfoBuilder {
 
         System.out.println("Building ClassInfo for " + typeName);
 
-        ClassInfo info = new ClassInfo().withName(name).withLabel(typeName)
+        ClassInfo info = new ClassInfo().withName(path).withLabel(typeName)
                 .withBaseType(this.resolveTypeName(sd.getBaseDefinition()))
                 .withRetrievable(sd.getKind() == StructureDefinitionKind.RESOURCE).withElement(elements)
                 .withPrimaryCodePath(this.primaryCodePath(elements, typeName));
 
-        this.typeInfos.put(this.getTypeName(modelName, typeName), info);
+        this.typeInfos.merge(this.getTypeName(modelName, path), info, (v1, v2) -> {v2.setBaseType(v1.getBaseType()); return v2;});
 
         return info;
     }
