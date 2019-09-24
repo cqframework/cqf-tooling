@@ -22,14 +22,17 @@ public class QuickClassInfoBuilder extends ClassInfoBuilder {
                     && !this.settings.cqlTypeMappings.containsKey(this.unQualify(x.getName())))
             );
 
-            /*
-              (x -> x.getKind() == StructureDefinitionKind.COMPLEXTYPE && (x.getBaseDefinition() == null
-                || !x.getBaseDefinition().equals("http://hl7.org/fhir/StructureDefinition/Extension"))));
-            */
-
         //delete fhir profile (duplicates)
         //filter out all that is FHIR Resource this.structureDefinitions
-        System.out.println("Building Resources");
+        System.out.println("Building Base FHIR Resources");
+        this.buildFor("QUICK", 
+            (x -> x.getKind() == StructureDefinitionKind.RESOURCE
+            && (!x.hasDerivation() || x.getDerivation() == TypeDerivationRule.SPECIALIZATION)
+                && x.getUrl().startsWith("http://hl7.org/fhir") && !x.getUrl().startsWith("http://hl7.org/fhir/us/qicore")
+                && !x.getUrl().startsWith("http://hl7.org/fhir/us/core"))
+        );
+
+        System.out.println("Building Quick Extension Resources");
         this.buildFor("QUICK", 
             (x -> x.getKind() == StructureDefinitionKind.RESOURCE 
                 && (!x.hasDerivation() || x.getDerivation() == TypeDerivationRule.CONSTRAINT)
