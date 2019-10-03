@@ -15,6 +15,7 @@ import org.hl7.fhir.dstu3.model.StructureDefinition.TypeDerivationRule;
 import org.opencds.cqf.modelinfo.ClassInfoBuilder;
 import org.hl7.elm_modelinfo.r1.ClassInfo;
 import org.hl7.elm_modelinfo.r1.ClassInfoElement;
+import org.hl7.elm_modelinfo.r1.TypeInfo;
 
 
 public class QuickClassInfoBuilder extends ClassInfoBuilder {
@@ -76,6 +77,34 @@ public class QuickClassInfoBuilder extends ClassInfoBuilder {
                     .forEach(z -> z.setElementType(x.getElementType()))
                     )
                 );
+
+                for(ClassInfo v1 : typeInfoValuesAsClassInfos)
+                {
+                    ClassInfo filteredClassInfo = (ClassInfo)v1;
+                    for(TypeInfo v2 : typeInfos.values())
+                    {
+                        ClassInfo baseClassInfo = (ClassInfo)v2;
+                        if(baseClassInfo != null)
+                        {
+                            //Get typespecifiers that are not CQL Primitives from FHIR replace QUICK Versions
+                            for (ClassInfoElement element: baseClassInfo.getElement())
+                            {
+                                if(element.getType() != null && baseClassInfo.getLabel() != null && element.getType().startsWith("QUICK.") 
+                                && baseClassInfo.getLabel().startsWith("http://hl7.org/fhir") && this.settings.cqlTypeMappings.get(element.getName()) == null)
+                                {
+                                    for(ClassInfoElement filteredElement: filteredClassInfo.getElement())
+                                    {
+                                        if(filteredElement.getName().matches(element.getName()) && baseClassInfo.getName().matches(filteredClassInfo.getName()))
+                                        {
+                                            filteredElement.setType(element.getType());
+                                        }
+                                    }
+                                }
+                            }
+                        }   
+                    }
+                    typeInfos.put(filteredClassInfo.getName().substring(0, filteredClassInfo.getName().lastIndexOf(".")) + "." +  filteredClassInfo.getLabel(), filteredClassInfo);
+                }
 
         //Remove Duplicates
         List<ClassInfo> invalidClassInfos = (typeInfoValuesAsClassInfos.stream()
