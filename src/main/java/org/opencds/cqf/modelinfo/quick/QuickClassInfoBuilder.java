@@ -53,74 +53,74 @@ public class QuickClassInfoBuilder extends ClassInfoBuilder {
         List<ClassInfo> typeInfoValuesAsClassInfos = new ArrayList<ClassInfo>();  
         typeInfos.values().forEach(x -> typeInfoValuesAsClassInfos.add((ClassInfo)x));
 
-        for(ClassInfo dependantClassInfo : typeInfoValuesAsClassInfos)
+        for(ClassInfo updatedClassInfo : typeInfoValuesAsClassInfos)
         {
-            for(TypeInfo independantTypeInfo : typeInfos.values())
+            for(TypeInfo originalTypeInfo : typeInfos.values())
             {
-                ClassInfo independantClassInfo = (ClassInfo)independantTypeInfo;
-                if(independantClassInfo != null)
+                ClassInfo originalClassInfo = (ClassInfo)originalTypeInfo;
+                if(originalClassInfo != null)
                 {
                     
-                    for (ClassInfoElement element: independantClassInfo.getElement())
+                    for (ClassInfoElement originalElement: originalClassInfo.getElement())
                     {
                         //update CQL Primitives from FHIR to Quick Versions i.e. System
-                        ListTypeSpecifier elementTypeSpecifier = (ListTypeSpecifier) element.getTypeSpecifier();
-                        if(this.settings.cqlTypeMappings.containsKey(element.getType()) && element.getType().startsWith("QUICK"))
+                        ListTypeSpecifier originalElementTypeSpecifier = (ListTypeSpecifier) originalElement.getTypeSpecifier();
+                        if(this.settings.cqlTypeMappings.containsKey(originalElement.getType()) && originalElement.getType().startsWith("QUICK"))
                         {
-                            for(ClassInfoElement filteredElement: dependantClassInfo.getElement())
+                            for(ClassInfoElement updatedElement: updatedClassInfo.getElement())
                             {
-                                if(filteredElement.getType() != null && element.getType() != null &&
-                                this.unQualify(filteredElement.getType()).matches(this.unQualify(element.getType())))
+                                if(updatedElement.getType() != null && originalElement.getType() != null &&
+                                this.unQualify(updatedElement.getType()).matches(this.unQualify(originalElement.getType())))
                                 {
-                                    filteredElement.setType("System." + this.unQualify(element.getType()));
+                                    updatedElement.setType("System." + this.unQualify(originalElement.getType()));
                                 }
                             }
                         }
                         //update CQL Primitives from FHIR to Quick Versions i.e. System
-                        else if(elementTypeSpecifier != null && elementTypeSpecifier.getElementType() != null
-                        && this.settings.cqlTypeMappings.containsKey(elementTypeSpecifier.getElementType()) && (elementTypeSpecifier.getElementType().startsWith("QUICK")))
+                        else if(originalElementTypeSpecifier != null && originalElementTypeSpecifier.getElementType() != null
+                        && this.settings.cqlTypeMappings.containsKey(originalElementTypeSpecifier.getElementType()) && (originalElementTypeSpecifier.getElementType().startsWith("QUICK")))
                         {
-                            for(ClassInfoElement filteredElement: dependantClassInfo.getElement())
+                            for(ClassInfoElement updatedElement: updatedClassInfo.getElement())
                             {
-                                ListTypeSpecifier filteredElementTypeSpecifier = (ListTypeSpecifier) filteredElement.getTypeSpecifier();
-                                if(filteredElementTypeSpecifier != null && filteredElementTypeSpecifier.getElementType() != null
-                                && this.unQualify(filteredElementTypeSpecifier.getElementType()).matches(this.unQualify(elementTypeSpecifier.getElementType())))
+                                ListTypeSpecifier updatedElementTypeSpecifier = (ListTypeSpecifier) updatedElement.getTypeSpecifier();
+                                if(updatedElementTypeSpecifier != null && updatedElementTypeSpecifier.getElementType() != null
+                                && this.unQualify(updatedElementTypeSpecifier.getElementType()).matches(this.unQualify(originalElementTypeSpecifier.getElementType())))
                                 {
-                                    filteredElementTypeSpecifier.setElementType("System." + this.unQualify(elementTypeSpecifier.getElementType()));
+                                    updatedElementTypeSpecifier.setElementType("System." + this.unQualify(originalElementTypeSpecifier.getElementType()));
                                 }
                             }
                         }
                         //Get typespecifiers that are not CQL Primitives from FHIR replace QUICK Versions
-                        else if(element.getType() != null && independantClassInfo.getLabel() != null && element.getType().startsWith("QUICK.") 
-                        && independantClassInfo.getLabel().startsWith("http://hl7.org/fhir"))
+                        else if(originalElement.getType() != null && originalClassInfo.getLabel() != null && originalElement.getType().startsWith("QUICK.") 
+                        && originalClassInfo.getLabel().startsWith("http://hl7.org/fhir"))
                         {
-                            for(ClassInfoElement filteredElement: dependantClassInfo.getElement())
+                            for(ClassInfoElement updatedElement: updatedClassInfo.getElement())
                             {
-                                if(filteredElement.getName().matches(element.getName()) && independantClassInfo.getName().matches(dependantClassInfo.getName()))
+                                if(updatedElement.getName().matches(originalElement.getName()) && originalClassInfo.getName().matches(updatedClassInfo.getName()))
                                 {
-                                    filteredElement.setType(element.getType());
+                                    updatedElement.setType(originalElement.getType());
                                 }
                             }
                         }
                     }
                     //Get BaseType from FHIR replace QUICK
-                    if (dependantClassInfo.getName().matches(independantClassInfo.getName()) 
-                        && dependantClassInfo.getBaseType() != null && independantClassInfo.getBaseType() != null
-                        && !dependantClassInfo.getBaseType().matches(independantClassInfo.getBaseType())
-                        && dependantClassInfo.getLabel() != null && independantClassInfo.getLabel() != null
-                        && independantClassInfo.getLabel().startsWith("http://hl7.org/fhir"))
+                    if (updatedClassInfo.getName().matches(originalClassInfo.getName()) 
+                        && updatedClassInfo.getBaseType() != null && originalClassInfo.getBaseType() != null
+                        && !updatedClassInfo.getBaseType().matches(originalClassInfo.getBaseType())
+                        && updatedClassInfo.getLabel() != null && originalClassInfo.getLabel() != null
+                        && originalClassInfo.getLabel().startsWith("http://hl7.org/fhir"))
                     {
-                        dependantClassInfo.setBaseType(independantClassInfo.getBaseType());
+                        updatedClassInfo.setBaseType(originalClassInfo.getBaseType());
                     }
                     //Remove all labels beginning with "http://hl7.org/fhir/StructureDefinition/
-                    if (this.settings.primaryCodePath.get(this.unQualify(dependantClassInfo.getName())) == null
-                    && dependantClassInfo.getLabel() != null && dependantClassInfo.getLabel().startsWith("http://hl7.org/fhir"))
+                    if (this.settings.primaryCodePath.get(this.unQualify(updatedClassInfo.getName())) == null
+                    && updatedClassInfo.getLabel() != null && updatedClassInfo.getLabel().startsWith("http://hl7.org/fhir"))
                     {
-                        dependantClassInfo.setLabel(null);
+                        updatedClassInfo.setLabel(null);
                     }
                 }   
             }
-            typeInfos.put(dependantClassInfo.getName().substring(0, dependantClassInfo.getName().lastIndexOf(".")) + "." +  dependantClassInfo.getLabel(), dependantClassInfo);
+            typeInfos.put(updatedClassInfo.getName().substring(0, updatedClassInfo.getName().lastIndexOf(".")) + "." +  updatedClassInfo.getLabel(), updatedClassInfo);
         }
 
         //Remove Duplicates
