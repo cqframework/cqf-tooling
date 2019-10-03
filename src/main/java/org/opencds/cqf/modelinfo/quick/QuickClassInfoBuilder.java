@@ -110,6 +110,12 @@ public class QuickClassInfoBuilder extends ClassInfoBuilder {
                             {
                                 filteredClassInfo.setBaseType(baseClassInfo.getBaseType());
                             }
+                            //Remove all labels beginning with "http://hl7.org/fhir/StructureDefinition/
+                            if (this.settings.primaryCodePath.get(this.unQualify(filteredClassInfo.getName())) == null
+                            && filteredClassInfo.getLabel() != null && filteredClassInfo.getLabel().startsWith("http://hl7.org/fhir"))
+                            {
+                                filteredClassInfo.setLabel(null);
+                            }
                         }   
                     }
                     typeInfos.put(filteredClassInfo.getName().substring(0, filteredClassInfo.getName().lastIndexOf(".")) + "." +  filteredClassInfo.getLabel(), filteredClassInfo);
