@@ -556,7 +556,7 @@ public abstract class ClassInfoBuilder {
 
                 elements.add(cie);
 
-                ClassInfo info = new ClassInfo().withName(typeName).withLabel(null).withBaseType(modelName + ".Element")
+                ClassInfo info = new ClassInfo().withName(modelName + "." + typeName).withLabel(null).withBaseType(modelName + ".Element")
                         .withRetrievable(false).withElement(elements).withPrimaryCodePath(null);
                         
                 this.typeInfos.put(this.getTypeName(modelName, typeName), info);
@@ -726,46 +726,49 @@ public abstract class ClassInfoBuilder {
             structureEds = structure.getSnapshot().getElement();
         }
 
-        // int indexer = 0;
-        // int edsArraySize = eds.size();
-        // while (indexer < edsArraySize)
-        // {
-        //     if(eds.get(indexer).hasBase())
-        //     {
-        //         if(getQualifier(eds.get(indexer).getBase().getPath()) != null)
-        //         {
-        //             if(getQualifier(eds.get(indexer).getBase().getPath()).matches("Element"))
-        //             {
-        //                 eds.remove(eds.get(indexer));
-        //                 --edsArraySize;
-        //             }
-        //             else ++indexer;
-        //         }
-        //         else ++indexer;
-        //     }
-            
-        //     else ++indexer;
-        // }
+        int indexEdsArray = 0;
+        int edsArraySize = eds.size();
+        while (indexEdsArray < edsArraySize)
+        {
+            if(eds.get(indexEdsArray).hasBase())
+            {
+                if(getQualifier(eds.get(indexEdsArray).getBase().getPath()) != null)
+                {
+                    if(getQualifier(eds.get(indexEdsArray).getBase().getPath()).matches("Element")
+                    || getQualifier(eds.get(indexEdsArray).getBase().getPath()).matches("Resource")
+                    || getQualifier(eds.get(indexEdsArray).getBase().getPath()).matches("DomainResource"))
+                    {
+                        eds.remove(eds.get(indexEdsArray));
+                        --edsArraySize;
+                    }
+                    else ++indexEdsArray;
+                }
+                else ++indexEdsArray;
+            }
+            else ++indexEdsArray;
+        }
 
-        // indexer = 0;
-        // int structureEdsArraySize = structureEds.size();
-        // while (indexer < structureEdsArraySize)
-        // {
-        //     if(structureEds.get(indexer).hasBase())
-        //     {
-        //         if(getQualifier(eds.get(indexer).getBase().getPath()) != null)
-        //         {
-        //             if(getQualifier(structureEds.get(indexer).getBase().getPath()).matches("Element"))
-        //             {
-        //                 structureEds.remove(structureEds.get(indexer));
-        //                 --structureEdsArraySize;
-        //             }
-        //             else ++indexer;
-        //         }
-        //         else ++indexer;
-        //     }
-        //     else ++indexer;
-        // }
+        int indexStructureEdsArray = 0;
+        int structureEdsArraySize = structureEds.size();
+        while (indexStructureEdsArray < structureEdsArraySize)
+        {
+            if(structureEds.get(indexStructureEdsArray).hasBase())
+            {
+                if(getQualifier(eds.get(indexStructureEdsArray).getBase().getPath()) != null)
+                {
+                    if(getQualifier(structureEds.get(indexStructureEdsArray).getBase().getPath()).matches("Element")
+                    || getQualifier(structureEds.get(indexStructureEdsArray).getBase().getPath()).matches("Resource")
+                    || getQualifier(structureEds.get(indexStructureEdsArray).getBase().getPath()).matches("DomainResource"))
+                    {
+                        structureEds.remove(structureEds.get(indexStructureEdsArray));
+                        --structureEdsArraySize;
+                    }
+                    else ++indexStructureEdsArray;
+                }
+                else ++indexStructureEdsArray;
+            }
+            else ++indexStructureEdsArray;
+        }
 
         while (index.get() < eds.size()) {
             ElementDefinition e = eds.get(index.get());
@@ -783,13 +786,12 @@ public abstract class ClassInfoBuilder {
 
         System.out.println("Building ClassInfo for " + typeName);
 
-        ClassInfo info = new ClassInfo().withName(modelName + "." +path).withLabel(typeName)
+        ClassInfo info = new ClassInfo().withName(modelName + "." + path).withLabel(typeName)
                 .withBaseType(this.resolveTypeName(sd.getBaseDefinition()))
                 .withRetrievable(sd.getKind() == StructureDefinitionKind.RESOURCE).withElement(elements)
                 .withPrimaryCodePath(this.primaryCodePath(elements, typeName));
 
-        //pull this out
-        this.typeInfos.merge(this.getTypeName(modelName, path), info, (v1, v2) -> {v2.setBaseType(v1.getBaseType()); return v2;});
+        this.typeInfos.put(this.getTypeName(modelName, typeName), info);
 
         return info;
     }
