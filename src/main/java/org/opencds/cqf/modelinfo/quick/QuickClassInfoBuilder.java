@@ -1,11 +1,21 @@
 package org.opencds.cqf.modelinfo.quick;
 
+
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.dstu3.model.StructureDefinition.TypeDerivationRule;
 import org.opencds.cqf.modelinfo.ClassInfoBuilder;
+import org.hl7.elm_modelinfo.r1.ClassInfo;
+import org.hl7.elm_modelinfo.r1.ClassInfoElement;
+
 
 public class QuickClassInfoBuilder extends ClassInfoBuilder {
 
@@ -15,6 +25,7 @@ public class QuickClassInfoBuilder extends ClassInfoBuilder {
 
     @Override
     protected void innerBuild() {
+        this.settings.useCQLPrimitives = true;
         System.out.println("Building ComplexTypes");
         this.buildFor("QUICK",
             (x -> x.getKind() == StructureDefinitionKind.COMPLEXTYPE && (x.getBaseDefinition() == null
@@ -22,8 +33,7 @@ public class QuickClassInfoBuilder extends ClassInfoBuilder {
                     && !this.settings.cqlTypeMappings.containsKey(this.unQualify(x.getName())))
             );
 
-        //delete fhir profile (duplicates)
-        //filter out all that is FHIR Resource this.structureDefinitions
+        this.settings.useCQLPrimitives = false;
         System.out.println("Building Base FHIR Resources");
         this.buildFor("QUICK", 
             (x -> x.getKind() == StructureDefinitionKind.RESOURCE
@@ -31,12 +41,47 @@ public class QuickClassInfoBuilder extends ClassInfoBuilder {
                 && x.getUrl().startsWith("http://hl7.org/fhir") && !x.getUrl().startsWith("http://hl7.org/fhir/us/qicore")
                 && !x.getUrl().startsWith("http://hl7.org/fhir/us/core"))
         );
-
+        
+        this.settings.useCQLPrimitives = true;
         System.out.println("Building Quick Extension Resources");
         this.buildFor("QUICK", 
             (x -> x.getKind() == StructureDefinitionKind.RESOURCE 
                 && (!x.hasDerivation() || x.getDerivation() == TypeDerivationRule.CONSTRAINT)
                 && (x.getUrl().startsWith("http://hl7.org/fhir/us/qicore") || x.getUrl().startsWith("http://hl7.org/fhir/us/core")))
         );
+
+        List<ClassInfo> typeInfoValuesAsClassInfos = new ArrayList<ClassInfo>();  
+        typeInfos.values().forEach(x -> typeInfoValuesAsClassInfos.add((ClassInfo)x));
+        Set<ClassInfoElement> ClassInfoElements = new HashSet<ClassInfoElement>();
+        typeInfoValuesAsClassInfos.forEach(x -> ClassInfoElements.addAll(x.getElement()));
+
+        //Remove all Infos that are in the CQL Type Mappings
+        List<ClassInfoElement> invalidElementTypes = (ClassInfoElements.stream()
+        .filter(x -> this.settings.cqlTypeMappings.containsKey(x.getType()) && x.getType().startsWith("QUICK") 
+            || this.settings.cqlTypeMappings.containsKey(x.getElementType())&& (x.getElementType().startsWith("QUICK")))
+        .collect(Collectors.toList()));
+        invalidElementTypes.forEach(x -> x.setType("System." + this.unQualify(x.getType())));
+        invalidElementTypes.forEach(x -> x.setElementType("System." + this.unQualify(x.getType())));
+        invalidElementTypes.forEach(
+            x -> typeInfoValuesAsClassInfos.forEach(
+                y -> y.getElement().stream()
+                .filter(z -> z.getType() != null && this.unQualify(z.getType()).matches(this.unQualify(x.getType())))
+                .forEach(z -> z.setType(x.getType()))
+                )
+            );
+            invalidElementTypes.forEach(
+                x -> typeInfoValuesAsClassInfos.forEach(
+                    y -> y.getElement().stream()
+                    .filter(z -> z.getElementType() != null && this.unQualify(z.getElementType()).matches(this.unQualify(x.getElementType())))
+                    .forEach(z -> z.setElementType(x.getElementType()))
+                    )
+                );
+
+        //Remove Duplicates
+        List<ClassInfo> invalidClassInfos = (typeInfoValuesAsClassInfos.stream()
+        .filter(x -> this.settings.cqlTypeMappings.containsKey(x.getName()) 
+        || (x.getLabel() != null && x.getLabel().startsWith("http://hl7.org/fhir"))).collect(Collectors.toList()));
+        invalidClassInfos.forEach(x -> typeInfos.remove( "QUICK." + x.getLabel()));
+        typeInfoValuesAsClassInfos.getClass();
     }
 }
