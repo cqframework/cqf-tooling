@@ -78,7 +78,8 @@ public class QuickClassInfoBuilder extends ClassInfoBuilder {
                         }
                         //update CQL Primitives from FHIR to Quick Versions i.e. System
                         else if(originalElementTypeSpecifier != null && originalElementTypeSpecifier.getElementType() != null
-                        && this.settings.cqlTypeMappings.containsKey(originalElementTypeSpecifier.getElementType()) && (originalElementTypeSpecifier.getElementType().startsWith("QUICK")))
+                        && this.settings.cqlTypeMappings.containsKey(originalElementTypeSpecifier.getElementType()) 
+                        && (originalElementTypeSpecifier.getElementType().startsWith("QUICK")))
                         {
                             for(ClassInfoElement updatedElement: updatedClassInfo.getElement())
                             {
@@ -91,7 +92,8 @@ public class QuickClassInfoBuilder extends ClassInfoBuilder {
                             }
                         }
                         //Get typespecifiers that are not CQL Primitives from FHIR replace QUICK Versions
-                        else if(originalElement.getType() != null && originalClassInfo.getLabel() != null && originalElement.getType().startsWith("QUICK.") 
+                        else if(originalElement.getType() != null && originalClassInfo.getLabel() != null 
+                        && originalElement.getType().startsWith("QUICK.") 
                         && originalClassInfo.getLabel().startsWith("http://hl7.org/fhir"))
                         {
                             for(ClassInfoElement updatedElement: updatedClassInfo.getElement())
@@ -99,6 +101,21 @@ public class QuickClassInfoBuilder extends ClassInfoBuilder {
                                 if(updatedElement.getName().matches(originalElement.getName()) && originalClassInfo.getName().matches(updatedClassInfo.getName()))
                                 {
                                     updatedElement.setType(originalElement.getType());
+                                }
+                            }
+                        }
+                        else if(originalElementTypeSpecifier != null && originalClassInfo.getLabel() != null 
+                        && originalElementTypeSpecifier.getElementType() != null
+                        && (originalElementTypeSpecifier.getElementType().startsWith("QUICK")) 
+                        && originalClassInfo.getLabel().startsWith("http://hl7.org/fhir"))
+                        {
+                            for(ClassInfoElement updatedElement: updatedClassInfo.getElement())
+                            {
+                                ListTypeSpecifier updatedElementTypeSpecifier = (ListTypeSpecifier) updatedElement.getTypeSpecifier();
+                                if(updatedElementTypeSpecifier != null && updatedElement.getName().matches(originalElement.getName())
+                                && originalClassInfo.getName().matches(updatedClassInfo.getName()))
+                                {
+                                    updatedElementTypeSpecifier.setElementType(originalElementTypeSpecifier.getElementType());
                                 }
                             }
                         }
