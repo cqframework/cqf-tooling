@@ -101,6 +101,15 @@ public class QuickClassInfoBuilder extends ClassInfoBuilder {
                                     }
                                 }
                             }
+                            //Get BaseType from FHIR replace QUICK
+                            if (filteredClassInfo.getName().matches(baseClassInfo.getName()) 
+                                && filteredClassInfo.getBaseType() != null && baseClassInfo.getBaseType() != null
+                                && !filteredClassInfo.getBaseType().matches(baseClassInfo.getBaseType())
+                                && filteredClassInfo.getLabel() != null && baseClassInfo.getLabel() != null
+                                && baseClassInfo.getLabel().startsWith("http://hl7.org/fhir"))
+                            {
+                                filteredClassInfo.setBaseType(baseClassInfo.getBaseType());
+                            }
                         }   
                     }
                     typeInfos.put(filteredClassInfo.getName().substring(0, filteredClassInfo.getName().lastIndexOf(".")) + "." +  filteredClassInfo.getLabel(), filteredClassInfo);
