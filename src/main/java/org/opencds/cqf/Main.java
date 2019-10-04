@@ -80,6 +80,14 @@ package org.opencds.cqf;
                 - group.population.criteria
             - See the documentation for CQL to FHIR Library conversion to see which Library elements will be populated
 
+        - Bundle Resources
+            - mvn exec:java -Dexec.args="[-BundleResources] [-pathtodirectory | -ptd] (-outputpath | -op) (-version | -v) "
+            - Example: mvn exec:java -Dexec.args="-BundleResources -ptd=/Users/adam/Src/cqframework/opioid-cds-r4/quickstartcontent -op=/Users/adam/Src/cqframework/opioid-cds-r4/quickstartcontentbundle -v=r4"
+            - This tooling consolidates all resources from files in the 'pathtodirectory' directory into a single FHIR Bundle.
+            - Default output path: src/main/resources/org/opencds/cqf/bundle/output
+            - version = FHIR version { dstu2, stu3, r4 }
+                Default version: Dstu3
+
         - Bundle consolidation
             - mvn exec:java -Dexec.args="[-BundlesToBundle] [input directory path] (output encoding) (output file name) (org.opencds.cqf.qdm.output directory path)"
             - Example: mvn exec:java -Dexec.args="-BundlesToBundle /Users/christopherschuler/Documents/workspace/Bundles xml master-bundle /Users/christopherschuler/Documents/workspace/master-bundles"
