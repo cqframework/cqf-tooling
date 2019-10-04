@@ -24,8 +24,8 @@ public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3Narr
 
     @Override
     public void processLibrary(String id, CqlTranslator translator) {
-        Library library = populateMeta(id);
         org.hl7.elm.r1.Library elm = translator.toELM();
+        Library library = populateMeta(id, elm.getIdentifier().getVersion());
         if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
             for (IncludeDef def : elm.getIncludes().getDef()) {
                 if (!libraryMap.containsKey(def.getPath())) {
@@ -58,7 +58,7 @@ public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3Narr
         Bundle bundle = new Bundle();
 
         for (Map.Entry<String, Library> entry : libraryMap.entrySet()) {
-            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + entry.getKey() + "." + encoding)) {
+            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/library-" + entry.getKey() + "." + encoding)) {
                 bundle.addEntry().setResource(entry.getValue()).setRequest(new Bundle.BundleEntryRequestComponent().setMethod(Bundle.HTTPVerb.PUT).setUrl("Library/" + entry.getValue().getId()));
                 writer.write(
                         encoding.equals("json")
@@ -94,10 +94,11 @@ public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3Narr
     }
 
     // Populate metadata
-    private Library populateMeta(String id) {
+    private Library populateMeta(String name, String version) {
         Library library = new Library();
-        library.setId(id.replaceAll("_", "-"));
-        library.setName(id);
+        library.setId(nameToId(name));
+        library.setName(name);
+        library.setVersion(version);
         library.setStatus(Enumerations.PublicationStatus.ACTIVE);
         library.setExperimental(true);
         library.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://hl7.org/fhir/codesystem-library-type.html")));
@@ -142,5 +143,9 @@ public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3Narr
 
     public Library refreshGeneratedContent(Path pathToLibraryDirectory) {
         return null;
+    }
+
+    private String nameToId(String name) {
+        return name.replaceAll("_", "-").toLowerCase();
     }
 }
