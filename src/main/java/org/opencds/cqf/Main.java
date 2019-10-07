@@ -56,6 +56,10 @@ package org.opencds.cqf;
                 - content.contentType (both application/elm+xml and text/cql by default)
                 - content.data (base64 encoded String)
 
+        - Update CQL for an existing Library resource
+            - command: mvn exec:java -Dexec.args="[-UpdateCql] [-pathtolibrary | -ptl] [-pathtolibraryresource | -ptlr] (-encoding | -e) (-outputpath | -op)"
+            - Example: -UpdateCql -ptl="C:\Users\Bryn\Documents\Src\SS\Pilots\Opioid\opioid-cds\pages\cql\OpioidCDS_STU3_Common.cql" -ptlr="C:\Users\Bryn\Documents\Src\SS\Pilots\Opioid\opioid-cds\resources\library-opioidcds-stu3-common-0-1-0.xml"
+
         - CQL to FHIR Measure conversion
             - command: mvn exec:java -Dexec.args="[-CqlToMeasure] [path to CQL library] (id) (encoding) (contentType encoding) (-ip=initial population criteria) {-nX=numerator X criteria} {-dX=denominator X criteria} {sX=stratifier X criteria} (org.opencds.cqf.qdm.output directory path)"
             - NOTE: The 'X' for the numerator, denominator and stratifier params MUST be an Integer value
@@ -75,6 +79,14 @@ package org.opencds.cqf;
                 - group.population.code
                 - group.population.criteria
             - See the documentation for CQL to FHIR Library conversion to see which Library elements will be populated
+
+        - Bundle Resources
+            - mvn exec:java -Dexec.args="[-BundleResources] [-pathtodirectory | -ptd] (-outputpath | -op) (-version | -v) "
+            - Example: mvn exec:java -Dexec.args="-BundleResources -ptd=/Users/adam/Src/cqframework/opioid-cds-r4/quickstartcontent -op=/Users/adam/Src/cqframework/opioid-cds-r4/quickstartcontentbundle -v=r4"
+            - This tooling consolidates all resources from files in the 'pathtodirectory' directory into a single FHIR Bundle.
+            - Default output path: src/main/resources/org/opencds/cqf/bundle/output
+            - version = FHIR version { dstu2, stu3, r4 }
+                Default version: Dstu3
 
         - Bundle consolidation
             - mvn exec:java -Dexec.args="[-BundlesToBundle] [input directory path] (output encoding) (output file name) (org.opencds.cqf.qdm.output directory path)"
