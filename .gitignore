@@ -101,14 +101,17 @@ hs_err_pid*
 /src/main/resources/org/opencds/cqf/terminology/output/*
 !/src/main/resources/org/opencds/cqf/terminology/output/.gitkeep
 
-/src/main/resources/org/opencds/cqf/library/output/*
-!/src/main/resources/org/opencds/cqf/library/output/.gitkeep
-
 /src/main/resources/org/opencds/cqf/jsonschema/output/*
 !/src/main/resources/org/opencds/cqf/jsonschema/output/.gitkeep
 
 /src/main/resources/org/opencds/cqf/igtools/output/*
 !/src/main/resources/org/opencds/cqf/igtools/output/.gitkeep
+
+/src/main/resources/org/opencds/cqf/library/output/r4/*
+!/src/main/resources/org/opencds/cqf/library/output/r4/.gitkeep
+
+/src/main/resources/org/opencds/cqf/library/output/stu3/*
+!/src/main/resources/org/opencds/cqf/library/output/stu3/.gitkeep
 
 *.iml
 /src/main/resources/org/opencds/cqf/bundle/output/

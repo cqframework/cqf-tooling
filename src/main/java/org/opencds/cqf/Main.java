@@ -43,8 +43,8 @@ package org.opencds.cqf;
                 - TODO
 
         - CQL to FHIR Library conversion
-            - command: mvn exec:java -Dexec.args="[-CqlToLibrary] [-pathtolibrarydirectory | -ptld] (-encoding | -e) (-outputpath | -op)"
-            - Example: TODO
+            - command: mvn exec:java -Dexec.args="[-CqlToSTU3Library|-CqlToR4Library] [-pathtolibrarydirectory | -ptld] (-encoding | -e) (-outputpath | -op)"
+            - Example: java -Dexec.args="-CqlToR4Library -ptld=/Users/christopherschuler/Src/cqframework/opioid-cds-r4/pages/cql/ -op=/Users/christopherschuler/Src/cqframework/opioid-cds-r4/resources"
             - This tooling converts CQL libraries to FHIR Library resources
             - The following elements will be populated in the FHIR Library resource:
                 - id (auto-generated)

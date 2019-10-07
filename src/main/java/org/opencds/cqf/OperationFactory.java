@@ -4,7 +4,8 @@ package org.opencds.cqf;
 import org.opencds.cqf.acceleratorkit.Processor;
 import org.opencds.cqf.bundler.BundleResources;
 import org.opencds.cqf.igtools.IgBundler;
-import org.opencds.cqf.library.LibraryGenerator;
+import org.opencds.cqf.library.R4LibraryGenerator;
+import org.opencds.cqf.library.STU3LibraryGenerator;
 import org.opencds.cqf.modelinfo.StructureDefinitionToModelInfo;
 import org.opencds.cqf.qdm.QdmToQiCore;
 import org.opencds.cqf.quick.QuickPageGenerator;
@@ -29,8 +30,10 @@ class OperationFactory {
                 return new HEDISValueSetGenerator();
             case "XlsxToValueSet":
                 return new GenericValueSetGenerator();
-            case "CqlToLibrary":
-                return new LibraryGenerator();
+            case "CqlToSTU3Library":
+                return new STU3LibraryGenerator();
+            case "CqlToR4Library":
+                return new R4LibraryGenerator();
             case "UpdateCql":
                 return new LibraryGenerator();
             case "JsonSchemaGenerator":
