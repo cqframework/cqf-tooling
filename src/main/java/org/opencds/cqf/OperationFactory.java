@@ -34,8 +34,10 @@ class OperationFactory {
                 return new STU3LibraryGenerator();
             case "CqlToR4Library":
                 return new R4LibraryGenerator();
-            case "UpdateCql":
-                return new LibraryGenerator();
+            case "UpdateSTU3Cql":
+                return new STU3LibraryGenerator();
+            case "UpdateR4Cql":
+                return new R4LibraryGenerator();
             case "JsonSchemaGenerator":
 //                return new SchemaGenerator();
             case "BundleIg":
