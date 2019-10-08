@@ -13,10 +13,10 @@ import com.google.common.io.Files;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -65,7 +65,7 @@ public class ResourceLoader {
     private List<StructureDefinition> readStructureDefFromFolder(String path) {
         Collection<File> files = getFiles(path);
 
-        IParser parser = FhirContext.forDstu3().newJsonParser();
+        IParser parser = FhirContext.forR4().newJsonParser();
 
         List<StructureDefinition> objects = new ArrayList<StructureDefinition>();
 

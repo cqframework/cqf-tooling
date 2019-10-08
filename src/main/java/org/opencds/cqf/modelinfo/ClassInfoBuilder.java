@@ -18,14 +18,15 @@ import org.hl7.elm_modelinfo.r1.ListTypeSpecifier;
 import org.hl7.elm_modelinfo.r1.NamedTypeSpecifier;
 import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.hl7.elm_modelinfo.r1.TypeSpecifier;
-import org.hl7.fhir.dstu3.model.Element;
-import org.hl7.fhir.dstu3.model.ElementDefinition;
-import org.hl7.fhir.dstu3.model.ElementDefinition.TypeRefComponent;
-import org.hl7.fhir.dstu3.model.Enumerations.BindingStrength;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.Element;
+import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
+import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
 
 public abstract class ClassInfoBuilder {
     protected Map<String, StructureDefinition> structureDefinitions;
@@ -165,9 +166,21 @@ public abstract class ClassInfoBuilder {
     private TypeSpecifier buildTypeSpecifier(String modelName, TypeRefComponent typeRef) {
         try {
             if (typeRef != null && typeRef.getProfile() != null) {
-                return this.buildTypeSpecifier(this.resolveTypeName(typeRef.getProfile()));
+                List<CanonicalType> canonicalTypeRefs = typeRef.getProfile();
+                    if (canonicalTypeRefs.size() == 1) {
+                        return this.buildTypeSpecifier(this.resolveTypeName(canonicalTypeRefs.get(0).asStringValue()));
+                    } else if (canonicalTypeRefs.size() > 1) {
+                        ChoiceTypeSpecifier cts = new ChoiceTypeSpecifier();
+                        for(CanonicalType canonicalType: canonicalTypeRefs)
+                        {
+                            if (canonicalType != null)
+                            {
+                                cts.withChoice(this.buildTypeSpecifier(this.resolveTypeName(canonicalType.asStringValue())));
+                            }
+                        }
+                        return cts;
+                    } else return null;             
             } else {
-
                 if (this.settings.useCQLPrimitives && typeRef != null) {
                     String typeName = this.settings.cqlTypeMappings.get(modelName + "." + typeRef.getCode());
                     return this.buildTypeSpecifier(typeName);
