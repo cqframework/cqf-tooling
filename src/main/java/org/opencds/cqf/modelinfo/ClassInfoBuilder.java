@@ -165,7 +165,7 @@ public abstract class ClassInfoBuilder {
     // Builds a TypeSpecifier from the given list of TypeRefComponents
     private TypeSpecifier buildTypeSpecifier(String modelName, TypeRefComponent typeRef) {
         try {
-            if (typeRef != null && typeRef.getProfile() != null) {
+            if (typeRef != null && typeRef.getProfile() != null && typeRef.getProfile().size() != 0) {
                 List<CanonicalType> canonicalTypeRefs = typeRef.getProfile();
                     if (canonicalTypeRefs.size() == 1) {
                         return this.buildTypeSpecifier(this.resolveTypeName(canonicalTypeRefs.get(0).asStringValue()));
@@ -181,7 +181,8 @@ public abstract class ClassInfoBuilder {
                         return cts;
                     } else return null;             
             } else {
-                if (this.settings.useCQLPrimitives && typeRef != null) {
+                if (this.settings.useCQLPrimitives && typeRef != null 
+                    && this.settings.cqlTypeMappings.get(modelName + "." + typeRef.getCode()) != null) {
                     String typeName = this.settings.cqlTypeMappings.get(modelName + "." + typeRef.getCode());
                     return this.buildTypeSpecifier(typeName);
                 } else {
@@ -628,11 +629,24 @@ public abstract class ClassInfoBuilder {
             throws Exception {
         ElementDefinition ed = eds.get(index.get());
         String path = ed.getPath();
-
+        if(path.matches("Procedure.statusReason"))
+        {
+            System.out.println("");
+        }
         TypeSpecifier typeSpecifier = this.buildElementTypeSpecifier(modelName, root, ed);
 
         String typeCode = this.typeCode(ed);
-        StructureDefinition typeDefinition = structureDefinitions.get(typeCode);
+        StructureDefinition typeDefinition;
+        if(this.settings.useCQLPrimitives && !this.settings.primitiveTypeMappings.containsKey("QUICK." + typeCode))
+        {
+            typeDefinition = structureDefinitions.get(typeCode);
+        }
+        else if (!this.settings.useCQLPrimitives){
+            typeDefinition = structureDefinitions.get(typeCode);
+        }
+        else typeDefinition = null;
+            
+        
 
         List<ElementDefinition> typeEds;
         if (typeCode != null && typeCode.equals("ComplexType") && !typeDefinition.getId().equals("BackboneElement")) {
@@ -652,7 +666,7 @@ public abstract class ClassInfoBuilder {
         List<ClassInfoElement> elements = new ArrayList<>();
         while (index.get() < eds.size()) {
             ElementDefinition e = eds.get(index.get());
-            if (e.getPath().startsWith(path) && !e.getPath().equals(path)) {
+            if (e.getPath().matches(path) && !e.getPath().equals(path)) {
                 ClassInfoElement cie = this.visitElementDefinition(modelName, root, eds, typeRoot, structureEds, index);
                 if (cie != null) {
                     elements.add(cie);
@@ -785,7 +799,8 @@ public abstract class ClassInfoBuilder {
 
         while (index.get() < eds.size()) {
             ElementDefinition e = eds.get(index.get());
-            if (e.getPath().startsWith(path) && !e.getPath().equals(path)) {
+            ;
+            if (e.getPath().startsWith(path) && e.getPath().split(path)[1].startsWith(".") && !e.getPath().equals(path)) {
                 ClassInfoElement cie = this.visitElementDefinition(modelName, path, eds, structure == null? null: structure.getId(),
                         structureEds, index);
                 if (cie != null) {
@@ -799,7 +814,7 @@ public abstract class ClassInfoBuilder {
 
         System.out.println("Building ClassInfo for " + typeName);
 
-        ClassInfo info = new ClassInfo().withName(modelName + "." + path).withLabel(typeName)
+        ClassInfo info = new ClassInfo().withName(path).withLabel(typeName)
                 .withBaseType(this.resolveTypeName(sd.getBaseDefinition()))
                 .withRetrievable(sd.getKind() == StructureDefinitionKind.RESOURCE).withElement(elements)
                 .withPrimaryCodePath(this.primaryCodePath(elements, typeName));

@@ -21,7 +21,7 @@ public class QuickClassInfoBuilder extends ClassInfoBuilder {
         this.buildFor("QUICK",
             (x -> x.getKind() == StructureDefinitionKind.COMPLEXTYPE && (x.getBaseDefinition() == null
                     || !x.getBaseDefinition().equals("http://hl7.org/fhir/StructureDefinition/Extension"))
-                    && !this.settings.cqlTypeMappings.containsKey(this.unQualify(x.getName())))
+                    && !this.settings.cqlTypeMappings.containsKey("QUICK." + x.getName()))
             );
         
         this.settings.useCQLPrimitives = true;
