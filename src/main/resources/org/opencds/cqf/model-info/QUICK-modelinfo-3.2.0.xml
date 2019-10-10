@@ -1,0 +1,2109 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns4:modelInfo name="QUICK" version="3.2.0" url="http://hl7.org/fhir/us/qicore" targetQualifier="quick" patientClassName="QUICK.Patient" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns4="urn:hl7-org:elm-modelinfo:r1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ns4:requiredModelInfo name="System" version="1.0.0"/>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="MedicationAdministration" label="StructureDefinition/qicore-medicationadministration" retrievable="true" baseType="QUICK.MedicationAdministration">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="instantiates">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
+        </ns4:element>
+        <ns4:element name="partOf">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="category" type="System.Concept"/>
+        <ns4:element name="medication" type="System.Concept"/>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="context" type="QUICK.Reference"/>
+        <ns4:element name="supportingInformation">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="effective" type="System.DateTime"/>
+        <ns4:element name="performer">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="reasonCode">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="reasonReference">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="request" type="QUICK.Reference"/>
+        <ns4:element name="device">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+        <ns4:element name="dosage" type="QUICK.BackboneElement"/>
+        <ns4:element name="eventHistory">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="ImmunizationRecommendation" label="StructureDefinition/qicore-immunizationrec" retrievable="true" baseType="QUICK.ImmunizationRecommendation">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="patient" type="QUICK.Reference"/>
+        <ns4:element name="date" type="System.DateTime"/>
+        <ns4:element name="authority" type="QUICK.Reference"/>
+        <ns4:element name="recommendation">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="AllergyIntolerance" label="StructureDefinition/qicore-allergyintolerance" retrievable="true" primaryCodePath="code" baseType="USCore.us-core-allergyintolerance">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="resolutionAge" type="QUICK.allergyintolerance-resolutionAge"/>
+        <ns4:element name="reasonRefuted" type="QUICK.allergyintolerance-reasonRefuted"/>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="clinicalStatus" type="System.Concept"/>
+        <ns4:element name="verificationStatus" type="System.Concept"/>
+        <ns4:element name="type" type="System.String"/>
+        <ns4:element name="category">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
+        </ns4:element>
+        <ns4:element name="criticality" type="System.String"/>
+        <ns4:element name="code" type="System.Concept"/>
+        <ns4:element name="patient" type="QUICK.Reference"/>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="onset" type="System.DateTime"/>
+        <ns4:element name="recordedDate" type="System.DateTime"/>
+        <ns4:element name="recorder" type="QUICK.Reference"/>
+        <ns4:element name="asserter" type="QUICK.Reference"/>
+        <ns4:element name="lastOccurrence" type="System.DateTime"/>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+        <ns4:element name="reaction">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="BodyStructure" label="StructureDefinition/qicore-bodystructure" retrievable="true" baseType="QUICK.BodyStructure">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="active" type="System.Boolean"/>
+        <ns4:element name="morphology" type="System.Concept"/>
+        <ns4:element name="location" type="System.Concept"/>
+        <ns4:element name="description" type="System.String"/>
+        <ns4:element name="image">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Attachment"/>
+        </ns4:element>
+        <ns4:element name="patient" type="QUICK.Reference"/>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="CareTeam" label="StructureDefinition/qicore-careteam" retrievable="true" baseType="USCore.us-core-careteam">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="category">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="name" type="System.String"/>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="period" type="System.DateTime"/>
+        <ns4:element name="participant">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="reasonCode">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="reasonReference">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="managingOrganization">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="telecom">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.ContactPoint"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="MedicationDispense" label="StructureDefinition/qicore-medicationdispense" retrievable="true" baseType="QUICK.MedicationDispense">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="partOf">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="category" type="System.Concept"/>
+        <ns4:element name="medication" type="System.Concept"/>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="context" type="QUICK.Reference"/>
+        <ns4:element name="supportingInformation">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="performer">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="location" type="QUICK.Reference"/>
+        <ns4:element name="authorizingPrescription">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="type" type="System.Concept"/>
+        <ns4:element name="quantity" type="QUICK.SimpleQuantity"/>
+        <ns4:element name="daysSupply" type="QUICK.SimpleQuantity"/>
+        <ns4:element name="whenPrepared" type="System.DateTime"/>
+        <ns4:element name="whenHandedOver" type="System.DateTime"/>
+        <ns4:element name="destination" type="QUICK.Reference"/>
+        <ns4:element name="receiver">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+        <ns4:element name="dosageInstruction">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Dosage"/>
+        </ns4:element>
+        <ns4:element name="substitution" type="QUICK.BackboneElement"/>
+        <ns4:element name="detectedIssue">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="eventHistory">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="ImagingStudy" label="StructureDefinition/qicore-imagingstudy" retrievable="true" baseType="QUICK.ImagingStudy">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="modality">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Code"/>
+        </ns4:element>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="started" type="System.DateTime"/>
+        <ns4:element name="basedOn">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="referrer" type="QUICK.Reference"/>
+        <ns4:element name="interpreter">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="endpoint">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="numberOfSeries" type="System.Integer"/>
+        <ns4:element name="numberOfInstances" type="System.Integer"/>
+        <ns4:element name="procedureReference" type="QUICK.Reference"/>
+        <ns4:element name="procedureCode">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="location" type="QUICK.Reference"/>
+        <ns4:element name="reasonCode">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="reasonReference">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+        <ns4:element name="description" type="System.String"/>
+        <ns4:element name="series">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="DeviceUseStatement" label="StructureDefinition/qicore-deviceusestatement" retrievable="true" baseType="QUICK.DeviceUseStatement">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="notDone" type="QICore.qicore-deviceusestatement-notDone"/>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="basedOn">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="derivedFrom">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="timing" type="QUICK.Timing"/>
+        <ns4:element name="recordedOn" type="System.DateTime"/>
+        <ns4:element name="source" type="QUICK.Reference"/>
+        <ns4:element name="device" type="QUICK.Reference"/>
+        <ns4:element name="reasonCode">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="reasonReference">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="bodySite" type="System.Concept"/>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="ServiceRequest" label="StructureDefinition/qicore-servicerequest" retrievable="true" primaryCodePath="code" baseType="QUICK.ServiceRequest">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="statusReason" type="QUICK.request-statusReason"/>
+        <ns4:element name="approachBodyStructure">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.procedure-approachBodyStructure"/>
+        </ns4:element>
+        <ns4:element name="appropriatenessScore" type="QICore.qicore-servicerequest-appropriatenessScore"/>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="instantiatesCanonical">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.canonical"/>
+        </ns4:element>
+        <ns4:element name="instantiatesUri">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
+        </ns4:element>
+        <ns4:element name="basedOn">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="replaces">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="requisition" type="QUICK.Identifier"/>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="intent" type="System.String"/>
+        <ns4:element name="category">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="priority" type="System.String"/>
+        <ns4:element name="doNotPerform" type="System.Boolean"/>
+        <ns4:element name="code" type="System.Concept"/>
+        <ns4:element name="orderDetail">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="quantity" type="System.Quantity"/>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="occurrence" type="System.DateTime"/>
+        <ns4:element name="asNeeded" type="System.Boolean"/>
+        <ns4:element name="authoredOn" type="System.DateTime"/>
+        <ns4:element name="requester" type="QUICK.Reference"/>
+        <ns4:element name="performerType" type="System.Concept"/>
+        <ns4:element name="performer">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="locationCode">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="locationReference">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="reasonCode">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="reasonReference">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="insurance">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="supportingInfo">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="specimen">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="bodySite">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+        <ns4:element name="patientInstruction" type="System.String"/>
+        <ns4:element name="relevantHistory">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="FamilyMemberHistory" label="StructureDefinition/qicore-familymemberhistory" retrievable="true" baseType="QUICK.FamilyMemberHistory">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="instantiatesCanonical">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.canonical"/>
+        </ns4:element>
+        <ns4:element name="instantiatesUri">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="dataAbsentReason" type="System.Concept"/>
+        <ns4:element name="patient" type="QUICK.Reference"/>
+        <ns4:element name="date" type="System.DateTime"/>
+        <ns4:element name="name" type="System.String"/>
+        <ns4:element name="relationship" type="System.Concept"/>
+        <ns4:element name="sex" type="System.Concept"/>
+        <ns4:element name="born" type="System.DateTime"/>
+        <ns4:element name="age" type="System.Quantity"/>
+        <ns4:element name="estimatedAge" type="System.Boolean"/>
+        <ns4:element name="deceased" type="System.Boolean"/>
+        <ns4:element name="reasonCode">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="reasonReference">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+        <ns4:element name="condition">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Flag" label="StructureDefinition/qicore-flag" retrievable="true" primaryCodePath="code" baseType="QUICK.Flag">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="category">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="code" type="System.Concept"/>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="period" type="System.DateTime"/>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="author" type="QUICK.Reference"/>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Medication" label="StructureDefinition/qicore-medication" retrievable="true" primaryCodePath="code" baseType="USCore.us-core-medication">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="code" type="System.Concept"/>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="manufacturer" type="QUICK.Reference"/>
+        <ns4:element name="form" type="System.Concept"/>
+        <ns4:element name="amount" type="QUICK.Ratio"/>
+        <ns4:element name="ingredient">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="batch" type="QUICK.BackboneElement"/>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Coverage" label="StructureDefinition/qicore-coverage" retrievable="true" baseType="QUICK.Coverage">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="type" type="System.Concept"/>
+        <ns4:element name="policyHolder" type="QUICK.Reference"/>
+        <ns4:element name="subscriber" type="QUICK.Reference"/>
+        <ns4:element name="beneficiary" type="QUICK.Reference"/>
+        <ns4:element name="dependent" type="System.String"/>
+        <ns4:element name="relationship" type="System.Concept"/>
+        <ns4:element name="period" type="System.DateTime"/>
+        <ns4:element name="payor">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="class">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="order" type="System.Integer"/>
+        <ns4:element name="network" type="System.String"/>
+        <ns4:element name="costToBeneficiary">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="subrogation" type="System.Boolean"/>
+        <ns4:element name="contract">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Device" label="StructureDefinition/qicore-device" retrievable="true" baseType="USCore.us-core-device">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="definition" type="QUICK.Reference"/>
+        <ns4:element name="udiCarrier" type="QUICK.BackboneElement"/>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="distinctIdentifier" type="System.String"/>
+        <ns4:element name="manufacturer" type="System.String"/>
+        <ns4:element name="manufactureDate" type="System.DateTime"/>
+        <ns4:element name="expirationDate" type="System.DateTime"/>
+        <ns4:element name="lotNumber" type="System.String"/>
+        <ns4:element name="serialNumber" type="System.String"/>
+        <ns4:element name="deviceName">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="modelNumber" type="System.String"/>
+        <ns4:element name="partNumber" type="System.String"/>
+        <ns4:element name="type" type="System.Concept"/>
+        <ns4:element name="specialization">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="version">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="property">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="patient" type="QUICK.Reference"/>
+        <ns4:element name="owner" type="QUICK.Reference"/>
+        <ns4:element name="contact">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.ContactPoint"/>
+        </ns4:element>
+        <ns4:element name="location" type="QUICK.Reference"/>
+        <ns4:element name="url" type="System.String"/>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+        <ns4:element name="safety">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="parent" type="QUICK.Reference"/>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="NutritionOrder" label="StructureDefinition/qicore-nutritionorder" retrievable="true" baseType="QUICK.NutritionOrder">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="instantiatesCanonical">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.canonical"/>
+        </ns4:element>
+        <ns4:element name="instantiatesUri">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
+        </ns4:element>
+        <ns4:element name="instantiates">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="intent" type="System.String"/>
+        <ns4:element name="patient" type="QUICK.Reference"/>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="dateTime" type="System.DateTime"/>
+        <ns4:element name="orderer" type="QUICK.Reference"/>
+        <ns4:element name="allergyIntolerance">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="foodPreferenceModifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="excludeFoodModifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="oralDiet" type="QUICK.BackboneElement"/>
+        <ns4:element name="supplement">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="enteralFormula" type="QUICK.BackboneElement"/>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="ImmunizationEvaluation" label="StructureDefinition/qicore-immunizationevaluation" retrievable="true" baseType="QUICK.ImmunizationEvaluation">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="patient" type="QUICK.Reference"/>
+        <ns4:element name="date" type="System.DateTime"/>
+        <ns4:element name="authority" type="QUICK.Reference"/>
+        <ns4:element name="targetDisease" type="System.Concept"/>
+        <ns4:element name="immunizationEvent" type="QUICK.Reference"/>
+        <ns4:element name="doseStatus" type="System.Concept"/>
+        <ns4:element name="description" type="System.String"/>
+        <ns4:element name="series" type="System.String"/>
+        <ns4:element name="doseNumber" type="System.Integer"/>
+        <ns4:element name="seriesDoses" type="System.Integer"/>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Task" label="StructureDefinition/qicore-task" retrievable="true" primaryCodePath="code" baseType="QUICK.Task">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="instantiatesCanonical" type="QUICK.canonical"/>
+        <ns4:element name="instantiatesUri" type="System.String"/>
+        <ns4:element name="basedOn">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="groupIdentifier" type="QUICK.Identifier"/>
+        <ns4:element name="partOf">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="businessStatus" type="System.Concept"/>
+        <ns4:element name="intent" type="System.String"/>
+        <ns4:element name="priority" type="System.String"/>
+        <ns4:element name="code" type="System.Concept"/>
+        <ns4:element name="description" type="System.String"/>
+        <ns4:element name="focus" type="QUICK.Reference"/>
+        <ns4:element name="for" type="QUICK.Reference"/>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="executionPeriod" type="System.DateTime"/>
+        <ns4:element name="authoredOn" type="System.DateTime"/>
+        <ns4:element name="lastModified" type="System.DateTime"/>
+        <ns4:element name="requester" type="QUICK.Reference"/>
+        <ns4:element name="performerType">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="owner" type="QUICK.Reference"/>
+        <ns4:element name="location" type="QUICK.Reference"/>
+        <ns4:element name="reasonCode" type="System.Concept"/>
+        <ns4:element name="reasonReference" type="QUICK.Reference"/>
+        <ns4:element name="insurance">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+        <ns4:element name="relevantHistory">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="restriction" type="QUICK.BackboneElement"/>
+        <ns4:element name="input">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="output">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="DiagnosticReport" label="StructureDefinition/qicore-diagnosticreport-note" retrievable="true" primaryCodePath="code" baseType="USCore.us-core-diagnosticreport-note">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="locationPerformed" type="QUICK.diagnosticReport-locationPerformed"/>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="basedOn">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="category">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="code" type="System.Concept"/>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="effective" type="System.DateTime"/>
+        <ns4:element name="issued" type="System.DateTime"/>
+        <ns4:element name="performer">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="resultsInterpreter">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="specimen">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="result">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="imagingStudy">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="media">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="conclusion" type="System.String"/>
+        <ns4:element name="presentedForm">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Attachment"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="MedicationStatement" label="StructureDefinition/qicore-medicationstatement" retrievable="true" baseType="USCore.us-core-medicationstatement">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="basedOn">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="partOf">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="category" type="System.Concept"/>
+        <ns4:element name="medication" type="System.Concept"/>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="context" type="QUICK.Reference"/>
+        <ns4:element name="effective" type="System.DateTime"/>
+        <ns4:element name="dateAsserted" type="System.DateTime"/>
+        <ns4:element name="informationSource" type="QUICK.Reference"/>
+        <ns4:element name="derivedFrom">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="reasonCode">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="reasonReference">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+        <ns4:element name="dosage">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Dosage"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Specimen" label="StructureDefinition/qicore-specimen" retrievable="true" baseType="QUICK.Specimen">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="accessionIdentifier" type="QUICK.Identifier"/>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="type" type="System.Concept"/>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="receivedTime" type="System.DateTime"/>
+        <ns4:element name="parent">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="request">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="collection" type="QUICK.BackboneElement"/>
+        <ns4:element name="processing">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="container">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="condition">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Practitioner" label="StructureDefinition/qicore-practitioner" retrievable="true" baseType="USCore.us-core-practitioner">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="npislice" type="QUICK.Identifier"/>
+        <ns4:element name="active" type="System.Boolean"/>
+        <ns4:element name="name" type="QUICK.HumanName"/>
+        <ns4:element name="telecom">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.ContactPoint"/>
+        </ns4:element>
+        <ns4:element name="address">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Address"/>
+        </ns4:element>
+        <ns4:element name="gender" type="System.String"/>
+        <ns4:element name="birthDate" type="System.DateTime"/>
+        <ns4:element name="photo">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Attachment"/>
+        </ns4:element>
+        <ns4:element name="qualification">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="communication">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="PractitionerRole" label="StructureDefinition/qicore-practitionerrole" retrievable="true" primaryCodePath="code" baseType="USCore.us-core-practitionerrole">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="active" type="System.Boolean"/>
+        <ns4:element name="period" type="System.DateTime"/>
+        <ns4:element name="practitioner" type="QUICK.Reference"/>
+        <ns4:element name="organization" type="QUICK.Reference"/>
+        <ns4:element name="code" type="System.Concept"/>
+        <ns4:element name="specialty" type="System.Concept"/>
+        <ns4:element name="location">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="healthcareService">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="telecom">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.ContactPoint"/>
+        </ns4:element>
+        <ns4:element name="availableTime">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="notAvailable">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="availabilityExceptions" type="System.String"/>
+        <ns4:element name="endpoint">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Condition" label="StructureDefinition/qicore-condition" retrievable="true" primaryCodePath="code" baseType="USCore.us-core-condition">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="dueTo">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.condition-dueTo"/>
+        </ns4:element>
+        <ns4:element name="occurredFollowing">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.condition-occurredFollowing"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="clinicalStatus" type="System.Concept"/>
+        <ns4:element name="verificationStatus" type="System.Concept"/>
+        <ns4:element name="category">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="severity" type="System.Concept"/>
+        <ns4:element name="code" type="System.Concept"/>
+        <ns4:element name="bodySite">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="onset" type="System.DateTime"/>
+        <ns4:element name="abatement" type="System.DateTime"/>
+        <ns4:element name="recordedDate" type="System.DateTime"/>
+        <ns4:element name="recorder" type="QUICK.Reference"/>
+        <ns4:element name="asserter" type="QUICK.Reference"/>
+        <ns4:element name="stage">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="evidence">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="AdverseEvent" label="StructureDefinition/qicore-adverseevent" retrievable="true" baseType="QUICK.AdverseEvent">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier" type="QUICK.Identifier"/>
+        <ns4:element name="actuality" type="System.String"/>
+        <ns4:element name="category">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="event" type="System.Concept"/>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="date" type="System.DateTime"/>
+        <ns4:element name="detected" type="System.DateTime"/>
+        <ns4:element name="recordedDate" type="System.DateTime"/>
+        <ns4:element name="resultingCondition">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="location" type="QUICK.Reference"/>
+        <ns4:element name="seriousness" type="System.Concept"/>
+        <ns4:element name="severity" type="System.Concept"/>
+        <ns4:element name="outcome" type="System.Concept"/>
+        <ns4:element name="recorder" type="QUICK.Reference"/>
+        <ns4:element name="contributor">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="suspectEntity">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="subjectMedicalHistory">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="referenceDocument">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="study">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Location" label="StructureDefinition/qicore-location" retrievable="true" baseType="USCore.us-core-location">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="operationalStatus" type="System.Code"/>
+        <ns4:element name="name" type="System.String"/>
+        <ns4:element name="alias">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
+        </ns4:element>
+        <ns4:element name="description" type="System.String"/>
+        <ns4:element name="mode" type="System.String"/>
+        <ns4:element name="type">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="telecom">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.ContactPoint"/>
+        </ns4:element>
+        <ns4:element name="address" type="QUICK.Address"/>
+        <ns4:element name="physicalType" type="System.Concept"/>
+        <ns4:element name="position" type="QUICK.BackboneElement"/>
+        <ns4:element name="managingOrganization" type="QUICK.Reference"/>
+        <ns4:element name="partOf" type="QUICK.Reference"/>
+        <ns4:element name="hoursOfOperation">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="availabilityExceptions" type="System.String"/>
+        <ns4:element name="endpoint">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Patient" label="StructureDefinition/qicore-patient" retrievable="true" baseType="USCore.us-core-patient">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="race" type="USCore.us-core-race"/>
+        <ns4:element name="ethnicity" type="USCore.us-core-ethnicity"/>
+        <ns4:element name="birthsex" type="USCore.us-core-birthsex"/>
+        <ns4:element name="religion" type="QUICK.patient-religion"/>
+        <ns4:element name="birthPlace" type="QUICK.patient-birthPlace"/>
+        <ns4:element name="disability">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.patient-disability"/>
+        </ns4:element>
+        <ns4:element name="nationality">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.patient-nationality"/>
+        </ns4:element>
+        <ns4:element name="cadavericDonor" type="QUICK.patient-cadavericDonor"/>
+        <ns4:element name="military-service" type="QICore.qicore-military-service"/>
+        <ns4:element name="birthTime" type="QUICK.patient-birthTime"/>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="active" type="System.Boolean"/>
+        <ns4:element name="name">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.HumanName"/>
+        </ns4:element>
+        <ns4:element name="telecom">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.ContactPoint"/>
+        </ns4:element>
+        <ns4:element name="gender" type="System.String"/>
+        <ns4:element name="birthDate" type="System.DateTime"/>
+        <ns4:element name="deceased" type="System.Boolean"/>
+        <ns4:element name="address">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Address"/>
+        </ns4:element>
+        <ns4:element name="maritalStatus" type="System.Concept"/>
+        <ns4:element name="multipleBirth" type="System.Boolean"/>
+        <ns4:element name="photo">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Attachment"/>
+        </ns4:element>
+        <ns4:element name="contact">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="communication">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="generalPractitioner">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="managingOrganization" type="QUICK.Reference"/>
+        <ns4:element name="link">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="RelatedPerson" label="StructureDefinition/qicore-relatedperson" retrievable="true" baseType="QUICK.RelatedPerson">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="active" type="System.Boolean"/>
+        <ns4:element name="patient" type="QUICK.Reference"/>
+        <ns4:element name="relationship">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="name">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.HumanName"/>
+        </ns4:element>
+        <ns4:element name="telecom">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.ContactPoint"/>
+        </ns4:element>
+        <ns4:element name="gender" type="System.String"/>
+        <ns4:element name="birthDate" type="System.DateTime"/>
+        <ns4:element name="address">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Address"/>
+        </ns4:element>
+        <ns4:element name="photo">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Attachment"/>
+        </ns4:element>
+        <ns4:element name="period" type="System.DateTime"/>
+        <ns4:element name="communication">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="MedicationRequest" label="StructureDefinition/qicore-medicationrequest" retrievable="true" baseType="USCore.us-core-medicationrequest">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="intent" type="System.String"/>
+        <ns4:element name="category">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="priority" type="System.String"/>
+        <ns4:element name="doNotPerform" type="System.Boolean"/>
+        <ns4:element name="reported" type="System.Boolean"/>
+        <ns4:element name="medication" type="System.Concept"/>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="supportingInformation">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="authoredOn" type="System.DateTime"/>
+        <ns4:element name="requester" type="QUICK.Reference"/>
+        <ns4:element name="performer" type="QUICK.Reference"/>
+        <ns4:element name="recorder" type="QUICK.Reference"/>
+        <ns4:element name="reasonCode">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="reasonReference">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="instantiatesCanonical">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.canonical"/>
+        </ns4:element>
+        <ns4:element name="instantiatesUri">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
+        </ns4:element>
+        <ns4:element name="basedOn">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="groupIdentifier" type="QUICK.Identifier"/>
+        <ns4:element name="courseOfTherapyType" type="System.Concept"/>
+        <ns4:element name="insurance">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+        <ns4:element name="dosageInstruction">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Dosage"/>
+        </ns4:element>
+        <ns4:element name="dispenseRequest" type="QUICK.BackboneElement"/>
+        <ns4:element name="substitution" type="QUICK.BackboneElement"/>
+        <ns4:element name="priorPrescription" type="QUICK.Reference"/>
+        <ns4:element name="detectedIssue">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="eventHistory">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Encounter" label="StructureDefinition/qicore-encounter" retrievable="true" baseType="USCore.us-core-encounter">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="reasonCancelled" type="QUICK.encounter-reasonCancelled"/>
+        <ns4:element name="procedure">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QICore.qicore-encounter-procedure"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="class" type="System.Code"/>
+        <ns4:element name="type">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="serviceType" type="System.Concept"/>
+        <ns4:element name="priority" type="System.Concept"/>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="episodeOfCare">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="basedOn">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="participant">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="appointment">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="period" type="System.DateTime"/>
+        <ns4:element name="length" type="System.Quantity"/>
+        <ns4:element name="reasonCode">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="reasonReference">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="diagnosis">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="account">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="hospitalization" type="QUICK.BackboneElement"/>
+        <ns4:element name="location">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="serviceProvider" type="QUICK.Reference"/>
+        <ns4:element name="partOf" type="QUICK.Reference"/>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Procedure" label="StructureDefinition/qicore-procedure" retrievable="true" primaryCodePath="code" baseType="USCore.us-core-procedure">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="approachBodyStructure">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.procedure-approachBodyStructure"/>
+        </ns4:element>
+        <ns4:element name="incisionDateTime" type="QUICK.procedure-incisionDateTime"/>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="instantiatesCanonical">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.canonical"/>
+        </ns4:element>
+        <ns4:element name="instantiatesUri">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
+        </ns4:element>
+        <ns4:element name="basedOn">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="partOf">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="category" type="System.Concept"/>
+        <ns4:element name="code" type="System.Concept"/>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="performed" type="System.DateTime"/>
+        <ns4:element name="recorder" type="QUICK.Reference"/>
+        <ns4:element name="asserter" type="QUICK.Reference"/>
+        <ns4:element name="performer">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="location" type="QUICK.Reference"/>
+        <ns4:element name="reasonCode">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="reasonReference">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="bodySite">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="outcome" type="System.Concept"/>
+        <ns4:element name="report">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="complication">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="followUp">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+        <ns4:element name="focalDevice">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="usedReference">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="usedCode">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Communication" label="StructureDefinition/qicore-communication" retrievable="true" baseType="QUICK.Communication">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="instantiatesCanonical">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.canonical"/>
+        </ns4:element>
+        <ns4:element name="instantiatesUri">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
+        </ns4:element>
+        <ns4:element name="basedOn">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="partOf">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="inResponseTo">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="category">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="priority" type="System.String"/>
+        <ns4:element name="medium">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="topic" type="System.Concept"/>
+        <ns4:element name="about">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="sent" type="System.DateTime"/>
+        <ns4:element name="received" type="System.DateTime"/>
+        <ns4:element name="recipient">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="sender" type="QUICK.Reference"/>
+        <ns4:element name="reasonCode">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="reasonReference">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="payload">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Substance" label="StructureDefinition/qicore-substance" retrievable="true" primaryCodePath="code" baseType="QUICK.Substance">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="category">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="code" type="System.Concept"/>
+        <ns4:element name="description" type="System.String"/>
+        <ns4:element name="instance">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="ingredient">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="CarePlan" label="StructureDefinition/qicore-careplan" retrievable="true" baseType="USCore.us-core-careplan">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="instantiatesCanonical">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.canonical"/>
+        </ns4:element>
+        <ns4:element name="instantiatesUri">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
+        </ns4:element>
+        <ns4:element name="basedOn">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="replaces">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="partOf">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="intent" type="System.String"/>
+        <ns4:element name="category">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="assessplan" type="System.Concept"/>
+        <ns4:element name="title" type="System.String"/>
+        <ns4:element name="description" type="System.String"/>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="period" type="System.DateTime"/>
+        <ns4:element name="created" type="System.DateTime"/>
+        <ns4:element name="author" type="QUICK.Reference"/>
+        <ns4:element name="contributor">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="careTeam">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="addresses">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="supportingInfo">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="goal">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="activity">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Goal" label="StructureDefinition/qicore-goal" retrievable="true" baseType="USCore.us-core-goal">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="reasonRejected" type="QUICK.goal-reasonRejected"/>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="lifecycleStatus" type="System.String"/>
+        <ns4:element name="achievementStatus" type="System.Concept"/>
+        <ns4:element name="category">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="priority" type="System.Concept"/>
+        <ns4:element name="description" type="System.Concept"/>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="start" type="System.DateTime"/>
+        <ns4:element name="target">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="statusDate" type="System.DateTime"/>
+        <ns4:element name="statusReason" type="System.String"/>
+        <ns4:element name="expressedBy" type="QUICK.Reference"/>
+        <ns4:element name="addresses">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+        <ns4:element name="outcomeCode">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="outcomeReference">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="DeviceRequest" label="StructureDefinition/qicore-devicerequest" retrievable="true" baseType="QUICK.DeviceRequest">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="doNotPerform" type="QUICK.request-doNotPerform"/>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="instantiatesCanonical">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.canonical"/>
+        </ns4:element>
+        <ns4:element name="instantiatesUri">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
+        </ns4:element>
+        <ns4:element name="basedOn">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="priorRequest">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="groupIdentifier" type="QUICK.Identifier"/>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="intent" type="System.String"/>
+        <ns4:element name="priority" type="System.String"/>
+        <ns4:element name="code" type="QUICK.Reference"/>
+        <ns4:element name="parameter">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="occurrence" type="System.DateTime"/>
+        <ns4:element name="authoredOn" type="System.DateTime"/>
+        <ns4:element name="requester" type="QUICK.Reference"/>
+        <ns4:element name="performerType" type="System.Concept"/>
+        <ns4:element name="performer" type="QUICK.Reference"/>
+        <ns4:element name="reasonCode">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="reasonReference">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="insurance">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="supportingInfo">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+        <ns4:element name="relevantHistory">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Immunization" label="StructureDefinition/qicore-immunization" retrievable="true" baseType="USCore.us-core-immunization">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="vaccineCode" type="System.Concept"/>
+        <ns4:element name="patient" type="QUICK.Reference"/>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="occurrence" type="System.DateTime"/>
+        <ns4:element name="recorded" type="System.DateTime"/>
+        <ns4:element name="primarySource" type="System.Boolean"/>
+        <ns4:element name="reportOrigin" type="System.Concept"/>
+        <ns4:element name="location" type="QUICK.Reference"/>
+        <ns4:element name="manufacturer" type="QUICK.Reference"/>
+        <ns4:element name="lotNumber" type="System.String"/>
+        <ns4:element name="expirationDate" type="System.DateTime"/>
+        <ns4:element name="site" type="System.Concept"/>
+        <ns4:element name="route" type="System.Concept"/>
+        <ns4:element name="doseQuantity" type="QUICK.SimpleQuantity"/>
+        <ns4:element name="performer">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+        <ns4:element name="reasonCode">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="reasonReference">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="isSubpotent" type="System.Boolean"/>
+        <ns4:element name="subpotentReason">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="education">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="programEligibility">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="fundingSource" type="System.Concept"/>
+        <ns4:element name="reaction">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="protocolApplied">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="CommunicationRequest" label="StructureDefinition/qicore-communicationrequest" retrievable="true" baseType="QUICK.CommunicationRequest">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="basedOn">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="replaces">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="groupIdentifier" type="QUICK.Identifier"/>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="category">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="priority" type="System.String"/>
+        <ns4:element name="doNotPerform" type="System.Boolean"/>
+        <ns4:element name="medium">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="about">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="payload">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="occurrence" type="System.DateTime"/>
+        <ns4:element name="authoredOn" type="System.DateTime"/>
+        <ns4:element name="requester" type="QUICK.Reference"/>
+        <ns4:element name="recipient">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="sender" type="QUICK.Reference"/>
+        <ns4:element name="reasonCode">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="reasonReference">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Claim" label="StructureDefinition/qicore-claim" retrievable="true" baseType="QUICK.Claim">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="type" type="System.Concept"/>
+        <ns4:element name="subType" type="System.Concept"/>
+        <ns4:element name="use" type="System.String"/>
+        <ns4:element name="patient" type="QUICK.Reference"/>
+        <ns4:element name="billablePeriod" type="System.DateTime"/>
+        <ns4:element name="created" type="System.DateTime"/>
+        <ns4:element name="enterer" type="QUICK.Reference"/>
+        <ns4:element name="insurer" type="QUICK.Reference"/>
+        <ns4:element name="provider" type="QUICK.Reference"/>
+        <ns4:element name="priority" type="System.Concept"/>
+        <ns4:element name="fundsReserve" type="System.Concept"/>
+        <ns4:element name="related">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="prescription" type="QUICK.Reference"/>
+        <ns4:element name="originalPrescription" type="QUICK.Reference"/>
+        <ns4:element name="payee" type="QUICK.BackboneElement"/>
+        <ns4:element name="referral" type="QUICK.Reference"/>
+        <ns4:element name="facility" type="QUICK.Reference"/>
+        <ns4:element name="careTeam">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="supportingInfo">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="diagnosis">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="procedure">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="insurance">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="accident" type="QUICK.BackboneElement"/>
+        <ns4:element name="item">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="total" type="System.Quantity"/>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Organization" label="StructureDefinition/qicore-organization" retrievable="true" baseType="USCore.us-core-organization">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="active" type="System.Boolean"/>
+        <ns4:element name="type">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="name" type="System.String"/>
+        <ns4:element name="alias">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
+        </ns4:element>
+        <ns4:element name="telecom">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.ContactPoint"/>
+        </ns4:element>
+        <ns4:element name="address">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Address"/>
+        </ns4:element>
+        <ns4:element name="partOf" type="QUICK.Reference"/>
+        <ns4:element name="contact">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="endpoint">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="Observation" label="StructureDefinition/qicore-observation" retrievable="true" primaryCodePath="code" baseType="QUICK.Observation">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="bodyPosition" type="QUICK.observation-bodyPosition"/>
+        <ns4:element name="delta" type="QUICK.observation-delta"/>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="basedOn">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="partOf">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="category">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="code" type="System.Concept"/>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="focus">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="effective" type="System.DateTime"/>
+        <ns4:element name="issued" type="System.DateTime"/>
+        <ns4:element name="performer">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="value" type="System.Quantity"/>
+        <ns4:element name="dataAbsentReason" type="System.Concept"/>
+        <ns4:element name="interpretation">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="note">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
+        </ns4:element>
+        <ns4:element name="bodySite" type="System.Concept"/>
+        <ns4:element name="method" type="System.Concept"/>
+        <ns4:element name="specimen" type="QUICK.Reference"/>
+        <ns4:element name="device" type="QUICK.Reference"/>
+        <ns4:element name="referenceRange">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="hasMember">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="derivedFrom">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="component">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" name="DiagnosticReport" label="StructureDefinition/qicore-diagnosticreport-lab" retrievable="true" primaryCodePath="code" baseType="USCore.us-core-diagnosticreport-lab">
+        <ns4:element name="id" type="System.String"/>
+        <ns4:element name="meta" type="QUICK.Meta"/>
+        <ns4:element name="implicitRules" type="System.String"/>
+        <ns4:element name="language" type="System.String"/>
+        <ns4:element name="text" type="QUICK.Narrative"/>
+        <ns4:element name="contained">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Resource"/>
+        </ns4:element>
+        <ns4:element name="extension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="locationPerformed" type="QUICK.diagnosticReport-locationPerformed"/>
+        <ns4:element name="modifierExtension">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
+        </ns4:element>
+        <ns4:element name="identifier">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
+        </ns4:element>
+        <ns4:element name="basedOn">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="status" type="System.String"/>
+        <ns4:element name="category">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
+        </ns4:element>
+        <ns4:element name="lab" type="System.Concept"/>
+        <ns4:element name="code" type="System.Concept"/>
+        <ns4:element name="subject" type="QUICK.Reference"/>
+        <ns4:element name="encounter" type="QUICK.Reference"/>
+        <ns4:element name="effective" type="System.DateTime"/>
+        <ns4:element name="issued" type="System.DateTime"/>
+        <ns4:element name="performer">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="resultsInterpreter">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="specimen">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="result">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="imagingStudy">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
+        </ns4:element>
+        <ns4:element name="media">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.BackboneElement"/>
+        </ns4:element>
+        <ns4:element name="conclusion" type="System.String"/>
+        <ns4:element name="presentedForm">
+            <ns4:typeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Attachment"/>
+        </ns4:element>
+    </ns4:typeInfo>
+    <ns4:conversionInfo functionName="ToCode" fromType="Coding" toType="System.Code"/>
+    <ns4:conversionInfo functionName="ToCode" fromType="CodeableConcept" toType="System.Concept"/>
+    <ns4:conversionInfo functionName="ToQuantity" fromType="Quantity" toType="System.Quantity"/>
+    <ns4:conversionInfo functionName="ToInterval" fromType="Period" toType="Interval&lt;System.DateTime&gt;"/>
+    <ns4:conversionInfo functionName="ToInterval" fromType="Range" toType="Interval&lt;System.Quantity&gt;"/>
+</ns4:modelInfo>
