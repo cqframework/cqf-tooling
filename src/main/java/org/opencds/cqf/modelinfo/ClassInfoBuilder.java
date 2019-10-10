@@ -530,9 +530,9 @@ public abstract class ClassInfoBuilder {
             ClassInfoElement cie = new ClassInfoElement();
             cie.setName(name);
             if (typeSpecifier instanceof NamedTypeSpecifier) {
-                cie.setType(this.getTypeName((NamedTypeSpecifier) typeSpecifier));
+                cie.setElementType(this.getTypeName((NamedTypeSpecifier) typeSpecifier));
             } else {
-                cie.setTypeSpecifier(typeSpecifier);
+                cie.setElementTypeSpecifier(typeSpecifier);
             }
 
             return cie;
@@ -629,10 +629,7 @@ public abstract class ClassInfoBuilder {
             throws Exception {
         ElementDefinition ed = eds.get(index.get());
         String path = ed.getPath();
-        if(path.matches("Procedure.statusReason"))
-        {
-            System.out.println("");
-        }
+
         TypeSpecifier typeSpecifier = this.buildElementTypeSpecifier(modelName, root, ed);
 
         String typeCode = this.typeCode(ed);
@@ -646,8 +643,6 @@ public abstract class ClassInfoBuilder {
         }
         else typeDefinition = null;
             
-        
-
         List<ElementDefinition> typeEds;
         if (typeCode != null && typeCode.equals("ComplexType") && !typeDefinition.getId().equals("BackboneElement")) {
             typeEds = typeDefinition.getSnapshot().getElement();
@@ -666,7 +661,14 @@ public abstract class ClassInfoBuilder {
         List<ClassInfoElement> elements = new ArrayList<>();
         while (index.get() < eds.size()) {
             ElementDefinition e = eds.get(index.get());
-            if (e.getPath().matches(path) && !e.getPath().equals(path)) {
+            //How does it figureOut that it is a dateTime
+            //Maybe Check Previous versions
+            if(e.getId().startsWith("Procedure.status"))
+            {
+                System.out.println("");
+            }
+            if (e.getPath().startsWith(path) && e.getPath().split(path).length > 1
+            && e.getPath().split(path)[1].startsWith(".") &&!e.getPath().equals(path)) {
                 ClassInfoElement cie = this.visitElementDefinition(modelName, root, eds, typeRoot, structureEds, index);
                 if (cie != null) {
                     elements.add(cie);
@@ -753,54 +755,13 @@ public abstract class ClassInfoBuilder {
             structureEds = structure.getSnapshot().getElement();
         }
 
-        int indexEdsArray = 0;
-        int edsArraySize = eds.size();
-        while (indexEdsArray < edsArraySize)
-        {
-            if(eds.get(indexEdsArray).hasBase())
-            {
-                if(getQualifier(eds.get(indexEdsArray).getBase().getPath()) != null)
-                {
-                    if(getQualifier(eds.get(indexEdsArray).getBase().getPath()).matches("Element")
-                    || getQualifier(eds.get(indexEdsArray).getBase().getPath()).matches("Resource")
-                    || getQualifier(eds.get(indexEdsArray).getBase().getPath()).matches("DomainResource"))
-                    {
-                        eds.remove(eds.get(indexEdsArray));
-                        --edsArraySize;
-                    }
-                    else ++indexEdsArray;
-                }
-                else ++indexEdsArray;
-            }
-            else ++indexEdsArray;
-        }
-
-        int indexStructureEdsArray = 0;
-        int structureEdsArraySize = structureEds.size();
-        while (indexStructureEdsArray < structureEdsArraySize)
-        {
-            if(structureEds.get(indexStructureEdsArray).hasBase())
-            {
-                if(getQualifier(eds.get(indexStructureEdsArray).getBase().getPath()) != null)
-                {
-                    if(getQualifier(structureEds.get(indexStructureEdsArray).getBase().getPath()).matches("Element")
-                    || getQualifier(structureEds.get(indexStructureEdsArray).getBase().getPath()).matches("Resource")
-                    || getQualifier(structureEds.get(indexStructureEdsArray).getBase().getPath()).matches("DomainResource"))
-                    {
-                        structureEds.remove(structureEds.get(indexStructureEdsArray));
-                        --structureEdsArraySize;
-                    }
-                    else ++indexStructureEdsArray;
-                }
-                else ++indexStructureEdsArray;
-            }
-            else ++indexStructureEdsArray;
-        }
-
         while (index.get() < eds.size()) {
             ElementDefinition e = eds.get(index.get());
-            ;
-            if (e.getPath().startsWith(path) && e.getPath().split(path)[1].startsWith(".") && !e.getPath().equals(path)) {
+            if(e.getPath().startsWith("Procedure.partOf"))
+            {
+                System.out.println("");
+            }
+            if (e.getPath().startsWith(path) && /*e.getPath().split(path)[1].startsWith(".") &&*/ !e.getPath().equals(path)) {
                 ClassInfoElement cie = this.visitElementDefinition(modelName, path, eds, structure == null? null: structure.getId(),
                         structureEds, index);
                 if (cie != null) {
@@ -814,14 +775,68 @@ public abstract class ClassInfoBuilder {
 
         System.out.println("Building ClassInfo for " + typeName);
 
+        String baseDefinition;
+        if(sd.getBaseDefinition() != null && (sd.getBaseDefinition()).endsWith(path.toLowerCase()))
+        {
+            baseDefinition = getTopLevelBaseDefinition(sd, path);
+        }
+        else {
+            baseDefinition = sd.getBaseDefinition();
+        }
+        
         ClassInfo info = new ClassInfo().withName(path).withLabel(typeName)
-                .withBaseType(this.resolveTypeName(sd.getBaseDefinition()))
+                .withBaseType(this.resolveTypeName(baseDefinition))
                 .withRetrievable(sd.getKind() == StructureDefinitionKind.RESOURCE).withElement(elements)
                 .withPrimaryCodePath(this.primaryCodePath(elements, typeName));
 
         this.typeInfos.put(this.getTypeName(modelName, typeName), info);
 
         return info;
+    }
+
+    private String getTopLevelBaseDefinition(StructureDefinition sd, String path) {
+        AtomicReference<Boolean> foundTopLevelBaseDefinition = new AtomicReference<Boolean>(false) ;
+        StructureDefinition nextLevelStructureDefinition = structureDefinitions.get(getTail(sd.getBaseDefinition()));
+        if(nextLevelStructureDefinition != null)
+        {
+            while (foundTopLevelBaseDefinition.get() == false)
+            {
+                
+                if(!nextLevelStructureDefinition.getBaseDefinition().toLowerCase().endsWith(path.toLowerCase()))
+                {
+                    foundTopLevelBaseDefinition.set(true);
+                }
+                else {
+                    return getTopLevelBaseDefinition(nextLevelStructureDefinition, path, foundTopLevelBaseDefinition);
+                }
+            }
+            return nextLevelStructureDefinition.getBaseDefinition();
+        }
+        else return sd.getBaseDefinition();
+        
+        
+    }
+
+    private String getTopLevelBaseDefinition(StructureDefinition sd, String path, AtomicReference<Boolean> foundTopLevelBaseDefinition) {
+        StructureDefinition nextLevelStructureDefinition = structureDefinitions.get(getTail(sd.getBaseDefinition()));
+        if(nextLevelStructureDefinition != null)
+        {
+            while (foundTopLevelBaseDefinition.get() == false)
+            {
+                
+                if(!nextLevelStructureDefinition.getBaseDefinition().toLowerCase().endsWith(path.toLowerCase()))
+                {
+                    foundTopLevelBaseDefinition.set(true);
+                }
+                else {
+                    return getTopLevelBaseDefinition(nextLevelStructureDefinition, path);
+                }
+            }
+            return nextLevelStructureDefinition.getBaseDefinition();
+        }
+        else return sd.getBaseDefinition();
+        
+        
     }
 
     protected void buildFor(String model, Predicate<StructureDefinition> predicate) {
