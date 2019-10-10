@@ -555,11 +555,54 @@ public abstract class ClassInfoBuilder {
     // Builds the type specifier for the given element
     private TypeSpecifier buildElementTypeSpecifier(String modelName, String root, ElementDefinition ed) {
         String typeCode = this.typeCode(ed);
-        if (!this.settings.useCQLPrimitives && typeCode != null && typeCode.equals("code") && ed.hasBinding()
+        if (typeCode != null && typeCode.equals("code") && ed.hasBinding()
                 && ed.getBinding().getStrength() == BindingStrength.REQUIRED) {
-            String typeName = ((StringType) (this
-                    .extension(ed.getBinding(), "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName")
-                    .getValue())).getValue();
+                    if(ed.getPath().startsWith("Procedure"))
+                    {
+                        System.out.println("");
+                    }
+                    Boolean foundTopLevelElementDefinitions = false;
+                    String typeName;
+                    if(ed.getBinding().hasExtension())
+                    {
+                        typeName = ((StringType) (this
+                            .extension(ed.getBinding(), "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName")
+                            .getValue())).getValue();
+                    }
+                    else
+                    {
+                        StructureDefinition topLevelStructureDefinition = structureDefinitions.get(root);
+                        for(ElementDefinition elementDefinition : topLevelStructureDefinition.getSnapshot().getElement())
+                        {
+                            if(ed.getId().matches(elementDefinition.getId()))
+                            {
+                                ed = elementDefinition;
+                                foundTopLevelElementDefinitions = true;
+                                break;
+                            }
+                        }
+                        if(foundTopLevelElementDefinitions)
+                        {
+                            typeName = ((StringType) (this
+                            .extension(ed.getBinding(), "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName")
+                            .getValue())).getValue();
+                        }
+                        else {
+                            TypeSpecifier ts = this.buildTypeSpecifier(modelName, ed.hasType() ? ed.getType().get(0) : null);
+                            if (ts instanceof NamedTypeSpecifier && ((NamedTypeSpecifier) ts).getName() == null) {
+                                String tn = this.getTypeName(modelName, root);
+                                if (this.settings.primitiveTypeMappings.containsKey(tn)) {
+                                    ts = this.buildTypeSpecifier(this.settings.primitiveTypeMappings.get(this.getTypeName(modelName, root)));
+                                } else {
+                                    ts = null;
+                                }
+                            }
+                            return ts;
+                        }
+                        
+                    }
+
+                
 
             if (!this.typeInfos.containsKey(this.getTypeName(modelName, typeName))) {
 
@@ -629,7 +672,10 @@ public abstract class ClassInfoBuilder {
             throws Exception {
         ElementDefinition ed = eds.get(index.get());
         String path = ed.getPath();
-
+        if(path.matches("Procedure.extension:approachBodyStructure"))
+        {
+            System.out.println("");
+        }
         TypeSpecifier typeSpecifier = this.buildElementTypeSpecifier(modelName, root, ed);
 
         String typeCode = this.typeCode(ed);
@@ -661,9 +707,7 @@ public abstract class ClassInfoBuilder {
         List<ClassInfoElement> elements = new ArrayList<>();
         while (index.get() < eds.size()) {
             ElementDefinition e = eds.get(index.get());
-            //How does it figureOut that it is a dateTime
-            //Maybe Check Previous versions
-            if(e.getId().startsWith("Procedure.status"))
+            if(e.getId().startsWith("Procedure.extension:approachBodyStructure"))
             {
                 System.out.println("");
             }
@@ -757,11 +801,11 @@ public abstract class ClassInfoBuilder {
 
         while (index.get() < eds.size()) {
             ElementDefinition e = eds.get(index.get());
-            if(e.getPath().startsWith("Procedure.partOf"))
+            if(e.getPath().startsWith("Procedure.extension:approachBodyStructure"))
             {
                 System.out.println("");
             }
-            if (e.getPath().startsWith(path) && /*e.getPath().split(path)[1].startsWith(".") &&*/ !e.getPath().equals(path)) {
+            if (e.getPath().startsWith(path) && e.getPath().split(path)[1].startsWith(".") && !e.getPath().equals(path)) {
                 ClassInfoElement cie = this.visitElementDefinition(modelName, path, eds, structure == null? null: structure.getId(),
                         structureEds, index);
                 if (cie != null) {
@@ -778,7 +822,7 @@ public abstract class ClassInfoBuilder {
         String baseDefinition;
         if(sd.getBaseDefinition() != null && (sd.getBaseDefinition()).endsWith(path.toLowerCase()))
         {
-            baseDefinition = getTopLevelBaseDefinition(sd, path);
+            baseDefinition = getTopLevelStructureDefinition(sd, path).getBaseDefinition();
         }
         else {
             baseDefinition = sd.getBaseDefinition();
@@ -794,30 +838,30 @@ public abstract class ClassInfoBuilder {
         return info;
     }
 
-    private String getTopLevelBaseDefinition(StructureDefinition sd, String path) {
-        AtomicReference<Boolean> foundTopLevelBaseDefinition = new AtomicReference<Boolean>(false) ;
+    private StructureDefinition getTopLevelStructureDefinition(StructureDefinition sd, String path) {
+        AtomicReference<Boolean> foundTopLevelStructureDefinition = new AtomicReference<Boolean>(false) ;
         StructureDefinition nextLevelStructureDefinition = structureDefinitions.get(getTail(sd.getBaseDefinition()));
         if(nextLevelStructureDefinition != null)
         {
-            while (foundTopLevelBaseDefinition.get() == false)
+            while (foundTopLevelStructureDefinition.get() == false)
             {
                 
                 if(!nextLevelStructureDefinition.getBaseDefinition().toLowerCase().endsWith(path.toLowerCase()))
                 {
-                    foundTopLevelBaseDefinition.set(true);
+                    foundTopLevelStructureDefinition.set(true);
                 }
                 else {
-                    return getTopLevelBaseDefinition(nextLevelStructureDefinition, path, foundTopLevelBaseDefinition);
+                    return getTopLevelStructureDefinition(nextLevelStructureDefinition, path, foundTopLevelStructureDefinition);
                 }
             }
-            return nextLevelStructureDefinition.getBaseDefinition();
+            return nextLevelStructureDefinition;
         }
-        else return sd.getBaseDefinition();
+        else return sd;
         
         
     }
 
-    private String getTopLevelBaseDefinition(StructureDefinition sd, String path, AtomicReference<Boolean> foundTopLevelBaseDefinition) {
+    private StructureDefinition getTopLevelStructureDefinition(StructureDefinition sd, String path, AtomicReference<Boolean> foundTopLevelBaseDefinition) {
         StructureDefinition nextLevelStructureDefinition = structureDefinitions.get(getTail(sd.getBaseDefinition()));
         if(nextLevelStructureDefinition != null)
         {
@@ -829,12 +873,12 @@ public abstract class ClassInfoBuilder {
                     foundTopLevelBaseDefinition.set(true);
                 }
                 else {
-                    return getTopLevelBaseDefinition(nextLevelStructureDefinition, path);
+                    return getTopLevelStructureDefinition(nextLevelStructureDefinition, path);
                 }
             }
-            return nextLevelStructureDefinition.getBaseDefinition();
+            return nextLevelStructureDefinition;
         }
-        else return sd.getBaseDefinition();
+        else return sd;
         
         
     }

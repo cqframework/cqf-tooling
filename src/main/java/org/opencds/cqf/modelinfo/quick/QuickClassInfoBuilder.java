@@ -16,7 +16,7 @@ public class QuickClassInfoBuilder extends ClassInfoBuilder {
 
     @Override
     protected void innerBuild() {
-        this.settings.useCQLPrimitives = true;
+        this.settings.useCQLPrimitives = false;
         System.out.println("Building ComplexTypes");
         this.buildFor("QUICK",
             (x -> x.getKind() == StructureDefinitionKind.COMPLEXTYPE && (x.getBaseDefinition() == null
