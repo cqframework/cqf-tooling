@@ -254,6 +254,7 @@ public class Processor extends Operation {
         String fhirType = toFhirType(type);
         switch (fhirType) {
             case "markdown": return "string";
+            case "date": return "dateTime";
             default: return fhirType;
         }
     }
@@ -331,56 +332,59 @@ public class Processor extends Operation {
         ed.addType(tr);
         ed.setMustSupport(true);
 
-        // TODO: binding and CodeSystem/ValueSet for MultipleChoice elements
-        CodeSystem codeSystem = new CodeSystem();
-        codeSystem.setId(sd.getId() + "-codes");
-        codeSystem.setUrl(String.format("%s/CodeSystem/%s", canonicalBase, codeSystem.getId()));
-        // TODO: version
-        codeSystem.setName(element.getName() + "_codes");
-        codeSystem.setTitle(String.format("%s codes", element.getLabel()));
-        codeSystem.setStatus(Enumerations.PublicationStatus.DRAFT);
-        codeSystem.setExperimental(false);
-        // TODO: date
-        // TODO: publisher
-        // TODO: contact
-        codeSystem.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
-        codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-        codeSystem.setCaseSensitive(true);
-        for (DictionaryCode code : element.getChoices()) {
-            CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent();
-            concept.setCode(code.getOpenMRSEntityId());
-            concept.setDisplay(code.getLabel());
-            codeSystem.addConcept(concept);
+        // binding and CodeSystem/ValueSet for MultipleChoice elements
+        if (element.getChoices().size() > 0) {
+            CodeSystem codeSystem = new CodeSystem();
+            codeSystem.setId(sd.getId() + "-codes");
+            codeSystem.setUrl(String.format("%s/CodeSystem/%s", canonicalBase, codeSystem.getId()));
+            // TODO: version
+            codeSystem.setName(element.getName() + "_codes");
+            codeSystem.setTitle(String.format("%s codes", element.getLabel()));
+            codeSystem.setStatus(Enumerations.PublicationStatus.DRAFT);
+            codeSystem.setExperimental(false);
+            // TODO: date
+            // TODO: publisher
+            // TODO: contact
+            codeSystem.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
+            codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+            codeSystem.setCaseSensitive(true);
+            for (DictionaryCode code : element.getChoices()) {
+                CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent();
+                concept.setCode(code.getOpenMRSEntityId());
+                concept.setDisplay(code.getLabel());
+                codeSystem.addConcept(concept);
+            }
+
+            ValueSet valueSet = new ValueSet();
+            valueSet.setId(sd.getId() + "-values");
+            valueSet.setUrl(String.format("%s/ValueSet/%s", canonicalBase, valueSet.getId()));
+            // TODO: version
+            valueSet.setName(element.getName() + "_values");
+            valueSet.setTitle(String.format("%s values", element.getLabel()));
+            valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
+            valueSet.setExperimental(false);
+            // TODO: date
+            // TODO: publisher
+            // TODO: contact
+            valueSet.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
+            valueSet.setImmutable(true);
+            ValueSet.ValueSetComposeComponent compose = new ValueSet.ValueSetComposeComponent();
+            valueSet.setCompose(compose);
+            ValueSet.ConceptSetComponent conceptSet = new ValueSet.ConceptSetComponent();
+            compose.addInclude(conceptSet);
+            conceptSet.setSystem(codeSystem.getUrl());
+
+            codeSystem.setValueSet(valueSet.getUrl());
+
+            codeSystems.add(codeSystem);
+            valueSets.add(valueSet);
+
+            ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
+            binding.setStrength(Enumerations.BindingStrength.REQUIRED);
+            binding.setValueSet(valueSet.getUrl());
+            ed.setBinding(binding);
         }
 
-        ValueSet valueSet = new ValueSet();
-        valueSet.setId(sd.getId() + "-values");
-        valueSet.setUrl(String.format("%s/ValueSet/%s", canonicalBase, valueSet.getId()));
-        // TODO: version
-        valueSet.setName(element.getName() + "_values");
-        valueSet.setTitle(String.format("%s values", element.getLabel()));
-        valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
-        valueSet.setExperimental(false);
-        // TODO: date
-        // TODO: publisher
-        // TODO: contact
-        valueSet.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
-        valueSet.setImmutable(true);
-        ValueSet.ValueSetComposeComponent compose = new ValueSet.ValueSetComposeComponent();
-        valueSet.setCompose(compose);
-        ValueSet.ConceptSetComponent conceptSet = new ValueSet.ConceptSetComponent();
-        compose.addInclude(conceptSet);
-        conceptSet.setSystem(codeSystem.getUrl());
-
-        codeSystem.setValueSet(valueSet.getUrl());
-
-        codeSystems.add(codeSystem);
-        valueSets.add(valueSet);
-
-        ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
-        binding.setStrength(Enumerations.BindingStrength.REQUIRED);
-        binding.setValueSet(valueSet.getUrl());
-        ed.setBinding(binding);
         sd.getDifferential().addElement(ed);
 
         return sd;
