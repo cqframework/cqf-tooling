@@ -197,8 +197,8 @@ public abstract class ClassInfoBuilder {
         }
     }
 
-    private TypeSpecifier buildTypeSpecifier(String modelName, List<TypeRefComponent> typeReferencRefComponents)
-            throws Exception {
+    private TypeSpecifier buildTypeSpecifier(String modelName, List<TypeRefComponent> typeReferencRefComponents) {
+        
         List<TypeSpecifier> specifiers = typeReferencRefComponents.stream()
                 .map(x -> this.buildTypeSpecifier(modelName, x)).filter(distinctByKey(x -> x.toString()))
                 .collect(Collectors.toList());
@@ -588,7 +588,7 @@ public abstract class ClassInfoBuilder {
                             .getValue())).getValue();
                         }
                         else {
-                            TypeSpecifier ts = this.buildTypeSpecifier(modelName, ed.hasType() ? ed.getType().get(0) : null);
+                            TypeSpecifier ts = this.buildTypeSpecifier(modelName, ed.hasType() ? ed.getType() : null);
                             if (ts instanceof NamedTypeSpecifier && ((NamedTypeSpecifier) ts).getName() == null) {
                                 String tn = this.getTypeName(modelName, root);
                                 if (this.settings.primitiveTypeMappings.containsKey(tn)) {
@@ -626,7 +626,8 @@ public abstract class ClassInfoBuilder {
 
             return nts;
         } else {
-            TypeSpecifier ts = this.buildTypeSpecifier(modelName, ed.hasType() ? ed.getType().get(0) : null);
+            
+            TypeSpecifier ts = this.buildTypeSpecifier(modelName, ed.hasType() ? ed.getType() : null);
             if (ts instanceof NamedTypeSpecifier && ((NamedTypeSpecifier) ts).getName() == null) {
                 String tn = this.getTypeName(modelName, root);
                 if (this.settings.primitiveTypeMappings.containsKey(tn)) {
