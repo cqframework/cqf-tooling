@@ -3,6 +3,7 @@ package org.opencds.cqf.modelinfo;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -31,7 +32,7 @@ public class ResourceLoader {
         String[] paths = resourcePaths.split(";");
         for (String path : paths) {
             System.out.println("Reading " + path + " StructureDefinitions");
-            resources.addAll(this.readStructureDefFromFolder(basePath + path));
+            resources.addAll(this.readStructureDefFromFolder(Paths.get(basePath, path).toString()));
         }
 
         System.out.println("Indexing StructureDefinitions by Id");

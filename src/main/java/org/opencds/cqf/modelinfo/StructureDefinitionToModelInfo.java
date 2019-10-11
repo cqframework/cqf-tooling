@@ -12,6 +12,7 @@ import javax.xml.namespace.QName;
 
 import org.hl7.fhir.r4.model.StructureDefinition;
 
+import java.nio.file.Paths;
 import java.util.Map;
 
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
@@ -28,32 +29,33 @@ import org.opencds.cqf.modelinfo.quick.QuickModelInfoBuilder;
 public class StructureDefinitionToModelInfo extends Operation {
     @Override
     public void execute(String[] args) {
-        String inputPath = "../FHIR-Spec";
+        String inputPath = Paths.get("..", "FHIR-Spec").toString();
         if (args.length > 1) {
-            inputPath = args[0];
+            inputPath = args[1];
         }
 
         if (args.length > 2) {
-            setOutputPath(args[1]);
+            setOutputPath(args[2]);
         }
         else {
-            setOutputPath("../cqf-tooling/src/main/resources/org/opencds/cqf/model-info");
+            setOutputPath("../cqf-tooling/src/main/resources/org/opencds/cqf/modelinfo");
         }
 
-        String resourcePaths = "/3.0.1;/US-Core/1.0.1";
+        String resourcePaths = "4.0.0";
         if (args.length > 3) {
-            resourcePaths = args[2];
+            resourcePaths = args[3];
         }
 
         // TODO : Can we autodetect this from the structure defintions?
+        // Yes, would need to be an extension definition on the ImplementationGuide...
         String modelName = "FHIR";
         if (args.length > 4) {
-            modelName = args[3];
+            modelName = args[4];
         }
 
-        String modelVersion = "3.0.1";
-        if (args.length >= 5) {
-            modelVersion = args[4];
+        String modelVersion = "4.0.0";
+        if (args.length > 5) {
+            modelVersion = args[5];
         }        
 
         ResourceLoader loader = new ResourceLoader();
