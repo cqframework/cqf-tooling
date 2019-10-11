@@ -30,19 +30,22 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
     @Override
     protected void beforeBuild() {
         List<ClassInfo> fhirElementInfos = this.getFhirElementInfos();
-        fhirElementInfos.stream().filter(x -> x.getElement().get(0).getType() != null)
+        ClassInfo sd = fhirElementInfos.stream().map(x -> (ClassInfo)x).filter(x -> x.getName().equals("dateTime")).findFirst().get();
+        fhirElementInfos.stream().filter(x -> x.getElement().get(0).getElementType() != null)
         .map(x -> new ConversionInfo()
             .withFromType("FHIR." + x.getName())
-            .withToType(x.getElement().get(0).getType())
-            .withFunctionName("FHIRHelpers.To" + this.unQualify(x.getElement().get(0).getType())))
+            .withToType(x.getElement().get(0).getElementType())
+            .withFunctionName("FHIRHelpers.To" + this.unQualify(x.getElement().get(0).getElementType())))
         .forEach(x -> this.settings.conversionInfos.add(x));
 
+        // TODO: Figure out why primitives are not being added to the conversion lists here
         List<String> statements = new ArrayList<>();
-        fhirElementInfos.stream().filter(x -> x.getElement().get(0).getType() != null)
+        ClassInfo ci = fhirElementInfos.stream().filter(x -> x.getName().equals("string")).findFirst().get();
+        fhirElementInfos.stream().filter(x -> x.getElement().get(0).getElementType() != null)
         .sorted(Comparator.comparing(ClassInfo::getName))
         .forEach(x -> {
             String sourceTypeName = x.getName();
-            String targetTypeName = x.getElement().get(0).getType();
+            String targetTypeName = x.getElement().get(0).getElementType();
             String functionName = "To" + this.unQualify(targetTypeName);
             statements.add("define function " + functionName + "(value " + sourceTypeName + "): value.value");
         });
@@ -50,6 +53,48 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
         // TODO: File naming?
         try {
             PrintWriter pw = new PrintWriter(this.fhirHelpersPath);
+            pw.println("library FHIRHelpers version '4.0.0'\n" +
+                    "\n" +
+                    "using FHIR version '4.0.0'\n" +
+                    "\n" +
+                    "define function ToInterval(period FHIR.Period):\n" +
+                    "    if period is null then\n" +
+                    "        null\n" +
+                    "    else\n" +
+                    "        Interval[period.\"start\".value, period.\"end\".value]\n" +
+                    "\n" +
+                    "define function ToQuantity(quantity FHIR.Quantity):\n" +
+                    "    if quantity is null then\n" +
+                    "        null\n" +
+                    "    else\n" +
+                    "        System.Quantity { value: quantity.value.value, unit: quantity.unit.value }\n" +
+                    "\n" +
+                    "define function ToInterval(range FHIR.Range):\n" +
+                    "    if range is null then\n" +
+                    "        null\n" +
+                    "    else\n" +
+                    "        Interval[ToQuantity(range.low), ToQuantity(range.high)]\n" +
+                    "\n" +
+                    "define function ToCode(coding FHIR.Coding):\n" +
+                    "    if coding is null then\n" +
+                    "        null\n" +
+                    "    else\n" +
+                    "        System.Code {\n" +
+                    "          code: coding.code.value,\n" +
+                    "          system: coding.system.value,\n" +
+                    "          version: coding.version.value,\n" +
+                    "          display: coding.display.value\n" +
+                    "        }\n" +
+                    "\n" +
+                    "define function ToConcept(concept FHIR.CodeableConcept):\n" +
+                    "    if concept is null then\n" +
+                    "        null\n" +
+                    "    else\n" +
+                    "        System.Concept {\n" +
+                    "            codes: concept.coding C return ToCode(C),\n" +
+                    "            display: concept.text.value\n" +
+                    "        }\n" +
+                    "\n");
             statements.stream().forEach(x -> pw.println(x));
             pw.close();
         }

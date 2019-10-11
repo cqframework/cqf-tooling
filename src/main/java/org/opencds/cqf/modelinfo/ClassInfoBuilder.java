@@ -117,10 +117,10 @@ public abstract class ClassInfoBuilder {
     }
 
     private TypeInfo resolveType(ClassInfoElement classInfoElement) {
-        if (classInfoElement.getType() != null) {
-            return this.resolveType(classInfoElement.getType());
+        if (classInfoElement.getElementType() != null) {
+            return this.resolveType(classInfoElement.getElementType());
         } else {
-            return this.resolveType(classInfoElement.getTypeSpecifier());
+            return this.resolveType(classInfoElement.getElementTypeSpecifier());
         }
     }
 
@@ -215,12 +215,12 @@ public abstract class ClassInfoBuilder {
 
     // Gets the type specifier for the given class info element
     private TypeSpecifier getTypeSpecifier(ClassInfoElement classInfoElement) {
-        if (classInfoElement.getType() != null) {
-            return this.buildTypeSpecifier(this.getQualifier(classInfoElement.getType()),
-                    this.unQualify(classInfoElement.getType()));
-        } else if (classInfoElement.getTypeSpecifier() != null) {
-            if (classInfoElement.getTypeSpecifier() instanceof ListTypeSpecifier) {
-                ListTypeSpecifier lts = (ListTypeSpecifier) classInfoElement.getTypeSpecifier();
+        if (classInfoElement.getElementType() != null) {
+            return this.buildTypeSpecifier(this.getQualifier(classInfoElement.getElementType()),
+                    this.unQualify(classInfoElement.getElementType()));
+        } else if (classInfoElement.getElementTypeSpecifier() != null) {
+            if (classInfoElement.getElementTypeSpecifier() instanceof ListTypeSpecifier) {
+                ListTypeSpecifier lts = (ListTypeSpecifier) classInfoElement.getElementTypeSpecifier();
                 if (lts.getElementType() != null) {
                     return this.buildTypeSpecifier(this.getQualifier(lts.getElementType()),
                             this.unQualify(lts.getElementType()));
@@ -447,7 +447,7 @@ public abstract class ClassInfoBuilder {
 
     private Boolean hasContentReferenceTypeSpecifier(ClassInfoElement element) {
 
-        return element.getType().startsWith("#") || this.isContentReferenceTypeSpecifier(element.getTypeSpecifier());
+        return element.getElementType().startsWith("#") || this.isContentReferenceTypeSpecifier(element.getElementTypeSpecifier());
     }
 
     private ClassInfoElement fixupContentRefererenceSpecifier(String modelName, ClassInfoElement element) {
@@ -455,18 +455,18 @@ public abstract class ClassInfoBuilder {
         try {
             if (this.hasContentReferenceTypeSpecifier(element)) {
                 result = element;
-                if (element.getType().startsWith("#")) {
-                    element.setType(this.getTypeName(
-                            (NamedTypeSpecifier) this.resolveContentReference(modelName, element.getType())));
-                } else if (element.getTypeSpecifier() instanceof ListTypeSpecifier) {
+                if (element.getElementType().startsWith("#")) {
+                    element.setElementType(this.getTypeName(
+                            (NamedTypeSpecifier) this.resolveContentReference(modelName, element.getElementType())));
+                } else if (element.getElementTypeSpecifier() instanceof ListTypeSpecifier) {
                     ListTypeSpecifier lts = new ListTypeSpecifier();
                     lts.setElementTypeSpecifier(this.resolveContentReference(modelName,
                             this.getContentReference(element.getTypeSpecifier())));
 
-                    element.setTypeSpecifier(lts);
+                    element.setElementTypeSpecifier(lts);
                 } else {
-                    element.setTypeSpecifier(this.resolveContentReference(modelName,
-                            this.getContentReference(element.getTypeSpecifier())));
+                    element.setElementTypeSpecifier(this.resolveContentReference(modelName,
+                            this.getContentReference(element.getElementTypeSpecifier())));
                 }
             }
         } catch (Exception e) {
@@ -506,9 +506,9 @@ public abstract class ClassInfoBuilder {
             ClassInfoElement cie = new ClassInfoElement();
             cie.setName(name);
             if (typeSpecifier instanceof NamedTypeSpecifier) {
-                cie.setType(this.getTypeName((NamedTypeSpecifier) typeSpecifier));
+                cie.setElementType(this.getTypeName((NamedTypeSpecifier) typeSpecifier));
             } else {
-                cie.setTypeSpecifier(typeSpecifier);
+                cie.setElementTypeSpecifier(typeSpecifier);
             }
 
             return cie;
@@ -609,11 +609,11 @@ public abstract class ClassInfoBuilder {
                 List<ClassInfoElement> elements = new ArrayList<>();
                 ClassInfoElement cie = new ClassInfoElement();
                 cie.setName("value");
-                cie.setType("System.String");
+                cie.setElementType("System.String");
 
                 elements.add(cie);
 
-                ClassInfo info = new ClassInfo().withName(modelName + "." + typeName).withLabel(null).withBaseType(modelName + ".Element")
+                ClassInfo info = new ClassInfo().withName(typeName).withNamespace(modelName).withLabel(null).withBaseType(modelName + ".Element")
                         .withRetrievable(false).withElement(elements).withPrimaryCodePath(null);
                         
                 this.typeInfos.put(this.getTypeName(modelName, typeName), info);
@@ -727,7 +727,7 @@ public abstract class ClassInfoBuilder {
             if (typeDefinition != null && typeDefinition.getId().equals("BackboneElement")) {
                 String typeName = this.getComponentTypeName(path);
 
-                ClassInfo componentClassInfo = new ClassInfo().withName(typeName).withLabel(null)
+                ClassInfo componentClassInfo = new ClassInfo().withNamespace(modelName).withName(typeName).withLabel(null)
                         .withBaseType(modelName + ".BackboneElement").withRetrievable(false).withElement(elements)
                         .withPrimaryCodePath(null);
 
@@ -765,7 +765,7 @@ public abstract class ClassInfoBuilder {
             return this.settings.primaryCodePath.get(typeName);
         } else if (elements != null) {
             for (ClassInfoElement e : elements) {
-                if (e.getName().toLowerCase().equals("code") && this.isCodeable(e.getType())) {
+                if (e.getName().toLowerCase().equals("code") && this.isCodeable(e.getElementType())) {
                     return e.getName();
                 }
             }
@@ -786,7 +786,9 @@ public abstract class ClassInfoBuilder {
         String typeName = sd.getId();
         AtomicReference<Integer> index = new AtomicReference<Integer>(1);
         List<ClassInfoElement> elements = new ArrayList<>();
-        List<ElementDefinition> eds = sd.getSnapshot().getElement();
+        List<ElementDefinition> eds = sd.getKind() == StructureDefinitionKind.RESOURCE && sd.getDerivation() == StructureDefinition.TypeDerivationRule.CONSTRAINT
+                ? sd.getSnapshot().getElement()
+                : sd.getDifferential().getElement();
         String path = sd.getType(); // Type is used to navigate the elements, regardless of the baseDefinition
 
         StructureDefinition structure = null;
@@ -828,7 +830,7 @@ public abstract class ClassInfoBuilder {
             baseDefinition = sd.getBaseDefinition();
         }
         
-        ClassInfo info = new ClassInfo().withName(path).withLabel(typeName)
+        ClassInfo info = new ClassInfo().withName(path).withNamespace(modelName).withLabel(typeName)
                 .withBaseType(this.resolveTypeName(baseDefinition))
                 .withRetrievable(sd.getKind() == StructureDefinitionKind.RESOURCE).withElement(elements)
                 .withPrimaryCodePath(this.primaryCodePath(elements, typeName));
