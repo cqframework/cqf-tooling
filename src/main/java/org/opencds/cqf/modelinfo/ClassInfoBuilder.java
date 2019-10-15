@@ -199,17 +199,23 @@ public abstract class ClassInfoBuilder {
 
     private TypeSpecifier buildTypeSpecifier(String modelName, List<TypeRefComponent> typeReferencRefComponents) {
         
-        List<TypeSpecifier> specifiers = typeReferencRefComponents.stream()
-                .map(x -> this.buildTypeSpecifier(modelName, x)).filter(distinctByKey(x -> x.toString()))
-                .collect(Collectors.toList());
+        if(typeReferencRefComponents == null)
+        {
+            return buildTypeSpecifier(modelName, (TypeRefComponent) null);
+        }
+            else {
+                List<TypeSpecifier> specifiers = typeReferencRefComponents.stream()
+                    .map(x -> this.buildTypeSpecifier(modelName, x)).filter(distinctByKey(x -> x.toString()))
+                    .collect(Collectors.toList());
 
-        if (specifiers.size() == 1) {
-            return specifiers.get(0);
-        } else if (specifiers.size() > 1) {
-            ChoiceTypeSpecifier cts = new ChoiceTypeSpecifier();
-            return cts.withChoice(specifiers);
-        } else {
-            return null;
+            if (specifiers.size() == 1) {
+                return specifiers.get(0);
+            } else if (specifiers.size() > 1) {
+                ChoiceTypeSpecifier cts = new ChoiceTypeSpecifier();
+                return cts.withChoice(specifiers);
+            } else {
+                return null;
+            }
         }
     }
 
@@ -894,11 +900,7 @@ public abstract class ClassInfoBuilder {
         for (StructureDefinition sd : structureDefinitions.values()) {
             if (predicate.test(sd)) {
                 try {
-                    this.buildClassInfo(model, sd);
-                    if(sd.getName().matches("SimpleQuantity"))
-                    {
-                        System.out.println("");
-                    }
+                    this.buildClassInfo(model, sd);    
                 } catch (Exception e) {
                     System.out.println("Error building ClassInfo for: " + sd.getId() + " - " + e.getMessage());
                     e.printStackTrace();
