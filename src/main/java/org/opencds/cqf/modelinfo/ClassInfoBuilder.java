@@ -712,8 +712,7 @@ public abstract class ClassInfoBuilder {
             {
                 System.out.println("");
             }
-            if (e.getPath().startsWith(path) && e.getPath().split(path).length > 1
-            && e.getPath().split(path)[1].startsWith(".") &&!e.getPath().equals(path)) {
+            if (isNextAContinuationOfElement(path, e)) {
                 ClassInfoElement cie = this.visitElementDefinition(modelName, root, eds, typeRoot, structureEds, index);
                 if (cie != null) {
                     elements.add(cie);
@@ -748,6 +747,11 @@ public abstract class ClassInfoBuilder {
         ElementDefinition typeEd = this.elementForPath(typeEds, ed.getPath());
 
         return this.buildClassInfoElement(root, ed, typeEd, typeSpecifier);
+    }
+
+    private boolean isNextAContinuationOfElement(String path, ElementDefinition e) {
+        return e.getPath().startsWith(path) && e.getPath().split(path).length > 1
+        && e.getPath().split(path)[1].startsWith(".") && !e.getPath().equals(path);
     }
 
     // Returns true if the type is a "codeable" type (i.e. String, Code, Concept,
@@ -808,7 +812,7 @@ public abstract class ClassInfoBuilder {
             {
                 System.out.println("");
             }
-            if (e.getPath().startsWith(path) && e.getPath().split(path)[1].startsWith(".") && !e.getPath().equals(path)) {
+            if (isNextAContinuationOfElement(path, e)) {
                 ClassInfoElement cie = this.visitElementDefinition(modelName, path, eds, structure == null? null: structure.getId(),
                         structureEds, index);
                 if (cie != null) {
@@ -891,6 +895,10 @@ public abstract class ClassInfoBuilder {
             if (predicate.test(sd)) {
                 try {
                     this.buildClassInfo(model, sd);
+                    if(sd.getName().matches("SimpleQuantity"))
+                    {
+                        System.out.println("");
+                    }
                 } catch (Exception e) {
                     System.out.println("Error building ClassInfo for: " + sd.getId() + " - " + e.getMessage());
                     e.printStackTrace();
