@@ -844,7 +844,7 @@ public abstract class ClassInfoBuilder {
         ClassInfo info = new ClassInfo().withName(path).withNamespace(modelName).withLabel(typeName)
                 .withBaseType(this.resolveTypeName(baseDefinition))
                 .withRetrievable(sd.getKind() == StructureDefinitionKind.RESOURCE).withElement(elements)
-                .withPrimaryCodePath(this.primaryCodePath(elements, typeName));
+                .withPrimaryCodePath(this.primaryCodePath(elements, path));
 
         this.typeInfos.put(this.getTypeName(modelName, typeName), info);
 
@@ -900,6 +900,10 @@ public abstract class ClassInfoBuilder {
         for (StructureDefinition sd : structureDefinitions.values()) {
             if (predicate.test(sd)) {
                 try {
+                    if(sd.getName().matches("xhtml"))
+                    {
+                        System.out.println("");
+                    }
                     this.buildClassInfo(model, sd);    
                 } catch (Exception e) {
                     System.out.println("Error building ClassInfo for: " + sd.getId() + " - " + e.getMessage());
