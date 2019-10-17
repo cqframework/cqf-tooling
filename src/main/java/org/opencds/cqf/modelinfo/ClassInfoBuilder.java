@@ -251,7 +251,7 @@ public abstract class ClassInfoBuilder {
     // Returns the given path with the first letter of every path capitalized
     private String captitalizePath(String path) {
         return String.join(".",
-                Arrays.asList(path.split(".")).stream().map(x -> this.capitalize(x)).collect(Collectors.toList()));
+                Arrays.asList(path.split("\\.")).stream().map(x -> this.capitalize(x)).collect(Collectors.toList()));
     }
 
     // Returns the name of the component type used to represent anonymous nested
@@ -269,6 +269,21 @@ public abstract class ClassInfoBuilder {
         }
 
         String result = path.substring(root.length());
+
+        if (result.startsWith(".")) {
+            result = result.substring(1);
+        }
+
+        return result;
+    }
+
+    private String stripPath(String path) throws Exception {
+        int index = path.lastIndexOf(".");
+        if (index == -1) {
+            throw new Exception("Path " + path + " does not have any continuation represented by " + ".");
+        }
+
+        String result = path.substring(index);
 
         if (result.startsWith(".")) {
             result = result.substring(1);
@@ -396,7 +411,7 @@ public abstract class ClassInfoBuilder {
     // Returns the element with the given path
     private ClassInfoElement forPath(List<ClassInfoElement> elements, String path) {
         ClassInfoElement result = null;
-        String[] segments = path.split(".");
+        String[] segments = path.split("\\.");
         for (String p : segments) {
             result = element(elements, p);
             if (result != null) {
@@ -507,7 +522,7 @@ public abstract class ClassInfoBuilder {
             }
 
             String name = ed.getSliceName() != null ? ed.getSliceName()
-                    : this.stripChoice(this.stripRoot(ed.getPath(), root));
+                    : this.stripChoice(this.stripPath(ed.getPath()));
 
             ClassInfoElement cie = new ClassInfoElement();
             cie.setName(name);
@@ -522,7 +537,7 @@ public abstract class ClassInfoBuilder {
             if (ed.getMax() != null && (ed.getMax().equals("*") || (this.asInteger(ed.getMax()) > 1))) {
                 ListTypeSpecifier lts = new ListTypeSpecifier();
                 if (typeSpecifier instanceof NamedTypeSpecifier) {
-                    lts.setElementType(this.getTypeName((NamedTypeSpecifier) typeSpecifier));
+                    lts.setElementType(this.captitalizePath(this.getTypeName((NamedTypeSpecifier) typeSpecifier)));
                 } else {
                     lts.setElementTypeSpecifier(typeSpecifier);
                 }
@@ -531,7 +546,7 @@ public abstract class ClassInfoBuilder {
             }
 
             String name = ed.getSliceName() != null ? ed.getSliceName()
-                    : this.stripChoice(this.stripRoot(ed.getPath(), root));
+                    : this.stripChoice(this.stripPath(ed.getPath()));
 
             ClassInfoElement cie = new ClassInfoElement();
             cie.setName(name);
@@ -679,7 +694,11 @@ public abstract class ClassInfoBuilder {
             throws Exception {
         ElementDefinition ed = eds.get(index.get());
         String path = ed.getPath();
-        if(path.matches("Procedure.extension:approachBodyStructure"))
+        if(path.endsWith("areaUnderCurve"))
+        {
+            System.out.println("");
+        }
+        if(root.matches("Quantity"))
         {
             System.out.println("");
         }
@@ -731,15 +750,16 @@ public abstract class ClassInfoBuilder {
 
         if (elements.size() > 0) {
             if (typeDefinition != null && typeDefinition.getId().equals("BackboneElement")) {
-                String typeName = this.getComponentTypeName(path);
+                //String typeName = this.getComponentTypeName(path);
 
-                ClassInfo componentClassInfo = new ClassInfo().withNamespace(modelName).withName(typeName).withLabel(null)
+                
+                ClassInfo componentClassInfo = new ClassInfo().withNamespace(modelName).withName(this.captitalizePath(path)).withLabel(null)
                         .withBaseType(modelName + ".BackboneElement").withRetrievable(false).withElement(elements)
                         .withPrimaryCodePath(null);
 
-                this.typeInfos.put(this.getTypeName(modelName, typeName), componentClassInfo);
+                this.typeInfos.put(this.getTypeName(modelName, path), componentClassInfo);
 
-                typeSpecifier = this.buildTypeSpecifier(modelName, typeName);
+                typeSpecifier = this.buildTypeSpecifier(modelName, path);
 
             } else if (typeDefinition != null && typeDefinition.getId().equals("Extension")) {
                 // If this is an extension, the elements will be constraints on the existing
@@ -801,7 +821,7 @@ public abstract class ClassInfoBuilder {
                 ? sd.getSnapshot().getElement()
                 : sd.getDifferential().getElement();
         String path = sd.getType(); // Type is used to navigate the elements, regardless of the baseDefinition
-
+        
         StructureDefinition structure = null;
         if (!typeName.equals(path)) {
             structure = structureDefinitions.get(path);

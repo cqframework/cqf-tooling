@@ -103,7 +103,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.RelatedArtifact"/>
         </ns4:element>
         <ns4:element name="library">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="kind" elementType="FHIR.ActivityDefinitionKind"/>
         <ns4:element name="profile" elementType="FHIR.canonical"/>
@@ -163,7 +163,7 @@
         <ns4:element name="type" elementType="FHIR.AddressType"/>
         <ns4:element name="text" elementType="FHIR.string"/>
         <ns4:element name="line">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="city" elementType="FHIR.string"/>
         <ns4:element name="district" elementType="FHIR.string"/>
@@ -501,10 +501,10 @@
         <ns4:element name="copyright" elementType="FHIR.markdown"/>
         <ns4:element name="kind" elementType="FHIR.CapabilityStatementKind"/>
         <ns4:element name="instantiates">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="imports">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="software" elementType="FHIR.BackboneElement"/>
         <ns4:element name="implementation" elementType="FHIR.BackboneElement"/>
@@ -516,7 +516,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.MimeType"/>
         </ns4:element>
         <ns4:element name="implementationGuide">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="rest">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
@@ -536,10 +536,10 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Identifier"/>
         </ns4:element>
         <ns4:element name="instantiatesCanonical">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="instantiatesUri">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.uri"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Uri"/>
         </ns4:element>
         <ns4:element name="basedOn">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Reference"/>
@@ -665,10 +665,10 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Identifier"/>
         </ns4:element>
         <ns4:element name="definitionUri">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.uri"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Uri"/>
         </ns4:element>
         <ns4:element name="definitionCanonical">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="status" elementType="FHIR.ChargeItemStatus"/>
         <ns4:element name="partOf">
@@ -729,13 +729,13 @@
         <ns4:element name="version" elementType="FHIR.string"/>
         <ns4:element name="title" elementType="FHIR.string"/>
         <ns4:element name="derivedFromUri">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.uri"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Uri"/>
         </ns4:element>
         <ns4:element name="partOf">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="replaces">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="status" elementType="FHIR.PublicationStatus"/>
         <ns4:element name="experimental" elementType="FHIR.boolean"/>
@@ -842,7 +842,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
         </ns4:element>
         <ns4:element name="adjudication">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="#ClaimResponse.item.adjudication"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="#ClaimResponse.Item.Adjudication"/>
         </ns4:element>
         <ns4:element name="total">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
@@ -896,7 +896,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
         </ns4:element>
         <ns4:element name="protocol">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.uri"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Uri"/>
         </ns4:element>
         <ns4:element name="summary" elementType="FHIR.string"/>
         <ns4:element name="finding">
@@ -987,10 +987,10 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Identifier"/>
         </ns4:element>
         <ns4:element name="instantiatesCanonical">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="instantiatesUri">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.uri"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Uri"/>
         </ns4:element>
         <ns4:element name="basedOn">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Reference"/>
@@ -1348,7 +1348,7 @@
         <ns4:element name="title" elementType="FHIR.string"/>
         <ns4:element name="subtitle" elementType="FHIR.string"/>
         <ns4:element name="alias">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="author" elementType="FHIR.Reference"/>
         <ns4:element name="scope" elementType="FHIR.CodeableConcept"/>
@@ -1507,7 +1507,7 @@
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="DataRequirement" label="http://hl7.org/fhir/StructureDefinition/DataRequirement" retrievable="false" baseType="FHIR.Element">
         <ns4:element name="type" elementType="FHIR.FHIRAllTypes"/>
         <ns4:element name="profile">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="subject">
             <ns4:elementTypeSpecifier xsi:type="ns4:ChoiceTypeSpecifier">
@@ -1516,7 +1516,7 @@
             </ns4:elementTypeSpecifier>
         </ns4:element>
         <ns4:element name="mustSupport">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="codeFilter">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Element"/>
@@ -1638,7 +1638,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
         </ns4:element>
         <ns4:element name="version">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="safety">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.CodeableConcept"/>
@@ -1710,10 +1710,10 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Identifier"/>
         </ns4:element>
         <ns4:element name="instantiatesCanonical">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="instantiatesUri">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.uri"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Uri"/>
         </ns4:element>
         <ns4:element name="basedOn">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Reference"/>
@@ -2033,7 +2033,7 @@
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="ElementDefinition" label="http://hl7.org/fhir/StructureDefinition/elementdefinition-de" retrievable="false" baseType="FHIR.ElementDefinition">
         <ns4:element name="Question">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.elementdefinition-question"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Elementdefinition-question"/>
         </ns4:element>
         <ns4:element name="AllowedUnits" elementType="FHIR.elementdefinition-allowedUnits"/>
         <ns4:element name="representation"/>
@@ -2065,7 +2065,7 @@
         <ns4:element name="comment" elementType="FHIR.markdown"/>
         <ns4:element name="requirements" elementType="FHIR.markdown"/>
         <ns4:element name="alias">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="min" elementType="FHIR.unsignedInt"/>
         <ns4:element name="max" elementType="FHIR.string"/>
@@ -2266,7 +2266,7 @@
         </ns4:element>
         <ns4:element name="maxLength" elementType="FHIR.integer"/>
         <ns4:element name="condition">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.id"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Id"/>
         </ns4:element>
         <ns4:element name="constraint">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Element"/>
@@ -2372,7 +2372,7 @@
         </ns4:element>
         <ns4:element name="address" elementType="FHIR.url"/>
         <ns4:element name="header">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="EndpointStatus" retrievable="false" baseType="FHIR.Element">
@@ -2645,7 +2645,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
         </ns4:element>
         <ns4:element name="workflow">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="ExampleScenarioActorType" retrievable="false" baseType="FHIR.Element">
@@ -2681,7 +2681,7 @@
         <ns4:element name="outcome" elementType="FHIR.RemittanceOutcome"/>
         <ns4:element name="disposition" elementType="FHIR.string"/>
         <ns4:element name="preAuthRef">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="preAuthRefPeriod">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Period"/>
@@ -2710,7 +2710,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
         </ns4:element>
         <ns4:element name="adjudication">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="#ExplanationOfBenefit.item.adjudication"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="#ExplanationOfBenefit.Item.Adjudication"/>
         </ns4:element>
         <ns4:element name="total">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
@@ -2824,10 +2824,10 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Identifier"/>
         </ns4:element>
         <ns4:element name="instantiatesCanonical">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="instantiatesUri">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.uri"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Uri"/>
         </ns4:element>
         <ns4:element name="status" elementType="FHIR.FamilyHistoryStatus"/>
         <ns4:element name="dataAbsentReason" elementType="FHIR.CodeableConcept"/>
@@ -3098,13 +3098,13 @@
         <ns4:element name="text" elementType="FHIR.string"/>
         <ns4:element name="family" elementType="FHIR.string"/>
         <ns4:element name="given">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="prefix">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="suffix">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="period" elementType="FHIR.Period"/>
     </ns4:typeInfo>
@@ -3312,7 +3312,7 @@
         </ns4:element>
         <ns4:element name="name" elementType="FHIR.string"/>
         <ns4:element name="alias">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="period" elementType="FHIR.Period"/>
         <ns4:element name="ownedBy" elementType="FHIR.Reference"/>
@@ -3355,7 +3355,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
         </ns4:element>
         <ns4:element name="totalPriceComponent">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="#Invoice.lineItem.priceComponent"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="#Invoice.LineItem.PriceComponent"/>
         </ns4:element>
         <ns4:element name="totalNet" elementType="FHIR.Money"/>
         <ns4:element name="totalGross" elementType="FHIR.Money"/>
@@ -3488,7 +3488,7 @@
         <ns4:element name="operationalStatus" elementType="FHIR.Coding"/>
         <ns4:element name="name" elementType="FHIR.string"/>
         <ns4:element name="alias">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="description" elementType="FHIR.string"/>
         <ns4:element name="mode" elementType="FHIR.LocationMode"/>
@@ -3578,7 +3578,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.RelatedArtifact"/>
         </ns4:element>
         <ns4:element name="library">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="disclaimer" elementType="FHIR.markdown"/>
         <ns4:element name="scoring" elementType="FHIR.CodeableConcept"/>
@@ -3592,7 +3592,7 @@
         <ns4:element name="clinicalRecommendationStatement" elementType="FHIR.markdown"/>
         <ns4:element name="improvementNotation" elementType="FHIR.CodeableConcept"/>
         <ns4:element name="definition">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.markdown"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Markdown"/>
         </ns4:element>
         <ns4:element name="guidance" elementType="FHIR.markdown"/>
         <ns4:element name="group">
@@ -3688,7 +3688,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Identifier"/>
         </ns4:element>
         <ns4:element name="instantiates">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.uri"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Uri"/>
         </ns4:element>
         <ns4:element name="partOf">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Reference"/>
@@ -3805,7 +3805,7 @@
         <ns4:element name="doseForm" elementType="FHIR.CodeableConcept"/>
         <ns4:element name="amount" elementType="FHIR.SimpleQuantity"/>
         <ns4:element name="synonym">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="relatedMedicationKnowledge">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
@@ -3896,10 +3896,10 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Reference"/>
         </ns4:element>
         <ns4:element name="instantiatesCanonical">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="instantiatesUri">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.uri"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Uri"/>
         </ns4:element>
         <ns4:element name="basedOn">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Reference"/>
@@ -3997,7 +3997,7 @@
         <ns4:element name="legalStatusOfSupply" elementType="FHIR.CodeableConcept"/>
         <ns4:element name="additionalMonitoringIndicator" elementType="FHIR.CodeableConcept"/>
         <ns4:element name="specialMeasures">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="paediatricUseIndicator" elementType="FHIR.CodeableConcept"/>
         <ns4:element name="productClassification">
@@ -4205,7 +4205,7 @@
         <ns4:element name="name" elementType="FHIR.string"/>
         <ns4:element name="title" elementType="FHIR.string"/>
         <ns4:element name="replaces">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="status" elementType="FHIR.PublicationStatus"/>
         <ns4:element name="experimental" elementType="FHIR.boolean"/>
@@ -4225,7 +4225,7 @@
         <ns4:element name="copyright" elementType="FHIR.markdown"/>
         <ns4:element name="base" elementType="FHIR.canonical"/>
         <ns4:element name="parent">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="event">
             <ns4:elementTypeSpecifier xsi:type="ns4:ChoiceTypeSpecifier">
@@ -4242,7 +4242,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
         </ns4:element>
         <ns4:element name="graph">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="MessageHeader" label="http://hl7.org/fhir/StructureDefinition/MessageHeader" retrievable="true" baseType="FHIR.DomainResource">
@@ -4275,7 +4275,7 @@
         <ns4:element name="lastUpdated" elementType="FHIR.instant"/>
         <ns4:element name="source" elementType="FHIR.uri"/>
         <ns4:element name="profile">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="security">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Coding"/>
@@ -4371,13 +4371,13 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Identifier"/>
         </ns4:element>
         <ns4:element name="instantiatesCanonical">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="instantiatesUri">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.uri"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Uri"/>
         </ns4:element>
         <ns4:element name="instantiates">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.uri"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Uri"/>
         </ns4:element>
         <ns4:element name="status" elementType="FHIR.NutritionOrderStatus"/>
         <ns4:element name="intent" elementType="FHIR.NutritiionOrderIntent"/>
@@ -4570,7 +4570,7 @@
         </ns4:element>
         <ns4:element name="name" elementType="FHIR.string"/>
         <ns4:element name="alias">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="telecom">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.ContactPoint"/>
@@ -4814,7 +4814,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.RelatedArtifact"/>
         </ns4:element>
         <ns4:element name="library">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="goal">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
@@ -4899,10 +4899,10 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Identifier"/>
         </ns4:element>
         <ns4:element name="instantiatesCanonical">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="instantiatesUri">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.uri"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Uri"/>
         </ns4:element>
         <ns4:element name="basedOn">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Reference"/>
@@ -4978,10 +4978,10 @@
         <ns4:element name="externalDiameter" elementType="FHIR.Quantity"/>
         <ns4:element name="shape" elementType="FHIR.string"/>
         <ns4:element name="color">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="imprint">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="image">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Attachment"/>
@@ -5014,7 +5014,7 @@
         </ns4:element>
         <ns4:element name="recorded" elementType="FHIR.instant"/>
         <ns4:element name="policy">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.uri"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Uri"/>
         </ns4:element>
         <ns4:element name="location" elementType="FHIR.Reference"/>
         <ns4:element name="reason">
@@ -5060,7 +5060,7 @@
         <ns4:element name="name" elementType="FHIR.string"/>
         <ns4:element name="title" elementType="FHIR.string"/>
         <ns4:element name="derivedFrom">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="status" elementType="FHIR.PublicationStatus"/>
         <ns4:element name="experimental" elementType="FHIR.boolean"/>
@@ -5190,10 +5190,10 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Identifier"/>
         </ns4:element>
         <ns4:element name="instantiatesCanonical">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="instantiatesUri">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.uri"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Uri"/>
         </ns4:element>
         <ns4:element name="basedOn">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Reference"/>
@@ -5257,7 +5257,7 @@
         </ns4:element>
         <ns4:element name="description" elementType="FHIR.markdown"/>
         <ns4:element name="comment">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="useContext">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.UsageContext"/>
@@ -5290,7 +5290,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.RelatedArtifact"/>
         </ns4:element>
         <ns4:element name="library">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="population" elementType="FHIR.Reference"/>
         <ns4:element name="exposure" elementType="FHIR.Reference"/>
@@ -5322,7 +5322,7 @@
         </ns4:element>
         <ns4:element name="description" elementType="FHIR.markdown"/>
         <ns4:element name="comment">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="useContext">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.UsageContext"/>
@@ -5355,7 +5355,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.RelatedArtifact"/>
         </ns4:element>
         <ns4:element name="library">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="type" elementType="FHIR.ResearchElementType"/>
         <ns4:element name="variableType" elementType="FHIR.VariableType"/>
@@ -5638,7 +5638,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.SearchModifierCode"/>
         </ns4:element>
         <ns4:element name="chain">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="component">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
@@ -5652,10 +5652,10 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Identifier"/>
         </ns4:element>
         <ns4:element name="instantiatesCanonical">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="instantiatesUri">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.uri"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Uri"/>
         </ns4:element>
         <ns4:element name="basedOn">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Reference"/>
@@ -5871,7 +5871,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
         </ns4:element>
         <ns4:element name="contextInvariant">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="type" elementType="FHIR.uri"/>
         <ns4:element name="baseDefinition" elementType="FHIR.canonical"/>
@@ -5910,7 +5910,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
         </ns4:element>
         <ns4:element name="import">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.canonical"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Canonical"/>
         </ns4:element>
         <ns4:element name="group">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
@@ -5999,7 +5999,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.CodeableConcept"/>
         </ns4:element>
         <ns4:element name="modification">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="monomerSet">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
@@ -6012,7 +6012,7 @@
         <ns4:element name="sequenceType" elementType="FHIR.CodeableConcept"/>
         <ns4:element name="numberOfSubunits" elementType="FHIR.integer"/>
         <ns4:element name="disulfideLinkage">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="subunit">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
@@ -6043,13 +6043,13 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Identifier"/>
         </ns4:element>
         <ns4:element name="parentSubstanceName">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="countryOfOrigin">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.CodeableConcept"/>
         </ns4:element>
         <ns4:element name="geographicalLocation">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="developmentStage" elementType="FHIR.CodeableConcept"/>
         <ns4:element name="fractionDescription">
@@ -6085,7 +6085,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
         </ns4:element>
         <ns4:element name="molecularWeight">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="#SubstanceSpecification.structure.isotope.molecularWeight"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="#SubstanceSpecification.Structure.Isotope.MolecularWeight"/>
         </ns4:element>
         <ns4:element name="relationship">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.BackboneElement"/>
@@ -6342,7 +6342,7 @@
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="Timing" label="http://hl7.org/fhir/StructureDefinition/Timing" retrievable="false" primaryCodePath="code" baseType="FHIR.BackboneElement">
         <ns4:element name="event">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.dateTime"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.DateTime"/>
         </ns4:element>
         <ns4:element name="repeat" elementType="FHIR.Element"/>
         <ns4:element name="code" elementType="FHIR.CodeableConcept"/>
@@ -6428,7 +6428,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Reference"/>
         </ns4:element>
         <ns4:element name="targetLocation">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.String"/>
         </ns4:element>
         <ns4:element name="need" elementType="FHIR.CodeableConcept"/>
         <ns4:element name="status" elementType="FHIR.status"/>

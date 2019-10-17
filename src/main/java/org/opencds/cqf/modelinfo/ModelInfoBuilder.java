@@ -6,6 +6,7 @@ import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.hl7.elm_modelinfo.r1.ClassInfo;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import javax.xml.namespace.QName;
@@ -29,6 +30,7 @@ public class ModelInfoBuilder {
     protected ModelInfo innerBuild() {
         Collection<TypeInfo> modelTypeInfos = this.typeInfos.stream()
         .map(x -> ((ClassInfo)x))
+        .sorted(Comparator.comparing(ClassInfo::getName))
         .collect(Collectors.toList());
 
         ModelInfo mi = new ModelInfo().withRequiredModelInfo(new ModelSpecifier().withName("System").withVersion("1.0.0"))
