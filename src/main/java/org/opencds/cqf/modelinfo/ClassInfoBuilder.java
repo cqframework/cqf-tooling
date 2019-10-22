@@ -250,8 +250,16 @@ public abstract class ClassInfoBuilder {
 
     // Returns the given path with the first letter of every path capitalized
     private String captitalizePath(String path) {
-        return String.join(".",
+        if(path.contains("-"))
+        {
+            return String.join("-",
+                Arrays.asList(path.split("\\-")).stream().map(x -> this.capitalize(x)).collect(Collectors.toList()));
+        }
+        else
+        {
+            return String.join(".",
                 Arrays.asList(path.split("\\.")).stream().map(x -> this.capitalize(x)).collect(Collectors.toList()));
+        }
     }
 
     // Returns the name of the component type used to represent anonymous nested
@@ -337,7 +345,8 @@ public abstract class ClassInfoBuilder {
 
     // Returns true if the ElementDefinition describes an Extension
     private Boolean isExtension(ElementDefinition ed) {
-        return ed.getType() != null && ed.getType().size() == 1 && ed.getType().get(0).getCode().equals("Extension");
+        return ed.getType() != null && ed.getType().size() == 1 && ed.getType().get(0).hasCode()
+            && ed.getType().get(0).getCode() != null && ed.getType().get(0).getCode().equals("Extension");
     }
 
     // Returns the type code for the element if there is only one type ref
@@ -693,12 +702,18 @@ public abstract class ClassInfoBuilder {
             String structureRoot, List<ElementDefinition> structureEds, AtomicReference<Integer> index)
             throws Exception {
         ElementDefinition ed = eds.get(index.get());
-        String path = ed.getPath();
+        String path;
+        if(isExtension(ed) || ed.getId().contains(":"))
+        {
+            path = ed.getId();
+        }
+        else path = ed.getPath();
+
         if(path.endsWith("areaUnderCurve"))
         {
             System.out.println("");
         }
-        if(root.matches("Quantity"))
+        if(root.matches("elementdefinition-de"))
         {
             System.out.println("");
         }
@@ -733,10 +748,7 @@ public abstract class ClassInfoBuilder {
         List<ClassInfoElement> elements = new ArrayList<>();
         while (index.get() < eds.size()) {
             ElementDefinition e = eds.get(index.get());
-            if(e.getId().startsWith("Procedure.extension:approachBodyStructure"))
-            {
-                System.out.println("");
-            }
+            // else 
             if (isNextAContinuationOfElement(path, e)) {
                 ClassInfoElement cie = this.visitElementDefinition(modelName, root, eds, typeRoot, structureEds, index);
                 if (cie != null) {
@@ -761,10 +773,25 @@ public abstract class ClassInfoBuilder {
 
                 typeSpecifier = this.buildTypeSpecifier(modelName, path);
 
-            } else if (typeDefinition != null && typeDefinition.getId().equals("Extension")) {
+            } else if (typeDefinition != null && typeDefinition.getId().endsWith("Extension")) {
                 // If this is an extension, the elements will be constraints on the existing
                 // elements of an extension (i.e. url and value)
                 // Use the type of the value element
+                String extensionTypeName;
+                if((ed.getType().size() == 1))
+                {
+                    List<CanonicalType> canonicalTypeRefs = ed.getType().get(0).getProfile();
+                    if (canonicalTypeRefs.size() == 1) {
+                        extensionTypeName = this.resolveTypeName(canonicalTypeRefs.get(0).asStringValue());
+                    }
+                    else extensionTypeName = path;
+                }
+                else extensionTypeName = path;
+                ClassInfo componentClassInfo = new ClassInfo().withNamespace(modelName).withName(this.unQualify(this.captitalizePath(extensionTypeName))).withLabel(null)
+                        .withBaseType(modelName + ".BackboneElement").withRetrievable(false).withElement(elements)
+                        .withPrimaryCodePath(null);
+
+                this.typeInfos.put(this.getTypeName(modelName, path), componentClassInfo);
             } else {
                 // element has children that are being ignored.
             }
@@ -775,9 +802,41 @@ public abstract class ClassInfoBuilder {
         return this.buildClassInfoElement(root, ed, typeEd, typeSpecifier);
     }
 
+        private boolean checkContinuationById(String extensionPath, ElementDefinition e) {
+            return e.getId().startsWith(extensionPath) && e.getId().split(extensionPath).length > 1
+                    && (e.getId().split(extensionPath)[1].startsWith(".") || e.getId().split(extensionPath)[1].startsWith("-")) && !e.getId().equals(extensionPath);
+        }
+
+        private boolean checkContinuationByPath(String path, ElementDefinition e) {
+            return e.getPath().startsWith(path) && e.getPath().split(path).length > 1
+                    && (e.getPath().split(path)[1].startsWith(".") || e.getPath().split(path)[1].startsWith("-")) && !e.getPath().equals(path);
+        }
+
+    private boolean isNextAContinuationOfElementExtension(String path, ElementDefinition e) {
+        if(e.getId().contains(":"))
+        {
+            if (path.contains(":"))
+            {
+                return checkContinuationById(path, e);
+            }
+            else return (path.endsWith("extension")) ? false : true;
+        }
+         else
+            return checkContinuationByPath(path, e);
+    }
+
     private boolean isNextAContinuationOfElement(String path, ElementDefinition e) {
-        return e.getPath().startsWith(path) && e.getPath().split(path).length > 1
-        && e.getPath().split(path)[1].startsWith(".") && !e.getPath().equals(path);
+        if(this.isExtension(e))
+        {
+            return isNextAContinuationOfElementExtension(path, e);
+        }
+        else if (path.contains(":"))
+        {
+            return checkContinuationById(path, e);
+        }
+        else {
+            return checkContinuationByPath(path, e);
+        }
     }
 
     // Returns true if the type is a "codeable" type (i.e. String, Code, Concept,
@@ -806,6 +865,19 @@ public abstract class ClassInfoBuilder {
         return null;
     }
 
+    private String unQualifyId(String id)
+    {
+        if(id == null)
+        {
+            return null;
+        }
+        int index = id.indexOf("/");
+        if (index > 0) {
+            return id.substring(index + 1);
+        }
+
+        return null;
+    }
     // Given a StructureDefinition, creates a ClassInfo to represent it
     // This approach uses the base type to guide the walk, which requires navigating
     // the derived profiles
@@ -813,19 +885,20 @@ public abstract class ClassInfoBuilder {
         if (modelName == null) {
             modelName = this.resolveModelName(sd.getUrl());
         }
-
-        String typeName = sd.getId();
+        String typeName = unQualifyId(sd.getIdElement().toUnqualified().getValueAsString());
+        String fullUrl = sd.getId();
         AtomicReference<Integer> index = new AtomicReference<Integer>(1);
         List<ClassInfoElement> elements = new ArrayList<>();
-        List<ElementDefinition> eds = sd.getKind() == StructureDefinitionKind.RESOURCE && sd.getDerivation() == StructureDefinition.TypeDerivationRule.CONSTRAINT
+        String path = sd.getType(); // Type is used to navigate the elements, regardless of the baseDefinition
+        List<ElementDefinition> eds = (sd.getKind() == StructureDefinitionKind.RESOURCE && sd.getDerivation() == StructureDefinition.TypeDerivationRule.CONSTRAINT) || !typeName.matches(path)
                 ? sd.getSnapshot().getElement()
                 : sd.getDifferential().getElement();
-        String path = sd.getType(); // Type is used to navigate the elements, regardless of the baseDefinition
         
         StructureDefinition structure = null;
         if (!typeName.equals(path)) {
             structure = structureDefinitions.get(path);
         }
+        //else if ()
 
         List<ElementDefinition> structureEds = null;
         if (structure != null) {
@@ -834,12 +907,19 @@ public abstract class ClassInfoBuilder {
 
         while (index.get() < eds.size()) {
             ElementDefinition e = eds.get(index.get());
-            if(e.getPath().startsWith("Procedure.extension:approachBodyStructure"))
+            if(this.isExtension(e))
             {
-                System.out.println("");
+                if (isNextAContinuationOfElement(path, e)) {
+                ClassInfoElement cie = this.visitElementDefinition(modelName, typeName, eds, structure == null? null: structure.getId(),
+                        eds, index);
+                if (cie != null) {
+                    elements.add(cie);
+                }
+
+                }
             }
-            if (isNextAContinuationOfElement(path, e)) {
-                ClassInfoElement cie = this.visitElementDefinition(modelName, path, eds, structure == null? null: structure.getId(),
+            else if (isNextAContinuationOfElement(path, e)) {
+                ClassInfoElement cie = this.visitElementDefinition(modelName, typeName, eds, structure == null? null: structure.getId(),
                         structureEds, index);
                 if (cie != null) {
                     elements.add(cie);
@@ -853,18 +933,18 @@ public abstract class ClassInfoBuilder {
         System.out.println("Building ClassInfo for " + typeName);
 
         String baseDefinition;
-        if(sd.getBaseDefinition() != null && (sd.getBaseDefinition()).endsWith(path.toLowerCase()))
+        if(sd.getBaseDefinition() != null && (sd.getBaseDefinition()).endsWith(typeName.toLowerCase()))
         {
-            baseDefinition = getTopLevelStructureDefinition(sd, path).getBaseDefinition();
+            baseDefinition = getTopLevelStructureDefinition(sd, typeName).getBaseDefinition();
         }
         else {
             baseDefinition = sd.getBaseDefinition();
         }
         
-        ClassInfo info = new ClassInfo().withName(path).withNamespace(modelName).withLabel(typeName)
+        ClassInfo info = new ClassInfo().withName(typeName).withNamespace(modelName).withLabel(fullUrl)
                 .withBaseType(this.resolveTypeName(baseDefinition))
                 .withRetrievable(sd.getKind() == StructureDefinitionKind.RESOURCE).withElement(elements)
-                .withPrimaryCodePath(this.primaryCodePath(elements, path));
+                .withPrimaryCodePath(this.primaryCodePath(elements, typeName));
 
         this.typeInfos.put(this.getTypeName(modelName, typeName), info);
 
