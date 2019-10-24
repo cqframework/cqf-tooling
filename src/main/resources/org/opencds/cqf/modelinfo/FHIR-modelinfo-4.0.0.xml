@@ -6522,7 +6522,7 @@
         <ns4:element name="Question">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.elementdefinition-Question"/>
         </ns4:element>
-        <ns4:element name="AllowedUnits" elementType="FHIR.elementdefinition-allowedUnits"/>
+        <ns4:element name="AllowedUnits" elementType="FHIR.elementdefinition-AllowedUnits"/>
         <ns4:element name="modifierExtension">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Extension"/>
         </ns4:element>
