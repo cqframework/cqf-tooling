@@ -2,6 +2,7 @@ package org.opencds.cqf.modelinfo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import org.hl7.elm_modelinfo.r1.ChoiceTypeSpecifier;
 import org.hl7.elm_modelinfo.r1.ClassInfo;
 import org.hl7.elm_modelinfo.r1.ClassInfoElement;
 import org.hl7.elm_modelinfo.r1.ListTypeSpecifier;
+import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.elm_modelinfo.r1.NamedTypeSpecifier;
 import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.hl7.elm_modelinfo.r1.TypeSpecifier;
@@ -505,7 +507,7 @@ public abstract class ClassInfoBuilder {
 
     private Boolean hasContentReferenceTypeSpecifier(ClassInfoElement element) {
 
-        return element.getElementType().startsWith("#") || this.isContentReferenceTypeSpecifier(element.getElementTypeSpecifier());
+        return element.getElementType() != null && element.getElementType().startsWith("#") || this.isContentReferenceTypeSpecifier(element.getElementTypeSpecifier());
     }
 
     private ClassInfoElement fixupContentReferenceSpecifier(String modelName, ClassInfoElement element) {
@@ -513,19 +515,19 @@ public abstract class ClassInfoBuilder {
         try {
             if (this.hasContentReferenceTypeSpecifier(element)) {
                 result = element;
-                if (element.getElementType().startsWith("#")) {
+                if (element.getElementType() != null && element.getElementType().startsWith("#")) {
                     element.setElementType(this.getTypeName(
                             (NamedTypeSpecifier) this.resolveContentReference(modelName, element.getElementType())));
-                } else if (element.getElementTypeSpecifier() instanceof ListTypeSpecifier) {
+                } else if (element.getElementTypeSpecifier() != null && element.getElementTypeSpecifier() instanceof ListTypeSpecifier) {
                     ListTypeSpecifier lts = new ListTypeSpecifier();
                     lts.setElementTypeSpecifier(this.resolveContentReference(modelName,
-                            this.getContentReference(element.getTypeSpecifier())));
+                            this.getContentReference(element.getElementTypeSpecifier())));
 
                     element.setElementTypeSpecifier(lts);
-                } else {
+                } else if (element.getElementTypeSpecifier() != null) {
                     element.setElementTypeSpecifier(this.resolveContentReference(modelName,
                             this.getContentReference(element.getElementTypeSpecifier())));
-                }
+                } else return element;
             }
         } catch (Exception e) {
             System.out.println("Error fixing up contentreferencetypespecifier: " + e.getMessage());
@@ -1003,6 +1005,14 @@ public abstract class ClassInfoBuilder {
         }
 
         return getTopLevelStructureDefinition(structureDefinitions.get(getTail(sd.getBaseDefinition())), path);
+    }
+
+    public void fixupContentReferenceSpecifier(String modelName, Collection<TypeInfo> typeInfos) {
+        typeInfos.stream().map(x -> (ClassInfo)x).forEach(
+            x -> x.getElement().stream()
+            .filter(y -> hasContentReferenceTypeSpecifier(y))
+            .forEach(y -> fixupContentReferenceSpecifier(modelName, y))
+        );
     }
 
     protected void buildFor(String model, Predicate<StructureDefinition> predicate) {
