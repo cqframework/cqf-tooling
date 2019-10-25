@@ -66,7 +66,7 @@ public class StructureDefinitionToModelInfo extends Operation {
         ModelInfoBuilder miBuilder;
         ModelInfo mi;
 
-        if(modelName.matches("FHIR"))
+        if(modelName.equals("FHIR"))
         {
             ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(structureDefinitions);
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
@@ -75,7 +75,7 @@ public class StructureDefinitionToModelInfo extends Operation {
             miBuilder = new FHIRModelInfoBuilder(modelVersion, typeInfos.values(), fhirHelpersPath);
             mi = miBuilder.build();
         }
-        else if(modelName.matches("QUICK"))
+        else if(modelName.equals("QUICK"))
         {
             ClassInfoBuilder ciBuilder = new QuickClassInfoBuilder(structureDefinitions);
             Map<String, TypeInfo> typeInfos = ciBuilder.build();

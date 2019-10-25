@@ -21,6 +21,7 @@ public class ModelInfoSettings {
         this.version = version;
         this.url = url;
         this.patientClassName = patientClassName;
+        this.patientBirthDatePropertyName = patientBirthDatePropertyName;
         this.targetQualifier = targetQualifier;
     }
 }
