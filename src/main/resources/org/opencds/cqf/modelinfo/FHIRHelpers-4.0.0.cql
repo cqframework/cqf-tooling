@@ -88,7 +88,6 @@ define function ToString(value ClinicalImpressionStatus): value.value
 define function ToString(value CodeSearchSupport): value.value
 define function ToString(value CodeSystemContentMode): value.value
 define function ToString(value CodeSystemHierarchyMeaning): value.value
-define function Tostring(value CodeableConcept): value.value
 define function ToString(value CommunicationPriority): value.value
 define function ToString(value CommunicationRequestStatus): value.value
 define function ToString(value CommunicationStatus): value.value
@@ -104,7 +103,6 @@ define function ToString(value ConsentDataMeaning): value.value
 define function ToString(value ConsentProvisionType): value.value
 define function ToString(value ConsentState): value.value
 define function ToString(value ConstraintSeverity): value.value
-define function Tostring(value ContactDetail): value.value
 define function ToString(value ContactPointSystem): value.value
 define function ToString(value ContactPointUse): value.value
 define function ToString(value ContractPublicationStatus): value.value
@@ -277,7 +275,6 @@ define function ToString(value TypeDerivationRule): value.value
 define function ToString(value TypeRestfulInteraction): value.value
 define function ToString(value UDIEntryType): value.value
 define function ToString(value UnitsOfTime): value.value
-define function ToCoding(value UsageContext): value.value
 define function ToString(value Use): value.value
 define function ToString(value VariableType): value.value
 define function ToString(value VisionBase): value.value
@@ -301,3 +298,4 @@ define function ToString(value strandType): value.value
 define function ToString(value string): value.value
 define function ToTime(value time): value.value
 define function ToString(value uri): value.value
+define function ToString(value xhtml): value.value

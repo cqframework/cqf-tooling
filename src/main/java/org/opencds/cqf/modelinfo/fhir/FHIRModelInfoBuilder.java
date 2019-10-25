@@ -1,6 +1,7 @@
 package org.opencds.cqf.modelinfo.fhir;
 
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
+import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.opencds.cqf.modelinfo.ModelInfoBuilder;
 import org.hl7.elm_modelinfo.r1.ClassInfo;
@@ -102,4 +103,10 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
             System.out.println("Unable to write FileHelpers");
         }
     }
+
+    @Override
+    protected ModelInfo afterBuild(ModelInfo mi) {
+        // Apply fixups
+        return mi;
+    };
 }

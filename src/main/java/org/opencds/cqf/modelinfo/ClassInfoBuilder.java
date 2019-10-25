@@ -508,7 +508,7 @@ public abstract class ClassInfoBuilder {
         return element.getElementType().startsWith("#") || this.isContentReferenceTypeSpecifier(element.getElementTypeSpecifier());
     }
 
-    private ClassInfoElement fixupContentRefererenceSpecifier(String modelName, ClassInfoElement element) {
+    private ClassInfoElement fixupContentReferenceSpecifier(String modelName, ClassInfoElement element) {
         ClassInfoElement result = null;
         try {
             if (this.hasContentReferenceTypeSpecifier(element)) {
@@ -543,6 +543,10 @@ public abstract class ClassInfoBuilder {
             NamedTypeSpecifier nts = new NamedTypeSpecifier();
             nts.setName(ed.getContentReference());
             typeSpecifier = nts;
+        }
+
+        if (ed.hasBase() && ed.getBase().hasPath() && !ed.getBase().getPath().startsWith(root)) {
+            return null;
         }
 
         // TODO: These code paths look identical to me...
@@ -771,7 +775,7 @@ public abstract class ClassInfoBuilder {
             // else 
             if (isNextAContinuationOfElement(path, e)) {
                 ClassInfoElement cie = this.visitElementDefinition(modelName, root, eds, typeRoot, structureEds, index);
-                if (cie != null && !(cie.getElementType() == null || cie.getElementTypeSpecifier() != null)) {
+                if (cie != null && !(cie.getElementType() == null && cie.getElementTypeSpecifier() == null)) {
                     elements.add(cie);
                 }
 
@@ -934,7 +938,7 @@ public abstract class ClassInfoBuilder {
         String path = sd.getType(); // Type is used to navigate the elements, regardless of the baseDefinition
         List<ElementDefinition> eds = (sd.getKind() == StructureDefinitionKind.RESOURCE && sd.getDerivation() == StructureDefinition.TypeDerivationRule.CONSTRAINT) || !typeName.equals(path)
                 ? sd.getSnapshot().getElement()
-                : sd.getDifferential().getElement();
+                : sd.getSnapshot().getElement();
         
         StructureDefinition structure = null;
         if (!typeName.equals(path)) {
@@ -952,18 +956,18 @@ public abstract class ClassInfoBuilder {
             if(this.isExtension(e))
             {
                 if (isNextAContinuationOfElement(path, e)) {
-                ClassInfoElement cie = this.visitElementDefinition(modelName, typeName, eds, structure == null ? null : structure.getId(),
+                ClassInfoElement cie = this.visitElementDefinition(modelName, typeName, eds, structure == null ? null : getTail(structure.getId()),
                         eds, index);
-                if (cie != null && !(cie.getElementType() == null || cie.getElementTypeSpecifier() != null)) {
+                if (cie != null && !(cie.getElementType() == null && cie.getElementTypeSpecifier() == null)) {
                     elements.add(cie);
                 }
 
                 }
             }
             else if (isNextAContinuationOfElement(path, e)) {
-                ClassInfoElement cie = this.visitElementDefinition(modelName, typeName, eds, structure == null? null: structure.getId(),
+                ClassInfoElement cie = this.visitElementDefinition(modelName, typeName, eds, structure == null ? null : getTail(structure.getId()),
                         structureEds, index);
-                if (cie != null && !(cie.getElementType() == null || cie.getElementTypeSpecifier() != null)) {
+                if (cie != null && !(cie.getElementType() == null && cie.getElementTypeSpecifier() == null)) {
                     elements.add(cie);
                 }
 
