@@ -70,7 +70,7 @@ public class StructureDefinitionToModelInfo extends Operation {
         {
             ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(structureDefinitions);
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
-            ciBuilder.fixupContentReferenceSpecifier(modelName, typeInfos.values());
+            ciBuilder.afterBuild();
 
             String fhirHelpersPath = this.getOutputPath() + "/" + modelName + "Helpers-" + modelVersion + ".cql";
             miBuilder = new FHIRModelInfoBuilder(modelVersion, typeInfos.values(), fhirHelpersPath);

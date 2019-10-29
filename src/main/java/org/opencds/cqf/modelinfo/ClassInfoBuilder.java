@@ -41,6 +41,7 @@ public abstract class ClassInfoBuilder {
     }
 
     protected abstract void innerBuild();
+    protected abstract void afterBuild();
 
     public Map<String, TypeInfo> build() {
         this.innerBuild();
@@ -516,12 +517,12 @@ public abstract class ClassInfoBuilder {
         return null;
     }
 
-    private Boolean hasContentReferenceTypeSpecifier(ClassInfoElement element) {
+    protected Boolean hasContentReferenceTypeSpecifier(ClassInfoElement element) {
 
         return element.getElementType() != null && element.getElementType().startsWith("#") || this.isContentReferenceTypeSpecifier(element.getElementTypeSpecifier());
     }
 
-    private ClassInfoElement fixupContentReferenceSpecifier(String modelName, ClassInfoElement element) {
+    protected ClassInfoElement fixupContentReferenceSpecifier(String modelName, ClassInfoElement element) {
         ClassInfoElement result = null;
         try {
             if (this.hasContentReferenceTypeSpecifier(element)) {
@@ -1054,15 +1055,6 @@ public abstract class ClassInfoBuilder {
         }
 
         return getTopLevelStructureDefinition(structureDefinitions.get(getTail(sd.getBaseDefinition())), path);
-    }
-
-    //Abstract this method
-    public void fixupContentReferenceSpecifier(String modelName, Collection<TypeInfo> typeInfos) {
-        typeInfos.stream().map(x -> (ClassInfo)x).forEach(
-            x -> x.getElement().stream()
-            .filter(y -> hasContentReferenceTypeSpecifier(y))
-            .forEach(y -> fixupContentReferenceSpecifier(modelName, y))
-        );
     }
 
     private StructureDefinition getBaseDefinitionStructureDef(String model, StructureDefinition sd) {

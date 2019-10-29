@@ -32,4 +32,8 @@ public class QuickClassInfoBuilder extends ClassInfoBuilder {
                 && (x.getUrl().startsWith("http://hl7.org/fhir/us/qicore")))
         );
     }
+    @Override
+    protected void afterBuild() {
+        
+    }
 }
