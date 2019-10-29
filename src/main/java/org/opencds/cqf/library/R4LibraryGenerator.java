@@ -28,7 +28,7 @@ public class R4LibraryGenerator extends BaseLibraryGenerator<Library, R4Narrativ
             for (IncludeDef def : elm.getIncludes().getDef()) {
                 if (!libraryMap.containsKey(def.getPath())) {
                     if (!translatorMap.containsKey(def.getPath())) {
-                        throw new IllegalArgumentException("Referenced library: " + def.getPath() + " not found");
+                        throw new IllegalArgumentException("Referenced library: " + def.getPath().replaceAll("_", "-").toLowerCase() + " not found");
                     }
                     processLibrary(def.getPath(), translatorMap.get(def.getPath()));
                 }
@@ -36,7 +36,7 @@ public class R4LibraryGenerator extends BaseLibraryGenerator<Library, R4Narrativ
                 library.addRelatedArtifact(
                         new RelatedArtifact()
                                 .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
-                                .setResource("Library/" + nameToId(def.getPath()))
+                                .setResource("Library/" + nameToId(def.getPath().replaceAll("_", "-").toLowerCase()))
                 );
 
                 for (DataRequirement req : libraryMap.get(def.getPath()).getDataRequirement()) {

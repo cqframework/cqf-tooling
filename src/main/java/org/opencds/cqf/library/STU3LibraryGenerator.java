@@ -30,7 +30,7 @@ public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3Narr
             for (IncludeDef def : elm.getIncludes().getDef()) {
                 if (!libraryMap.containsKey(def.getPath())) {
                     if (!translatorMap.containsKey(def.getPath())) {
-                        throw new IllegalArgumentException("Referenced library: " + def.getPath() + " not found");
+                        throw new IllegalArgumentException("Referenced library: " + def.getPath().replaceAll("_", "-").toLowerCase() + " not found");
                     }
                     processLibrary(def.getPath(), translatorMap.get(def.getPath()));
                 }
@@ -38,7 +38,7 @@ public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3Narr
                 library.addRelatedArtifact(
                         new RelatedArtifact()
                                 .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
-                                .setResource(new Reference().setReference("Library/" + def.getPath()))
+                                .setResource(new Reference().setReference("Library/" + def.getPath().replaceAll("_", "-").toLowerCase()))
                 );
 
                 for (DataRequirement req : libraryMap.get(def.getPath()).getDataRequirement()) {
