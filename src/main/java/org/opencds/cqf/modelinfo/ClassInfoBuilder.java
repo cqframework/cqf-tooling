@@ -41,6 +41,7 @@ public abstract class ClassInfoBuilder {
     }
 
     protected abstract void innerBuild();
+
     protected abstract void afterBuild();
 
     public Map<String, TypeInfo> build() {
@@ -88,7 +89,11 @@ public abstract class ClassInfoBuilder {
     private String resolveTypeName(String url) throws Exception {
         if (url != null) {
             String modelName = resolveModelName(url);
-            return getTypeName(modelName, getTail(url));
+            if (getTail(url).contains("-"))
+            {
+                return getTypeName(modelName, capitalize(unQualify(getTail(url))));
+            }
+            else return getTypeName(modelName, getTail(url));
         }
 
         return null;
@@ -128,8 +133,7 @@ public abstract class ClassInfoBuilder {
     }
 
     protected String getQualifier(String name) {
-        if (name == null)
-        {
+        if (name == null) {
             return null;
         }
         int index = name.indexOf(".");
@@ -141,19 +145,17 @@ public abstract class ClassInfoBuilder {
     }
 
     protected String unQualify(String name) {
-        if(name == null)
-        {
+        if (name == null) {
             return null;
         }
-        if(name.contains(".")) {
+        if (name.contains(".")) {
             int index = name.indexOf(".");
             if (index > 0) {
                 return name.substring(index + 1);
             }
 
             return null;
-        }
-        else if (name.contains("-")) {
+        } else if (name.contains("-")) {
             int index = name.lastIndexOf("-");
             if (index > 0) {
                 return name.substring(index + 1);
@@ -181,22 +183,22 @@ public abstract class ClassInfoBuilder {
         try {
             if (typeRef != null && typeRef.getProfile() != null && typeRef.getProfile().size() != 0) {
                 List<CanonicalType> canonicalTypeRefs = typeRef.getProfile();
-                    if (canonicalTypeRefs.size() == 1) {
-                        return this.buildTypeSpecifier(this.resolveTypeName(canonicalTypeRefs.get(0).asStringValue()));
-                    } else if (canonicalTypeRefs.size() > 1) {
-                        ChoiceTypeSpecifier cts = new ChoiceTypeSpecifier();
-                        for(CanonicalType canonicalType: canonicalTypeRefs)
-                        {
-                            if (canonicalType != null)
-                            {
-                                cts.withChoice(this.buildTypeSpecifier(this.resolveTypeName(canonicalType.asStringValue())));
-                            }
+                if (canonicalTypeRefs.size() == 1) {
+                    return this.buildTypeSpecifier(this.resolveTypeName(canonicalTypeRefs.get(0).asStringValue()));
+                } else if (canonicalTypeRefs.size() > 1) {
+                    ChoiceTypeSpecifier cts = new ChoiceTypeSpecifier();
+                    for (CanonicalType canonicalType : canonicalTypeRefs) {
+                        if (canonicalType != null) {
+                            cts.withChoice(
+                                    this.buildTypeSpecifier(this.resolveTypeName(canonicalType.asStringValue())));
                         }
-                        return cts;
-                    } else return null;             
+                    }
+                    return cts;
+                } else
+                    return null;
             } else {
-                if (this.settings.useCQLPrimitives && typeRef != null 
-                    && this.settings.cqlTypeMappings.get(modelName + "." + typeRef.getCode()) != null) {
+                if (this.settings.useCQLPrimitives && typeRef != null
+                        && this.settings.cqlTypeMappings.get(modelName + "." + typeRef.getCode()) != null) {
                     String typeName = this.settings.cqlTypeMappings.get(modelName + "." + typeRef.getCode());
                     return this.buildTypeSpecifier(typeName);
                 } else {
@@ -212,13 +214,11 @@ public abstract class ClassInfoBuilder {
     }
 
     private TypeSpecifier buildTypeSpecifier(String modelName, List<TypeRefComponent> typeReferencRefComponents) {
-        
-        if(typeReferencRefComponents == null)
-        {
+
+        if (typeReferencRefComponents == null) {
             return buildTypeSpecifier(modelName, (TypeRefComponent) null);
-        }
-            else {
-                List<TypeSpecifier> specifiers = typeReferencRefComponents.stream()
+        } else {
+            List<TypeSpecifier> specifiers = typeReferencRefComponents.stream()
                     .map(x -> this.buildTypeSpecifier(modelName, x)).filter(distinctByKey(x -> x.toString()))
                     .collect(Collectors.toList());
 
@@ -264,30 +264,24 @@ public abstract class ClassInfoBuilder {
 
     // Returns the given path with the first letter of every path capitalized
     private String capitalizePath(String path) {
-        if(path.contains("-"))
-        {
-            return String.join("-",
-                Arrays.asList(path.split("\\-")).stream().map(x -> this.capitalize(x)).collect(Collectors.toList()));
-        }
-        else
-        {
-            return String.join(".",
-                Arrays.asList(path.split("\\.")).stream().map(x -> this.capitalize(x)).collect(Collectors.toList()));
+        if (path.contains("-")) {
+            return String.join("-", Arrays.asList(path.split("\\-")).stream().map(x -> this.capitalize(x))
+                    .collect(Collectors.toList()));
+        } else {
+            return String.join(".", Arrays.asList(path.split("\\.")).stream().map(x -> this.capitalize(x))
+                    .collect(Collectors.toList()));
         }
     }
 
     private String capitalizePath(String path, String modelName) {
-        if(path.contains("-"))
-        {
-            return String.join("-",
-                Arrays.asList(path.split("\\-")).stream().map(x -> this.capitalize(x)).collect(Collectors.toList()));
-        }
-        else if(!path.contains(modelName + "."))
-        {
-            return String.join(".",
-                Arrays.asList(path.split("\\.")).stream().map(x -> this.capitalize(x)).collect(Collectors.toList()));
-        }
-        else return path;
+        if (path.contains("-")) {
+            return String.join("-", Arrays.asList(path.split("\\-")).stream().map(x -> this.capitalize(x))
+                    .collect(Collectors.toList()));
+        } else if (!path.contains(modelName + ".")) {
+            return String.join(".", Arrays.asList(path.split("\\.")).stream().map(x -> this.capitalize(x))
+                    .collect(Collectors.toList()));
+        } else
+            return path;
     }
 
     // Returns the name of the component type used to represent anonymous nested
@@ -388,7 +382,7 @@ public abstract class ClassInfoBuilder {
     // Returns true if the ElementDefinition describes an Extension
     private Boolean isExtension(ElementDefinition ed) {
         return ed.getType() != null && ed.getType().size() == 1 && ed.getType().get(0).hasCode()
-            && ed.getType().get(0).getCode() != null && ed.getType().get(0).getCode().equals("Extension");
+                && ed.getType().get(0).getCode() != null && ed.getType().get(0).getCode().equals("Extension");
     }
 
     // Returns the type code for the element if there is only one type ref
@@ -519,7 +513,8 @@ public abstract class ClassInfoBuilder {
 
     protected Boolean hasContentReferenceTypeSpecifier(ClassInfoElement element) {
 
-        return element.getElementType() != null && element.getElementType().startsWith("#") || this.isContentReferenceTypeSpecifier(element.getElementTypeSpecifier());
+        return element.getElementType() != null && element.getElementType().startsWith("#")
+                || this.isContentReferenceTypeSpecifier(element.getElementTypeSpecifier());
     }
 
     protected ClassInfoElement fixupContentReferenceSpecifier(String modelName, ClassInfoElement element) {
@@ -530,7 +525,8 @@ public abstract class ClassInfoBuilder {
                 if (element.getElementType() != null && element.getElementType().startsWith("#")) {
                     element.setElementType(this.getTypeName(
                             (NamedTypeSpecifier) this.resolveContentReference(modelName, element.getElementType())));
-                } else if (element.getElementTypeSpecifier() != null && element.getElementTypeSpecifier() instanceof ListTypeSpecifier) {
+                } else if (element.getElementTypeSpecifier() != null
+                        && element.getElementTypeSpecifier() instanceof ListTypeSpecifier) {
                     ListTypeSpecifier lts = new ListTypeSpecifier();
                     lts.setElementTypeSpecifier(this.resolveContentReference(modelName,
                             this.getContentReference(element.getElementTypeSpecifier())));
@@ -539,7 +535,8 @@ public abstract class ClassInfoBuilder {
                 } else if (element.getElementTypeSpecifier() != null) {
                     element.setElementTypeSpecifier(this.resolveContentReference(modelName,
                             this.getContentReference(element.getElementTypeSpecifier())));
-                } else return element;
+                } else
+                    return element;
             }
         } catch (Exception e) {
             System.out.println("Error fixing up contentreferencetypespecifier: " + e.getMessage());
@@ -559,50 +556,44 @@ public abstract class ClassInfoBuilder {
             typeSpecifier = nts;
         }
 
-        if(!needsTopLevelSD)
-        {
+        if (!needsTopLevelSD) {
             if (ed.hasBase() && ed.getBase().hasPath() && !ed.getBase().getPath().startsWith(root)) {
                 return null;
             }
-        }
-        else 
-        {
-            
-            if (ed.hasBase() && ed.getBase().hasPath() && ed.getId().contains(":"))
-            {
+        } else {
+
+            if (ed.hasBase() && ed.getBase().hasPath() && ed.getId().contains(":")) {
                 String[] elementPathSplitByExtensions = ed.getId().split(":");
-                if(elementPathSplitByExtensions[elementPathSplitByExtensions.length - 1].contains("."))
-                {
-                    //This is needed for cases when there is an extension or constraint that then has an element
-                    String[] elementPathSplit = ed.getId().split(ed.getId().substring(ed.getId().lastIndexOf(":"), ed.getId().lastIndexOf(".")));
+                if (elementPathSplitByExtensions[elementPathSplitByExtensions.length - 1].contains(".")) {
+                    // This is needed for cases when there is an extension or constraint that then
+                    // has an element
+                    String[] elementPathSplit = ed.getId()
+                            .split(ed.getId().substring(ed.getId().lastIndexOf(":"), ed.getId().lastIndexOf(".")));
                     String elementPath = elementPathSplit[0] + elementPathSplit[1];
                     if (!elementPath.contains(ed.getBase().getPath().toLowerCase())) {
                         return null;
                     }
-                }
-                else if(elementPathSplitByExtensions[elementPathSplitByExtensions.length - 1].contains("-"))
-                {
-                    //This is needed for cases when there is an extension or constraint that then has an element
-                    String[] elementPathSplit = ed.getId().split(ed.getId().substring(ed.getId().lastIndexOf(":"), ed.getId().lastIndexOf("-")));
+                } else if (elementPathSplitByExtensions[elementPathSplitByExtensions.length - 1].contains("-")) {
+                    // This is needed for cases when there is an extension or constraint that then
+                    // has an element
+                    String[] elementPathSplit = ed.getId()
+                            .split(ed.getId().substring(ed.getId().lastIndexOf(":"), ed.getId().lastIndexOf("-")));
                     String elementPath = elementPathSplit[0] + elementPathSplit[elementPathSplit.length - 1];
                     if (!elementPath.contains(ed.getBase().getPath().toLowerCase())) {
                         return null;
                     }
-                }
-                else {
+                } else {
                     String[] elementPathSplit = ed.getId().split(ed.getId().substring(ed.getId().lastIndexOf(":")));
                     String elementPath = elementPathSplit[0];
-                    if (!elementPath.contains(ed.getBase().getPath())) {
+                    if (!elementPath.contains(ed.getBase().getPath()) && !elementPath.contains("extension")) {
                         return null;
                     }
                 }
-                
-            }
-            else if (!ed.getId().contains(ed.getBase().getPath())) {
+
+            } else if (!ed.getId().contains(ed.getBase().getPath())) {
                 return null;
             }
         }
-        
 
         // TODO: These code paths look identical to me...
         if (structureEd == null) {
@@ -647,7 +638,8 @@ public abstract class ClassInfoBuilder {
             ClassInfoElement cie = new ClassInfoElement();
             cie.setName(name);
             if (typeSpecifier instanceof NamedTypeSpecifier) {
-                cie.setElementType(this.capitalizePath(this.getTypeName((NamedTypeSpecifier) typeSpecifier), modelName));
+                cie.setElementType(
+                        this.capitalizePath(this.getTypeName((NamedTypeSpecifier) typeSpecifier), modelName));
             } else {
                 cie.setElementTypeSpecifier(typeSpecifier);
             }
@@ -670,12 +662,60 @@ public abstract class ClassInfoBuilder {
     }
 
     // Builds the type specifier for the given element
-    private TypeSpecifier buildElementTypeSpecifier(String modelName, String root, ElementDefinition ed, ElementDefinition topLevelEd) {
+    private TypeSpecifier buildElementTypeSpecifier(String modelName, String root, ElementDefinition ed,
+            List<ElementDefinition> eds, ElementDefinition topLevelEd, AtomicReference<Integer> index) {
         String typeCode = this.typeCode(ed);
-        if (typeCode != null && typeCode.equals("code") && ed.hasBinding()
+        String typeName;
+        //This is needed to pickup any Extensions that are defined by a profile in the type of the Element Definition
+        ElementDefinition nextEd = (index.get() + 1 < eds.size()) ? eds.get(index.get() + 1) : null;
+        if (typeCode != null && typeCode.equals("Extension") && ed.getId().contains(":")
+                && ed.getType().get(0).hasProfile() && nextEd != null && !nextEd.getId().startsWith(ed.getId())) {
+            List<CanonicalType> extensionProfile = ed.getType().get(0).getProfile();
+            try {
+                if (extensionProfile.size() == 1) {
+                        typeName = capitalize(unQualify(getTail(extensionProfile.get(0).asStringValue())));
+                        if (!this.typeInfos.containsKey(this.getTypeName(modelName, typeName))) {
+
+                            List<ClassInfoElement> elements = new ArrayList<>();
+                            ClassInfoElement cie = new ClassInfoElement();
+                            cie.setName("value");
+                            cie.setElementType("System.String");
+            
+                            elements.add(cie);
+            
+                            ClassInfo info = new ClassInfo().withName(typeName).withNamespace(modelName).withLabel(null).withBaseType(modelName + ".Element")
+                                    .withRetrievable(false).withElement(elements).withPrimaryCodePath(null);
+                                    
+                            this.typeInfos.put(this.getTypeName(modelName, typeName), info);
+            
+                        }
+            
+                        NamedTypeSpecifier nts = new NamedTypeSpecifier();
+                        nts.setModelName(modelName);
+                        nts.setName(typeName);
+            
+                        return nts;
+                    }
+                    else if (extensionProfile.size() > 1) {
+                        ChoiceTypeSpecifier cts = new ChoiceTypeSpecifier();
+                        for (CanonicalType canonicalType : extensionProfile) {
+                            if (canonicalType != null) {
+                                cts.withChoice(
+                                        this.buildTypeSpecifier(this.resolveTypeName(canonicalType.asStringValue())));
+                            }
+                        }
+                        return cts;
+                    } else
+                        return null;
+            } catch (Exception e) {
+                System.out.println("Error building type specifier for " + modelName + "."
+                    + ed.getId() + ": " + e.getMessage());
+                return null;
+            }
+        }
+        else if (typeCode != null && typeCode.equals("code") && ed.hasBinding()
                 && ed.getBinding().getStrength() == BindingStrength.REQUIRED) {
                     
-                    String typeName;
                     Extension bindingExtension = this.extension(ed.getBinding(), "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName");
                     if (bindingExtension != null)
                     {
@@ -789,7 +829,7 @@ public abstract class ClassInfoBuilder {
         }
         else path = ed.getPath();
 
-        TypeSpecifier typeSpecifier = this.buildElementTypeSpecifier(modelName, root, ed, topLevelEd);
+        TypeSpecifier typeSpecifier = this.buildElementTypeSpecifier(modelName, root, ed, eds, topLevelEd, index);
 
         String typeCode = this.typeCode(ed);
         StructureDefinition typeDefinition;
