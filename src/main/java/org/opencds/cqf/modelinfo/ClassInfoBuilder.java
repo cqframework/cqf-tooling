@@ -566,14 +566,24 @@ public abstract class ClassInfoBuilder {
         }
         else 
         {
-            //root is returning Resource root not element root
             
             if (ed.hasBase() && ed.getBase().hasPath() && ed.getId().contains(":"))
             {
-                if(ed.getId().split(":")[1].contains("."))
+                String[] elementPathSplitByExtensions = ed.getId().split(":");
+                if(elementPathSplitByExtensions[elementPathSplitByExtensions.length - 1].contains("."))
                 {
+                    //This is needed for cases when there is an extension or constraint that then has an element
                     String[] elementPathSplit = ed.getId().split(ed.getId().substring(ed.getId().lastIndexOf(":"), ed.getId().lastIndexOf(".")));
                     String elementPath = elementPathSplit[0] + elementPathSplit[1];
+                    if (!elementPath.contains(ed.getBase().getPath().toLowerCase())) {
+                        return null;
+                    }
+                }
+                else if(elementPathSplitByExtensions[elementPathSplitByExtensions.length - 1].contains("-"))
+                {
+                    //This is needed for cases when there is an extension or constraint that then has an element
+                    String[] elementPathSplit = ed.getId().split(ed.getId().substring(ed.getId().lastIndexOf(":"), ed.getId().lastIndexOf("-")));
+                    String elementPath = elementPathSplit[0] + elementPathSplit[elementPathSplit.length - 1];
                     if (!elementPath.contains(ed.getBase().getPath().toLowerCase())) {
                         return null;
                     }
@@ -1046,6 +1056,7 @@ public abstract class ClassInfoBuilder {
         return getTopLevelStructureDefinition(structureDefinitions.get(getTail(sd.getBaseDefinition())), path);
     }
 
+    //Abstract this method
     public void fixupContentReferenceSpecifier(String modelName, Collection<TypeInfo> typeInfos) {
         typeInfos.stream().map(x -> (ClassInfo)x).forEach(
             x -> x.getElement().stream()
