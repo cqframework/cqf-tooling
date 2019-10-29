@@ -58,7 +58,7 @@ public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3Narr
         Bundle bundle = new Bundle();
 
         for (Map.Entry<String, Library> entry : libraryMap.entrySet()) {
-            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/library-" + entry.getKey() + "." + encoding)) {
+            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/library-" + entry.getKey().replaceAll("_", "-").toLowerCase() + "." + encoding)) {
                 bundle.addEntry().setResource(entry.getValue()).setRequest(new Bundle.BundleEntryRequestComponent().setMethod(Bundle.HTTPVerb.PUT).setUrl("Library/" + entry.getValue().getId()));
                 writer.write(
                         encoding.equals("json")
