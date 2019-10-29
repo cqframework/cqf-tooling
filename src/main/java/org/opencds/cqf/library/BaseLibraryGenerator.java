@@ -83,7 +83,12 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
             translator = translate(cqlFile);
             translatorMap.put(translator.toELM().getIdentifier().getId(), translator);
             cqlMap.put(translator.toELM().getIdentifier().getId(), getCql(cqlFile));
-            elmMap.put(translator.toELM().getIdentifier().getId(), translator.toXml());
+            if (encoding.equals("json")) {
+                elmMap.put(translator.toELM().getIdentifier().getId(), translator.toJson());
+            }
+            else {
+                elmMap.put(translator.toELM().getIdentifier().getId(), translator.toXml());
+            }
         }
 
         for (Map.Entry<String, CqlTranslator> entry : translatorMap.entrySet()) {

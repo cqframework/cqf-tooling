@@ -69,7 +69,7 @@ public class R4LibraryGenerator extends BaseLibraryGenerator<Library, R4Narrativ
                 e.printStackTrace();
                 throw new IllegalArgumentException("Error outputting library: " + entry.getKey());
             }
-            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/elm-" + entry.getKey().replaceAll("_", "-").toLowerCase() + ".xml"))
+            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/elm-" + entry.getKey().replaceAll("_", "-").toLowerCase() + "." + encoding))
             {
                 writer.write(elmMap.get(entry.getKey()).getBytes());
                 writer.flush();
