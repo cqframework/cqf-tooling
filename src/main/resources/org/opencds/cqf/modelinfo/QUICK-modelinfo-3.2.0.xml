@@ -134,12 +134,6 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
         </ns4:element>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="BirthPlace" retrievable="false" baseType="QUICK.BackboneElement">
-        <ns4:element name="url" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="BirthTime" retrievable="false" baseType="QUICK.BackboneElement">
-        <ns4:element name="url" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Bodystructure" label="QICoreBodyStructure" retrievable="true" baseType="QUICK.DomainResource">
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
@@ -155,9 +149,6 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Attachment"/>
         </ns4:element>
         <ns4:element name="patient" elementType="QUICK.Reference"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="CadavericDonor" retrievable="false" baseType="QUICK.BackboneElement">
-        <ns4:element name="url" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="CarePlan.Activity" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="outcomeCodeableConcept">
@@ -1004,9 +995,6 @@
         <ns4:element name="comment" elementType="System.String"/>
         <ns4:element name="link" elementType="QUICK.Reference"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Disability" retrievable="false" baseType="QUICK.BackboneElement">
-        <ns4:element name="url" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Dosage" label="Dosage" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="sequence" elementType="QUICK.integer"/>
         <ns4:element name="text" elementType="QUICK.string"/>
@@ -1428,12 +1416,6 @@
             </ns4:elementTypeSpecifier>
         </ns4:element>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Extension:nationality.Extension:code" retrievable="false" baseType="QUICK.BackboneElement">
-        <ns4:element name="url" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Extension:nationality.Extension:period" retrievable="false" baseType="QUICK.BackboneElement">
-        <ns4:element name="url" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="FamilyMemberHistory.Condition" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="code" elementType="System.Concept"/>
         <ns4:element name="outcome" elementType="System.Concept"/>
@@ -1838,7 +1820,7 @@
         </ns4:element>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Lab" label="QICoreDiagnosticReportLab" retrievable="true" primaryCodePath="code" baseType="QUICK.DomainResource">
-        <ns4:element name="locationPerformed" elementType="QUICK.LocationPerformed"/>
+        <ns4:element name="locationPerformed" elementType="System.String"/>
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
         </ns4:element>
@@ -1929,9 +1911,6 @@
         <ns4:element name="longitude" elementType="System.Decimal"/>
         <ns4:element name="latitude" elementType="System.Decimal"/>
         <ns4:element name="altitude" elementType="System.Decimal"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="LocationPerformed" retrievable="false" baseType="QUICK.BackboneElement">
-        <ns4:element name="url" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="MarketingStatus" label="MarketingStatus" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="country" elementType="QUICK.CodeableConcept"/>
@@ -2267,8 +2246,8 @@
         <ns4:element name="div" elementType="QUICK.xhtml"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Nationality" retrievable="false" baseType="QUICK.BackboneElement">
-        <ns4:element name="code" elementType="QUICK.Extension"/>
-        <ns4:element name="period" elementType="QUICK.Extension"/>
+        <ns4:element name="code" elementType="System.String"/>
+        <ns4:element name="period" elementType="System.String"/>
         <ns4:element name="url" elementType="System.String"/>
         <ns4:element name="value">
             <ns4:elementTypeSpecifier xsi:type="ns4:ChoiceTypeSpecifier">
@@ -2325,7 +2304,7 @@
         </ns4:element>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Note" label="QICoreDiagnosticReportNote" retrievable="true" primaryCodePath="code" baseType="QUICK.DomainResource">
-        <ns4:element name="locationPerformed" elementType="QUICK.LocationPerformed"/>
+        <ns4:element name="locationPerformed" elementType="System.String"/>
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
         </ns4:element>
@@ -2622,16 +2601,16 @@
         <ns4:element name="race" elementType="System.String"/>
         <ns4:element name="ethnicity" elementType="System.String"/>
         <ns4:element name="birthsex" elementType="System.String"/>
-        <ns4:element name="religion" elementType="QUICK.Religion"/>
-        <ns4:element name="birthPlace" elementType="QUICK.BirthPlace"/>
+        <ns4:element name="religion" elementType="System.String"/>
+        <ns4:element name="birthPlace" elementType="System.String"/>
         <ns4:element name="disability">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Disability"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
         </ns4:element>
         <ns4:element name="nationality">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Nationality"/>
         </ns4:element>
-        <ns4:element name="cadavericDonor" elementType="QUICK.CadavericDonor"/>
-        <ns4:element name="birthTime" elementType="QUICK.BirthTime"/>
+        <ns4:element name="cadavericDonor" elementType="System.String"/>
+        <ns4:element name="birthTime" elementType="System.String"/>
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
         </ns4:element>
@@ -2783,12 +2762,6 @@
         <ns4:element name="endpoint">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Preferred" retrievable="false" baseType="QUICK.BackboneElement">
-        <ns4:element name="url" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Preferred" retrievable="false" baseType="QUICK.BackboneElement">
-        <ns4:element name="url" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Procedure" label="QICoreProcedure" retrievable="true" primaryCodePath="code" baseType="QUICK.DomainResource">
         <ns4:element name="approachBodyStructure">
@@ -2950,9 +2923,6 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.RelatedPerson.Communication"/>
         </ns4:element>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Religion" retrievable="false" baseType="QUICK.BackboneElement">
-        <ns4:element name="url" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="SampledData" label="SampledData" retrievable="false" baseType="QUICK.Element">
         <ns4:element name="origin" elementType="QUICK.SimpleQuantity"/>
         <ns4:element name="period" elementType="QUICK.decimal"/>
@@ -2961,9 +2931,6 @@
         <ns4:element name="upperLimit" elementType="QUICK.decimal"/>
         <ns4:element name="dimensions" elementType="QUICK.positiveInt"/>
         <ns4:element name="data" elementType="QUICK.string"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Service" retrievable="false" baseType="QUICK.BackboneElement">
-        <ns4:element name="url" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Servicerequest" label="QICoreServiceRequest" retrievable="true" primaryCodePath="code" baseType="QUICK.DomainResource">
         <ns4:element name="statusReason" elementType="System.String"/>

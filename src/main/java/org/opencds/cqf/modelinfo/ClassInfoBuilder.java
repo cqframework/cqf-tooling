@@ -673,7 +673,8 @@ public abstract class ClassInfoBuilder {
             List<CanonicalType> extensionProfile = ed.getType().get(0).getProfile();
             try {
                 if (extensionProfile.size() == 1) {
-                        typeName = capitalize(unQualify(getTail(extensionProfile.get(0).asStringValue())));
+                    //set targetPath here
+                    typeName = capitalize(unQualify(getTail(extensionProfile.get(0).asStringValue())));
                         if (!this.typeInfos.containsKey(this.getTypeName(modelName, typeName))) {
 
                             List<ClassInfoElement> elements = new ArrayList<>();
@@ -745,7 +746,7 @@ public abstract class ClassInfoBuilder {
                     }
 
             if (!this.typeInfos.containsKey(this.getTypeName(modelName, typeName))) {
-
+                //set targetPath here
                 List<ClassInfoElement> elements = new ArrayList<>();
                 ClassInfoElement cie = new ClassInfoElement();
                 cie.setName("value");
@@ -873,6 +874,11 @@ public abstract class ClassInfoBuilder {
         }
 
         if (elements.size() > 0) {
+            if(elements.size() == 1) {
+                if(this.settings.primitiveTypeMappings.containsKey(elements.get(0).getElementType())) {
+                    //set targetPath here
+                }
+            }
             if (typeDefinition != null && isBackboneElement(typeDefinition)) {
                 //String typeName = this.getComponentTypeName(path);
                 String typeName = this.capitalizePath(path);
@@ -892,6 +898,12 @@ public abstract class ClassInfoBuilder {
                 // elements of an extension (i.e. url and value)
                 // Use the type of the value element
                 String extensionTypeName;
+                if(elements.size() == 1) {
+                    String primitiveTypeName = "QUICK." + unQualify(elements.get(0).getElementType()).toLowerCase();
+                    if(this.settings.primitiveTypeMappings.containsKey(primitiveTypeName)) {
+                        //set targetPath here
+                    }
+                }
                 if((ed.getType().size() == 1))
                 {
                     List<CanonicalType> canonicalTypeRefs = ed.getType().get(0).getProfile();
@@ -901,7 +913,7 @@ public abstract class ClassInfoBuilder {
                     else extensionTypeName = path;
                 }
                 else extensionTypeName = path;
-                ClassInfo componentClassInfo = new ClassInfo().withNamespace(modelName).withName(this.unQualify(this.capitalizePath(extensionTypeName))).withLabel(null)
+                    ClassInfo componentClassInfo = new ClassInfo().withNamespace(modelName).withName(this.unQualify(this.capitalizePath(extensionTypeName))).withLabel(null)
                         .withBaseType(modelName + ".BackboneElement").withRetrievable(false).withElement(elements)
                         .withPrimaryCodePath(null);
 
