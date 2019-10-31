@@ -2,8 +2,8 @@
 <ns4:modelInfo name="QUICK" version="3.2.0" url="http://hl7.org/fhir/us/qicore" targetQualifier="quick" patientClassName="QUICK.Patient" patientBirthDatePropertyName="birthDate" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns4="urn:hl7-org:elm-modelinfo:r1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <ns4:requiredModelInfo name="System" version="1.0.0"/>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Address" label="Address" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="use" elementType="QUICK.AddressUse"/>
-        <ns4:element name="type" elementType="QUICK.AddressType"/>
+        <ns4:element name="use" elementType="System.String"/>
+        <ns4:element name="type" elementType="System.String"/>
         <ns4:element name="text" elementType="QUICK.string"/>
         <ns4:element name="line">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.string"/>
@@ -15,15 +15,6 @@
         <ns4:element name="country" elementType="QUICK.string"/>
         <ns4:element name="period" elementType="QUICK.Period"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="AddressType" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="AddressUse" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="AdministrativeGender" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="AdverseEvent.SuspectEntity" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="instance" elementType="QUICK.Reference"/>
         <ns4:element name="causality" elementType="QUICK.AdverseEvent.SuspectEntity.Causality"/>
@@ -34,12 +25,9 @@
         <ns4:element name="author" elementType="QUICK.Reference"/>
         <ns4:element name="method" elementType="System.Concept"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="AdverseEventActuality" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Adverseevent" label="QICoreAdverseEvent" retrievable="true" baseType="QUICK.DomainResource">
         <ns4:element name="identifier" elementType="QUICK.Identifier"/>
-        <ns4:element name="actuality" elementType="QUICK.AdverseEventActuality"/>
+        <ns4:element name="actuality" elementType="System.String"/>
         <ns4:element name="category">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
         </ns4:element>
@@ -73,9 +61,6 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="AggregationMode" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="AllergyIntolerance.Reaction" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="substance" elementType="System.Concept"/>
         <ns4:element name="manifestation">
@@ -83,23 +68,11 @@
         </ns4:element>
         <ns4:element name="description" elementType="System.String"/>
         <ns4:element name="onset" elementType="System.DateTime"/>
-        <ns4:element name="severity" elementType="QUICK.AllergyIntoleranceSeverity"/>
+        <ns4:element name="severity" elementType="System.String"/>
         <ns4:element name="exposureRoute" elementType="System.Concept"/>
         <ns4:element name="note">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Annotation"/>
         </ns4:element>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="AllergyIntoleranceCategory" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="AllergyIntoleranceCriticality" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="AllergyIntoleranceSeverity" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="AllergyIntoleranceType" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Allergyintolerance" label="QICoreAllergyIntolerance" retrievable="true" primaryCodePath="code" baseType="QUICK.DomainResource">
         <ns4:element name="resolutionAge" elementType="System.String"/>
@@ -109,11 +82,11 @@
         </ns4:element>
         <ns4:element name="clinicalStatus" elementType="System.Concept"/>
         <ns4:element name="verificationStatus" elementType="System.Concept"/>
-        <ns4:element name="type" elementType="QUICK.AllergyIntoleranceType"/>
+        <ns4:element name="type" elementType="System.String"/>
         <ns4:element name="category">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.AllergyIntoleranceCategory"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
         </ns4:element>
-        <ns4:element name="criticality" elementType="QUICK.AllergyIntoleranceCriticality"/>
+        <ns4:element name="criticality" elementType="System.String"/>
         <ns4:element name="code" elementType="System.Concept"/>
         <ns4:element name="patient" elementType="QUICK.Reference"/>
         <ns4:element name="encounter" elementType="QUICK.Reference"/>
@@ -147,7 +120,7 @@
         <ns4:element name="text" elementType="QUICK.markdown"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Attachment" label="Attachment" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="contentType" elementType="QUICK.MimeType"/>
+        <ns4:element name="contentType" elementType="System.String"/>
         <ns4:element name="language" elementType="QUICK.code"/>
         <ns4:element name="data" elementType="QUICK.base64Binary"/>
         <ns4:element name="url" elementType="QUICK.url"/>
@@ -160,9 +133,6 @@
         <ns4:element name="modifierExtension">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Extension"/>
         </ns4:element>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="BindingStrength" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="BirthPlace" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="url" elementType="System.String"/>
@@ -203,7 +173,7 @@
         <ns4:element name="detail" elementType="QUICK.CarePlan.Activity.Detail"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="CarePlan.Activity.Detail" retrievable="false" baseType="QUICK.BackboneElement">
-        <ns4:element name="kind" elementType="QUICK.CarePlanActivityKind"/>
+        <ns4:element name="kind" elementType="System.String"/>
         <ns4:element name="instantiatesCanonical">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Canonical"/>
         </ns4:element>
@@ -220,7 +190,7 @@
         <ns4:element name="goal">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.CarePlanActivityStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="statusReason" elementType="System.Concept"/>
         <ns4:element name="doNotPerform" elementType="System.Boolean"/>
         <ns4:element name="scheduled">
@@ -244,26 +214,11 @@
         <ns4:element name="quantity" elementType="QUICK.SimpleQuantity"/>
         <ns4:element name="description" elementType="System.String"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="CarePlanActivityKind" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="CarePlanActivityStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="CarePlanIntent" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="CarePlanStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="CareTeam.Participant" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="role" elementType="System.Concept"/>
         <ns4:element name="member" elementType="QUICK.Reference"/>
         <ns4:element name="onBehalfOf" elementType="QUICK.Reference"/>
         <ns4:element name="period" elementType="System.DateTime"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="CareTeamStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Careplan" label="QICoreCarePlan" retrievable="true" baseType="QUICK.DomainResource">
         <ns4:element name="identifier">
@@ -284,8 +239,8 @@
         <ns4:element name="partOf">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.CarePlanStatus"/>
-        <ns4:element name="intent" elementType="QUICK.CarePlanIntent"/>
+        <ns4:element name="status" elementType="System.String"/>
+        <ns4:element name="intent" elementType="System.String"/>
         <ns4:element name="category">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
         </ns4:element>
@@ -323,7 +278,7 @@
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.CareTeamStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="category">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
         </ns4:element>
@@ -354,10 +309,10 @@
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.ClaimStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="type" elementType="System.Concept"/>
         <ns4:element name="subType" elementType="System.Concept"/>
-        <ns4:element name="use" elementType="QUICK.Use"/>
+        <ns4:element name="use" elementType="System.String"/>
         <ns4:element name="patient" elementType="QUICK.Reference"/>
         <ns4:element name="billablePeriod" elementType="System.DateTime"/>
         <ns4:element name="created" elementType="System.DateTime"/>
@@ -578,9 +533,6 @@
         </ns4:element>
         <ns4:element name="reason" elementType="System.Concept"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ClaimStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Communication" label="QICoreCommunication" retrievable="true" primaryCodePath="category" baseType="QUICK.DomainResource">
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
@@ -600,12 +552,12 @@
         <ns4:element name="inResponseTo">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.CommunicationStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="statusReason" elementType="System.Concept"/>
         <ns4:element name="category">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
         </ns4:element>
-        <ns4:element name="priority" elementType="QUICK.CommunicationPriority"/>
+        <ns4:element name="priority" elementType="System.String"/>
         <ns4:element name="medium">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
         </ns4:element>
@@ -643,9 +595,6 @@
             </ns4:elementTypeSpecifier>
         </ns4:element>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="CommunicationPriority" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="CommunicationRequest.Payload" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="content">
             <ns4:elementTypeSpecifier xsi:type="ns4:ChoiceTypeSpecifier">
@@ -654,12 +603,6 @@
                 <ns4:choice xsi:type="ns4:NamedTypeSpecifier" modelName="QUICK" name="Reference"/>
             </ns4:elementTypeSpecifier>
         </ns4:element>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="CommunicationRequestStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="CommunicationStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Communicationrequest" label="QICoreCommunicationRequest" retrievable="true" baseType="QUICK.DomainResource">
         <ns4:element name="identifier">
@@ -672,12 +615,12 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
         <ns4:element name="groupIdentifier" elementType="QUICK.Identifier"/>
-        <ns4:element name="status" elementType="QUICK.CommunicationRequestStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="statusReason" elementType="System.Concept"/>
         <ns4:element name="category">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
         </ns4:element>
-        <ns4:element name="priority" elementType="QUICK.CommunicationPriority"/>
+        <ns4:element name="priority" elementType="System.String"/>
         <ns4:element name="doNotPerform" elementType="System.Boolean"/>
         <ns4:element name="medium">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
@@ -778,9 +721,6 @@
         </ns4:element>
         <ns4:element name="type" elementType="System.Concept"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ConstraintSeverity" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ContactDetail" label="ContactDetail" retrievable="false" baseType="QUICK.Element">
         <ns4:element name="name" elementType="QUICK.string"/>
         <ns4:element name="telecom">
@@ -788,33 +728,24 @@
         </ns4:element>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ContactPoint" label="ContactPoint" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="system" elementType="QUICK.ContactPointSystem"/>
+        <ns4:element name="system" elementType="System.String"/>
         <ns4:element name="value" elementType="QUICK.string"/>
-        <ns4:element name="use" elementType="QUICK.ContactPointUse"/>
+        <ns4:element name="use" elementType="System.String"/>
         <ns4:element name="rank" elementType="QUICK.positiveInt"/>
         <ns4:element name="period" elementType="QUICK.Period"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ContactPointSystem" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ContactPointUse" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Contributor" label="Contributor" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="type" elementType="QUICK.ContributorType"/>
+        <ns4:element name="type" elementType="System.String"/>
         <ns4:element name="name" elementType="QUICK.string"/>
         <ns4:element name="contact">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.ContactDetail"/>
         </ns4:element>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ContributorType" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Coverage" label="QICoreCoverage" retrievable="true" primaryCodePath="type" baseType="QUICK.DomainResource">
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.CoverageStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="type" elementType="System.Concept"/>
         <ns4:element name="policyHolder" elementType="QUICK.Reference"/>
         <ns4:element name="subscriber" elementType="QUICK.Reference"/>
@@ -860,11 +791,8 @@
         <ns4:element name="type" elementType="System.Concept"/>
         <ns4:element name="period" elementType="System.DateTime"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="CoverageStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="DataRequirement" label="DataRequirement" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="type" elementType="QUICK.FHIRAllTypes"/>
+        <ns4:element name="type" elementType="System.String"/>
         <ns4:element name="profile">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.canonical"/>
         </ns4:element>
@@ -888,12 +816,6 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Element"/>
         </ns4:element>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="DayOfWeek" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="DaysOfWeek" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="De" label="DataElement constraint on ElementDefinition data type" retrievable="false" baseType="QUICK.ElementDefinition"/>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Device" label="QICoreDevice" retrievable="true" primaryCodePath="type" baseType="QUICK.DomainResource">
         <ns4:element name="identifier">
@@ -901,7 +823,7 @@
         </ns4:element>
         <ns4:element name="definition" elementType="QUICK.Reference"/>
         <ns4:element name="udiCarrier" elementType="QUICK.Device.UdiCarrier"/>
-        <ns4:element name="status" elementType="QUICK.FHIRDeviceStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="statusReason">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
         </ns4:element>
@@ -943,7 +865,7 @@
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Device.DeviceName" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="name" elementType="System.String"/>
-        <ns4:element name="type" elementType="QUICK.DeviceNameType"/>
+        <ns4:element name="type" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Device.Property" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="type" elementType="System.Concept"/>
@@ -964,14 +886,11 @@
         <ns4:element name="jurisdiction" elementType="System.String"/>
         <ns4:element name="carrierAIDC" elementType="System.String"/>
         <ns4:element name="carrierHRF" elementType="System.String"/>
-        <ns4:element name="entryType" elementType="QUICK.UDIEntryType"/>
+        <ns4:element name="entryType" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Device.Version" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="type" elementType="System.Concept"/>
         <ns4:element name="component" elementType="QUICK.Identifier"/>
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="DeviceNameType" retrievable="false" baseType="QUICK.Element">
         <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="DeviceRequest.Parameter" retrievable="false" baseType="QUICK.BackboneElement">
@@ -984,12 +903,6 @@
                 <ns4:choice xsi:type="ns4:NamedTypeSpecifier" modelName="System" name="Boolean"/>
             </ns4:elementTypeSpecifier>
         </ns4:element>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="DeviceRequestStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="DeviceUseStatementStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Devicerequest" label="QICoreDeviceRequest" retrievable="true" baseType="QUICK.DomainResource">
         <ns4:element name="doNotPerform" elementType="System.String"/>
@@ -1009,9 +922,9 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
         <ns4:element name="groupIdentifier" elementType="QUICK.Identifier"/>
-        <ns4:element name="status" elementType="QUICK.DeviceRequestStatus"/>
-        <ns4:element name="intent" elementType="QUICK.RequestIntent"/>
-        <ns4:element name="priority" elementType="QUICK.RequestPriority"/>
+        <ns4:element name="status" elementType="System.String"/>
+        <ns4:element name="intent" elementType="System.String"/>
+        <ns4:element name="priority" elementType="System.String"/>
         <ns4:element name="code">
             <ns4:elementTypeSpecifier xsi:type="ns4:ChoiceTypeSpecifier">
                 <ns4:choice xsi:type="ns4:NamedTypeSpecifier" modelName="QUICK" name="Reference"/>
@@ -1061,7 +974,7 @@
         <ns4:element name="basedOn">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.DeviceUseStatementStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="subject" elementType="QUICK.Reference"/>
         <ns4:element name="derivedFrom">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
@@ -1091,14 +1004,8 @@
         <ns4:element name="comment" elementType="System.String"/>
         <ns4:element name="link" elementType="QUICK.Reference"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="DiagnosticReportStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Disability" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="url" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="DiscriminatorType" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Dosage" label="Dosage" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="sequence" elementType="QUICK.integer"/>
@@ -1132,7 +1039,7 @@
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ElementDefinition" label="ElementDefinition" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="path" elementType="QUICK.string"/>
         <ns4:element name="representation">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.PropertyRepresentation"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
         </ns4:element>
         <ns4:element name="sliceName" elementType="QUICK.string"/>
         <ns4:element name="sliceIsConstraining" elementType="QUICK.boolean"/>
@@ -1369,7 +1276,7 @@
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.EncounterStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="statusHistory">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Encounter.StatusHistory"/>
         </ns4:element>
@@ -1444,7 +1351,7 @@
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Encounter.Location" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="location" elementType="QUICK.Reference"/>
-        <ns4:element name="status" elementType="QUICK.EncounterLocationStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="physicalType" elementType="System.Concept"/>
         <ns4:element name="period" elementType="System.DateTime"/>
     </ns4:typeInfo>
@@ -1456,17 +1363,8 @@
         <ns4:element name="individual" elementType="QUICK.Reference"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Encounter.StatusHistory" retrievable="false" baseType="QUICK.BackboneElement">
-        <ns4:element name="status" elementType="QUICK.EncounterStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="period" elementType="System.DateTime"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="EncounterLocationStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="EncounterStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="EventTiming" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Expression" label="Expression" retrievable="false" baseType="QUICK.Element">
         <ns4:element name="description" elementType="QUICK.string"/>
@@ -1536,18 +1434,6 @@
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Extension:nationality.Extension:period" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="url" elementType="System.String"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="FHIRAllTypes" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="FHIRDeviceStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="FHIRSubstanceStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="FamilyHistoryStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="FamilyMemberHistory.Condition" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="code" elementType="System.Concept"/>
         <ns4:element name="outcome" elementType="System.Concept"/>
@@ -1574,7 +1460,7 @@
         <ns4:element name="instantiatesUri">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.FamilyHistoryStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="dataAbsentReason" elementType="System.Concept"/>
         <ns4:element name="patient" elementType="QUICK.Reference"/>
         <ns4:element name="date" elementType="System.DateTime"/>
@@ -1622,7 +1508,7 @@
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.FlagStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="category">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
         </ns4:element>
@@ -1632,15 +1518,12 @@
         <ns4:element name="encounter" elementType="QUICK.Reference"/>
         <ns4:element name="author" elementType="QUICK.Reference"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="FlagStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Goal" label="QICoreGoal" retrievable="true" primaryCodePath="category" baseType="QUICK.DomainResource">
         <ns4:element name="reasonRejected" elementType="System.String"/>
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
         </ns4:element>
-        <ns4:element name="lifecycleStatus" elementType="QUICK.GoalLifecycleStatus"/>
+        <ns4:element name="lifecycleStatus" elementType="System.String"/>
         <ns4:element name="achievementStatus" elementType="System.Concept"/>
         <ns4:element name="category">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
@@ -1688,11 +1571,8 @@
             </ns4:elementTypeSpecifier>
         </ns4:element>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="GoalLifecycleStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="HumanName" label="HumanName" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="use" elementType="QUICK.NameUse"/>
+        <ns4:element name="use" elementType="System.String"/>
         <ns4:element name="text" elementType="QUICK.string"/>
         <ns4:element name="family" elementType="QUICK.string"/>
         <ns4:element name="given">
@@ -1707,15 +1587,12 @@
         <ns4:element name="period" elementType="QUICK.Period"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Identifier" label="Identifier" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="use" elementType="QUICK.IdentifierUse"/>
+        <ns4:element name="use" elementType="System.String"/>
         <ns4:element name="type" elementType="QUICK.CodeableConcept"/>
         <ns4:element name="system" elementType="QUICK.uri"/>
         <ns4:element name="value" elementType="QUICK.string"/>
         <ns4:element name="period" elementType="QUICK.Period"/>
         <ns4:element name="assigner" elementType="QUICK.Reference"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="IdentifierUse" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ImagingStudy.Series" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="uid" elementType="System.String"/>
@@ -1749,14 +1626,11 @@
         <ns4:element name="function" elementType="System.Concept"/>
         <ns4:element name="actor" elementType="QUICK.Reference"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ImagingStudyStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Imagingstudy" label="QICoreImagingStudy" retrievable="true" baseType="QUICK.DomainResource">
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.ImagingStudyStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="modality">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Code"/>
         </ns4:element>
@@ -1798,7 +1672,7 @@
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.ImmunizationStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="statusReason" elementType="System.Concept"/>
         <ns4:element name="vaccineCode" elementType="System.Concept"/>
         <ns4:element name="patient" elementType="QUICK.Reference"/>
@@ -1883,9 +1757,6 @@
         <ns4:element name="detail" elementType="QUICK.Reference"/>
         <ns4:element name="reported" elementType="System.Boolean"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ImmunizationEvaluationStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ImmunizationRecommendation.Recommendation" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="vaccineCode">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
@@ -1926,14 +1797,11 @@
         <ns4:element name="code" elementType="System.Concept"/>
         <ns4:element name="value" elementType="System.DateTime"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ImmunizationStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Immunizationevaluation" label="QICoreImmunizationEvaluation" retrievable="true" baseType="QUICK.DomainResource">
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.ImmunizationEvaluationStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="patient" elementType="QUICK.Reference"/>
         <ns4:element name="date" elementType="System.DateTime"/>
         <ns4:element name="authority" elementType="QUICK.Reference"/>
@@ -1977,7 +1845,7 @@
         <ns4:element name="basedOn">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.DiagnosticReportStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="category">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
         </ns4:element>
@@ -2018,21 +1886,18 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Attachment"/>
         </ns4:element>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="LinkType" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Location" label="QICoreLocation" retrievable="true" baseType="QUICK.DomainResource">
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.LocationStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="operationalStatus" elementType="System.Code"/>
         <ns4:element name="name" elementType="System.String"/>
         <ns4:element name="alias">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
         </ns4:element>
         <ns4:element name="description" elementType="System.String"/>
-        <ns4:element name="mode" elementType="QUICK.LocationMode"/>
+        <ns4:element name="mode" elementType="System.String"/>
         <ns4:element name="type">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
         </ns4:element>
@@ -2054,7 +1919,7 @@
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Location.HoursOfOperation" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="daysOfWeek">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.DaysOfWeek"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
         </ns4:element>
         <ns4:element name="allDay" elementType="System.Boolean"/>
         <ns4:element name="openingTime" elementType="System.Time"/>
@@ -2065,14 +1930,8 @@
         <ns4:element name="latitude" elementType="System.Decimal"/>
         <ns4:element name="altitude" elementType="System.Decimal"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="LocationMode" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="LocationPerformed" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="url" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="LocationStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="MarketingStatus" label="MarketingStatus" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="country" elementType="QUICK.CodeableConcept"/>
@@ -2086,7 +1945,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
         </ns4:element>
         <ns4:element name="code" elementType="System.Concept"/>
-        <ns4:element name="status" elementType="QUICK.MedicationStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="manufacturer" elementType="QUICK.Reference"/>
         <ns4:element name="form" elementType="System.Concept"/>
         <ns4:element name="amount" elementType="QUICK.Ratio"/>
@@ -2126,9 +1985,6 @@
         <ns4:element name="function" elementType="System.Concept"/>
         <ns4:element name="actor" elementType="QUICK.Reference"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="MedicationAdministrationStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="MedicationDispense.Performer" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="function" elementType="System.Concept"/>
         <ns4:element name="actor" elementType="QUICK.Reference"/>
@@ -2142,9 +1998,6 @@
         <ns4:element name="responsibleParty">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="MedicationDispenseStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="MedicationRequest.DispenseRequest" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="initialFill" elementType="QUICK.MedicationRequest.DispenseRequest.InitialFill"/>
@@ -2168,21 +2021,6 @@
         </ns4:element>
         <ns4:element name="reason" elementType="System.Concept"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="MedicationRequestIntent" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="MedicationRequestPriority" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="MedicationRequestStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="MedicationStatementStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="MedicationStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Medicationadministration" label="QICoreMedicationAdministration" retrievable="true" baseType="QUICK.DomainResource">
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
@@ -2193,7 +2031,7 @@
         <ns4:element name="partOf">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.MedicationAdministrationStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="statusReason">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
         </ns4:element>
@@ -2243,7 +2081,7 @@
         <ns4:element name="partOf">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.MedicationDispenseStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="statusReason">
             <ns4:elementTypeSpecifier xsi:type="ns4:ChoiceTypeSpecifier">
                 <ns4:choice xsi:type="ns4:NamedTypeSpecifier" modelName="System" name="Concept"/>
@@ -2296,13 +2134,13 @@
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.MedicationRequestStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="statusReason" elementType="System.Concept"/>
-        <ns4:element name="intent" elementType="QUICK.MedicationRequestIntent"/>
+        <ns4:element name="intent" elementType="System.String"/>
         <ns4:element name="category">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
         </ns4:element>
-        <ns4:element name="priority" elementType="QUICK.MedicationRequestPriority"/>
+        <ns4:element name="priority" elementType="System.String"/>
         <ns4:element name="doNotPerform" elementType="System.Boolean"/>
         <ns4:element name="reported">
             <ns4:elementTypeSpecifier xsi:type="ns4:ChoiceTypeSpecifier">
@@ -2372,7 +2210,7 @@
         <ns4:element name="partOf">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.MedicationStatementStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="statusReason">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
         </ns4:element>
@@ -2423,19 +2261,10 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Coding"/>
         </ns4:element>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="MimeType" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="MoneyQuantity" label="MoneyQuantity" retrievable="false" baseType="QUICK.Quantity"/>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="NameUse" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Narrative" label="Narrative" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="status" elementType="QUICK.NarrativeStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="div" elementType="QUICK.xhtml"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="NarrativeStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Nationality" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="code" elementType="QUICK.Extension"/>
@@ -2503,7 +2332,7 @@
         <ns4:element name="basedOn">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.DiagnosticReportStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="category">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
         </ns4:element>
@@ -2542,9 +2371,6 @@
         <ns4:element name="presentedForm">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Attachment"/>
         </ns4:element>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="NutritiionOrderIntent" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="NutritionOrder.EnteralFormula" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="baseFormulaType" elementType="System.Concept"/>
@@ -2604,9 +2430,6 @@
         <ns4:element name="quantity" elementType="QUICK.SimpleQuantity"/>
         <ns4:element name="instruction" elementType="System.String"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="NutritionOrderStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Nutritionorder" label="QICoreNutritionOrder" retrievable="true" baseType="QUICK.DomainResource">
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
@@ -2620,8 +2443,8 @@
         <ns4:element name="instantiates">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.NutritionOrderStatus"/>
-        <ns4:element name="intent" elementType="QUICK.NutritiionOrderIntent"/>
+        <ns4:element name="status" elementType="System.String"/>
+        <ns4:element name="intent" elementType="System.String"/>
         <ns4:element name="patient" elementType="QUICK.Reference"/>
         <ns4:element name="encounter" elementType="QUICK.Reference"/>
         <ns4:element name="dateTime" elementType="System.DateTime"/>
@@ -2656,7 +2479,7 @@
         <ns4:element name="partOf">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.ObservationStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="category">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
         </ns4:element>
@@ -2752,9 +2575,6 @@
         <ns4:element name="age" elementType="System.Quantity"/>
         <ns4:element name="text" elementType="System.String"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ObservationStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Organization" label="QICoreOrganization" retrievable="true" baseType="QUICK.DomainResource">
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
@@ -2791,15 +2611,12 @@
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ParameterDefinition" label="ParameterDefinition" retrievable="false" baseType="QUICK.Element">
         <ns4:element name="name" elementType="QUICK.code"/>
-        <ns4:element name="use" elementType="QUICK.ParameterUse"/>
+        <ns4:element name="use" elementType="System.String"/>
         <ns4:element name="min" elementType="QUICK.integer"/>
         <ns4:element name="max" elementType="QUICK.string"/>
         <ns4:element name="documentation" elementType="QUICK.string"/>
-        <ns4:element name="type" elementType="QUICK.FHIRAllTypes"/>
+        <ns4:element name="type" elementType="System.String"/>
         <ns4:element name="profile" elementType="QUICK.canonical"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ParameterUse" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Patient" label="QICorePatient" retrievable="true" baseType="QUICK.DomainResource">
         <ns4:element name="race" elementType="System.String"/>
@@ -2825,7 +2642,7 @@
         <ns4:element name="telecom">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.ContactPoint"/>
         </ns4:element>
-        <ns4:element name="gender" elementType="QUICK.AdministrativeGender"/>
+        <ns4:element name="gender" elementType="System.String"/>
         <ns4:element name="birthDate" elementType="System.DateTime"/>
         <ns4:element name="deceased">
             <ns4:elementTypeSpecifier xsi:type="ns4:ChoiceTypeSpecifier">
@@ -2873,13 +2690,13 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.ContactPoint"/>
         </ns4:element>
         <ns4:element name="address" elementType="QUICK.Address"/>
-        <ns4:element name="gender" elementType="QUICK.AdministrativeGender"/>
+        <ns4:element name="gender" elementType="System.String"/>
         <ns4:element name="organization" elementType="QUICK.Reference"/>
         <ns4:element name="period" elementType="System.DateTime"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Patient.Link" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="other" elementType="QUICK.Reference"/>
-        <ns4:element name="type" elementType="QUICK.LinkType"/>
+        <ns4:element name="type" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Population" label="Population" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="age">
@@ -2905,7 +2722,7 @@
         <ns4:element name="address">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Address"/>
         </ns4:element>
-        <ns4:element name="gender" elementType="QUICK.AdministrativeGender"/>
+        <ns4:element name="gender" elementType="System.String"/>
         <ns4:element name="birthDate" elementType="System.DateTime"/>
         <ns4:element name="photo">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Attachment"/>
@@ -2927,7 +2744,7 @@
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="PractitionerRole.AvailableTime" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="daysOfWeek">
-            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.DaysOfWeek"/>
+            <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.String"/>
         </ns4:element>
         <ns4:element name="allDay" elementType="System.Boolean"/>
         <ns4:element name="availableStartTime" elementType="System.Time"/>
@@ -2993,7 +2810,7 @@
         <ns4:element name="partOf">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.ProcedureStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="statusReason" elementType="System.Concept"/>
         <ns4:element name="category" elementType="System.Concept"/>
         <ns4:element name="code" elementType="System.Concept"/>
@@ -3055,9 +2872,6 @@
         <ns4:element name="actor" elementType="QUICK.Reference"/>
         <ns4:element name="onBehalfOf" elementType="QUICK.Reference"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ProcedureStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ProdCharacteristic" label="ProdCharacteristic" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="height" elementType="QUICK.Quantity"/>
         <ns4:element name="width" elementType="QUICK.Quantity"/>
@@ -3085,12 +2899,6 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.CodeableConcept"/>
         </ns4:element>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="PropertyRepresentation" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="QuantityComparator" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Ratio" label="Ratio" retrievable="false" baseType="QUICK.Element">
         <ns4:element name="numerator" elementType="QUICK.Quantity"/>
         <ns4:element name="denominator" elementType="QUICK.Quantity"/>
@@ -3101,20 +2909,14 @@
         <ns4:element name="identifier" elementType="QUICK.Identifier"/>
         <ns4:element name="display" elementType="QUICK.string"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ReferenceVersionRules" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="RelatedArtifact" label="RelatedArtifact" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="type" elementType="QUICK.RelatedArtifactType"/>
+        <ns4:element name="type" elementType="System.String"/>
         <ns4:element name="label" elementType="QUICK.string"/>
         <ns4:element name="display" elementType="QUICK.string"/>
         <ns4:element name="citation" elementType="QUICK.markdown"/>
         <ns4:element name="url" elementType="QUICK.url"/>
         <ns4:element name="document" elementType="QUICK.Attachment"/>
         <ns4:element name="resource" elementType="QUICK.canonical"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="RelatedArtifactType" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="RelatedPerson.Communication" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="language" elementType="System.Concept"/>
@@ -3135,7 +2937,7 @@
         <ns4:element name="telecom">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.ContactPoint"/>
         </ns4:element>
-        <ns4:element name="gender" elementType="QUICK.AdministrativeGender"/>
+        <ns4:element name="gender" elementType="System.String"/>
         <ns4:element name="birthDate" elementType="System.DateTime"/>
         <ns4:element name="address">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Address"/>
@@ -3151,12 +2953,6 @@
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Religion" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="url" elementType="System.String"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="RequestIntent" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="RequestPriority" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="SampledData" label="SampledData" retrievable="false" baseType="QUICK.Element">
         <ns4:element name="origin" elementType="QUICK.SimpleQuantity"/>
         <ns4:element name="period" elementType="QUICK.decimal"/>
@@ -3168,15 +2964,6 @@
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Service" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="url" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ServiceRequestIntent" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ServiceRequestPriority" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="ServiceRequestStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Servicerequest" label="QICoreServiceRequest" retrievable="true" primaryCodePath="code" baseType="QUICK.DomainResource">
         <ns4:element name="statusReason" elementType="System.String"/>
@@ -3200,12 +2987,12 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
         <ns4:element name="requisition" elementType="QUICK.Identifier"/>
-        <ns4:element name="status" elementType="QUICK.ServiceRequestStatus"/>
-        <ns4:element name="intent" elementType="QUICK.ServiceRequestIntent"/>
+        <ns4:element name="status" elementType="System.String"/>
+        <ns4:element name="intent" elementType="System.String"/>
         <ns4:element name="category">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
         </ns4:element>
-        <ns4:element name="priority" elementType="QUICK.ServiceRequestPriority"/>
+        <ns4:element name="priority" elementType="System.String"/>
         <ns4:element name="doNotPerform" elementType="System.Boolean"/>
         <ns4:element name="code" elementType="System.Concept"/>
         <ns4:element name="orderDetail">
@@ -3278,22 +3065,16 @@
         <ns4:element name="when" elementType="QUICK.instant"/>
         <ns4:element name="who" elementType="QUICK.Reference"/>
         <ns4:element name="onBehalfOf" elementType="QUICK.Reference"/>
-        <ns4:element name="targetFormat" elementType="QUICK.MimeType"/>
-        <ns4:element name="sigFormat" elementType="QUICK.MimeType"/>
+        <ns4:element name="targetFormat" elementType="System.String"/>
+        <ns4:element name="sigFormat" elementType="System.String"/>
         <ns4:element name="data" elementType="QUICK.base64Binary"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="SlicingRules" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="SortDirection" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Specimen" label="QICoreSpecimen" retrievable="true" primaryCodePath="type" baseType="QUICK.DomainResource">
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
         </ns4:element>
         <ns4:element name="accessionIdentifier" elementType="QUICK.Identifier"/>
-        <ns4:element name="status" elementType="QUICK.SpecimenStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="type" elementType="System.Concept"/>
         <ns4:element name="subject" elementType="QUICK.Reference"/>
         <ns4:element name="receivedTime" elementType="System.DateTime"/>
@@ -3364,14 +3145,11 @@
             </ns4:elementTypeSpecifier>
         </ns4:element>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="SpecimenStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Substance" label="QICoreSubstance" retrievable="true" primaryCodePath="code" baseType="QUICK.DomainResource">
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Identifier"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.FHIRSubstanceStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="category">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="System.Concept"/>
         </ns4:element>
@@ -3418,11 +3196,11 @@
         <ns4:element name="partOf">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
-        <ns4:element name="status" elementType="QUICK.TaskStatus"/>
+        <ns4:element name="status" elementType="System.String"/>
         <ns4:element name="statusReason" elementType="System.Concept"/>
         <ns4:element name="businessStatus" elementType="System.Concept"/>
-        <ns4:element name="intent" elementType="QUICK.TaskIntent"/>
-        <ns4:element name="priority" elementType="QUICK.TaskPriority"/>
+        <ns4:element name="intent" elementType="System.String"/>
+        <ns4:element name="priority" elementType="System.String"/>
         <ns4:element name="code" elementType="System.Concept"/>
         <ns4:element name="description" elementType="System.String"/>
         <ns4:element name="focus" elementType="QUICK.Reference"/>
@@ -3575,15 +3353,6 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.Reference"/>
         </ns4:element>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="TaskIntent" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="TaskPriority" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="TaskStatus" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Timing" label="Timing" retrievable="false" baseType="QUICK.BackboneElement">
         <ns4:element name="event">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="QUICK.dateTime"/>
@@ -3592,7 +3361,7 @@
         <ns4:element name="code" elementType="QUICK.CodeableConcept"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="TriggerDefinition" label="TriggerDefinition" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="type" elementType="QUICK.TriggerType"/>
+        <ns4:element name="type" elementType="System.String"/>
         <ns4:element name="name" elementType="QUICK.string"/>
         <ns4:element name="timing">
             <ns4:elementTypeSpecifier xsi:type="ns4:ChoiceTypeSpecifier">
@@ -3607,15 +3376,6 @@
         </ns4:element>
         <ns4:element name="condition" elementType="QUICK.Expression"/>
     </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="TriggerType" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="UDIEntryType" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="UnitsOfTime" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="UsageContext" label="UsageContext" retrievable="false" baseType="QUICK.Element">
         <ns4:element name="code" elementType="QUICK.Coding"/>
         <ns4:element name="value">
@@ -3626,9 +3386,6 @@
                 <ns4:choice xsi:type="ns4:NamedTypeSpecifier" modelName="QUICK" name="Reference"/>
             </ns4:elementTypeSpecifier>
         </ns4:element>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="QUICK" name="Use" retrievable="false" baseType="QUICK.Element">
-        <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:conversionInfo functionName="ToCode" fromType="Coding" toType="System.Code"/>
     <ns4:conversionInfo functionName="ToCode" fromType="CodeableConcept" toType="System.Concept"/>
