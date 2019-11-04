@@ -13,7 +13,7 @@ public class FHIRModelInfoSettings extends ModelInfoSettings {
             {
                 add(new ConversionInfo().withFromType("FHIR.Coding").withToType("System.Code").withFunctionName("FHIRHelpers.ToCode"));
                 add(new ConversionInfo().withFromType("FHIR.CodeableConcept").withToType("System.Concept")
-                    .withFunctionName("FHIRHelpers.ToCode"));
+                    .withFunctionName("FHIRHelpers.ToConcept"));
                 add(new ConversionInfo().withFromType("FHIR.Quantity").withToType("System.Quantity")
                     .withFunctionName("FHIRHelpers.ToQuantity"));
                 add(new ConversionInfo().withFromType("FHIR.SimpleQuantity").withToType("System.Quantity")

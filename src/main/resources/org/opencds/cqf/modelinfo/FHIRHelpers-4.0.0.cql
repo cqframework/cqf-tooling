@@ -191,6 +191,7 @@ define function ToString(value MedicationRequestStatus): value.value
 define function ToString(value MedicationStatementStatus): value.value
 define function ToString(value MedicationStatus): value.value
 define function ToString(value MessageSignificanceCategory): value.value
+define function ToString(value Messageheader_Response_Request): value.value
 define function ToString(value MimeType): value.value
 define function ToString(value NameUse): value.value
 define function ToString(value NamingSystemIdentifierType): value.value
@@ -204,6 +205,7 @@ define function ToString(value ObservationRangeCategory): value.value
 define function ToString(value ObservationStatus): value.value
 define function ToString(value OperationKind): value.value
 define function ToString(value OperationParameterUse): value.value
+define function ToString(value OrientationType): value.value
 define function ToString(value ParameterUse): value.value
 define function ToString(value ParticipantRequired): value.value
 define function ToString(value ParticipantStatus): value.value
@@ -215,6 +217,7 @@ define function ToString(value PropertyRepresentation): value.value
 define function ToString(value PropertyType): value.value
 define function ToString(value ProvenanceEntityRole): value.value
 define function ToString(value PublicationStatus): value.value
+define function ToString(value QualityType): value.value
 define function ToString(value QuantityComparator): value.value
 define function ToString(value QuestionnaireItemOperator): value.value
 define function ToString(value QuestionnaireItemType): value.value
@@ -224,6 +227,7 @@ define function ToString(value ReferenceVersionRules): value.value
 define function ToString(value ReferredDocumentStatus): value.value
 define function ToString(value RelatedArtifactType): value.value
 define function ToString(value RemittanceOutcome): value.value
+define function ToString(value RepositoryType): value.value
 define function ToString(value RequestIntent): value.value
 define function ToString(value RequestPriority): value.value
 define function ToString(value RequestStatus): value.value
@@ -241,6 +245,7 @@ define function ToString(value SearchEntryMode): value.value
 define function ToString(value SearchModifierCode): value.value
 define function ToString(value SearchParamType): value.value
 define function ToString(value SectionMode): value.value
+define function ToString(value SequenceType): value.value
 define function ToString(value ServiceRequestIntent): value.value
 define function ToString(value ServiceRequestPriority): value.value
 define function ToString(value ServiceRequestStatus): value.value
@@ -249,6 +254,8 @@ define function ToString(value SlotStatus): value.value
 define function ToString(value SortDirection): value.value
 define function ToString(value SpecimenContainedPreference): value.value
 define function ToString(value SpecimenStatus): value.value
+define function ToString(value Status): value.value
+define function ToString(value StrandType): value.value
 define function ToString(value StructureDefinitionKind): value.value
 define function ToString(value StructureMapContextType): value.value
 define function ToString(value StructureMapGroupTypeMode): value.value
@@ -288,13 +295,6 @@ define function ToDateTime(value dateTime): value.value
 define function ToDecimal(value decimal): value.value
 define function ToDateTime(value instant): value.value
 define function ToInteger(value integer): value.value
-define function ToString(value messageheader-response-request): value.value
-define function ToString(value orientationType): value.value
-define function ToString(value qualityType): value.value
-define function ToString(value repositoryType): value.value
-define function ToString(value sequenceType): value.value
-define function ToString(value status): value.value
-define function ToString(value strandType): value.value
 define function ToString(value string): value.value
 define function ToTime(value time): value.value
 define function ToString(value uri): value.value

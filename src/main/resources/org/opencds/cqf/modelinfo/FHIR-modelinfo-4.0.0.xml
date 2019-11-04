@@ -7102,7 +7102,7 @@
         <ns4:element name="focus">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.MessageDefinition.Focus"/>
         </ns4:element>
-        <ns4:element name="responseRequired" elementType="FHIR.messageheader-response-request"/>
+        <ns4:element name="responseRequired" elementType="FHIR.Messageheader_Response_Request"/>
         <ns4:element name="allowedResponse">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.MessageDefinition.AllowedResponse"/>
         </ns4:element>
@@ -7163,6 +7163,9 @@
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="MessageSignificanceCategory" retrievable="false" baseType="FHIR.Element">
         <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="Messageheader_Response_Request" retrievable="false" baseType="FHIR.Element">
+        <ns4:element name="value" elementType="System.String"/>
+    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="Meta" label="Meta" retrievable="false" baseType="FHIR.Element">
         <ns4:element name="versionId" elementType="FHIR.id"/>
         <ns4:element name="lastUpdated" elementType="FHIR.instant"/>
@@ -7184,7 +7187,7 @@
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Identifier"/>
         </ns4:element>
-        <ns4:element name="type" elementType="FHIR.sequenceType"/>
+        <ns4:element name="type" elementType="FHIR.SequenceType"/>
         <ns4:element name="coordinateSystem" elementType="FHIR.integer"/>
         <ns4:element name="patient" elementType="FHIR.Reference"/>
         <ns4:element name="specimen" elementType="FHIR.Reference"/>
@@ -7211,7 +7214,7 @@
         </ns4:element>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="MolecularSequence.Quality" retrievable="false" baseType="FHIR.BackboneElement">
-        <ns4:element name="type" elementType="FHIR.qualityType"/>
+        <ns4:element name="type" elementType="FHIR.QualityType"/>
         <ns4:element name="standardSequence" elementType="FHIR.CodeableConcept"/>
         <ns4:element name="start" elementType="FHIR.integer"/>
         <ns4:element name="end" elementType="FHIR.integer"/>
@@ -7253,16 +7256,16 @@
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="MolecularSequence.ReferenceSeq" retrievable="false" baseType="FHIR.BackboneElement">
         <ns4:element name="chromosome" elementType="FHIR.CodeableConcept"/>
         <ns4:element name="genomeBuild" elementType="FHIR.string"/>
-        <ns4:element name="orientation" elementType="FHIR.orientationType"/>
+        <ns4:element name="orientation" elementType="FHIR.OrientationType"/>
         <ns4:element name="referenceSeqId" elementType="FHIR.CodeableConcept"/>
         <ns4:element name="referenceSeqPointer" elementType="FHIR.Reference"/>
         <ns4:element name="referenceSeqString" elementType="FHIR.string"/>
-        <ns4:element name="strand" elementType="FHIR.strandType"/>
+        <ns4:element name="strand" elementType="FHIR.StrandType"/>
         <ns4:element name="windowStart" elementType="FHIR.integer"/>
         <ns4:element name="windowEnd" elementType="FHIR.integer"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="MolecularSequence.Repository" retrievable="false" baseType="FHIR.BackboneElement">
-        <ns4:element name="type" elementType="FHIR.repositoryType"/>
+        <ns4:element name="type" elementType="FHIR.RepositoryType"/>
         <ns4:element name="url" elementType="FHIR.uri"/>
         <ns4:element name="name" elementType="FHIR.string"/>
         <ns4:element name="datasetId" elementType="FHIR.string"/>
@@ -7766,6 +7769,9 @@
         <ns4:element name="endpoint">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Reference"/>
         </ns4:element>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="OrientationType" retrievable="false" baseType="FHIR.Element">
+        <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="ParameterDefinition" label="ParameterDefinition" retrievable="false" baseType="FHIR.Element">
         <ns4:element name="name" elementType="FHIR.code"/>
@@ -8459,6 +8465,9 @@
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="PublicationStatus" retrievable="false" baseType="FHIR.Element">
         <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="QualityType" retrievable="false" baseType="FHIR.Element">
+        <ns4:element name="value" elementType="System.String"/>
+    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="Quantity" label="Quantity" retrievable="false" primaryCodePath="code" baseType="FHIR.Element">
         <ns4:element name="value" elementType="FHIR.decimal"/>
         <ns4:element name="comparator" elementType="FHIR.QuantityComparator"/>
@@ -8720,6 +8729,9 @@
         <ns4:element name="preferred" elementType="FHIR.boolean"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="RemittanceOutcome" retrievable="false" baseType="FHIR.Element">
+        <ns4:element name="value" elementType="System.String"/>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="RepositoryType" retrievable="false" baseType="FHIR.Element">
         <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="RequestGroup" label="RequestGroup" retrievable="true" primaryCodePath="code" baseType="FHIR.DomainResource">
@@ -9352,6 +9364,9 @@
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="SectionMode" retrievable="false" baseType="FHIR.Element">
         <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="SequenceType" retrievable="false" baseType="FHIR.Element">
+        <ns4:element name="value" elementType="System.String"/>
+    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="ServiceRequest" label="ServiceRequest" retrievable="true" primaryCodePath="code" baseType="FHIR.DomainResource">
         <ns4:element name="identifier">
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.Identifier"/>
@@ -9630,6 +9645,12 @@
         <ns4:element name="instruction" elementType="FHIR.string"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="SpecimenStatus" retrievable="false" baseType="FHIR.Element">
+        <ns4:element name="value" elementType="System.String"/>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="Status" retrievable="false" baseType="FHIR.Element">
+        <ns4:element name="value" elementType="System.String"/>
+    </ns4:typeInfo>
+    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="StrandType" retrievable="false" baseType="FHIR.Element">
         <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="StructureDefinition" label="StructureDefinition" retrievable="true" baseType="FHIR.DomainResource">
@@ -11147,7 +11168,7 @@
             <ns4:elementTypeSpecifier xsi:type="ns4:ListTypeSpecifier" elementType="FHIR.string"/>
         </ns4:element>
         <ns4:element name="need" elementType="FHIR.CodeableConcept"/>
-        <ns4:element name="status" elementType="FHIR.status"/>
+        <ns4:element name="status" elementType="FHIR.Status"/>
         <ns4:element name="statusDate" elementType="FHIR.dateTime"/>
         <ns4:element name="validationType" elementType="FHIR.CodeableConcept"/>
         <ns4:element name="validationProcess">
@@ -11270,29 +11291,8 @@
         <ns4:element name="value" elementType="System.Integer"/>
     </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="markdown" label="markdown" retrievable="false" baseType="FHIR.string"/>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="messageheader-response-request" retrievable="false" baseType="FHIR.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="oid" label="oid" retrievable="false" baseType="FHIR.uri"/>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="orientationType" retrievable="false" baseType="FHIR.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="positiveInt" label="positiveInt" retrievable="false" baseType="FHIR.integer"/>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="qualityType" retrievable="false" baseType="FHIR.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="repositoryType" retrievable="false" baseType="FHIR.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="sequenceType" retrievable="false" baseType="FHIR.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="status" retrievable="false" baseType="FHIR.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
-    <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="strandType" retrievable="false" baseType="FHIR.Element">
-        <ns4:element name="value" elementType="System.String"/>
-    </ns4:typeInfo>
     <ns4:typeInfo xsi:type="ns4:ClassInfo" namespace="FHIR" name="string" label="string" retrievable="false" baseType="FHIR.Element">
         <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
@@ -11309,7 +11309,7 @@
         <ns4:element name="value" elementType="System.String"/>
     </ns4:typeInfo>
     <ns4:conversionInfo functionName="FHIRHelpers.ToCode" fromType="FHIR.Coding" toType="System.Code"/>
-    <ns4:conversionInfo functionName="FHIRHelpers.ToCode" fromType="FHIR.CodeableConcept" toType="System.Concept"/>
+    <ns4:conversionInfo functionName="FHIRHelpers.ToConcept" fromType="FHIR.CodeableConcept" toType="System.Concept"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToQuantity" fromType="FHIR.Quantity" toType="System.Quantity"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToQuantity" fromType="FHIR.SimpleQuantity" toType="System.Quantity"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToQuantity" fromType="FHIR.Age" toType="System.Quantity"/>
@@ -11336,7 +11336,6 @@
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.StructureMapSourceListMode" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.RequestStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.QuestionnaireResponseStatus" toType="System.String"/>
-    <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.strandType" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.SearchComparator" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.ChargeItemStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.xhtml" toType="System.String"/>
@@ -11352,7 +11351,6 @@
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.IssueType" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.StructureMapContextType" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.FamilyHistoryStatus" toType="System.String"/>
-    <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.status" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.ExtensionContextType" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.CommunicationStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.AssertionResponseTypes" toType="System.String"/>
@@ -11361,7 +11359,6 @@
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.string" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.ActionRequiredBehavior" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.GraphCompartmentUse" toType="System.String"/>
-    <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.orientationType" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.AccountStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.MedicationDispenseStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.ParameterUse" toType="System.String"/>
@@ -11373,6 +11370,7 @@
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.BindingStrength" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.RequestPriority" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.MimeType" toType="System.String"/>
+    <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.QualityType" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.ParticipantRequired" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.XPathUsageType" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.CoverageStatus" toType="System.String"/>
@@ -11383,8 +11381,8 @@
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.ResponseType" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToDecimal" fromType="FHIR.decimal" toType="System.Decimal"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.AggregationMode" toType="System.String"/>
-    <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.sequenceType" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.SystemRestfulInteraction" toType="System.String"/>
+    <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.Messageheader_Response_Request" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.NutritiionOrderIntent" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.MedicationKnowledgeStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.AdverseEventActuality" toType="System.String"/>
@@ -11409,6 +11407,7 @@
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.PaymentReconciliationStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToBoolean" fromType="FHIR.boolean" toType="System.Boolean"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.StructureMapGroupTypeMode" toType="System.String"/>
+    <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.OrientationType" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.SupplyRequestStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.EncounterLocationStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.CommunicationPriority" toType="System.String"/>
@@ -11429,7 +11428,6 @@
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.GoalLifecycleStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.ObservationDataType" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.DocumentReferenceStatus" toType="System.String"/>
-    <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.repositoryType" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.LocationStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.SectionMode" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.NoteType" toType="System.String"/>
@@ -11443,6 +11441,7 @@
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.TypeDerivationRule" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.GuidanceResponseStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.RelatedArtifactType" toType="System.String"/>
+    <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.SequenceType" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.ReferredDocumentStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.MediaStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.CompartmentType" toType="System.String"/>
@@ -11467,6 +11466,7 @@
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.DocumentRelationshipType" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.ClaimResponseStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.VariableType" toType="System.String"/>
+    <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.RepositoryType" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.TestReportResult" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.ConceptMapGroupUnmappedMode" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToDateTime" fromType="FHIR.instant" toType="System.DateTime"/>
@@ -11498,7 +11498,6 @@
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.SpecimenContainedPreference" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.ActionRelationshipType" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.ConstraintSeverity" toType="System.String"/>
-    <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.messageheader-response-request" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.EventCapabilityMode" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.ProcedureStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.CodeSearchSupport" toType="System.String"/>
@@ -11531,7 +11530,6 @@
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.OperationParameterUse" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.ConsentProvisionType" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.ActionConditionKind" toType="System.String"/>
-    <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.qualityType" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.ParticipantStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.AdministrativeGender" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.QuestionnaireItemType" toType="System.String"/>
@@ -11563,6 +11561,8 @@
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.HTTPVerb" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.EpisodeOfCareStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.RemittanceOutcome" toType="System.String"/>
+    <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.StrandType" toType="System.String"/>
+    <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.Status" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.MedicationStatementStatus" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.EligibilityRequestPurpose" toType="System.String"/>
     <ns4:conversionInfo functionName="FHIRHelpers.ToString" fromType="FHIR.ServiceRequestPriority" toType="System.String"/>

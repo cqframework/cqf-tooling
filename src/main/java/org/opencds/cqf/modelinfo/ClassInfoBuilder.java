@@ -152,7 +152,9 @@ public abstract class ClassInfoBuilder {
             }
 
             return null;
-        } else if (name.contains("-")) {
+        }
+        // BTR -> Need to understand why this is here. If this is required at all, it should be a separate function, unHyphenate or something like that.
+        else if (name.contains("-")) {
             int index = name.lastIndexOf("-");
             if (index > 0) {
                 return name.substring(index + 1);
@@ -160,6 +162,7 @@ public abstract class ClassInfoBuilder {
 
             return null;
         }
+
         return null;
     }
 
@@ -175,7 +178,7 @@ public abstract class ClassInfoBuilder {
     // Returns the given path with the first letter of every path capitalized
     private String capitalizePath(String path) {
         if (path.contains("-")) {
-            return String.join("-", Arrays.asList(path.split("\\-")).stream().map(x -> this.capitalize(x))
+            return String.join("_", Arrays.asList(path.split("\\-")).stream().map(x -> this.capitalize(x))
                     .collect(Collectors.toList()));
         } else {
             return String.join(".", Arrays.asList(path.split("\\.")).stream().map(x -> this.capitalize(x))
@@ -185,7 +188,7 @@ public abstract class ClassInfoBuilder {
 
     private String capitalizePath(String path, String modelName) {
         if (path.contains("-")) {
-            return String.join("-", Arrays.asList(path.split("\\-")).stream().map(x -> this.capitalize(x))
+            return String.join("_", Arrays.asList(path.split("\\-")).stream().map(x -> this.capitalize(x))
                     .collect(Collectors.toList()));
         } else if (!path.contains(modelName + ".")) {
             return String.join(".", Arrays.asList(path.split("\\.")).stream().map(x -> this.capitalize(x))
@@ -591,40 +594,44 @@ public abstract class ClassInfoBuilder {
                 if (extensionProfile.size() == 1) {
                     //set targetPath here
                     typeName = capitalize(unQualify(getTail(extensionProfile.get(0).asStringValue())));
-                        if (!this.typeInfos.containsKey(this.getTypeName(modelName, typeName))) {
+                    if (!this.typeInfos.containsKey(this.getTypeName(modelName, typeName))) {
 
-                            List<ClassInfoElement> elements = new ArrayList<>();
-                            ClassInfoElement cie = new ClassInfoElement();
-                            cie.setName("value");
-                            cie.setElementType("System.String");
-            
-                            elements.add(cie);
-            
-                            ClassInfo info = new ClassInfo().withName(typeName).withNamespace(modelName).withLabel(null).withBaseType(modelName + ".Element")
-                                    .withRetrievable(false).withElement(elements).withPrimaryCodePath(null);
-                                    
-                            this.typeInfos.put(this.getTypeName(modelName, typeName), info);
-            
-                        }
-            
-                        NamedTypeSpecifier nts = new NamedTypeSpecifier();
-                        nts.setModelName(modelName);
-                        nts.setName(typeName);
-            
-                        return nts;
+                        List<ClassInfoElement> elements = new ArrayList<>();
+                        ClassInfoElement cie = new ClassInfoElement();
+                        cie.setName("value");
+                        cie.setElementType("System.String");
+
+                        elements.add(cie);
+
+                        ClassInfo info = new ClassInfo().withName(typeName).withNamespace(modelName).withLabel(null).withBaseType(modelName + ".Element")
+                                .withRetrievable(false).withElement(elements).withPrimaryCodePath(null);
+
+                        this.typeInfos.put(this.getTypeName(modelName, typeName), info);
+
                     }
-                    else if (extensionProfile.size() > 1) {
-                        ChoiceTypeSpecifier cts = new ChoiceTypeSpecifier();
-                        for (CanonicalType canonicalType : extensionProfile) {
-                            if (canonicalType != null) {
-                                cts.withChoice(
-                                        this.buildTypeSpecifier(this.resolveTypeName(canonicalType.asStringValue())));
-                            }
+
+                    NamedTypeSpecifier nts = new NamedTypeSpecifier();
+                    nts.setModelName(modelName);
+                    nts.setName(typeName);
+
+                    return nts;
+                }
+                else if (extensionProfile.size() > 1) {
+                    ChoiceTypeSpecifier cts = new ChoiceTypeSpecifier();
+                    for (CanonicalType canonicalType : extensionProfile) {
+                        if (canonicalType != null) {
+                            cts.withChoice(
+                                    this.buildTypeSpecifier(this.resolveTypeName(canonicalType.asStringValue())));
                         }
-                        return cts;
-                    } else
-                        return null;
-            } catch (Exception e) {
+                    }
+
+                    return cts;
+                }
+                else {
+                    return null;
+                }
+            }
+            catch (Exception e) {
                 System.out.println("Error building type specifier for " + modelName + "."
                     + ed.getId() + ": " + e.getMessage());
                 return null;
@@ -632,34 +639,36 @@ public abstract class ClassInfoBuilder {
         }
         else if (typeCode != null && typeCode.equals("code") && ed.hasBinding()
                 && ed.getBinding().getStrength() == BindingStrength.REQUIRED) {
-                    
-                    Extension bindingExtension = this.extension(ed.getBinding(), "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName");
-                    if (bindingExtension != null)
-                    {
-                        typeName = ((StringType) (bindingExtension.getValue())).getValue();
+            Extension bindingExtension = this.extension(ed.getBinding(), "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName");
+            if (bindingExtension != null) {
+                typeName = capitalizePath(((StringType) (bindingExtension.getValue())).getValue());
+            }
+
+            else {
+                /* BTR -> This shouldn't be necessary. If it turns out to be, document the reason and clean up this code...
+                if (needsTopLevelSD && topLevelEd != null) {
+                    Extension topLevelBindingExtension = this.extension(topLevelEd.getBinding(), "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName");
+                    if (topLevelBindingExtension != null) {
+                        typeName = capitalizePath((StringType) (topLevelBindingExtension.getValue())).getValue();
                     }
                     else {
-                        if(needsTopLevelSD && topLevelEd != null)
-                        {
-                            Extension topLevelBindingExtension = this.extension(topLevelEd.getBinding(), "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName");
-                            if (topLevelBindingExtension != null)
-                            {
-                                typeName = ((StringType) (topLevelBindingExtension.getValue())).getValue();
-                            }
-                            else typeName = null;
-                        } else {
-                            TypeSpecifier ts = this.buildTypeSpecifier(modelName, ed.hasType() ? ed.getType() : null);
-                            if (ts instanceof NamedTypeSpecifier && ((NamedTypeSpecifier) ts).getName() == null) {
-                                String tn = this.getTypeName(modelName, root);
-                                if (this.settings.primitiveTypeMappings.containsKey(tn)) {
-                                    ts = this.buildTypeSpecifier(this.settings.primitiveTypeMappings.get(this.getTypeName(modelName, root)));
-                                } else {
-                                    ts = null;
-                                }
-                            }
-                            return ts;
-                            }
+                        typeName = null;
                     }
+                }
+                else {
+                */
+                    TypeSpecifier ts = this.buildTypeSpecifier(modelName, ed.hasType() ? ed.getType() : null);
+                    if (ts instanceof NamedTypeSpecifier && ((NamedTypeSpecifier) ts).getName() == null) {
+                        String tn = this.getTypeName(modelName, root);
+                        if (this.settings.primitiveTypeMappings.containsKey(tn)) {
+                            ts = this.buildTypeSpecifier(this.settings.primitiveTypeMappings.get(this.getTypeName(modelName, root)));
+                        } else {
+                            ts = null;
+                        }
+                    }
+                    return ts;
+                //}
+            }
 
             if (!this.typeInfos.containsKey(this.getTypeName(modelName, typeName))) {
                 //set targetPath here
@@ -682,7 +691,8 @@ public abstract class ClassInfoBuilder {
             nts.setName(typeName);
 
             return nts;
-        } else {
+        }
+        else {
             TypeSpecifier ts = this.buildTypeSpecifier(modelName, ed.hasType() ? ed.getType() : null);
 	        if (ts instanceof NamedTypeSpecifier && ((NamedTypeSpecifier) ts).getName() == null) {
 	            String tn = this.getTypeName(modelName, root);
@@ -693,7 +703,7 @@ public abstract class ClassInfoBuilder {
 	            }
 	        }
 	        return ts;
-	        }
+	    }
     }
 
     // Builds a ClassInfoElement for the given ElementDefinition
