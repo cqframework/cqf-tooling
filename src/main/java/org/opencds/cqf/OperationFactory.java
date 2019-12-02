@@ -5,7 +5,7 @@ import org.opencds.cqf.acceleratorkit.Processor;
 import org.opencds.cqf.bundler.BundleResources;
 import org.opencds.cqf.igtools.IgBundler;
 import org.opencds.cqf.library.R4LibraryGenerator;
-import org.opencds.cqf.library.STU3LibraryGenerator;
+import org.opencds.cqf.library.STU3MultiLibraryGenerator;
 import org.opencds.cqf.modelinfo.StructureDefinitionToModelInfo;
 import org.opencds.cqf.qdm.QdmToQiCore;
 import org.opencds.cqf.quick.QuickPageGenerator;
@@ -31,11 +31,11 @@ class OperationFactory {
             case "XlsxToValueSet":
                 return new GenericValueSetGenerator();
             case "CqlToSTU3Library":
-                return new STU3LibraryGenerator();
+                return new STU3MultiLibraryGenerator();
             case "CqlToR4Library":
                 return new R4LibraryGenerator();
             case "UpdateSTU3Cql":
-                return new STU3LibraryGenerator();
+                return new STU3MultiLibraryGenerator();
             case "UpdateR4Cql":
                 return new R4LibraryGenerator();
             case "JsonSchemaGenerator":

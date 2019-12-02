@@ -11,11 +11,11 @@ import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
 
-public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3NarrativeProvider> {
+public class STU3MultiLibraryGenerator extends BaseLibraryGenerator<Library, STU3NarrativeProvider> {
 
     private Map<String, Library> libraryMap = new HashMap<>();
 
-    public STU3LibraryGenerator() {
+    public STU3MultiLibraryGenerator() {
         this.narrativeProvider = new STU3NarrativeProvider();
         this.fhirContext = FhirContext.forDstu3();
         setOutputPath("src/main/resources/org/opencds/cqf/library/output/stu3");
