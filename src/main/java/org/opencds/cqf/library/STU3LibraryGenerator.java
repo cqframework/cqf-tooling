@@ -11,11 +11,11 @@ import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
 
-public class STU3MultiLibraryGenerator extends BaseLibraryGenerator<Library, STU3NarrativeProvider> {
+public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3NarrativeProvider> {
 
     private Map<String, Library> libraryMap = new HashMap<>();
 
-    public STU3MultiLibraryGenerator() {
+    public STU3LibraryGenerator() {
         this.narrativeProvider = new STU3NarrativeProvider();
         this.fhirContext = FhirContext.forDstu3();
         setOutputPath("src/main/resources/org/opencds/cqf/library/output/stu3");
@@ -53,42 +53,95 @@ public class STU3MultiLibraryGenerator extends BaseLibraryGenerator<Library, STU
 
     @Override
     public void output() {
-        Bundle bundle = new Bundle();
+        Bundle masterBundle = new Bundle();
 
         for (Map.Entry<String, Library> entry : libraryMap.entrySet()) {
-            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + createFileName(entry.getValue().getId(), encoding))) {
-                bundle.addEntry().setResource(entry.getValue()).setRequest(new Bundle.BundleEntryRequestComponent().setMethod(Bundle.HTTPVerb.PUT).setUrl("Library/" + entry.getValue().getId()));
-                writer.write(
-                        encoding.equals("json")
-                                ? fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(entry.getValue()).getBytes()
-                                : fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(entry.getValue()).getBytes()
-                );
-                writer.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new IllegalArgumentException("Error outputting library: " + entry.getValue().getId());
+            Bundle dependancyInclusiveBundle = buildDependancyInclusiveBundle(entry);
+            File bundlesDirectory = new File(getOutputPath() + "/bundles");
+            if (! bundlesDirectory.exists()){
+                bundlesDirectory.mkdir();
             }
-            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/elm-" + createFileName(entry.getValue().getId(), encoding)))
-            {
-                writer.write(elmMap.get(entry.getKey()).getBytes());
-                writer.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new IllegalArgumentException("Error outputting elm for library: " + entry.getValue().getId());
+            File elmDirectory = new File(getOutputPath() + "/elm");
+            if (! elmDirectory.exists()){
+                elmDirectory.mkdir();
             }
+            writeDependancyInclusiveBundle(entry, dependancyInclusiveBundle);
+            writeEntryBundle(masterBundle, entry);
+            writeELM(entry);
+            masterBundle.addEntry().setResource(entry.getValue()).setRequest(new Bundle.BundleEntryRequestComponent().setMethod(Bundle.HTTPVerb.PUT).setUrl("Library/" + entry.getValue().getId()));
         }
+        if(!this.cqlHasFocus){
+            writeMasterBundle(masterBundle);
+        }
+    }
 
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/libraries-master-bundle." +  encoding)) {
+    private void writeMasterBundle(Bundle masterBundle) {
+        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/bundles/master-bundle." +  encoding)) {
             writer.write(
                     encoding.equals("json")
-                            ? fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle).getBytes()
-                            : fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle).getBytes()
+                            ? fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(masterBundle).getBytes()
+                            : fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(masterBundle).getBytes()
             );
             writer.flush();
         } catch (IOException e) {
             e.printStackTrace();
             throw new IllegalArgumentException("Error outputting library bundle");
         }
+    }
+
+    private void writeELM(Map.Entry<String, Library> entry) {
+        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/elm/elm-" + createFileName(entry.getValue().getId(), encoding)))
+        {
+            writer.write(elmMap.get(entry.getKey()).getBytes());
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Error outputting elm for library: " + entry.getValue().getId());
+        }
+    }
+
+    private void writeEntryBundle(Bundle masterBundle, Map.Entry<String, Library> entry) {
+        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + createFileName(entry.getValue().getId(), encoding))) {
+            writer.write(
+                    encoding.equals("json")
+                            ? fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(entry.getValue()).getBytes()
+                            : fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(entry.getValue()).getBytes()
+            );
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Error outputting library: " + entry.getValue().getId());
+        }
+    }
+
+    private void writeDependancyInclusiveBundle(Map.Entry<String, Library> entry, Bundle dependancyInclusiveBundle) {
+        if (dependancyInclusiveBundle != null) {
+            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/bundles/" + entry.getValue().getId() + "-bundle." +  encoding)) {
+                writer.write(
+                        encoding.equals("json")
+                                ? fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(dependancyInclusiveBundle).getBytes()
+                                : fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(dependancyInclusiveBundle).getBytes()
+                );
+                writer.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new IllegalArgumentException("Error outputting library bundle");
+            }
+        }
+    }
+
+    private Bundle buildDependancyInclusiveBundle(Map.Entry<String, Library> entry) {
+        Bundle dependancyInclusiveBundle = new Bundle();
+        dependancyInclusiveBundle.addEntry().setResource(entry.getValue()).setRequest(new Bundle.BundleEntryRequestComponent().setMethod(Bundle.HTTPVerb.PUT).setUrl("Library/" + entry.getValue().getId()));
+        if (entry.getValue().hasRelatedArtifact()) {
+            for(RelatedArtifact relatedArtifact : entry.getValue().getRelatedArtifact()) {
+                String resourceReferenceId = relatedArtifact.getResource().getReference().split("Library/")[1];
+                Library relatedArtifactResource = libraryMap.get(resourceReferenceId.substring(0, resourceReferenceId.lastIndexOf("-")).replaceAll("library-", "").replaceAll("-", "_"));
+                dependancyInclusiveBundle.addEntry().setResource(relatedArtifactResource).setRequest(new Bundle.BundleEntryRequestComponent().setMethod(Bundle.HTTPVerb.PUT).setUrl("Library/" + relatedArtifactResource.getId()));
+            }
+        }
+        else dependancyInclusiveBundle = null;
+        return dependancyInclusiveBundle;
     }
 
     // Populate metadata
@@ -168,7 +221,7 @@ public class STU3MultiLibraryGenerator extends BaseLibraryGenerator<Library, STU
     }
 
     private String nameToId(String name, String version) {
-        String nameAndVersion = name + "-" + version;
+        String nameAndVersion = "library-" + name + "-" + version;
         return nameAndVersion.replaceAll("_", "-");
     }
 

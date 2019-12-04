@@ -22,7 +22,11 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
 
     String operationName;
     String encoding = "json";
+    private File libraryDir;
+    private File[] cqlFiles;
 
+    protected boolean cqlHasFocus;
+    private String pathToCQLContent;
     private String pathToLibraryDir;
     private ModelManager modelManager;
     private LibraryManager libraryManager;
@@ -44,7 +48,11 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
             String flag = flagAndValue[0];
             String value = flagAndValue.length < 2 ? null : flagAndValue[1];
 
-            if (flag.equals("-pathtolibrarydirectory") || flag.equals("-ptld")) {
+            if (flag.equals("-pathToCQLContent") || flag.equals("-ptcql")) {
+                cqlHasFocus = true;
+                pathToCQLContent = value;
+            }
+            else if (flag.equals("-pathtolibrarydirectory") || flag.equals("-ptld")) {
                 pathToLibraryDir = value;
             }
             else if (flag.equals("-encoding") || flag.equals("-e")) {
@@ -55,26 +63,65 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
             }
         }
 
-        if (pathToLibraryDir == null) {
-            throw new IllegalArgumentException("The path to the CQL Library is required");
-        }
+        if(pathToCQLContent == null)
+        {
+            if (pathToLibraryDir == null) {
+                throw new IllegalArgumentException("The path to either the CQL Library or the CQL Content is required");
+            }
+        }  
 
-        File libraryDir = new File(pathToLibraryDir);
-        if (!libraryDir.isDirectory()) {
-            throw new IllegalArgumentException("The specified path to library files is not a directory");
-        }
+        if(cqlHasFocus) {
+            File cqlContent = new File(pathToCQLContent);
+            libraryDir = cqlContent.getParentFile();
+            pathToLibraryDir = libraryDir.getPath();
+            if (!libraryDir.isDirectory()) {
+                throw new IllegalArgumentException("The specified path to library files is not a directory");
+            }
+            String cql = getCql(cqlContent);
+            ArrayList<String> dependencyLibraries = getIncludedLibraries(cql);
+            File[] allCQLFiles = libraryDir.listFiles();
+            if (allCQLFiles == null) {
+                return;
+            }
+            else if (allCQLFiles.length == 0) {
+                return;
+            }
+            ArrayList<File> dependencyLibrarieFiles = new ArrayList<File>();
+            dependencyLibrarieFiles.add(cqlContent);
+            for (File cqlFile : allCQLFiles) {
+                if (dependencyLibraries.contains(cqlFile.getName().replace(".cql", ""))) {
+                    dependencyLibrarieFiles.add(cqlFile);
+                }
 
-        File[] cqlFiles = libraryDir.listFiles();
-        if (cqlFiles == null) {
-            return;
+            }
+            cqlFiles = dependencyLibrarieFiles.toArray(new File[0]);
+            if (cqlFiles == null) {
+                return;
+            }
+            else if (cqlFiles.length == 0) {
+                return;
+            }
         }
-        else if (cqlFiles.length == 0) {
-            return;
+        else {
+            libraryDir = new File(pathToLibraryDir);
+            if (!libraryDir.isDirectory()) {
+                throw new IllegalArgumentException("The specified path to library files is not a directory");
+            }
+            cqlFiles = libraryDir.listFiles();
+            if (cqlFiles == null) {
+                return;
+            }
+            else if (cqlFiles.length == 0) {
+                return;
+            }
         }
+        
+
+        
 
         modelManager = new ModelManager();
-        libraryManager = new LibraryManager(modelManager);
         sourceProvider = new GenericLibrarySourceProvider(pathToLibraryDir);
+        libraryManager = new LibraryManager(modelManager);
         libraryManager.getLibrarySourceLoader().registerProvider(sourceProvider);
 
         CqlTranslator translator;
@@ -114,7 +161,6 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
             e.printStackTrace();
             throw new IllegalArgumentException("Error reading CQL file: " + file.getName());
         }
-
         return cql.toString();
     }
 
@@ -163,5 +209,35 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
             }
         }
         return valueSetName;
+    }
+
+    private ArrayList<String> getIncludedLibraries(String cql) {
+        int includeDefinitionIndex = cql.indexOf("include");
+        String[] includedDefsAndBelow = cql.substring(includeDefinitionIndex).split("\\n");
+
+        int index = 0; 
+        ArrayList<String> relatedArtifacts = new ArrayList<String>();
+        while (includedDefsAndBelow[index].startsWith("include")) {
+            String includedLibraryName = includedDefsAndBelow[index].replace("include ", "").split(" version ")[0];
+            String includedLibraryVersion = includedDefsAndBelow[index].replace("include ", "").split(" version ")[1].replaceAll("\'", "").split(" called")[0];
+            String includedLibraryId = includedLibraryName + "-" + includedLibraryVersion;
+            relatedArtifacts.add(includedLibraryId);
+            index++;
+        }
+        return relatedArtifacts;
+    }
+    private String getIdFromSource(String cql) {
+        if (cql.startsWith("library")) {
+            return getNameFromSource(cql);
+        }
+
+        throw new RuntimeException("This tool requires cql libraries to include a named/versioned identifier");
+    }
+
+    private String getNameFromSource(String cql) {
+        return cql.replaceFirst("library ", "").split(" version")[0].replaceAll("\"", "");
+    }
+    private String getVersionFromSource(String cql) {
+        return cql.split("version")[1].split("'")[1];
     }
 }
