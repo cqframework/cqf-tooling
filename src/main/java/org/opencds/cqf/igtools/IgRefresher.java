@@ -4,10 +4,19 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.CopyOption;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Stream;
+import java.nio.file.Path;
 
+import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.opencds.cqf.Operation;
-import org.opencds.cqf.library.STU3MultiLibraryGenerator;
+import org.opencds.cqf.bundler.BundleResources;
+import org.opencds.cqf.library.STU3LibraryGenerator;
 import org.opencds.cqf.terminology.VSACBatchValueSetGenerator;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -21,20 +30,23 @@ public class IgRefresher extends Operation {
     private File igDir;
     private File cqlDir;
     private File resourcesDir;
+    private File baseBundleDir;
 
-    private File[] cqlFiles;
-    private File[] igFiles;
-    
-    //Map igFiles = igDir.listFiles(); I want to create a map of the directories and files to use throughout in the future
+    private ArrayList<File> cqlFiles;
+    private ArrayList<File> bundleDirs = new ArrayList<>();
+    private ArrayList<File> igFiles;
+
+    private File testsDir;
 
     @Override
     public void execute(String[] args) {
         parseArgs(args);
-        ensureIsIg();
+        ensureIgHasRequiredDirectories();
         setCqlFiles();
-        refreshLibraries(cqlFiles);
+        refreshLibraries();
         refreshValueSets();
-        //refreshBundles();  //not yet ready
+        refreshBundles();  //not yet ready
+        //bundleTests();  //not yet ready
 
     }
 
@@ -61,7 +73,7 @@ public class IgRefresher extends Operation {
         }
     }
 
-    private void ensureIsIg() {
+    private void ensureIgHasRequiredDirectories() {
 
         igDir = new File(pathToIg);
         if (!igDir.isDirectory()) {
@@ -69,29 +81,39 @@ public class IgRefresher extends Operation {
         }
         cqlDir = new File(pathToIg + "/cql");
         if (!cqlDir.isDirectory()) {
-            throw new IllegalArgumentException("IG must include a cql directory");
+            throw new IllegalArgumentException("IG must include a cql directory"); //need to change these to just continue if not there
         }
         resourcesDir = new File(pathToIg + "/resources");
         if (!resourcesDir.isDirectory()) {
-            throw new IllegalArgumentException("IG must include a resources directory");
+            throw new IllegalArgumentException("IG must include a resources directory"); //need to change these to just continue if not there
+        }
+
+        testsDir = new File(pathToIg + "/tests");
+        if (!testsDir.isDirectory()) {
+            throw new IllegalArgumentException("IG must include a tests directory"); //need to change these to just continue if not there
+        }
+
+        baseBundleDir = new File(pathToIg + "/bundles");
+        if (! baseBundleDir.exists()){
+            baseBundleDir.mkdir();
         }
         
     }
 
     private void setCqlFiles() {
-        cqlFiles = cqlDir.listFiles();
+        cqlFiles = new ArrayList<File>(Arrays.asList(cqlDir.listFiles()));
         if (cqlFiles == null) {
             return;
         }
-        else if (cqlFiles.length == 0) {
+        else if (cqlFiles.isEmpty()) {
             return;
         }
     }
 
-    private void refreshLibraries(File[] cqlFiles) {
+    private void refreshLibraries() {
         for (File cqlFile : cqlFiles) {
             String cqlFilePath = cqlFile.getPath();
-            STU3MultiLibraryGenerator STU3MultiLibraryGenerator = new STU3MultiLibraryGenerator();
+            STU3LibraryGenerator STU3MultiLibraryGenerator = new STU3LibraryGenerator();
             try {
                 STU3MultiLibraryGenerator.execute(buildRefreshLibraryArgs(cqlFilePath));
             }
@@ -113,7 +135,14 @@ public class IgRefresher extends Operation {
     private void refreshValueSets() {
         String pathToValueSetSpreadsheetDirectory = pathToIg + "/resources/valuesets/spreadsheets";  //think about possibly including this as an argument because it is not defined by the IG
         VSACBatchValueSetGenerator VSACBatchValueSetGenerator = new VSACBatchValueSetGenerator();
-        VSACBatchValueSetGenerator.execute(buildRefreshValueSetArgs(pathToValueSetSpreadsheetDirectory));
+        try {
+            VSACBatchValueSetGenerator.execute(buildRefreshValueSetArgs(pathToValueSetSpreadsheetDirectory));
+            //add a if there is no bundles dir create one and
+            
+        } catch (Exception e) {
+            System.out.println("error refreshing valuesets");
+            System.out.println(e.getMessage());
+        }
     }
 
     private String[] buildRefreshValueSetArgs(String pathToSpreadsheetDirectory) {
@@ -126,22 +155,37 @@ public class IgRefresher extends Operation {
     }
 
     private void refreshBundles() {
-        File[] bundleDirs = igDir.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.equals("bundles") && !dir.getAbsolutePath().equals(pathToIg + "/bundles"); //make sure to not include base bundles dir
+        
+        try (Stream<Path> bundlePaths = Files.find(
+            igDir.toPath(), Integer.MAX_VALUE,
+            (path, basicAttributes) ->  path.getFileName().toFile().getName().equals("bundles") && basicAttributes.isDirectory())
+            ) {
+                bundlePaths.forEach(path -> bundleDirs.add(path.toFile()));
+            } 
+            catch (Exception e) {
+                System.out.println("could not refresh bundles due to an error");
+                System.out.println(e.getMessage());
             }
-        });
+            
         if (bundleDirs == null) {
             return;
         }
-        else if (bundleDirs.length == 0) {
+        else if (bundleDirs.isEmpty()) {
+            return;
+        }
+        bundleDirs.remove(baseBundleDir);
+        if (bundleDirs == null) {
+            return;
+        }
+        else if (bundleDirs.isEmpty()) {
             return;
         }
         buildMasterBundle(bundleDirs);
     }
 
-    private void buildMasterBundle(File[] bundleDirs) {
-        Bundle masterBundle = new Bundle();
+    private void buildMasterBundle(ArrayList<File> bundleDirs) {
+        //walk through ig dir and if path starts ends with bundles but isnt ig/bundles (base bundles path) then bundleResources and copy all files to ig/bundles/name/
+        Bundle masterBundle = new Bundle(); //still needs to be implemented
         for (File bundleDir : bundleDirs) {
             File[] bundleFiles = bundleDir.listFiles();
             if (bundleFiles == null) {
@@ -150,7 +194,7 @@ public class IgRefresher extends Operation {
             else if (bundleFiles.length == 0) {
                 return;
             }
-            buildDirectorySpecificBundle(bundleDir, bundleFiles);
+            buildDirectorySpecificBundleAndCopy(bundleDir, bundleFiles);
         }
         //create File masterBundle = new File(master-bundle.json) //should probably have parameter for encoding
         //write masterBundle to pathToIg + "/bundles/" + masterBundle.getName()
@@ -161,46 +205,35 @@ public class IgRefresher extends Operation {
         //and copy all into a new directory igDirPath/bundles/parentDirName
     }
 
-    private void buildDirectorySpecificBundle(File bundleDir, File[] bundleFiles) {
-        File baseParentDirBundlesDir = new File(pathToIg + "/bundles/" + bundleDir.getName());
+    private void buildDirectorySpecificBundleAndCopy(File bundleDir, File[] bundleFiles) {
+        File baseParentDirBundlesDir = new File(pathToIg + "/bundles/" + bundleDir.getParentFile().getName());
         if (! baseParentDirBundlesDir.exists()){
             baseParentDirBundlesDir.mkdir();
         }
-        Bundle allBundles = new Bundle();
-        for (File bundleFile : bundleFiles) {
-            buildBundle(baseParentDirBundlesDir, bundleFile);
-
+        //bundleResources(bundleDir.getPath());  //not yet working
+        try {
+            FileUtils.copyDirectory(bundleDir, baseParentDirBundlesDir);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         //create File allBundlesFile = new File(all-bundleFile.getParentPath-bundle.json) //should probably have parameter for encoding
         //write allBundlesBundle to baseParentDirBundlesDir.getPath() + "/" + allBundlesFile.getName()
         //add allBundlesBundle to master bundle
     }
 
-    private void buildBundle(File baseParentDirBundlesDir, File bundleFile) {
-        Bundle bundle = new Bundle();
-        //parse json files for bundle resources
-        //run through each bundle resource and add it to a bundle as an entry              
-        writeBundleToFile(baseParentDirBundlesDir, bundleFile, bundle);
-         // masterBundle.addEntry().setResource(bundle).setRequest(new Bundle.BundleEntryRequestComponent().setMethod(Bundle.HTTPVerb.PUT).setUrl("Library/" + entry.getValue().getId()));
-        //add bundle to allBundlesBundle
-        //add bundle to master bundle
+    private void bundleResources(String path) {
+        String pathToResourceDir = path + "/";
+        BundleResources BundleResources = new BundleResources();
+        BundleResources.execute(buildBundleResourcesArgs(pathToResourceDir));
     }
 
-    private void writeBundleToFile(File baseParentDirBundlesDir, File bundleFile, Bundle bundle) {
-        //write bundle to baseParentDirBundlesDir.getPath() + "/" + bundleFile.getName()
-        if (bundle != null) {
-            try (FileOutputStream writer = new FileOutputStream(baseParentDirBundlesDir.getPath() + "/" + bundleFile.getName())) {
-                writer.write(
-                        encoding.equals("json")
-                                ? fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle).getBytes()
-                                : fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle).getBytes()
-                );
-                writer.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new IllegalArgumentException("Error outputting library bundle");
-            }
-        }
+    private String[] buildBundleResourcesArgs(String pathToResourceDir) {
+        return new String[] {
+            "-BundleResources",
+            "-ptd=" + pathToResourceDir,
+            "-op=" + pathToResourceDir,  //might be just resourcesDir + "/valuesets"
+            "-v=stu3"
+        };
     }
 
 

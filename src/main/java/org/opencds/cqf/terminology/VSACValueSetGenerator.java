@@ -162,6 +162,7 @@ public class VSACValueSetGenerator extends Operation {
         }
     }
 
+    //should bundle and store in a bundles dir
     private void writeValueSetToFile(String fileName, ValueSet vs) {
         IParser parser =
                 encoding == null
