@@ -133,4 +133,15 @@ public class IOUtils
         }
         return parser;
     }
+
+    public static Boolean pathIncludesElement(String igPath, String pathElement)
+    {
+        Boolean result = false;
+        try
+        {
+            result = FilenameUtils.directoryContains(igPath, pathElement);
+        }
+        catch (Exception e) {}
+        return result;
+    }
 }
