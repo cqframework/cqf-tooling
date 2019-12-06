@@ -41,7 +41,7 @@ public class IOUtils
     {        
         for (Map.Entry<String, T> set : resources.entrySet())
         {
-            writeResource(set.getValue(), set.getKey(), outputPath, encoding, fhirContext);
+            writeResource(set.getValue(), set.getValue().getId(), outputPath, encoding, fhirContext);
         }
     }
 
@@ -60,7 +60,7 @@ public class IOUtils
         return resource;
     }
 
-    public static List<IAnyResource> readResource(List<String> inputPaths, FhirContext fhirContext) 
+    public static List<IAnyResource> readResources(List<String> inputPaths, FhirContext fhirContext) 
     {
         List<IAnyResource> resources = new ArrayList<IAnyResource>();
         for (String inputPath : inputPaths)
