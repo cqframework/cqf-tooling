@@ -1,14 +1,14 @@
 package org.opencds.cqf.igtools;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.nio.file.CopyOption;
-import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.nio.file.Path;
 
@@ -17,6 +17,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.opencds.cqf.Operation;
 import org.opencds.cqf.bundler.BundleResources;
 import org.opencds.cqf.library.STU3LibraryGenerator;
+import org.opencds.cqf.library.STU3LibraryRefresher;
 import org.opencds.cqf.terminology.VSACBatchValueSetGenerator;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -113,20 +114,51 @@ public class IgRefresher extends Operation {
     private void refreshLibraries() {
         for (File cqlFile : cqlFiles) {
             String cqlFilePath = cqlFile.getPath();
-            STU3LibraryGenerator STU3MultiLibraryGenerator = new STU3LibraryGenerator();
-            try {
-                STU3MultiLibraryGenerator.execute(buildRefreshLibraryArgs(cqlFilePath));
+            File libraryDir = new File(resourcesDir + "/library");
+
+            ArrayList<File> libraryFiles = new ArrayList<File>(Arrays.asList(libraryDir.listFiles()));
+            List<File> matchingLibrariesCollection = libraryFiles.stream()
+            .filter(library -> containsAllChars(library.getName(), cqlFile.getName()))
+            .collect(Collectors.toList());
+
+            if(!matchingLibrariesCollection.isEmpty()) {
+                File libraryFile = matchingLibrariesCollection.get(0);
+                if(libraryFile != null) {
+                    STU3LibraryRefresher STU3LibraryRefresher = new STU3LibraryRefresher();
+                    try {
+                        STU3LibraryRefresher.execute(buildRefreshLibraryArgs(cqlFilePath, libraryFile.getPath().toString()));
+                    }
+                    catch(Exception e) {
+                        System.out.println("Error while refreshing " + cqlFile.getName() + ":");
+                        System.out.println(e.getMessage());
+                    }
+                }
             }
-            catch(Exception e) {
-                System.out.println("Error while refreshing " + cqlFile.getName() + ":");
-                System.out.println(e.getMessage());
+            else {
+                STU3LibraryGenerator STU3LibraryGenerator = new STU3LibraryGenerator();
+                try {
+                    STU3LibraryGenerator.execute(buildGenerateLibraryArgs(cqlFilePath));
+                }
+                catch(Exception e) {
+                    System.out.println("Error while refreshing " + cqlFile.getName() + ":");
+                    System.out.println(e.getMessage());
+                }
             }
         }
     }
 
-    private String[] buildRefreshLibraryArgs(String cqlFilePath) {
+    private String[] buildGenerateLibraryArgs(String cqlFilePath) {
         return new String[] {
             "-ptcql=" + cqlFilePath,
+            "-e=" + encoding,
+            "-op=" + pathToIg + "/resources/library"  //might be just resourcesDir + "/library"
+        };
+    }
+
+    private String[] buildRefreshLibraryArgs(String cqlFilePath, String pathToLibrary) {
+        return new String[] {
+            "-ptcql=" + cqlFilePath,
+            "-ptl=" + pathToLibrary,
             "-e=" + encoding,
             "-op=" + pathToIg + "/resources/library"  //might be just resourcesDir + "/library"
         };
@@ -234,6 +266,20 @@ public class IgRefresher extends Operation {
             "-op=" + pathToResourceDir,  //might be just resourcesDir + "/valuesets"
             "-v=stu3"
         };
+    }
+
+    private Set<Character> stringToCharacterSet(String s) {
+        Set<Character> set = new HashSet<>();
+        for (char c : s.toCharArray()) {
+            set.add(c);
+        }
+        return set;
+    }
+    
+    private boolean containsAllChars
+        (String container, String containee) {
+        return stringToCharacterSet(container).containsAll
+                   (stringToCharacterSet(containee));
     }
 
 
