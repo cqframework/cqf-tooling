@@ -7,6 +7,9 @@ import org.opencds.cqf.igtools.IgBundler;
 import org.opencds.cqf.igtools.IgRefresher;
 import org.opencds.cqf.library.R4LibraryGenerator;
 import org.opencds.cqf.library.STU3LibraryGenerator;
+import org.opencds.cqf.measure.RefreshGeneratedContent;
+import org.opencds.cqf.measure.RefreshR4Measure;
+import org.opencds.cqf.measure.RefreshStu3Measure;
 import org.opencds.cqf.modelinfo.StructureDefinitionToModelInfo;
 import org.opencds.cqf.qdm.QdmToQiCore;
 import org.opencds.cqf.quick.QuickPageGenerator;
@@ -45,6 +48,10 @@ class OperationFactory {
                 return new IgBundler();
             case "RefreshIg":
                 return new IgRefresher();
+            case "RefreshStu3Measure":
+                return new RefreshStu3Measure();
+            case "RefreshR4Measure":
+                return new RefreshR4Measure();
             case "CqlToMeasure":
                 throw new NotImplementedException();
             case "BundlesToBundle":
