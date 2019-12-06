@@ -23,9 +23,9 @@ public class IOUtils
         return parser.setPrettyPrint(true).encodeResourceToString(resource).getBytes();
     }
 
-    public static <T extends IAnyResource> void writeResource(T resource, String fileName, String outputPath, String encoding, FhirContext fhirContext) 
+    public static <T extends IAnyResource> void writeResource(T resource, String baseFileName, String outputPath, String encoding, FhirContext fhirContext) 
     {        
-        try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + fileName + "." + encoding))
+        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(outputPath, baseFileName + "." + encoding)))
         {
             writer.write(parseResource(resource, encoding, fhirContext));
             writer.flush();
