@@ -34,7 +34,7 @@ public class IO
         }
     }
 
-    public static void outputResources(Map<String, IAnyResource> resources, String outputPath, String encoding, FhirContext fhirContext) 
+    public static void writeResource(Map<String, IAnyResource> resources, String outputPath, String encoding, FhirContext fhirContext) 
     {        
         for (Map.Entry<String, IAnyResource> set : resources.entrySet())
         {
@@ -42,7 +42,7 @@ public class IO
         }
     }
 
-    public static IAnyResource inputResource(String inputPath, FhirContext fhirContext) 
+    public static IAnyResource readResource(String inputPath, FhirContext fhirContext) 
     {
         IAnyResource resource;       
         IParser parser = getParser(getEncoding(inputPath), fhirContext);
