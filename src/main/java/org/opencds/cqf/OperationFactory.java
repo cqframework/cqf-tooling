@@ -1,6 +1,7 @@
 package org.opencds.cqf;
 
 //import org.opencds.cqf.jsonschema.SchemaGenerator;
+import org.apache.commons.lang.NotImplementedException;
 import org.opencds.cqf.acceleratorkit.Processor;
 import org.opencds.cqf.bundler.BundleResources;
 import org.opencds.cqf.igtools.IgBundler;
@@ -12,7 +13,6 @@ import org.opencds.cqf.modelinfo.StructureDefinitionToModelInfo;
 import org.opencds.cqf.qdm.QdmToQiCore;
 import org.opencds.cqf.quick.QuickPageGenerator;
 import org.opencds.cqf.terminology.*;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 class OperationFactory {
 
