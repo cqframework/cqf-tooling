@@ -20,7 +20,7 @@ public class IO
         return parser.setPrettyPrint(true).encodeResourceToString(resource).getBytes();
     }
 
-    public static void outputResource(IAnyResource resource, String fileName, String outputPath, String encoding, FhirContext fhirContext) 
+    public static void writeResource(IAnyResource resource, String fileName, String outputPath, String encoding, FhirContext fhirContext) 
     {        
         try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + fileName + "." + encoding))
         {
@@ -34,11 +34,11 @@ public class IO
         }
     }
 
-    public static void writeResource(Map<String, IAnyResource> resources, String outputPath, String encoding, FhirContext fhirContext) 
+    public static void writeResources(Map<String, IAnyResource> resources, String outputPath, String encoding, FhirContext fhirContext) 
     {        
         for (Map.Entry<String, IAnyResource> set : resources.entrySet())
         {
-            outputResource(set.getValue(), set.getKey(), outputPath, encoding, fhirContext);
+            writeResource(set.getValue(), set.getKey(), outputPath, encoding, fhirContext);
         }
     }
 
@@ -65,11 +65,11 @@ public class IO
     private static IParser getParser(String encoding, FhirContext fhirContext) 
     {
         IParser parser;
-        if (encoding == "xml") 
+        if (encoding.equals("xml")) 
         {
             parser = fhirContext.newXmlParser();
         }
-        else if (encoding == "json")
+        else if (encoding.equals("json"))
         {
             parser = fhirContext.newJsonParser();
         }
