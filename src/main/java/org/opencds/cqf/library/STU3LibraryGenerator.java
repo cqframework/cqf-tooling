@@ -44,7 +44,6 @@ public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3Narr
 
     @Override
     public void output() {
-        //replace with writeResources
         IOUtils.writeResources(libraryMap, getOutputPath(), encoding, fhirContext);
     }
 

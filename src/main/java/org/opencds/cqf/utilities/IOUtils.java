@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -44,13 +45,13 @@ public class IOUtils
             writeResource(set.getValue(), set.getValue().getId(), outputPath, encoding, fhirContext);
         }
     }
-
+    
     public static IAnyResource readResource(String inputPath, FhirContext fhirContext) 
     {
         IAnyResource resource;       
-        IParser parser = getParser(getEncoding(inputPath), fhirContext);
         try
         {            
+            IParser parser = getParser(getEncoding(inputPath), fhirContext);
             resource = (IAnyResource)parser.parseResource(new FileReader(new File(inputPath.toString())));
         }
         catch (FileNotFoundException fnfe)
@@ -68,6 +69,49 @@ public class IOUtils
             resources.add(readResource(inputPath, fhirContext));
         }
         return resources;
+    }
+
+    public static List<IAnyResource> readResourcesFromDir(String inputDirectoryPath, FhirContext fhirContext, boolean recursive) {
+        List<IAnyResource> resources = new ArrayList<IAnyResource>();
+        if (!recursive) {
+            File inputDir = new File(inputDirectoryPath);
+            ArrayList<File> files = new ArrayList<File>(Arrays.asList(inputDir.listFiles()));
+            if (files.isEmpty()) return new ArrayList<IAnyResource>();
+            try {
+                files.forEach(file -> resources.add(readResource(file.getPath(), fhirContext)));
+            } catch (Exception e) {
+                System.out.println("error reading resource: ");
+                System.out.println(e.getMessage());
+            }
+            
+        }
+        else {
+            File inputDir = new File(inputDirectoryPath);
+            ArrayList<File> files = new ArrayList<File>(Arrays.asList(inputDir.listFiles()));
+            if (files.isEmpty()) return new ArrayList<IAnyResource>();
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    resources.addAll(readResourcesFromDir(file.getPath(), fhirContext, recursive));
+                }
+                else {
+                    try {
+                        resources.add(readResource(file.getPath(), fhirContext));
+                    } catch (Exception e) {
+                        System.out.println("error reading resource: ");
+                        System.out.println(e.getMessage());
+                    }
+                }
+            }
+        }
+        return resources;
+    }
+
+    public static ArrayList<File> getFilesFromDir(String pathToDir) {
+        File dir = new File(pathToDir);
+        if(!dir.isDirectory()) {
+            throw new IllegalArgumentException("The path to the tests Directory is not a Directory");
+        }
+        return new ArrayList<File>(Arrays.asList(dir.listFiles()));
     }
 
     public static String getEncoding(String path)

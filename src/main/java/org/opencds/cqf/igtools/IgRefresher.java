@@ -16,6 +16,7 @@ import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.opencds.cqf.Operation;
 import org.opencds.cqf.bundler.BundleResources;
+import org.opencds.cqf.bundler.STU3TestsBundler;
 import org.opencds.cqf.library.STU3LibraryGenerator;
 import org.opencds.cqf.library.STU3LibraryRefresher;
 import org.opencds.cqf.terminology.VSACBatchValueSetGenerator;
@@ -34,8 +35,6 @@ public class IgRefresher extends Operation {
     private File baseBundleDir;
 
     private ArrayList<File> cqlFiles;
-    private ArrayList<File> bundleDirs = new ArrayList<>();
-    private ArrayList<File> igFiles;
 
     private File testsDir;
 
@@ -45,8 +44,9 @@ public class IgRefresher extends Operation {
         ensureIgHasRequiredDirectories();
         setCqlFiles();
         refreshLibraries();
-        refreshValueSets();
-        refreshBundles();  //not yet ready
+        bundleTests();
+        //bundleValueSets(); //not yet ready
+        //refreshBundles();  //not yet ready
         //bundleTests();  //not yet ready
 
     }
@@ -164,107 +164,21 @@ public class IgRefresher extends Operation {
         };
     }
 
-    private void refreshValueSets() {
-        String pathToValueSetSpreadsheetDirectory = pathToIg + "/resources/valuesets/spreadsheets";  //think about possibly including this as an argument because it is not defined by the IG
-        VSACBatchValueSetGenerator VSACBatchValueSetGenerator = new VSACBatchValueSetGenerator();
+    private void bundleTests() {
+        STU3TestsBundler stu3TestBundler = new STU3TestsBundler();
         try {
-            VSACBatchValueSetGenerator.execute(buildRefreshValueSetArgs(pathToValueSetSpreadsheetDirectory));
-            //add a if there is no bundles dir create one and
-            
+            stu3TestBundler.execute(buildSTU3TestsBundlerArgs());
         } catch (Exception e) {
-            System.out.println("error refreshing valuesets");
+            System.out.println("error bundling tests: ");
             System.out.println(e.getMessage());
         }
     }
 
-    private String[] buildRefreshValueSetArgs(String pathToSpreadsheetDirectory) {
+    private String[] buildSTU3TestsBundlerArgs() {
         return new String[] {
-            "-VsacXlsxToValueSetBatch",
-            "-ptsd=" + pathToSpreadsheetDirectory,
-            "-op=" + pathToIg + "/resources/valuesets",  //might be just resourcesDir + "/valuesets"
-            "-vssrc=cms"
-        };
-    }
-
-    private void refreshBundles() {
-        
-        try (Stream<Path> bundlePaths = Files.find(
-            igDir.toPath(), Integer.MAX_VALUE,
-            (path, basicAttributes) ->  path.getFileName().toFile().getName().equals("bundles") && basicAttributes.isDirectory())
-            ) {
-                bundlePaths.forEach(path -> bundleDirs.add(path.toFile()));
-            } 
-            catch (Exception e) {
-                System.out.println("could not refresh bundles due to an error");
-                System.out.println(e.getMessage());
-            }
-            
-        if (bundleDirs == null) {
-            return;
-        }
-        else if (bundleDirs.isEmpty()) {
-            return;
-        }
-        bundleDirs.remove(baseBundleDir);
-        if (bundleDirs == null) {
-            return;
-        }
-        else if (bundleDirs.isEmpty()) {
-            return;
-        }
-        buildMasterBundle(bundleDirs);
-    }
-
-    private void buildMasterBundle(ArrayList<File> bundleDirs) {
-        //walk through ig dir and if path starts ends with bundles but isnt ig/bundles (base bundles path) then bundleResources and copy all files to ig/bundles/name/
-        Bundle masterBundle = new Bundle(); //still needs to be implemented
-        for (File bundleDir : bundleDirs) {
-            File[] bundleFiles = bundleDir.listFiles();
-            if (bundleFiles == null) {
-                return;
-            }
-            else if (bundleFiles.length == 0) {
-                return;
-            }
-            buildDirectorySpecificBundleAndCopy(bundleDir, bundleFiles);
-        }
-        //create File masterBundle = new File(master-bundle.json) //should probably have parameter for encoding
-        //write masterBundle to pathToIg + "/bundles/" + masterBundle.getName()
-
-
-        //I want to walk through every directory and check for a bundles dir,
-        //if there is one, bundle all the bundles and call it all-{parentDirName}-bundle.json
-        //and copy all into a new directory igDirPath/bundles/parentDirName
-    }
-
-    private void buildDirectorySpecificBundleAndCopy(File bundleDir, File[] bundleFiles) {
-        File baseParentDirBundlesDir = new File(pathToIg + "/bundles/" + bundleDir.getParentFile().getName());
-        if (! baseParentDirBundlesDir.exists()){
-            baseParentDirBundlesDir.mkdir();
-        }
-        //bundleResources(bundleDir.getPath());  //not yet working
-        try {
-            FileUtils.copyDirectory(bundleDir, baseParentDirBundlesDir);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //create File allBundlesFile = new File(all-bundleFile.getParentPath-bundle.json) //should probably have parameter for encoding
-        //write allBundlesBundle to baseParentDirBundlesDir.getPath() + "/" + allBundlesFile.getName()
-        //add allBundlesBundle to master bundle
-    }
-
-    private void bundleResources(String path) {
-        String pathToResourceDir = path + "/";
-        BundleResources BundleResources = new BundleResources();
-        BundleResources.execute(buildBundleResourcesArgs(pathToResourceDir));
-    }
-
-    private String[] buildBundleResourcesArgs(String pathToResourceDir) {
-        return new String[] {
-            "-BundleResources",
-            "-ptd=" + pathToResourceDir,
-            "-op=" + pathToResourceDir,  //might be just resourcesDir + "/valuesets"
-            "-v=stu3"
+            "-bundleTests",
+            "-pttd=" + testsDir.getPath().toString(),
+            "-e=" + encoding
         };
     }
 
@@ -281,7 +195,4 @@ public class IgRefresher extends Operation {
         return stringToCharacterSet(container).containsAll
                    (stringToCharacterSet(containee));
     }
-
-
-
 }
