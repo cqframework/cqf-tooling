@@ -43,72 +43,46 @@ public class IOUtils
         }
     }
 
-    public static IAnyResource readResource(String inputPath, FhirContext fhirContext) 
+    public static IAnyResource readResource(String path, FhirContext fhirContext) 
     {
         IAnyResource resource;       
         try
         {
-            IParser parser = getParser(getEncoding(inputPath), fhirContext);
-            resource = (IAnyResource)parser.parseResource(new FileReader(new File(inputPath.toString())));
+            IParser parser = getParser(getEncoding(path), fhirContext);
+            resource = (IAnyResource)parser.parseResource(new FileReader(new File(path)));
         }
         catch (FileNotFoundException fnfe)
         {
-            throw new RuntimeException("Error reading file: " + inputPath);
+            throw new RuntimeException("Error reading file: " + path);
         }
         return resource;
     }
 
-    public static List<IAnyResource> readResources(List<String> inputPaths, FhirContext fhirContext) 
+    public static List<IAnyResource> readResources(List<String> paths, FhirContext fhirContext) 
     {
         List<IAnyResource> resources = new ArrayList<>();
-        for (String inputPath : inputPaths)
+        for (String path : paths)
         {
-            resources.add(readResource(inputPath, fhirContext));
+            resources.add(readResource(path, fhirContext));
         }
         return resources;
     }
 
-    public static List<IAnyResource> readResourcesFromDir(String inputDirectoryPath, FhirContext fhirContext, boolean recursive) {
-        List<IAnyResource> resources = new ArrayList<>();
-        if (!recursive) {
-            File inputDir = new File(inputDirectoryPath);
-            ArrayList<File> files = new ArrayList<>(Arrays.asList(Optional.ofNullable(inputDir.listFiles()).orElseThrow()));
-            if (files.isEmpty()) return new ArrayList<>();
-            try {
-                files.forEach(file -> resources.add(readResource(file.getPath(), fhirContext)));
-            } catch (Exception e) {
-                System.out.println("error reading resource: ");
-                System.out.println(e.getMessage());
+    public static List<String> getFilePaths(String directoryPath, Boolean recursive)
+    {
+        List<String> filePaths = new ArrayList<String>();
+        File inputDir = new File(directoryPath);
+        ArrayList<File> files = new ArrayList<>(Arrays.asList(Optional.ofNullable(inputDir.listFiles()).orElseThrow()));
+       
+        for (File file : files) {
+            if (file.isDirectory()  && recursive) {
+                filePaths.addAll(getFilePaths(file.getPath(), recursive));
             }
-
-        }
-        else {
-            File inputDir = new File(inputDirectoryPath);
-            ArrayList<File> files = new ArrayList<>(Arrays.asList(Optional.ofNullable(inputDir.listFiles()).orElseThrow()));
-            if (files.isEmpty()) return new ArrayList<>();
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    resources.addAll(readResourcesFromDir(file.getPath(), fhirContext, recursive));
-                }
-                else {
-                    try {
-                        resources.add(readResource(file.getPath(), fhirContext));
-                    } catch (Exception e) {
-                        System.out.println("error reading resource: ");
-                        System.out.println(e.getMessage());
-                    }
-                }
+            else {
+               filePaths.add(file.getPath());
             }
         }
-        return resources;
-    }
-
-    public static ArrayList<File> getFilesFromDir(String pathToDir) {
-        File dir = new File(pathToDir);
-        if(!dir.isDirectory()) {
-            throw new IllegalArgumentException("The path to the tests Directory is not a Directory");
-        }
-        return new ArrayList<>(Arrays.asList(Optional.ofNullable(dir.listFiles()).orElseThrow()));
+        return filePaths;
     }
 
     public static String getEncoding(String path)

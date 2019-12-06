@@ -25,16 +25,21 @@ public class IGProcessor
         }
     }
 
-    public static void refreshStu3IG(FhirContext fhirContext, String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCasts)
+    public static void refreshStu3IG(FhirContext fhirContext, String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases)
     {
         refreshStu3IgLibraryContent(fhirContext, igPath, includeELM, includeDependencies, includeTerminology);
         //refreshMeasureContent();
-        if (includeTestCasts)
+        if (includeTestCases)
         {
-            //refreshTestCases();
+            refreshStu3TestCases();
         }
 
         //bundle        
+
+    }
+
+    public static void refreshStu3TestCases()
+    {
 
     }
 

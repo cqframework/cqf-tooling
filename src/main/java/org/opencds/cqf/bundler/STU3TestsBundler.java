@@ -10,6 +10,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.Operation;
+import org.opencds.cqf.igtools.IGProcessor;
 import org.opencds.cqf.utilities.BundleUtils;
 import org.opencds.cqf.utilities.IOUtils;
 
@@ -30,8 +31,7 @@ public class STU3TestsBundler extends Operation {
     @Override
     public void execute(String[] args) {
         parseArgs(args);
-        readResources();
-        output();
+        IGProcessor.refreshStu3TestCases();
     }
 
     private void parseArgs(String[] args) {
@@ -58,18 +58,7 @@ public class STU3TestsBundler extends Operation {
     }
 
     private void readResources() {
-        ArrayList<File> allMeasureTestDirs = IOUtils.getFilesFromDir(pathToTestsDir);
-        for (File measureTestDir : allMeasureTestDirs) {
-            ArrayList<File> testScenarios = IOUtils.getFilesFromDir(measureTestDir.getPath().toString());
-            for (File testScenario : testScenarios) {
-                if (testScenario.isFile()) {
-                    if (!isMeasureReport(testScenario)) continue;
-                }
-                testResourcesMap.put(
-                    testScenario,
-                    IOUtils.readResourcesFromDir(testScenario.getPath().toString(), fhirContext, true));
-            }
-        }
+        IOUtils.readResources(IOUtils.getFilePaths(pathToTestsDir, true), fhirContext);
     }
 
     private boolean isMeasureReport(File file) {
