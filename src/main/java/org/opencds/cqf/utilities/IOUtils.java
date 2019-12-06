@@ -33,7 +33,7 @@ public class IOUtils
         catch (IOException e)
         {
             e.printStackTrace();
-            throw new RuntimeException("Error writing Resource Bundle to file: " + e.getMessage());
+            throw new RuntimeException("Error writing Resource to file: " + e.getMessage());
         }
     }
 
@@ -51,18 +51,18 @@ public class IOUtils
         IParser parser = getParser(getEncoding(inputPath), fhirContext);
         try
         {            
-            resource = (IAnyResource)parser.parseResource(new FileReader(new File(inputPath.toString())));
+            resource = (IAnyResource)parser.parseResource(new FileReader(new File(inputPath)));
         }
         catch (FileNotFoundException fnfe)
         {
-            throw new RuntimeException("Error reading file: " + inputPath.toString());
+            throw new RuntimeException("Error reading file: " + inputPath);
         }
         return resource;
     }
 
     public static List<IAnyResource> readResources(List<String> inputPaths, FhirContext fhirContext) 
     {
-        List<IAnyResource> resources = new ArrayList<IAnyResource>();
+        List<IAnyResource> resources = new ArrayList<>();
         for (String inputPath : inputPaths)
         {
             resources.add(readResource(inputPath, fhirContext));
@@ -88,7 +88,7 @@ public class IOUtils
         }
         else
         {
-            throw new RuntimeException("Unknown file type: " + encoding);
+            throw new RuntimeException("Unknown encoding type: " + encoding);
         }
         return parser;
     }

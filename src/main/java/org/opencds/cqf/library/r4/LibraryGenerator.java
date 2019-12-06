@@ -1,4 +1,4 @@
-package org.opencds.cqf.library;
+package org.opencds.cqf.library.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -6,18 +6,19 @@ import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.ValueSetRef;
 import org.hl7.fhir.r4.model.*;
+import org.opencds.cqf.library.BaseLibraryGenerator;
 
 import java.io.*;
 import java.util.Collections;
 import java.util.Map;
 
-public class R4LibraryGenerator extends BaseLibraryGenerator<Library, R4NarrativeProvider> {
+public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativeProvider> {
 
-    public R4LibraryGenerator() {
-        this.narrativeProvider = new R4NarrativeProvider();
-        this.fhirContext = FhirContext.forR4();
+    public LibraryGenerator() {
+        setNarrativeProvider(new NarrativeProvider());
+        setFhirContext(FhirContext.forR4());
         setOutputPath("src/main/resources/org/opencds/cqf/library/output/r4");
-        operationName = "-CqlToR4Library";
+        setOperationName("-CqlToR4Library");
     }
 
     @Override
@@ -26,11 +27,11 @@ public class R4LibraryGenerator extends BaseLibraryGenerator<Library, R4Narrativ
         Library library = populateMeta(id, elm.getIdentifier().getVersion());
         if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
             for (IncludeDef def : elm.getIncludes().getDef()) {
-                if (!libraryMap.containsKey(def.getPath())) {
-                    if (!translatorMap.containsKey(def.getPath())) {
+                if (!getLibraryMap().containsKey(def.getPath())) {
+                    if (!getTranslatorMap().containsKey(def.getPath())) {
                         throw new IllegalArgumentException("Referenced library: " + def.getPath().replaceAll("_", "-").toLowerCase() + " not found");
                     }
-                    processLibrary(def.getPath(), translatorMap.get(def.getPath()));
+                    processLibrary(def.getPath(), getTranslatorMap().get(def.getPath()));
                 }
 
                 library.addRelatedArtifact(
@@ -39,39 +40,39 @@ public class R4LibraryGenerator extends BaseLibraryGenerator<Library, R4Narrativ
                                 .setResource("Library/" + nameToId(def.getPath().replaceAll("_", "-").toLowerCase()))
                 );
 
-                for (DataRequirement req : libraryMap.get(def.getPath()).getDataRequirement()) {
+                for (DataRequirement req : getLibraryMap().get(def.getPath()).getDataRequirement()) {
                     library.addDataRequirement(req);
                 }
             }
         }
 
         resolveDataRequirements(library, translator);
-        attachContent(library, translator, cqlMap.get(id));
-        library.setText(narrativeProvider.getNarrative(fhirContext, library));
-        libraryMap.put(id, library);
+        attachContent(library, translator, getCqlMap().get(id));
+        library.setText(getNarrativeProvider().getNarrative(getFhirContext(), library));
+        getLibraryMap().put(id, library);
     }
 
     @Override
     public void output() {
         Bundle bundle = new Bundle();
 
-        for (Map.Entry<String, Library> entry : libraryMap.entrySet()) {
-            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/library-" + entry.getKey().replaceAll("_", "-").toLowerCase() + "." + encoding))
+        for (Map.Entry<String, Library> entry : getLibraryMap().entrySet()) {
+            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/library-" + entry.getKey().replaceAll("_", "-").toLowerCase() + "." + getEncoding()))
             {
                 bundle.addEntry().setResource(entry.getValue()).setRequest(new Bundle.BundleEntryRequestComponent().setMethod(Bundle.HTTPVerb.PUT).setUrl("Library/" + entry.getValue().getId()));
                 writer.write(
-                        encoding.equals("json")
-                                ? fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(entry.getValue()).getBytes()
-                                : fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(entry.getValue()).getBytes()
+                        getEncoding().equals("json")
+                                ? getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(entry.getValue()).getBytes()
+                                : getFhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(entry.getValue()).getBytes()
                 );
                 writer.flush();
             } catch (IOException e) {
                 e.printStackTrace();
                 throw new IllegalArgumentException("Error outputting library: " + entry.getKey());
             }
-            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/elm-" + entry.getKey().replaceAll("_", "-").toLowerCase() + "." + encoding))
+            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/elm-" + entry.getKey().replaceAll("_", "-").toLowerCase() + "." + getEncoding()))
             {
-                writer.write(elmMap.get(entry.getKey()).getBytes());
+                writer.write(getElmMap().get(entry.getKey()).getBytes());
                 writer.flush();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -79,11 +80,11 @@ public class R4LibraryGenerator extends BaseLibraryGenerator<Library, R4Narrativ
             }
         }
 
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/all-libraries-bundle." +  encoding)) {
+        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/all-libraries-bundle." +  getEncoding())) {
             writer.write(
-                    encoding.equals("json")
-                            ? fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle).getBytes()
-                            : fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle).getBytes()
+                    getEncoding().equals("json")
+                            ? getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle).getBytes()
+                            : getFhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle).getBytes()
             );
             writer.flush();
         } catch (IOException e) {

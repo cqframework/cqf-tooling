@@ -1,4 +1,6 @@
-package org.opencds.cqf.measure;
+package org.opencds.cqf.measure.r4;
+
+import org.opencds.cqf.measure.RefreshGeneratedContent;
 
 public class RefreshR4Measure extends RefreshGeneratedContent {
 

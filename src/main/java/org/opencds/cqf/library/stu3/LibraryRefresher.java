@@ -1,4 +1,4 @@
-package org.opencds.cqf.library;
+package org.opencds.cqf.library.stu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -7,45 +7,72 @@ import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.ValueSetRef;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.opencds.cqf.library.BaseLibraryGenerator;
 import org.opencds.cqf.utilities.IOUtils;
 
-import java.io.*;
-import java.nio.file.Path;
 import java.util.*;
 
-
-
-public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3NarrativeProvider> {
+public class LibraryRefresher extends BaseLibraryGenerator<Library, NarrativeProvider> {
 
     private Map<String, IAnyResource> libraryMap = new HashMap<>();
 
-    public STU3LibraryGenerator() {
-        this.narrativeProvider = new STU3NarrativeProvider();
-        this.fhirContext = FhirContext.forDstu3();
+    public LibraryRefresher() {
+        setNarrativeProvider(new NarrativeProvider());
+        setFhirContext(FhirContext.forDstu3());
         setOutputPath("src/main/resources/org/opencds/cqf/library/output/stu3");
-        operationName = "-CqlToSTU3Library";
+        setOperationName("-refreshLibrary");
     }
 
     @Override
     public void processLibrary(String id, CqlTranslator translator) {
         org.hl7.elm.r1.Library elm = translator.toELM();
-        Library library = populateMeta(id, elm.getIdentifier().getVersion());
+        Library generatedLibrary = populateMeta(id, elm.getIdentifier().getVersion());
         if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
             for (IncludeDef def : elm.getIncludes().getDef()) {
-                addRelatedArtifact(library, def);
+                addRelatedArtifact(generatedLibrary, def);
             }        
         }
 
-        resolveDataRequirements(library, translator);
-        attachContent(library, translator, cqlMap.get(id));
-        library.setText(narrativeProvider.getNarrative(fhirContext, library));
-        libraryMap.put(id, library);
+        resolveDataRequirements(generatedLibrary, translator);
+        attachContent(generatedLibrary, translator, getCqlMap().get(id));
+        generatedLibrary.setText(getNarrativeProvider().getNarrative(getFhirContext(), generatedLibrary));
+        Library refreshedLibrary = refreshLibrary(generatedLibrary, id, translator);
+        libraryMap.put(id, refreshedLibrary);
+    }
+
+    private Library refreshLibrary(Library generatedLibrary, String id, CqlTranslator generatedLibraryTranslator) {
+        if (getPathToLibrary() == null) {
+            throw new IllegalArgumentException("The path to the CQL Library is required to refresh Content");
+        }
+
+        Library referenceLibrary;
+        try {
+            referenceLibrary = (Library) IOUtils.readResource(getPathToLibrary(), getFhirContext());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("The path to the CQL Library is not a Library Resource");
+        }
+
+        referenceLibrary.getRelatedArtifact().clear();
+        generatedLibrary.getRelatedArtifact().stream()
+        .forEach(relatedArtifact -> referenceLibrary.addRelatedArtifact(relatedArtifact));
+
+        referenceLibrary.getDataRequirement().clear();
+        generatedLibrary.getDataRequirement().stream()
+        .forEach(dateRequirement -> referenceLibrary.addDataRequirement(dateRequirement));
+
+        referenceLibrary.getContent().clear();
+        generatedLibrary.getContent().stream()
+        .forEach(getContent -> attachContent(referenceLibrary, generatedLibraryTranslator, getCqlMap().get(id)));
+
+        referenceLibrary.setText(getNarrativeProvider().getNarrative(getFhirContext(), generatedLibrary));
+
+        return referenceLibrary;
     }
 
     @Override
     public void output() {
         //replace with writeResources
-        IOUtils.writeResources(libraryMap, getOutputPath(), encoding, fhirContext);
+        IOUtils.writeResources(libraryMap, getOutputPath(), getEncoding(), getFhirContext());
     }
 
     // Populate metadata
@@ -99,14 +126,6 @@ public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3Narr
                         .setContentType("text/cql")
                         .setData(cql.getBytes())
         );
-    }
-
-    public Library refreshGeneratedContent(List<Library> libraries) {
-        return null;
-    }
-
-    public Library refreshGeneratedContent(Path pathToLibraryDirectory) {
-        return null;
     }
 
     //helpers

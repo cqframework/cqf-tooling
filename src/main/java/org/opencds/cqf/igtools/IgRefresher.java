@@ -16,8 +16,8 @@ import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.opencds.cqf.Operation;
 import org.opencds.cqf.bundler.BundleResources;
-import org.opencds.cqf.library.STU3LibraryGenerator;
-import org.opencds.cqf.library.STU3LibraryRefresher;
+import org.opencds.cqf.library.stu3.LibraryGenerator;
+import org.opencds.cqf.library.stu3.LibraryRefresher;
 import org.opencds.cqf.terminology.VSACBatchValueSetGenerator;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -124,7 +124,7 @@ public class IgRefresher extends Operation {
             if(!matchingLibrariesCollection.isEmpty()) {
                 File libraryFile = matchingLibrariesCollection.get(0);
                 if(libraryFile != null) {
-                    STU3LibraryRefresher STU3LibraryRefresher = new STU3LibraryRefresher();
+                    LibraryRefresher STU3LibraryRefresher = new LibraryRefresher();
                     try {
                         STU3LibraryRefresher.execute(buildRefreshLibraryArgs(cqlFilePath, libraryFile.getPath().toString()));
                     }
@@ -135,7 +135,7 @@ public class IgRefresher extends Operation {
                 }
             }
             else {
-                STU3LibraryGenerator STU3LibraryGenerator = new STU3LibraryGenerator();
+                LibraryGenerator STU3LibraryGenerator = new LibraryGenerator();
                 try {
                     STU3LibraryGenerator.execute(buildGenerateLibraryArgs(cqlFilePath));
                 }

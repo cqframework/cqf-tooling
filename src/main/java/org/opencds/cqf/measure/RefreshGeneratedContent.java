@@ -1,5 +1,6 @@
 package org.opencds.cqf.measure;
 
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.Operation;
 
 public abstract class RefreshGeneratedContent extends Operation {
@@ -44,5 +45,21 @@ public abstract class RefreshGeneratedContent extends Operation {
         }
     }
 
+    public void output(IAnyResource resource) {
+
+    }
+
     public abstract void refreshGeneratedContent();
+
+    public String getPathToMeasures() {
+        return pathToMeasures;
+    }
+
+    public String getPathToLibraries() {
+        return pathToLibraries;
+    }
+
+    public String getEncoding() {
+        return encoding;
+    }
 }

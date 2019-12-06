@@ -5,11 +5,9 @@ import org.opencds.cqf.acceleratorkit.Processor;
 import org.opencds.cqf.bundler.BundleResources;
 import org.opencds.cqf.igtools.IgBundler;
 import org.opencds.cqf.igtools.IgRefresher;
-import org.opencds.cqf.library.R4LibraryGenerator;
-import org.opencds.cqf.library.STU3LibraryGenerator;
-import org.opencds.cqf.measure.RefreshGeneratedContent;
-import org.opencds.cqf.measure.RefreshR4Measure;
-import org.opencds.cqf.measure.RefreshStu3Measure;
+import org.opencds.cqf.library.r4.LibraryGenerator;
+import org.opencds.cqf.measure.r4.RefreshR4Measure;
+import org.opencds.cqf.measure.stu3.RefreshStu3Measure;
 import org.opencds.cqf.modelinfo.StructureDefinitionToModelInfo;
 import org.opencds.cqf.qdm.QdmToQiCore;
 import org.opencds.cqf.quick.QuickPageGenerator;
@@ -35,13 +33,13 @@ class OperationFactory {
             case "XlsxToValueSet":
                 return new GenericValueSetGenerator();
             case "CqlToSTU3Library":
-                return new STU3LibraryGenerator();
+                return new org.opencds.cqf.library.stu3.LibraryGenerator();
             case "CqlToR4Library":
-                return new R4LibraryGenerator();
+                return new LibraryGenerator();
             case "UpdateSTU3Cql":
-                return new STU3LibraryGenerator();
+                return new org.opencds.cqf.library.stu3.LibraryGenerator();
             case "UpdateR4Cql":
-                return new R4LibraryGenerator();
+                return new LibraryGenerator();
             case "JsonSchemaGenerator":
 //                return new SchemaGenerator();
             case "BundleIg":

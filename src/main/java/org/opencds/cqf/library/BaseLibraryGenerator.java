@@ -1,5 +1,8 @@
 package org.opencds.cqf.library;
+
 import ca.uhn.fhir.context.FhirContext;
+import lombok.Getter;
+import lombok.Setter;
 import org.cqframework.cql.cql2elm.*;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.elm.r1.ValueSetDef;
@@ -15,13 +18,15 @@ import java.util.HashMap;
 import java.util.Map;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 
+@Getter
+@Setter
 public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends BaseNarrativeProvider> extends Operation {
 
-    T narrativeProvider;
-    FhirContext fhirContext;
+    private T narrativeProvider;
+    private FhirContext fhirContext;
 
-    String operationName;
-    String encoding = "json";
+    private String operationName;
+    private String encoding = "json";
     private File cqlContentDir;
     private File[] cqlFiles;
 
@@ -31,11 +36,15 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
     private LibraryManager libraryManager;
     private LibrarySourceProvider sourceProvider;
 
-    String pathToLibrary;
-    Map<String, CqlTranslator> translatorMap = new HashMap<>();
-    Map<String, String> cqlMap = new HashMap<>();
-    Map<String, String> elmMap = new HashMap<>();
-    Map<String, L> libraryMap = new HashMap<>();
+    private String pathToLibrary;
+    private Map<String, CqlTranslator> translatorMap = new HashMap<>();
+    private Map<String, String> cqlMap = new HashMap<>();
+    private Map<String, String> elmMap = new HashMap<>();
+    private Map<String, L> libraryMap = new HashMap<>();
+
+    //instead of processLibrary this would be refreshLibrary or refreshMeasure
+    public abstract void processLibrary(String id, CqlTranslator translator);
+    public abstract void output();
 
     @Override
     public void execute(String[] args) {
@@ -58,6 +67,20 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
         output();
     }
 
+    protected String getValueSetId(String valueSetName) {
+        for (CqlTranslator translator : translatorMap.values()) {
+            org.hl7.elm.r1.Library.ValueSets valueSets = translator.toELM().getValueSets();
+            if (valueSets != null) {
+                for (ValueSetDef def : valueSets.getDef()) {
+                    if (def.getName().equals(valueSetName)) {
+                        return def.getId();
+                    }
+                }
+            }
+        }
+        return valueSetName;
+    }
+
     private void buildArgs(String[] args) {
         for (String arg : args) {
             if (arg.equals(operationName)) {
@@ -68,17 +91,23 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
             String flag = flagAndValue[0];
             String value = flagAndValue.length < 2 ? null : flagAndValue[1];
 
-            if (flag.equals("-pathtocqlcontent") || flag.equals("-ptcql")) {
-                pathToCQLContent = value;
-            }
-            else if (flag.equals("-pathtolibrary") || flag.equals("-ptl")) {
-                pathToLibrary = value;
-            }
-            else if (flag.equals("-encoding") || flag.equals("-e")) {
-                encoding = value == null ? "json" : value.toLowerCase();
-            }
-            else if (flag.equals("-outputpath") || flag.equals("-op")) {
-                setOutputPath(value);
+            switch (flag) {
+                case "-pathtocqlcontent":
+                case "-ptcql":
+                    pathToCQLContent = value;
+                    break;
+                case "-pathtolibrary":
+                case "-ptl":
+                    pathToLibrary = value;
+                    break;
+                case "-encoding":
+                case "-e":
+                    encoding = value == null ? "json" : value.toLowerCase();
+                    break;
+                case "-outputpath":
+                case "-op":
+                    setOutputPath(value);
+                    break;
             }
         }
 
@@ -104,7 +133,7 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
         else if (allCqlContentFiles.length == 0) {
             return;
         }
-        ArrayList<File> dependencyLibrarieFiles = new ArrayList<File>();
+        ArrayList<File> dependencyLibrarieFiles = new ArrayList<>();
         dependencyLibrarieFiles.add(cqlContent);
         for (File cqlFile : allCqlContentFiles) {
             if (dependencyLibraries.contains(cqlFile.getName().replace(".cql", ""))) {
@@ -113,13 +142,6 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
 
         }
         cqlFiles = dependencyLibrarieFiles.toArray(new File[0]);
-        if (cqlFiles == null) {
-            return;
-        }
-        else if (cqlFiles.length == 0) {
-            return;
-        }
-
     }
 
     private void translateCqlFiles() {
@@ -137,11 +159,6 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
             }
         }
     }
-
-    //instead of processLibrary this would be refreshLibrary or refreshMeasure
-    public abstract void processLibrary(String id, CqlTranslator translator);
-    
-    public abstract void output();
 
     private String getCql(File file) {
         StringBuilder cql = new StringBuilder();
@@ -167,7 +184,7 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
                             cqlFile,
                             modelManager,
                             libraryManager,
-                            options.toArray(new CqlTranslator.Options[options.size()])
+                            options.toArray(new CqlTranslator.Options[0])
                     );
 
             if (translator.getErrors().size() > 0) {
@@ -190,26 +207,12 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
         }
     }
 
-    String getValueSetId(String valueSetName) {
-        for (CqlTranslator translator : translatorMap.values()) {
-            org.hl7.elm.r1.Library.ValueSets valueSets = translator.toELM().getValueSets();
-            if (valueSets != null) {
-                for (ValueSetDef def : valueSets.getDef()) {
-                    if (def.getName().equals(valueSetName)) {
-                        return def.getId();
-                    }
-                }
-            }
-        }
-        return valueSetName;
-    }
-
     private ArrayList<String> getIncludedLibraries(String cql) {
         int includeDefinitionIndex = cql.indexOf("include");
         String[] includedDefsAndBelow = cql.substring(includeDefinitionIndex).split("\\n");
 
         int index = 0; 
-        ArrayList<String> relatedArtifacts = new ArrayList<String>();
+        ArrayList<String> relatedArtifacts = new ArrayList<>();
         while (includedDefsAndBelow[index].startsWith("include")) {
             String includedLibraryName = includedDefsAndBelow[index].replace("include ", "").split(" version ")[0];
             String includedLibraryVersion = includedDefsAndBelow[index].replace("include ", "").split(" version ")[1].replaceAll("\'", "").split(" called")[0];
@@ -230,6 +233,7 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
     private String getNameFromSource(String cql) {
         return cql.replaceFirst("library ", "").split(" version")[0].replaceAll("\"", "");
     }
+
     private String getVersionFromSource(String cql) {
         return cql.split("version")[1].split("'")[1];
     }
