@@ -5,14 +5,17 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
-public class IO 
+public class IOUtils 
 {    
     public static byte[] parseResource(IAnyResource resource, String encoding, FhirContext fhirContext) 
     {
@@ -20,7 +23,7 @@ public class IO
         return parser.setPrettyPrint(true).encodeResourceToString(resource).getBytes();
     }
 
-    public static void writeResource(IAnyResource resource, String fileName, String outputPath, String encoding, FhirContext fhirContext) 
+    public static <T extends IAnyResource> void writeResource(T resource, String fileName, String outputPath, String encoding, FhirContext fhirContext) 
     {        
         try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + fileName + "." + encoding))
         {
@@ -34,9 +37,9 @@ public class IO
         }
     }
 
-    public static void writeResources(Map<String, IAnyResource> resources, String outputPath, String encoding, FhirContext fhirContext) 
+    public static <T extends IAnyResource> void writeResources(Map<String, T> resources, String outputPath, String encoding, FhirContext fhirContext)
     {        
-        for (Map.Entry<String, IAnyResource> set : resources.entrySet())
+        for (Map.Entry<String, T> set : resources.entrySet())
         {
             writeResource(set.getValue(), set.getKey(), outputPath, encoding, fhirContext);
         }
@@ -57,9 +60,19 @@ public class IO
         return resource;
     }
 
+    public static List<IAnyResource> readResource(List<String> inputPaths, FhirContext fhirContext) 
+    {
+        List<IAnyResource> resources = new ArrayList<IAnyResource>();
+        for (String inputPath : inputPaths)
+        {
+            resources.add(readResource(inputPath, fhirContext));
+        }
+        return resources;
+    }
+
     public static String getEncoding(String path)
     {
-        return path.substring(path.lastIndexOf("."));
+        return FilenameUtils.getExtension(path);
     }
 
     private static IParser getParser(String encoding, FhirContext fhirContext) 
