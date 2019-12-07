@@ -1,0 +1,39 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - RefreshIG",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.igtools.RefreshIG",
+            "projectName": "tooling"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch) - Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Main<tooling>",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.Main",
+            "projectName": "tooling",
+            "args": [
+                "-RefreshIg",
+                "-igPath=/src/GitHub/connectathon/fhir3"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-StructureDefinitionToModelInfo<tooling>",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.modelinfo.StructureDefinitionToModelInfo",
+            "projectName": "tooling"
+        }
+    ]
+}
