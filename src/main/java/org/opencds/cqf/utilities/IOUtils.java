@@ -14,16 +14,44 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
 public class IOUtils 
-{    
-    public static byte[] parseResource(IAnyResource resource, String encoding, FhirContext fhirContext) 
+{        
+    public enum Encoding 
+    { 
+        JSON("json"), XML("xml"); 
+  
+        private String string; 
+    
+        public String toString() 
+        { 
+            return this.string; 
+        } 
+    
+        private Encoding(String string) 
+        { 
+            this.string = string; 
+        }
+
+        public static Encoding parse(String value) {
+            switch (value) {
+                case "json": 
+                    return JSON;
+                case "xml":
+                    return XML;
+                default: 
+                    throw new RuntimeException("Unable to parse Encoding value:" + value);
+            }
+        }
+    } 
+
+    public static byte[] parseResource(IAnyResource resource, Encoding encoding, FhirContext fhirContext) 
     {
         IParser parser = getParser(encoding, fhirContext);      
         return parser.setPrettyPrint(true).encodeResourceToString(resource).getBytes();
     }
 
-    public static <T extends IAnyResource> void writeResource(T resource, String baseFileName, String outputPath, String encoding, FhirContext fhirContext) 
+    public static <T extends IAnyResource> void writeResource(T resource, String outputPath, String baseFileName, Encoding encoding, FhirContext fhirContext) 
     {        
-        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(outputPath, baseFileName + "." + encoding)))
+        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(outputPath, baseFileName + "." + encoding.toString())))
         {
             writer.write(parseResource(resource, encoding, fhirContext));
             writer.flush();
@@ -35,11 +63,23 @@ public class IOUtils
         }
     }
 
-    public static <T extends IAnyResource> void writeResources(Map<String, T> resources, String outputPath, String encoding, FhirContext fhirContext)
+    public static <T extends IAnyResource> void writeResources(Map<String, T> resources, String outputPath, Encoding encoding, FhirContext fhirContext)
     {        
         for (Map.Entry<String, T> set : resources.entrySet())
         {
-            writeResource(set.getValue(), set.getValue().getId(), outputPath, encoding, fhirContext);
+            writeResource(set.getValue(), outputPath, set.getValue().getId(), encoding, fhirContext);
+        }
+    }
+
+    //There's a special operation to write a bundle because I can't find a type that will reference both dstu3 and r4.
+    public static void writeBundle(Object bundle, String outputPath, String baseFileName, Encoding encoding, FhirContext fhirContext) {
+        switch (fhirContext.getVersion().getVersion()) {
+            case DSTU3:
+                writeResource(((org.hl7.fhir.dstu3.model.Bundle)bundle), outputPath, baseFileName, encoding, fhirContext);
+            case R4:
+                writeResource(((org.hl7.fhir.r4.model.Bundle)bundle), outputPath, baseFileName, encoding, fhirContext);
+            default:
+                throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
     }
 
@@ -85,27 +125,36 @@ public class IOUtils
         return filePaths;
     }
 
-    public static String getEncoding(String path)
+    public static List<String> getDirectoryPaths(String path, Boolean recursive)
     {
-        return FilenameUtils.getExtension(path);
+        List<String> directoryPaths = new ArrayList<String>();
+        File parentDirectory = new File(path);
+        ArrayList<File> directories = new ArrayList<>(Arrays.asList(Optional.ofNullable(parentDirectory.listFiles()).orElseThrow()));
+       
+        for (File directory : directories) {
+            if (directory.isDirectory()  && recursive) {
+                directoryPaths.addAll(getDirectoryPaths(directory.getPath(), recursive));
+                directoryPaths.add(directory.getPath());
+            }
+        }
+        return directoryPaths;
     }
 
-    private static IParser getParser(String encoding, FhirContext fhirContext) 
+    public static Encoding getEncoding(String path)
     {
-        IParser parser;
-        if (encoding.equals("xml")) 
-        {
-            parser = fhirContext.newXmlParser();
+        return Encoding.parse(FilenameUtils.getExtension(path));
+    }
+
+    private static IParser getParser(Encoding encoding, FhirContext fhirContext) 
+    {
+        switch (encoding) {
+            case XML: 
+                return fhirContext.newXmlParser();
+            case JSON:
+                return fhirContext.newJsonParser();
+            default: 
+                throw new RuntimeException("Unknown encoding type: " + encoding.toString());
         }
-        else if (encoding.equals("json"))
-        {
-            parser = fhirContext.newJsonParser();
-        }
-        else
-        {
-            throw new RuntimeException("Unknown encoding type: " + encoding);
-        }
-        return parser;
     }
 
     public static Boolean pathIncludesElement(String igPath, String pathElement)

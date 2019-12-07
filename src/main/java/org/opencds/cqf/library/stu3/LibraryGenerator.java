@@ -43,7 +43,7 @@ public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativePro
     @Override
     public void output() {
         //replace with writeResources
-        IOUtils.writeResources(libraryMap, getOutputPath(), getEncoding(), getFhirContext());
+        IOUtils.writeResources(libraryMap, getOutputPath(), IOUtils.Encoding.parse(getEncoding()), getFhirContext());
     }
 
     // Populate metadata

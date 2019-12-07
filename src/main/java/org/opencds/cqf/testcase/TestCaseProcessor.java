@@ -3,6 +3,7 @@ package org.opencds.cqf.testcase;
 import java.util.*;
 
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.opencds.cqf.utilities.BundleUtils;
 import org.opencds.cqf.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -16,11 +17,17 @@ public class TestCaseProcessor
         - write them out to the root of the test directory
             - with the name of the test case directory 
     */
-    public static void refreshTestCases(FhirContext fhirContext, String path)
+    public static void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext)
     {
-        //TODO: this is a stub
-
-        List<String> paths = IOUtils.getFilePaths(path, true);
-        List<IAnyResource> resources = IOUtils.readResources(paths, fhirContext);
+        List<String> libaryTestCasePaths = IOUtils.getDirectoryPaths(path, false); 
+        for (String libraryTestCasePath : libaryTestCasePaths) {
+            List<String> testCasePaths = IOUtils.getDirectoryPaths(libraryTestCasePath, false); 
+            for (String testCasePath : testCasePaths) {
+                List<String> paths = IOUtils.getFilePaths(testCasePath, true);
+                List<IAnyResource> resources = IOUtils.readResources(paths, fhirContext);
+                Object bundle = BundleUtils.bundleArtifacts(testCasePath, resources, fhirContext);
+                IOUtils.writeBundle(bundle, path, testCasePath, encoding, fhirContext);
+            }
+        }        
     }
 }

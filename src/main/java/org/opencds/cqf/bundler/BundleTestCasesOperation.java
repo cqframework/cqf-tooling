@@ -1,15 +1,10 @@
 package org.opencds.cqf.bundler;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.opencds.cqf.Operation;
 import org.opencds.cqf.testcase.TestCaseProcessor;
 import org.opencds.cqf.utilities.ArgUtils;
 import org.opencds.cqf.utilities.ResourceUtils;
+import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -24,8 +19,8 @@ public class BundleTestCasesOperation extends Operation {
     @Override
     public void execute(String[] args) {
         initializeArgs(args);
-        FhirContext fhirContext = ResourceUtils.getFhirContext(fhirVersion);
-        TestCaseProcessor.refreshTestCases(fhirContext, path);
+        FhirContext fhirContext = ResourceUtils.getFhirContext(ResourceUtils.FhirVersion.parse(fhirVersion));
+        TestCaseProcessor.refreshTestCases(path, Encoding.JSON, fhirContext);
     }
 
     private void initializeArgs(String[] args) {

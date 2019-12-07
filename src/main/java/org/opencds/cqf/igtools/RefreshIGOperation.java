@@ -2,6 +2,7 @@ package org.opencds.cqf.igtools;
 
 import org.opencds.cqf.Operation;
 import org.opencds.cqf.igtools.IGProcessor;
+import org.opencds.cqf.igtools.IGProcessor.IGVersion;
 import org.opencds.cqf.utilities.ArgUtils;
 
 public class RefreshIGOperation extends Operation {
@@ -20,7 +21,7 @@ public class RefreshIGOperation extends Operation {
     @Override
     public void execute(String[] args) {
         initializeArgs(args);
-        IGProcessor.refreshIG(igPath, igVersion, includeELM,  includeDependencies, includeTerminology, includeTestCases, versioned);
+        IGProcessor.refreshIG(igPath, IGVersion.parse(igVersion), includeELM,  includeDependencies, includeTerminology, includeTestCases, versioned);
     }
 
     private void initializeArgs(String[] args) {
@@ -29,7 +30,7 @@ public class RefreshIGOperation extends Operation {
         igPath = ArgUtils.getValue("igPath", args, true);
         igVersion = ArgUtils.getValue("igVersion", args);
         if (igVersion.equals("")) {
-            igVersion = IGProcessor.getIgVersion(igPath);
+            igVersion = IGProcessor.getIgVersion(igPath).toString();
         }
 
         includeELM = ArgUtils.isTrue("includeELM", args);

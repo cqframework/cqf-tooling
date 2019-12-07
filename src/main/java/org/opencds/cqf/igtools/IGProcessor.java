@@ -8,38 +8,63 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class IGProcessor
 {    
-    public static final String stu3IgVersion = "fhir3";
-    public static final String r4IgVersion = "fhir4";
-
-    public static final String testCasePathElement = "tests/";
-
-    public static void refreshIG(String igPath, String igVersion, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases) {
-        refreshIG(igPath, igVersion, includeELM, includeDependencies, includeTerminology, includeTestCases, false);
-    }
-
-    public static void refreshIG(String igPath, String igVersion, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases,  Boolean versioned)
-    {
-        FhirContext context = getIgFhirContext(igVersion);
+    public enum IGVersion 
+    { 
+        FHIR3("fhir3"), FHIR4("fhir4"); 
   
-        switch (context.getVersion().getVersion()) {
-            case DSTU3:
-                refreshStu3IG(context, igPath, includeELM, includeDependencies, includeTerminology, includeTestCases);
-                break;
-            case R4:
-                refreshR4IG(context, igPath, includeELM, includeDependencies, includeTerminology, includeTestCases);
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown fhir version: " + context.getVersion().getVersion().getFhirVersionString());
+        private String string; 
+    
+        public String toString() 
+        { 
+            return this.string; 
+        } 
+    
+        private IGVersion(String string) 
+        { 
+            this.string = string; 
+        }
+
+        public static IGVersion parse(String value) {
+            switch (value) {
+                case "fhir3": 
+                    return FHIR3;
+                case "fhir4":
+                    return FHIR4;
+                default: 
+                    throw new RuntimeException("Unable to parse IG version value:" + value);
+            }
         }
     }
 
-    public static void refreshStu3IG(FhirContext fhirContext, String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases)
+    public static final String testCasePathElement = "tests/";
+
+    public static void refreshIG(String igPath, IGVersion igVersion, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases) {
+        refreshIG(igPath, igVersion, includeELM, includeDependencies, includeTerminology, includeTestCases, false);
+    }
+
+    public static void refreshIG(String igPath, IGVersion igVersion, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases,  Boolean versioned)
     {
-        refreshStu3IgLibraryContent(fhirContext, igPath, includeELM);
+        FhirContext fhirContext = getIgFhirContext(igVersion);
+  
+        switch (fhirContext.getVersion().getVersion()) {
+            case DSTU3:
+                refreshStu3IG(igPath, includeELM, includeDependencies, includeTerminology, includeTestCases, fhirContext);
+                break;
+            case R4:
+                refreshR4IG(igPath, includeELM, includeDependencies, includeTerminology, includeTestCases, fhirContext);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+        }
+    }
+
+    public static void refreshStu3IG(String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases, FhirContext fhirContext)
+    {
+        refreshStu3IgLibraryContent(igPath, includeELM, fhirContext);
         //refreshMeasureContent();
         if (includeTestCases)
         {
-            TestCaseProcessor.refreshTestCases(fhirContext, FilenameUtils.concat(igPath, testCasePathElement));
+            TestCaseProcessor.refreshTestCases(FilenameUtils.concat(igPath, testCasePathElement), IOUtils.Encoding.JSON, fhirContext);
         }
         //bundle
         /*
@@ -67,49 +92,49 @@ public class IGProcessor
 
     }    
 
-    public static void refreshR4IG(FhirContext fhirContext, String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCasts)
+    public static void refreshR4IG(String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCasts, FhirContext fhirContext)
     {
-        refreshR4LibraryContent(fhirContext, igPath, includeELM);
+        refreshR4LibraryContent(igPath, includeELM, fhirContext);
         //refreshMeasureContent();
         //refreshTestCases();
     }
 
     public static final String libraryPathElement = "library/";
-    public static void refreshStu3IgLibraryContent(FhirContext fhirContext, String igPath, Boolean includeELM)
+    public static void refreshStu3IgLibraryContent(String igPath, Boolean includeELM, FhirContext fhirContext)
     {
         String libraryPath = FilenameUtils.concat(igPath, libraryPathElement);
         //ILibraryProcessor libraryProcessor = new LibraryProcessor<DSTU3>(libraryPath);
         //libraryProcessor.refreshLibraryContent();
     }
 
-    public static void refreshR4LibraryContent(FhirContext fhirContext, String igPath, Boolean includeELM)
+    public static void refreshR4LibraryContent(String igPath, Boolean includeELM, FhirContext fhirContext)
     {
         String libraryPath = FilenameUtils.concat(igPath, libraryPathElement);
         //ILibraryProcessor libraryProcessor = new LibraryProcessor<R4>(libraryPath);
         //libraryProcessor.refreshLibraryContent();
     }
 
-    public static FhirContext getIgFhirContext(String igVersion)
+    public static FhirContext getIgFhirContext(IGVersion igVersion)
     {
         switch (igVersion) {
-            case stu3IgVersion:
+            case FHIR3:
                 return FhirContext.forDstu3();
-            case r4IgVersion:
+            case FHIR4:
                 return FhirContext.forR4();
             default:
                 throw new IllegalArgumentException("Unknown IG version: " + igVersion);
         }     
     }
 
-    public static String getIgVersion(String igPath)
+    public static IGVersion getIgVersion(String igPath)
     {
-        if (IOUtils.pathIncludesElement(igPath, stu3IgVersion))
+        if (IOUtils.pathIncludesElement(igPath, IGVersion.FHIR3.toString()))
         {
-            return stu3IgVersion;
+            return IGVersion.FHIR3;
         }
-        else if (IOUtils.pathIncludesElement(igPath, r4IgVersion))
+        else if (IOUtils.pathIncludesElement(igPath, IGVersion.FHIR4.toString()))
         {
-            return r4IgVersion;
+            return IGVersion.FHIR4;
         }
         throw new IllegalArgumentException("IG version not found in IG Path.");
     }
