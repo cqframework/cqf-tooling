@@ -237,4 +237,52 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
     private String getVersionFromSource(String cql) {
         return cql.split("version")[1].split("'")[1];
     }
+
+    protected T getNarrativeProvider() {
+        return narrativeProvider;
+    }
+
+    protected void setNarrativeProvider(T narrativeProvider) {
+        this.narrativeProvider = narrativeProvider;
+    }
+
+    protected FhirContext getFhirContext() {
+        return fhirContext;
+    }
+
+    protected void setFhirContext(FhirContext fhirContext) {
+        this.fhirContext = fhirContext;
+    }
+
+    protected String getOperationName() {
+        return operationName;
+    }
+
+    protected void setOperationName(String operationName) {
+        this.operationName = operationName;
+    }
+
+    protected String getEncoding() {
+        return encoding;
+    }
+
+    protected Map<String, L> getLibraryMap() {
+        return libraryMap;
+    }
+
+    protected Map<String, CqlTranslator> getTranslatorMap() {
+        return translatorMap;
+    }
+
+    protected Map<String, String> getCqlMap() {
+        return cqlMap;
+    }
+
+    protected Map<String, String> getElmMap() {
+        return elmMap;
+    }
+
+    protected String getPathToLibrary() {
+        return pathToLibrary;
+    }
 }
