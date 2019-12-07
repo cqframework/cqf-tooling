@@ -18,7 +18,7 @@ import org.opencds.cqf.Operation;
 import org.opencds.cqf.bundler.BundleResources;
 import org.opencds.cqf.library.stu3.LibraryGenerator;
 import org.opencds.cqf.library.stu3.LibraryRefresher;
-import org.opencds.cqf.bundler.STU3TestsBundler;
+import org.opencds.cqf.bundler.BundleTestCasesOperation;
 import org.opencds.cqf.terminology.VSACBatchValueSetGenerator;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -165,7 +165,7 @@ public class IgRefresher extends Operation {
     }
 
     private void bundleTests() {
-        STU3TestsBundler stu3TestBundler = new STU3TestsBundler();
+        BundleTestCasesOperation stu3TestBundler = new BundleTestCasesOperation();
         try {
             stu3TestBundler.execute(buildSTU3TestsBundlerArgs());
         } catch (Exception e) {

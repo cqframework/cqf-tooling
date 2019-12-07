@@ -8,6 +8,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public class BundleUtils {
 
+    //TODO: consider providing utilities to mask stu3 vs r4 from user
     public static Bundle bundleStu3Artifacts(List<IAnyResource> list, String id) {
         Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.TRANSACTION);
