@@ -88,8 +88,12 @@ public class IOUtils
         }
     }
 
+    public static IAnyResource readResource(String path, FhirContext fhirContext) {
+        return readResource(path, fhirContext, false);
+    }
+    
     //users should always check for null
-    public static IAnyResource readResource(String path, FhirContext fhirContext) 
+    public static IAnyResource readResource(String path, FhirContext fhirContext, Boolean safeRead) 
     {        
         Encoding encoding = getEncoding(path);
         if (encoding == Encoding.UNKNOWN) {
@@ -100,7 +104,13 @@ public class IOUtils
         try
         {
             IParser parser = getParser(encoding, fhirContext);
-            resource = (IAnyResource)parser.parseResource(new FileReader(new File(path)));
+            File file = new File(path);
+            if (safeRead) {
+                if (!file.exists()) {
+                    return null;
+                }
+            }
+            resource = (IAnyResource)parser.parseResource(new FileReader(file));
         }
         catch (FileNotFoundException fnfe)
         {
