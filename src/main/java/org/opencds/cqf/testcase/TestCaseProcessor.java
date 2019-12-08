@@ -25,7 +25,7 @@ public class TestCaseProcessor
         }        
     }
 
-    private static String getId(String baseId) {
+    public static String getId(String baseId) {
         return "tests-" + baseId;
     }
 }

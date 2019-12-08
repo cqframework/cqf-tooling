@@ -7,7 +7,9 @@ import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.opencds.cqf.library.LibraryProcessor;
 import org.opencds.cqf.testcase.TestCaseProcessor;
+import org.opencds.cqf.utilities.BundleUtils;
 import org.opencds.cqf.utilities.IOUtils;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
 
@@ -116,7 +118,8 @@ public class IGProcessor
     }
 
     public static final String cqlLibraryPathElement = "cql/";
-    public static final String bundlePathElement = "bundle/";
+    public static final String bundlePathElement = "bundles/";
+    
     public static final String measurePathElement = "resources/measure/";
     public static void bundleIg(String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, FhirContext fhirContext) {
         //bundle
@@ -130,38 +133,51 @@ public class IGProcessor
                 - save bundle to bundle directory, by library name
 
         */  
-        
+        Encoding encoding = Encoding.JSON;
         String bundlePath = FilenameUtils.concat(igPath, bundlePathElement);
-        String measureLibraryPath = FilenameUtils.concat(igPath, measurePathElement);
+        String igMeasurePath = FilenameUtils.concat(igPath, measurePathElement);
+        String igLibraryPath = FilenameUtils.concat(igPath, libraryPathElement);
 
-        List<String> measurePaths = IOUtils.getFilePaths(measureLibraryPath, false);
+        List<String> measureSourcePaths = IOUtils.getFilePaths(igMeasurePath, false);
         Boolean shouldPersist = true;
-        for (String measurePath : measurePaths) {
+        for (String measureSourcePath : measureSourcePaths) {
             List<IAnyResource> resources = new ArrayList<IAnyResource>();
             Map<String, String> resourceExceptions = new HashMap<String, String>();
+            String libraryName = FilenameUtils.getBaseName(measureSourcePath).replace("measure-", "");
+            String librarySourcePath = FilenameUtils.concat(igLibraryPath, IOUtils.getFileName(LibraryProcessor.getId(libraryName), encoding));
 
-            shouldPersist = safeAddResource(measurePath, resources, fhirContext, resourceExceptions);
-            
-            String fileName = FilenameUtils.getBaseName(measurePath).replace("measure-", "") + "." + Encoding.JSON.toString();
-    
-            String libraryPath = FilenameUtils.concat(FilenameUtils.concat(igPath, libraryPathElement), "library-" + fileName);
-            shouldPersist = shouldPersist & safeAddResource(libraryPath, resources, fhirContext, resourceExceptions);
+            shouldPersist = safeAddResource(measureSourcePath, resources, fhirContext, resourceExceptions);    
+            shouldPersist = shouldPersist & safeAddResource(librarySourcePath, resources, fhirContext, resourceExceptions);
 
             if (shouldPersist) {
-                //bundle
-                //initialize directory
-                //write to directory
-                String cqlLibraryPath = FilenameUtils.concat(FilenameUtils.concat(igPath, cqlLibraryPathElement), fileName);
-                //write to directory
+                String bundleDestPath = FilenameUtils.concat(bundlePath, libraryName);
+                IOUtils.initializeDirectory(bundleDestPath);
+                Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext);
+                IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);
+                bundleFiles(igPath, bundleDestPath, libraryName, measureSourcePath, librarySourcePath);
             }
             else {
                 String exceptionMessage = "";
                 for (Map.Entry<String, String> resourceException : resourceExceptions.entrySet()) {
                     exceptionMessage += "\r\n" + "          Resource could not be processed: " + resourceException.getKey() + " - " + resourceException.getValue();
                 }
-                ourLog.warn("Measure could not be processed: " + fileName + " - " + exceptionMessage);
+                ourLog.warn("Measure could not be processed: " + libraryName + " - " + exceptionMessage);
             }
         } 
+    }
+
+    public static final String bundleFilesPathElement = "files/";
+    private static void bundleFiles(String igPath, String bundleDestPath, String libraryName, String measureSourcePath, String librarySourcePath) {
+        String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, libraryName + "-" + bundleFilesPathElement);
+        IOUtils.initializeDirectory(bundleDestFilesPath);
+
+        IOUtils.copyFile(measureSourcePath, FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(measureSourcePath)));
+        IOUtils.copyFile(librarySourcePath, FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(librarySourcePath)));
+
+        String cqlFileName = IOUtils.getFileName(libraryName, Encoding.CQL);
+        String cqlLibrarySourcePath = FilenameUtils.concat(FilenameUtils.concat(igPath, cqlLibraryPathElement), cqlFileName);
+        String cqlDestPath = FilenameUtils.concat(bundleDestFilesPath, cqlFileName);        
+        IOUtils.copyFile(cqlLibrarySourcePath, cqlDestPath);
     }
 
     private static Boolean safeAddResource(String path, List<IAnyResource> resources, FhirContext fhirContext, Map<String, String> resourceExceptions) {
