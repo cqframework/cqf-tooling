@@ -23,7 +23,7 @@ public class BundleUtils {
     public static org.hl7.fhir.dstu3.model.Bundle bundleStu3Artifacts(String id, List<IAnyResource> resources)
     {
         org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
-        ResourceUtils.setIgId(id, bundle);
+        ResourceUtils.setIgId(id, bundle, false);
         bundle.setType(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION);
         for (IAnyResource resource : resources)
         {
@@ -43,7 +43,7 @@ public class BundleUtils {
     public static org.hl7.fhir.r4.model.Bundle bundleR4Artifacts(String id, List<IAnyResource> resources)
     {
         org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
-        ResourceUtils.setIgId(id, bundle);
+        ResourceUtils.setIgId(id, bundle, false);
         bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
         for (IAnyResource resource : resources)
         {

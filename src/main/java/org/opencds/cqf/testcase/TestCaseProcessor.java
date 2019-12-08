@@ -10,15 +10,7 @@ import org.opencds.cqf.utilities.IOUtils;
 import ca.uhn.fhir.context.FhirContext;
 
 public class TestCaseProcessor
-{    
-    /*
-        - iterate through the test case directories
-        - collect all the resources
-        - bundle them
-        - write them out to the root of the test directory
-            - with the name of the test case directory 
-    */
-    
+{         
     public static void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext)
     {
         List<String> libaryTestCasePaths = IOUtils.getDirectoryPaths(path, false); 

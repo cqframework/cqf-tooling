@@ -39,18 +39,17 @@ public class ResourceUtils
         }
     }
     
-    public static void setIgId(String baseId, IAnyResource resource){
-      setIgId(baseId, resource, false);
-    }
-   
     public static void setIgId(String baseId, IAnyResource resource, Boolean includeVersion)
     {
       String igId = "";
+      String resourceName = resource.getClass().getSimpleName().toLowerCase();
+      String versionId = includeVersion ? "-" + resource.getMeta().getVersionId() : "";
+      
       if (resource instanceof org.hl7.fhir.dstu3.model.Bundle || resource instanceof org.hl7.fhir.r4.model.Bundle) {
-        igId = baseId + (includeVersion ? "-" + resource.getMeta().getVersionId() : "") + "-" + resource.getClass().getSimpleName().toLowerCase();        
+        igId = baseId + versionId + "-" + resourceName;        
       }
       else {
-        igId =  resource.getClass().getSimpleName().toLowerCase() + "-" + (includeVersion ? "-" + resource.getMeta().getVersionId() : "");
+        igId = resourceName + "-" + baseId + versionId;
 
       }
       igId = igId.replace("_", "-");

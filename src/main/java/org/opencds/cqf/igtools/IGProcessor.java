@@ -42,23 +42,24 @@ public class IGProcessor
         refreshIG(igPath, igVersion, includeELM, includeDependencies, includeTerminology, includeTestCases, false);
     }
 
-    public static void refreshIG(String igPath, IGVersion igVersion, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases,  Boolean versioned)
+    public static void refreshIG(String igPath, IGVersion igVersion, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases,  Boolean includeVersion)
     {
         FhirContext fhirContext = getIgFhirContext(igVersion);
   
+        //TODO: if refresh content is fhir version non-specific, no need for two
         switch (fhirContext.getVersion().getVersion()) {
             case DSTU3:
-                refreshStu3IG(igPath, includeELM, includeDependencies, includeTerminology, includeTestCases, fhirContext);
+                refreshStu3IG(igPath, includeELM, includeDependencies, includeTerminology, includeTestCases, includeVersion, fhirContext);
                 break;
             case R4:
-                refreshR4IG(igPath, includeELM, includeDependencies, includeTerminology, includeTestCases, fhirContext);
+                refreshR4IG(igPath, includeELM, includeDependencies, includeTerminology, includeTestCases, includeVersion, fhirContext);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
     }
 
-    public static void refreshStu3IG(String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases, FhirContext fhirContext)
+    private static void refreshStu3IG(String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, FhirContext fhirContext)
     {
         refreshStu3IgLibraryContent(igPath, includeELM, fhirContext);
         //refreshMeasureContent();
@@ -92,7 +93,7 @@ public class IGProcessor
 
     }    
 
-    public static void refreshR4IG(String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCasts, FhirContext fhirContext)
+    private static void refreshR4IG(String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCasts, Boolean includeVersion, FhirContext fhirContext)
     {
         refreshR4LibraryContent(igPath, includeELM, fhirContext);
         //refreshMeasureContent();
