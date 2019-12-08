@@ -2,6 +2,7 @@ package org.opencds.cqf.testcase;
 
 import java.util.*;
 
+import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.utilities.BundleUtils;
 import org.opencds.cqf.utilities.IOUtils;
@@ -17,6 +18,7 @@ public class TestCaseProcessor
         - write them out to the root of the test directory
             - with the name of the test case directory 
     */
+    
     public static void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext)
     {
         List<String> libaryTestCasePaths = IOUtils.getDirectoryPaths(path, false); 
@@ -25,9 +27,13 @@ public class TestCaseProcessor
             for (String testCasePath : testCasePaths) {
                 List<String> paths = IOUtils.getFilePaths(testCasePath, true);
                 List<IAnyResource> resources = IOUtils.readResources(paths, fhirContext);
-                Object bundle = BundleUtils.bundleArtifacts(testCasePath, resources, fhirContext);
-                IOUtils.writeBundle(bundle, path, testCasePath, encoding, fhirContext);
+                Object bundle = BundleUtils.bundleArtifacts(getId(FilenameUtils.getName(testCasePath)), resources, fhirContext);
+                IOUtils.writeBundle(bundle, libraryTestCasePath, encoding, fhirContext);
             }
         }        
+    }
+
+    private static String getId(String baseId) {
+        return "tests-" + baseId;
     }
 }

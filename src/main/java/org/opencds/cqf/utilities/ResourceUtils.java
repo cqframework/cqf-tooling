@@ -39,14 +39,22 @@ public class ResourceUtils
         }
     }
     
-    public static void setId(Resource resource)
-    {
-        setId(resource, false);
+    public static void setIgId(String baseId, IAnyResource resource){
+      setIgId(baseId, resource, false);
     }
    
-    public static void setId(Resource resource, Boolean includeVersion)
+    public static void setIgId(String baseId, IAnyResource resource, Boolean includeVersion)
     {
-      //  resource.setId((resource.getType() + "-" + resource.getName() + includeVersion ? "-" + resource.getMeta().getVersionId() : "").replace('_', '-'));
+      String igId = "";
+      if (resource instanceof org.hl7.fhir.dstu3.model.Bundle || resource instanceof org.hl7.fhir.r4.model.Bundle) {
+        igId = baseId + (includeVersion ? "-" + resource.getMeta().getVersionId() : "") + "-" + resource.getClass().getSimpleName().toLowerCase();        
+      }
+      else {
+        igId =  resource.getClass().getSimpleName().toLowerCase() + "-" + (includeVersion ? "-" + resource.getMeta().getVersionId() : "");
+
+      }
+      igId = igId.replace("_", "-");
+      resource.setId(igId);
     }
 
     public static FhirContext getFhirContext(FhirVersion fhirVersion) {

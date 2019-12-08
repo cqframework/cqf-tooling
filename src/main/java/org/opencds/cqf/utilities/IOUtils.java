@@ -17,7 +17,7 @@ public class IOUtils
 {        
     public enum Encoding 
     { 
-        JSON("json"), XML("xml"); 
+        JSON("json"), XML("xml"), UNKNOWN(""); 
   
         private String string; 
     
@@ -38,20 +38,23 @@ public class IOUtils
                 case "xml":
                     return XML;
                 default: 
-                    throw new RuntimeException("Unable to parse Encoding value:" + value);
+                    return UNKNOWN;
             }
         }
     } 
 
     public static byte[] parseResource(IAnyResource resource, Encoding encoding, FhirContext fhirContext) 
     {
+        if (encoding == Encoding.UNKNOWN) {
+            return new byte[] { };
+        }
         IParser parser = getParser(encoding, fhirContext);      
         return parser.setPrettyPrint(true).encodeResourceToString(resource).getBytes();
     }
 
-    public static <T extends IAnyResource> void writeResource(T resource, String outputPath, String baseFileName, Encoding encoding, FhirContext fhirContext) 
+    public static <T extends IAnyResource> void writeResource(T resource, String outputPath, Encoding encoding, FhirContext fhirContext) 
     {        
-        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(outputPath, baseFileName + "." + encoding.toString())))
+        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(outputPath, resource.getId() + "." + encoding.toString())))
         {
             writer.write(parseResource(resource, encoding, fhirContext));
             writer.flush();
@@ -67,28 +70,36 @@ public class IOUtils
     {        
         for (Map.Entry<String, T> set : resources.entrySet())
         {
-            writeResource(set.getValue(), outputPath, set.getValue().getId(), encoding, fhirContext);
+            writeResource(set.getValue(), outputPath, encoding, fhirContext);
         }
     }
 
     //There's a special operation to write a bundle because I can't find a type that will reference both dstu3 and r4.
-    public static void writeBundle(Object bundle, String outputPath, String baseFileName, Encoding encoding, FhirContext fhirContext) {
+    public static void writeBundle(Object bundle, String outputPath, Encoding encoding, FhirContext fhirContext) {
         switch (fhirContext.getVersion().getVersion()) {
             case DSTU3:
-                writeResource(((org.hl7.fhir.dstu3.model.Bundle)bundle), outputPath, baseFileName, encoding, fhirContext);
+                writeResource(((org.hl7.fhir.dstu3.model.Bundle)bundle), outputPath, encoding, fhirContext);
+                break;
             case R4:
-                writeResource(((org.hl7.fhir.r4.model.Bundle)bundle), outputPath, baseFileName, encoding, fhirContext);
+                writeResource(((org.hl7.fhir.r4.model.Bundle)bundle), outputPath, encoding, fhirContext);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
     }
 
+    //users should always check for null
     public static IAnyResource readResource(String path, FhirContext fhirContext) 
-    {
-        IAnyResource resource;       
+    {        
+        Encoding encoding = getEncoding(path);
+        if (encoding == Encoding.UNKNOWN) {
+            return null;
+        }
+
+        IAnyResource resource = null;      
         try
         {
-            IParser parser = getParser(getEncoding(path), fhirContext);
+            IParser parser = getParser(encoding, fhirContext);
             resource = (IAnyResource)parser.parseResource(new FileReader(new File(path)));
         }
         catch (FileNotFoundException fnfe)
@@ -103,7 +114,10 @@ public class IOUtils
         List<IAnyResource> resources = new ArrayList<>();
         for (String path : paths)
         {
-            resources.add(readResource(path, fhirContext));
+            IAnyResource resource = readResource(path, fhirContext);
+            if (resource != null) {
+                resources.add(resource);
+            }
         }
         return resources;
     }
@@ -132,10 +146,13 @@ public class IOUtils
         ArrayList<File> directories = new ArrayList<>(Arrays.asList(Optional.ofNullable(parentDirectory.listFiles()).orElseThrow()));
        
         for (File directory : directories) {
-            if (directory.isDirectory()  && recursive) {
-                directoryPaths.addAll(getDirectoryPaths(directory.getPath(), recursive));
+            if (directory.isDirectory()) {
+                if (recursive) {
+                    directoryPaths.addAll(getDirectoryPaths(directory.getPath(), recursive));
+                }
                 directoryPaths.add(directory.getPath());
             }
+
         }
         return directoryPaths;
     }
@@ -145,6 +162,7 @@ public class IOUtils
         return Encoding.parse(FilenameUtils.getExtension(path));
     }
 
+    //users should protect against Encoding.UNKNOWN
     private static IParser getParser(Encoding encoding, FhirContext fhirContext) 
     {
         switch (encoding) {
@@ -162,7 +180,7 @@ public class IOUtils
         Boolean result = false;
         try
         {
-            result = FilenameUtils.directoryContains(igPath, pathElement);
+            result = FilenameUtils.getName(igPath).equals(pathElement);
         }
         catch (Exception e) {}
         return result;

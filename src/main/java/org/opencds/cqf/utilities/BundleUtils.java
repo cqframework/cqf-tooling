@@ -12,17 +12,18 @@ public class BundleUtils {
        
         switch (fhirContext.getVersion().getVersion()) {
             case DSTU3:
-                return bundleStu3Artifacts(resources);
+                return bundleStu3Artifacts(id, resources);
             case R4:
-                return bundleR4Artifacts(resources);
+                return bundleR4Artifacts(id, resources);
             default:
                 throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
     }
 
-    public static org.hl7.fhir.dstu3.model.Bundle bundleStu3Artifacts(List<IAnyResource> resources)
+    public static org.hl7.fhir.dstu3.model.Bundle bundleStu3Artifacts(String id, List<IAnyResource> resources)
     {
         org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
+        ResourceUtils.setIgId(id, bundle);
         bundle.setType(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION);
         for (IAnyResource resource : resources)
         {
@@ -39,9 +40,10 @@ public class BundleUtils {
         return bundle;
     }
 
-    public static org.hl7.fhir.r4.model.Bundle bundleR4Artifacts(List<IAnyResource> resources)
+    public static org.hl7.fhir.r4.model.Bundle bundleR4Artifacts(String id, List<IAnyResource> resources)
     {
         org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
+        ResourceUtils.setIgId(id, bundle);
         bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
         for (IAnyResource resource : resources)
         {

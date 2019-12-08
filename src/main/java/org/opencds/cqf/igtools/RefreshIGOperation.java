@@ -36,7 +36,7 @@ public class RefreshIGOperation extends Operation {
         includeELM = ArgUtils.isTrue("includeELM", args);
         includeDependencies = ArgUtils.isTrue("includeDependencies", args);
         includeTerminology = ArgUtils.isTrue("includeTerminology", args);
-        includeTestCases = ArgUtils.isTrue("includeTestCases", args);
+        includeTestCases = ArgUtils.isTrue("includeTests", args);
         versioned = ArgUtils.isTrue("versioned", args);
     }
 }
