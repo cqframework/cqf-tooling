@@ -110,14 +110,12 @@ public class IGProcessor
         //bundle
         /*
                 - if include dependencies, add dependencies to bundle
-                - if include terminiology, add terminology to bundle
-                - if include test cases, add testcases to bundle
+                - if include terminiology, add terminology to bundle         
         */  
         //zip
         /*
                 - if include dependencies, add bundle of libary dependencies to zip
                 - if include terminology, add bundle of terminology to zip
-                - if include test cases, add test cases to zip
              
         */   
         Encoding encoding = Encoding.JSON;
@@ -196,6 +194,23 @@ public class IGProcessor
         String cqlLibrarySourcePath = FilenameUtils.concat(FilenameUtils.concat(igPath, cqlLibraryPathElement), cqlFileName);
         String cqlDestPath = FilenameUtils.concat(bundleDestFilesPath, cqlFileName);        
         IOUtils.copyFile(cqlLibrarySourcePath, cqlDestPath);
+
+        String igTestsPath = FilenameUtils.concat(igPath, testCasePathElement);
+        String igTestCasePath = FilenameUtils.concat(igTestsPath, libraryName);
+        List<String> testCasePaths = IOUtils.getFilePaths(igTestCasePath, false);
+        for (String testPath : testCasePaths) {
+            String bundleTestDestPath = FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(testPath));
+            IOUtils.copyFile(testPath, bundleTestDestPath);
+
+            List<String> testCaseDirectories = IOUtils.getDirectoryPaths(igTestCasePath, false);
+            for (String testCaseDirectory : testCaseDirectories) {
+                List<String> testContentPaths = IOUtils.getFilePaths(testCaseDirectory, false);
+                for (String testContentPath : testContentPaths) {
+                    String bundleTestContentDestPath = FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(testContentPath));
+                    IOUtils.copyFile(testContentPath, bundleTestContentDestPath);
+                }
+            }            
+        }
     }
 
     private static Boolean safeAddResource(String path, List<IAnyResource> resources, FhirContext fhirContext, Map<String, String> resourceExceptions) {
