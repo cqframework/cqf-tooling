@@ -1,5 +1,6 @@
 package org.opencds.cqf.utilities;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -17,8 +18,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
+import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.CqlTranslatorException;
+import org.cqframework.cql.cql2elm.LibraryManager;
+import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -175,6 +182,11 @@ public class IOUtils
         return filePaths;
     }
 
+    public static String getParentDirectoryPath(String path) {
+        File file = new File(path);
+        return file.getParent().toString();
+    }
+
     public static List<String> getDirectoryPaths(String path, Boolean recursive)
     {
         List<String> directoryPaths = new ArrayList<String>();
@@ -249,6 +261,127 @@ public class IOUtils
         }
         catch (Exception e) {}
         return result;
+    }
+
+    public static List<String> getSTU3DependencyLibraryPaths(String pathToLibrary) {
+        return ResourceUtils.getSTU3DependencyLibraries(pathToLibrary).keySet().stream().collect(Collectors.toList());
+    }
+
+    public static List<String> getR4DependencyLibraryPaths(String pathToLibrary) {
+        return ResourceUtils.getR4DependencyLibraries(pathToLibrary).keySet().stream().collect(Collectors.toList());
+    }
+
+    public static List<String> getDependencyCqlPaths(String cqlContentPath) {
+        ArrayList<File> DependencyFiles = getDependencyCqlFiles(cqlContentPath);
+        ArrayList<String> DependencyPaths = new ArrayList<String>();
+        for (File file : DependencyFiles) {
+            DependencyPaths.add(file.getPath().toString());
+        }
+        return DependencyPaths;
+    }
+
+    public static ArrayList<File> getDependencyCqlFiles(String cqlContentPath) {
+        File cqlContent = new File(cqlContentPath);
+        File cqlContentDir = cqlContent.getParentFile();
+        if (!cqlContentDir.isDirectory()) {
+            throw new IllegalArgumentException("The specified path to library files is not a directory");
+        }
+        ArrayList<String> dependencyLibraries = ResourceUtils.getIncludedLibraryNames(cqlContentPath);
+        File[] allCqlContentFiles = cqlContentDir.listFiles();
+        if (allCqlContentFiles.length == 1) {
+            return new ArrayList<File>();
+        }
+        ArrayList<File> dependencyCqlFiles = new ArrayList<>();
+        dependencyCqlFiles.add(cqlContent);
+        for (File cqlFile : allCqlContentFiles) {
+            if (dependencyLibraries.contains(cqlFile.getName().replace(".cql", ""))) {
+                dependencyCqlFiles.add(cqlFile);
+            }
+  
+        }
+        return dependencyCqlFiles;
+    }
+
+    public static List<String> getDependencyValueSetPaths(String cqlContentPath, String valueSetDirPath)
+            throws FileNotFoundException {
+        ArrayList<File> DependencyFiles = getDependencyValueSetFiles(cqlContentPath, valueSetDirPath);
+        ArrayList<String> DependencyPaths = new ArrayList<String>();
+        for (File file : DependencyFiles) {
+            DependencyPaths.add(file.getPath().toString());
+        }
+        return DependencyPaths;
+    }
+
+    public static ArrayList<File> getDependencyValueSetFiles(String cqlContentPath, String valueSetDirPath)
+            throws FileNotFoundException {
+        File valueSetDir = new File(valueSetDirPath);
+        if (!valueSetDir.isDirectory()) {
+            throw new IllegalArgumentException("The specified path to valueset files is not a directory");
+        }
+        ArrayList<String> dependencyValueSets = ResourceUtils.getDependencyValueSetNames(cqlContentPath);
+        File[] allValueSetFiles = valueSetDir.listFiles();
+        if (allValueSetFiles.length == 0) {
+            throw new FileNotFoundException("did not find any files in valueset directory");
+        }
+        ArrayList<File> dependencyValueSetFiles = new ArrayList<>();
+        for (File cqlFile : allValueSetFiles) {
+            if (dependencyValueSets.contains(cqlFile.getName().replace(".json", ""))) {
+                dependencyValueSetFiles.add(cqlFile);
+            }
+        }
+        return dependencyValueSetFiles;
+    }
+
+    public static CqlTranslator translate(String cqlContentPath, ModelManager modelManager, LibraryManager libraryManager) {
+        try {
+          File cqlFile = new File(cqlContentPath);
+          if(!cqlFile.getName().endsWith(".cql")) {
+            throw new IllegalArgumentException("cqlContentPath must be a path to a .cql file");
+          }
+            ArrayList<CqlTranslator.Options> options = new ArrayList<>();
+            options.add(CqlTranslator.Options.EnableDateRangeOptimization);
+  
+            CqlTranslator translator =
+                    CqlTranslator.fromFile(
+                            cqlFile,
+                            modelManager,
+                            libraryManager,
+                            options.toArray(new CqlTranslator.Options[0])
+                    );
+  
+            if (translator.getErrors().size() > 0) {
+                System.err.println("Translation failed due to errors:");
+                ArrayList<String> errors = new ArrayList<>();
+                for (CqlTranslatorException error : translator.getErrors()) {
+                    TrackBack tb = error.getLocator();
+                    String lines = tb == null ? "[n/a]" : String.format("[%d:%d, %d:%d]",
+                            tb.getStartLine(), tb.getStartChar(), tb.getEndLine(), tb.getEndChar());
+                    System.err.printf("%s %s%n", lines, error.getMessage());
+                    errors.add(lines + error.getMessage());
+                }
+                throw new IllegalArgumentException(errors.toString());
+            }
+  
+            return translator;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Error encountered during CQL translation: " + e.getMessage());
+        }
+    }
+
+    public static String getCqlString(String cqlContentPath) {
+        File cqlFile = new File(cqlContentPath);
+        StringBuilder cql = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader(cqlFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                cql.append(line).append("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Error reading CQL file: " + cqlFile.getName());
+        }
+        return cql.toString();
     }
 
     public static String getFileExtension(Encoding encoding) {
