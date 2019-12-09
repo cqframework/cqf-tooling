@@ -121,7 +121,7 @@ public class IGProcessor
              
         */   
         Encoding encoding = Encoding.JSON;
-        String bundlePath = FilenameUtils.concat(igPath, bundlePathElement);
+        
         String igMeasurePath = FilenameUtils.concat(igPath, measurePathElement);
         String igLibraryPath = FilenameUtils.concat(igPath, libraryPathElement);
 
@@ -137,24 +137,13 @@ public class IGProcessor
             shouldPersist = shouldPersist & safeAddResource(librarySourcePath, resources, fhirContext, resourceExceptions);
 
             if (includeTestCases) {
-                String igTestsPath = FilenameUtils.concat(igPath, testCasePathElement);
-                String igTestCasePath = FilenameUtils.concat(igTestsPath, libraryName);
-                //this is breaking for bundle of a bundle. Replace with resources until we can figure it out.
-                // List<String> testCaseSourcePaths = IOUtils.getFilePaths(igTestCasePath, false);
-                // for (String testCaseSourcePath : testCaseSourcePaths) {
-                //     shouldPersist = shouldPersist & safeAddResource(testCaseSourcePath, resources, fhirContext, resourceExceptions);
-                // }
-                List<IAnyResource> testCaseResources = TestCaseProcessor.getTestCaseResources(igTestCasePath, fhirContext);
-                resources.addAll(testCaseResources);
+                shouldPersist = shouldPersist & bundleTestCases(igPath, libraryName, fhirContext, resources, resourceExceptions);
             }
 
             if (shouldPersist) {
+                String bundlePath = FilenameUtils.concat(igPath, bundlePathElement);
                 String bundleDestPath = FilenameUtils.concat(bundlePath, libraryName);
-                IOUtils.initializeDirectory(bundleDestPath);
-                
-                Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext);
-                IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);
-                
+                persistBundle(igPath, bundleDestPath, libraryName, encoding, fhirContext, resources);
                 bundleFiles(igPath, bundleDestPath, libraryName, measureSourcePath, librarySourcePath);
             }
             else {
@@ -165,6 +154,34 @@ public class IGProcessor
                 ourLog.warn("Measure could not be processed: " + libraryName + " - " + exceptionMessage);
             }
         } 
+    }
+
+    private static Boolean bundleTestCases(String igPath, String libraryName, FhirContext fhirContext, List<IAnyResource> resources, Map<String, String> resourceExceptions ) {
+        Boolean shouldPersist = true;
+        String igTestsPath = FilenameUtils.concat(igPath, testCasePathElement);
+        String igTestCasePath = FilenameUtils.concat(igTestsPath, libraryName);
+        
+        //this is breaking for bundle of a bundle. Replace with individual resources until we can figure it out.
+        // List<String> testCaseSourcePaths = IOUtils.getFilePaths(igTestCasePath, false);
+        // for (String testCaseSourcePath : testCaseSourcePaths) {
+        //     shouldPersist = shouldPersist & safeAddResource(testCaseSourcePath, resources, fhirContext, resourceExceptions);
+        // }
+        
+        try {
+            List<IAnyResource> testCaseResources = TestCaseProcessor.getTestCaseResources(igTestCasePath, fhirContext);
+            resources.addAll(testCaseResources);
+        }
+        catch(Exception e) {
+            shouldPersist = false;
+            resourceExceptions.put(igTestCasePath, e.getMessage());
+        } 
+        return shouldPersist;
+    }
+
+    private static void persistBundle(String igPath, String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, List<IAnyResource> resources) {
+        IOUtils.initializeDirectory(bundleDestPath);        
+        Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext);
+        IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);    
     }
 
     public static final String bundleFilesPathElement = "files/";
