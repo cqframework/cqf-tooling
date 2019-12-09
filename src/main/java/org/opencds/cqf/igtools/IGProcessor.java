@@ -142,7 +142,7 @@ public class IGProcessor
                 String bundlePath = FilenameUtils.concat(igPath, bundlePathElement);
                 String bundleDestPath = FilenameUtils.concat(bundlePath, libraryName);
                 persistBundle(igPath, bundleDestPath, libraryName, encoding, fhirContext, resources);
-                bundleFiles(igPath, bundleDestPath, libraryName, measureSourcePath, librarySourcePath);
+                bundleFiles(igPath, bundleDestPath, libraryName, measureSourcePath, librarySourcePath, includeTestCases);
             }
             else {
                 String exceptionMessage = "";
@@ -183,7 +183,7 @@ public class IGProcessor
     }
 
     public static final String bundleFilesPathElement = "files/";
-    private static void bundleFiles(String igPath, String bundleDestPath, String libraryName, String measureSourcePath, String librarySourcePath) {
+    private static void bundleFiles(String igPath, String bundleDestPath, String libraryName, String measureSourcePath, String librarySourcePath, Boolean includeTestCases) {
         String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, libraryName + "-" + bundleFilesPathElement);
         IOUtils.initializeDirectory(bundleDestFilesPath);
 
@@ -195,18 +195,24 @@ public class IGProcessor
         String cqlDestPath = FilenameUtils.concat(bundleDestFilesPath, cqlFileName);        
         IOUtils.copyFile(cqlLibrarySourcePath, cqlDestPath);
 
+        if (includeTestCases) {
+            bundleTestCaseFiles(igPath, libraryName, bundleDestFilesPath);
+        }        
+    }
+
+    public static void bundleTestCaseFiles(String igPath, String libraryName, String destPath) {
         String igTestsPath = FilenameUtils.concat(igPath, testCasePathElement);
         String igTestCasePath = FilenameUtils.concat(igTestsPath, libraryName);
         List<String> testCasePaths = IOUtils.getFilePaths(igTestCasePath, false);
         for (String testPath : testCasePaths) {
-            String bundleTestDestPath = FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(testPath));
+            String bundleTestDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testPath));
             IOUtils.copyFile(testPath, bundleTestDestPath);
 
             List<String> testCaseDirectories = IOUtils.getDirectoryPaths(igTestCasePath, false);
             for (String testCaseDirectory : testCaseDirectories) {
                 List<String> testContentPaths = IOUtils.getFilePaths(testCaseDirectory, false);
                 for (String testContentPath : testContentPaths) {
-                    String bundleTestContentDestPath = FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(testContentPath));
+                    String bundleTestContentDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testContentPath));
                     IOUtils.copyFile(testContentPath, bundleTestContentDestPath);
                 }
             }            
