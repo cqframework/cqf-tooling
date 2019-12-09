@@ -48,7 +48,6 @@ public class IGProcessor
     private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(IGProcessor.class);
 
     public static final String testCasePathElement = "tests/";
-
     public static void refreshIG(String igPath, IGVersion igVersion, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases) {
         refreshIG(igPath, igVersion, includeELM, includeDependencies, includeTerminology, includeTestCases, false);
     }
@@ -80,20 +79,6 @@ public class IGProcessor
     {
         refreshStu3IgLibraryContent(igPath, includeELM, fhirContext);
         //refreshMeasureContent();
-        
-        //zip
-        /*
-            - iterate cql files
-                - add cql to zip
-                - add measure to zip
-                - add library to zip
-                - if include dependencies, add bundle of libary dependencies to zip
-                - if include terminology, add bundle of terminology to zip
-                - if include test cases, add test cases to zip
-                - save zip to bundle directory, by library name
-
-        */   
-
     }    
 
     private static void refreshR4IG(String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, FhirContext fhirContext)
@@ -124,15 +109,17 @@ public class IGProcessor
     public static void bundleIg(String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, FhirContext fhirContext) {
         //bundle
         /*
-            - iterate cql files
-                - add measure to bundle
-                - add libary to bundle
                 - if include dependencies, add dependencies to bundle
                 - if include terminiology, add terminology to bundle
                 - if include test cases, add testcases to bundle
-                - save bundle to bundle directory, by library name
-
         */  
+        //zip
+        /*
+                - if include dependencies, add bundle of libary dependencies to zip
+                - if include terminology, add bundle of terminology to zip
+                - if include test cases, add test cases to zip
+             
+        */   
         Encoding encoding = Encoding.JSON;
         String bundlePath = FilenameUtils.concat(igPath, bundlePathElement);
         String igMeasurePath = FilenameUtils.concat(igPath, measurePathElement);
@@ -149,11 +136,25 @@ public class IGProcessor
             shouldPersist = safeAddResource(measureSourcePath, resources, fhirContext, resourceExceptions);    
             shouldPersist = shouldPersist & safeAddResource(librarySourcePath, resources, fhirContext, resourceExceptions);
 
+            if (includeTestCases) {
+                String igTestsPath = FilenameUtils.concat(igPath, testCasePathElement);
+                String igTestCasePath = FilenameUtils.concat(igTestsPath, libraryName);
+                //this is breaking for bundle of a bundle. Replace with resources until we can figure it out.
+                // List<String> testCaseSourcePaths = IOUtils.getFilePaths(igTestCasePath, false);
+                // for (String testCaseSourcePath : testCaseSourcePaths) {
+                //     shouldPersist = shouldPersist & safeAddResource(testCaseSourcePath, resources, fhirContext, resourceExceptions);
+                // }
+                List<IAnyResource> testCaseResources = TestCaseProcessor.getTestCaseResources(igTestCasePath, fhirContext);
+                resources.addAll(testCaseResources);
+            }
+
             if (shouldPersist) {
                 String bundleDestPath = FilenameUtils.concat(bundlePath, libraryName);
                 IOUtils.initializeDirectory(bundleDestPath);
+                
                 Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext);
                 IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);
+                
                 bundleFiles(igPath, bundleDestPath, libraryName, measureSourcePath, librarySourcePath);
             }
             else {
@@ -181,20 +182,16 @@ public class IGProcessor
     }
 
     private static Boolean safeAddResource(String path, List<IAnyResource> resources, FhirContext fhirContext, Map<String, String> resourceExceptions) {
-        IAnyResource resource = null;
         Boolean added = true;
         try {
-             resource = IOUtils.readResource(path, fhirContext, true);
+             resources.add(IOUtils.readResource(path, fhirContext, true));
         }
         catch(Exception e) {
             added = false;
             resourceExceptions.put(path, e.getMessage());
-        }
-        if (resource != null) {
-            resources.add(resource);
-        }
+        }  
         return added;
-    }
+    } 
 
     public static FhirContext getIgFhirContext(IGVersion igVersion)
     {
