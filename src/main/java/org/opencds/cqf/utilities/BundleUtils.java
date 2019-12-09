@@ -1,6 +1,7 @@
 package org.opencds.cqf.utilities;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
@@ -9,7 +10,12 @@ import ca.uhn.fhir.context.FhirContext;
 public class BundleUtils {
     
     public static Object bundleArtifacts(String id, List<IAnyResource> resources, FhirContext fhirContext) {
-       
+        for (IAnyResource resource : resources) {
+            if (resource.getId() == null || resource.getId().equals("")) {
+                ResourceUtils.setIgId(id.replace("-bundle", "-" + UUID.randomUUID()), resource, false);
+                resource.setId(resource.getClass().getSimpleName() + "/" + resource.getId());
+            }
+        }
         switch (fhirContext.getVersion().getVersion()) {
             case DSTU3:
                 return bundleStu3Artifacts(id, resources);
@@ -46,7 +52,7 @@ public class BundleUtils {
         ResourceUtils.setIgId(id, bundle, false);
         bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
         for (IAnyResource resource : resources)
-        {
+        {            
             bundle.addEntry(
             new org.hl7.fhir.r4.model.Bundle.BundleEntryComponent()
                     .setResource((org.hl7.fhir.r4.model.Resource) resource)

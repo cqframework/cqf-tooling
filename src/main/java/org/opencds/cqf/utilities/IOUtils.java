@@ -172,8 +172,11 @@ public class IOUtils
         ArrayList<File> files = new ArrayList<>(Arrays.asList(Optional.ofNullable(inputDir.listFiles()).orElseThrow()));
        
         for (File file : files) {
-            if (file.isDirectory()  && recursive) {
-                filePaths.addAll(getFilePaths(file.getPath(), recursive));
+            if (file.isDirectory()) {
+                //note: this is not the same as anding recursive to isDirectory as that would result in directories being added to the list if the request is not recursive.
+                if (recursive) {
+                    filePaths.addAll(getFilePaths(file.getPath(), recursive));
+                }
             }
             else {
                filePaths.add(file.getPath());
