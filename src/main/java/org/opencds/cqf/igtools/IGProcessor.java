@@ -106,6 +106,8 @@ public class IGProcessor
     public static final String bundlePathElement = "bundles/";
     
     public static final String measurePathElement = "resources/measure/";
+    //TODO: most of the work of the sub methods of this should probably be moved to their respective resource Processors.
+    //Not time for a refactor atm though.  So stinky it is!
     public static void bundleIg(String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, FhirContext fhirContext) {
         //bundle
         /*
@@ -152,6 +154,24 @@ public class IGProcessor
                 ourLog.warn("Measure could not be processed: " + libraryName + " - " + exceptionMessage);
             }
         } 
+    }
+
+    /*
+        given the path of the parent library
+            - parent library (object resource or json?)
+        - and bundle
+        - and a unique collection
+        - for each dependent library get the json
+            - get the set of dependant libraries (reference id?)
+            - go get the file from the ig directory
+            - add the json of the library to a bundle
+                -  and add it to the unique collection       
+
+    */
+    public static void bundleDependencies(String path, Object bundle) {
+        Map<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        
+
     }
 
     private static Boolean bundleTestCases(String igPath, String libraryName, FhirContext fhirContext, List<IAnyResource> resources, Map<String, String> resourceExceptions ) {

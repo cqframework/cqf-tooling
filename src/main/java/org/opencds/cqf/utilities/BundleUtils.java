@@ -16,6 +16,7 @@ public class BundleUtils {
                 resource.setId(resource.getClass().getSimpleName() + "/" + resource.getId());
             }
         }
+        
         switch (fhirContext.getVersion().getVersion()) {
             case DSTU3:
                 return bundleStu3Artifacts(id, resources);

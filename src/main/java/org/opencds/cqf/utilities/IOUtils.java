@@ -266,14 +266,6 @@ public class IOUtils
         return result;
     }
 
-    public static List<String> getSTU3DependencyLibraryPaths(String pathToLibrary) {
-        return ResourceUtils.getSTU3DependencyLibraries(pathToLibrary).keySet().stream().collect(Collectors.toList());
-    }
-
-    public static List<String> getR4DependencyLibraryPaths(String pathToLibrary) {
-        return ResourceUtils.getR4DependencyLibraries(pathToLibrary).keySet().stream().collect(Collectors.toList());
-    }
-
     public static List<String> getDependencyCqlPaths(String cqlContentPath) {
         ArrayList<File> DependencyFiles = getDependencyCqlFiles(cqlContentPath);
         ArrayList<String> DependencyPaths = new ArrayList<String>();
@@ -299,8 +291,7 @@ public class IOUtils
         for (File cqlFile : allCqlContentFiles) {
             if (dependencyLibraries.contains(cqlFile.getName().replace(".cql", ""))) {
                 dependencyCqlFiles.add(cqlFile);
-            }
-  
+            }  
         }
         return dependencyCqlFiles;
     }
