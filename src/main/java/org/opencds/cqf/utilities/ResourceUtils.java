@@ -244,8 +244,7 @@ public class ResourceUtils
       try {
         elm = getElmFromCql(cqlContentPath);
       } catch (Exception e) {
-        System.out.println("error proccessing cql: ");
-        System.out.println(e.getMessage());
+        System.out.println("error translating cql: ");
         return valueSetDefs;
       }
       if (elm.getValueSets() != null && !elm.getValueSets().getDef().isEmpty()) {
@@ -267,7 +266,7 @@ public class ResourceUtils
       return translator.toELM();  
     }  
 
-    public static Boolean safeAddResource(String path, Map<String, IAnyResource> resources, FhirContext fhirContext, Map<String, String> resourceExceptions) {
+    public static Boolean safeAddResource(String path, Map<String, IAnyResource> resources, FhirContext fhirContext) {
       Boolean added = true;
       try {
           IAnyResource resource = IOUtils.readResource(path, fhirContext, true);
@@ -275,7 +274,7 @@ public class ResourceUtils
       }
       catch(Exception e) {
           added = false;
-          resourceExceptions.put(path, e.getMessage());
+          LogUtils.putWarning(path, e.getMessage());
       }  
       return added;
   } 

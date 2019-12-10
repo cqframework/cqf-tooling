@@ -13,6 +13,7 @@ import org.hl7.elm.r1.ValueSetRef;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.opencds.cqf.library.stu3.NarrativeProvider;
 import org.opencds.cqf.utilities.IOUtils;
+import org.opencds.cqf.utilities.LogUtils;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -24,13 +25,13 @@ public class LibraryProcessor {
         return "library-" + baseId;
     }
 
-    public static void refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Map<String, String> resourceExceptions) {
+    public static void refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding) {
         Boolean shouldPersist = true;
         Library resource;
         try {
             resource = (Library)IOUtils.readResource(libraryPath, fhirContext, shouldPersist);
         } catch (Exception e) {
-            resourceExceptions.put(libraryPath, e.getMessage());
+            LogUtils.putWarning(libraryPath, e.getMessage());
             resource = null;
         }
 
@@ -38,20 +39,22 @@ public class LibraryProcessor {
         try {
             translator = getTranslator(cqlContentPath);
         } catch (Exception e) {
-            resourceExceptions.put(libraryPath, e.getMessage());
+            LogUtils.putWarning(libraryPath, e.getMessage());
             return;
         }
          
-        
-        if (resource != null) {
-            
-            refreshLibrary(resource, cqlContentPath, libraryPath, encoding, translator, fhirContext, resourceExceptions);
-        } else {
-            generateLibrary(cqlContentPath, libraryPath, encoding, translator, fhirContext, resourceExceptions);
+        try {
+            if (resource != null) {            
+                refreshLibrary(resource, cqlContentPath, libraryPath, encoding, translator, fhirContext);
+            } else {
+                generateLibrary(cqlContentPath, libraryPath, encoding, translator, fhirContext);
+            }
+        } catch (Exception e) {
+            LogUtils.putWarning(libraryPath, e.getMessage());
         }
     }
 
-    private static void refreshLibrary(Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, CqlTranslator translator, FhirContext fhirContext, Map<String, String> resourceExceptions) {
+    private static void refreshLibrary(Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, CqlTranslator translator, FhirContext fhirContext) {
         Library generatedLibrary = processLibrary(cqlContentPath, translator, fhirContext);
         mergeDiff(referenceLibrary, generatedLibrary, cqlContentPath, translator, fhirContext);
         IOUtils.writeResource(generatedLibrary, outputPath, encoding, fhirContext);
@@ -76,10 +79,9 @@ public class LibraryProcessor {
         referenceLibrary.setText((Narrative)narrative);
     }
 
-    private static void generateLibrary(String cqlContentPath, String outputPath, Encoding encoding, CqlTranslator translator, FhirContext fhirContext, Map<String, String> resourceExceptions) {
+    private static void generateLibrary(String cqlContentPath, String outputPath, Encoding encoding, CqlTranslator translator, FhirContext fhirContext) {
         Library generatedLibrary = processLibrary(cqlContentPath, translator, fhirContext);
         IOUtils.writeResource(generatedLibrary, outputPath, encoding, fhirContext);
-
     }
 
     private static Library processLibrary(String cqlContentPath, CqlTranslator translator, FhirContext fhirContext) {
