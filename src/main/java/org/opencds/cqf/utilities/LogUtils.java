@@ -16,6 +16,10 @@ public class LogUtils
         resourceWarnings.put(id, warning);
     }
 
+    public static void info(String message) {
+        ourLog.info(message);
+    }
+
     public static void warn(String libraryName) {
         String exceptionMessage = "";
         //TODO: come up with a better answer for SUPER long errors (that include all the text of the measure narrative, for example)
