@@ -14,6 +14,7 @@ import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import org.opencds.cqf.library.GenericLibrarySourceProvider;
+import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -23,8 +24,7 @@ public class ResourceUtils
     { 
         DSTU3("dstu3"), R4("r4"); 
 
-        private String string; 
-    
+        private String string;     
         public String toString() 
         { 
             return this.string; 
@@ -77,40 +77,37 @@ public class ResourceUtils
 
     private static List<org.hl7.fhir.dstu3.model.RelatedArtifact> getStu3RelatedArtifacts(String pathToLibrary, FhirContext fhirContext) {
       Object mainLibrary = IOUtils.readResource(pathToLibrary, fhirContext);
-      if (!(mainLibrary instanceof org.hl7.fhir.r4.model.Library)) {
-        throw new IllegalArgumentException("pathToLibrary must be a path to a  Library Resource");
+      if (!(mainLibrary instanceof org.hl7.fhir.dstu3.model.Library)) {
+        throw new IllegalArgumentException("pathToLibrary must be a path to a Library type Resource");
       }
-
       return ((org.hl7.fhir.dstu3.model.Library)mainLibrary).getRelatedArtifact();   
     }    
 
     private static List<org.hl7.fhir.r4.model.RelatedArtifact> getR4RelatedArtifacts(String pathToLibrary, FhirContext fhirContext) {
       Object mainLibrary = IOUtils.readResource(pathToLibrary, fhirContext);
       if (!(mainLibrary instanceof org.hl7.fhir.r4.model.Library)) {
-        throw new IllegalArgumentException("pathToLibrary must be a path to a  Library Resource");
+        throw new IllegalArgumentException("pathToLibrary must be a path to a Library type Resource");
       }
-
       return ((org.hl7.fhir.r4.model.Library)mainLibrary).getRelatedArtifact();   
     }    
 
-    public static Map<String, IAnyResource> getDependencyLibraries(String path, FhirContext fhirContext) {
+    public static Map<String, IAnyResource> getDependencyLibraries(String path, FhirContext fhirContext, Encoding encoding) {
       String directoryPath = FilenameUtils.getPath(path);
       Map<String, IAnyResource> dependencyLibraries = new HashMap<String, IAnyResource>();
       switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:
-            return getStu3DependencyLibraries(path, directoryPath, dependencyLibraries, fhirContext);
+            return getStu3DependencyLibraries(path, directoryPath, dependencyLibraries, fhirContext, encoding);
         case R4:
-            return getR4DependencyLibraries(path, directoryPath, dependencyLibraries, fhirContext);
+            return getR4DependencyLibraries(path, directoryPath, dependencyLibraries, fhirContext, encoding);
         default:
             throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
       }
     }
 
-    private static Map<String, IAnyResource> getStu3DependencyLibraries(String path, String directoryPath, Map<String, IAnyResource> dependencyLibraries, FhirContext fhirContext) {
-      
+    private static Map<String, IAnyResource> getStu3DependencyLibraries(String path, String directoryPath, Map<String, IAnyResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding) {      
       List<org.hl7.fhir.dstu3.model.RelatedArtifact> relatedArtifacts = getStu3RelatedArtifacts(path, fhirContext);
       for (org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
-          String dependencyLibraryName = relatedArtifact.getResource().getReference().split("Library/")[1];
+          String dependencyLibraryName = IOUtils.getFileName(relatedArtifact.getResource().getReference().split("Library/")[1], encoding);
           String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
           Object resource = IOUtils.readResource(dependencyLibraryPath, fhirContext);
           if (resource instanceof org.hl7.fhir.dstu3.model.Library) {
@@ -121,10 +118,10 @@ public class ResourceUtils
         return dependencyLibraries;
     }
 
-    private static Map<String, IAnyResource> getR4DependencyLibraries(String path, String directoryPath, Map<String, IAnyResource> dependencyLibraries, FhirContext fhirContext) {
+    private static Map<String, IAnyResource> getR4DependencyLibraries(String path, String directoryPath, Map<String, IAnyResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding) {
       List<org.hl7.fhir.r4.model.RelatedArtifact> relatedArtifacts = getR4RelatedArtifacts(path, fhirContext);
       for (org.hl7.fhir.r4.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
-          String dependencyLibraryName = relatedArtifact.getResource().split("Library/")[1];
+          String dependencyLibraryName = IOUtils.getFileName(relatedArtifact.getResource().split("Library/")[1], encoding);
           String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);          
           Object resource = IOUtils.readResource(dependencyLibraryPath, fhirContext);
           if (resource instanceof org.hl7.fhir.r4.model.Library) {
@@ -182,8 +179,7 @@ public class ResourceUtils
       LibraryManager libraryManager = new LibraryManager(modelManager);
       libraryManager.getLibrarySourceLoader().registerProvider(sourceProvider);
 
-      CqlTranslator translator = IOUtils.translate(cqlContentPath, modelManager, libraryManager);
-      
+      CqlTranslator translator = IOUtils.translate(cqlContentPath, modelManager, libraryManager);      
       return translator.toELM();  
     }  
 }

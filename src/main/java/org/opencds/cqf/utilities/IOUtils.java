@@ -145,9 +145,9 @@ public class IOUtils
             }
             resource = (IAnyResource)parser.parseResource(new FileReader(file));
         }
-        catch (FileNotFoundException fnfe)
+        catch (Exception e)
         {
-            throw new RuntimeException("Error reading file: " + path);
+            throw new RuntimeException(e.getMessage());
         }
         return resource;
     }

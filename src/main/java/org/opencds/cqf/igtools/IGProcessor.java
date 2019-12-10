@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -11,6 +12,7 @@ import org.opencds.cqf.library.LibraryProcessor;
 import org.opencds.cqf.testcase.TestCaseProcessor;
 import org.opencds.cqf.utilities.BundleUtils;
 import org.opencds.cqf.utilities.IOUtils;
+import org.opencds.cqf.utilities.ResourceUtils;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -136,6 +138,10 @@ public class IGProcessor
             shouldPersist = safeAddResource(measureSourcePath, resources, fhirContext, resourceExceptions);    
             shouldPersist = shouldPersist & safeAddResource(librarySourcePath, resources, fhirContext, resourceExceptions);
 
+            if (includeDependencies) {
+                shouldPersist = shouldPersist & bundleDependencies(librarySourcePath, fhirContext, resources, resourceExceptions, encoding);
+            }
+
             if (includeTestCases) {
                 shouldPersist = shouldPersist & bundleTestCases(igPath, libraryName, fhirContext, resources, resourceExceptions);
             }
@@ -156,25 +162,26 @@ public class IGProcessor
         } 
     }
 
-    /*
-        given the path of the parent library
-            - parent library (object resource or json?)
-        - and bundle
-        - and a unique collection
-        - for each dependent library get the json
-            - get the set of dependant libraries (reference id?)
-            - go get the file from the ig directory
-            - add the json of the library to a bundle
-                -  and add it to the unique collection       
-
-    */
-    public static void bundleDependencies(String path, Object bundle) {
-        Map<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
-        
-
+    public static Boolean bundleDependencies(String path, FhirContext fhirContext, List<IAnyResource> resources, Map<String, String> resourceExceptions, Encoding encoding) {
+        Map<String, IAnyResource> uniqueResources = new HashMap<String, IAnyResource>();
+        Boolean shouldPersist = true;        
+        try {
+            Map<String, IAnyResource> dependencies = ResourceUtils.getDependencyLibraries(path, fhirContext, encoding);
+            for (Entry<String, IAnyResource> entry : dependencies.entrySet()) {
+                if (!uniqueResources.containsKey(entry.getKey())) {
+                    uniqueResources.put(entry.getKey(), entry.getValue());
+                }
+            }
+            resources.addAll(uniqueResources.values());
+        }
+        catch(Exception e) {
+            shouldPersist = false;
+            resourceExceptions.put(path, e.getMessage());
+        } 
+        return shouldPersist;
     }
 
-    private static Boolean bundleTestCases(String igPath, String libraryName, FhirContext fhirContext, List<IAnyResource> resources, Map<String, String> resourceExceptions ) {
+    private static Boolean bundleTestCases(String igPath, String libraryName, FhirContext fhirContext, List<IAnyResource> resources, Map<String, String> resourceExceptions) {
         Boolean shouldPersist = true;
         String igTestsPath = FilenameUtils.concat(igPath, testCasePathElement);
         String igTestCasePath = FilenameUtils.concat(igTestsPath, libraryName);
