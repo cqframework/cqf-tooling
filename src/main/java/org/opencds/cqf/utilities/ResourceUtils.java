@@ -1,5 +1,6 @@
 package org.opencds.cqf.utilities;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.ValueSetDef;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import org.opencds.cqf.library.GenericLibrarySourceProvider;
@@ -161,6 +163,43 @@ public class ResourceUtils
       }
       return dependencyLibraries;
     }
+    
+    public static Map<String, IAnyResource> getDepValueSetResources(String cqlContentPath, String valueSetDirPath, FhirContext fhirContext) {
+      switch (fhirContext.getVersion().getVersion()) {
+        case DSTU3:
+            return getStu3DepValueSetResources(cqlContentPath, valueSetDirPath, fhirContext);
+        case R4:
+            return getR4DepValueSetResources(cqlContentPath, valueSetDirPath, fhirContext);
+        default:
+            throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+      }
+    }
+
+    public static Map<String, IAnyResource> getStu3DepValueSetResources(String cqlContentPath, String valueSetDirPath, FhirContext fhirContext) {
+        List<String> valueSetPaths = IOUtils.getDepValueSetPaths(cqlContentPath, valueSetDirPath);
+        Map<String, IAnyResource> valueSetResources = new HashMap<String, IAnyResource>();
+        for (String valueSetPath : valueSetPaths) {
+          IAnyResource resource = IOUtils.readResource(valueSetPath, fhirContext);
+          if (resource instanceof org.hl7.fhir.dstu3.model.ValueSet) {
+            org.hl7.fhir.dstu3.model.ValueSet valueset = (org.hl7.fhir.dstu3.model.ValueSet)resource;
+            valueSetResources.putIfAbsent(valueset.getId(), valueset);
+          }
+        }
+        return valueSetResources;
+    }
+
+    public static Map<String, IAnyResource> getR4DepValueSetResources(String cqlContentPath, String valueSetDirPath, FhirContext fhirContext) {
+      List<String> valueSetPaths = IOUtils.getDepValueSetPaths(cqlContentPath, valueSetDirPath);
+      Map<String, IAnyResource> valueSetResources = new HashMap<String, IAnyResource>();
+      for (String valueSetPath : valueSetPaths) {
+        IAnyResource resource = IOUtils.readResource(valueSetPath, fhirContext);
+        if (resource instanceof org.hl7.fhir.r4.model.ValueSet) {
+          org.hl7.fhir.r4.model.ValueSet valueset = (org.hl7.fhir.r4.model.ValueSet)resource;
+          valueSetResources.putIfAbsent(valueset.getId(), valueset);
+        }
+      }
+      return valueSetResources;
+  }
 
     public static ArrayList<String> getIncludedLibraryNames(String cqlContentPath) {
       ArrayList<String> includedLibraryNames = new ArrayList<String>();
@@ -175,14 +214,22 @@ public class ResourceUtils
       ArrayList<String> includedValueSetNames = new ArrayList<String>();
       ArrayList<ValueSetDef> valueSetDefs = getValueSetDefs(cqlContentPath);
       for (ValueSetDef def : valueSetDefs) {
-        IOUtils.putInListIfAbsent(def.getName(), includedValueSetNames);
+        IOUtils.putInListIfAbsent(def.getName().replaceAll(" ", ""), includedValueSetNames);
       }
       return includedValueSetNames;
     }
 
     public static ArrayList<IncludeDef> getIncludedDefs(String cqlContentPath) {
       ArrayList<IncludeDef> includedDefs = new ArrayList<IncludeDef>();
-      org.hl7.elm.r1.Library elm = getElmFromCql(cqlContentPath);
+      org.hl7.elm.r1.Library elm;
+      try {
+        elm = getElmFromCql(cqlContentPath);
+      } catch (Exception e) {
+        System.out.println("error proccessing cql: ");
+        System.out.println(e.getMessage());
+        return includedDefs;
+      }
+      
       if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
         for (IncludeDef def : elm.getIncludes().getDef()) {
           includedDefs.add(def);
@@ -193,7 +240,14 @@ public class ResourceUtils
 
     public static ArrayList<ValueSetDef> getValueSetDefs(String cqlContentPath) {
       ArrayList<ValueSetDef> valueSetDefs = new ArrayList<ValueSetDef>();
-      org.hl7.elm.r1.Library elm = getElmFromCql(cqlContentPath);
+      org.hl7.elm.r1.Library elm;
+      try {
+        elm = getElmFromCql(cqlContentPath);
+      } catch (Exception e) {
+        System.out.println("error proccessing cql: ");
+        System.out.println(e.getMessage());
+        return valueSetDefs;
+      }
       if (elm.getValueSets() != null && !elm.getValueSets().getDef().isEmpty()) {
         for (ValueSetDef def : elm.getValueSets().getDef()) {
           valueSetDefs.add(def);

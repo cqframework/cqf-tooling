@@ -299,14 +299,25 @@ public class IOUtils
         return dependencyCqlFiles;
     }
 
-    public static List<String> getDepValueSetPaths(String cqlContentPath, String valueSetDirPath)
-            throws FileNotFoundException {
-        ArrayList<File> dependencyFiles = getDepValueSetFiles(cqlContentPath, valueSetDirPath);
-        ArrayList<String> dependencyPaths = new ArrayList<String>();
-        for (File file : dependencyFiles) {
-            putInListIfAbsent(file.getPath().toString(), dependencyPaths);
+    public static List<String> getDepValueSetPaths(String cqlContentPath, String valueSetDirPath) {
+        ArrayList<File> dependencyFiles;
+        try {
+            dependencyFiles = getDepValueSetFiles(cqlContentPath, valueSetDirPath);
+        } catch (FileNotFoundException e) {
+            System.out.println("Could not get valueset files");
+            System.out.println(e.getMessage());
+            dependencyFiles = new ArrayList<File>();
         }
-        return dependencyPaths;
+        ArrayList<String> dependencyPaths = new ArrayList<String>();
+        if(!dependencyFiles.isEmpty())
+        {
+            for (File file : dependencyFiles) {
+                putInListIfAbsent(file.getPath().toString(), dependencyPaths);
+            }
+            return dependencyPaths;
+        }
+        else return dependencyPaths;
+        
     }
 
     public static ArrayList<File> getDepValueSetFiles(String cqlContentPath, String valueSetDirPath)
@@ -321,9 +332,9 @@ public class IOUtils
             throw new FileNotFoundException("did not find any files in valueset directory");
         }
         ArrayList<File> dependencyValueSetFiles = new ArrayList<>();
-        for (File cqlFile : allValueSetFiles) {
-            if (dependencyValueSets.contains(cqlFile.getName().replace(".json", ""))) {
-                dependencyValueSetFiles.add(cqlFile);
+        for (File valuesetFile : allValueSetFiles) {
+            if (dependencyValueSets.contains(valuesetFile.getName().replace(".json", ""))) {
+                dependencyValueSetFiles.add(valuesetFile);
             }
         }
         return dependencyValueSetFiles;

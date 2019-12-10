@@ -72,7 +72,7 @@ public class IGProcessor {
     }
 
     private static void refreshStu3IG(String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, FhirContext fhirContext) {
-        // refreshStu3IgLibraryContent(igPath, includeELM, fhirContext);
+         refreshStu3IgLibraryContent(igPath, includeELM, fhirContext);
         // refreshMeasureContent();
     }
 
@@ -250,12 +250,15 @@ public class IGProcessor {
         IOUtils.copyFile(cqlLibrarySourcePath, cqlDestPath);
 
         if (includeTerminology) {
-            // String igValueSetsPath = FilenameUtils.concat(igPath, valuesetsPathElement);
-            // Map<String, IAnyResource> valuesets = ResourceUtils.getDepValueSetResources(igValueSetsPath, fhirContext, encoding);
-            // String valuesetsID = "valuesets-" + libraryName;
-            // Object bundle = BundleUtils.bundleArtifacts(valuesetsID, new ArrayList<IAnyResource>(valuesets.values()), fhirContext);
-        
-            // IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);          
+            String igValueSetsPath = FilenameUtils.concat(igPath, valuesetsPathElement);
+            String cqlContentDirPath = FilenameUtils.concat(igPath, cqlLibraryPathElement);
+            List<String> cqlContentPaths = IOUtils.getFilePaths(cqlContentDirPath, false);
+            for (String cqlContentPath : cqlContentPaths) {
+                Map<String, IAnyResource> valuesets = ResourceUtils.getDepValueSetResources(cqlContentPath, igValueSetsPath, fhirContext);
+                String valuesetsID = "valuesets-" + libraryName;
+                Object bundle = BundleUtils.bundleArtifacts(valuesetsID, new ArrayList<IAnyResource>(valuesets.values()), fhirContext);
+                IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);
+            }        
         }
         
         if (includeDependencies) {
