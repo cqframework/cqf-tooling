@@ -335,6 +335,10 @@ public class IOUtils
         for (File valuesetFile : allValueSetFiles) {
             if (dependencyValueSets.contains(valuesetFile.getName().replace(".json", ""))) {
                 dependencyValueSetFiles.add(valuesetFile);
+                continue;
+            }
+            else {
+                throw new FileNotFoundException("did not find: " + valuesetFile.getName() + " in valueset directory");
             }
         }
         return dependencyValueSetFiles;
