@@ -60,6 +60,7 @@ public class ResourceUtils
         igId = resourceName + "-" + baseId + versionId;
 
       }
+      igId = igId.replace("_", "-");
       resource.setId(igId);
     }
 

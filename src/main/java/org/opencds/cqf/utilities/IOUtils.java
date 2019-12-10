@@ -31,6 +31,9 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
+import org.opencds.cqf.igtools.IGProcessor;
+import org.opencds.cqf.igtools.IGProcessor.IGVersion;
+
 public class IOUtils 
 {        
     public enum Encoding 
@@ -383,7 +386,13 @@ public class IOUtils
     }
 
     public static String getFileName(String baseName, Encoding encoding) {
-        String result = baseName + getFileExtension(encoding);     
+        String result = baseName + getFileExtension(encoding); 
+        //TODO: Fix for: FHIR IDs don't allow "_" and FHIR Library names can't include "-".
+        //Need to figure out better solution or make it a convention that IG filenames can't have "_" other than the IGVersion.
+        for (IGProcessor.IGVersion igVersion : IGVersion.values()) {
+            String igVersionToken = igVersion.toString().toUpperCase();
+            result = result.replace("-" + igVersionToken, "_" + igVersionToken);
+        }
         return result;
     }    
 
