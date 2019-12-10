@@ -130,7 +130,7 @@ public class IGProcessor
         List<String> measureSourcePaths = IOUtils.getFilePaths(igMeasurePath, false);
         Boolean shouldPersist = true;
         for (String measureSourcePath : measureSourcePaths) {
-            List<IAnyResource> resources = new ArrayList<IAnyResource>();
+            Map<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
             Map<String, String> resourceExceptions = new HashMap<String, String>();
             String libraryName = FilenameUtils.getBaseName(measureSourcePath).replace("measure-", "");
             String librarySourcePath = FilenameUtils.concat(igLibraryPath, IOUtils.getFileName(LibraryProcessor.getId(libraryName), encoding));
@@ -149,7 +149,7 @@ public class IGProcessor
             if (shouldPersist) {
                 String bundlePath = FilenameUtils.concat(igPath, bundlePathElement);
                 String bundleDestPath = FilenameUtils.concat(bundlePath, libraryName);
-                persistBundle(igPath, bundleDestPath, libraryName, encoding, fhirContext, resources);
+                persistBundle(igPath, bundleDestPath, libraryName, encoding, fhirContext, new ArrayList<IAnyResource>(resources.values()));
                 bundleFiles(igPath, bundleDestPath, libraryName, measureSourcePath, librarySourcePath, includeTestCases);
             }
             else {
@@ -162,17 +162,13 @@ public class IGProcessor
         } 
     }
 
-    public static Boolean bundleDependencies(String path, FhirContext fhirContext, List<IAnyResource> resources, Map<String, String> resourceExceptions, Encoding encoding) {
-        Map<String, IAnyResource> uniqueResources = new HashMap<String, IAnyResource>();
+    public static Boolean bundleDependencies(String path, FhirContext fhirContext, Map<String, IAnyResource> resources, Map<String, String> resourceExceptions, Encoding encoding) {
         Boolean shouldPersist = true;        
         try {
             Map<String, IAnyResource> dependencies = ResourceUtils.getDependencyLibraries(path, fhirContext, encoding);
-            for (Entry<String, IAnyResource> entry : dependencies.entrySet()) {
-                if (!uniqueResources.containsKey(entry.getKey())) {
-                    uniqueResources.put(entry.getKey(), entry.getValue());
-                }
+            for (IAnyResource resource : dependencies.values()) {             
+                safeAddResource(resource, resources);
             }
-            resources.addAll(uniqueResources.values());
         }
         catch(Exception e) {
             shouldPersist = false;
@@ -181,7 +177,7 @@ public class IGProcessor
         return shouldPersist;
     }
 
-    private static Boolean bundleTestCases(String igPath, String libraryName, FhirContext fhirContext, List<IAnyResource> resources, Map<String, String> resourceExceptions) {
+    private static Boolean bundleTestCases(String igPath, String libraryName, FhirContext fhirContext, Map<String, IAnyResource> resources, Map<String, String> resourceExceptions) {
         Boolean shouldPersist = true;
         String igTestsPath = FilenameUtils.concat(igPath, testCasePathElement);
         String igTestCasePath = FilenameUtils.concat(igTestsPath, libraryName);
@@ -194,7 +190,9 @@ public class IGProcessor
         
         try {
             List<IAnyResource> testCaseResources = TestCaseProcessor.getTestCaseResources(igTestCasePath, fhirContext);
-            resources.addAll(testCaseResources);
+            for (IAnyResource resource : testCaseResources) {
+                safeAddResource(resource, resources);
+            }
         }
         catch(Exception e) {
             shouldPersist = false;
@@ -246,10 +244,19 @@ public class IGProcessor
         }
     }
 
-    private static Boolean safeAddResource(String path, List<IAnyResource> resources, FhirContext fhirContext, Map<String, String> resourceExceptions) {
+    private static Map<String, IAnyResource> safeAddResource(IAnyResource resource, Map<String, IAnyResource> resources)
+    {
+        if (!resources.containsKey(resource.getId())) {
+            resources.put(resource.getId(), resource);
+        }
+        return resources;
+    }
+
+    private static Boolean safeAddResource(String path, Map<String, IAnyResource> resources, FhirContext fhirContext, Map<String, String> resourceExceptions) {
         Boolean added = true;
         try {
-             resources.add(IOUtils.readResource(path, fhirContext, true));
+            IAnyResource resource = IOUtils.readResource(path, fhirContext, true);
+            safeAddResource(resource, resources);
         }
         catch(Exception e) {
             added = false;
