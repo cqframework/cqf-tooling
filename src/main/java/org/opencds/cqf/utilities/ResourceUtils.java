@@ -92,7 +92,7 @@ public class ResourceUtils
     }    
 
     public static Map<String, IAnyResource> getDependencyLibraries(String path, FhirContext fhirContext, Encoding encoding) {
-      String directoryPath = FilenameUtils.getPath(path);
+      String directoryPath = FilenameUtils.getFullPath(path);
       Map<String, IAnyResource> dependencyLibraries = new HashMap<String, IAnyResource>();
       switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:
