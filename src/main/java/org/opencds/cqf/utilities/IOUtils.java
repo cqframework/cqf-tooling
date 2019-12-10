@@ -296,23 +296,23 @@ public class IOUtils
         return dependencyCqlFiles;
     }
 
-    public static List<String> getDependencyValueSetPaths(String cqlContentPath, String valueSetDirPath)
+    public static List<String> getDepValueSetPaths(String cqlContentPath, String valueSetDirPath)
             throws FileNotFoundException {
-        ArrayList<File> DependencyFiles = getDependencyValueSetFiles(cqlContentPath, valueSetDirPath);
-        ArrayList<String> DependencyPaths = new ArrayList<String>();
-        for (File file : DependencyFiles) {
-            DependencyPaths.add(file.getPath().toString());
+        ArrayList<File> dependencyFiles = getDepValueSetFiles(cqlContentPath, valueSetDirPath);
+        ArrayList<String> dependencyPaths = new ArrayList<String>();
+        for (File file : dependencyFiles) {
+            putInListIfAbsent(file.getPath().toString(), dependencyPaths);
         }
-        return DependencyPaths;
+        return dependencyPaths;
     }
 
-    public static ArrayList<File> getDependencyValueSetFiles(String cqlContentPath, String valueSetDirPath)
+    public static ArrayList<File> getDepValueSetFiles(String cqlContentPath, String valueSetDirPath)
             throws FileNotFoundException {
         File valueSetDir = new File(valueSetDirPath);
         if (!valueSetDir.isDirectory()) {
             throw new IllegalArgumentException("The specified path to valueset files is not a directory");
         }
-        ArrayList<String> dependencyValueSets = ResourceUtils.getDependencyValueSetNames(cqlContentPath);
+        ArrayList<String> dependencyValueSets = ResourceUtils.getDepValueSetNames(cqlContentPath);
         File[] allValueSetFiles = valueSetDir.listFiles();
         if (allValueSetFiles.length == 0) {
             throw new FileNotFoundException("did not find any files in valueset directory");
@@ -385,13 +385,13 @@ public class IOUtils
     public static String getFileName(String baseName, Encoding encoding) {
         String result = baseName + getFileExtension(encoding);     
         return result;
-    }
+    }    
 
-    public static List<String> putIfAbsent(String path, List<String> paths)
+    public static List<String> putInListIfAbsent(String value, List<String> list)
     {
-        if (!paths.contains(path)) {
-            paths.add(path);
+        if (!list.contains(value)) {
+            list.add(value);
         }
-        return paths;
+        return list;
     }
 }

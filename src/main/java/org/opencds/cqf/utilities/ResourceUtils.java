@@ -120,7 +120,7 @@ public class ResourceUtils
       for (org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
         String dependencyLibraryName = IOUtils.getFileName(relatedArtifact.getResource().getReference().split("Library/")[1], encoding);
         String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
-        IOUtils.putIfAbsent(dependencyLibraryPath, paths);
+        IOUtils.putInListIfAbsent(dependencyLibraryPath, paths);
       }
       return paths;
     }
@@ -144,7 +144,7 @@ public class ResourceUtils
       for (org.hl7.fhir.r4.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
         String dependencyLibraryName = IOUtils.getFileName(relatedArtifact.getResource().split("Library/")[1], encoding);
         String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
-        IOUtils.putIfAbsent(dependencyLibraryPath, paths);
+        IOUtils.putInListIfAbsent(dependencyLibraryPath, paths);
       }
       return paths;
     }
@@ -165,18 +165,18 @@ public class ResourceUtils
       ArrayList<String> includedLibraryNames = new ArrayList<String>();
       ArrayList<IncludeDef> includedDefs = getIncludedDefs(cqlContentPath);
       for (IncludeDef def : includedDefs) {
-        includedLibraryNames.add(def.getPath());
+        IOUtils.putInListIfAbsent(def.getPath(), includedLibraryNames);
       }
       return includedLibraryNames;
     }
 
-    public static ArrayList<String> getDependencyValueSetNames(String cqlContentPath) {
-      ArrayList<String> includedLibraryNames = new ArrayList<String>();
+    public static ArrayList<String> getDepValueSetNames(String cqlContentPath) {
+      ArrayList<String> includedValueSetNames = new ArrayList<String>();
       ArrayList<ValueSetDef> valueSetDefs = getValueSetDefs(cqlContentPath);
       for (ValueSetDef def : valueSetDefs) {
-        includedLibraryNames.add(def.getName());
+        IOUtils.putInListIfAbsent(def.getName(), includedValueSetNames);
       }
-      return includedLibraryNames;
+      return includedValueSetNames;
     }
 
     public static ArrayList<IncludeDef> getIncludedDefs(String cqlContentPath) {
