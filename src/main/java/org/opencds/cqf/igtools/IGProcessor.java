@@ -82,17 +82,32 @@ public class IGProcessor {
     }
 
     public static final String libraryPathElement = "resources/library/";
-
-    public static void refreshStu3IgLibraryContent(String igPath, Boolean includeELM, FhirContext fhirContext) {
+    public static void refreshStu3IgLibraryContent(String igPath, Boolean includeELM, FhirContext fhirContext)
+    {
+        Map<String, String> resourceExceptions = new HashMap<String, String>();
+        String cqlContentDirPath = FilenameUtils.concat(igPath, cqlLibraryPathElement);
         String libraryPath = FilenameUtils.concat(igPath, libraryPathElement);
+        List<String> cqlContentPaths = IOUtils.getFilePaths(cqlContentDirPath, false);
         //ILibraryProcessor libraryProcessor = new LibraryProcessor<DSTU3>(libraryPath);
-        //libraryProcessor.refreshLibraryContent();
+        for (String path : cqlContentPaths) {
+            LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, Encoding.JSON, resourceExceptions);
+            if (!resourceExceptions.isEmpty()) {
+                {
+                    String exceptionMessage = "";
+                    for (Map.Entry<String, String> resourceException : resourceExceptions.entrySet()) {
+                        exceptionMessage += "\r\n" + "          Resource could not be processed: " + resourceException.getKey() + " - " + resourceException.getValue();
+                    }
+                    ourLog.warn("Library could not be refreshed for: " + FilenameUtils.getName(path) + " - " + exceptionMessage);
+                }
+            }
+        }
     }
 
-    public static void refreshR4LibraryContent(String igPath, Boolean includeELM, FhirContext fhirContext) {
+    public static void refreshR4LibraryContent(String igPath, Boolean includeELM, FhirContext fhirContext)
+    {
         String libraryPath = FilenameUtils.concat(igPath, libraryPathElement);
-        // ILibraryProcessor libraryProcessor = new LibraryProcessor<R4>(libraryPath);
-        // libraryProcessor.refreshLibraryContent();
+        //ILibraryProcessor libraryProcessor = new LibraryProcessor<R4>(libraryPath);
+        //libraryProcessor.refreshLibraryContent();
     }
 
     public static final String cqlLibraryPathElement = "cql/";
