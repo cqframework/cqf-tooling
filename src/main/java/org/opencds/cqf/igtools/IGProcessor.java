@@ -135,8 +135,8 @@ public class IGProcessor
             String libraryName = FilenameUtils.getBaseName(measureSourcePath).replace("measure-", "");
             String librarySourcePath = FilenameUtils.concat(igLibraryPath, IOUtils.getFileName(LibraryProcessor.getId(libraryName), encoding));
 
-            shouldPersist = safeAddResource(measureSourcePath, resources, fhirContext, resourceExceptions);    
-            shouldPersist = shouldPersist & safeAddResource(librarySourcePath, resources, fhirContext, resourceExceptions);
+            shouldPersist = ResourceUtils.safeAddResource(measureSourcePath, resources, fhirContext, resourceExceptions);    
+            shouldPersist = shouldPersist & ResourceUtils.safeAddResource(librarySourcePath, resources, fhirContext, resourceExceptions);
 
             if (includeDependencies) {
                 shouldPersist = shouldPersist & bundleDependencies(librarySourcePath, fhirContext, resources, resourceExceptions, encoding);
@@ -150,7 +150,7 @@ public class IGProcessor
                 String bundlePath = FilenameUtils.concat(igPath, bundlePathElement);
                 String bundleDestPath = FilenameUtils.concat(bundlePath, libraryName);
                 persistBundle(igPath, bundleDestPath, libraryName, encoding, fhirContext, new ArrayList<IAnyResource>(resources.values()));
-                bundleFiles(igPath, bundleDestPath, libraryName, measureSourcePath, librarySourcePath, includeTestCases);
+                bundleFiles(igPath, bundleDestPath, libraryName, measureSourcePath, librarySourcePath, fhirContext, encoding, includeDependencies, includeTestCases);
             }
             else {
                 String exceptionMessage = "";
@@ -165,9 +165,9 @@ public class IGProcessor
     public static Boolean bundleDependencies(String path, FhirContext fhirContext, Map<String, IAnyResource> resources, Map<String, String> resourceExceptions, Encoding encoding) {
         Boolean shouldPersist = true;        
         try {
-            Map<String, IAnyResource> dependencies = ResourceUtils.getDependencyLibraries(path, fhirContext, encoding);
+            Map<String, IAnyResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding);
             for (IAnyResource resource : dependencies.values()) {             
-                safeAddResource(resource, resources);
+                resources.putIfAbsent(resource.getId(), resource);
             }
         }
         catch(Exception e) {
@@ -191,7 +191,7 @@ public class IGProcessor
         try {
             List<IAnyResource> testCaseResources = TestCaseProcessor.getTestCaseResources(igTestCasePath, fhirContext);
             for (IAnyResource resource : testCaseResources) {
-                safeAddResource(resource, resources);
+                resources.putIfAbsent(resource.getId(), resource);
             }
         }
         catch(Exception e) {
@@ -208,7 +208,7 @@ public class IGProcessor
     }
 
     public static final String bundleFilesPathElement = "files/";
-    private static void bundleFiles(String igPath, String bundleDestPath, String libraryName, String measureSourcePath, String librarySourcePath, Boolean includeTestCases) {
+    private static void bundleFiles(String igPath, String bundleDestPath, String libraryName, String measureSourcePath, String librarySourcePath, FhirContext fhirContext, Encoding encoding, Boolean includeDependencies, Boolean includeTestCases) {
         String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, libraryName + "-" + bundleFilesPathElement);
         IOUtils.initializeDirectory(bundleDestFilesPath);
 
@@ -219,6 +219,14 @@ public class IGProcessor
         String cqlLibrarySourcePath = FilenameUtils.concat(FilenameUtils.concat(igPath, cqlLibraryPathElement), cqlFileName);
         String cqlDestPath = FilenameUtils.concat(bundleDestFilesPath, cqlFileName);        
         IOUtils.copyFile(cqlLibrarySourcePath, cqlDestPath);
+
+        if (includeDependencies) {
+            List<String> depLibraries = ResourceUtils.getDepLibraryPaths(librarySourcePath, fhirContext, encoding);
+            for (String depLibrary : depLibraries) {
+                String depLibraryDestPath = FilenameUtils.concat(bundleDestFilesPath, IOUtils.getFileName(FilenameUtils.getBaseName(depLibrary), encoding));
+                IOUtils.copyFile(depLibrary, depLibraryDestPath);
+            }
+        }
 
         if (includeTestCases) {
             bundleTestCaseFiles(igPath, libraryName, bundleDestFilesPath);
@@ -243,27 +251,6 @@ public class IGProcessor
             }            
         }
     }
-
-    private static Map<String, IAnyResource> safeAddResource(IAnyResource resource, Map<String, IAnyResource> resources)
-    {
-        if (!resources.containsKey(resource.getId())) {
-            resources.put(resource.getId(), resource);
-        }
-        return resources;
-    }
-
-    private static Boolean safeAddResource(String path, Map<String, IAnyResource> resources, FhirContext fhirContext, Map<String, String> resourceExceptions) {
-        Boolean added = true;
-        try {
-            IAnyResource resource = IOUtils.readResource(path, fhirContext, true);
-            safeAddResource(resource, resources);
-        }
-        catch(Exception e) {
-            added = false;
-            resourceExceptions.put(path, e.getMessage());
-        }  
-        return added;
-    } 
 
     public static FhirContext getIgFhirContext(IGVersion igVersion)
     {
