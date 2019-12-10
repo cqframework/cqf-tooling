@@ -143,8 +143,11 @@ public class IGProcessor {
             shouldPersist = ResourceUtils.safeAddResource(measureSourcePath, resources, fhirContext, resourceExceptions);
             shouldPersist = shouldPersist & ResourceUtils.safeAddResource(librarySourcePath, resources, fhirContext, resourceExceptions);
 
+            String igValueSetsPath = FilenameUtils.concat(igPath, valuesetsPathElement);
+            String cqlFileName = IOUtils.getFileName(libraryName, Encoding.CQL);
+            String cqlLibrarySourcePath = FilenameUtils.concat(FilenameUtils.concat(igPath, cqlLibraryPathElement), cqlFileName);
             if (includeTerminology) {
-                shouldPersist = shouldPersist & bundleValueSets(librarySourcePath, fhirContext, resources, resourceExceptions, encoding);
+                shouldPersist = shouldPersist & bundleValueSets(cqlLibrarySourcePath, igValueSetsPath, fhirContext, resources, resourceExceptions, encoding);
             }
 
             if (includeDependencies) {
@@ -175,19 +178,22 @@ public class IGProcessor {
         }
     }
 
-    public static Boolean bundleValueSets(String path, FhirContext fhirContext, Map<String, IAnyResource> resources, Map<String, String> resourceExceptions, Encoding encoding) {
+    public static Boolean bundleValueSets(String cqlContentPath, String valuesetDirPath, FhirContext fhirContext, Map<String, IAnyResource> resources, Map<String, String> resourceExceptions, Encoding encoding) {
         Boolean shouldPersist = true;
-        // try {
+         try {
         //     Map<String, IAnyResource> dependencies =
         //     ResourceUtils.getDepValueSetResources(path, fhirContext, encoding);
         //     for (IAnyResource resource : dependencies.values()) {
         //         resources.putIfAbsent(resource.getId(), resource);
-        //     }
-        // }
-        // catch(Exception e) {
-        //     shouldPersist = false;
-        //     resourceExceptions.put(path, e.getMessage());
-        // }
+            Map<String, IAnyResource> dependencies = ResourceUtils.getDepValueSetResources(cqlContentPath, valuesetDirPath, fhirContext);
+            for (IAnyResource resource : dependencies.values()) {
+                resources.putIfAbsent(resource.getId(), resource);
+            }
+        }
+        catch(Exception e) {
+            shouldPersist = false;
+            resourceExceptions.put(cqlContentPath, e.getMessage());
+        }
         return shouldPersist;
     }
 
