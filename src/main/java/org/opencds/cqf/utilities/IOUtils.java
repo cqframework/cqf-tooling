@@ -383,6 +383,15 @@ public class IOUtils
     }
 
     public static String getFileName(String baseName, Encoding encoding) {
-        return baseName + getFileExtension(encoding);
+        String result = baseName + getFileExtension(encoding);     
+        return result;
+    }
+
+    public static List<String> putIfAbsent(String path, List<String> paths)
+    {
+        if (!paths.contains(path)) {
+            paths.add(path);
+        }
+        return paths;
     }
 }

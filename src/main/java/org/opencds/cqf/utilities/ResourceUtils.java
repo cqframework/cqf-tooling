@@ -60,7 +60,6 @@ public class ResourceUtils
         igId = resourceName + "-" + baseId + versionId;
 
       }
-      igId = igId.replace("_", "-");
       resource.setId(igId);
     }
 
@@ -91,45 +90,75 @@ public class ResourceUtils
       return ((org.hl7.fhir.r4.model.Library)mainLibrary).getRelatedArtifact();   
     }    
 
-    public static Map<String, IAnyResource> getDependencyLibraries(String path, FhirContext fhirContext, Encoding encoding) {
-      String directoryPath = FilenameUtils.getFullPath(path);
+    public static Map<String, IAnyResource> getDepLibraryResources(String path, FhirContext fhirContext, Encoding encoding) {      
       Map<String, IAnyResource> dependencyLibraries = new HashMap<String, IAnyResource>();
       switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:
-            return getStu3DependencyLibraries(path, directoryPath, dependencyLibraries, fhirContext, encoding);
+            return getStu3DepLibraryResources(path, dependencyLibraries, fhirContext, encoding);
         case R4:
-            return getR4DependencyLibraries(path, directoryPath, dependencyLibraries, fhirContext, encoding);
+            return getR4DepLibraryResources(path, dependencyLibraries, fhirContext, encoding);
         default:
             throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
       }
     }
 
-    private static Map<String, IAnyResource> getStu3DependencyLibraries(String path, String directoryPath, Map<String, IAnyResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding) {      
-      List<org.hl7.fhir.dstu3.model.RelatedArtifact> relatedArtifacts = getStu3RelatedArtifacts(path, fhirContext);
-      for (org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
-          String dependencyLibraryName = IOUtils.getFileName(relatedArtifact.getResource().getReference().split("Library/")[1], encoding);
-          String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
-          Object resource = IOUtils.readResource(dependencyLibraryPath, fhirContext);
-          if (resource instanceof org.hl7.fhir.dstu3.model.Library) {
-            org.hl7.fhir.dstu3.model.Library library = (org.hl7.fhir.dstu3.model.Library)resource;
-            dependencyLibraries.put(library.getId(), library);
-          }
-        }
-        return dependencyLibraries;
+    public static List<String> getDepLibraryPaths(String path, FhirContext fhirContext, Encoding encoding) {
+      switch (fhirContext.getVersion().getVersion()) {
+        case DSTU3:
+            return getStu3DepLibraryPaths(path, fhirContext, encoding);
+        case R4:
+            return getR4DepLibraryPaths(path, fhirContext, encoding);
+        default:
+            throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+      }
     }
 
-    private static Map<String, IAnyResource> getR4DependencyLibraries(String path, String directoryPath, Map<String, IAnyResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding) {
+    private static List<String> getStu3DepLibraryPaths(String path, FhirContext fhirContext, Encoding encoding) {
+      List<String> paths = new ArrayList<String>();
+      String directoryPath = FilenameUtils.getFullPath(path);
+      List<org.hl7.fhir.dstu3.model.RelatedArtifact> relatedArtifacts = getStu3RelatedArtifacts(path, fhirContext);
+      for (org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
+        String dependencyLibraryName = IOUtils.getFileName(relatedArtifact.getResource().getReference().split("Library/")[1], encoding);
+        String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
+        IOUtils.putIfAbsent(dependencyLibraryPath, paths);
+      }
+      return paths;
+    }
+
+    private static Map<String, IAnyResource> getStu3DepLibraryResources(String path, Map<String, IAnyResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding) {      
+      List<String> dependencyLibraryPaths = getStu3DepLibraryPaths(path, fhirContext, encoding);
+      for (String dependencyLibraryPath : dependencyLibraryPaths) {
+        Object resource = IOUtils.readResource(dependencyLibraryPath, fhirContext);
+        if (resource instanceof org.hl7.fhir.dstu3.model.Library) {
+          org.hl7.fhir.dstu3.model.Library library = (org.hl7.fhir.dstu3.model.Library)resource;
+          dependencyLibraries.putIfAbsent(library.getId(), library);
+        }
+      }
+      return dependencyLibraries;
+    }
+
+    private static List<String> getR4DepLibraryPaths(String path, FhirContext fhirContext, Encoding encoding) {
+      List<String> paths = new ArrayList<String>();
+      String directoryPath = FilenameUtils.getFullPath(path);
       List<org.hl7.fhir.r4.model.RelatedArtifact> relatedArtifacts = getR4RelatedArtifacts(path, fhirContext);
       for (org.hl7.fhir.r4.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
-          String dependencyLibraryName = IOUtils.getFileName(relatedArtifact.getResource().split("Library/")[1], encoding);
-          String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);          
-          Object resource = IOUtils.readResource(dependencyLibraryPath, fhirContext);
-          if (resource instanceof org.hl7.fhir.r4.model.Library) {
-            org.hl7.fhir.r4.model.Library library = (org.hl7.fhir.r4.model.Library)resource;
-            dependencyLibraries.put(library.getId(), library);
-          }
+        String dependencyLibraryName = IOUtils.getFileName(relatedArtifact.getResource().split("Library/")[1], encoding);
+        String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
+        IOUtils.putIfAbsent(dependencyLibraryPath, paths);
+      }
+      return paths;
+    }
+
+    private static Map<String, IAnyResource> getR4DepLibraryResources(String path, Map<String, IAnyResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding) {      
+      List<String> dependencyLibraryPaths = getR4DepLibraryPaths(path, fhirContext, encoding);
+      for (String dependencyLibraryPath : dependencyLibraryPaths) {
+        Object resource = IOUtils.readResource(dependencyLibraryPath, fhirContext);
+        if (resource instanceof org.hl7.fhir.r4.model.Library) {
+          org.hl7.fhir.r4.model.Library library = (org.hl7.fhir.r4.model.Library)resource;
+          dependencyLibraries.putIfAbsent(library.getId(), library);
         }
-        return dependencyLibraries;
+      }
+      return dependencyLibraries;
     }
 
     public static ArrayList<String> getIncludedLibraryNames(String cqlContentPath) {
@@ -182,4 +211,17 @@ public class ResourceUtils
       CqlTranslator translator = IOUtils.translate(cqlContentPath, modelManager, libraryManager);      
       return translator.toELM();  
     }  
+
+    public static Boolean safeAddResource(String path, Map<String, IAnyResource> resources, FhirContext fhirContext, Map<String, String> resourceExceptions) {
+      Boolean added = true;
+      try {
+          IAnyResource resource = IOUtils.readResource(path, fhirContext, true);
+          resources.putIfAbsent(resource.getId(), resource);
+      }
+      catch(Exception e) {
+          added = false;
+          resourceExceptions.put(path, e.getMessage());
+      }  
+      return added;
+  } 
 }
