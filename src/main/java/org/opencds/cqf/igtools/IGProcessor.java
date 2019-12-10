@@ -72,12 +72,12 @@ public class IGProcessor {
     }
 
     private static void refreshStu3IG(String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, FhirContext fhirContext) {
-        refreshStu3IgLibraryContent(igPath, includeELM, fhirContext);
+        // refreshStu3IgLibraryContent(igPath, includeELM, fhirContext);
         // refreshMeasureContent();
     }
 
     private static void refreshR4IG(String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, FhirContext fhirContext) {
-        refreshR4LibraryContent(igPath, includeELM, fhirContext);
+        // refreshR4LibraryContent(igPath, includeELM, fhirContext);
         // refreshMeasureContent();
     }
 
@@ -120,12 +120,10 @@ public class IGProcessor {
     public static void bundleIg(String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, FhirContext fhirContext) {
         // bundle
         /*
-                - if include dependencies, add dependencies to bundle
                 - if include terminiology, add terminology to bundle         
         */  
         //zip
         /*
-                - if include dependencies, add bundle of libary dependencies to zip
                 - if include terminology, add bundle of terminology to zip
              
         */   
