@@ -63,7 +63,7 @@ public class DictionaryElement {
 
     private String relevance;
     public String getRelevance() {
-        return relevance;
+        return this.relevance;
     }
     public void setRelevance(String relevance) {
         this.relevance = relevance;
@@ -81,7 +81,6 @@ public class DictionaryElement {
     public String getNotes() {
         return this.notes;
     }
-
     public void setNotes(String notes) {
         this.notes = notes;
     }

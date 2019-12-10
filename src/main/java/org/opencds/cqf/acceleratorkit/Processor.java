@@ -101,26 +101,34 @@ public class Processor extends Operation {
         String currentGroup = null;
         while (it.hasNext()) {
             Row row = it.next();
-            // Skip header row
-            if (row.getRowNum() == 0) {
+            // Skip header row (and any previous rows
+            int headerRow = 1;
+            if (row.getRowNum() < headerRow) {
+                continue;
+            }
+            else if (row.getRowNum() == headerRow) {
                 Iterator<Cell> colIt = row.cellIterator();
                 while (colIt.hasNext()) {
                     Cell cell = colIt.next();
                     String header = SpreadsheetHelper.getCellAsString(cell).toLowerCase();
                     switch (header) {
-                        case "label": colIds.put("Label", cell.getColumnIndex()); break;
-                        case "group": colIds.put("Group", cell.getColumnIndex()); break;
-                        case "name": colIds.put("Name", cell.getColumnIndex()); break;
+                        case "data element label": colIds.put("Label", cell.getColumnIndex()); break;
+                        // no group column in old or new spreadsheet? Ask Bryn?
+                        //case "group": colIds.put("Group", cell.getColumnIndex()); break;
+                        case "data element name": colIds.put("Name", cell.getColumnIndex()); break;
                         case "due": colIds.put("Due", cell.getColumnIndex()); break;
-                        case "frequency": colIds.put("Due", cell.getColumnIndex()); break;
-                        case "relevance": colIds.put("Relevance", cell.getColumnIndex()); break;
-                        case "info icon": colIds.put("InfoIcon", cell.getColumnIndex()); break;
+                        // no frequency column in new master spreadsheet?
+                        //case "frequency": colIds.put("Due", cell.getColumnIndex()); break;
+                        // relevance not used in FHIR?
+                        //case "relevance": colIds.put("Relevance", cell.getColumnIndex()); break;
+                        // info icon not used in FHIR?
+                        //case "info icon": colIds.put("InfoIcon", cell.getColumnIndex()); break;
                         case "description": colIds.put("Description", cell.getColumnIndex()); break;
                         case "notes": colIds.put("Notes", cell.getColumnIndex()); break;
-                        case "type": colIds.put("Type", cell.getColumnIndex()); break;
-                        case "choices": colIds.put("Choices", cell.getColumnIndex()); break;
+                        case "data type": colIds.put("Type", cell.getColumnIndex()); break;
+                        case "input options": colIds.put("Choices", cell.getColumnIndex()); break;
                         case "calculation": colIds.put("Calculation", cell.getColumnIndex()); break;
-                        case "constraint": colIds.put("Constraint", cell.getColumnIndex()); break;
+                        case "validation required": colIds.put("Constraint", cell.getColumnIndex()); break;
                         case "required": colIds.put("Required", cell.getColumnIndex()); break;
                         case "editable": colIds.put("Editable", cell.getColumnIndex()); break;
                         case "openmrs entity parent": colIds.put("OpenMRSEntityParent", cell.getColumnIndex()); break;

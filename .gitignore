@@ -116,3 +116,5 @@ hs_err_pid*
 *.iml
 /src/main/resources/org/opencds/cqf/bundle/output/
 !/src/main/resources/org/opencds/cqf/bundle/output/.gitkeep
+/src/main/resources/org/opencds/cqf/acceleratorkit/output/*
+/src/main/resources/org/opencds/cqf/acceleratorkit/output_old/*
