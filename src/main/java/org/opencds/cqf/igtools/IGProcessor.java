@@ -162,8 +162,13 @@ public class IGProcessor {
                 bundleFiles(igPath, bundleDestPath, libraryName, measureSourcePath, librarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includeTestCases);
             } else {
                 String exceptionMessage = "";
+                //TODO: come up with a better answer for SUPER long errors (that include all the text of the measure narrative, for example)
                 for (Map.Entry<String, String> resourceException : resourceExceptions.entrySet()) {
-                    exceptionMessage += "\r\n" + "          Resource could not be processed: " + resourceException.getKey() + " - " + resourceException.getValue();
+                    String resourceExceptionMessage = resourceException.getValue();
+                    resourceExceptionMessage = (resourceExceptionMessage.indexOf("\r\n") > -1 ? resourceExceptionMessage.substring(0, resourceExceptionMessage.indexOf("\r\n")) + "..." : resourceExceptionMessage);
+                    resourceExceptionMessage = (resourceExceptionMessage.indexOf("\r") > -1 ? resourceExceptionMessage.substring(0, resourceExceptionMessage.indexOf("\r")) + "..." : resourceExceptionMessage);
+                    resourceExceptionMessage = " - \r\n                    " + (resourceExceptionMessage.indexOf("\n") > -1 ? resourceExceptionMessage.substring(0, resourceExceptionMessage.indexOf("\n")) + " ..." : resourceExceptionMessage);
+                    exceptionMessage += "\r\n" + "          Resource could not be processed: " + resourceException.getKey() + resourceExceptionMessage;
                 }
                 ourLog.warn("Measure could not be processed: " + libraryName + " - " + exceptionMessage);
             }
