@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -163,7 +164,7 @@ public class ResourceUtils
       return dependencyLibraries;
     }
     
-    public static Map<String, IAnyResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext) throws Exception {
+    public static Map<String, IAnyResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext, boolean includeDependencies) throws Exception {
       Map<String, IAnyResource> valueSetResources = new HashMap<String, IAnyResource>();
       List<String> valueSetIDs = getDepValueSetIDs(cqlContentPath);
         
@@ -181,6 +182,16 @@ public class ResourceUtils
         }        
         throw new Exception(message);
       }
+
+      if(includeDependencies) {
+        List<String> dependencyCqlPaths = IOUtils.getDependencyCqlPaths(cqlContentPath);
+        for (String path : dependencyCqlPaths) {
+          Map<String, IAnyResource> dependencies = getDepValueSetResources(path, igPath, fhirContext, includeDependencies);
+          for (Entry<String, IAnyResource> entry : dependencies.entrySet()) {
+            valueSetResources.putIfAbsent(entry.getKey(), entry.getValue());
+          }
+        }
+      }
       return valueSetResources;
     }   
 
@@ -188,7 +199,7 @@ public class ResourceUtils
       ArrayList<String> includedLibraryNames = new ArrayList<String>();
       ArrayList<IncludeDef> includedDefs = getIncludedDefs(cqlContentPath);
       for (IncludeDef def : includedDefs) {
-        IOUtils.putInListIfAbsent(def.getPath(), includedLibraryNames);
+        IOUtils.putInListIfAbsent(def.getPath() + "-" + def.getVersion(), includedLibraryNames);
       }
       return includedLibraryNames;
     }

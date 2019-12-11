@@ -195,7 +195,7 @@ public class IGProcessor {
     public static Boolean bundleValueSets(String cqlContentPath, String igPath, FhirContext fhirContext, Map<String, IAnyResource> resources, Encoding encoding) {
         Boolean shouldPersist = true;
          try { 
-            Map<String, IAnyResource> dependencies = ResourceUtils.getDepValueSetResources(cqlContentPath, igPath, fhirContext);
+            Map<String, IAnyResource> dependencies = ResourceUtils.getDepValueSetResources(cqlContentPath, igPath, fhirContext, true);
             for (IAnyResource resource : dependencies.values()) {
                 resources.putIfAbsent(resource.getId(), resource);
             }
@@ -264,7 +264,7 @@ public class IGProcessor {
 
         if (includeTerminology) {  
             try {     
-                Map<String, IAnyResource> valuesets = ResourceUtils.getDepValueSetResources(cqlLibrarySourcePath, igPath, fhirContext);      
+                Map<String, IAnyResource> valuesets = ResourceUtils.getDepValueSetResources(cqlLibrarySourcePath, igPath, fhirContext, true);      
                 if (!valuesets.isEmpty()) {
                     Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<IAnyResource>(valuesets.values()), fhirContext);
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  

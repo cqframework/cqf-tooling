@@ -287,7 +287,6 @@ public class IOUtils
             return new ArrayList<File>();
         }
         ArrayList<File> dependencyCqlFiles = new ArrayList<>();
-        dependencyCqlFiles.add(cqlContent);
         for (File cqlFile : allCqlContentFiles) {
             if (dependencyLibraries.contains(cqlFile.getName().replace(".cql", ""))) {
                 dependencyCqlFiles.add(cqlFile);
