@@ -2,7 +2,6 @@ package org.opencds.cqf.utilities;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -295,48 +294,8 @@ public class IOUtils
             }  
         }
         return dependencyCqlFiles;
-    }
-
-    public static List<String> getDepValueSetPaths(String cqlContentPath, String valueSetDirPath) {
-        ArrayList<String> dependencyPaths = new ArrayList<String>();  
-
-        try {
-            ArrayList<File> dependencyFiles = getDepValueSetFiles(cqlContentPath, valueSetDirPath);
-            for (File file : dependencyFiles) {
-                putInListIfAbsent(file.getPath().toString(), dependencyPaths);
-            }
-        } catch (FileNotFoundException e) {
-            LogUtils.putWarning(cqlContentPath, "Could not get valueset files");
-            //System.out.println(e.getMessage());   
-        } 
-       
-        return dependencyPaths;
-    }
-
-    public static ArrayList<File> getDepValueSetFiles(String cqlContentPath, String valueSetDirPath)
-            throws FileNotFoundException {
-        File valueSetDir = new File(valueSetDirPath);
-        if (!valueSetDir.isDirectory()) {
-            throw new IllegalArgumentException("The specified path to valueset files is not a directory");
-        }
-        ArrayList<String> dependencyValueSets = ResourceUtils.getDepValueSetNames(cqlContentPath);
-        File[] allValueSetFiles = valueSetDir.listFiles();
-        if (allValueSetFiles.length == 0) {
-            throw new FileNotFoundException("did not find any files in valueset directory");
-        }
-        ArrayList<File> dependencyValueSetFiles = new ArrayList<>();
-        for (File valuesetFile : allValueSetFiles) {
-            if (dependencyValueSets.contains(valuesetFile.getName().replace(".json", ""))) {
-                dependencyValueSetFiles.add(valuesetFile);
-                continue;
-            }
-            else {
-                throw new FileNotFoundException("did not find: " + valuesetFile.getName() + " in valueset directory");
-            }
-        }
-        return dependencyValueSetFiles;
-    }
-
+    } 
+  
     public static CqlTranslator translate(String cqlContentPath, ModelManager modelManager, LibraryManager libraryManager) {
         try {
           File cqlFile = new File(cqlContentPath);

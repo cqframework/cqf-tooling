@@ -1,6 +1,5 @@
 package org.opencds.cqf.utilities;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,10 +11,10 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.ValueSetDef;
-import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import org.opencds.cqf.library.GenericLibrarySourceProvider;
+import org.opencds.cqf.terminology.ValueSetsProcessor;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -164,42 +163,26 @@ public class ResourceUtils
       return dependencyLibraries;
     }
     
-    public static Map<String, IAnyResource> getDepValueSetResources(String cqlContentPath, String valueSetDirPath, FhirContext fhirContext) {
-      switch (fhirContext.getVersion().getVersion()) {
-        case DSTU3:
-            return getStu3DepValueSetResources(cqlContentPath, valueSetDirPath, fhirContext);
-        case R4:
-            return getR4DepValueSetResources(cqlContentPath, valueSetDirPath, fhirContext);
-        default:
-            throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
-      }
-    }
-
-    public static Map<String, IAnyResource> getStu3DepValueSetResources(String cqlContentPath, String valueSetDirPath, FhirContext fhirContext) {
-        List<String> valueSetPaths = IOUtils.getDepValueSetPaths(cqlContentPath, valueSetDirPath);
-        Map<String, IAnyResource> valueSetResources = new HashMap<String, IAnyResource>();
-        for (String valueSetPath : valueSetPaths) {
-          IAnyResource resource = IOUtils.readResource(valueSetPath, fhirContext);
-          if (resource instanceof org.hl7.fhir.dstu3.model.ValueSet) {
-            org.hl7.fhir.dstu3.model.ValueSet valueset = (org.hl7.fhir.dstu3.model.ValueSet)resource;
-            valueSetResources.putIfAbsent(valueset.getId(), valueset);
-          }
-        }
-        return valueSetResources;
-    }
-
-    public static Map<String, IAnyResource> getR4DepValueSetResources(String cqlContentPath, String valueSetDirPath, FhirContext fhirContext) {
-      List<String> valueSetPaths = IOUtils.getDepValueSetPaths(cqlContentPath, valueSetDirPath);
+    public static Map<String, IAnyResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext) throws Exception {
       Map<String, IAnyResource> valueSetResources = new HashMap<String, IAnyResource>();
-      for (String valueSetPath : valueSetPaths) {
-        IAnyResource resource = IOUtils.readResource(valueSetPath, fhirContext);
-        if (resource instanceof org.hl7.fhir.r4.model.ValueSet) {
-          org.hl7.fhir.r4.model.ValueSet valueset = (org.hl7.fhir.r4.model.ValueSet)resource;
-          valueSetResources.putIfAbsent(valueset.getId(), valueset);
-        }
+      List<String> valueSetIDs = getDepValueSetIDs(cqlContentPath);
+        
+      for (String valueSetId : valueSetIDs) {
+          ValueSetsProcessor.getCachedValueSets(igPath, fhirContext).entrySet().stream()
+          .filter(entry -> entry.getKey().equals(valueSetId))
+          .forEach(entry -> valueSetResources.putIfAbsent(entry.getKey(), entry.getValue()));
+      }
+      
+      if (valueSetIDs.size() != valueSetResources.size()) {
+        String message = (valueSetIDs.size() - valueSetResources.size()) + " missing ValueSets: ";
+        valueSetIDs.removeAll(valueSetResources.keySet());
+        for (String valueSetId : valueSetIDs) {
+          message += "\r\n" + valueSetId + " MISSING";
+        }        
+        throw new Exception(message);
       }
       return valueSetResources;
-  }
+    }   
 
     public static ArrayList<String> getIncludedLibraryNames(String cqlContentPath) {
       ArrayList<String> includedLibraryNames = new ArrayList<String>();
@@ -210,13 +193,13 @@ public class ResourceUtils
       return includedLibraryNames;
     }
 
-    public static ArrayList<String> getDepValueSetNames(String cqlContentPath) {
-      ArrayList<String> includedValueSetNames = new ArrayList<String>();
+    public static ArrayList<String> getDepValueSetIDs(String cqlContentPath) {
+      ArrayList<String> includedValueSetIDs = new ArrayList<String>();
       ArrayList<ValueSetDef> valueSetDefs = getValueSetDefs(cqlContentPath);
       for (ValueSetDef def : valueSetDefs) {
-        IOUtils.putInListIfAbsent(def.getName().replaceAll(" ", ""), includedValueSetNames);
+        IOUtils.putInListIfAbsent(def.getId(), includedValueSetIDs);
       }
-      return includedValueSetNames;
+      return includedValueSetIDs;
     }
 
     public static ArrayList<IncludeDef> getIncludedDefs(String cqlContentPath) {
@@ -270,7 +253,12 @@ public class ResourceUtils
       Boolean added = true;
       try {
           IAnyResource resource = IOUtils.readResource(path, fhirContext, true);
-          resources.putIfAbsent(resource.getId(), resource);
+          if (resource != null) {
+            resources.putIfAbsent(resource.getId(), resource);
+          } else {
+            added = false;
+            LogUtils.putWarning(path, "Unable to add Resource: " + path);
+          }
       }
       catch(Exception e) {
           added = false;
