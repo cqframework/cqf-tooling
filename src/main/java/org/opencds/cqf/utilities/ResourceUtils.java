@@ -121,7 +121,7 @@ public class ResourceUtils
       String directoryPath = FilenameUtils.getFullPath(path);
       List<org.hl7.fhir.dstu3.model.RelatedArtifact> relatedArtifacts = getStu3RelatedArtifacts(path, fhirContext);
       for (org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
-        String dependencyLibraryName = IOUtils.getFileName(relatedArtifact.getResource().getReference().split("Library/")[1], encoding);
+        String dependencyLibraryName = IOUtils.formatFileName(relatedArtifact.getResource().getReference().split("Library/")[1], encoding);
         String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
         IOUtils.putInListIfAbsent(dependencyLibraryPath, paths);
       }
@@ -145,7 +145,7 @@ public class ResourceUtils
       String directoryPath = FilenameUtils.getFullPath(path);
       List<org.hl7.fhir.r4.model.RelatedArtifact> relatedArtifacts = getR4RelatedArtifacts(path, fhirContext);
       for (org.hl7.fhir.r4.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
-        String dependencyLibraryName = IOUtils.getFileName(relatedArtifact.getResource().split("Library/")[1], encoding);
+        String dependencyLibraryName = IOUtils.formatFileName(relatedArtifact.getResource().split("Library/")[1], encoding);
         String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
         IOUtils.putInListIfAbsent(dependencyLibraryPath, paths);
       }

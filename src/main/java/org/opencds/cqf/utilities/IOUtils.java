@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -77,7 +76,7 @@ public class IOUtils
 
     public static <T extends IAnyResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext) 
     {        
-        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(path, resource.getId() + "." + encoding.toString())))
+        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(path, formatFileName(resource.getId(), encoding))))
         {
             writer.write(parseResource(resource, encoding, fhirContext));
             writer.flush();
@@ -206,7 +205,6 @@ public class IOUtils
                 }
                 directoryPaths.add(directory.getPath());
             }
-
         }
         return directoryPaths;
     }
@@ -300,24 +298,19 @@ public class IOUtils
     }
 
     public static List<String> getDepValueSetPaths(String cqlContentPath, String valueSetDirPath) {
-        ArrayList<File> dependencyFiles;
+        ArrayList<String> dependencyPaths = new ArrayList<String>();  
+
         try {
-            dependencyFiles = getDepValueSetFiles(cqlContentPath, valueSetDirPath);
-        } catch (FileNotFoundException e) {
-            System.out.println("Could not get valueset files");
-            System.out.println(e.getMessage());
-            dependencyFiles = new ArrayList<File>();
-        }
-        ArrayList<String> dependencyPaths = new ArrayList<String>();
-        if(!dependencyFiles.isEmpty())
-        {
+            ArrayList<File> dependencyFiles = getDepValueSetFiles(cqlContentPath, valueSetDirPath);
             for (File file : dependencyFiles) {
                 putInListIfAbsent(file.getPath().toString(), dependencyPaths);
             }
-            return dependencyPaths;
-        }
-        else return dependencyPaths;
-        
+        } catch (FileNotFoundException e) {
+            LogUtils.putWarning(cqlContentPath, "Could not get valueset files");
+            //System.out.println(e.getMessage());   
+        } 
+       
+        return dependencyPaths;
     }
 
     public static ArrayList<File> getDepValueSetFiles(String cqlContentPath, String valueSetDirPath)
@@ -362,13 +355,13 @@ public class IOUtils
                     );
   
             if (translator.getErrors().size() > 0) {
-                System.err.println("Translation failed due to errors:");
+                //System.err.println("Translation failed due to errors:");
                 ArrayList<String> errors = new ArrayList<>();
                 for (CqlTranslatorException error : translator.getErrors()) {
                     TrackBack tb = error.getLocator();
                     String lines = tb == null ? "[n/a]" : String.format("[%d:%d, %d:%d]",
                             tb.getStartLine(), tb.getStartChar(), tb.getEndLine(), tb.getEndChar());
-                    System.err.printf("%s %s%n", lines, error.getMessage());
+                    //System.err.printf("%s %s%n", lines, error.getMessage());
                     errors.add(lines + error.getMessage());
                 }
                 throw new IllegalArgumentException(errors.toString());
@@ -376,8 +369,9 @@ public class IOUtils
   
             return translator;
         } catch (IOException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("Error encountered during CQL translation: " + e.getMessage());
+            //e.printStackTrace();
+            //throw new IllegalArgumentException("Error encountered during CQL translation: " + e.getMessage());
+            throw new IllegalArgumentException("Error encountered during CQL translation");
         }
     }
 
@@ -400,7 +394,7 @@ public class IOUtils
         return "." + encoding.toString();
     }
 
-    public static String getFileName(String baseName, Encoding encoding) {
+    public static String formatFileName(String baseName, Encoding encoding) {
         String result = baseName + getFileExtension(encoding); 
         //TODO: Fix for: FHIR IDs don't allow "_" and FHIR Library names can't include "-".
         //Need to figure out better solution or make it a convention that IG filenames can't have "_" other than the IGVersion.

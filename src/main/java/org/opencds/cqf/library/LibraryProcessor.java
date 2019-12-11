@@ -13,7 +13,6 @@ import org.hl7.elm.r1.ValueSetRef;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.opencds.cqf.library.stu3.NarrativeProvider;
 import org.opencds.cqf.utilities.IOUtils;
-import org.opencds.cqf.utilities.LogUtils;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -25,33 +24,19 @@ public class LibraryProcessor {
         return "library-" + baseId;
     }
 
-    public static void refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding) {
-        Boolean shouldPersist = true;
-        Library resource;
-        try {
-            resource = (Library)IOUtils.readResource(libraryPath, fhirContext, shouldPersist);
-        } catch (Exception e) {
-            LogUtils.putWarning(libraryPath, e.getMessage());
-            resource = null;
-        }
+    public static Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding) {         
+        Library resource = (Library)IOUtils.readResource(libraryPath, fhirContext, true);
+        Boolean libraryExists = resource != null;       
 
-        CqlTranslator translator;
-        try {
-            translator = getTranslator(cqlContentPath);
-        } catch (Exception e) {
-            LogUtils.putWarning(libraryPath, e.getMessage());
-            return;
+        CqlTranslator translator = getTranslator(cqlContentPath);
+              
+        if (libraryExists) {            
+            refreshLibrary(resource, cqlContentPath, libraryPath, encoding, translator, fhirContext);
+        } else {
+            generateLibrary(cqlContentPath, libraryPath, encoding, translator, fhirContext);
         }
-         
-        try {
-            if (resource != null) {            
-                refreshLibrary(resource, cqlContentPath, libraryPath, encoding, translator, fhirContext);
-            } else {
-                generateLibrary(cqlContentPath, libraryPath, encoding, translator, fhirContext);
-            }
-        } catch (Exception e) {
-            LogUtils.putWarning(libraryPath, e.getMessage());
-        }
+      
+        return true;
     }
 
     private static void refreshLibrary(Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, CqlTranslator translator, FhirContext fhirContext) {

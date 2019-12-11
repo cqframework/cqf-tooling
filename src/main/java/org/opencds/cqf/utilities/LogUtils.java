@@ -1,6 +1,7 @@
 
 package org.opencds.cqf.utilities;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,7 +14,7 @@ public class LogUtils
     private static final Map<String, String> resourceWarnings = new HashMap<String, String>();    
 
     public static void putWarning(String id, String warning) {
-        resourceWarnings.put(id, warning);
+        resourceWarnings.put(LocalDateTime.now().toString() + ": " + id, warning);
     }
 
     public static void info(String message) {
