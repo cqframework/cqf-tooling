@@ -9,6 +9,8 @@ import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.library.LibraryProcessor;
+import org.opencds.cqf.library.R4LibraryProcessor;
+import org.opencds.cqf.library.STU3LibraryProcessor;
 import org.opencds.cqf.measure.MeasureProcessor;
 import org.opencds.cqf.terminology.ValueSetsProcessor;
 import org.opencds.cqf.testcase.TestCaseProcessor;
@@ -101,7 +103,7 @@ public class IGProcessor {
         
         for (String path : cqlContentPaths) {
             try {
-                LibraryProcessor.refreshLibraryContent(path, getLibraryPath(igPath), fhirContext, Encoding.JSON);
+                STU3LibraryProcessor.refreshLibraryContent(path, getLibraryPath(igPath), fhirContext, Encoding.JSON);
                 refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
             } catch (Exception e) {
                 LogUtils.putWarning(path, e.getMessage());
@@ -113,9 +115,18 @@ public class IGProcessor {
 
     public static ArrayList<String> refreshR4LibraryContent(String igPath, Boolean includeELM, FhirContext fhirContext)
     {
-        ArrayList<String> refreshedLibraryNames = new ArrayList<String>(); 
-        //ILibraryProcessor libraryProcessor = new LibraryProcessor<R4>(getLibraryPath(igPath));
-        //libraryProcessor.refreshLibraryContent();
+        ArrayList<String> refreshedLibraryNames = new ArrayList<String>();  
+        List<String> cqlContentPaths = IOUtils.getFilePaths(getCqlLibraryPath(igPath), false);
+        
+        for (String path : cqlContentPaths) {
+            try {
+                R4LibraryProcessor.refreshLibraryContent(path, getLibraryPath(igPath), fhirContext, Encoding.JSON);
+                refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
+            } catch (Exception e) {
+                LogUtils.putWarning(path, e.getMessage());
+            }              
+        }
+
         return refreshedLibraryNames;
     }
 

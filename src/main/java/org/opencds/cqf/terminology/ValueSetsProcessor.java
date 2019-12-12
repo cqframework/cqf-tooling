@@ -42,7 +42,15 @@ public class ValueSetsProcessor {
     private static Map<String, IAnyResource> copyToR4IDs(List<IAnyResource> valueSets, FhirContext fhirContext) {
         Map<String, IAnyResource> valueSetIDs = new HashMap<String, IAnyResource>();
         for (IAnyResource resource : valueSets) {
-            valueSetIDs.put(((org.hl7.fhir.r4.model.ValueSet)resource).getUrl(), resource);
+            if (resource instanceof org.hl7.fhir.r4.model.ValueSet) {
+                valueSetIDs.putIfAbsent(((org.hl7.fhir.r4.model.ValueSet)resource).getUrl(), resource);
+            } else if (resource instanceof org.hl7.fhir.r4.model.Bundle) {
+                org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle) resource; 
+                for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent bundleEntry : bundle.getEntry()) {
+                    org.hl7.fhir.r4.model.ValueSet valueSet = (org.hl7.fhir.r4.model.ValueSet)bundleEntry.getResource();
+                    valueSetIDs.putIfAbsent((valueSet).getUrl(), valueSet);
+                }
+            }
         }
         return valueSetIDs;
     }
