@@ -26,17 +26,31 @@ public class LogUtils
             return;
         }
         String exceptionMessage = "";
-        //TODO: come up with a better answer for SUPER long errors (that include all the text of the measure narrative, for example)
         for (Map.Entry<String, String> resourceException : resourceWarnings.entrySet()) {
-            String resourceExceptionMessage = resourceException.getValue();
-            if (resourceExceptionMessage.length() > 1000) {
-                resourceExceptionMessage = (resourceExceptionMessage.indexOf("\r\n") > -1 ? resourceExceptionMessage.substring(0, resourceExceptionMessage.indexOf("\r\n")) + "..." : resourceExceptionMessage);
-                resourceExceptionMessage = (resourceExceptionMessage.indexOf("\r") > -1 ? resourceExceptionMessage.substring(0, resourceExceptionMessage.indexOf("\r")) + "..." : resourceExceptionMessage);
-                resourceExceptionMessage = (resourceExceptionMessage.indexOf("\n") > -1 ? resourceExceptionMessage.substring(0, resourceExceptionMessage.indexOf("\n")) + "..." : resourceExceptionMessage);
-            }
-            exceptionMessage += "\r\n          Resource could not be processed: " + FilenameUtils.getBaseName(resourceException.getKey()) + "\r\n                    "  + resourceExceptionMessage;
+            String resourceExceptionMessage = truncateMessage(resourceException.getValue()); 
+            String resource =  FilenameUtils.getBaseName(resourceException.getKey());           
+            exceptionMessage += "\r\n          Resource could not be processed: " + resource + "\r\n                    "  + resourceExceptionMessage;
         }
         ourLog.warn("Measure could not be processed: " + libraryName + exceptionMessage);
         resourceWarnings.clear(); 
     } 
+
+    private static String truncateMessage(String message) {   
+        int maxSize = 500;     
+        int cutoffIndex = message.indexOf("\r\n");
+        cutoffIndex = cutoffIndex > -1 ? cutoffIndex : message.indexOf("\r");
+        cutoffIndex = cutoffIndex > -1 ? cutoffIndex : message.indexOf("\n");
+        cutoffIndex = cutoffIndex > maxSize ? maxSize : cutoffIndex;
+        int cutoffIndex2 = -1;
+        if (cutoffIndex > -1) {
+            cutoffIndex2 = message.indexOf("\r\n", cutoffIndex + 1);
+            cutoffIndex2 = cutoffIndex2 > -1 ? cutoffIndex2 : message.indexOf("\r", cutoffIndex + 1);
+            cutoffIndex2 = cutoffIndex2 > -1 ? cutoffIndex2 : message.indexOf("\n", cutoffIndex + 1);
+            cutoffIndex2 = cutoffIndex2 > maxSize ? maxSize : cutoffIndex2;
+        } 
+
+        cutoffIndex = cutoffIndex2 > -1 ? cutoffIndex2 : (cutoffIndex > -1 ? cutoffIndex : maxSize);        
+  
+        return message.length() < cutoffIndex ? message : message.substring(0, cutoffIndex) + "...";
+    }
 }

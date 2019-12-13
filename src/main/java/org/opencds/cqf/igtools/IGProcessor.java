@@ -107,7 +107,8 @@ public class IGProcessor {
                 refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
             } catch (Exception e) {
                 LogUtils.putWarning(path, e.getMessage());
-            }              
+            }    
+            LogUtils.warn(path);          
         }
 
         return refreshedLibraryNames;
@@ -124,7 +125,8 @@ public class IGProcessor {
                 refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
             } catch (Exception e) {
                 LogUtils.putWarning(path, e.getMessage());
-            }              
+            }  
+            LogUtils.warn(path);                
         }
 
         return refreshedLibraryNames;
@@ -145,40 +147,45 @@ public class IGProcessor {
                 
         List<String> bundledMeasures = new ArrayList<String>();
         for (String refreshedLibraryName : refreshedLibraryNames) {
-            if (!measurePathLibraryNames.contains(refreshedLibraryName)) {
-                continue;
+            try {
+                if (!measurePathLibraryNames.contains(refreshedLibraryName)) {
+                    continue;
+                }
+
+                Map<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+                
+                String librarySourcePath = FilenameUtils.concat(getLibraryPath(igPath), IOUtils.formatFileName(LibraryProcessor.getId(refreshedLibraryName), encoding));
+                String measureSourcePath = FilenameUtils.concat(getMeasurePath(igPath), IOUtils.formatFileName(MeasureProcessor.getId(refreshedLibraryName), encoding));
+
+                Boolean shouldPersist = ResourceUtils.safeAddResource(measureSourcePath, resources, fhirContext);
+                shouldPersist = shouldPersist & ResourceUtils.safeAddResource(librarySourcePath, resources, fhirContext);
+
+                String cqlFileName = IOUtils.formatFileName(refreshedLibraryName, Encoding.CQL);
+                String cqlLibrarySourcePath = FilenameUtils.concat(getCqlLibraryPath(igPath), cqlFileName);
+                if (includeTerminology) {
+                    shouldPersist = shouldPersist & bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding);
+                }
+
+                if (includeDependencies) {
+                    shouldPersist = shouldPersist & bundleDependencies(librarySourcePath, fhirContext, resources, encoding);
+                }
+
+                if (includeTestCases) {
+                    shouldPersist = shouldPersist & bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
+                }
+
+                if (shouldPersist) {                
+                    String bundleDestPath = FilenameUtils.concat(getBundlesPath(igPath), refreshedLibraryName);
+                    persistBundle(igPath, bundleDestPath, refreshedLibraryName, encoding, fhirContext, new ArrayList<IAnyResource>(resources.values()));
+                    bundleFiles(igPath, bundleDestPath, refreshedLibraryName, measureSourcePath, librarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includeTestCases);
+                    bundledMeasures.add(refreshedLibraryName);
+                }   
+            } catch (Exception e) {
+                LogUtils.putWarning(refreshedLibraryName, e.getMessage());
             }
-
-            Map<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
-            
-            String librarySourcePath = FilenameUtils.concat(getLibraryPath(igPath), IOUtils.formatFileName(LibraryProcessor.getId(refreshedLibraryName), encoding));
-            String measureSourcePath = FilenameUtils.concat(getMeasurePath(igPath), IOUtils.formatFileName(MeasureProcessor.getId(refreshedLibraryName), encoding));
-
-            Boolean shouldPersist = ResourceUtils.safeAddResource(measureSourcePath, resources, fhirContext);
-            shouldPersist = shouldPersist & ResourceUtils.safeAddResource(librarySourcePath, resources, fhirContext);
-
-            String cqlFileName = IOUtils.formatFileName(refreshedLibraryName, Encoding.CQL);
-            String cqlLibrarySourcePath = FilenameUtils.concat(getCqlLibraryPath(igPath), cqlFileName);
-            if (includeTerminology) {
-                shouldPersist = shouldPersist & bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding);
+            finally {
+                LogUtils.warn(refreshedLibraryName);
             }
-
-            if (includeDependencies) {
-                shouldPersist = shouldPersist & bundleDependencies(librarySourcePath, fhirContext, resources, encoding);
-            }
-
-            if (includeTestCases) {
-                shouldPersist = shouldPersist & bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
-            }
-
-            if (shouldPersist) {                
-                String bundleDestPath = FilenameUtils.concat(getBundlesPath(igPath), refreshedLibraryName);
-                persistBundle(igPath, bundleDestPath, refreshedLibraryName, encoding, fhirContext, new ArrayList<IAnyResource>(resources.values()));
-                bundleFiles(igPath, bundleDestPath, refreshedLibraryName, measureSourcePath, librarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includeTestCases);
-                bundledMeasures.add(refreshedLibraryName);
-            } 
-            
-            LogUtils.warn(refreshedLibraryName);
         }
         String message = "\r\n" + bundledMeasures.size() + " Measures successfully bundled:";
         for (String bundledMeasure : bundledMeasures) {
