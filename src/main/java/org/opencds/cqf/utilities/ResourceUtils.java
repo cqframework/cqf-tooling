@@ -62,7 +62,7 @@ public class ResourceUtils
     {
       String igId = "";
       String resourceName = resource.getClass().getSimpleName().toLowerCase();
-      String versionId = "-" + version;
+      String versionId = (version == null || version == "") ? "" : "-" + version;
       
       if (resource instanceof org.hl7.fhir.dstu3.model.Bundle || resource instanceof org.hl7.fhir.r4.model.Bundle) {
         igId = baseId + versionId + "-" + resourceName;        
