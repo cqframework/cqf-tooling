@@ -64,6 +64,10 @@ public class IOUtils
         }
     } 
 
+    public static String getIdFromFileName(String fileName) {
+        return fileName.replaceAll("_", "-");
+    }
+
     public static byte[] parseResource(IAnyResource resource, Encoding encoding, FhirContext fhirContext) 
     {
         if (encoding == Encoding.UNKNOWN) {
@@ -266,7 +270,7 @@ public class IOUtils
         return result;
     }
 
-    public static List<String> getDependencyCqlPaths(String cqlContentPath) {
+    public static List<String> getDependencyCqlPaths(String cqlContentPath) throws Exception {
         ArrayList<File> DependencyFiles = getDependencyCqlFiles(cqlContentPath);
         ArrayList<String> DependencyPaths = new ArrayList<String>();
         for (File file : DependencyFiles) {
@@ -275,7 +279,7 @@ public class IOUtils
         return DependencyPaths;
     }
 
-    public static ArrayList<File> getDependencyCqlFiles(String cqlContentPath) {
+    public static ArrayList<File> getDependencyCqlFiles(String cqlContentPath) throws Exception {
         File cqlContent = new File(cqlContentPath);
         File cqlContentDir = cqlContent.getParentFile();
         if (!cqlContentDir.isDirectory()) {
@@ -288,10 +292,20 @@ public class IOUtils
         }
         ArrayList<File> dependencyCqlFiles = new ArrayList<>();
         for (File cqlFile : allCqlContentFiles) {
-            if (dependencyLibraries.contains(cqlFile.getName().replace(".cql", ""))) {
+            if (dependencyLibraries.contains(getIdFromFileName(cqlFile.getName().replace(".cql", "")))) {
                 dependencyCqlFiles.add(cqlFile);
+                dependencyLibraries.remove(getIdFromFileName(cqlFile.getName().replace(".cql", "")));
             }  
         }
+
+        if (dependencyLibraries.size() != 0) {
+            String message = (dependencyLibraries.size()) + " included cql Libraries not found: ";
+            
+            for (String includedLibrary : dependencyLibraries) {
+              message += "\r\n" + includedLibrary + " MISSING";
+            }        
+            throw new Exception(message);
+          }
         return dependencyCqlFiles;
     } 
   
