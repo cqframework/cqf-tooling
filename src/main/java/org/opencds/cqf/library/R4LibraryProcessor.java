@@ -13,6 +13,7 @@ import org.hl7.elm.r1.ValueSetRef;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.opencds.cqf.library.stu3.NarrativeProvider;
 import org.opencds.cqf.utilities.IOUtils;
+import org.opencds.cqf.utilities.ResourceUtils;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -88,7 +89,8 @@ public class R4LibraryProcessor {
     // Populate metadata
     private static Library populateMeta(String name, String version) {
         Library library = new Library();
-        library.setId(nameToId(name, version));
+        //TODO: change true to versioned variable
+        library.setId(ResourceUtils.getId(name, version, true));
         library.setName(name);
         library.setVersion(version);
         library.setStatus(Enumerations.PublicationStatus.ACTIVE);

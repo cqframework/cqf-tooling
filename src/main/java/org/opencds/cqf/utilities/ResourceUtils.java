@@ -48,12 +48,21 @@ public class ResourceUtils
             }
         }
     }
-    
+
+    public static String getId(String name, String version, boolean versioned) {
+      return name.replaceAll("_", "-") + (versioned ? "-" + version.replaceAll("_", ".") : "");
+    }
+
     public static void setIgId(String baseId, IAnyResource resource, Boolean includeVersion)
+    {
+      setIgId(baseId, resource, includeVersion ? resource.getMeta().getVersionId() : "");
+    }
+    
+    public static void setIgId(String baseId, IAnyResource resource, String version)
     {
       String igId = "";
       String resourceName = resource.getClass().getSimpleName().toLowerCase();
-      String versionId = includeVersion ? "-" + resource.getMeta().getVersionId() : "";
+      String versionId = "-" + version;
       
       if (resource instanceof org.hl7.fhir.dstu3.model.Bundle || resource instanceof org.hl7.fhir.r4.model.Bundle) {
         igId = baseId + versionId + "-" + resourceName;        
@@ -199,7 +208,8 @@ public class ResourceUtils
       ArrayList<String> includedLibraryNames = new ArrayList<String>();
       ArrayList<IncludeDef> includedDefs = getIncludedDefs(cqlContentPath);
       for (IncludeDef def : includedDefs) {
-        IOUtils.putInListIfAbsent(def.getPath() + "-" + def.getVersion(), includedLibraryNames);
+        //TODO: replace true with versioned variable
+        IOUtils.putInListIfAbsent(getId(def.getPath(), def.getVersion(), true), includedLibraryNames);
       }
       return includedLibraryNames;
     }
