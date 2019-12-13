@@ -182,15 +182,6 @@ public class ResourceUtils
           .filter(entry -> entry.getKey().equals(valueSetId))
           .forEach(entry -> valueSetResources.putIfAbsent(entry.getKey(), entry.getValue()));
       }
-      
-      if (valueSetIDs.size() != valueSetResources.size()) {
-        String message = (valueSetIDs.size() - valueSetResources.size()) + " missing ValueSets: ";
-        valueSetIDs.removeAll(valueSetResources.keySet());
-        for (String valueSetId : valueSetIDs) {
-          message += "\r\n" + valueSetId + " MISSING";
-        }        
-        throw new Exception(message);
-      }
 
       if(includeDependencies) {
         List<String> dependencyCqlPaths = IOUtils.getDependencyCqlPaths(cqlContentPath);
@@ -200,6 +191,15 @@ public class ResourceUtils
             valueSetResources.putIfAbsent(entry.getKey(), entry.getValue());
           }
         }
+      }
+
+      if (valueSetIDs.size() != valueSetResources.size()) {
+        String message = (valueSetIDs.size() - valueSetResources.size()) + " missing ValueSets: ";
+        valueSetIDs.removeAll(valueSetResources.keySet());
+        for (String valueSetId : valueSetIDs) {
+          message += "\r\n" + valueSetId + " MISSING";
+        }        
+        throw new Exception(message);
       }
       return valueSetResources;
     }   
