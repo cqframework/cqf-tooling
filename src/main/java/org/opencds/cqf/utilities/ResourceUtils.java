@@ -2,6 +2,7 @@ package org.opencds.cqf.utilities;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -177,24 +178,27 @@ public class ResourceUtils
     public static Map<String, IAnyResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext, boolean includeDependencies) throws Exception {
       Map<String, IAnyResource> valueSetResources = new HashMap<String, IAnyResource>();
       List<String> valueSetIDs = getDepValueSetIDs(cqlContentPath);
+      HashSet<String> dependencies = new HashSet<>();
         
       for (String valueSetId : valueSetIDs) {
           ValueSetsProcessor.getCachedValueSets(igPath, fhirContext).entrySet().stream()
           .filter(entry -> entry.getKey().equals(valueSetId))
           .forEach(entry -> valueSetResources.putIfAbsent(entry.getKey(), entry.getValue()));
       }
+      dependencies.addAll(valueSetResources.keySet());
 
       if(includeDependencies) {
         List<String> dependencyCqlPaths = IOUtils.getDependencyCqlPaths(cqlContentPath);
         for (String path : dependencyCqlPaths) {
-          Map<String, IAnyResource> dependencies = getDepValueSetResources(path, igPath, fhirContext, includeDependencies);
-          for (Entry<String, IAnyResource> entry : dependencies.entrySet()) {
+          Map<String, IAnyResource> dependencyValueSets = getDepValueSetResources(path, igPath, fhirContext, includeDependencies);
+          dependencies.addAll(dependencyValueSets.keySet());
+          for (Entry<String, IAnyResource> entry : dependencyValueSets.entrySet()) {
             valueSetResources.putIfAbsent(entry.getKey(), entry.getValue());
           }
         }
       }
 
-      if (valueSetIDs.size() != valueSetResources.size()) {
+      if (dependencies.size() != valueSetResources.size()) {
         String message = (valueSetIDs.size() - valueSetResources.size()) + " missing ValueSets: ";
         valueSetIDs.removeAll(valueSetResources.keySet());
         for (String valueSetId : valueSetIDs) {
@@ -260,7 +264,12 @@ public class ResourceUtils
       return valueSetDefs;
     }
 
+    private static Map<String, org.hl7.elm.r1.Library> cachedElm = new HashMap<String, org.hl7.elm.r1.Library>();
     public static org.hl7.elm.r1.Library getElmFromCql(String cqlContentPath) {
+      org.hl7.elm.r1.Library elm = cachedElm.get(cqlContentPath);
+      if (elm != null) {
+        return elm;
+      }
       String cqlDirPath = IOUtils.getParentDirectoryPath(cqlContentPath);
       ModelManager modelManager = new ModelManager();
       GenericLibrarySourceProvider sourceProvider = new GenericLibrarySourceProvider(cqlDirPath);
@@ -268,7 +277,9 @@ public class ResourceUtils
       libraryManager.getLibrarySourceLoader().registerProvider(sourceProvider);
 
       CqlTranslator translator = IOUtils.translate(cqlContentPath, modelManager, libraryManager);      
-      return translator.toELM();  
+      elm = translator.toELM(); 
+      cachedElm.put(cqlContentPath, elm);
+      return elm; 
     }  
 
     public static Boolean safeAddResource(String path, Map<String, IAnyResource> resources, FhirContext fhirContext) {

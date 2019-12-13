@@ -14,6 +14,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -131,6 +132,7 @@ public class IOUtils
     }
     
     //users should always check for null
+    private static Map<String, IAnyResource> cachedResources = new HashMap<String, IAnyResource>();
     public static IAnyResource readResource(String path, FhirContext fhirContext, Boolean safeRead) 
     {        
         Encoding encoding = getEncoding(path);
@@ -138,7 +140,11 @@ public class IOUtils
             return null;
         }
 
-        IAnyResource resource = null;      
+        IAnyResource resource = cachedResources.get(path);     
+        if (resource != null) {
+            return resource;
+        } 
+
         try
         {
             IParser parser = getParser(encoding, fhirContext);
@@ -149,6 +155,7 @@ public class IOUtils
                 }
             }
             resource = (IAnyResource)parser.parseResource(new FileReader(file));
+            cachedResources.put(path, resource);
         }
         catch (Exception e)
         {
@@ -309,16 +316,22 @@ public class IOUtils
         return dependencyCqlFiles;
     } 
   
+    private static Map<String, CqlTranslator> cachedTranslator = new HashMap<String, CqlTranslator>();
     public static CqlTranslator translate(String cqlContentPath, ModelManager modelManager, LibraryManager libraryManager) {
+        CqlTranslator translator = cachedTranslator.get(cqlContentPath);
+        if (translator != null) {
+            return translator;
+        }
         try {
           File cqlFile = new File(cqlContentPath);
           if(!cqlFile.getName().endsWith(".cql")) {
             throw new IllegalArgumentException("cqlContentPath must be a path to a .cql file");
           }
+          
             ArrayList<CqlTranslator.Options> options = new ArrayList<>();
             options.add(CqlTranslator.Options.EnableDateRangeOptimization);
   
-            CqlTranslator translator =
+            translator =
                     CqlTranslator.fromFile(
                             cqlFile,
                             modelManager,
@@ -338,7 +351,7 @@ public class IOUtils
                 }
                 throw new IllegalArgumentException(errors.toString());
             }
-  
+            cachedTranslator.put(cqlContentPath, translator);
             return translator;
         } catch (IOException e) {
             //e.printStackTrace();
