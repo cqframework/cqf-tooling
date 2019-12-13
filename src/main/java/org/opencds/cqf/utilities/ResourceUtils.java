@@ -55,14 +55,15 @@ public class ResourceUtils
 
     public static void setIgId(String baseId, IAnyResource resource, Boolean includeVersion)
     {
-      setIgId(baseId, resource, includeVersion ? resource.getMeta().getVersionId() : "");
+      String version = includeVersion ? resource.getMeta().getVersionId() : "";
+      setIgId(baseId, resource,  version);
     }
     
     public static void setIgId(String baseId, IAnyResource resource, String version)
     {
       String igId = "";
       String resourceName = resource.getClass().getSimpleName().toLowerCase();
-      String versionId = (version == null || version == "") ? "" : "-" + version;
+      String versionId = (version == null || version.equals("")) ? "" : "-" + version;
       
       if (resource instanceof org.hl7.fhir.dstu3.model.Bundle || resource instanceof org.hl7.fhir.r4.model.Bundle) {
         igId = baseId + versionId + "-" + resourceName;        
