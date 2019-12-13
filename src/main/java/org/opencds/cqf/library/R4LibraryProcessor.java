@@ -89,8 +89,7 @@ public class R4LibraryProcessor {
     // Populate metadata
     private static Library populateMeta(String name, String version) {
         Library library = new Library();
-        //TODO: change true to versioned variable
-        library.setId(ResourceUtils.getId(name, version, true));
+        ResourceUtils.setIgId(name, library, version);
         library.setName(name);
         library.setVersion(version);
         library.setStatus(Enumerations.PublicationStatus.ACTIVE);
