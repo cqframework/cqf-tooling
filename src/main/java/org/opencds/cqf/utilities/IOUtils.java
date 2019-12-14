@@ -74,8 +74,17 @@ public class IOUtils
         if (encoding == Encoding.UNKNOWN) {
             return new byte[] { };
         }
-        IParser parser = getParser(encoding, fhirContext);      
+        IParser parser = getParser(encoding, fhirContext);    
         return parser.setPrettyPrint(true).encodeResourceToString(resource).getBytes();
+    }
+
+    public static String parseResourceAsString(IAnyResource resource, Encoding encoding, FhirContext fhirContext) 
+    {
+        if (encoding == Encoding.UNKNOWN) {
+            return "";
+        }
+        IParser parser = getParser(encoding, fhirContext);  
+        return parser.setPrettyPrint(true).encodeResourceToString(resource).toString();
     }
 
     public static <T extends IAnyResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext) 

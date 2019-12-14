@@ -10,7 +10,6 @@ import org.apache.commons.io.FilenameUtils;
 public class LogUtils 
 {    
     private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LogUtils.class);
-    
     private static final Map<String, String> resourceWarnings = new LinkedHashMap<String, String>();    
 
     public static void putWarning(String id, String warning) {
@@ -49,8 +48,7 @@ public class LogUtils
             cutoffIndex2 = cutoffIndex2 > maxSize ? maxSize : cutoffIndex2;
         } 
 
-        cutoffIndex = cutoffIndex2 > -1 ? cutoffIndex2 : (cutoffIndex > -1 ? cutoffIndex : maxSize);        
-  
+        cutoffIndex = cutoffIndex2 > -1 ? cutoffIndex2 : (cutoffIndex > -1 ? cutoffIndex : maxSize); 
         return message.length() < cutoffIndex ? message : message.substring(0, cutoffIndex) + "...";
     }
 }

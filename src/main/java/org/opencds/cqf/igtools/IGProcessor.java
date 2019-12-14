@@ -1,6 +1,7 @@
 package org.opencds.cqf.igtools;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,12 +16,14 @@ import org.opencds.cqf.measure.MeasureProcessor;
 import org.opencds.cqf.terminology.ValueSetsProcessor;
 import org.opencds.cqf.testcase.TestCaseProcessor;
 import org.opencds.cqf.utilities.BundleUtils;
+import org.opencds.cqf.utilities.HttpClientUtils;
 import org.opencds.cqf.utilities.IOUtils;
 import org.opencds.cqf.utilities.LogUtils;
 import org.opencds.cqf.utilities.ResourceUtils;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.api.HttpClientUtil;
 
 public class IGProcessor {
     public enum IGVersion {
@@ -48,26 +51,30 @@ public class IGProcessor {
         }
     }
 
-    public static void refreshIG(String igPath, IGVersion igVersion, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases) {
+    public static void refreshIG(String igPath, IGVersion igVersion, Boolean includeELM, Boolean includeDependencies,
+            Boolean includeTerminology, Boolean includeTestCases, String fhirServerUrl) {
         refreshIG(igPath, igVersion, includeELM, includeDependencies, includeTerminology, includeTestCases, false);
     }
 
-    public static void refreshIG(String igPath, IGVersion igVersion, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion) {
+    public static void refreshIG(String igPath, IGVersion igVersion, Boolean includeELM, Boolean includeDependencies,
+            Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, String fhirServerUrl) {
         ensure(igPath);
 
         FhirContext fhirContext = getIgFhirContext(igVersion);
 
-        // TODO: if refresh content is fhir version non-specific, no need for two
         ArrayList<String> refreshedLibraryNames = null;
         switch (fhirContext.getVersion().getVersion()) {
-            case DSTU3:
-                refreshedLibraryNames = refreshStu3IG(igPath, includeELM, includeDependencies, includeTerminology, includeTestCases, includeVersion, fhirContext);
-                break;
-            case R4:
-                refreshedLibraryNames = refreshR4IG(igPath, includeELM, includeDependencies, includeTerminology, includeTestCases, includeVersion, fhirContext);
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+        case DSTU3:
+            refreshedLibraryNames = refreshStu3IG(igPath, includeELM, includeDependencies, includeTerminology,
+                    includeTestCases, includeVersion, fhirContext);
+            break;
+        case R4:
+            refreshedLibraryNames = refreshR4IG(igPath, includeELM, includeDependencies, includeTerminology,
+                    includeTestCases, includeVersion, fhirContext);
+            break;
+        default:
+            throw new IllegalArgumentException(
+                    "Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
 
         if (refreshedLibraryNames.isEmpty()) {
@@ -79,72 +86,81 @@ public class IGProcessor {
             TestCaseProcessor.refreshTestCases(getTestsPath(igPath), IOUtils.Encoding.JSON, fhirContext);
         }
 
-        bundleIg(refreshedLibraryNames, igPath, includeELM, includeDependencies, includeTerminology, includeTestCases, includeVersion, fhirContext);
+        bundleIg(refreshedLibraryNames, igPath, includeELM, includeDependencies, includeTerminology, includeTestCases,
+                includeVersion, fhirContext, fhirServerUrl);
     }
 
-    private static ArrayList<String> refreshStu3IG(String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, FhirContext fhirContext) {       
-         ArrayList<String> refreshedLibraryNames = refreshStu3IgLibraryContent(igPath, includeELM, fhirContext);
+    private static ArrayList<String> refreshStu3IG(String igPath, Boolean includeELM, Boolean includeDependencies,
+            Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, FhirContext fhirContext) {
+        ArrayList<String> refreshedLibraryNames = refreshStu3IgLibraryContent(igPath, includeELM, fhirContext);
         // union with below when this is implemented.
-         // refreshMeasureContent();
+        // refreshMeasureContent();
         return refreshedLibraryNames;
     }
 
-    private static ArrayList<String> refreshR4IG(String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, FhirContext fhirContext) {
+    private static ArrayList<String> refreshR4IG(String igPath, Boolean includeELM, Boolean includeDependencies,
+            Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, FhirContext fhirContext) {
         ArrayList<String> refreshedLibraryNames = refreshR4LibraryContent(igPath, includeELM, fhirContext);
         // union with below when this is implemented.
         // refreshMeasureContent();
         return refreshedLibraryNames;
     }
-    
-    public static ArrayList<String> refreshStu3IgLibraryContent(String igPath, Boolean includeELM, FhirContext fhirContext)
-    {              
-        ArrayList<String> refreshedLibraryNames = new ArrayList<String>();  
+
+    public static ArrayList<String> refreshStu3IgLibraryContent(String igPath, Boolean includeELM,
+            FhirContext fhirContext) {
+        ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
         List<String> cqlContentPaths = IOUtils.getFilePaths(getCqlLibraryPath(igPath), false);
-        
+
         for (String path : cqlContentPaths) {
             try {
                 STU3LibraryProcessor.refreshLibraryContent(path, getLibraryPath(igPath), fhirContext, Encoding.JSON);
                 refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
             } catch (Exception e) {
                 LogUtils.putWarning(path, e.getMessage());
-            }    
-            LogUtils.warn(path);          
+            }
+            LogUtils.warn(path);
         }
 
         return refreshedLibraryNames;
     }
 
-    public static ArrayList<String> refreshR4LibraryContent(String igPath, Boolean includeELM, FhirContext fhirContext)
-    {
-        ArrayList<String> refreshedLibraryNames = new ArrayList<String>();  
+    public static ArrayList<String> refreshR4LibraryContent(String igPath, Boolean includeELM,
+            FhirContext fhirContext) {
+        ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
         List<String> cqlContentPaths = IOUtils.getFilePaths(getCqlLibraryPath(igPath), false);
-        
+
         for (String path : cqlContentPaths) {
             try {
                 R4LibraryProcessor.refreshLibraryContent(path, getLibraryPath(igPath), fhirContext, Encoding.JSON);
                 refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
             } catch (Exception e) {
                 LogUtils.putWarning(path, e.getMessage());
-            }  
-            LogUtils.warn(path);                
+            }
+            LogUtils.warn(path);
         }
 
         return refreshedLibraryNames;
     }
 
-    // TODO: most of the work of the sub methods of this should probably be moved to their respective resource Processors.
+    // TODO: most of the work of the sub methods of this should probably be moved to
+    // their respective resource Processors.
     // No time for a refactor atm though. So stinky it is!
-    public static void bundleIg(ArrayList<String> refreshedLibraryNames, String igPath, Boolean includeELM, Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, FhirContext fhirContext) {
-        Encoding encoding = Encoding.JSON;   
-        
-        //The set to bundle should be the union of the successfully refreshed Measures and Libraries
-        //Until we have the ability to refresh Measures, the set is the union of existing Measures and successfully refreshed Libraries
+    public static void bundleIg(ArrayList<String> refreshedLibraryNames, String igPath, Boolean includeELM,
+            Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion,
+            FhirContext fhirContext, String fhirServerUrl) {
+        Encoding encoding = Encoding.JSON;
+
+        // The set to bundle should be the union of the successfully refreshed Measures
+        // and Libraries
+        // Until we have the ability to refresh Measures, the set is the union of
+        // existing Measures and successfully refreshed Libraries
         List<String> measureSourcePaths = IOUtils.getFilePaths(getMeasurePath(igPath), false);
         List<String> measurePathLibraryNames = new ArrayList<String>();
         for (String measureSourcePath : measureSourcePaths) {
-            measurePathLibraryNames.add(FilenameUtils.getBaseName(measureSourcePath).replace(MeasureProcessor.ResourcePrefix, ""));
+            measurePathLibraryNames
+                    .add(FilenameUtils.getBaseName(measureSourcePath).replace(MeasureProcessor.ResourcePrefix, ""));
         }
-                
+
         List<String> bundledMeasures = new ArrayList<String>();
         for (String refreshedLibraryName : refreshedLibraryNames) {
             try {
@@ -153,37 +169,42 @@ public class IGProcessor {
                 }
 
                 Map<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
-                
-                String librarySourcePath = FilenameUtils.concat(getLibraryPath(igPath), IOUtils.formatFileName(LibraryProcessor.getId(refreshedLibraryName), encoding));
-                String measureSourcePath = FilenameUtils.concat(getMeasurePath(igPath), IOUtils.formatFileName(MeasureProcessor.getId(refreshedLibraryName), encoding));
+
+                String librarySourcePath = FilenameUtils.concat(getLibraryPath(igPath),
+                        IOUtils.formatFileName(LibraryProcessor.getId(refreshedLibraryName), encoding));
+                String measureSourcePath = FilenameUtils.concat(getMeasurePath(igPath),
+                        IOUtils.formatFileName(MeasureProcessor.getId(refreshedLibraryName), encoding));
 
                 Boolean shouldPersist = ResourceUtils.safeAddResource(measureSourcePath, resources, fhirContext);
-                shouldPersist = shouldPersist & ResourceUtils.safeAddResource(librarySourcePath, resources, fhirContext);
+                shouldPersist = shouldPersist
+                        & ResourceUtils.safeAddResource(librarySourcePath, resources, fhirContext);
 
                 String cqlFileName = IOUtils.formatFileName(refreshedLibraryName, Encoding.CQL);
                 String cqlLibrarySourcePath = FilenameUtils.concat(getCqlLibraryPath(igPath), cqlFileName);
                 if (includeTerminology) {
-                    shouldPersist = shouldPersist & bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding);
+                    shouldPersist = shouldPersist
+                            & bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding);
                 }
 
                 if (includeDependencies) {
-                    shouldPersist = shouldPersist & bundleDependencies(librarySourcePath, fhirContext, resources, encoding);
+                    shouldPersist = shouldPersist
+                            & bundleDependencies(librarySourcePath, fhirContext, resources, encoding);
                 }
 
                 if (includeTestCases) {
-                    shouldPersist = shouldPersist & bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
+                    shouldPersist = shouldPersist
+                            & bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
                 }
 
-                if (shouldPersist) {                
+                if (shouldPersist) {
                     String bundleDestPath = FilenameUtils.concat(getBundlesPath(igPath), refreshedLibraryName);
-                    persistBundle(igPath, bundleDestPath, refreshedLibraryName, encoding, fhirContext, new ArrayList<IAnyResource>(resources.values()));
+                    persistBundle(igPath, bundleDestPath, refreshedLibraryName, encoding, fhirContext, new ArrayList<IAnyResource>(resources.values()), fhirServerUrl);
                     bundleFiles(igPath, bundleDestPath, refreshedLibraryName, measureSourcePath, librarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includeTestCases);
                     bundledMeasures.add(refreshedLibraryName);
-                }   
+                }
             } catch (Exception e) {
                 LogUtils.putWarning(refreshedLibraryName, e.getMessage());
-            }
-            finally {
+            } finally {
                 LogUtils.warn(refreshedLibraryName);
             }
         }
@@ -191,7 +212,7 @@ public class IGProcessor {
         for (String bundledMeasure : bundledMeasures) {
             message += "\r\n     " + bundledMeasure + " BUNDLED";
         }
-        
+
         ArrayList<String> failedMeasures = new ArrayList<>(measurePathLibraryNames);
         measurePathLibraryNames.removeAll(bundledMeasures);
         measurePathLibraryNames.retainAll(refreshedLibraryNames);
@@ -199,7 +220,7 @@ public class IGProcessor {
         for (String notBundled : measurePathLibraryNames) {
             message += "\r\n     " + notBundled + " REFRESHED";
         }
-        
+
         failedMeasures.removeAll(bundledMeasures);
         failedMeasures.removeAll(measurePathLibraryNames);
         message += "\r\n" + failedMeasures.size() + " Measures failed refresh:";
@@ -210,22 +231,24 @@ public class IGProcessor {
         LogUtils.info(message);
     }
 
-    public static Boolean bundleValueSets(String cqlContentPath, String igPath, FhirContext fhirContext, Map<String, IAnyResource> resources, Encoding encoding) {
+    public static Boolean bundleValueSets(String cqlContentPath, String igPath, FhirContext fhirContext,
+            Map<String, IAnyResource> resources, Encoding encoding) {
         Boolean shouldPersist = true;
-         try { 
-            Map<String, IAnyResource> dependencies = ResourceUtils.getDepValueSetResources(cqlContentPath, igPath, fhirContext, true);
+        try {
+            Map<String, IAnyResource> dependencies = ResourceUtils.getDepValueSetResources(cqlContentPath, igPath,
+                    fhirContext, true);
             for (IAnyResource resource : dependencies.values()) {
                 resources.putIfAbsent(resource.getId(), resource);
             }
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             shouldPersist = false;
             LogUtils.putWarning(cqlContentPath, e.getMessage());
         }
         return shouldPersist;
     }
 
-    public static Boolean bundleDependencies(String path, FhirContext fhirContext, Map<String, IAnyResource> resources, Encoding encoding) {
+    public static Boolean bundleDependencies(String path, FhirContext fhirContext, Map<String, IAnyResource> resources,
+            Encoding encoding) {
         Boolean shouldPersist = true;
         try {
             Map<String, IAnyResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding);
@@ -239,14 +262,18 @@ public class IGProcessor {
         return shouldPersist;
     }
 
-    private static Boolean bundleTestCases(String igPath, String libraryName, FhirContext fhirContext, Map<String, IAnyResource> resources) {
+    private static Boolean bundleTestCases(String igPath, String libraryName, FhirContext fhirContext,
+            Map<String, IAnyResource> resources) {
         Boolean shouldPersist = true;
         String igTestCasePath = FilenameUtils.concat(getTestsPath(igPath), libraryName);
-        
-        //this is breaking for bundle of a bundle. Replace with individual resources until we can figure it out.
-        // List<String> testCaseSourcePaths = IOUtils.getFilePaths(igTestCasePath, false);
+
+        // this is breaking for bundle of a bundle. Replace with individual resources
+        // until we can figure it out.
+        // List<String> testCaseSourcePaths = IOUtils.getFilePaths(igTestCasePath,
+        // false);
         // for (String testCaseSourcePath : testCaseSourcePaths) {
-        //     shouldPersist = shouldPersist & safeAddResource(testCaseSourcePath, resources, fhirContext);
+        // shouldPersist = shouldPersist & safeAddResource(testCaseSourcePath,
+        // resources, fhirContext);
         // }
 
         try {
@@ -261,10 +288,18 @@ public class IGProcessor {
         return shouldPersist;
     }
 
-    private static void persistBundle(String igPath, String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, List<IAnyResource> resources) {
+    private static void persistBundle(String igPath, String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, List<IAnyResource> resources, String fhirServerUrl) {
         IOUtils.initializeDirectory(bundleDestPath);
         Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext);
         IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);
+
+        if (fhirServerUrl != null && !fhirServerUrl.equals("")) {
+            try {
+                HttpClientUtils.post(fhirServerUrl, (IAnyResource) bundle, encoding, fhirContext);
+            } catch (IOException e) {
+
+            }
+        }
     }
 
     public static final String bundleFilesPathElement = "files/";    

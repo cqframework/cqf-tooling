@@ -5,7 +5,6 @@ import org.apache.commons.lang.NotImplementedException;
 import org.opencds.cqf.acceleratorkit.Processor;
 import org.opencds.cqf.bundler.BundleResources;
 import org.opencds.cqf.igtools.IgBundler;
-import org.opencds.cqf.igtools.IgRefresher;
 import org.opencds.cqf.igtools.RefreshIGOperation;
 import org.opencds.cqf.library.r4.LibraryGenerator;
 import org.opencds.cqf.measure.r4.RefreshR4Measure;

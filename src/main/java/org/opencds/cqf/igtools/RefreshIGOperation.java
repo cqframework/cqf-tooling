@@ -14,6 +14,7 @@ public class RefreshIGOperation extends Operation {
     private Boolean includeTerminology;
     private Boolean includeTestCases;
     private Boolean versioned;
+    private String fhirServerUrl;
 
     public RefreshIGOperation() {    
     } 
@@ -21,7 +22,7 @@ public class RefreshIGOperation extends Operation {
     @Override
     public void execute(String[] args) {
         initializeArgs(args);
-        IGProcessor.refreshIG(igPath, IGVersion.parse(igVersion), includeELM,  includeDependencies, includeTerminology, includeTestCases, versioned);
+        IGProcessor.refreshIG(igPath, IGVersion.parse(igVersion), includeELM,  includeDependencies, includeTerminology, includeTestCases, versioned, fhirServerUrl);
     }
 
     private void initializeArgs(String[] args) {
@@ -38,6 +39,7 @@ public class RefreshIGOperation extends Operation {
         includeTerminology = ArgUtils.isTrue("includeTerminology", args);
         includeTestCases = ArgUtils.isTrue("includeTests", args);
         versioned = ArgUtils.isTrue("versioned", args);
+        fhirServerUrl = ArgUtils.getValue("url", args);
     }
 }
 
