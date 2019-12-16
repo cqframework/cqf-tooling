@@ -27,6 +27,7 @@ public class Processor extends Operation {
     private String canonicalBase = "http://fhir.org/guides/who/anc-cds"; // -canonicalbase (-cb) (without trailing slash, e.g. http://fhir.org/guides/who/anc-cds)
 
     private String openMRSSystem = "http://openmrs.org/concepts";
+    private Map<String, String> supportedCodeSystems = new HashMap<String, String>();
 
     private Map<String, DictionaryElement> elementMap = new HashMap<String, DictionaryElement>();
     private List<StructureDefinition> profiles = new ArrayList<StructureDefinition>();
@@ -34,6 +35,8 @@ public class Processor extends Operation {
     private List<ValueSet> valueSets = new ArrayList<ValueSet>();
     private List<String> igJsonFragments = new ArrayList<String>();
     private List<String> igResourceFragments = new ArrayList<String>();
+
+
 
     @Override
     public void execute(String[] args) {
@@ -61,6 +64,12 @@ public class Processor extends Operation {
         if (pathToSpreadsheet == null) {
             throw new IllegalArgumentException("The path to the spreadsheet is required");
         }
+
+        supportedCodeSystems.put("OpenMRS", openMRSSystem);
+        supportedCodeSystems.put("ICD-10-WHO", "http://hl7.org/fhir/sid/icd-10");
+        supportedCodeSystems.put("SNOMED-CT", "http://snomed.info/sct");
+        supportedCodeSystems.put("LOINC", "http://loinc.org");
+        supportedCodeSystems.put("RxNorm", "http://www.nlm.nih.gov/research/umls/rxnorm");
 
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
 
@@ -101,11 +110,12 @@ public class Processor extends Operation {
         String currentGroup = null;
         while (it.hasNext()) {
             Row row = it.next();
-            // Skip header row (and any previous rows
             int headerRow = 1;
+            // Skip rows prior to header row
             if (row.getRowNum() < headerRow) {
                 continue;
             }
+            // Create column id map
             else if (row.getRowNum() == headerRow) {
                 Iterator<Cell> colIt = row.cellIterator();
                 while (colIt.hasNext()) {
@@ -134,6 +144,19 @@ public class Processor extends Operation {
                         case "openmrs entity parent": colIds.put("OpenMRSEntityParent", cell.getColumnIndex()); break;
                         case "openmrs entity": colIds.put("OpenMRSEntity", cell.getColumnIndex()); break;
                         case "openmrs entity id": colIds.put("OpenMRSEntityId", cell.getColumnIndex()); break;
+
+                        // fhir resource details
+                        case "hl7 fhir r4 - resource": colIds.put("FhirR4Resource", cell.getColumnIndex()); break;
+                        case "hl7 fhir r4 - base profile": colIds.put("FhirR4BaseProfile", cell.getColumnIndex()); break;
+                        case "hl7 fhir r4 - version number": colIds.put("FhirR4VersionNumber", cell.getColumnIndex()); break;
+
+                        // terminology
+                        case "fhir code system": colIds.put("FhirCodeSystem", cell.getColumnIndex()); break;
+                        case "hl7 fhir r4 code": colIds.put("FhirR4Code", cell.getColumnIndex()); break;
+                        case "icd-10-who": colIds.put("ICD-10-WHO", cell.getColumnIndex()); break;
+                        case "snomed-ct": colIds.put("SNOMED-CT", cell.getColumnIndex()); break;
+                        case "loinc": colIds.put("LOINC", cell.getColumnIndex()); break;
+                        case "rxnorm": colIds.put("RxNorm", cell.getColumnIndex()); break;
                     }
                 }
                 continue;
@@ -147,8 +170,27 @@ public class Processor extends Operation {
                 if (currentElement != null) {
                     String choices = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Choices"));
                     if (choices != null && !choices.isEmpty()) {
+                        // Open MRS choices
                         DictionaryCode code = getCode(choices, row, colIds);
                         currentElement.getChoices().add(code);
+
+                        // FHIR choices
+                        String fhirCodeSystem = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
+                        if (fhirCodeSystem != null && !fhirCodeSystem.isEmpty()) {
+                            String fhirCode = SpreadsheetHelper.getCellAsString(row, getColId(colIds,"FhirR4Code"));
+                            CodeableConcept codeableConcept = toCodeableConcept(fhirCodeSystem, fhirCode, choices);
+                            code.getTerminologies().add(codeableConcept);
+                        }
+
+                        // Other Terminology CodeSystems
+                        for (String codeSystemKey : supportedCodeSystems.keySet()) {
+                            String systemValue = supportedCodeSystems.get(codeSystemKey);
+                            String codeValue = SpreadsheetHelper.getCellAsString(row, getColId(colIds, codeSystemKey));
+                            if (codeValue != null && !codeValue.isEmpty()) {
+                                CodeableConcept codeableConcept = toCodeableConcept(systemValue, codeValue, choices);
+                                code.getTerminologies().add(codeableConcept);
+                            }
+                        }
                     }
                 }
                 else if (type == null || type.isEmpty()) {
@@ -267,16 +309,20 @@ public class Processor extends Operation {
         }
     }
 
-    private CodeableConcept toCodeableConcept(DictionaryCode code) {
+    private CodeableConcept toCodeableConcept(String system, String code, String display) {
         CodeableConcept cc = new CodeableConcept();
         //cc.setText(code.getLabel());
         Coding coding = new Coding();
-        coding.setCode(code.getOpenMRSEntityId());
-        coding.setDisplay(code.getOpenMRSEntity());
+        coding.setCode(code);
+        coding.setDisplay(display);
         // TODO: Support different systems here
-        coding.setSystem(openMRSSystem);
+        coding.setSystem(system);
         cc.addCoding(coding);
         return cc;
+    }
+
+    private CodeableConcept toCodeableConcept(DictionaryCode code) {
+        return toCodeableConcept(openMRSSystem, code.getOpenMRSEntityId(), code.getOpenMRSEntity());
     }
 
     private StructureDefinition createProfile(DictionaryElement element) {
@@ -399,7 +445,8 @@ public class Processor extends Operation {
     }
 
     public void writeResource(Resource resource) {
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + resource.getResourceType().toString().toLowerCase() + "-" + resource.getId() + "." + encoding)) {
+        String outputFilePath = getOutputPath() + "/" + resource.getResourceType().toString().toLowerCase() + "-" + resource.getId() + "." + encoding;
+        try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
             writer.write(
                     encoding.equals("json")
                             ? FhirContext.forR4().newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()

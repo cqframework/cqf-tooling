@@ -1,5 +1,9 @@
 package org.opencds.cqf.acceleratorkit;
 
+import org.hl7.fhir.r4.model.CodeableConcept;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Bryn on 8/18/2019.
  */
@@ -36,4 +40,11 @@ public class DictionaryCode {
         this.openMRSEntityId = openMRSEntityId;
     }
 
+    private List<CodeableConcept> terminologies;
+    public List<CodeableConcept> getTerminologies() {
+        if (this.terminologies == null) {
+            this.terminologies = new ArrayList<CodeableConcept>();
+        }
+        return this.terminologies;
+    }
 }
