@@ -141,6 +141,14 @@ public class DictionaryElement {
         this.code = code;
     }
 
+    private DictionaryFhirType fhirType;
+    public DictionaryFhirType getFhirType() {
+        return this.fhirType;
+    }
+    public void setFhirType(DictionaryFhirType fhirType) {
+        this.fhirType = fhirType;
+    }
+
     @Override
     public int hashCode() {
         return name.hashCode();

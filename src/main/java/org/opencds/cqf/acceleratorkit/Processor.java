@@ -16,6 +16,10 @@ import java.util.*;
 /**
  * Created by Bryn on 8/18/2019.
  */
+enum FhirBaseTypeEnum {
+    Observation
+}
+
 public class Processor extends Operation {
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
     private String encoding = "json"; // -encoding (-e)
@@ -92,6 +96,17 @@ public class Processor extends Operation {
         code.setOpenMRSEntity(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "OpenMRSEntity")));
         code.setOpenMRSEntityId(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "OpenMRSEntityId")));
         return code;
+    }
+
+    private DictionaryFhirType getFhirType(Row row, HashMap<String, Integer> colIds) {
+        DictionaryFhirType fhirType = new DictionaryFhirType();
+        String resource = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4Resource"));
+        if (resource != null && !resource.isEmpty()) {
+            fhirType.setResource(resource);
+            fhirType.setBaseProfile(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4BaseProfile")));
+            fhirType.setVersion(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4VersionNumber")));
+        }
+        return fhirType;
     }
 
     private int getColId(HashMap<String, Integer> colIds, String colName) {
@@ -223,6 +238,7 @@ public class Processor extends Operation {
                 currentElement.setRequired(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Required")));
                 currentElement.setEditable(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Editable")));
                 currentElement.setCode(getCode(name, row, colIds));
+                currentElement.setFhirType(getFhirType(row, colIds));
             }
         }
     }
@@ -326,6 +342,24 @@ public class Processor extends Operation {
     }
 
     private StructureDefinition createProfile(DictionaryElement element) {
+        String resourceType = element.getFhirType().getResourceType();
+        String codePath = null;
+        String choicesPath;
+        switch (resourceType) {
+            case "Observation":
+                // For observations...
+                codePath = "code";
+                choicesPath = element.getFhirType().getResourcePath(); //"value[x]";
+                break;
+            case "Patient":
+            case "Coverage":
+            case "Encounter":
+                choicesPath = element.getFhirType().getResourcePath();
+                break;
+            default:
+                throw new IllegalArgumentException("Unrecognized baseType: " + resourceType.toString());
+        }
+
         StructureDefinition sd = new StructureDefinition();
         sd.setId(toId(element.getName()));
         sd.setUrl(String.format("%s/StructureDefinition/%s", canonicalBase, sd.getId()));
@@ -343,33 +377,35 @@ public class Processor extends Operation {
         sd.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
         sd.setAbstract(false);
         // TODO: Support resources other than Observation
-        sd.setType("Observation");
+        sd.setType(resourceType);
         // TODO: Use baseDefinition to derive from less specialized profiles
-        sd.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Observation");
+        sd.setBaseDefinition(element.getFhirType().getBaseProfile());
         sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
         sd.setDifferential(new StructureDefinition.StructureDefinitionDifferentialComponent());
 
-        // For observations...
+        List<ElementDefinition> elementDefinitions = new ArrayList<>();
         // Add root element
         ElementDefinition ed = new ElementDefinition();
-        ed.setId("Observation");
-        ed.setPath("Observation");
+        ed.setId(resourceType);
+        ed.setPath(resourceType);
         ed.setMustSupport(false);
-        sd.getDifferential().addElement(ed);
+        elementDefinitions.add(ed);
 
         // TODO: status
 
         // TODO: category
 
-        // code - Fixed to the value of the OpenMRS code for this DictionaryElement
-        ed = new ElementDefinition();
-        ed.setId("Observation.code");
-        ed.setPath("Observation.code");
-        ed.setMin(1);
-        ed.setMax("1");
-        ed.setMustSupport(true);
-        ed.setFixed(toCodeableConcept(element.getCode()));
-        sd.getDifferential().addElement(ed);
+        if (codePath != null && !codePath.isEmpty()) {
+            // code - Fixed to the value of the OpenMRS code for this DictionaryElement
+            ed = new ElementDefinition();
+            ed.setId(String.format("%s.%s", resourceType, codePath));
+            ed.setPath(String.format("%s.%s", resourceType, codePath));
+            ed.setMin(1);
+            ed.setMax("1");
+            ed.setMustSupport(true);
+            ed.setFixed(toCodeableConcept(element.getCode()));
+            elementDefinitions.add(ed);
+        }
 
         // TODO: subject
 
@@ -377,8 +413,8 @@ public class Processor extends Operation {
 
         // value
         ed = new ElementDefinition();
-        ed.setId("Observation.value[x]");
-        ed.setPath("Observation.value[x]");
+        ed.setId(String.format("%s.%s", resourceType, choicesPath));
+        ed.setPath(String.format("%s.%s", resourceType, choicesPath));
         ed.setMin(toBoolean(element.getRequired()) ? 1 : 0);
         ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
         ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
@@ -438,8 +474,11 @@ public class Processor extends Operation {
             binding.setValueSet(valueSet.getUrl());
             ed.setBinding(binding);
         }
+        elementDefinitions.add(ed);
 
-        sd.getDifferential().addElement(ed);
+        for (ElementDefinition elementDef : elementDefinitions) {
+            sd.getDifferential().addElement(elementDef);
+        }
 
         return sd;
     }
