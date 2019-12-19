@@ -2,6 +2,7 @@ package org.opencds.cqf.igtools;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,11 +54,12 @@ public class IGProcessor {
 
     public static void refreshIG(String igPath, IGVersion igVersion, Boolean includeELM, Boolean includeDependencies,
             Boolean includeTerminology, Boolean includeTestCases, String fhirServerUrl) {
-        refreshIG(igPath, igVersion, includeELM, includeDependencies, includeTerminology, includeTestCases, false);
+        refreshIG(igPath, igVersion, includeELM, includeDependencies, includeTerminology, includeTestCases, false, fhirServerUrl);
     }
 
     public static void refreshIG(String igPath, IGVersion igVersion, Boolean includeELM, Boolean includeDependencies,
             Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, String fhirServerUrl) {
+        igPath = Paths.get(igPath).toAbsolutePath().toString();
         ensure(igPath);
 
         FhirContext fhirContext = getIgFhirContext(igVersion);
