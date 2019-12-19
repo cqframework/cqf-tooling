@@ -16,10 +16,6 @@ import java.util.*;
 /**
  * Created by Bryn on 8/18/2019.
  */
-enum FhirBaseTypeEnum {
-    Observation
-}
-
 public class Processor extends Operation {
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
     private String encoding = "json"; // -encoding (-e)
@@ -89,12 +85,64 @@ public class Processor extends Operation {
         writeIgResourceFragments();
     }
 
-    private DictionaryCode getCode(String label, Row row, HashMap<String, Integer> colIds) {
+
+    private DictionaryCode getTerminologyCode(String codeSystemKey, String label, Row row, HashMap<String, Integer> colIds) {
+        String system = supportedCodeSystems.get(codeSystemKey);
+        String codeValue = SpreadsheetHelper.getCellAsString(row, getColId(colIds, codeSystemKey));
+        String display = String.format("%s (%s)", label, codeSystemKey);
+        if (codeValue != null && !codeValue.isEmpty()) {
+            return getCode(system, label, display, codeValue, null);
+        }
+        return null;
+    }
+
+    private DictionaryCode getFhirCode(String label, Row row, HashMap<String, Integer> colIds) {
+        String system = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
+        String display = String.format("%s (%s)", label, "FHIR");
+        if (system != null && !system.isEmpty()) {
+            String codeValue = SpreadsheetHelper.getCellAsString(row, getColId(colIds,"FhirR4Code"));
+            if (codeValue != null && !codeValue.isEmpty()) {
+                return getCode(system, label, display, codeValue, null);
+            }
+        }
+        return null;
+    }
+
+    private DictionaryCode getOpenMRSCode(String label, Row row, HashMap<String, Integer> colIds) {
+        String system = openMRSSystem;
+        String parent = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "OpenMRSEntityParent"));
+        String display = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "OpenMRSEntity"));
+        String codeValue = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "OpenMRSEntityId"));
+        if (codeValue != null && !codeValue.isEmpty()) {
+            return getCode(system, display, label, codeValue, parent);
+        }
+        return null;
+    }
+
+    private DictionaryCode getPrimaryCode(String label, Row row, HashMap<String, Integer> colIds) {
+        DictionaryCode code;
+        code = getOpenMRSCode(label, row, colIds);
+        if (code == null) {
+            code = getFhirCode(label, row, colIds);
+        }
+        if (code == null) {
+            for (String codeSystemKey : supportedCodeSystems.keySet()) {
+                code = getTerminologyCode(codeSystemKey, label, row, colIds);
+                if (code != null) {
+                    break;
+                }
+            }
+        }
+        return code;
+    }
+
+    private DictionaryCode getCode(String system, String label, String display, String codeValue, String parent) {
         DictionaryCode code = new DictionaryCode();
         code.setLabel(label);
-        code.setOpenMRSEntityParent(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "OpenMRSEntityParent")));
-        code.setOpenMRSEntity(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "OpenMRSEntity")));
-        code.setOpenMRSEntityId(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "OpenMRSEntityId")));
+        code.setSystem(system);
+        code.setDisplay(display);
+        code.setCode(codeValue);
+        code.setParent(parent);
         return code;
     }
 
@@ -186,24 +234,25 @@ public class Processor extends Operation {
                     String choices = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Choices"));
                     if (choices != null && !choices.isEmpty()) {
                         // Open MRS choices
-                        DictionaryCode code = getCode(choices, row, colIds);
-                        currentElement.getChoices().add(code);
+                        DictionaryCode code = getOpenMRSCode(choices, row, colIds);
+                        if (code != null) {
+                            currentElement.getChoices().add(code);
+                        }
 
                         // FHIR choices
                         String fhirCodeSystem = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
                         if (fhirCodeSystem != null && !fhirCodeSystem.isEmpty()) {
-                            String fhirCode = SpreadsheetHelper.getCellAsString(row, getColId(colIds,"FhirR4Code"));
-                            CodeableConcept codeableConcept = toCodeableConcept(fhirCodeSystem, fhirCode, choices);
-                            code.getTerminologies().add(codeableConcept);
+                            code = getFhirCode(choices, row, colIds);
+                            if (code != null) {
+                                currentElement.getChoices().add(code);
+                            }
                         }
 
-                        // Other Terminology CodeSystems
+                        // Other Terminology choices
                         for (String codeSystemKey : supportedCodeSystems.keySet()) {
-                            String systemValue = supportedCodeSystems.get(codeSystemKey);
-                            String codeValue = SpreadsheetHelper.getCellAsString(row, getColId(colIds, codeSystemKey));
-                            if (codeValue != null && !codeValue.isEmpty()) {
-                                CodeableConcept codeableConcept = toCodeableConcept(systemValue, codeValue, choices);
-                                code.getTerminologies().add(codeableConcept);
+                            code = getTerminologyCode(codeSystemKey, choices, row, colIds);
+                            if (code != null) {
+                                currentElement.getChoices().add(code);
                             }
                         }
                     }
@@ -237,7 +286,7 @@ public class Processor extends Operation {
                 currentElement.setConstraint(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Constraint")));
                 currentElement.setRequired(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Required")));
                 currentElement.setEditable(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Editable")));
-                currentElement.setCode(getCode(name, row, colIds));
+                currentElement.setCode(getPrimaryCode(name, row, colIds));
                 currentElement.setFhirType(getFhirType(row, colIds));
             }
         }
@@ -325,22 +374,6 @@ public class Processor extends Operation {
         }
     }
 
-    private CodeableConcept toCodeableConcept(String system, String code, String display) {
-        CodeableConcept cc = new CodeableConcept();
-        //cc.setText(code.getLabel());
-        Coding coding = new Coding();
-        coding.setCode(code);
-        coding.setDisplay(display);
-        // TODO: Support different systems here
-        coding.setSystem(system);
-        cc.addCoding(coding);
-        return cc;
-    }
-
-    private CodeableConcept toCodeableConcept(DictionaryCode code) {
-        return toCodeableConcept(openMRSSystem, code.getOpenMRSEntityId(), code.getOpenMRSEntity());
-    }
-
     private StructureDefinition createProfile(DictionaryElement element) {
         String resourceType = element.getFhirType().getResourceType();
         String codePath = null;
@@ -395,7 +428,7 @@ public class Processor extends Operation {
 
         // TODO: category
 
-        if (codePath != null && !codePath.isEmpty()) {
+        if (codePath != null && !codePath.isEmpty() && element.getCode() != null) {
             // code - Fixed to the value of the OpenMRS code for this DictionaryElement
             ed = new ElementDefinition();
             ed.setId(String.format("%s.%s", resourceType, codePath));
@@ -403,7 +436,7 @@ public class Processor extends Operation {
             ed.setMin(1);
             ed.setMax("1");
             ed.setMustSupport(true);
-            ed.setFixed(toCodeableConcept(element.getCode()));
+            ed.setFixed(element.getCode().toCodeableConcept());
             elementDefinitions.add(ed);
         }
 
@@ -425,24 +458,30 @@ public class Processor extends Operation {
         // binding and CodeSystem/ValueSet for MultipleChoice elements
         if (element.getChoices().size() > 0) {
             CodeSystem codeSystem = new CodeSystem();
-            codeSystem.setId(sd.getId() + "-codes");
-            codeSystem.setUrl(String.format("%s/CodeSystem/%s", canonicalBase, codeSystem.getId()));
-            // TODO: version
-            codeSystem.setName(element.getName() + "_codes");
-            codeSystem.setTitle(String.format("%s codes", element.getLabel()));
-            codeSystem.setStatus(Enumerations.PublicationStatus.DRAFT);
-            codeSystem.setExperimental(false);
-            // TODO: date
-            // TODO: publisher
-            // TODO: contact
-            codeSystem.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
-            codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-            codeSystem.setCaseSensitive(true);
-            for (DictionaryCode code : element.getChoices()) {
-                CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent();
-                concept.setCode(code.getOpenMRSEntityId());
-                concept.setDisplay(code.getLabel());
-                codeSystem.addConcept(concept);
+            if (element.getChoicesForSystem(openMRSSystem).size() > 0) {
+                codeSystem.setId(sd.getId() + "-codes");
+                codeSystem.setUrl(String.format("%s/CodeSystem/%s", canonicalBase, codeSystem.getId()));
+                // TODO: version
+                codeSystem.setName(element.getName() + "_codes");
+                codeSystem.setTitle(String.format("%s codes", element.getLabel()));
+                codeSystem.setStatus(Enumerations.PublicationStatus.DRAFT);
+                codeSystem.setExperimental(false);
+                // TODO: date
+                // TODO: publisher
+                // TODO: contact
+                codeSystem.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
+                codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+                codeSystem.setCaseSensitive(true);
+
+                // collect all the OpenMRS choices to add to the codeSystem
+                for (DictionaryCode code : element.getChoicesForSystem(openMRSSystem)) {
+                    CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent();
+                    concept.setCode(code.getCode());
+                    concept.setDisplay(code.getLabel());
+                    codeSystem.addConcept(concept);
+                }
+
+                codeSystems.add(codeSystem);
             }
 
             ValueSet valueSet = new ValueSet();
@@ -460,13 +499,30 @@ public class Processor extends Operation {
             valueSet.setImmutable(true);
             ValueSet.ValueSetComposeComponent compose = new ValueSet.ValueSetComposeComponent();
             valueSet.setCompose(compose);
-            ValueSet.ConceptSetComponent conceptSet = new ValueSet.ConceptSetComponent();
-            compose.addInclude(conceptSet);
-            conceptSet.setSystem(codeSystem.getUrl());
 
-            codeSystem.setValueSet(valueSet.getUrl());
+            // Group by Supported Terminology System
+            for (String codeSystemKey : supportedCodeSystems.keySet()) {
+                String codeSystemUrl = supportedCodeSystems.get(codeSystemKey);
+                List<DictionaryCode> systemCodes = element.getChoicesForSystem(codeSystemUrl);
 
-            codeSystems.add(codeSystem);
+                if (systemCodes.size() > 0) {
+                    ValueSet.ConceptSetComponent conceptSet = new ValueSet.ConceptSetComponent();
+                    compose.addInclude(conceptSet);
+                    conceptSet.setSystem(codeSystemUrl);
+
+                    for (DictionaryCode code : systemCodes) {
+                        ValueSet.ConceptReferenceComponent conceptReference = new ValueSet.ConceptReferenceComponent();
+                        conceptReference.setCode(code.getCode());
+                        conceptReference.setDisplay(code.getLabel());
+                        conceptSet.addConcept(conceptReference);
+                    }
+                }
+            }
+
+            if (element.getChoicesForSystem(openMRSSystem).size() == element.getChoices().size()) {
+                codeSystem.setValueSet(valueSet.getUrl());
+            }
+
             valueSets.add(valueSet);
 
             ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();

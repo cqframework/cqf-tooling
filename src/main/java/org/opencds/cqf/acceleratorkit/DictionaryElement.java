@@ -2,6 +2,7 @@ package org.opencds.cqf.acceleratorkit;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Bryn on 8/18/2019.
@@ -96,9 +97,18 @@ public class DictionaryElement {
     private List<DictionaryCode> choices;
     public List<DictionaryCode> getChoices() {
         if (this.choices == null) {
-            this.choices = new ArrayList<DictionaryCode>();
+            this.choices = new ArrayList<>();
         }
         return this.choices;
+    }
+    public List<DictionaryCode> getChoicesForSystem(String system) {
+        if (this.choices == null) {
+            this.choices = new ArrayList<>();
+        }
+        List<DictionaryCode> codes = this.choices.stream()
+                .filter((c) -> c.getSystem() == system)
+                .collect(Collectors.toList());
+        return codes;
     }
 
     private String calculation;
