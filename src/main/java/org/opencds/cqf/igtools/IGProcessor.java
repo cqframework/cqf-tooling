@@ -23,7 +23,6 @@ import org.opencds.cqf.utilities.ResourceUtils;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.HttpClientUtil;
 
 public class IGProcessor {
     public enum IGVersion {
@@ -53,7 +52,7 @@ public class IGProcessor {
 
     public static void refreshIG(String igPath, IGVersion igVersion, Boolean includeELM, Boolean includeDependencies,
             Boolean includeTerminology, Boolean includeTestCases, String fhirServerUrl) {
-        refreshIG(igPath, igVersion, includeELM, includeDependencies, includeTerminology, includeTestCases, false);
+        refreshIG(igPath, igVersion, includeELM, includeDependencies, includeTerminology, includeTestCases, false, fhirServerUrl);
     }
 
     public static void refreshIG(String igPath, IGVersion igVersion, Boolean includeELM, Boolean includeDependencies,
@@ -297,7 +296,7 @@ public class IGProcessor {
             try {
                 HttpClientUtils.post(fhirServerUrl, (IAnyResource) bundle, encoding, fhirContext);
             } catch (IOException e) {
-
+                LogUtils.putWarning(((IAnyResource)bundle).getId(), "Error posting to FHIR Server: " + fhirServerUrl + ".  Bundle not posted.");
             }
         }
     }

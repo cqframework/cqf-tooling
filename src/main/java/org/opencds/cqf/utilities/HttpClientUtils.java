@@ -26,15 +26,17 @@ public class HttpClientUtils {
             post.setEntity(input);
             HttpResponse response = httpClient.execute(post);
             BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            String responseMessage = "";
             String line = "";
             while ((line = rd.readLine()) != null) {
-                System.out.println(line);
+                responseMessage += line;
             }
-        //TODO: add summary of what was done
-        } catch (IOException e) {
-        
-            // handle
-        
-        }    
+            if (responseMessage.indexOf("error") > -1) {
+                throw new IOException("Error posting resource to FHIR server (" + fhirServerUrl + "). Resource was not posted : " +  resource.getId());
+            }
+            else {
+                LogUtils.info("Resource successfully posted to FHIR server (" + fhirServerUrl + "): " + resource.getId());
+            }
+        }
     }
 }
