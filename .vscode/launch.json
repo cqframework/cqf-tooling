@@ -1,0 +1,53 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - RefreshIG",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.igtools.RefreshIG",
+            "projectName": "tooling"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch) - Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Connectathon FHIR3",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.Main",
+            "projectName": "tooling",
+            "args": [
+                "-RefreshIg",
+                "-igPath=/src/connectathon/fhir3",
+                "-url=http://localhost:8080/cqf-ruler-dstu3/fhir/",
+                "-includeTerminology",
+                "-includeDependencies",
+                "-includeTests",
+                "-versioned"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Connectathon FHIR4",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.Main",
+            "projectName": "tooling",
+            "args": [
+                "-RefreshIg",
+                "-igPath=/src/connectathon/fhir4",
+                "-url=http://localhost:8080/cqf-ruler-r4/fhir/",
+                "-includeTerminology",
+                "-includeDependencies",
+                "-includeTests",
+                "-versioned"
+            ]
+        }        
+    ]
+}
