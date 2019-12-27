@@ -1,54 +1,35 @@
 package org.opencds.cqf.utilities;
 
-public class ArgUtils 
-{    
-    //TODO: implement abbreviated arg name
-    public static String getValue(String arg, String[]args){
-        return getValue(arg, args, false);
-    }
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 
-    public static String getValue(String arg, String[]args, Boolean required){
-        for (String entry : args) {  
-            String[] flagAndValue = entry.split("=");
-            if (flagAndValue.length == 2) {       
-                String flag = flagAndValue[0];
-                String value = flagAndValue[1];     
-                if (flag.toLowerCase().equals("-" + arg.toLowerCase())) {
-                    return value;    
-                }
+public class ArgUtils {
+
+    public static final String[] HELP_OPTIONS = {"h", "help", "?"};
+
+    public static OptionSet parse(String[] args, OptionParser parser) {
+        OptionSet options = parser.parse(args);
+        if (options.has(HELP_OPTIONS[0])) {
+            try {
+                parser.printHelpOn(System.out);
             }
-        }
-        if (required) {
-            throw new IllegalArgumentException("Argument required: " + arg);
-        }
-        return "";
-    }
-
-    public static Boolean isTrue(String arg, String[] args) {
-        return exists(arg, args);
-    }
-
-    public static Boolean isTrue(String arg, String[] args, Boolean required) {
-        return exists(arg, args, required);
-    }
-
-    public static Boolean exists(String arg, String[] args) {
-        return exists(arg, args, false);
-    }
-
-    public static Boolean exists(String arg, String[] args, Boolean required) {
-        for (String entry : args) {       
-            if (entry.toLowerCase().equals("-" + arg.toLowerCase())) {
-                return true;    
+            catch (Exception e) {
             }
+
+            System.exit(0);
         }
-        if (required) {
-            throw new IllegalArgumentException("Argument required: " + arg);
-        }
-        return false;
+
+        return options;
     }
 
-    public static void ensure(String arg, String[] args) {
-        exists(arg, args, true);
+    public static void ensure(String option, OptionSet options) {
+        if (!options.has(option)) {
+            throw new IllegalArgumentException(String.format("%s is a required option.", option));
+        }
+    }
+
+    public static String defaultValue(OptionSet optionSet, String option, String value) {
+        return optionSet.valueOf(option) == null ? value : (String)optionSet.valueOf(option); 
     }
 }

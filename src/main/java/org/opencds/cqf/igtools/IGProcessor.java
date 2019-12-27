@@ -51,13 +51,17 @@ public class IGProcessor {
         }
     }
 
-    public static void refreshIG(String igPath, IGVersion igVersion, Boolean includeELM, Boolean includeDependencies,
-            Boolean includeTerminology, Boolean includeTestCases, String fhirServerUrl) {
-        refreshIG(igPath, igVersion, includeELM, includeDependencies, includeTerminology, includeTestCases, false, fhirServerUrl);
-    }
+    public static void refreshIG(RefreshIGParameters params) {
 
-    public static void refreshIG(String igPath, IGVersion igVersion, Boolean includeELM, Boolean includeDependencies,
-            Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, String fhirServerUrl) {
+        String igPath = params.igPath;
+        IGVersion igVersion = params.igVersion;
+        Boolean includeELM = params.includeELM;
+        Boolean includeDependencies = params.includeDependencies;
+        Boolean includeTerminology = params.includeTerminology;
+        Boolean includePatientScenarios = params.includePatientScenarios;
+        Boolean versioned = params.versioned;
+        String fhirUri = params.fhirUri;
+        
         igPath = Paths.get(igPath).toAbsolutePath().toString();
         ensure(igPath);
 
@@ -67,11 +71,11 @@ public class IGProcessor {
         switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:
             refreshedLibraryNames = refreshStu3IG(igPath, includeELM, includeDependencies, includeTerminology,
-                    includeTestCases, includeVersion, fhirContext);
+                    includePatientScenarios, versioned, fhirContext);
             break;
         case R4:
             refreshedLibraryNames = refreshR4IG(igPath, includeELM, includeDependencies, includeTerminology,
-                    includeTestCases, includeVersion, fhirContext);
+                    includePatientScenarios, versioned, fhirContext);
             break;
         default:
             throw new IllegalArgumentException(
@@ -83,16 +87,16 @@ public class IGProcessor {
             return;
         }
 
-        if (includeTestCases) {
+        if (includePatientScenarios) {
             TestCaseProcessor.refreshTestCases(getTestsPath(igPath), IOUtils.Encoding.JSON, fhirContext);
         }
 
-        bundleIg(refreshedLibraryNames, igPath, includeELM, includeDependencies, includeTerminology, includeTestCases,
-                includeVersion, fhirContext, fhirServerUrl);
+        bundleIg(refreshedLibraryNames, igPath, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
+        versioned, fhirContext, fhirUri);
     }
 
     private static ArrayList<String> refreshStu3IG(String igPath, Boolean includeELM, Boolean includeDependencies,
-            Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, FhirContext fhirContext) {
+            Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned, FhirContext fhirContext) {
         ArrayList<String> refreshedLibraryNames = refreshStu3IgLibraryContent(igPath, includeELM, fhirContext);
         // union with below when this is implemented.
         // refreshMeasureContent();
@@ -100,7 +104,7 @@ public class IGProcessor {
     }
 
     private static ArrayList<String> refreshR4IG(String igPath, Boolean includeELM, Boolean includeDependencies,
-            Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion, FhirContext fhirContext) {
+            Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned, FhirContext fhirContext) {
         ArrayList<String> refreshedLibraryNames = refreshR4LibraryContent(igPath, includeELM, fhirContext);
         // union with below when this is implemented.
         // refreshMeasureContent();
@@ -147,8 +151,8 @@ public class IGProcessor {
     // their respective resource Processors.
     // No time for a refactor atm though. So stinky it is!
     public static void bundleIg(ArrayList<String> refreshedLibraryNames, String igPath, Boolean includeELM,
-            Boolean includeDependencies, Boolean includeTerminology, Boolean includeTestCases, Boolean includeVersion,
-            FhirContext fhirContext, String fhirServerUrl) {
+            Boolean includeDependencies, Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned,
+            FhirContext fhirContext, String fhirUri) {
         Encoding encoding = Encoding.JSON;
 
         // The set to bundle should be the union of the successfully refreshed Measures
@@ -192,15 +196,15 @@ public class IGProcessor {
                             & bundleDependencies(librarySourcePath, fhirContext, resources, encoding);
                 }
 
-                if (includeTestCases) {
+                if (includePatientScenarios) {
                     shouldPersist = shouldPersist
                             & bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
                 }
 
                 if (shouldPersist) {
                     String bundleDestPath = FilenameUtils.concat(getBundlesPath(igPath), refreshedLibraryName);
-                    persistBundle(igPath, bundleDestPath, refreshedLibraryName, encoding, fhirContext, new ArrayList<IAnyResource>(resources.values()), fhirServerUrl);
-                    bundleFiles(igPath, bundleDestPath, refreshedLibraryName, measureSourcePath, librarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includeTestCases);
+                    persistBundle(igPath, bundleDestPath, refreshedLibraryName, encoding, fhirContext, new ArrayList<IAnyResource>(resources.values()), fhirUri);
+                    bundleFiles(igPath, bundleDestPath, refreshedLibraryName, measureSourcePath, librarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios);
                     bundledMeasures.add(refreshedLibraryName);
                 }
             } catch (Exception e) {
@@ -289,22 +293,22 @@ public class IGProcessor {
         return shouldPersist;
     }
 
-    private static void persistBundle(String igPath, String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, List<IAnyResource> resources, String fhirServerUrl) {
+    private static void persistBundle(String igPath, String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, List<IAnyResource> resources, String fhirUri) {
         IOUtils.initializeDirectory(bundleDestPath);
         Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext);
         IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);
 
-        if (fhirServerUrl != null && !fhirServerUrl.equals("")) {
+        if (fhirUri != null && !fhirUri.equals("")) {
             try {
-                HttpClientUtils.post(fhirServerUrl, (IAnyResource) bundle, encoding, fhirContext);
+                HttpClientUtils.post(fhirUri, (IAnyResource) bundle, encoding, fhirContext);
             } catch (IOException e) {
-                LogUtils.putWarning(((IAnyResource)bundle).getId(), "Error posting to FHIR Server: " + fhirServerUrl + ".  Bundle not posted.");
+                LogUtils.putWarning(((IAnyResource)bundle).getId(), "Error posting to FHIR Server: " + fhirUri + ".  Bundle not posted.");
             }
         }
     }
 
     public static final String bundleFilesPathElement = "files/";    
-    private static void bundleFiles(String igPath, String bundleDestPath, String libraryName, String measureSourcePath, String librarySourcePath, FhirContext fhirContext, Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includeTestCases) {
+    private static void bundleFiles(String igPath, String bundleDestPath, String libraryName, String measureSourcePath, String librarySourcePath, FhirContext fhirContext, Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios) {
         String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, libraryName + "-" + bundleFilesPathElement);
         IOUtils.initializeDirectory(bundleDestFilesPath);
 
@@ -337,7 +341,7 @@ public class IGProcessor {
             }        
         }
 
-        if (includeTestCases) {
+        if (includePatientScenarios) {
             bundleTestCaseFiles(igPath, libraryName, bundleDestFilesPath);
         }        
     }
