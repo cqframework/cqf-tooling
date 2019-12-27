@@ -44,7 +44,7 @@ class OperationFactory {
 //                return new SchemaGenerator();
             case "BundleIg":
                 return new IgBundler();
-            case "RefreshIg":
+            case "RefreshIG":
                 return new RefreshIGOperation();
             case "RefreshStu3Measure":
                 return new RefreshStu3Measure();

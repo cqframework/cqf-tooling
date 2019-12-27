@@ -20,7 +20,7 @@ import joptsimple.util.KeyValuePair;
 
 public class RefreshIGArgumentProcessor {
 
-    public static final String[] OPERATION_OPTIONS = {"RefreshIg"};
+    public static final String[] OPERATION_OPTIONS = {"RefreshIG"};
 
     public static final String[] IG_PATH_OPTIONS = {"ip", "ig-path"};
     public static final String[] IG_VERSION_OPTIONS = {"iv", "ig-version"};

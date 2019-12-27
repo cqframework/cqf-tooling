@@ -24,7 +24,7 @@
             "mainClass": "org.opencds.cqf.Main",
             "projectName": "tooling",
             "args": [
-                "-RefreshIg",
+                "-RefreshIG",
                 "-ip=/src/connectathon/fhir3",
                 "-fs=http://localhost:8080/cqf-ruler-dstu3/fhir/",
                 "-t",
@@ -40,7 +40,7 @@
             "mainClass": "org.opencds.cqf.Main",
             "projectName": "tooling",
             "args": [
-                "-RefreshIg",
+                "-RefreshIG",
                 "-ip=/src/connectathon/fhir4",
                 "-fs=http://localhost:8080/cqf-ruler-r4/fhir/",
                 "-t",
