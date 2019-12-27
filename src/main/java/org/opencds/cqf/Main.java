@@ -80,6 +80,9 @@ package org.opencds.cqf;
                 - group.population.criteria
             - See the documentation for CQL to FHIR Library conversion to see which Library elements will be populated
 
+        - Refresh Measure(s)
+            - command: mvn exec:java -Dexec.args="[-RefreshStu3Measure|RefreshR4Measure] [-ptm| pathToMeasures] [-ptl|pathToLibraries] (-e|encoding) (-o|-output)"
+
         - Bundle Resources
             - mvn exec:java -Dexec.args="[-BundleResources] [-pathtodirectory | -ptd] (-outputpath | -op) (-version | -v) "
             - Example: mvn exec:java -Dexec.args="-BundleResources -ptd=/Users/adam/Src/cqframework/opioid-cds-r4/quickstartcontent -op=/Users/adam/Src/cqframework/opioid-cds-r4/quickstartcontentbundle -v=r4"

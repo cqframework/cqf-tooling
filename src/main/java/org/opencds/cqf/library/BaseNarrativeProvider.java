@@ -8,7 +8,10 @@ import org.hl7.fhir.instance.model.api.INarrative;
 
 public abstract class BaseNarrativeProvider<T extends INarrative> {
 
-    INarrativeGenerator generator;
+    private INarrativeGenerator generator;
+    public INarrativeGenerator getGenerator() {
+        return this.generator;
+    }
 
     public BaseNarrativeProvider(String pathToPropertiesFile) {
         CustomThymeleafNarrativeGenerator myGenerator = new CustomThymeleafNarrativeGenerator("classpath:ca/uhn/fhir/narrative/narratives.properties", pathToPropertiesFile);

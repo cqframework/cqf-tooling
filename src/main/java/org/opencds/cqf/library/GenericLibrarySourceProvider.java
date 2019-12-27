@@ -50,12 +50,15 @@ public class GenericLibrarySourceProvider implements LibrarySourceProvider {
 
     private String getIdFromSource(String cql) {
         if (cql.startsWith("library")) {
-            return cql.replaceFirst("library ", "").split(" version")[0].replaceAll("\"", "");
+            return getNameFromSource(cql);
         }
 
         throw new RuntimeException("This tool requires cql libraries to include a named/versioned identifier");
     }
 
+    private String getNameFromSource(String cql) {
+        return cql.replaceFirst("library ", "").split(" version")[0].replaceAll("\"", "");
+    }
     private String getVersionFromSource(String cql) {
         return cql.split("version")[1].split("'")[1];
     }
