@@ -93,17 +93,35 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.7.4</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>com.github.ben-manes.caffeine</groupId>-->
-            <!--<artifactId>caffeine</artifactId>-->
-            <!--<version>2.7.0</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>2.7.0</version>
+        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.4</version>
             <scope>provided</scope>
+        </dependency>
+      
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-base</artifactId>
+            <version>3.8.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-converter</artifactId>
+            <version>${hapi_version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-jpaserver-base</artifactId>
+            <version>${hapi_version}</version>
         </dependency>
 
         <!-- CQL engine dependencies -->

@@ -56,7 +56,7 @@ public class R4LibraryProcessor {
         generatedLibrary.getContent().stream()
                 .forEach(getContent -> attachContent(referenceLibrary, translator, IOUtils.getCqlString(cqlContentPath)));
 
-        BaseNarrativeProvider narrativeProvider = new org.opencds.cqf.library.r4.NarrativeProvider();
+        BaseNarrativeProvider<Narrative> narrativeProvider = new org.opencds.cqf.library.r4.NarrativeProvider();
         INarrative narrative = narrativeProvider.getNarrative(fhirContext, generatedLibrary);
         referenceLibrary.setText((Narrative)narrative);
     }
@@ -79,7 +79,7 @@ public class R4LibraryProcessor {
 
         resolveDataRequirements(library, translator);
         attachContent(library, translator, IOUtils.getCqlString(cqlContentPath));
-        BaseNarrativeProvider narrativeProvider = new org.opencds.cqf.library.r4.NarrativeProvider();
+        BaseNarrativeProvider<Narrative> narrativeProvider = new org.opencds.cqf.library.r4.NarrativeProvider();
         INarrative narrative = narrativeProvider.getNarrative(fhirContext, library);
         library.setText((Narrative) narrative);
         return library;

@@ -57,7 +57,7 @@ public class STU3LibraryProcessor {
         generatedLibrary.getContent().stream()
                 .forEach(getContent -> attachContent(referenceLibrary, translator, IOUtils.getCqlString(cqlContentPath)));
 
-        BaseNarrativeProvider narrativeProvider = new NarrativeProvider();
+        BaseNarrativeProvider<Narrative> narrativeProvider = new NarrativeProvider();
         INarrative narrative = narrativeProvider.getNarrative(fhirContext, generatedLibrary);
         referenceLibrary.setText((Narrative)narrative);
     }
@@ -80,7 +80,7 @@ public class STU3LibraryProcessor {
 
         resolveDataRequirements(library, translator);
         attachContent(library, translator, IOUtils.getCqlString(cqlContentPath));
-        BaseNarrativeProvider narrativeProvider = new NarrativeProvider();
+        BaseNarrativeProvider<Narrative> narrativeProvider = new NarrativeProvider();
         INarrative narrative = narrativeProvider.getNarrative(fhirContext, library);
         library.setText((Narrative) narrative);
         return library;
