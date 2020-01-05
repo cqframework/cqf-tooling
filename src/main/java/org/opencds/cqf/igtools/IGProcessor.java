@@ -2,7 +2,6 @@ package org.opencds.cqf.igtools;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +61,6 @@ public class IGProcessor {
         Boolean versioned = params.versioned;
         String fhirUri = params.fhirUri;
         
-        igPath = Paths.get(igPath).toAbsolutePath().toString();
         ensure(igPath);
 
         FhirContext fhirContext = getIgFhirContext(igVersion);

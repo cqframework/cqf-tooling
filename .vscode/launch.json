@@ -32,7 +32,7 @@
             "projectName": "tooling",
             "args": [
                 "-RefreshIG",
-                "-ip=/src/connectathon/fhir3",
+                "-ip=C:\\src\\connectathon\\fhir3\\",
                 "-fs=http://localhost:8080/cqf-ruler-dstu3/fhir/",
                 "-t",
                 "-d",
