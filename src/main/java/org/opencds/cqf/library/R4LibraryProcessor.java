@@ -22,6 +22,7 @@ import org.hl7.fhir.r4.model.*;
 
 public class R4LibraryProcessor {
         public static Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding) {         
+        //TODO: this is the wrong path and libraryExists is always false
         Library resource = (Library)IOUtils.readResource(libraryPath, fhirContext, true);
         Boolean libraryExists = resource != null;       
 

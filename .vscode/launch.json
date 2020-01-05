@@ -36,7 +36,8 @@
                 "-fs=http://localhost:8080/cqf-ruler-dstu3/fhir/",
                 "-t",
                 "-d",
-                "-v"
+                "-v",
+                "-p"
             ]
         },
         {
@@ -51,7 +52,8 @@
                 "-fs=http://localhost:8080/cqf-ruler-r4/fhir/",
                 "-t",
                 "-d",
-                "-v"
+                "-v",
+                "-p"
             ]
         }        
     ]
