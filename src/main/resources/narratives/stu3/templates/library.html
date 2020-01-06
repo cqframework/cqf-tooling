@@ -55,6 +55,14 @@
                 <td style="padding-right: 25px;" th:narrative="${topics}"></td>
             </tr>
         </th:block>
+        <th:block th:each="cont, iter : ${resource.contributor}">
+            <tr style="vertical-align: top;">
+                <th th:if="${iter.index == 0}" th:rowspan="${iter.size}"  scope="row"><b>Contributor: </b></th>
+                <td style="padding-left: 25px; padding-right: 25px;">
+                    <b><span th:narrative="${cont.type.toCode()}"></span>: </b><span th:narrative="${cont.name}"></span>
+                </td>
+            </tr>
+        </th:block>
         <th:block th:each="related, iter : ${resource.relatedArtifact}">
             <tr style="vertical-align: top;">
                     <th th:if="${iter.index == 0}" th:rowspan="${iter.size}"  scope="row"><b>Related: </b></th>
