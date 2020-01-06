@@ -2,7 +2,6 @@ package org.opencds.cqf.igtools;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +61,6 @@ public class IGProcessor {
         Boolean versioned = params.versioned;
         String fhirUri = params.fhirUri;
         
-        igPath = Paths.get(igPath).toAbsolutePath().toString();
         ensure(igPath);
 
         FhirContext fhirContext = getIgFhirContext(igVersion);
@@ -119,9 +117,12 @@ public class IGProcessor {
         for (String path : cqlContentPaths) {
             try {
                 STU3LibraryProcessor.refreshLibraryContent(path, getLibraryPath(igPath), fhirContext, Encoding.JSON);
+                // String libraryPath = FilenameUtils.concat(getLibraryPath(igPath), IOUtils.formatFileName(LibraryProcessor.getId(FilenameUtils.getBaseName(path)), Encoding.JSON));
+                // STU3LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, Encoding.JSON);
                 refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
             } catch (Exception e) {
-                LogUtils.putWarning(path, e.getMessage());
+                //TODO: protect all exception logging against no message
+                LogUtils.putWarning(path, e.getMessage() == null ? e.toString() : e.getMessage());
             }
             LogUtils.warn(path);
         }
@@ -137,9 +138,11 @@ public class IGProcessor {
         for (String path : cqlContentPaths) {
             try {
                 R4LibraryProcessor.refreshLibraryContent(path, getLibraryPath(igPath), fhirContext, Encoding.JSON);
+                //String libraryPath = FilenameUtils.concat(getLibraryPath(igPath), IOUtils.formatFileName(LibraryProcessor.getId(FilenameUtils.getBaseName(path)), Encoding.JSON));                
+                //R4LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, Encoding.JSON);
                 refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
             } catch (Exception e) {
-                LogUtils.putWarning(path, e.getMessage());
+                LogUtils.putWarning(path, e.getMessage() == null ? e.toString() : e.getMessage());
             }
             LogUtils.warn(path);
         }
