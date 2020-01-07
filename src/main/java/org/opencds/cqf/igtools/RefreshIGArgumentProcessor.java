@@ -2,6 +2,7 @@ package org.opencds.cqf.igtools;
 
 import static java.util.Arrays.asList;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -63,6 +64,8 @@ public class RefreshIGArgumentProcessor {
         ArgUtils.ensure(OPERATION_OPTIONS[0], options);
 
         String igPath = (String)options.valueOf(IG_PATH_OPTIONS[0]);
+        igPath = Paths.get(igPath).toAbsolutePath().toString();        
+
         //could not easily use the built-in default here because it is based on the value of the igPath argument.
         String igVersion = ArgUtils.defaultValue(options, IG_VERSION_OPTIONS[0], IGProcessor.getIgVersion(igPath).toString());
         Boolean includeELM = options.has(INCLUDE_ELM_OPTIONS[0]);  

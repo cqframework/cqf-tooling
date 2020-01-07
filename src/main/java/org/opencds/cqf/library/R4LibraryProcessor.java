@@ -22,6 +22,7 @@ import org.hl7.fhir.r4.model.*;
 
 public class R4LibraryProcessor {
         public static Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding) {         
+        //TODO: this is the wrong path and libraryExists is always false
         Library resource = (Library)IOUtils.readResource(libraryPath, fhirContext, true);
         Boolean libraryExists = resource != null;       
 
@@ -56,7 +57,7 @@ public class R4LibraryProcessor {
         generatedLibrary.getContent().stream()
                 .forEach(getContent -> attachContent(referenceLibrary, translator, IOUtils.getCqlString(cqlContentPath)));
 
-        BaseNarrativeProvider narrativeProvider = new org.opencds.cqf.library.r4.NarrativeProvider();
+        BaseNarrativeProvider<Narrative> narrativeProvider = new org.opencds.cqf.library.r4.NarrativeProvider();
         INarrative narrative = narrativeProvider.getNarrative(fhirContext, generatedLibrary);
         referenceLibrary.setText((Narrative)narrative);
     }
@@ -79,7 +80,7 @@ public class R4LibraryProcessor {
 
         resolveDataRequirements(library, translator);
         attachContent(library, translator, IOUtils.getCqlString(cqlContentPath));
-        BaseNarrativeProvider narrativeProvider = new org.opencds.cqf.library.r4.NarrativeProvider();
+        BaseNarrativeProvider<Narrative> narrativeProvider = new org.opencds.cqf.library.r4.NarrativeProvider();
         INarrative narrative = narrativeProvider.getNarrative(fhirContext, library);
         library.setText((Narrative) narrative);
         return library;
