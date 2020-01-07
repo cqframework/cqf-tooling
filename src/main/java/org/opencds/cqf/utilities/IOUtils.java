@@ -2,6 +2,7 @@ package org.opencds.cqf.utilities;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -64,6 +66,8 @@ public class IOUtils
             }
         }
     } 
+
+    public static ArrayList<String> resourceDirectories = new ArrayList<String>();
 
     public static String getIdFromFileName(String fileName) {
         return fileName.replaceAll("_", "-");
@@ -190,7 +194,7 @@ public class IOUtils
     {
         List<String> filePaths = new ArrayList<String>();
         File inputDir = new File(directoryPath);
-        ArrayList<File> files = new ArrayList<>(Arrays.asList(Optional.ofNullable(inputDir.listFiles()).orElseThrow()));
+        ArrayList<File> files = inputDir.isDirectory() ? new ArrayList<File>(Arrays.asList(Optional.ofNullable(inputDir.listFiles()).orElseThrow())) : new ArrayList<File>();
        
         for (File file : files) {
             if (file.isDirectory()) {
@@ -405,5 +409,104 @@ public class IOUtils
             list.add(value);
         }
         return list;
+    }
+
+    public static String getLibraryPathAssociatedWithCqlFileName(String cqlPath) throws FileNotFoundException {
+        String[] split = cqlPath.split("\\\\");
+        String fileName = split[split.length - 1].replaceAll(".cql", ".json");
+        for (String path : IOUtils.getLibraryPaths()) {
+            if(path.contains("library-") && path.contains(fileName)) {
+                return path;
+            }
+        }
+        throw new FileNotFoundException("Could not find a Library Resource Associated with: " + cqlPath);
+    }
+
+    private static HashSet<String> cqlLibraryPaths = new HashSet<String>();
+    public static HashSet<String> getCqlLibraryPaths() {
+        return cqlLibraryPaths;
+    }
+    public static void setupCqlLibraryPaths() {  
+        //need to add a error report for bad resource paths
+        for(String dir : resourceDirectories) {
+            List<String> filePaths = IOUtils.getFilePaths(dir, true);
+            filePaths.stream().filter(path -> path.contains(".cql")).forEach(path -> cqlLibraryPaths.add(path));
+        }
+    }
+
+    private static HashSet<String> libraryPaths = new HashSet<String>();
+    public static HashSet<String> getLibraryPaths() {
+        return libraryPaths;
+    }
+    public static void setupLibraryPaths(FhirContext fhirContext) {
+        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        for(String dir : resourceDirectories) {
+            for(String path : IOUtils.getFilePaths(dir, true))
+            {
+                try {
+                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                } catch (Exception e) {
+                    //TODO: handle exception
+                }
+            }
+            resources.entrySet().stream()
+                .filter(entry -> entry.getValue() instanceof org.hl7.fhir.dstu3.model.Library)
+                .forEach(entry -> libraryPaths.add(entry.getKey()));
+            resources.entrySet().stream()
+                .filter(entry -> entry.getValue() instanceof org.hl7.fhir.r4.model.Library)
+                .forEach(entry -> libraryPaths.add(entry.getKey()));
+        }
+    }
+
+    private static HashSet<String> measurePaths = new HashSet<String>();
+    public static HashSet<String> getMeasurePaths() {
+        return measurePaths;
+    }
+    public static void setupMeasurePaths(FhirContext fhirContext) {
+        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        for(String dir : resourceDirectories) {
+            for(String path : IOUtils.getFilePaths(dir, true))
+            {
+                try {
+                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                } catch (Exception e) {
+                    //TODO: handle exception
+                }
+            }
+            resources.entrySet().stream()
+                .filter(entry -> entry.getValue() instanceof org.hl7.fhir.dstu3.model.Measure)
+                .forEach(entry -> measurePaths.add(entry.getKey()));
+            resources.entrySet().stream()
+                .filter(entry -> entry.getValue() instanceof org.hl7.fhir.r4.model.Measure)
+                .forEach(entry -> measurePaths.add(entry.getKey()));
+        }
+    }
+
+    private static HashSet<String> valuesetPaths = new HashSet<String>();
+    public static HashSet<String> getValueSetPaths() {
+        return valuesetPaths;
+    }
+    public static void setupValueSetPaths(FhirContext fhirContext) {
+        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        for(String dir : resourceDirectories) {
+            for(String path : IOUtils.getFilePaths(dir, true))
+            {
+                try {
+                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                } catch (Exception e) {
+                    //TODO: handle exception
+                }
+            }
+            resources.entrySet().stream()
+                .filter(entry -> entry.getValue() instanceof org.hl7.fhir.dstu3.model.ValueSet)
+                .forEach(entry -> valuesetPaths.add(entry.getKey()));
+            resources.entrySet().stream()
+                .filter(entry -> entry.getValue() instanceof org.hl7.fhir.r4.model.ValueSet)
+                .forEach(entry -> valuesetPaths.add(entry.getKey()));
+        }
+    }
+
+    public static String getTestsPath(String igPath) {
+        return FilenameUtils.concat(igPath, IGProcessor.testCasePathElement);
     }
 }

@@ -22,23 +22,28 @@ import org.hl7.fhir.dstu3.model.*;
 
 public class STU3LibraryProcessor {
 
-    public static Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding) {         
+    public static Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {         
         Library resource = (Library)IOUtils.readResource(libraryPath, fhirContext, true);
         Boolean libraryExists = resource != null;       
 
         CqlTranslator translator = getTranslator(cqlContentPath);
               
         if (libraryExists) {            
-            refreshLibrary(resource, cqlContentPath, libraryPath, encoding, translator, fhirContext);
+            refreshLibrary(resource, cqlContentPath, IOUtils.getParentDirectoryPath(libraryPath), encoding, includeVersion, translator, fhirContext);
         } else {
-            generateLibrary(cqlContentPath, libraryPath, encoding, translator, fhirContext);
+            String parentDirectory = IOUtils.getParentDirectoryPath(cqlContentPath);
+            for (String path : IOUtils.getLibraryPaths()) {
+                parentDirectory = IOUtils.getParentDirectoryPath(path);
+                break;
+            }
+            generateLibrary(cqlContentPath, parentDirectory, encoding, includeVersion, translator, fhirContext);
         }
       
         return true;
     }
 
-    private static void refreshLibrary(Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, CqlTranslator translator, FhirContext fhirContext) {
-        Library generatedLibrary = processLibrary(cqlContentPath, translator, fhirContext);
+    private static void refreshLibrary(Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, Boolean includeVersion, CqlTranslator translator, FhirContext fhirContext) {
+        Library generatedLibrary = processLibrary(cqlContentPath, translator, includeVersion, fhirContext);
         mergeDiff(referenceLibrary, generatedLibrary, cqlContentPath, translator, fhirContext);
         IOUtils.writeResource(generatedLibrary, outputPath, encoding, fhirContext);
     }
@@ -62,16 +67,16 @@ public class STU3LibraryProcessor {
         referenceLibrary.setText((Narrative)narrative);
     }
 
-    private static void generateLibrary(String cqlContentPath, String outputPath, Encoding encoding, CqlTranslator translator, FhirContext fhirContext) {
-        Library generatedLibrary = processLibrary(cqlContentPath, translator, fhirContext);
+    private static void generateLibrary(String cqlContentPath, String outputPath, Encoding encoding, Boolean includeVersion, CqlTranslator translator, FhirContext fhirContext) {
+        Library generatedLibrary = processLibrary(cqlContentPath, translator, includeVersion, fhirContext);
         IOUtils.writeResource(generatedLibrary, outputPath, encoding, fhirContext);
     }
 
-    private static Library processLibrary(String cqlContentPath, CqlTranslator translator, FhirContext fhirContext) {
+    private static Library processLibrary(String cqlContentPath, CqlTranslator translator, Boolean includeVersion, FhirContext fhirContext) {
         org.hl7.elm.r1.Library elm = translator.toELM();
         String id = elm.getIdentifier().getId();
         String version = elm.getIdentifier().getVersion();
-        Library library = populateMeta(id, version);
+        Library library = populateMeta(id, version, includeVersion);
         if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
             for (IncludeDef def : elm.getIncludes().getDef()) {
                 addRelatedArtifact(library, def);
@@ -88,9 +93,12 @@ public class STU3LibraryProcessor {
 
 
     // Populate metadata
-    private static Library populateMeta(String name, String version) {
+    private static Library populateMeta(String name, String version, Boolean includeVersion) {
         Library library = new Library();
-        ResourceUtils.setIgId(name, library, version);
+        if(!includeVersion) {
+            ResourceUtils.setIgId(name, library, "");
+        }
+        else ResourceUtils.setIgId(name, library, version);
         library.setName(name);
         library.setVersion(version);
         library.setStatus(Enumerations.PublicationStatus.ACTIVE);
