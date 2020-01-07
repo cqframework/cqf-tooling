@@ -9,6 +9,7 @@ import org.opencds.cqf.modelinfo.ClassInfoSettings;
 class FHIRClassInfoSettings extends ClassInfoSettings {
 
     public FHIRClassInfoSettings() {
+        this.modelName = "FHIR";
         this.codeableTypes = new HashSet<String>() {
             {
                 add("System.String");
@@ -40,6 +41,7 @@ class FHIRClassInfoSettings extends ClassInfoSettings {
                 put("FHIR.time", "System.Time");
                 put("FHIR.unsignedInt", "System.Integer");
                 put("FHIR.uri", "System.String");
+                put("FHIR.url", "System.String");
                 put("FHIR.uuid", "System.String");
                 put("FHIR.xhtml", "System.String");
             }
@@ -63,19 +65,22 @@ class FHIRClassInfoSettings extends ClassInfoSettings {
                 put("FHIR.time", "System.Time");
                 put("FHIR.unsignedInt", "System.Integer");
                 put("FHIR.uri", "System.String");
+                put("FHIR.url", "System.String");
                 put("FHIR.uuid", "System.String");
                 put("FHIR.xhtml", "System.String");
                 put("FHIR.Coding", "System.Code");
                 put("FHIR.CodeableConcept", "System.Concept");
-                put("FHIR.Period", "System.DateTime");
-                put("FHIR.Range", "System.Quantity");
+                put("FHIR.Period", "Interval<System.DateTime>");
+                put("FHIR.Range", "Interval<System.Quantity>");
+                put("FHIR.Ratio", "System.Ratio");
                 put("FHIR.Quantity", "System.Quantity");
                 put("FHIR.Age", "System.Quantity");
                 put("FHIR.Distance", "System.Quantity");
                 put("FHIR.SimpleQuantity", "System.Quantity");
                 put("FHIR.Duration", "System.Quantity");
                 put("FHIR.Count", "System.Quantity");
-                put("FHIR.Money", "System.Quantity");
+                put("FHIR.MoneyQuantity", "System.Quantity");
+                put("FHIR.Money", "System.Decimal");
             }
         };
 

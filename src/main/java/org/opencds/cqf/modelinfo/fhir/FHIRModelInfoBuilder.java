@@ -31,7 +31,7 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
     @Override
     protected void beforeBuild() {
         List<ClassInfo> fhirElementInfos = this.getFhirElementInfos();
-        ClassInfo sd = fhirElementInfos.stream().map(x -> (ClassInfo)x).filter(x -> x.getName().equals("dateTime")).findFirst().get();
+        //ClassInfo sd = fhirElementInfos.stream().map(x -> (ClassInfo)x).filter(x -> x.getName().equals("dateTime")).findFirst().get();
         fhirElementInfos.stream().filter(x -> x.getElement().get(0).getElementType() != null)
         .map(x -> new ConversionInfo()
             .withFromType("FHIR." + x.getName())
@@ -41,7 +41,7 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
 
         // TODO: Figure out why primitives are not being added to the conversion lists here
         List<String> statements = new ArrayList<>();
-        ClassInfo ci = fhirElementInfos.stream().filter(x -> x.getName().equals("string")).findFirst().get();
+        //ClassInfo ci = fhirElementInfos.stream().filter(x -> x.getName().equals("string")).findFirst().get();
         fhirElementInfos.stream().filter(x -> x.getElement().get(0).getElementType() != null)
         .sorted(Comparator.comparing(ClassInfo::getName))
         .forEach(x -> {

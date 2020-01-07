@@ -1,6 +1,7 @@
 package org.opencds.cqf;
 
 //import org.opencds.cqf.jsonschema.SchemaGenerator;
+import org.apache.commons.lang3.NotImplementedException;
 import org.opencds.cqf.igtools.IgBundler;
 import org.opencds.cqf.library.LibraryGenerator;
 import org.opencds.cqf.modelinfo.StructureDefinitionToModelInfo;
@@ -10,7 +11,6 @@ import org.opencds.cqf.terminology.GenericValueSetGenerator;
 import org.opencds.cqf.terminology.CMSFlatMultiValueSetGenerator;
 import org.opencds.cqf.terminology.VSACValueSetGenerator;
 import org.opencds.cqf.terminology.HEDISValueSetGenerator;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 class OperationFactory {
 
@@ -35,11 +35,11 @@ class OperationFactory {
             case "BundleIg":
                 return new IgBundler();
             case "CqlToMeasure":
-                throw new NotImplementedException();
+                throw new NotImplementedException("CqlToMeasure");
             case "BundlesToBundle":
-                throw new NotImplementedException();
+                throw new NotImplementedException("BundlesToBundle");
             case "BundleToResources":
-                throw new NotImplementedException();
+                throw new NotImplementedException("BundleToResources");
             case "GenerateMIs":
                 return new StructureDefinitionToModelInfo();
             default:

@@ -49,13 +49,13 @@ public class StructureDefinitionToModelInfo extends Operation {
 
         // TODO : Can we autodetect this from the structure defintions?
         // Yes, would need to be an extension definition on the ImplementationGuide...
-        String modelName = "FHIR";
-        //String modelName = "QUICK";
+        //String modelName = "FHIR";
+        String modelName = "QUICK";
         if (args.length > 4) {
             modelName = args[4];
         }
-        String modelVersion = "4.0.0";
-        //String modelVersion = "3.3.0";
+        //String modelVersion = "4.0.0";
+        String modelVersion = "3.3.0";
         if (args.length > 5) {
             modelVersion = args[5];
         }        
@@ -66,8 +66,7 @@ public class StructureDefinitionToModelInfo extends Operation {
         ModelInfoBuilder miBuilder;
         ModelInfo mi;
 
-        if(modelName.equals("FHIR"))
-        {
+        if (modelName.equals("FHIR")) {
             ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(structureDefinitions);
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             ciBuilder.afterBuild();
@@ -76,23 +75,21 @@ public class StructureDefinitionToModelInfo extends Operation {
             miBuilder = new FHIRModelInfoBuilder(modelVersion, typeInfos.values(), fhirHelpersPath);
             mi = miBuilder.build();
         }
-        else if(modelName.equals("QUICK"))
-        {
+        else if (modelName.equals("QUICK")) {
             ClassInfoBuilder ciBuilder = new QuickClassInfoBuilder(structureDefinitions);
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
+            ciBuilder.afterBuild();
 
             miBuilder = new QuickModelInfoBuilder(modelVersion, typeInfos.values());
             mi = miBuilder.build();
         }
-        else
-        {
+        else {
             //should blowup
             ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(structureDefinitions);
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             miBuilder = new ModelInfoBuilder(typeInfos.values());
             mi = miBuilder.build();
         }
-
 
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(ModelInfo.class, TypeInfo.class, ClassInfo.class,
