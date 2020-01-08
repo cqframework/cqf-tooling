@@ -72,9 +72,6 @@ public class IGProcessor {
 
         ensure(igPath, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
 
-        IOUtils.setupLibraryPaths(fhirContext);
-        IOUtils.setupMeasurePaths(fhirContext);
-
         ArrayList<String> refreshedLibraryNames = null;
         switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:
@@ -129,7 +126,7 @@ public class IGProcessor {
                         //ask about how to do this better
                         String libraryPath;
                         try {
-                            libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path);
+                            libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path, fhirContext);
                         } catch (Exception e) {
                             libraryPath = "";
                         }
@@ -155,7 +152,7 @@ public class IGProcessor {
                 //ask about how to do this better
                 String libraryPath;
                 try {
-                    libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path);
+                    libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path, fhirContext);
                 } catch (Exception e) {
                     libraryPath = "";
                 }
@@ -183,7 +180,7 @@ public class IGProcessor {
         // and Libraries
         // Until we have the ability to refresh Measures, the set is the union of
         // existing Measures and successfully refreshed Libraries
-        HashSet<String> measureSourcePaths = IOUtils.getMeasurePaths();
+        HashSet<String> measureSourcePaths = IOUtils.getMeasurePaths(fhirContext);
         List<String> measurePathLibraryNames = new ArrayList<String>();
         for (String measureSourcePath : measureSourcePaths) {
             measurePathLibraryNames
@@ -202,7 +199,7 @@ public class IGProcessor {
                 String refreshedLibraryFileName = IOUtils.formatFileName(refreshedLibraryName, encoding);
                 String librarySourcePath;
                 try {
-                    librarySourcePath = IOUtils.getLibraryPathAssociatedWithCqlFileName(refreshedLibraryFileName);
+                    librarySourcePath = IOUtils.getLibraryPathAssociatedWithCqlFileName(refreshedLibraryFileName, fhirContext);
                 } catch (Exception e) {
                     LogUtils.putWarning(refreshedLibraryName, e.getMessage());
                     continue;
@@ -461,7 +458,6 @@ public class IGProcessor {
             checkForDirectory(igPath, IGProcessor.valuesetsPathElement);
             checkForDirectory(igPath, IGProcessor.testCasePathElement);
         }
-        IOUtils.setupCqlLibraryPaths();
         HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
         for (String cqlContentPath : cqlContentPaths) {
             String cqlLibraryContent = IOUtils.getCqlString(cqlContentPath);

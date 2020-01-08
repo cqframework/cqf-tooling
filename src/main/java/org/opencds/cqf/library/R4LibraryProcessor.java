@@ -1,6 +1,7 @@
 package org.opencds.cqf.library;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -28,11 +29,8 @@ public class R4LibraryProcessor {
         if (libraryExists) {            
             refreshLibrary(resource, cqlContentPath, IOUtils.getParentDirectoryPath(libraryPath), encoding, includeVersion, translator, fhirContext);
         } else {
-            String parentDirectory = IOUtils.getParentDirectoryPath(cqlContentPath);
-            for (String path : IOUtils.getLibraryPaths()) {
-                parentDirectory = IOUtils.getParentDirectoryPath(path);
-                break;
-            }
+            Optional<String> anyOtherLibraryDirectory = IOUtils.getLibraryPaths(fhirContext).stream().findFirst();
+            String parentDirectory = anyOtherLibraryDirectory.isPresent() ? IOUtils.getParentDirectoryPath(anyOtherLibraryDirectory.get()) : IOUtils.getParentDirectoryPath(cqlContentPath);
             generateLibrary(cqlContentPath, parentDirectory, encoding, includeVersion, translator, fhirContext);
         }
       

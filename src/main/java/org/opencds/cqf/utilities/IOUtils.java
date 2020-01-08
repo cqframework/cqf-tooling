@@ -34,6 +34,7 @@ import ca.uhn.fhir.parser.IParser;
 
 import org.opencds.cqf.igtools.IGProcessor;
 import org.opencds.cqf.igtools.IGProcessor.IGVersion;
+import org.opencds.cqf.library.LibraryProcessor;
 
 public class IOUtils 
 {        
@@ -411,11 +412,11 @@ public class IOUtils
         return list;
     }
 
-    public static String getLibraryPathAssociatedWithCqlFileName(String cqlPath) throws FileNotFoundException {
-        String[] split = cqlPath.split("\\\\");
-        String fileName = split[split.length - 1].replaceAll(".cql", ".json");
-        for (String path : IOUtils.getLibraryPaths()) {
-            if(path.contains("library-") && path.contains(fileName)) {
+    public static String getLibraryPathAssociatedWithCqlFileName(String cqlPath, FhirContext fhirContext) throws FileNotFoundException {
+        String fileName = FilenameUtils.getName(cqlPath).replaceAll(".cql", ".json");
+        String libraryFileName = LibraryProcessor.ResourcePrefix + fileName;
+        for (String path : IOUtils.getLibraryPaths(fhirContext)) {
+            if(path.endsWith(libraryFileName)) {
                 return path;
             }
         }
@@ -424,9 +425,12 @@ public class IOUtils
 
     private static HashSet<String> cqlLibraryPaths = new HashSet<String>();
     public static HashSet<String> getCqlLibraryPaths() {
+        if (cqlLibraryPaths.isEmpty()) {
+            setupCqlLibraryPaths();
+        }
         return cqlLibraryPaths;
     }
-    public static void setupCqlLibraryPaths() {  
+    private static void setupCqlLibraryPaths() {  
         //need to add a error report for bad resource paths
         for(String dir : resourceDirectories) {
             List<String> filePaths = IOUtils.getFilePaths(dir, true);
@@ -435,10 +439,13 @@ public class IOUtils
     }
 
     private static HashSet<String> libraryPaths = new HashSet<String>();
-    public static HashSet<String> getLibraryPaths() {
+    public static HashSet<String> getLibraryPaths(FhirContext fhirContext) {
+        if (libraryPaths.isEmpty()) {
+            setupLibraryPaths(fhirContext);
+        }
         return libraryPaths;
     }
-    public static void setupLibraryPaths(FhirContext fhirContext) {
+    private static void setupLibraryPaths(FhirContext fhirContext) {
         HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
@@ -459,10 +466,13 @@ public class IOUtils
     }
 
     private static HashSet<String> measurePaths = new HashSet<String>();
-    public static HashSet<String> getMeasurePaths() {
+    public static HashSet<String> getMeasurePaths(FhirContext fhirContext) {
+        if (measurePaths.isEmpty()) {
+            setupMeasurePaths(fhirContext);
+        }
         return measurePaths;
     }
-    public static void setupMeasurePaths(FhirContext fhirContext) {
+    private static void setupMeasurePaths(FhirContext fhirContext) {
         HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
@@ -483,10 +493,13 @@ public class IOUtils
     }
 
     private static HashSet<String> valuesetPaths = new HashSet<String>();
-    public static HashSet<String> getValueSetPaths() {
+    public static HashSet<String> getValueSetPaths(FhirContext fhirContext) {
+        if (valuesetPaths.isEmpty()) {
+            setupValueSetPaths(fhirContext);
+        }
         return valuesetPaths;
     }
-    public static void setupValueSetPaths(FhirContext fhirContext) {
+    private static void setupValueSetPaths(FhirContext fhirContext) {
         HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))

@@ -2,6 +2,7 @@ package org.opencds.cqf.library;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -31,11 +32,8 @@ public class STU3LibraryProcessor {
         if (libraryExists) {            
             refreshLibrary(resource, cqlContentPath, IOUtils.getParentDirectoryPath(libraryPath), encoding, includeVersion, translator, fhirContext);
         } else {
-            String parentDirectory = IOUtils.getParentDirectoryPath(cqlContentPath);
-            for (String path : IOUtils.getLibraryPaths()) {
-                parentDirectory = IOUtils.getParentDirectoryPath(path);
-                break;
-            }
+            Optional<String> anyOtherLibraryDirectory = IOUtils.getLibraryPaths(fhirContext).stream().findFirst();
+            String parentDirectory = anyOtherLibraryDirectory.isPresent() ? anyOtherLibraryDirectory.get() : IOUtils.getParentDirectoryPath(cqlContentPath);
             generateLibrary(cqlContentPath, parentDirectory, encoding, includeVersion, translator, fhirContext);
         }
       
@@ -95,10 +93,8 @@ public class STU3LibraryProcessor {
     // Populate metadata
     private static Library populateMeta(String name, String version, Boolean includeVersion) {
         Library library = new Library();
-        if(!includeVersion) {
-            ResourceUtils.setIgId(name, library, "");
-        }
-        else ResourceUtils.setIgId(name, library, version);
+        version = includeVersion ? version : "";
+        ResourceUtils.setIgId(name, library, version);
         library.setName(name);
         library.setVersion(version);
         library.setStatus(Enumerations.PublicationStatus.ACTIVE);
