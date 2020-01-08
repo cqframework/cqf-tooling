@@ -13,6 +13,8 @@ import java.util.*;
 
 public class VSACValueSetGenerator extends Operation {
 
+    private final String VSAC_BASE_URL = "http://cts.nlm.nih.gov/fhir/ValueSet/";
+
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
     private String encoding = "json"; // -encoding (-e)
 
@@ -95,6 +97,7 @@ public class VSACValueSetGenerator extends Operation {
     public void resolveMetaData(ValueSet vs, Workbook workbook) {
         Sheet metaSheet = workbook.getSheetAt(metaSheetNum);
         String title = getSecondStringInRow(metaSheet, metaNameRow);
+        if (title != null) title = title.replace("/", "");
         if (title != null) {
             vs.setTitle(title);
         }
@@ -102,6 +105,7 @@ public class VSACValueSetGenerator extends Operation {
         if (id != null) {
             vs.setId(id);
         }
+        vs.setUrl(VSAC_BASE_URL + id);
         String publisher = getSecondStringInRow(metaSheet, metaStewardRow);
         if (publisher != null) {
             vs.setPublisher(publisher);
@@ -158,6 +162,7 @@ public class VSACValueSetGenerator extends Operation {
         }
     }
 
+    //should bundle and store in a bundles dir
     private void writeValueSetToFile(String fileName, ValueSet vs) {
         IParser parser =
                 encoding == null

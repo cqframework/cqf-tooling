@@ -1,8 +1,8 @@
 package org.opencds.cqf.quick;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.StructureDefinition;
 
 import java.io.*;
 import java.util.HashMap;
@@ -86,7 +86,7 @@ public class QuickAtlas {
         return cqlConceptUrl;
     }
 
-    private final String cqlDateTimeAndTimeUrl = "http://cql.hl7.org/02-authorsguide.html#datetime-and-time";
+    private final String cqlDateTimeAndTimeUrl = "http://cql.hl7.org/02-authorsguide.html#date-datetime-and-time";
     public String getCqlDateTimeAndTimeUrl() {
         return cqlDateTimeAndTimeUrl;
     }
@@ -99,6 +99,11 @@ public class QuickAtlas {
     private final String cqlIntegerUrl = "http://cql.hl7.org/02-authorsguide.html#integer";
     public String getCqlIntegerUrl() {
         return cqlIntegerUrl;
+    }
+
+    private final String cqlIntervalUrl = "http://cql.hl7.org/02-authorsguide.html#interval-values";
+    public String getCqlIntervalUrl() {
+        return cqlIntervalUrl;
     }
 
     private final String cqlQuantityUrl = "http://cql.hl7.org/02-authorsguide.html#quantities";

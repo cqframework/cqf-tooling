@@ -1,0 +1,60 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug (Attach)",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5051
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - RefreshIG",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.igtools.RefreshIG",
+            "projectName": "tooling"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch) - Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Connectathon FHIR3",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.Main",
+            "projectName": "tooling",
+            "args": [
+                "-RefreshIG",
+                "-ip=C:\\src\\connectathon\\fhir3\\",
+                "-fs=http://localhost:8080/cqf-ruler-dstu3/fhir/",
+                "-t",
+                "-d",
+                "-v",
+                "-p"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Connectathon FHIR4",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.Main",
+            "projectName": "tooling",
+            "args": [
+                "-RefreshIG",
+                "-ip=/src/connectathon/fhir4",
+                "-fs=http://localhost:8080/cqf-ruler-r4/fhir/",
+                "-t",
+                "-d",
+                "-v",
+                "-p"
+            ]
+        }        
+    ]
+}

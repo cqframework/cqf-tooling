@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -26,8 +27,22 @@ public class SpreadsheetHelper {
     }
 
     public static String getCellAsString(Cell cell) {
+        if (cell == null) {
+            throw new IllegalArgumentException("Cell is null");
+        }
         cell.setCellType(CellType.STRING);
         return cell.getStringCellValue();
+    }
+
+    public static String getCellAsString(Row row, int cellIndex) {
+        if (cellIndex >= 0) {
+            Cell cell = row.getCell(cellIndex, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+            if (cell != null) {
+                return getCellAsString(cell);
+            }
+        }
+
+        return null;
     }
 
     public static void resolveValueSet(org.hl7.fhir.dstu3.model.ValueSet vs, Map<Integer, ValueSet> codesBySystem) {
