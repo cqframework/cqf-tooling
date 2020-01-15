@@ -1,5 +1,6 @@
 package org.opencds.cqf.igtools;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -15,4 +16,6 @@ public class RefreshIGParameters {
     public Boolean includePatientScenarios;
     public Boolean versioned;
     public String fhirUri;
+    public ArrayList<String> resourceDirs;
+    public Boolean conformant;
 }

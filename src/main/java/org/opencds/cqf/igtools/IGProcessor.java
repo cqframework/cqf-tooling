@@ -2,14 +2,16 @@ package org.opencds.cqf.igtools;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.opencds.cqf.library.LibraryProcessor;
 import org.opencds.cqf.library.R4LibraryProcessor;
 import org.opencds.cqf.library.STU3LibraryProcessor;
 import org.opencds.cqf.measure.MeasureProcessor;
@@ -60,10 +62,15 @@ public class IGProcessor {
         Boolean includePatientScenarios = params.includePatientScenarios;
         Boolean versioned = params.versioned;
         String fhirUri = params.fhirUri;
-        
-        ensure(igPath);
+        ArrayList<String> resourceDirs = params.resourceDirs;
+
+        IOUtils.resourceDirectories.addAll(resourceDirs);
 
         FhirContext fhirContext = getIgFhirContext(igVersion);
+
+        igPath = Paths.get(igPath).toAbsolutePath().toString();
+
+        ensure(igPath, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
 
         ArrayList<String> refreshedLibraryNames = null;
         switch (fhirContext.getVersion().getVersion()) {
@@ -86,7 +93,7 @@ public class IGProcessor {
         }
 
         if (includePatientScenarios) {
-            TestCaseProcessor.refreshTestCases(getTestsPath(igPath), IOUtils.Encoding.JSON, fhirContext);
+            TestCaseProcessor.refreshTestCases(IOUtils.getTestsPath(igPath), IOUtils.Encoding.JSON, fhirContext);
         }
 
         bundleIg(refreshedLibraryNames, igPath, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
@@ -95,7 +102,7 @@ public class IGProcessor {
 
     private static ArrayList<String> refreshStu3IG(String igPath, Boolean includeELM, Boolean includeDependencies,
             Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned, FhirContext fhirContext) {
-        ArrayList<String> refreshedLibraryNames = refreshStu3IgLibraryContent(igPath, includeELM, fhirContext);
+        ArrayList<String> refreshedLibraryNames = refreshStu3IgLibraryContent(igPath, includeELM, versioned, fhirContext);
         // union with below when this is implemented.
         // refreshMeasureContent();
         return refreshedLibraryNames;
@@ -103,43 +110,54 @@ public class IGProcessor {
 
     private static ArrayList<String> refreshR4IG(String igPath, Boolean includeELM, Boolean includeDependencies,
             Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned, FhirContext fhirContext) {
-        ArrayList<String> refreshedLibraryNames = refreshR4LibraryContent(igPath, includeELM, fhirContext);
+        ArrayList<String> refreshedLibraryNames = refreshR4LibraryContent(igPath, includeELM, versioned, fhirContext);
         // union with below when this is implemented.
         // refreshMeasureContent();
         return refreshedLibraryNames;
     }
 
-    public static ArrayList<String> refreshStu3IgLibraryContent(String igPath, Boolean includeELM,
+    public static ArrayList<String> refreshStu3IgLibraryContent(String igPath, Boolean includeELM, Boolean versioned,
             FhirContext fhirContext) {
-        ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
-        List<String> cqlContentPaths = IOUtils.getFilePaths(getCqlLibraryPath(igPath), false);
-
-        for (String path : cqlContentPaths) {
-            try {
-                STU3LibraryProcessor.refreshLibraryContent(path, getLibraryPath(igPath), fhirContext, Encoding.JSON);
-                // String libraryPath = FilenameUtils.concat(getLibraryPath(igPath), IOUtils.formatFileName(LibraryProcessor.getId(FilenameUtils.getBaseName(path)), Encoding.JSON));
-                // STU3LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, Encoding.JSON);
-                refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
-            } catch (Exception e) {
-                //TODO: protect all exception logging against no message
-                LogUtils.putWarning(path, e.getMessage() == null ? e.toString() : e.getMessage());
-            }
-            LogUtils.warn(path);
-        }
-
-        return refreshedLibraryNames;
+                ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
+                HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
+        
+                for (String path : cqlContentPaths) {
+                    try {
+                        //ask about how to do this better
+                        String libraryPath;
+                        try {
+                            libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path, fhirContext);
+                        } catch (Exception e) {
+                            libraryPath = "";
+                        }
+                        
+                        STU3LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, Encoding.JSON, versioned);
+                        refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
+                    } catch (Exception e) {
+                        LogUtils.putWarning(path, e.getMessage());
+                    }
+                    LogUtils.warn(path);
+                }
+        
+                return refreshedLibraryNames;
     }
 
-    public static ArrayList<String> refreshR4LibraryContent(String igPath, Boolean includeELM,
+    public static ArrayList<String> refreshR4LibraryContent(String igPath, Boolean includeELM, Boolean versioned,
             FhirContext fhirContext) {
         ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
-        List<String> cqlContentPaths = IOUtils.getFilePaths(getCqlLibraryPath(igPath), false);
+        HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
 
         for (String path : cqlContentPaths) {
             try {
-                R4LibraryProcessor.refreshLibraryContent(path, getLibraryPath(igPath), fhirContext, Encoding.JSON);
-                //String libraryPath = FilenameUtils.concat(getLibraryPath(igPath), IOUtils.formatFileName(LibraryProcessor.getId(FilenameUtils.getBaseName(path)), Encoding.JSON));                
-                //R4LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, Encoding.JSON);
+                //ask about how to do this better
+                String libraryPath;
+                try {
+                    libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path, fhirContext);
+                } catch (Exception e) {
+                    libraryPath = "";
+                }
+                
+                R4LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, Encoding.JSON, versioned);
                 refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
             } catch (Exception e) {
                 LogUtils.putWarning(path, e.getMessage() == null ? e.toString() : e.getMessage());
@@ -162,7 +180,7 @@ public class IGProcessor {
         // and Libraries
         // Until we have the ability to refresh Measures, the set is the union of
         // existing Measures and successfully refreshed Libraries
-        List<String> measureSourcePaths = IOUtils.getFilePaths(getMeasurePath(igPath), false);
+        HashSet<String> measureSourcePaths = IOUtils.getMeasurePaths(fhirContext);
         List<String> measurePathLibraryNames = new ArrayList<String>();
         for (String measureSourcePath : measureSourcePaths) {
             measurePathLibraryNames
@@ -178,17 +196,34 @@ public class IGProcessor {
 
                 Map<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
 
-                String librarySourcePath = FilenameUtils.concat(getLibraryPath(igPath),
-                        IOUtils.formatFileName(LibraryProcessor.getId(refreshedLibraryName), encoding));
-                String measureSourcePath = FilenameUtils.concat(getMeasurePath(igPath),
-                        IOUtils.formatFileName(MeasureProcessor.getId(refreshedLibraryName), encoding));
+                String refreshedLibraryFileName = IOUtils.formatFileName(refreshedLibraryName, encoding);
+                String librarySourcePath;
+                try {
+                    librarySourcePath = IOUtils.getLibraryPathAssociatedWithCqlFileName(refreshedLibraryFileName, fhirContext);
+                } catch (Exception e) {
+                    LogUtils.putWarning(refreshedLibraryName, e.getMessage());
+                    continue;
+                } finally {
+                    LogUtils.warn(refreshedLibraryName);
+                }
+                
+                String measureSourcePath = "";
+                for (String path : measureSourcePaths) {
+                    if (path.endsWith(refreshedLibraryFileName))
+                    {
+                        measureSourcePath = path;
+                    }
+                }
 
                 Boolean shouldPersist = ResourceUtils.safeAddResource(measureSourcePath, resources, fhirContext);
                 shouldPersist = shouldPersist
                         & ResourceUtils.safeAddResource(librarySourcePath, resources, fhirContext);
 
                 String cqlFileName = IOUtils.formatFileName(refreshedLibraryName, Encoding.CQL);
-                String cqlLibrarySourcePath = FilenameUtils.concat(getCqlLibraryPath(igPath), cqlFileName);
+                List<String> cqlLibrarySourcePaths = IOUtils.getCqlLibraryPaths().stream()
+                    .filter(path -> path.endsWith(cqlFileName))
+                    .collect(Collectors.toList());
+                String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
                 if (includeTerminology) {
                     shouldPersist = shouldPersist
                             & bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding);
@@ -243,8 +278,7 @@ public class IGProcessor {
             Map<String, IAnyResource> resources, Encoding encoding) {
         Boolean shouldPersist = true;
         try {
-            Map<String, IAnyResource> dependencies = ResourceUtils.getDepValueSetResources(cqlContentPath, igPath,
-                    fhirContext, true);
+            Map<String, IAnyResource> dependencies = ResourceUtils.getDepValueSetResources(cqlContentPath, igPath, fhirContext, true);
             for (IAnyResource resource : dependencies.values()) {
                 resources.putIfAbsent(resource.getId(), resource);
             }
@@ -273,7 +307,7 @@ public class IGProcessor {
     private static Boolean bundleTestCases(String igPath, String libraryName, FhirContext fhirContext,
             Map<String, IAnyResource> resources) {
         Boolean shouldPersist = true;
-        String igTestCasePath = FilenameUtils.concat(getTestsPath(igPath), libraryName);
+        String igTestCasePath = FilenameUtils.concat(IOUtils.getTestsPath(igPath), libraryName);
 
         // this is breaking for bundle of a bundle. Replace with individual resources
         // until we can figure it out.
@@ -319,7 +353,10 @@ public class IGProcessor {
         IOUtils.copyFile(librarySourcePath, FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(librarySourcePath)));
 
         String cqlFileName = IOUtils.formatFileName(libraryName, Encoding.CQL);
-        String cqlLibrarySourcePath = FilenameUtils.concat(getCqlLibraryPath(igPath), cqlFileName);
+        List<String> cqlLibrarySourcePaths = IOUtils.getCqlLibraryPaths().stream()
+            .filter(path -> path.endsWith(cqlFileName))
+            .collect(Collectors.toList());
+        String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
         String cqlDestPath = FilenameUtils.concat(bundleDestFilesPath, cqlFileName);
         IOUtils.copyFile(cqlLibrarySourcePath, cqlDestPath);
 
@@ -350,7 +387,7 @@ public class IGProcessor {
     }
 
     public static void bundleTestCaseFiles(String igPath, String libraryName, String destPath) {    
-        String igTestCasePath = FilenameUtils.concat(getTestsPath(igPath), libraryName);
+        String igTestCasePath = FilenameUtils.concat(IOUtils.getTestsPath(igPath), libraryName);
         List<String> testCasePaths = IOUtils.getFilePaths(igTestCasePath, false);
         for (String testPath : testCasePaths) {
             String bundleTestDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testPath));
@@ -396,67 +433,37 @@ public class IGProcessor {
     public static String getBundlesPath(String igPath) {
         return FilenameUtils.concat(igPath, bundlePathElement);
     }
-
     public static final String cqlLibraryPathElement = "cql/";
-    public static String getCqlLibraryPath(String igPath) {
-        return FilenameUtils.concat(igPath, cqlLibraryPathElement);
-    }
-
     public static final String libraryPathElement = "resources/library/";
-    public static String getLibraryPath(String igPath) {
-        return FilenameUtils.concat(igPath, libraryPathElement);
-    }
-
     public static final String measurePathElement = "resources/measure/";
-    public static String getMeasurePath(String igPath) {
-        return FilenameUtils.concat(igPath, measurePathElement);
-    }
-
     public static final String valuesetsPathElement = "resources/valuesets/";
-    public static String getValueSetsPath(String igPath) {
-        return FilenameUtils.concat(igPath, valuesetsPathElement);
-    }
-
     public static final String testCasePathElement = "tests/";
-    public static String getTestsPath(String igPath) {
-        return FilenameUtils.concat(igPath, testCasePathElement);
-    }
     
-    private static void ensure(String igPath) {
-        File directory = null;
-                
-        directory = new File(getBundlesPath(igPath));
+    private static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, ArrayList<String> resourcePaths) {                
+        File directory = new File(getBundlesPath(igPath));
         if (!directory.exists()) {
-            throw new RuntimeException("Convention requires the following directory:" + bundlePathElement);
+            directory.mkdir();
         }        
-        directory = new File(getCqlLibraryPath(igPath));
-        if (!directory.exists()) {
-            throw new RuntimeException("Convention requires the following directory:" + cqlLibraryPathElement);
+        if (resourcePaths.isEmpty()) {
+            ensureDirectory(igPath, IGProcessor.cqlLibraryPathElement);
+            ensureDirectory(igPath, IGProcessor.libraryPathElement);
+            ensureDirectory(igPath, IGProcessor.measurePathElement);
+            ensureDirectory(igPath, IGProcessor.valuesetsPathElement);
+            ensureDirectory(igPath, IGProcessor.testCasePathElement);
         }
-        directory = new File(getLibraryPath(igPath));
-        if (!directory.exists()) {
-            throw new RuntimeException("Convention requires the following directory:" + libraryPathElement);
+        else {
+            checkForDirectory(igPath, IGProcessor.cqlLibraryPathElement);
+            checkForDirectory(igPath, IGProcessor.libraryPathElement);
+            checkForDirectory(igPath, IGProcessor.measurePathElement);
+            checkForDirectory(igPath, IGProcessor.valuesetsPathElement);
+            checkForDirectory(igPath, IGProcessor.testCasePathElement);
         }
-        directory = new File(getMeasurePath(igPath));
-        if (!directory.exists()) {
-            throw new RuntimeException("Convention requires the following directory:" + measurePathElement);
-        }
-        directory = new File(getValueSetsPath(igPath));
-        if (!directory.exists()) {
-            throw new RuntimeException("Convention requires the following directory:" + valuesetsPathElement);
-        }
-        directory = new File(getTestsPath(igPath));
-        if (!directory.exists()) {
-            throw new RuntimeException("Convention requires the following directory:" + testCasePathElement);
-        }
-
-        List<String> cqlContentPaths = IOUtils.getFilePaths(getCqlLibraryPath(igPath), false);
+        HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
         for (String cqlContentPath : cqlContentPaths) {
             String cqlLibraryContent = IOUtils.getCqlString(cqlContentPath);
             if (!cqlLibraryContent.startsWith("library ")) {
                 throw new RuntimeException("Unable to refresh IG.  All Libraries must begin with \"library \": " + cqlContentPath);
             }
-
             String strippedLibraryName = FilenameUtils.getBaseName(cqlContentPath);
             for (IGProcessor.IGVersion igVersion : IGVersion.values()) {                
                 String igVersionToken = "_" + igVersion.toString().toUpperCase();
@@ -471,6 +478,24 @@ public class IGProcessor {
             if (strippedLibraryName.contains("_")) {
                 throw new RuntimeException("Convention only allows a single \"_\" and it must be preceeding the IG Version: " + cqlContentPath);
             }
+        }
+    }
+
+    private static void ensureDirectory(String igPath, String pathElement) {
+        File directory = new File(FilenameUtils.concat(igPath, pathElement));
+        if (!directory.exists()) {
+            throw new RuntimeException("Convention requires the following directory:" + pathElement);
+        }
+        IOUtils.resourceDirectories.add(FilenameUtils.concat(igPath, pathElement));
+    }
+
+    private static void checkForDirectory(String igPath, String pathElement) {
+        File directory = new File(FilenameUtils.concat(igPath, pathElement));
+        if (!directory.exists()) {
+            System.out.println("No directory found by convention for: " + directory.getName());
+        }
+        else {
+            IOUtils.resourceDirectories.add(FilenameUtils.concat(igPath, pathElement));
         }
     }
 }

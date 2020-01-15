@@ -181,7 +181,7 @@ public class ResourceUtils
       HashSet<String> dependencies = new HashSet<>();
         
       for (String valueSetId : valueSetIDs) {
-          ValueSetsProcessor.getCachedValueSets(igPath, fhirContext).entrySet().stream()
+          ValueSetsProcessor.getCachedValueSets(fhirContext).entrySet().stream()
           .filter(entry -> entry.getKey().equals(valueSetId))
           .forEach(entry -> valueSetResources.putIfAbsent(entry.getKey(), entry.getValue()));
       }
