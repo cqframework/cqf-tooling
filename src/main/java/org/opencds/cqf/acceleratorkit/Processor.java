@@ -19,6 +19,7 @@ import java.util.*;
 public class Processor extends Operation {
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
     private String encoding = "json"; // -encoding (-e)
+    private String scopes; // -scopes (-s)
 
     // Data Elements
     private String dataElementPages; // -dataelementpages (-dep) comma-separated list of the names of pages in the workbook to be processed
@@ -41,7 +42,6 @@ public class Processor extends Operation {
     @Override
     public void execute(String[] args) {
         setOutputPath("src/main/resources/org/opencds/cqf/acceleratorkit/output"); // default
-
         for (String arg : args) {
             if (arg.equals("-ProcessAcceleratorKit")) continue;
             String[] flagAndValue = arg.split("=");
@@ -53,10 +53,11 @@ public class Processor extends Operation {
 
             switch (flag.replace("-", "").toLowerCase()) {
                 case "outputpath": case "op": setOutputPath(value); break; // -outputpath (-op)
-                case "pathtospreadsheet": case "pts": pathToSpreadsheet = value; break;
-                case "encoding": case "e": encoding = value.toLowerCase(); break;
-                case "dataelementpages": case "dep": dataElementPages = value; break;
-                case "canonicalbase": case "cb": canonicalBase = value; break;
+                case "pathtospreadsheet": case "pts": pathToSpreadsheet = value; break; // -pathtospreadsheet (-pts)
+                case "encoding": case "e": encoding = value.toLowerCase(); break; // -encoding (-e)
+                case "dataelementpages": case "dep": dataElementPages = value; break; // -dataelementpages (-dep)
+                case "canonicalbase": case "cb": canonicalBase = value; break; // -canonicalbase (-cb)
+                case "scopes": case "s": scopes = value; break; // -scopes (-s)
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
@@ -73,16 +74,55 @@ public class Processor extends Operation {
 
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
 
+        if (scopes == null) {
+            processScope(workbook, null);
+        }
+        else {
+            for (String scope : scopes.split(",")) {
+                processScope(workbook, scope);
+            }
+        }
+    }
+
+    private void processScope(Workbook workbook, String scope) {
+        // reset variables
+        elementMap = new HashMap<>();
+        profiles = new ArrayList<>();
+        codeSystems = new ArrayList<>();
+        valueSets = new ArrayList<>();
+        igJsonFragments = new ArrayList<>();
+        igResourceFragments = new ArrayList<>();
+
+        // ensure scope folder exists
+        String path = getScopePath(scope);
+        ensureScopePath(path);
+
+        // process workbook
         for (String page : dataElementPages.split(",")) {
-            processDataElementPage(workbook, page);
+            processDataElementPage(workbook, page, scope);
         }
 
+        // process element map
         processElementMap();
-        writeProfiles();
-        writeCodeSystems();
-        writeValueSets();
-        writeIgJsonFragments();
-        writeIgResourceFragments();
+
+        // write all resources
+        writeProfiles(path);
+        writeCodeSystems(path);
+        writeValueSets(path);
+        writeIgJsonFragments(path);
+        writeIgResourceFragments(path);
+    }
+
+    private void ensureScopePath(String path) {
+        //Creating a File object
+        java.io.File scopeDir = new java.io.File(path);
+        //Creating the directory
+        if (!scopeDir.exists()) {
+            if (!scopeDir.mkdir()) {
+                // TODO: change this to an IOException
+                throw new IllegalArgumentException("Could not create directory: " + path);
+            }
+        }
     }
 
 
@@ -165,11 +205,96 @@ public class Processor extends Operation {
         return -1;
     }
 
-    private void processDataElementPage(Workbook workbook, String page) {
+    private DictionaryElement createDataElement(String page, String group, Row row, HashMap<String, Integer> colIds) {
+        //String label = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Label"));
+        String type = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Type"));
+        if (type != null) {
+            type = type.trim();
+            if (type.equals("Coding")) {
+                String choiceType = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MultipleChoiceType"));
+                if (choiceType != null) {
+                    choiceType = choiceType.trim();
+                    type = type + " - " + choiceType;
+                }
+            }
+        }
+        String name = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Name"));
+        if (name.isEmpty()) {
+            return null;
+        }
+        name = name.trim();
+        String label = name;
+
+        // TODO: should we throw if a duplicate is found within the same scope?
+        // TODO: (core, anc, sti, fp, etc)
+        if (elementMap.containsKey(name)) {
+            //throw new IllegalArgumentException("Duplicate Name encountered: " + name);
+            return null;
+        }
+
+        DictionaryElement e = new DictionaryElement(name);
+
+        // Populate based on the row
+        e.setPage(page);
+        e.setGroup(group);
+        e.setLabel(label);
+        e.setType(type);
+        e.setInfoIcon(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "InfoIcon")));
+        e.setDue(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Due")));
+        e.setRelevance(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Relevance")));
+        e.setDescription(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Description")));
+        e.setNotes(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Notes")));
+        e.setCalculation(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Calculation")));
+        e.setConstraint(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Constraint")));
+        e.setRequired(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Required")));
+        e.setEditable(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Editable")));
+        e.setCode(getPrimaryCode(name, row, colIds));
+        e.setFhirType(getFhirType(row, colIds));
+
+        return e;
+    }
+
+    private void addInputOptionToParentElement(Row row, HashMap<String, Integer> colIds) {
+        String parentName = SpreadsheetHelper.getCellAsString(row, getColId(colIds,"InputOptionParent"));
+        if (parentName != null || !parentName.isEmpty())
+        {
+            DictionaryElement currentElement = elementMap.get(parentName);
+            if (currentElement != null) {
+                String choices = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Name"));
+                if (choices != null && !choices.isEmpty()) {
+                    choices = choices.trim();
+
+                    // Open MRS choices
+                    DictionaryCode code = getOpenMRSCode(choices, row, colIds);
+                    if (code != null) {
+                        currentElement.getChoices().add(code);
+                    }
+
+                    // FHIR choices
+                    String fhirCodeSystem = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
+                    if (fhirCodeSystem != null && !fhirCodeSystem.isEmpty()) {
+                        code = getFhirCode(choices, row, colIds);
+                        if (code != null) {
+                            currentElement.getChoices().add(code);
+                        }
+                    }
+
+                    // Other Terminology choices
+                    for (String codeSystemKey : supportedCodeSystems.keySet()) {
+                        code = getTerminologyCode(codeSystemKey, choices, row, colIds);
+                        if (code != null) {
+                            currentElement.getChoices().add(code);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void processDataElementPage(Workbook workbook, String page, String scope) {
         Sheet sheet = workbook.getSheet(page);
         Iterator<Row> it = sheet.rowIterator();
         HashMap<String, Integer> colIds = new HashMap<String, Integer>();
-        DictionaryElement currentElement = null;
         String currentGroup = null;
         while (it.hasNext()) {
             Row row = it.next();
@@ -185,10 +310,23 @@ public class Processor extends Operation {
                     Cell cell = colIt.next();
                     String header = SpreadsheetHelper.getCellAsString(cell).toLowerCase();
                     switch (header) {
-                        case "data element label": colIds.put("Label", cell.getColumnIndex()); break;
+                        case "core, fp, sti":
+                        case "scope":
+                            colIds.put("Scope", cell.getColumnIndex());
+                            break;
+                        case "master data type":
+                            colIds.put("DataType", cell.getColumnIndex());
+                            break;
+                        case "master data element label":
+                            colIds.put("Name", cell.getColumnIndex());
+                            colIds.put("Label", cell.getColumnIndex());
+                            break;
+                        case "data element parent for input options":
+                            colIds.put("InputOptionParent", cell.getColumnIndex());
+                            break;
                         // no group column in old or new spreadsheet? Ask Bryn?
                         //case "group": colIds.put("Group", cell.getColumnIndex()); break;
-                        case "data element name": colIds.put("Name", cell.getColumnIndex()); break;
+                        //case "data element name": colIds.put("Name", cell.getColumnIndex()); break;
                         case "due": colIds.put("Due", cell.getColumnIndex()); break;
                         // no frequency column in new master spreadsheet?
                         //case "frequency": colIds.put("Due", cell.getColumnIndex()); break;
@@ -199,6 +337,7 @@ public class Processor extends Operation {
                         case "description": colIds.put("Description", cell.getColumnIndex()); break;
                         case "notes": colIds.put("Notes", cell.getColumnIndex()); break;
                         case "data type": colIds.put("Type", cell.getColumnIndex()); break;
+                        case "multiple choice": colIds.put("MultipleChoiceType", cell.getColumnIndex()); break;
                         case "input options": colIds.put("Choices", cell.getColumnIndex()); break;
                         case "calculation": colIds.put("Calculation", cell.getColumnIndex()); break;
                         case "validation required": colIds.put("Constraint", cell.getColumnIndex()); break;
@@ -225,69 +364,30 @@ public class Processor extends Operation {
                 continue;
             }
 
-            String label = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Label"));
-            String type = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Type"));
-            String name = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Name"));
-            if (name == null || name.isEmpty())
-            {
-                if (currentElement != null) {
-                    String choices = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Choices"));
-                    if (choices != null && !choices.isEmpty()) {
-                        // Open MRS choices
-                        DictionaryCode code = getOpenMRSCode(choices, row, colIds);
-                        if (code != null) {
-                            currentElement.getChoices().add(code);
+            String rowScope = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Scope"));
+            boolean scopeIsNull = scope == null;
+            boolean scopeMatchesRowScope = rowScope != null && scope.toLowerCase().equals(rowScope.toLowerCase());
+            if (scopeIsNull || scopeMatchesRowScope) {
+                String dataType = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "DataType"));
+                switch(dataType) {
+                    case "Data Element":
+                        DictionaryElement e = createDataElement(page, currentGroup, row, colIds);
+                        if (e != null) {
+                            elementMap.put(e.getName(), e);
                         }
-
-                        // FHIR choices
-                        String fhirCodeSystem = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
-                        if (fhirCodeSystem != null && !fhirCodeSystem.isEmpty()) {
-                            code = getFhirCode(choices, row, colIds);
-                            if (code != null) {
-                                currentElement.getChoices().add(code);
-                            }
-                        }
-
-                        // Other Terminology choices
-                        for (String codeSystemKey : supportedCodeSystems.keySet()) {
-                            code = getTerminologyCode(codeSystemKey, choices, row, colIds);
-                            if (code != null) {
-                                currentElement.getChoices().add(code);
-                            }
-                        }
-                    }
+                        break;
+                    case "Input Option":
+                        addInputOptionToParentElement(row, colIds);
+                        break;
+                    case "Calculation":
+                    case "Slice":
+                    case "UI Element":
+                        // TODO: Do we need to do anything with these?
+                        break;
+                    default:
+                        // Currently unsupported/undocumented
+                        break;
                 }
-                else if (type == null || type.isEmpty()) {
-                    currentGroup = label;
-                }
-                continue;
-            }
-
-            if (name.equals("NA")) {
-                // TODO: Toaster message: create PlanDefinition
-                continue;
-            }
-
-            if (currentElement == null || !currentElement.getName().equals(name)) {
-                currentElement = new DictionaryElement(name);
-                elementMap.put(name, currentElement);
-
-                // Population based on the row:
-                currentElement.setPage(page);
-                currentElement.setGroup(currentGroup);
-                currentElement.setLabel(label);
-                currentElement.setInfoIcon(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "InfoIcon")));
-                currentElement.setDue(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Due")));
-                currentElement.setRelevance(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Relevance")));
-                currentElement.setDescription(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Description")));
-                currentElement.setNotes(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Notes")));
-                currentElement.setType(type);
-                currentElement.setCalculation(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Calculation")));
-                currentElement.setConstraint(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Constraint")));
-                currentElement.setRequired(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Required")));
-                currentElement.setEditable(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Editable")));
-                currentElement.setCode(getPrimaryCode(name, row, colIds));
-                currentElement.setFhirType(getFhirType(row, colIds));
             }
         }
     }
@@ -297,16 +397,19 @@ public class Processor extends Operation {
             return false;
         }
 
-        switch (type) {
-            case "Image":
-            case "Note":
-            case "QR Code":
-            case "Text":
-            case "Date":
-            case "Checkbox":
-            case "Integer":
-            case "MC (select one)":
-            case "MC (select multiple)":
+        switch (type.toLowerCase().trim()) {
+            case "checkbox":
+            case "coding":
+            case "coding - select one":
+            case "coding - select all that apply":
+            case "date":
+            case "image":
+            case "integer":
+            case "note":
+            case "qr code":
+            case "text":
+            case "mc (select one)":
+            case "mc (select multiple)":
                 return true;
             default:
                 return false;
@@ -318,8 +421,9 @@ public class Processor extends Operation {
             return false;
         }
 
-        switch (element.getType()) {
-            case "MC (select multiple)":
+        switch (element.getType().toLowerCase()) {
+            case "mc (select multiple)":
+            case "coding - select all that apply":
                 return true;
             default:
                 return false;
@@ -338,7 +442,23 @@ public class Processor extends Operation {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Name cannot be null or empty");
         }
-        return name.toLowerCase().replace("_", "-");
+        return name
+                .toLowerCase()
+                .trim()
+                // remove these characters
+                .replace("(", "")
+                .replace(")", "")
+                .replace("[", "")
+                .replace("]", "")
+                .replace("\n", "")
+                // replace these with ndash
+                .replace("_", "-")
+                .replace("/", "-")
+                .replace(" ", "-")
+                // remove multiple ndash
+                .replace("----", "-")
+                .replace("---", "-")
+                .replace("--", "-");
     }
 
     private boolean toBoolean(String value) {
@@ -346,20 +466,35 @@ public class Processor extends Operation {
     }
 
     private String toFhirType(String type) {
-        switch (type) {
-            case "Image": return "Attachment";
-            case "Note": return "Annotation";
-            case "QR Code": return "Attachment"; // TODO: Consider specifying mime type as QR Code here?
-            case "Text": return "markdown";
-            case "Date": return "date";
-            case "DateTime": return "dateTime";
-            case "Time": return "time";
-            case "Checkbox": return "boolean";
-            case "Integer": return "integer";
-            case "Decimal": return "decimal";
-            case "Quantity": return "Quantity";
-            case "MC (select one)":
-            case "MC (select multiple)": return "CodeableConcept";
+        switch (type.toLowerCase().trim()) {
+            case "image":
+                return "Attachment";
+            case "note":
+                return "Annotation";
+            case "qr code":
+                return "Attachment"; // TODO: Consider specifying mime type as QR Code here?
+            case "text":
+                return "markdown";
+            case "date":
+                return "date";
+            case "datetime":
+                return "dateTime";
+            case "time":
+                return "time";
+            case "checkbox":
+                return "boolean";
+            case "integer":
+                return "integer";
+            case "decimal":
+                return "decimal";
+            case "quantity":
+                return "Quantity";
+            case "coding":
+            case "coding - select one":
+            case "coding - select all that apply":
+            case "mc (select one)":
+            case "mc (select multiple)":
+                return "CodeableConcept";
             default:
                 throw new IllegalArgumentException(String.format("Unknown type code %s", type));
         }
@@ -387,6 +522,11 @@ public class Processor extends Operation {
             case "Patient":
             case "Coverage":
             case "Encounter":
+            case "Appointment":
+            case "Medication":
+            case "Practitioner":
+            case "Procedure":
+            case "Condition":
                 choicesPath = element.getFhirType().getResourcePath();
                 break;
             default:
@@ -539,8 +679,17 @@ public class Processor extends Operation {
         return sd;
     }
 
-    public void writeResource(Resource resource) {
-        String outputFilePath = getOutputPath() + "/" + resource.getResourceType().toString().toLowerCase() + "-" + resource.getId() + "." + encoding;
+    private String getScopePath(String scope) {
+        if (scope == null) {
+            return getOutputPath();
+        }
+        else {
+            return getOutputPath() + "/" + scope;
+        }
+    }
+
+    public void writeResource(String path, Resource resource) {
+        String outputFilePath = path + "/" + resource.getResourceType().toString().toLowerCase() + "-" + resource.getId() + "." + encoding;
         try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
             writer.write(
                     encoding.equals("json")
@@ -554,9 +703,9 @@ public class Processor extends Operation {
         }
     }
 
-    public void writeProfiles() {
+    public void writeProfiles(String path) {
         for (StructureDefinition sd : profiles) {
-            writeResource(sd);
+            writeResource(path, sd);
 
             // Generate JSON fragment for inclusion in the IG:
             /*
@@ -582,9 +731,9 @@ public class Processor extends Operation {
         }
     }
 
-    public void writeCodeSystems() {
+    public void writeCodeSystems(String path) {
         for (CodeSystem cs : codeSystems) {
-            writeResource(cs);
+            writeResource(path, cs);
 
             // Generate JSON fragment for inclusion in the IG:
             /*
@@ -609,9 +758,9 @@ public class Processor extends Operation {
         }
     }
 
-    public void writeValueSets() {
+    public void writeValueSets(String path) {
         for (ValueSet vs : valueSets) {
-            writeResource(vs);
+            writeResource(path, vs);
 
             // Generate JSON fragment for inclusion in the IG:
             /*
@@ -636,8 +785,8 @@ public class Processor extends Operation {
         }
     }
 
-    public void writeIgJsonFragments() {
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/ig.json")) {
+    public void writeIgJsonFragments(String path) {
+        try (FileOutputStream writer = new FileOutputStream(path + "/ig.json")) {
             writer.write(String.format("{\r\n%s\r\n}", String.join(",\r\n", igJsonFragments)).getBytes());
             writer.flush();
         } catch (IOException e) {
@@ -646,8 +795,8 @@ public class Processor extends Operation {
         }
     }
 
-    public void writeIgResourceFragments() {
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/ig.xml")) {
+    public void writeIgResourceFragments(String path) {
+        try (FileOutputStream writer = new FileOutputStream(path + "/ig.xml")) {
             writer.write(String.format(String.join("\r\n", igResourceFragments)).getBytes());
         } catch (IOException e) {
             e.printStackTrace();
