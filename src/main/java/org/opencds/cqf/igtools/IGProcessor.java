@@ -1,7 +1,11 @@
 package org.opencds.cqf.igtools;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -416,17 +420,49 @@ public class IGProcessor {
         }     
     }
 
-    public static IGVersion getIgVersion(String igPath)
-    {
-        if (IOUtils.pathIncludesElement(igPath, IGVersion.FHIR3.toString()))
-        {
-            return IGVersion.FHIR3;
+    public static IGVersion getIgVersion(String igPath){
+        IGVersion igVersion = null;
+        List<File> igPathFiles = IOUtils.getFilePaths(igPath, false).stream()
+            .map(path -> new File(path))
+            .collect(Collectors.toList());
+        for (File file : igPathFiles) {
+            if (FilenameUtils.getExtension(file.getName()).equals("ini")) {
+                igVersion = tryToReadIni(file);
+            }
         }
-        else if (IOUtils.pathIncludesElement(igPath, IGVersion.FHIR4.toString()))
-        {
-            return IGVersion.FHIR4;
+        if (igVersion == null) {
+            throw new IllegalArgumentException("IG version not found in ig.ini");
         }
-        throw new IllegalArgumentException("IG version not found in IG Path.");
+        else return igVersion;
+    }
+
+    private static IGVersion tryToReadIni(File file) {
+        try {
+            InputStream inputStream = new FileInputStream(file);
+            String igIniContent = new BufferedReader(new InputStreamReader(inputStream))
+                .lines().collect(Collectors.joining("\n"));
+            String[] contentLines = igIniContent.split("\n");
+            inputStream.close();
+            return parseVersion(contentLines);
+        } catch (Exception e) {
+                System.out.println(e.getMessage());
+                return null;
+            }
+    }
+
+    private static IGVersion parseVersion(String[] contentLines) {
+        for (String line : contentLines) {
+            if (line.toLowerCase().startsWith("fhirspec"))
+            {
+                if (line.contains("R4") || line.contains("r4")){
+                    return IGVersion.FHIR4;
+                }
+                else if (line.contains("stu3") || line.contains("STU3") || line.contains("dstu3") || line.contains("DSTU3")) {
+                    return IGVersion.FHIR3;
+                }
+            }
+        }
+        return null;
     }
 
     public static final String bundlePathElement = "bundles/";
