@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
@@ -25,6 +26,7 @@ import org.opencds.cqf.utilities.ResourceUtils;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 
 public class IGProcessor {
     public enum IGVersion {
@@ -382,11 +384,11 @@ public class IGProcessor {
         }
 
         if (includePatientScenarios) {
-            bundleTestCaseFiles(igPath, libraryName, bundleDestFilesPath);
+            bundleTestCaseFiles(igPath, libraryName, bundleDestFilesPath, fhirContext);
         }        
     }
 
-    public static void bundleTestCaseFiles(String igPath, String libraryName, String destPath) {    
+    public static void bundleTestCaseFiles(String igPath, String libraryName, String destPath, FhirContext fhirContext) {    
         String igTestCasePath = FilenameUtils.concat(IOUtils.getTestsPath(igPath), libraryName);
         List<String> testCasePaths = IOUtils.getFilePaths(igTestCasePath, false);
         for (String testPath : testCasePaths) {
@@ -397,8 +399,21 @@ public class IGProcessor {
             for (String testCaseDirectory : testCaseDirectories) {
                 List<String> testContentPaths = IOUtils.getFilePaths(testCaseDirectory, false);
                 for (String testContentPath : testContentPaths) {
-                    String bundleTestContentDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testContentPath));
-                    IOUtils.copyFile(testContentPath, bundleTestContentDestPath);
+                    Optional<String> matchingMeasureReportPath = IOUtils.getMeasureReportPaths(fhirContext).stream()
+                        .filter(path -> path.equals(testContentPath))
+                        .findFirst();
+                    if (matchingMeasureReportPath.isPresent()) {
+                        IAnyResource measureReport = IOUtils.readResource(testContentPath, fhirContext);
+                        if (!measureReport.getIdElement().getIdPart().contains("expected"))
+                        {
+                            measureReport.setId(measureReport.getIdElement().getIdPart().replace("measurereport-", "measurereport-expected"));
+                        }
+                        IOUtils.writeResource(measureReport, destPath, IOUtils.Encoding.JSON, fhirContext);
+                    }
+                    else {
+                        String bundleTestContentDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testContentPath));
+                        IOUtils.copyFile(testContentPath, bundleTestContentDestPath);
+                    }
                 }
             }            
         }
