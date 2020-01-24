@@ -37,8 +37,6 @@ public class Processor extends Operation {
     private List<String> igJsonFragments = new ArrayList<String>();
     private List<String> igResourceFragments = new ArrayList<String>();
 
-
-
     @Override
     public void execute(String[] args) {
         setOutputPath("src/main/resources/org/opencds/cqf/acceleratorkit/output"); // default
@@ -94,8 +92,8 @@ public class Processor extends Operation {
         igResourceFragments = new ArrayList<>();
 
         // ensure scope folder exists
-        String path = getScopePath(scope);
-        ensureScopePath(path);
+        String scopePath = getScopePath(scope);
+        ensurePath(scopePath);
 
         // process workbook
         for (String page : dataElementPages.split(",")) {
@@ -106,25 +104,63 @@ public class Processor extends Operation {
         processElementMap();
 
         // write all resources
-        writeProfiles(path);
-        writeCodeSystems(path);
-        writeValueSets(path);
-        writeIgJsonFragments(path);
-        writeIgResourceFragments(path);
+        writeProfiles(scopePath);
+        writeCodeSystems(scopePath);
+        writeValueSets(scopePath);
+
+        //ig.json is deprecated and resources a located by convention. If our output isn't satisfying convention, we should
+        //modify the tooling to match the convention.
+        //writeIgJsonFragments(scopePath);
+        //writeIgResourceFragments(scopePath);
     }
 
-    private void ensureScopePath(String path) {
+    private void ensurePath(String path) {
         //Creating a File object
         java.io.File scopeDir = new java.io.File(path);
         //Creating the directory
         if (!scopeDir.exists()) {
-            if (!scopeDir.mkdir()) {
+            if (!scopeDir.mkdirs()) {
                 // TODO: change this to an IOException
                 throw new IllegalArgumentException("Could not create directory: " + path);
             }
         }
     }
 
+    private String getScopePath(String scope) {
+        if (scope == null) {
+            return getOutputPath();
+        }
+        else {
+            return getOutputPath() + "/" + scope;
+        }
+    }
+
+    private void ensureProfilesPath(String scopePath) {
+        String profilesPath = getProfilesPath(scopePath);
+        ensurePath(profilesPath);
+    }
+
+    private String getProfilesPath(String scopePath) {
+        return scopePath + "/input/profiles";
+    }
+
+    private void ensureCodeSystemPath(String scopePath) {
+        String codeSystemPath = getCodeSystemPath(scopePath);
+        ensurePath(codeSystemPath);
+    }
+
+    private String getCodeSystemPath(String scopePath) {
+        return scopePath + "/input/vocabulary/codesystem";
+    }
+
+    private void ensureValueSetPath(String scopePath) {
+        String valueSetPath = getValueSetPath(scopePath);
+        ensurePath(valueSetPath);
+    }
+
+    private String getValueSetPath(String scopePath) {
+        return scopePath + "/input/vocabulary/valueset";
+    }
 
     private DictionaryCode getTerminologyCode(String codeSystemKey, String label, Row row, HashMap<String, Integer> colIds) {
         String system = supportedCodeSystems.get(codeSystemKey);
@@ -679,15 +715,6 @@ public class Processor extends Operation {
         return sd;
     }
 
-    private String getScopePath(String scope) {
-        if (scope == null) {
-            return getOutputPath();
-        }
-        else {
-            return getOutputPath() + "/" + scope;
-        }
-    }
-
     public void writeResource(String path, Resource resource) {
         String outputFilePath = path + "/" + resource.getResourceType().toString().toLowerCase() + "-" + resource.getId() + "." + encoding;
         try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
@@ -703,9 +730,12 @@ public class Processor extends Operation {
         }
     }
 
-    public void writeProfiles(String path) {
+    public void writeProfiles(String scopePath) {
+        String profilesPath = getProfilesPath(scopePath);
+        ensureProfilesPath(scopePath);
+
         for (StructureDefinition sd : profiles) {
-            writeResource(path, sd);
+            writeResource(profilesPath, sd);
 
             // Generate JSON fragment for inclusion in the IG:
             /*
@@ -731,9 +761,12 @@ public class Processor extends Operation {
         }
     }
 
-    public void writeCodeSystems(String path) {
+    public void writeCodeSystems(String scopePath) {
+        String codeSystemPath = getCodeSystemPath(scopePath);
+        ensureCodeSystemPath(scopePath);
+
         for (CodeSystem cs : codeSystems) {
-            writeResource(path, cs);
+            writeResource(codeSystemPath, cs);
 
             // Generate JSON fragment for inclusion in the IG:
             /*
@@ -758,9 +791,12 @@ public class Processor extends Operation {
         }
     }
 
-    public void writeValueSets(String path) {
+    public void writeValueSets(String scopePath) {
+        String valueSetPath = getValueSetPath(scopePath);
+        ensureValueSetPath(scopePath);
+
         for (ValueSet vs : valueSets) {
-            writeResource(path, vs);
+            writeResource(valueSetPath, vs);
 
             // Generate JSON fragment for inclusion in the IG:
             /*
