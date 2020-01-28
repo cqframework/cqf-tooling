@@ -6,10 +6,12 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.opencds.cqf.igtools.IGProcessor.IGVersion;
+import org.opencds.cqf.utilities.IOUtils;
 
 public class RefreshIGParameters {  
     public String igPath;
     public IGVersion igVersion;
+    public IOUtils.Encoding outputEncoding;
     public Boolean includeELM;
     public Boolean includeDependencies;
     public Boolean includeTerminology;
