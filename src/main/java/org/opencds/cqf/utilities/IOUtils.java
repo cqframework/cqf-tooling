@@ -150,7 +150,7 @@ public class IOUtils
     public static IAnyResource readResource(String path, FhirContext fhirContext, Boolean safeRead) 
     {        
         Encoding encoding = getEncoding(path);
-        if (encoding == Encoding.UNKNOWN) {
+        if (encoding == Encoding.UNKNOWN || encoding == Encoding.CQL) {
             return null;
         }
 
@@ -267,7 +267,7 @@ public class IOUtils
         return Encoding.parse(FilenameUtils.getExtension(path));
     }
 
-    //users should protect against Encoding.UNKNOWN
+    //users should protect against Encoding.UNKNOWN or Enconding.CQL
     private static IParser getParser(Encoding encoding, FhirContext fhirContext) 
     {
         switch (encoding) {
