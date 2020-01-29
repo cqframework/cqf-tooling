@@ -175,7 +175,7 @@ public class ResourceUtils
       return dependencyLibraries;
     }
     
-    public static Map<String, IAnyResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext, boolean includeDependencies) throws Exception {
+    public static Map<String, IAnyResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext, boolean includeDependencies, Boolean includeVersion) throws Exception {
       Map<String, IAnyResource> valueSetResources = new HashMap<String, IAnyResource>();
       List<String> valueSetIDs = getDepValueSetIDs(cqlContentPath);
       HashSet<String> dependencies = new HashSet<>();
@@ -188,9 +188,9 @@ public class ResourceUtils
       dependencies.addAll(valueSetResources.keySet());
 
       if(includeDependencies) {
-        List<String> dependencyCqlPaths = IOUtils.getDependencyCqlPaths(cqlContentPath);
+        List<String> dependencyCqlPaths = IOUtils.getDependencyCqlPaths(cqlContentPath, includeVersion);
         for (String path : dependencyCqlPaths) {
-          Map<String, IAnyResource> dependencyValueSets = getDepValueSetResources(path, igPath, fhirContext, includeDependencies);
+          Map<String, IAnyResource> dependencyValueSets = getDepValueSetResources(path, igPath, fhirContext, includeDependencies, includeVersion);
           dependencies.addAll(dependencyValueSets.keySet());
           for (Entry<String, IAnyResource> entry : dependencyValueSets.entrySet()) {
             valueSetResources.putIfAbsent(entry.getKey(), entry.getValue());
@@ -209,12 +209,12 @@ public class ResourceUtils
       return valueSetResources;
     }   
 
-    public static ArrayList<String> getIncludedLibraryNames(String cqlContentPath) {
+    public static ArrayList<String> getIncludedLibraryNames(String cqlContentPath, Boolean includeVersion) {
       ArrayList<String> includedLibraryNames = new ArrayList<String>();
       ArrayList<IncludeDef> includedDefs = getIncludedDefs(cqlContentPath);
       for (IncludeDef def : includedDefs) {
         //TODO: replace true with versioned variable
-        IOUtils.putInListIfAbsent(getId(def.getPath(), def.getVersion(), true), includedLibraryNames);
+        IOUtils.putInListIfAbsent(getId(def.getPath(), def.getVersion(), includeVersion), includedLibraryNames);
       }
       return includedLibraryNames;
     }

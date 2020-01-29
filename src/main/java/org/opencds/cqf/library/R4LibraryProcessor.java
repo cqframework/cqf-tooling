@@ -74,7 +74,7 @@ public class R4LibraryProcessor {
         Library library = populateMeta(id, version, includeVersion);
         if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
             for (IncludeDef def : elm.getIncludes().getDef()) {
-                addRelatedArtifact(library, def);
+                addRelatedArtifact(library, def, includeVersion);
             }
         }
 
@@ -103,11 +103,11 @@ public class R4LibraryProcessor {
     }
 
     // Add Related Artifact
-    private static void addRelatedArtifact(Library library, IncludeDef def) {
+    private static void addRelatedArtifact(Library library, IncludeDef def, Boolean includeVersion) {
         library.addRelatedArtifact(
                 new RelatedArtifact()
                         .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
-                        .setResource("Library/" + getIncludedLibraryId(def)) //this is the reference name
+                        .setResource("Library/" + getIncludedLibraryId(def, includeVersion)) //this is the reference name
                 );
     }
 
@@ -156,19 +156,16 @@ public class R4LibraryProcessor {
     }
 
     //TODO: need to move to Library Processor
-    private static String getIncludedLibraryId(IncludeDef def) {
+    private static String getIncludedLibraryId(IncludeDef def, Boolean includeVersion) {
+        Library tempLibrary = new Library();
         String name = getIncludedLibraryName(def);
-        String version = def.getVersion();
-        return nameToId(name, version);
+        String version = includeVersion ? def.getVersion() : "";
+        ResourceUtils.setIgId(name, tempLibrary, version);
+        return tempLibrary.getId();
     }
 
     private static String getIncludedLibraryName(IncludeDef def) {
         return def.getPath();
-    }
-
-    private static String nameToId(String name, String version) {
-        String nameAndVersion = "library-" + name + "-" + version;
-        return nameAndVersion.replaceAll("_", "-");
     }
 
     private static CqlTranslator getTranslator(String cqlContentPath) {

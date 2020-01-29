@@ -26,6 +26,25 @@
         },
         {
             "type": "java",
+            "name": "Opioid CDS FHIR3",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.Main",
+            "projectName": "tooling",
+            "args": [
+                "-RefreshIG",
+                "-ip=C:\\src\\GitHub\\opioid-cds",
+                "-rp=C:\\src\\GitHub\\opioid-cds\\input\\resources",
+                "-rp=C:\\src\\GitHub\\opioid-cds\\input\\pagecontent\\cql",
+                "-rp=C:\\src\\GitHub\\opioid-cds\\input\\vocabulary",
+                "-iv=fhir3",
+                "-t",
+                "-d",
+                "-v",
+                "-p"
+            ]
+        },
+        {
+            "type": "java",
             "name": "Connectathon FHIR3",
             "request": "launch",
             "mainClass": "org.opencds.cqf.Main",
