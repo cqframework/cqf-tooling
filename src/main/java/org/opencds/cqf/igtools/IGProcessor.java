@@ -15,6 +15,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.library.R4LibraryProcessor;
 import org.opencds.cqf.library.STU3LibraryProcessor;
 import org.opencds.cqf.measure.MeasureProcessor;
+import org.opencds.cqf.plandefinition.PlanDefinitionProcessor;
 import org.opencds.cqf.terminology.ValueSetsProcessor;
 import org.opencds.cqf.testcase.TestCaseProcessor;
 import org.opencds.cqf.utilities.BundleUtils;
@@ -176,6 +177,16 @@ public class IGProcessor {
             FhirContext fhirContext, String fhirUri) {
         Encoding encoding = Encoding.JSON;
 
+        bundleMeasures(refreshedLibraryNames, igPath, includeDependencies, includeTerminology, includePatientScenarios,
+                fhirContext, fhirUri, encoding);
+
+        bundlePlanDefinitions(refreshedLibraryNames, igPath, includeDependencies, includeTerminology, includePatientScenarios,
+                fhirContext, fhirUri, encoding);
+    }
+
+    private static void bundleMeasures(ArrayList<String> refreshedLibraryNames, String igPath, Boolean includeDependencies,
+            Boolean includeTerminology, Boolean includePatientScenarios, FhirContext fhirContext, String fhirUri,
+            Encoding encoding) {
         // The set to bundle should be the union of the successfully refreshed Measures
         // and Libraries
         // Until we have the ability to refresh Measures, the set is the union of
@@ -268,6 +279,104 @@ public class IGProcessor {
         failedMeasures.removeAll(measurePathLibraryNames);
         message += "\r\n" + failedMeasures.size() + " Measures failed refresh:";
         for (String failed : failedMeasures) {
+            message += "\r\n     " + failed + " FAILED";
+        }
+
+        LogUtils.info(message);
+    }
+
+    private static void bundlePlanDefinitions(ArrayList<String> refreshedLibraryNames, String igPath, Boolean includeDependencies,
+            Boolean includeTerminology, Boolean includePatientScenarios, FhirContext fhirContext, String fhirUri,
+            Encoding encoding) {
+        
+        HashSet<String> planDefinitionSourcePaths = IOUtils.getPlanDefinitionPaths(fhirContext);
+        List<String> planDefinitionPathLibraryNames = new ArrayList<String>();
+        for (String planDefinitionSourcePath : planDefinitionSourcePaths) {
+            planDefinitionPathLibraryNames
+                    .add(FilenameUtils.getBaseName(planDefinitionSourcePath).replace(PlanDefinitionProcessor.ResourcePrefix, ""));
+        }
+
+        List<String> bundledPlanDefinitions = new ArrayList<String>();
+        for (String refreshedLibraryName : refreshedLibraryNames) {
+            try {
+                if (!planDefinitionPathLibraryNames.contains(refreshedLibraryName)) {
+                    continue;
+                }
+
+                Map<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+
+                String refreshedLibraryFileName = IOUtils.formatFileName(refreshedLibraryName, encoding);
+                String librarySourcePath;
+                try {
+                    librarySourcePath = IOUtils.getLibraryPathAssociatedWithCqlFileName(refreshedLibraryFileName, fhirContext);
+                } catch (Exception e) {
+                    LogUtils.putWarning(refreshedLibraryName, e.getMessage());
+                    continue;
+                } finally {
+                    LogUtils.warn(refreshedLibraryName);
+                }
+                
+                String planDefinitionSourcePath = "";
+                for (String path : planDefinitionSourcePaths) {
+                    if (path.endsWith(refreshedLibraryFileName))
+                    {
+                        planDefinitionSourcePath = path;
+                    }
+                }
+
+                Boolean shouldPersist = ResourceUtils.safeAddResource(planDefinitionSourcePath, resources, fhirContext);
+                shouldPersist = shouldPersist
+                        & ResourceUtils.safeAddResource(librarySourcePath, resources, fhirContext);
+
+                String cqlFileName = IOUtils.formatFileName(refreshedLibraryName, Encoding.CQL);
+                List<String> cqlLibrarySourcePaths = IOUtils.getCqlLibraryPaths().stream()
+                    .filter(path -> path.endsWith(cqlFileName))
+                    .collect(Collectors.toList());
+                String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
+                if (includeTerminology) {
+                    shouldPersist = shouldPersist
+                            & bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding);
+                }
+
+                if (includeDependencies) {
+                    shouldPersist = shouldPersist
+                            & bundleDependencies(librarySourcePath, fhirContext, resources, encoding);
+                }
+
+                if (includePatientScenarios) {
+                    shouldPersist = shouldPersist
+                            & bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
+                }
+
+                if (shouldPersist) {
+                    String bundleDestPath = FilenameUtils.concat(getBundlesPath(igPath), refreshedLibraryName);
+                    persistBundle(igPath, bundleDestPath, refreshedLibraryName, encoding, fhirContext, new ArrayList<IAnyResource>(resources.values()), fhirUri);
+                    bundleFiles(igPath, bundleDestPath, refreshedLibraryName, planDefinitionSourcePath, librarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios);
+                    bundledPlanDefinitions.add(refreshedLibraryName);
+                }
+            } catch (Exception e) {
+                LogUtils.putWarning(refreshedLibraryName, e.getMessage());
+            } finally {
+                LogUtils.warn(refreshedLibraryName);
+            }
+        }
+        String message = "\r\n" + bundledPlanDefinitions.size() + " PlanDefinitions successfully bundled:";
+        for (String bundledPlanDefinition : bundledPlanDefinitions) {
+            message += "\r\n     " + bundledPlanDefinition + " BUNDLED";
+        }
+
+        ArrayList<String> failedPlanDefinitions = new ArrayList<>(planDefinitionPathLibraryNames);
+        planDefinitionPathLibraryNames.removeAll(bundledPlanDefinitions);
+        planDefinitionPathLibraryNames.retainAll(refreshedLibraryNames);
+        message += "\r\n" + planDefinitionPathLibraryNames.size() + " PlanDefinitions refreshed, but not bundled (due to issues):";
+        for (String notBundled : planDefinitionPathLibraryNames) {
+            message += "\r\n     " + notBundled + " REFRESHED";
+        }
+
+        failedPlanDefinitions.removeAll(bundledPlanDefinitions);
+        failedPlanDefinitions.removeAll(planDefinitionPathLibraryNames);
+        message += "\r\n" + failedPlanDefinitions.size() + " PlanDefinitions failed refresh:";
+        for (String failed : failedPlanDefinitions) {
             message += "\r\n     " + failed + " FAILED";
         }
 

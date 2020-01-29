@@ -29,7 +29,9 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.parser.IParser;
 
 import org.opencds.cqf.igtools.IGProcessor;
@@ -521,5 +523,43 @@ public class IOUtils
 
     public static String getTestsPath(String igPath) {
         return FilenameUtils.concat(igPath, IGProcessor.testCasePathElement);
+    }
+
+	private static HashSet<String> planDefinitionPaths = new HashSet<String>();
+    public static HashSet<String> getPlanDefinitionPaths(FhirContext fhirContext) {
+        if (planDefinitionPaths.isEmpty()) {
+            System.out.println("Reading measurereports");
+            setupPlanDefinitionPaths(fhirContext);
+        }
+        return planDefinitionPaths;
+    }
+    private static void setupPlanDefinitionPaths(FhirContext fhirContext) {
+        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        for(String dir : resourceDirectories) {
+            for(String path : IOUtils.getFilePaths(dir, true))
+            {
+                try {
+                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                } catch (Exception e) {
+                    //TODO: handle exception
+                }
+            }
+            RuntimeResourceDefinition planDefinitionDefinition = (RuntimeResourceDefinition)getResourceDefinition(fhirContext, "PlanDefinition");
+            String planDefinitionClassName = planDefinitionDefinition.getImplementingClass().getName();
+            resources.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .filter(entry ->  planDefinitionClassName.equals(entry.getValue().getClass().getName()))
+                .forEach(entry -> planDefinitionPaths.add(entry.getKey()));
+        }
+    }
+    
+    public static RuntimeResourceDefinition getResourceDefinition(FhirContext fhirContext, String ResourceName) {
+        RuntimeResourceDefinition def = fhirContext.getResourceDefinition(ResourceName);
+        return def;
+    }
+
+    public static BaseRuntimeElementDefinition getElementDefinition(FhirContext fhirContext, String ElementName) {
+        BaseRuntimeElementDefinition<?> def = fhirContext.getElementDefinition(ElementName);
+        return def;
     }
 }
