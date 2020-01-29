@@ -32,8 +32,8 @@ public class STU3LibraryProcessor {
         if (libraryExists) {            
             refreshLibrary(resource, cqlContentPath, IOUtils.getParentDirectoryPath(libraryPath), encoding, includeVersion, translator, fhirContext);
         } else {
-            Optional<String> anyOtherLibraryDirectory = IOUtils.getLibraryPaths(fhirContext).stream().findFirst();
-            String parentDirectory = anyOtherLibraryDirectory.isPresent() ? anyOtherLibraryDirectory.get() : IOUtils.getParentDirectoryPath(cqlContentPath);
+            Optional<String> anyOtherLibrary = IOUtils.getLibraryPaths(fhirContext).stream().findFirst();
+            String parentDirectory = anyOtherLibrary.isPresent() ? IOUtils.getParentDirectoryPath(anyOtherLibrary.get()) : IOUtils.getParentDirectoryPath(cqlContentPath);
             generateLibrary(cqlContentPath, parentDirectory, encoding, includeVersion, translator, fhirContext);
         }
       
