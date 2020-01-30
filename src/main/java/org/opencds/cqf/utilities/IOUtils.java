@@ -560,6 +560,34 @@ public class IOUtils
                 .forEach(entry -> planDefinitionPaths.add(entry.getKey()));
         }
     }
+
+    private static HashSet<String> activityDefinitionPaths = new HashSet<String>();
+    public static HashSet<String> getActivityDefinitionPaths(FhirContext fhirContext) {
+        if (activityDefinitionPaths.isEmpty()) {
+            System.out.println("Reading activitydefinitions");
+            setupActivityDefinitionPaths(fhirContext);
+        }
+        return activityDefinitionPaths;
+    }
+    private static void setupActivityDefinitionPaths(FhirContext fhirContext) {
+        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        for(String dir : resourceDirectories) {
+            for(String path : IOUtils.getFilePaths(dir, true))
+            {
+                try {
+                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                } catch (Exception e) {
+                    //TODO: handle exception
+                }
+            }
+            RuntimeResourceDefinition activityDefinitionDefinition = (RuntimeResourceDefinition)getResourceDefinition(fhirContext, "ActivityDefinition");
+            String activityDefinitionClassName = activityDefinitionDefinition.getImplementingClass().getName();
+            resources.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .filter(entry ->  activityDefinitionClassName.equals(entry.getValue().getClass().getName()))
+                .forEach(entry -> activityDefinitionPaths.add(entry.getKey()));
+        }
+    }
     
     public static RuntimeResourceDefinition getResourceDefinition(FhirContext fhirContext, String ResourceName) {
         RuntimeResourceDefinition def = fhirContext.getResourceDefinition(ResourceName);

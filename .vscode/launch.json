@@ -37,6 +37,7 @@
                 "-rp=C:\\src\\GitHub\\opioid-cds\\input\\pagecontent\\cql",
                 "-rp=C:\\src\\GitHub\\opioid-cds\\input\\vocabulary",
                 "-iv=fhir3",
+                "-e=xml",
                 "-t",
                 "-d",
                 "-v",
