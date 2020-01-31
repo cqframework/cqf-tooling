@@ -36,6 +36,7 @@
                 "-rp=C:\\src\\GitHub\\opioid-cds\\input\\resources",
                 "-rp=C:\\src\\GitHub\\opioid-cds\\input\\pagecontent\\cql",
                 "-rp=C:\\src\\GitHub\\opioid-cds\\input\\vocabulary",
+                "-fs=http://localhost:8080/cqf-ruler-dstu3/fhir",
                 "-iv=fhir3",
                 "-e=xml",
                 "-t",
@@ -54,8 +55,8 @@
                 "-RefreshIG",
                 "-ip=C:\\src\\GitHub\\connectathon\\fhir3",
                 "-rp=C:\\src\\GitHub\\connectathon\\fhir3\\resources",
+                "-rp=C:\\src\\GitHub\\connectathon\\fhir3\\cql",
                 "-iv=fhir3",
-                "-t",
                 "-d",
                 "-v",
                 "-p"

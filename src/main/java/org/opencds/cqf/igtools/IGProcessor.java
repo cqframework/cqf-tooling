@@ -605,11 +605,11 @@ public class IGProcessor {
     public static String getBundlesPath(String igPath) {
         return FilenameUtils.concat(igPath, bundlePathElement);
     }
-    public static final String cqlLibraryPathElement = "cql/";
-    public static final String libraryPathElement = "resources/library/";
-    public static final String measurePathElement = "resources/measure/";
-    public static final String valuesetsPathElement = "resources/valuesets/";
-    public static final String testCasePathElement = "tests/";
+    public static final String cqlLibraryPathElement = "input/pagecontent/cql/";
+    public static final String libraryPathElement = "input/resources/library/";
+    public static final String measurePathElement = "input/resources/measure/";
+    public static final String valuesetsPathElement = "input/vocabulary/valueset/";
+    public static final String testCasePathElement = "examples";
     
     private static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, ArrayList<String> resourcePaths) {                
         File directory = new File(getBundlesPath(igPath));

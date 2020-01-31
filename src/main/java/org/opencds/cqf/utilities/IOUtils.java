@@ -414,6 +414,16 @@ public class IOUtils
         return result;
     }    
 
+    public static List<String> putAllInListIfAbsent(List<String> values, List<String> list)
+    {
+        for (String value : values) {
+            if (!list.contains(value)) {
+                list.add(value);
+            }
+        }
+        return list;
+    }
+
     public static List<String> putInListIfAbsent(String value, List<String> list)
     {
         if (!list.contains(value)) {
