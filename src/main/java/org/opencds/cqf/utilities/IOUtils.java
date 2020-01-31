@@ -285,7 +285,8 @@ public class IOUtils
         Boolean result = false;
         try
         {
-            result = FilenameUtils.getName(FilenameUtils.getFullPathNoEndSeparator(igPath)).equals(pathElement);
+            String baseElement = FilenameUtils.getBaseName(igPath).equals("") ? FilenameUtils.getBaseName(FilenameUtils.getFullPathNoEndSeparator(igPath)) : FilenameUtils.getBaseName(igPath);
+            result = baseElement.equals(pathElement);
         }
         catch (Exception e) {}
         return result;
