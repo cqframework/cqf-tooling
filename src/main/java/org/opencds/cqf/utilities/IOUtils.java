@@ -280,12 +280,12 @@ public class IOUtils
         }
     }
 
-    public static Boolean pathIncludesElement(String igPath, String pathElement)
+    public static Boolean pathEndsWithElement(String igPath, String pathElement)
     {
         Boolean result = false;
         try
         {
-            result = FilenameUtils.getName(igPath).equals(pathElement);
+            result = FilenameUtils.getName(FilenameUtils.getFullPathNoEndSeparator(igPath)).equals(pathElement);
         }
         catch (Exception e) {}
         return result;
