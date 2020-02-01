@@ -49,7 +49,7 @@
             "args": [
                 "-RefreshIG",
                 "-ip=/src/connectathon/fhir4/",
-                "-fs=http://localhost:8080/r4/fhir/",
+                "-fs=http://localhost:8080/cqf-ruler-r4/fhir/",
                 "-t",
                 "-d",
                 "-v",
