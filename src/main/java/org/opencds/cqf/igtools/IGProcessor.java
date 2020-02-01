@@ -418,11 +418,11 @@ public class IGProcessor {
 
     public static IGVersion getIgVersion(String igPath)
     {
-        if (IOUtils.pathIncludesElement(igPath, IGVersion.FHIR3.toString()))
+        if (IOUtils.pathEndsWithElement(igPath, IGVersion.FHIR3.toString()))
         {
             return IGVersion.FHIR3;
         }
-        else if (IOUtils.pathIncludesElement(igPath, IGVersion.FHIR4.toString()))
+        else if (IOUtils.pathEndsWithElement(igPath, IGVersion.FHIR4.toString()))
         {
             return IGVersion.FHIR4;
         }

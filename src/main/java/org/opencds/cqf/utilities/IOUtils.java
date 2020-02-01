@@ -150,7 +150,7 @@ public class IOUtils
     public static IAnyResource readResource(String path, FhirContext fhirContext, Boolean safeRead) 
     {        
         Encoding encoding = getEncoding(path);
-        if (encoding == Encoding.UNKNOWN) {
+        if (encoding == Encoding.UNKNOWN || encoding == Encoding.CQL) {
             return null;
         }
 
@@ -267,7 +267,7 @@ public class IOUtils
         return Encoding.parse(FilenameUtils.getExtension(path));
     }
 
-    //users should protect against Encoding.UNKNOWN
+    //users should protect against Encoding.UNKNOWN or Enconding.CQL
     private static IParser getParser(Encoding encoding, FhirContext fhirContext) 
     {
         switch (encoding) {
@@ -280,12 +280,13 @@ public class IOUtils
         }
     }
 
-    public static Boolean pathIncludesElement(String igPath, String pathElement)
+    public static Boolean pathEndsWithElement(String igPath, String pathElement)
     {
         Boolean result = false;
         try
         {
-            result = FilenameUtils.getName(igPath).equals(pathElement);
+            String baseElement = FilenameUtils.getBaseName(igPath).equals("") ? FilenameUtils.getBaseName(FilenameUtils.getFullPathNoEndSeparator(igPath)) : FilenameUtils.getBaseName(igPath);
+            result = baseElement.equals(pathElement);
         }
         catch (Exception e) {}
         return result;
