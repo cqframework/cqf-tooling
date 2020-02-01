@@ -68,7 +68,10 @@ public class RefreshIGArgumentProcessor {
         String igPath = (String)options.valueOf(IG_PATH_OPTIONS[0]);
         List<String> resourcePaths = (List<String>)options.valuesOf(RESOURCE_PATH_OPTIONS[0]);
         //could not easily use the built-in default here because it is based on the value of the igPath argument.
-        String igVersion = ArgUtils.defaultValue(options, IG_VERSION_OPTIONS[0], IGProcessor.getIgVersion(igPath).toString());
+        String igVersion = (String)options.valueOf(IG_VERSION_OPTIONS[0]);
+        if(igVersion == null) {
+            igVersion = ArgUtils.defaultValue(options, IG_VERSION_OPTIONS[0], IGProcessor.getIgVersion(igPath).toString());
+        }
         Boolean includeELM = options.has(INCLUDE_ELM_OPTIONS[0]);  
         Boolean includeDependencies = options.has(INCLUDE_DEPENDENCY_LIBRARY_OPTIONS[0]);
         Boolean includeTerminology = options.has(INCLUDE_TERMINOLOGY_OPTIONS[0]);

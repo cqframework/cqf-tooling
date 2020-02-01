@@ -1,7 +1,11 @@
 package org.opencds.cqf.igtools;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -416,18 +420,53 @@ public class IGProcessor {
                 throw new IllegalArgumentException("Unknown IG version: " + igVersion);
         }     
     }
+    
+    public static IGVersion getIgVersion(String igPath){
+        IGVersion igVersion = null;
+        List<File> igPathFiles = IOUtils.getFilePaths(igPath, false).stream()
+            .map(path -> new File(path))
+            .collect(Collectors.toList());
+        for (File file : igPathFiles) {
+            if (FilenameUtils.getExtension(file.getName()).equals("ini")) {
+                igVersion = tryToReadIni(file);
+            }
+        }
+        if (igVersion == null) {
+            throw new IllegalArgumentException("IG version must be configured in ig.ini or provided as an argument.");
+        }
+        else return igVersion;
+    }
 
-    public static IGVersion getIgVersion(String igPath)
-    {
-        if (IOUtils.pathEndsWithElement(igPath, IGVersion.FHIR3.toString()))
-        {
-            return IGVersion.FHIR3;
+    private static IGVersion tryToReadIni(File file) {
+        try {
+            InputStream inputStream = new FileInputStream(file);
+            String igIniContent = new BufferedReader(new InputStreamReader(inputStream))
+                .lines().collect(Collectors.joining("\n"));
+            String[] contentLines = igIniContent.split("\n");
+            inputStream.close();
+            return parseVersion(contentLines);
+        } catch (Exception e) {
+                System.out.println(e.getMessage());
+                return null;
+            }
+    }
+
+    static final String STU3SPECIFIER = "stu3";
+    static final String DSTU3SPECIFIER = "dstu3";
+    static final String R4SPECIFIER = "r4";
+    private static IGVersion parseVersion(String[] contentLines) {
+        for (String line : contentLines) {
+            if (line.toLowerCase().startsWith("fhirspec"))
+            {
+                if (line.toLowerCase().contains(R4SPECIFIER)){
+                    return IGVersion.FHIR4;
+                }
+                else if (line.toLowerCase().contains(STU3SPECIFIER) || line.toLowerCase().contains(DSTU3SPECIFIER)) {
+                    return IGVersion.FHIR3;
+                }
+            }
         }
-        else if (IOUtils.pathEndsWithElement(igPath, IGVersion.FHIR4.toString()))
-        {
-            return IGVersion.FHIR4;
-        }
-        throw new IllegalArgumentException("IG version not found in IG Path.");
+        return null;
     }
 
     public static final String bundlePathElement = "bundles/";
