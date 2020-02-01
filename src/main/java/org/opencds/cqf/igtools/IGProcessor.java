@@ -160,7 +160,8 @@ public class IGProcessor {
                 R4LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, Encoding.JSON, versioned);
                 refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
             } catch (Exception e) {
-                LogUtils.putWarning(path, e.getMessage());
+                //TODO: need to protect against this everywhere
+                LogUtils.putWarning(path, e.getMessage() == null ? e.toString() : e.getMessage());
             }
             LogUtils.warn(path);
         }
