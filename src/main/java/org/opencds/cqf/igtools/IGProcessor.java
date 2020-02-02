@@ -412,11 +412,12 @@ public class IGProcessor {
                         .findFirst();
                     if (matchingMeasureReportPath.isPresent()) {
                         IAnyResource measureReport = IOUtils.readResource(testContentPath, fhirContext);
-                        if (!measureReport.getId().endsWith("-expectedresults")) {
+                        if (!measureReport.getId().startsWith("measurereport") || !measureReport.getId().endsWith("-expectedresults")) {
                             Object measureReportStatus = ResourceUtils.resolveProperty(measureReport, "status", fhirContext);
                             String measureReportStatusValue = ResourceUtils.resolveProperty(measureReportStatus, "value", fhirContext).toString();
                             if (measureReportStatusValue.equals("COMPLETE")) {
-                                measureReport.setId(FilenameUtils.getBaseName(testContentPath) + "-expectedresults");
+                                String expectedResultsId = FilenameUtils.getBaseName(testContentPath) + (FilenameUtils.getBaseName(testContentPath).endsWith("-expectedresults") ? "" : "-expectedresults");
+                                measureReport.setId(expectedResultsId);
                             }
                         }
                         IOUtils.writeResource(measureReport, destPath, IOUtils.Encoding.JSON, fhirContext);
