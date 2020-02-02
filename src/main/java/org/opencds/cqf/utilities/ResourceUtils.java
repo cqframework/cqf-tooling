@@ -14,12 +14,22 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseElement;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.library.GenericLibrarySourceProvider;
 import org.opencds.cqf.terminology.ValueSetsProcessor;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
+import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 
 public class ResourceUtils 
 {
@@ -299,5 +309,88 @@ public class ResourceUtils
           LogUtils.putWarning(path, e.getMessage());
       }  
       return added;
-  } 
+    } 
+
+    public static Object resolveProperty(Object target, String path, FhirContext fhirContext) {
+      if (target == null) {
+          return null;
+      }
+
+      IBase base = (IBase) target;
+      BaseRuntimeElementCompositeDefinition definition;
+      if (base instanceof IPrimitiveType) {
+          return path.equals("value") ? ((IPrimitiveType) target).getValue() : target;
+      }
+      else {
+          definition = resolveRuntimeDefinition(base, fhirContext);
+      }
+
+      BaseRuntimeChildDefinition child = definition.getChildByName(path);
+      if (child == null) {
+          child = resolveChoiceProperty(definition, path);
+      }
+
+      List<IBase> values = child.getAccessor().getValues(base);
+
+      if (values == null || values.isEmpty()) {
+          return null;
+      }
+
+      if (child instanceof RuntimeChildChoiceDefinition && !child.getElementName().equalsIgnoreCase(path)) {
+          if (!values.get(0).getClass().getSimpleName().equalsIgnoreCase(child.getChildByName(path).getImplementingClass().getSimpleName()))
+          {
+              return null;
+          }
+      }
+      //Hack to get DecimalType to work
+      if (child.getMax() == 1 && values.get(0) instanceof org.hl7.fhir.dstu3.model.DecimalType) {
+          return resolveProperty(values.get(0), "value", fhirContext);
+      }
+      if (child.getMax() == 1 && values.get(0) instanceof org.hl7.fhir.r4.model.DecimalType) {
+          return resolveProperty(values.get(0), "value", fhirContext);
+      }
+      return child.getMax() < 1 ? values : values.get(0);
+    }
+
+    public static BaseRuntimeElementCompositeDefinition resolveRuntimeDefinition(IBase base, FhirContext fhirContext) {
+      if (base instanceof IAnyResource) {
+        return fhirContext.getResourceDefinition((IAnyResource) base);
+      }
+
+      else if (base instanceof IBaseBackboneElement || base instanceof IBaseElement) {
+        return (BaseRuntimeElementCompositeDefinition) fhirContext.getElementDefinition(base.getClass());
+      }
+
+      else if (base instanceof ICompositeType) {
+        return (RuntimeCompositeDatatypeDefinition) fhirContext.getElementDefinition(base.getClass());
+      }
+
+      //should be UnkownType
+      throw new Error(String.format("Unable to resolve the runtime definition for %s", base.getClass().getName()));
+    }
+
+    public static BaseRuntimeChildDefinition resolveChoiceProperty(BaseRuntimeElementCompositeDefinition definition, String path) {
+      for (Object child :  definition.getChildren()) {
+        if (child instanceof RuntimeChildChoiceDefinition) {
+          RuntimeChildChoiceDefinition choiceDefinition = (RuntimeChildChoiceDefinition) child;
+
+          if (choiceDefinition.getElementName().startsWith(path)) {
+              return choiceDefinition;
+          }
+        }
+      }
+
+      //UnkownType
+      throw new Error(String.format("Unable to resolve path %s for %s", path, definition.getName()));
+    }
+
+    public static RuntimeResourceDefinition getResourceDefinition(FhirContext fhirContext, String ResourceName) {
+        RuntimeResourceDefinition def = fhirContext.getResourceDefinition(ResourceName);
+        return def;
+    }
+
+    public static BaseRuntimeElementDefinition getElementDefinition(FhirContext fhirContext, String ElementName) {
+        BaseRuntimeElementDefinition<?> def = fhirContext.getElementDefinition(ElementName);
+        return def;
+    }
 }

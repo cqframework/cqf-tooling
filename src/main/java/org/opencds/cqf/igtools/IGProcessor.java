@@ -1,16 +1,23 @@
 package org.opencds.cqf.igtools;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
+import org.hl7.fhir.MeasureReport;
+import org.hl7.fhir.MeasureReportStatus;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.library.R4LibraryProcessor;
 import org.opencds.cqf.library.STU3LibraryProcessor;
@@ -25,6 +32,7 @@ import org.opencds.cqf.utilities.ResourceUtils;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 
 public class IGProcessor {
     public enum IGVersion {
@@ -387,6 +395,7 @@ public class IGProcessor {
         }        
     }
 
+    //TODO: the bundle needs to have -expectedresults added too
     public static void bundleTestCaseFiles(String igPath, String libraryName, String destPath, FhirContext fhirContext) {    
         String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(igPath, testCasePathElement), libraryName);
         List<String> testCasePaths = IOUtils.getFilePaths(igTestCasePath, false);
@@ -398,8 +407,25 @@ public class IGProcessor {
             for (String testCaseDirectory : testCaseDirectories) {
                 List<String> testContentPaths = IOUtils.getFilePaths(testCaseDirectory, false);
                 for (String testContentPath : testContentPaths) {
-                    String bundleTestContentDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testContentPath));
-                    IOUtils.copyFile(testContentPath, bundleTestContentDestPath);
+                    Optional<String> matchingMeasureReportPath = IOUtils.getMeasureReportPaths(fhirContext).stream()
+                        .filter(path -> path.equals(testContentPath))
+                        .findFirst();
+                    if (matchingMeasureReportPath.isPresent()) {
+                        IAnyResource measureReport = IOUtils.readResource(testContentPath, fhirContext);
+                        if (!measureReport.getId().startsWith("measurereport") || !measureReport.getId().endsWith("-expectedresults")) {
+                            Object measureReportStatus = ResourceUtils.resolveProperty(measureReport, "status", fhirContext);
+                            String measureReportStatusValue = ResourceUtils.resolveProperty(measureReportStatus, "value", fhirContext).toString();
+                            if (measureReportStatusValue.equals("COMPLETE")) {
+                                String expectedResultsId = FilenameUtils.getBaseName(testContentPath) + (FilenameUtils.getBaseName(testContentPath).endsWith("-expectedresults") ? "" : "-expectedresults");
+                                measureReport.setId(expectedResultsId);
+                            }
+                        }
+                        IOUtils.writeResource(measureReport, destPath, IOUtils.Encoding.JSON, fhirContext);
+                    }
+                    else {
+                        String bundleTestContentDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testContentPath));
+                        IOUtils.copyFile(testContentPath, bundleTestContentDestPath);
+                    }
                 }
             }            
         }
@@ -416,18 +442,53 @@ public class IGProcessor {
                 throw new IllegalArgumentException("Unknown IG version: " + igVersion);
         }     
     }
+    
+    public static IGVersion getIgVersion(String igPath){
+        IGVersion igVersion = null;
+        List<File> igPathFiles = IOUtils.getFilePaths(igPath, false).stream()
+            .map(path -> new File(path))
+            .collect(Collectors.toList());
+        for (File file : igPathFiles) {
+            if (FilenameUtils.getExtension(file.getName()).equals("ini")) {
+                igVersion = tryToReadIni(file);
+            }
+        }
+        if (igVersion == null) {
+            throw new IllegalArgumentException("IG version must be configured in ig.ini or provided as an argument.");
+        }
+        else return igVersion;
+    }
 
-    public static IGVersion getIgVersion(String igPath)
-    {
-        if (IOUtils.pathEndsWithElement(igPath, IGVersion.FHIR3.toString()))
-        {
-            return IGVersion.FHIR3;
+    private static IGVersion tryToReadIni(File file) {
+        try {
+            InputStream inputStream = new FileInputStream(file);
+            String igIniContent = new BufferedReader(new InputStreamReader(inputStream))
+                .lines().collect(Collectors.joining("\n"));
+            String[] contentLines = igIniContent.split("\n");
+            inputStream.close();
+            return parseVersion(contentLines);
+        } catch (Exception e) {
+                System.out.println(e.getMessage());
+                return null;
+            }
+    }
+
+    static final String STU3SPECIFIER = "stu3";
+    static final String DSTU3SPECIFIER = "dstu3";
+    static final String R4SPECIFIER = "r4";
+    private static IGVersion parseVersion(String[] contentLines) {
+        for (String line : contentLines) {
+            if (line.toLowerCase().startsWith("fhirspec"))
+            {
+                if (line.toLowerCase().contains(R4SPECIFIER)){
+                    return IGVersion.FHIR4;
+                }
+                else if (line.toLowerCase().contains(STU3SPECIFIER) || line.toLowerCase().contains(DSTU3SPECIFIER)) {
+                    return IGVersion.FHIR3;
+                }
+            }
         }
-        else if (IOUtils.pathEndsWithElement(igPath, IGVersion.FHIR4.toString()))
-        {
-            return IGVersion.FHIR4;
-        }
-        throw new IllegalArgumentException("IG version not found in IG Path.");
+        return null;
     }
 
     public static final String bundlePathElement = "bundles/";
