@@ -361,6 +361,7 @@ public class IGProcessor {
                     persistBundle(igPath, bundleDestPath, refreshedLibraryName, encoding, fhirContext, new ArrayList<IAnyResource>(resources.values()), fhirUri);
                     bundleFiles(igPath, bundleDestPath, refreshedLibraryName, planDefinitionSourcePath, librarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion);
                     addActivityDefinitionFilesToBundle(igPath, bundleDestPath, refreshedLibraryName, activityDefinitionPaths, fhirContext, encoding);
+                    addRequestAndResponseFilesToBundle(igPath, bundleDestPath, refreshedLibraryName);
                     bundledPlanDefinitions.add(refreshedLibraryName);
                 }
             } catch (Exception e) {
@@ -390,6 +391,38 @@ public class IGProcessor {
         }
 
         LogUtils.info(message);
+    }
+
+    public static final String requestsPathElement = "input/pagecontent/requests/";  
+    public static final String responsesPathElement = "input/pagecontent/responses/";   
+    public static final String requestFilesPathElement = "requests/";  
+    public static final String responseFilesPathElement = "responses/"; 
+    private static void addRequestAndResponseFilesToBundle(String igPath, String bundleDestPath, String libraryName) {
+        String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, libraryName + "-" + bundleFilesPathElement);
+        String requestFilesPath = FilenameUtils.concat(igPath, requestsPathElement);
+        String responseFilesPath = FilenameUtils.concat(igPath, responsesPathElement);
+        String requestFilesDirectory = FilenameUtils.concat(bundleDestFilesPath, requestFilesPathElement);
+        IOUtils.initializeDirectory(requestFilesDirectory);
+        String responseFilesDirectory = FilenameUtils.concat(bundleDestFilesPath, responseFilesPathElement);
+        IOUtils.initializeDirectory(responseFilesDirectory);
+        List<String> requestDirectories = IOUtils.getDirectoryPaths(requestFilesPath, false);
+        for (String dir : requestDirectories) {
+            if (dir.endsWith(libraryName)) {
+                List<String> requestPaths = IOUtils.getFilePaths(dir, true);
+                for (String path : requestPaths) {
+                    IOUtils.copyFile(path, FilenameUtils.concat(requestFilesDirectory, FilenameUtils.getName(path)));
+                }
+            }
+        }
+        List<String> responseDirectories = IOUtils.getDirectoryPaths(responseFilesPath, false);
+        for (String dir : responseDirectories) {
+            if (dir.endsWith(libraryName)) {
+                List<String> responsePaths = IOUtils.getFilePaths(dir, true);
+                for (String path : responsePaths) {
+                    IOUtils.copyFile(path, FilenameUtils.concat(responseFilesDirectory, FilenameUtils.getName(path)));
+                }
+            } 
+        }
     }
 
     public static Boolean bundleValueSets(String cqlContentPath, String igPath, FhirContext fhirContext,
@@ -609,7 +642,7 @@ public class IGProcessor {
     public static final String libraryPathElement = "input/resources/library/";
     public static final String measurePathElement = "input/resources/measure/";
     public static final String valuesetsPathElement = "input/vocabulary/valueset/";
-    public static final String testCasePathElement = "examples";
+    public static final String testCasePathElement = "examples"; //"tests"; 
     
     private static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, ArrayList<String> resourcePaths) {                
         File directory = new File(getBundlesPath(igPath));
