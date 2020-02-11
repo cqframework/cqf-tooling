@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.Operation;
 import org.opencds.cqf.terminology.SpreadsheetHelper;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -33,6 +34,7 @@ public class Processor extends Operation {
     private Map<String, String> supportedCodeSystems = new HashMap<String, String>();
 
     private Map<String, DictionaryElement> elementMap = new HashMap<String, DictionaryElement>();
+    private List<StructureDefinition> extensions = new ArrayList<StructureDefinition>();
     private List<StructureDefinition> profiles = new ArrayList<StructureDefinition>();
     private List<CodeSystem> codeSystems = new ArrayList<CodeSystem>();
     private List<ValueSet> valueSets = new ArrayList<ValueSet>();
@@ -89,6 +91,7 @@ public class Processor extends Operation {
     private void processScope(Workbook workbook, String scope) {
         // reset variables
         elementMap = new HashMap<>();
+        extensions = new ArrayList<>();
         profiles = new ArrayList<>();
         codeSystems = new ArrayList<>();
         valueSets = new ArrayList<>();
@@ -108,6 +111,7 @@ public class Processor extends Operation {
         processElementMap();
 
         // write all resources
+        //writeExtensions(scopePath);
         writeProfiles(scopePath);
         writeCodeSystems(scopePath);
         writeValueSets(scopePath);
@@ -137,6 +141,15 @@ public class Processor extends Operation {
         else {
             return getOutputPath() + "/" + scope;
         }
+    }
+
+    private void ensureExtensionsPath(String scopePath) {
+        String extensionsPath = getProfilesPath(scopePath);
+        ensurePath(extensionsPath);
+    }
+
+    private String getExtensionsPath(String scopePath) {
+        return scopePath + "/input/extensions";
     }
 
     private void ensureProfilesPath(String scopePath) {
@@ -428,6 +441,7 @@ public class Processor extends Operation {
                     case "Slice":
                     case "UI Element":
                         // TODO: Do we need to do anything with these?
+                        // Answer: No, this should be ignored. Per Joe and Jennifer
                         break;
                     default:
                         // Currently unsupported/undocumented
@@ -437,8 +451,25 @@ public class Processor extends Operation {
         }
     }
 
-    private boolean shouldCreateProfile(String type) {
+    private boolean shouldCreateExtension(String baseProfile) {
+        if (baseProfile == null) {
+            return false;
+        }
+
+        switch (baseProfile.toLowerCase().trim()) {
+            case "extension needed":
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private boolean shouldCreateProfile(String type, String baseProfile) {
         if (type == null) {
+            return false;
+        }
+
+        if (baseProfile.toLowerCase().trim().equals("extension needed")) {
             return false;
         }
 
@@ -448,6 +479,7 @@ public class Processor extends Operation {
             case "coding - select one":
             case "coding - select all that apply":
             case "date":
+            case "humanname":
             case "image":
             case "integer":
             case "note":
@@ -477,8 +509,10 @@ public class Processor extends Operation {
 
     private void processElementMap() {
         for (DictionaryElement element : elementMap.values()) {
-            if (shouldCreateProfile(element.getType())) {
+            if (shouldCreateProfile(element.getType(), element.getFhirType().getBaseProfile())) {
                 profiles.add(createProfile(element));
+            } else if (shouldCreateExtension(element.getType())) {
+                extensions.add(createExtension(element));
             }
         }
     }
@@ -524,6 +558,8 @@ public class Processor extends Operation {
                 return "date";
             case "datetime":
                 return "dateTime";
+            case "humanname":
+                return "HumanName";
             case "time":
                 return "time";
             case "checkbox":
@@ -534,6 +570,7 @@ public class Processor extends Operation {
                 return "decimal";
             case "quantity":
                 return "Quantity";
+            case "codeableconcept":
             case "coding":
             case "coding - select one":
             case "coding - select all that apply":
@@ -554,6 +591,18 @@ public class Processor extends Operation {
         }
     }
 
+    private String toFhirPatientType(String type) {
+        String fhirType = toFhirType(type);
+        switch (fhirType) {
+            case "markdown": return "string";
+            default: return fhirType;
+        }
+    }
+
+    private StructureDefinition createExtension(DictionaryElement element) {
+        throw new NotImplementedException();
+    }
+
     private StructureDefinition createProfile(DictionaryElement element) {
         String resourceType = element.getFhirType().getResourceType();
         String codePath = null;
@@ -564,14 +613,23 @@ public class Processor extends Operation {
                 codePath = "code";
                 choicesPath = element.getFhirType().getResourcePath(); //"value[x]";
                 break;
-            case "Patient":
-            case "Coverage":
-            case "Encounter":
             case "Appointment":
+            case "CarePlan":
+            case "Communication":
+            case "Condition":
+            case "Coverage":
+            case "DeviceUseStatement":
+            case "Encounter":
+            case "HealthcareService":
             case "Medication":
+            case "MedicationAdministration":
+            case "MedicationDispense":
+            case "MedicationStatement":
+            case "OccupationalData":
+            case "Patient":
             case "Practitioner":
             case "Procedure":
-            case "Condition":
+            case "ServiceRequest":
                 choicesPath = element.getFhirType().getResourcePath();
                 break;
             default:
@@ -636,7 +694,15 @@ public class Processor extends Operation {
         ed.setMin(toBoolean(element.getRequired()) ? 1 : 0);
         ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
         ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
-        tr.setCode(toFhirObservationType(element.getType()));
+
+        if (resourceType.equals("Observation")) {
+            tr.setCode(toFhirObservationType(element.getType()));
+        } else if (resourceType.equals("Patient")) {
+            tr.setCode(toFhirPatientType(element.getType()));
+        } else {
+            tr.setCode(toFhirType(element.getType()));
+        }
+
         ed.addType(tr);
         ed.setMustSupport(true);
 
