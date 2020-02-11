@@ -16,7 +16,10 @@ public class DictionaryCode {
         return this.label;
     }
     public void setLabel(String label) {
-        this.label = label;
+        if (label == null) {
+            this.label = null;
+        }
+        this.label = label.replace((char)160, (char)32).trim();
     }
 
     private String display;
@@ -24,7 +27,10 @@ public class DictionaryCode {
         return this.display;
     }
     public void setDisplay(String display) {
-        this.display = display;
+        if (display == null) {
+            this.display = null;
+        }
+        this.display = display.replace((char)160, (char)32).trim();
     }
 
     private String parent;
@@ -48,7 +54,10 @@ public class DictionaryCode {
         return this.code;
     }
     public void setCode(String code) {
-        this.code = code;
+        if (code == null) {
+            this.code = null;
+        }
+        this.code = code.replace((char)160, (char)32).trim();
     }
 
     private List<CodeableConcept> terminologies;

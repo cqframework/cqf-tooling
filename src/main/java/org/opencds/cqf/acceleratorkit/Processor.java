@@ -200,8 +200,10 @@ public class Processor extends Operation {
     }
 
     private DictionaryCode getPrimaryCode(String label, Row row, HashMap<String, Integer> colIds) {
-        DictionaryCode code;
-        code = getOpenMRSCode(label, row, colIds);
+        DictionaryCode code = null;
+        if (enableOpenMRS) {
+            code = getOpenMRSCode(label, row, colIds);
+        }
         if (code == null) {
             code = getFhirCode(label, row, colIds);
         }
@@ -684,8 +686,6 @@ public class Processor extends Operation {
             valueSet.setCompose(compose);
 
             // Group by Supported Terminology System
-            //for (String codeSystemKey : supportedCodeSystems.keySet()) {
-            //    String codeSystemUrl = supportedCodeSystems.get(codeSystemKey);
             for (String codeSystemUrl : element.getCodeSystemUrls()) {
                 List<DictionaryCode> systemCodes = element.getChoicesForSystem(codeSystemUrl);
 
