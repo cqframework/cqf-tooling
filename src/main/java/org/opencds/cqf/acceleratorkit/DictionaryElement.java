@@ -101,14 +101,31 @@ public class DictionaryElement {
         }
         return this.choices;
     }
+    public List<DictionaryCode> getValidChoices() {
+        return this.getChoices().stream()
+                .filter((c) -> !c.getCode().trim().isEmpty())
+                .collect(Collectors.toList());
+    }
     public List<DictionaryCode> getChoicesForSystem(String system) {
         if (this.choices == null) {
             this.choices = new ArrayList<>();
         }
-        List<DictionaryCode> codes = this.choices.stream()
+        List<DictionaryCode> codes = this.getValidChoices().stream()
                 .filter((c) -> c.getSystem() == system)
                 .collect(Collectors.toList());
         return codes;
+    }
+
+    private ArrayList<String> codeSystemUrls;
+    public List<String> getCodeSystemUrls() {
+        if (this.codeSystemUrls == null) {
+            this.codeSystemUrls = new ArrayList<>();
+        }
+        List<String> codeSystemUrls = this.getValidChoices().stream()
+                .map((c) -> c.getSystem())
+                .distinct()
+                .collect(Collectors.toList());
+        return codeSystemUrls;
     }
 
     private String calculation;
