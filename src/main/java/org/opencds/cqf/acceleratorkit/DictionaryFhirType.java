@@ -37,7 +37,7 @@ public class DictionaryFhirType {
 
     private String baseProfile;
     public String getBaseProfile() {
-        if (this.baseProfile != null && !this.baseProfile.isEmpty() && this.baseProfile.toLowerCase() != "fhir") {
+        if (this.baseProfile != null && !this.baseProfile.isEmpty() && !this.baseProfile.toLowerCase().equals("fhir")) {
             return this.baseProfile;
         }
         return String.format("http://hl7.org/fhir/StructureDefinition/%s", this.getResourceType());
@@ -51,7 +51,7 @@ public class DictionaryFhirType {
         if (this.version != null && !this.version.isEmpty()) {
             return this.version;
         }
-        return "4.0.0";
+        return "4.0.1";
     }
     public void setVersion(String version) {
         this.version = version;
