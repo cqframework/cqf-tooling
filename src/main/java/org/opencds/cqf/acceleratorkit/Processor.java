@@ -28,6 +28,8 @@ public class Processor extends Operation {
     private String canonicalBase = "http://fhir.org/guides/who/anc-cds"; // -canonicalbase (-cb) (without trailing slash, e.g. http://fhir.org/guides/who/anc-cds)
 
     private String openMRSSystem = "http://openmrs.org/concepts";
+    // NOTE: for now, disable open MRS system/codes
+    private boolean enableOpenMRS = false;
     private Map<String, String> supportedCodeSystems = new HashMap<String, String>();
 
     private Map<String, DictionaryElement> elementMap = new HashMap<String, DictionaryElement>();
@@ -64,8 +66,9 @@ public class Processor extends Operation {
             throw new IllegalArgumentException("The path to the spreadsheet is required");
         }
 
-        // NOTE: for now, disable open MRS system/codes
-        //supportedCodeSystems.put("OpenMRS", openMRSSystem);
+        if (enableOpenMRS) {
+            supportedCodeSystems.put("OpenMRS", openMRSSystem);
+        }
         supportedCodeSystems.put("ICD-10-WHO", "http://hl7.org/fhir/sid/icd-10");
         supportedCodeSystems.put("SNOMED-CT", "http://snomed.info/sct");
         supportedCodeSystems.put("LOINC", "http://loinc.org");
@@ -301,15 +304,16 @@ public class Processor extends Operation {
                 if (choices != null && !choices.isEmpty()) {
                     choices = choices.trim();
 
-                    // NOTE: for now, disable open MRS system/codes
-                    // Open MRS choices
-                    //DictionaryCode code = getOpenMRSCode(choices, row, colIds);
-                    //if (code != null) {
-                    //    currentElement.getChoices().add(code);
-                    //}
+                    DictionaryCode code;
+                    if (enableOpenMRS) {
+                        // Open MRS choices
+                        code = getOpenMRSCode(choices, row, colIds);
+                        if (code != null) {
+                            currentElement.getChoices().add(code);
+                        }
+                    }
 
                     // FHIR choices
-                    DictionaryCode code;
                     String fhirCodeSystem = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
                     if (fhirCodeSystem != null && !fhirCodeSystem.isEmpty()) {
                         code = getFhirCode(choices, row, colIds);
@@ -637,7 +641,7 @@ public class Processor extends Operation {
         // binding and CodeSystem/ValueSet for MultipleChoice elements
         if (element.getChoices().size() > 0) {
             CodeSystem codeSystem = new CodeSystem();
-            if (element.getChoicesForSystem(openMRSSystem).size() > 0) {
+            if (enableOpenMRS && element.getChoicesForSystem(openMRSSystem).size() > 0) {
                 codeSystem.setId(sd.getId() + "-codes");
                 codeSystem.setUrl(String.format("%s/CodeSystem/%s", canonicalBase, codeSystem.getId()));
                 // TODO: version
