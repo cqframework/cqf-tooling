@@ -64,7 +64,8 @@ public class Processor extends Operation {
             throw new IllegalArgumentException("The path to the spreadsheet is required");
         }
 
-        supportedCodeSystems.put("OpenMRS", openMRSSystem);
+        // NOTE: for now, disable open MRS system/codes
+        //supportedCodeSystems.put("OpenMRS", openMRSSystem);
         supportedCodeSystems.put("ICD-10-WHO", "http://hl7.org/fhir/sid/icd-10");
         supportedCodeSystems.put("SNOMED-CT", "http://snomed.info/sct");
         supportedCodeSystems.put("LOINC", "http://loinc.org");
@@ -300,13 +301,15 @@ public class Processor extends Operation {
                 if (choices != null && !choices.isEmpty()) {
                     choices = choices.trim();
 
+                    // NOTE: for now, disable open MRS system/codes
                     // Open MRS choices
-                    DictionaryCode code = getOpenMRSCode(choices, row, colIds);
-                    if (code != null) {
-                        currentElement.getChoices().add(code);
-                    }
+                    //DictionaryCode code = getOpenMRSCode(choices, row, colIds);
+                    //if (code != null) {
+                    //    currentElement.getChoices().add(code);
+                    //}
 
                     // FHIR choices
+                    DictionaryCode code;
                     String fhirCodeSystem = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
                     if (fhirCodeSystem != null && !fhirCodeSystem.isEmpty()) {
                         code = getFhirCode(choices, row, colIds);
@@ -677,8 +680,9 @@ public class Processor extends Operation {
             valueSet.setCompose(compose);
 
             // Group by Supported Terminology System
-            for (String codeSystemKey : supportedCodeSystems.keySet()) {
-                String codeSystemUrl = supportedCodeSystems.get(codeSystemKey);
+            //for (String codeSystemKey : supportedCodeSystems.keySet()) {
+            //    String codeSystemUrl = supportedCodeSystems.get(codeSystemKey);
+            for (String codeSystemUrl : element.getCodeSystemUrls()) {
                 List<DictionaryCode> systemCodes = element.getChoicesForSystem(codeSystemUrl);
 
                 if (systemCodes.size() > 0) {
