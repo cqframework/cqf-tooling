@@ -10,10 +10,9 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
-import org.hl7.fhir.dstu3.model.StructureDefinition.TypeDerivationRule;
+import org.hl7.fhir.r4.model.StructureDefinition;
 
+import java.nio.file.Paths;
 import java.util.Map;
 
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
@@ -22,11 +21,15 @@ import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
 
 import org.opencds.cqf.Operation;
+import org.opencds.cqf.modelinfo.fhir.FHIRClassInfoBuilder;
+import org.opencds.cqf.modelinfo.fhir.FHIRModelInfoBuilder;
+import org.opencds.cqf.modelinfo.quick.QuickClassInfoBuilder;
+import org.opencds.cqf.modelinfo.quick.QuickModelInfoBuilder;
 
 public class StructureDefinitionToModelInfo extends Operation {
     @Override
     public void execute(String[] args) {
-        String inputPath = "../FHIR-Spec";
+        String inputPath = Paths.get("..", "FHIR-Spec").toString();
         if (args.length > 1) {
             inputPath = args[1];
         }
@@ -34,54 +37,66 @@ public class StructureDefinitionToModelInfo extends Operation {
         if (args.length > 2) {
             setOutputPath(args[2]);
         }
+        else {
+            setOutputPath("../cqf-tooling/src/main/resources/org/opencds/cqf/modelinfo");
+        }
 
-        String resourcePaths = "/3.0.1";
+        //String resourcePaths = "4.0.0";
+        String resourcePaths = "4.0.0;US-Core/3.0.0;QI-Core/3.3.0";
         if (args.length > 3) {
             resourcePaths = args[3];
         }
 
         // TODO : Can we autodetect this from the structure defintions?
-        String modelName = "FHIR";
+        // Yes, would need to be an extension definition on the ImplementationGuide...
+        //String modelName = "FHIR";
+        String modelName = "QUICK";
         if (args.length > 4) {
             modelName = args[4];
         }
-
-        String modelVersion = "3.0.1";
+        //String modelVersion = "4.0.0";
+        String modelVersion = "3.3.0";
         if (args.length > 5) {
-            modelName = args[5];
-        }
+            modelVersion = args[5];
+        }        
 
         ResourceLoader loader = new ResourceLoader();
         Map<String, StructureDefinition> structureDefinitions = loader.loadPaths(inputPath, resourcePaths);
 
-        Configuration config = Configuration.DefaultConfiguration;
+        ModelInfoBuilder miBuilder;
+        ModelInfo mi;
 
-        ClassInfoBuilder classInfoBuilder = new ClassInfoBuilder(Configuration.DefaultConfiguration,
-                structureDefinitions);
+        if (modelName.equals("FHIR")) {
+            ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(structureDefinitions);
+            Map<String, TypeInfo> typeInfos = ciBuilder.build();
+            ciBuilder.afterBuild();
 
-        // TODO: This build sequence is model specific. Need to refactor that.
-        System.out.println("Building Primitives");
-        classInfoBuilder.buildFor(modelName, (x -> x.getKind() == StructureDefinitionKind.PRIMITIVETYPE));
+            String fhirHelpersPath = this.getOutputPath() + "/" + modelName + "Helpers-" + modelVersion + ".cql";
+            miBuilder = new FHIRModelInfoBuilder(modelVersion, typeInfos.values(), fhirHelpersPath);
+            mi = miBuilder.build();
+        }
+        else if (modelName.equals("QUICK")) {
+            ClassInfoBuilder ciBuilder = new QuickClassInfoBuilder(structureDefinitions);
+            Map<String, TypeInfo> typeInfos = ciBuilder.build();
+            ciBuilder.afterBuild();
 
-        System.out.println("Building ComplexTypes");
-        classInfoBuilder.buildFor(modelName,
-                (x -> x.getKind() == StructureDefinitionKind.COMPLEXTYPE && (x.getBaseDefinition() == null
-                        || !x.getBaseDefinition().equals("http://hl7.org/fhir/StructureDefinition/Extension"))));
-
-        System.out.println("Building Resources");
-        classInfoBuilder.buildFor(modelName, (x -> x.getKind() == StructureDefinitionKind.RESOURCE
-                && (!x.hasDerivation() || x.getDerivation() == TypeDerivationRule.SPECIALIZATION)));
-
-        ModelInfoBuilder modelInfoBuilder = new ModelInfoBuilder();
-        ModelInfo mi = modelInfoBuilder.build(modelName, modelVersion, config,
-                classInfoBuilder.getTypeInfos().values());
+            miBuilder = new QuickModelInfoBuilder(modelVersion, typeInfos.values());
+            mi = miBuilder.build();
+        }
+        else {
+            //should blowup
+            ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(structureDefinitions);
+            Map<String, TypeInfo> typeInfos = ciBuilder.build();
+            miBuilder = new ModelInfoBuilder(typeInfos.values());
+            mi = miBuilder.build();
+        }
 
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(ModelInfo.class, TypeInfo.class, ClassInfo.class,
                     ConversionInfo.class);
 
             JAXBElement<ModelInfo> jbe = new JAXBElement<ModelInfo>(
-                    new QName("urn:hl7-org:elm-modelinfo:r1", "modelInfo", "ns4"), ModelInfo.class, null, mi);
+                    new QName("urn:hl7-org:elm-modelinfo:r1", "modelInfo"), ModelInfo.class, null, mi);
 
             // Create Marshaller
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
@@ -89,10 +104,13 @@ public class StructureDefinitionToModelInfo extends Operation {
             // Print XML String to Console
             StringWriter sw = new StringWriter();
 
-            // Write XML to StringWriter
+            //Write XML to StringWriter
+
+            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             jaxbMarshaller.marshal(jbe, sw);
 
-            writeOutput("output.xml", sw.toString());
+            String fileName = modelName + "-" + "modelinfo" + "-" + modelVersion + ".xml";
+            writeOutput(fileName, sw.toString());
         } catch (Exception e) {
             System.err.println("error" + e.getMessage());
             e.printStackTrace();
@@ -106,7 +124,6 @@ public class StructureDefinitionToModelInfo extends Operation {
         }
     }
     
-
     public static void main(String[] args) {
         Operation op = new StructureDefinitionToModelInfo();
         op.execute(args);

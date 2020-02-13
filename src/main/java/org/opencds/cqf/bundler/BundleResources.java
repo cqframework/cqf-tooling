@@ -14,6 +14,10 @@ public class BundleResources extends Operation {
     private String pathToDirectory; // -pathtodir (-ptd)
     private String version; // -version (-v) Can be dstu2, stu3, or r4
 
+    private IBaseResource theResource;
+    private List<IBaseResource> theResources = new ArrayList<>();
+    private FhirContext context;
+
     @Override
     public void execute(String[] args) {
         setOutputPath("src/main/resources/org/opencds/cqf/bundle/output"); // default
@@ -57,7 +61,6 @@ public class BundleResources extends Operation {
             throw new RuntimeException("The specified path to resource files is empty");
         }
 
-        FhirContext context;
         if (version == null) {
             context = FhirContext.forDstu3();
         }
@@ -76,37 +79,8 @@ public class BundleResources extends Operation {
                     throw new IllegalArgumentException("Unknown fhir version: " + version);
             }
         }
-
-        IBaseResource theResource;
-        List<IBaseResource> theResources = new ArrayList<>();
-        for (File resource : resources) {
-            if (resource.getPath().endsWith(".xml")) {
-                try {
-                    theResource = context.newXmlParser().parseResource(new FileReader(resource));
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e.getMessage());
-                }
-                catch (Exception e) {
-                    continue;
-                }
-            }
-            else if (resource.getPath().endsWith(".json")) {
-                try {
-                    theResource = context.newJsonParser().parseResource(new FileReader(resource));
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e.getMessage());
-                }
-                catch (Exception e) {
-                    continue;
-                }
-            }
-            else {
-                continue;
-            }
-            theResources.add(theResource);
-        }
+        
+        getResources(resources);
 
         if (context.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
             org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
@@ -144,9 +118,47 @@ public class BundleResources extends Operation {
         // TODO: add DSTU2
     }
 
+    private void getResources(File[] resources) {
+        for (File resource : resources) {
+
+            if(resource.isDirectory()) {
+                getResources(resource.listFiles());
+                continue;
+            }
+
+            if (resource.getPath().endsWith(".xml")) {
+                try {
+                    theResource = context.newXmlParser().parseResource(new FileReader(resource));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e.getMessage());
+                }
+                catch (Exception e) {
+                    continue;
+                }
+            }
+            else if (resource.getPath().endsWith(".json")) {
+                try {
+                    theResource = context.newJsonParser().parseResource(new FileReader(resource));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e.getMessage());
+                }
+                catch (Exception e) {
+                    continue;
+                }
+            }
+            else {
+                continue;
+            }
+            theResources.add(theResource);
+        }
+    }
+
+
     // Output
     public void output(IBaseResource resource, FhirContext context) {
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/bundle.json")) {
+        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + getOutputPath().substring(getOutputPath().lastIndexOf("/")) + "-bundle.json")) {
             writer.write(
                     context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
             );

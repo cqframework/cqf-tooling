@@ -1,16 +1,19 @@
 package org.opencds.cqf;
 
 //import org.opencds.cqf.jsonschema.SchemaGenerator;
+import org.apache.commons.lang.NotImplementedException;
 import org.opencds.cqf.acceleratorkit.Processor;
 import org.opencds.cqf.bundler.BundleResources;
 import org.opencds.cqf.igtools.IgBundler;
-import org.opencds.cqf.library.R4LibraryGenerator;
-import org.opencds.cqf.library.STU3LibraryGenerator;
+import org.opencds.cqf.igtools.RefreshIGOperation;
+import org.opencds.cqf.library.r4.LibraryGenerator;
+import org.opencds.cqf.measure.r4.RefreshR4Measure;
+import org.opencds.cqf.measure.stu3.RefreshStu3Measure;
 import org.opencds.cqf.modelinfo.StructureDefinitionToModelInfo;
 import org.opencds.cqf.qdm.QdmToQiCore;
 import org.opencds.cqf.quick.QuickPageGenerator;
 import org.opencds.cqf.terminology.*;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 
 class OperationFactory {
 
@@ -31,23 +34,29 @@ class OperationFactory {
             case "XlsxToValueSet":
                 return new GenericValueSetGenerator();
             case "CqlToSTU3Library":
-                return new STU3LibraryGenerator();
+                return new org.opencds.cqf.library.stu3.LibraryGenerator();
             case "CqlToR4Library":
-                return new R4LibraryGenerator();
+                return new LibraryGenerator();
             case "UpdateSTU3Cql":
-                return new STU3LibraryGenerator();
+                return new org.opencds.cqf.library.stu3.LibraryGenerator();
             case "UpdateR4Cql":
-                return new R4LibraryGenerator();
+                return new LibraryGenerator();
             case "JsonSchemaGenerator":
 //                return new SchemaGenerator();
             case "BundleIg":
                 return new IgBundler();
+            case "RefreshIG":
+                return new RefreshIGOperation();
+            case "RefreshStu3Measure":
+                return new RefreshStu3Measure();
+            case "RefreshR4Measure":
+                return new RefreshR4Measure();
             case "CqlToMeasure":
-                throw new NotImplementedException();
+                throw new NotImplementedException("CqlToMeasure");
             case "BundlesToBundle":
-                throw new NotImplementedException();
+                throw new NotImplementedException("BundlesToBundle");
             case "BundleToResources":
-                throw new NotImplementedException();
+                throw new NotImplementedException("BundleToResources");
             case "GenerateMIs":
                 return new StructureDefinitionToModelInfo();
             case "ProcessAcceleratorKit":

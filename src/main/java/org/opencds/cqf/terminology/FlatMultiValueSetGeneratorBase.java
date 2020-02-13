@@ -137,7 +137,7 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
             String valueSetVersion = SpreadsheetHelper.getCellAsString(row.getCell(valueSetVersionCol));
 
             // ValueSet.Url
-            String valueSetUrl = publisherNamespace.concat("/valueset/").concat(valueSetOid);
+            String valueSetUrl = publisherNamespace.concat("/ValueSet/").concat(valueSetOid);
 
             // Code
             String code = SpreadsheetHelper.getCellAsString(row.getCell(codeCol));

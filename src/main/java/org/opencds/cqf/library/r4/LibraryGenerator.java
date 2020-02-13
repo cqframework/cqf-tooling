@@ -1,25 +1,24 @@
-package org.opencds.cqf.library;
+package org.opencds.cqf.library.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.ValueSetRef;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.r4.model.*;
+import org.opencds.cqf.library.BaseLibraryGenerator;
 
 import java.io.*;
-import java.nio.file.Path;
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
 
-public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3NarrativeProvider> {
+public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativeProvider> {
 
-    private Map<String, Library> libraryMap = new HashMap<>();
-
-    public STU3LibraryGenerator() {
-        this.narrativeProvider = new STU3NarrativeProvider();
-        this.fhirContext = FhirContext.forDstu3();
-        setOutputPath("src/main/resources/org/opencds/cqf/library/output/stu3");
-        operationName = "-CqlToSTU3Library";
+    public LibraryGenerator() {
+        setNarrativeProvider(new NarrativeProvider());
+        setFhirContext(FhirContext.forR4());
+        setOutputPath("src/main/resources/org/opencds/cqf/library/output/r4");
+        setOperationName("-CqlToR4Library");
     }
 
     @Override
@@ -28,51 +27,52 @@ public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3Narr
         Library library = populateMeta(id, elm.getIdentifier().getVersion());
         if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
             for (IncludeDef def : elm.getIncludes().getDef()) {
-                if (!libraryMap.containsKey(def.getPath())) {
-                    if (!translatorMap.containsKey(def.getPath())) {
+                if (!getLibraryMap().containsKey(def.getPath())) {
+                    if (!getTranslatorMap().containsKey(def.getPath())) {
                         throw new IllegalArgumentException("Referenced library: " + def.getPath().replaceAll("_", "-").toLowerCase() + " not found");
                     }
-                    processLibrary(def.getPath(), translatorMap.get(def.getPath()));
+                    processLibrary(def.getPath(), getTranslatorMap().get(def.getPath()));
                 }
 
                 library.addRelatedArtifact(
                         new RelatedArtifact()
                                 .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
-                                .setResource(new Reference().setReference("Library/" + def.getPath().replaceAll("_", "-").toLowerCase()))
+                                .setResource("Library/" + nameToId(def.getPath().replaceAll("_", "-").toLowerCase()))
                 );
 
-                for (DataRequirement req : libraryMap.get(def.getPath()).getDataRequirement()) {
+                for (DataRequirement req : getLibraryMap().get(def.getPath()).getDataRequirement()) {
                     library.addDataRequirement(req);
                 }
             }
         }
 
         resolveDataRequirements(library, translator);
-        attachContent(library, translator, cqlMap.get(id));
-        library.setText(narrativeProvider.getNarrative(fhirContext, library));
-        libraryMap.put(id, library);
+        attachContent(library, translator, getCqlMap().get(id));
+        library.setText(getNarrativeProvider().getNarrative(getFhirContext(), library));
+        getLibraryMap().put(id, library);
     }
 
     @Override
     public void output() {
         Bundle bundle = new Bundle();
 
-        for (Map.Entry<String, Library> entry : libraryMap.entrySet()) {
-            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/library-" + entry.getKey().replaceAll("_", "-").toLowerCase() + "." + encoding)) {
+        for (Map.Entry<String, Library> entry : getLibraryMap().entrySet()) {
+            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/library-" + entry.getKey().replaceAll("_", "-").toLowerCase() + "." + getEncoding()))
+            {
                 bundle.addEntry().setResource(entry.getValue()).setRequest(new Bundle.BundleEntryRequestComponent().setMethod(Bundle.HTTPVerb.PUT).setUrl("Library/" + entry.getValue().getId()));
                 writer.write(
-                        encoding.equals("json")
-                                ? fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(entry.getValue()).getBytes()
-                                : fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(entry.getValue()).getBytes()
+                        getEncoding().equals("json")
+                                ? getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(entry.getValue()).getBytes()
+                                : getFhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(entry.getValue()).getBytes()
                 );
                 writer.flush();
             } catch (IOException e) {
                 e.printStackTrace();
                 throw new IllegalArgumentException("Error outputting library: " + entry.getKey());
             }
-            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/elm-" + entry.getKey().replaceAll("_", "-").toLowerCase() + "." + encoding))
+            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/elm-" + entry.getKey().replaceAll("_", "-").toLowerCase() + "." + getEncoding()))
             {
-                writer.write(elmMap.get(entry.getKey()).getBytes());
+                writer.write(getElmMap().get(entry.getKey()).getBytes());
                 writer.flush();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -80,11 +80,11 @@ public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3Narr
             }
         }
 
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/all-libraries-bundle." +  encoding)) {
+        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/all-libraries-bundle." +  getEncoding())) {
             writer.write(
-                    encoding.equals("json")
-                            ? fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle).getBytes()
-                            : fhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle).getBytes()
+                    getEncoding().equals("json")
+                            ? getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle).getBytes()
+                            : getFhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle).getBytes()
             );
             writer.flush();
         } catch (IOException e) {
@@ -101,7 +101,7 @@ public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3Narr
         library.setVersion(version);
         library.setStatus(Enumerations.PublicationStatus.ACTIVE);
         library.setExperimental(true);
-        library.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://hl7.org/fhir/codesystem-library-type.html")));
+        library.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://terminology.hl7.org/CodeSystem/library-type")));
         return library;
     }
 
@@ -114,8 +114,7 @@ public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3Narr
                 DataRequirement.DataRequirementCodeFilterComponent codeFilter = new DataRequirement.DataRequirementCodeFilterComponent();
                 codeFilter.setPath(retrieve.getCodeProperty());
                 if (retrieve.getCodes() instanceof ValueSetRef) {
-                    Type valueSetName = new StringType(getValueSetId(((ValueSetRef) retrieve.getCodes()).getName()));
-                    codeFilter.setValueSet(valueSetName);
+                    codeFilter.setValueSet(getValueSetId(((ValueSetRef) retrieve.getCodes()).getName()));
                 }
                 dataReq.setCodeFilter(Collections.singletonList(codeFilter));
             }
@@ -135,14 +134,6 @@ public class STU3LibraryGenerator extends BaseLibraryGenerator<Library, STU3Narr
                         .setContentType("text/cql")
                         .setData(cql.getBytes())
         );
-    }
-
-    public Library refreshGeneratedContent(List<Library> libraries) {
-        return null;
-    }
-
-    public Library refreshGeneratedContent(Path pathToLibraryDirectory) {
-        return null;
     }
 
     private String nameToId(String name) {
