@@ -128,3 +128,5 @@ hs_err_pid*
 .vscode/launch.json
 *.factorypath
 .settings
+src/main/resources/org/opencds/cqf/acceleratorkit/output/*
+FHIR-Spec/*

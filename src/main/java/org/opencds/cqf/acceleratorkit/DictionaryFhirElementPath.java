@@ -5,7 +5,7 @@ import java.util.Arrays;
 /**
  * Created by Bryn on 8/18/2019.
  */
-public class DictionaryFhirType {
+public class DictionaryFhirElementPath {
     private String resourceType = "Observation";
     public String getResourceType() {
         return this.resourceType;
@@ -18,6 +18,7 @@ public class DictionaryFhirType {
     public String getResourceTypeAndPath() {
         return this.resourceTypeAndPath;
     }
+
     public void setResource(String resource) {
         this.resourceTypeAndPath = resource;
         if (resource.contains(".")) {
@@ -28,6 +29,7 @@ public class DictionaryFhirType {
                     case "encounter": this.resourceType = "Encounter"; break;
                     case "patient": this.resourceType = "Patient"; break;
                     case "coverage": this.resourceType = "Coverage"; break;
+                    case "medicationstatement": this.resourceType = "MedicationStatement"; break;
                     default: this.resourceType = elements[0]; break;
                 }
                 this.resourcePath = String.join(".", Arrays.copyOfRange(elements, 1, elements.length));
@@ -37,6 +39,7 @@ public class DictionaryFhirType {
 
     private String baseProfile;
     public String getBaseProfile() {
+        //TODO: Naive check for a URL may need to be improved.
         if (this.baseProfile != null && !this.baseProfile.isEmpty() && !this.baseProfile.toLowerCase().equals("fhir")) {
             return this.baseProfile;
         }
@@ -45,6 +48,12 @@ public class DictionaryFhirType {
     public void setBaseProfile(String baseProfile) {
         this.baseProfile = baseProfile;
     }
+
+    private String fhirElementType;
+    public String getFhirElementType() {
+        return this.fhirElementType;
+    }
+    public void setFhirElementType(String fhirElementType) { this.fhirElementType = fhirElementType; }
 
     private String version;
     public String getVersion() {

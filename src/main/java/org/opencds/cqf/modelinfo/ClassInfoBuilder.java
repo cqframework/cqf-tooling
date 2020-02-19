@@ -115,7 +115,7 @@ public abstract class ClassInfoBuilder {
     protected String getTypeName(StructureDefinition sd) {
         String typeId = getTail(sd.getId());
         String typeName = sd.getName() == null ? capitalizePath(typeId) : sd.getName();
-        if (typeName.startsWith(this.settings.modelPrefix)) {
+        if (this.settings.modelPrefix != null && typeName.startsWith(this.settings.modelPrefix)) {
             typeName = typeName.substring(this.settings.modelPrefix.length());
         }
         return typeName;

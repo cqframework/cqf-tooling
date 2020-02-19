@@ -168,12 +168,12 @@ public class DictionaryElement {
         this.code = code;
     }
 
-    private DictionaryFhirType fhirType;
-    public DictionaryFhirType getFhirType() {
-        return this.fhirType;
+    private DictionaryFhirElementPath fhirElementPath;
+    public DictionaryFhirElementPath getFhirElementPath() {
+        return this.fhirElementPath;
     }
-    public void setFhirType(DictionaryFhirType fhirType) {
-        this.fhirType = fhirType;
+    public void setFhirElementPath(DictionaryFhirElementPath fhirElementPath) {
+        this.fhirElementPath = fhirElementPath;
     }
 
     @Override

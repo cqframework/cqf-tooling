@@ -1,17 +1,20 @@
 package org.opencds.cqf.acceleratorkit;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.hl7.fhir.r4.model.*;
+
 import org.opencds.cqf.Operation;
+import org.opencds.cqf.modelinfo.*;
 import org.opencds.cqf.terminology.SpreadsheetHelper;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -33,6 +36,7 @@ public class Processor extends Operation {
     private boolean enableOpenMRS = false;
     private Map<String, String> supportedCodeSystems = new HashMap<String, String>();
 
+    private Map<String, StructureDefinition> structureDefinitions = new HashMap<String, StructureDefinition>();
     private Map<String, DictionaryElement> elementMap = new HashMap<String, DictionaryElement>();
     private List<StructureDefinition> extensions = new ArrayList<StructureDefinition>();
     private List<StructureDefinition> profiles = new ArrayList<StructureDefinition>();
@@ -78,6 +82,8 @@ public class Processor extends Operation {
 
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
 
+        loadFHIRModel();
+
         if (scopes == null) {
             processScope(workbook, null);
         }
@@ -86,6 +92,22 @@ public class Processor extends Operation {
                 processScope(workbook, scope);
             }
         }
+    }
+
+    private void loadFHIRModel() {
+        String inputPath = Paths.get("/Users/Adam/Src/cqframework/cqf-tooling/FHIR-Spec").toString();
+        String resourcePaths = "4.0.0/StructureDefinition";//US-Core/3.0.0;QI-Core/3.3.0";
+        String modelName = "FHIR";
+        String modelVersion = "4.0.0";
+
+        ResourceLoader loader = new ResourceLoader();
+        structureDefinitions = loader.loadPaths(inputPath, resourcePaths);
+
+//        FHIRClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(structureDefinitions);
+//        Map<String, TypeInfo> typeInfos = ciBuilder.build();
+//        ciBuilder.afterBuild();
+
+//        StructureDefinition sd = structureDefinitions.get("MedicationRequest");
     }
 
     private void processScope(Workbook workbook, String scope) {
@@ -241,11 +263,12 @@ public class Processor extends Operation {
         return code;
     }
 
-    private DictionaryFhirType getFhirType(Row row, HashMap<String, Integer> colIds) {
-        DictionaryFhirType fhirType = new DictionaryFhirType();
+    private DictionaryFhirElementPath getFhirElementPath(Row row, HashMap<String, Integer> colIds) {
+        DictionaryFhirElementPath fhirType = new DictionaryFhirElementPath();
         String resource = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4Resource"));
         if (resource != null && !resource.isEmpty()) {
             fhirType.setResource(resource);
+            fhirType.setFhirElementType(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4ResourceType")));
             fhirType.setBaseProfile(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4BaseProfile")));
             fhirType.setVersion(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4VersionNumber")));
         }
@@ -304,7 +327,7 @@ public class Processor extends Operation {
         e.setRequired(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Required")));
         e.setEditable(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Editable")));
         e.setCode(getPrimaryCode(name, row, colIds));
-        e.setFhirType(getFhirType(row, colIds));
+        e.setFhirElementPath(getFhirElementPath(row, colIds));
 
         return e;
     }
@@ -407,6 +430,7 @@ public class Processor extends Operation {
 
                         // fhir resource details
                         case "hl7 fhir r4 - resource": colIds.put("FhirR4Resource", cell.getColumnIndex()); break;
+                        case "hl7 fhir r4 - resource type": colIds.put("FhirR4ResourceType", cell.getColumnIndex()); break;
                         case "hl7 fhir r4 - base profile": colIds.put("FhirR4BaseProfile", cell.getColumnIndex()); break;
                         case "hl7 fhir r4 - version number": colIds.put("FhirR4VersionNumber", cell.getColumnIndex()); break;
 
@@ -478,6 +502,7 @@ public class Processor extends Operation {
             case "coding":
             case "coding - select one":
             case "coding - select all that apply":
+            case "coding - (select all that apply":
             case "date":
             case "humanname":
             case "image":
@@ -501,6 +526,7 @@ public class Processor extends Operation {
         switch (element.getType().toLowerCase()) {
             case "mc (select multiple)":
             case "coding - select all that apply":
+            case "coding - (select all that apply":
                 return true;
             default:
                 return false;
@@ -509,7 +535,7 @@ public class Processor extends Operation {
 
     private void processElementMap() {
         for (DictionaryElement element : elementMap.values()) {
-            if (shouldCreateProfile(element.getType(), element.getFhirType().getBaseProfile())) {
+            if (shouldCreateProfile(element.getType(), element.getFhirElementPath().getBaseProfile())) {
                 profiles.add(createProfile(element));
             } else if (shouldCreateExtension(element.getType())) {
                 extensions.add(createExtension(element));
@@ -544,59 +570,120 @@ public class Processor extends Operation {
         return "Yes".equals(value);
     }
 
-    private String toFhirType(String type) {
-        switch (type.toLowerCase().trim()) {
-            case "image":
-                return "Attachment";
-            case "note":
-                return "Annotation";
-            case "qr code":
-                return "Attachment"; // TODO: Consider specifying mime type as QR Code here?
-            case "text":
-                return "markdown";
-            case "date":
-                return "date";
-            case "datetime":
-                return "dateTime";
-            case "humanname":
-                return "HumanName";
-            case "time":
-                return "time";
-            case "checkbox":
-                return "boolean";
-            case "integer":
-                return "integer";
-            case "decimal":
-                return "decimal";
-            case "quantity":
-                return "Quantity";
-            case "codeableconcept":
-            case "coding":
-            case "coding - select one":
-            case "coding - select all that apply":
-            case "mc (select one)":
-            case "mc (select multiple)":
-                return "CodeableConcept";
-            default:
-                throw new IllegalArgumentException(String.format("Unknown type code %s", type));
+    private String cleanseFhirType(String type) {
+        if (type != null && type.length() > 0) {
+            switch (type) {
+                case "Integer":
+                    return "integer";
+                default:
+                    return type;
+            }
+        } else {
+            return type;
+        }
+    }
+//    private String toFhirType(String type) {
+//        switch (type.toLowerCase().trim()) {
+//            case "image":
+//                return "Attachment";
+//            case "note":
+//                return "Annotation";
+//            case "qr code":
+//                return "Attachment"; // TODO: Consider specifying mime type as QR Code here?
+//            case "text":
+//                return "markdown";
+//            case "date":
+//                return "date";
+//            case "datetime":
+//                return "dateTime";
+//            case "humanname":
+//                return "HumanName";
+//            case "time":
+//                return "time";
+//            case "checkbox":
+//                return "boolean";
+//            case "integer":
+//                return "integer";
+//            case "decimal":
+//                return "decimal";
+//            case "quantity":
+//                return "Quantity";
+//            case "codeableconcept":
+//            case "coding":
+//            case "coding - select one":
+//            case "coding - select all that apply":
+//            case "coding - (select all that apply":
+//            case "mc (select one)":
+//            case "mc (select multiple)":
+//                return "CodeableConcept";
+//            default:
+//                throw new IllegalArgumentException(String.format("Unknown type code %s", type));
+//        }
+//    }
+//
+//    private String toFhirObservationType(String type) {
+//        String fhirType = toFhirType(type);
+//        switch (fhirType) {
+//            case "markdown": return "string";
+//            case "date": return "dateTime";
+//            default: return fhirType;
+//        }
+//    }
+//
+//    private String toFhirPatientType(String type) {
+//        String fhirType = toFhirType(type);
+//        switch (fhirType) {
+//            case "markdown": return "string";
+//            default: return fhirType;
+//        }
+//    }
+
+    private String getFhirTypeOfTargetElement(DictionaryFhirElementPath elementPath) {
+        try {
+            String resourceType = elementPath.getResourceType();
+            StructureDefinition sd = structureDefinitions.get(resourceType);
+
+            if (sd == null) {
+                System.out.println("StructureDefinition not found - " + resourceType);
+                return null;
+            }
+
+            if (isChoiceType(elementPath)) {
+                String typePortion = getSpecifiedChoiceType(elementPath);
+                return typePortion;
+            }
+
+            List<ElementDefinition> snapshotElements = sd.getSnapshot().getElement();
+            Optional<ElementDefinition> type = snapshotElements.stream().filter(e -> e.toString().toLowerCase().equals(elementPath.getResourceTypeAndPath().toLowerCase())).findFirst();
+
+            if (!type.isEmpty()) {
+                String elementType = type.get().getType().get(0).getCode();
+                return elementType;
+            } else {
+                System.out.println("Could not find element: " + elementPath.getResourceTypeAndPath());
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new NoSuchElementException("Unable to determine FHIR Type for: " + elementPath.getResourceTypeAndPath());
         }
     }
 
-    private String toFhirObservationType(String type) {
-        String fhirType = toFhirType(type);
-        switch (fhirType) {
-            case "markdown": return "string";
-            case "date": return "dateTime";
-            default: return fhirType;
-        }
+    private boolean isChoiceType(DictionaryFhirElementPath elementPath) {
+        return elementPath.getResourcePath().indexOf("[x]") >= 0;
     }
 
-    private String toFhirPatientType(String type) {
-        String fhirType = toFhirType(type);
-        switch (fhirType) {
-            case "markdown": return "string";
-            default: return fhirType;
-        }
+    private String getSpecifiedChoiceType(DictionaryFhirElementPath elementPath) {
+        return cleanseFhirType(elementPath.getFhirElementType());
+//        String choiceTypeDelimiter = "[x]";
+//        int chosenTypeIndex = path.indexOf(choiceTypeDelimiter) + choiceTypeDelimiter.length();
+//        String choiceElementName = path.substring(0, path.lastIndexOf(choiceTypeDelimiter)); // value
+//
+//        //value[x].valueDateTime
+//        String chosenType = path.substring(chosenTypeIndex, Math.min(path.indexOf(".", chosenTypeIndex) > 0 ? path.indexOf(".", chosenTypeIndex) : path.length(), path.length()));
+//        String typePortion = chosenType.replace(choiceElementName, "");
+//        return typePortion;
+
     }
 
     private StructureDefinition createExtension(DictionaryElement element) {
@@ -604,15 +691,17 @@ public class Processor extends Operation {
     }
 
     private StructureDefinition createProfile(DictionaryElement element) {
-        String resourceType = element.getFhirType().getResourceType();
+        DictionaryFhirElementPath elementPath = element.getFhirElementPath();
+        String resourceType = elementPath.getResourceType();
         String codePath = null;
         String choicesPath;
         switch (resourceType) {
             case "Observation":
                 // For observations...
                 codePath = "code";
-                choicesPath = element.getFhirType().getResourcePath(); //"value[x]";
+                choicesPath = elementPath.getResourcePath(); //"value[x]";
                 break;
+            case "AllergyIntolerance":
             case "Appointment":
             case "CarePlan":
             case "Communication":
@@ -630,7 +719,7 @@ public class Processor extends Operation {
             case "Practitioner":
             case "Procedure":
             case "ServiceRequest":
-                choicesPath = element.getFhirType().getResourcePath();
+                choicesPath = elementPath.getResourcePath();
                 break;
             default:
                 throw new IllegalArgumentException("Unrecognized baseType: " + resourceType.toString());
@@ -655,7 +744,7 @@ public class Processor extends Operation {
         // TODO: Support resources other than Observation
         sd.setType(resourceType);
         // TODO: Use baseDefinition to derive from less specialized profiles
-        sd.setBaseDefinition(element.getFhirType().getBaseProfile());
+        sd.setBaseDefinition(elementPath.getBaseProfile());
         sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
         sd.setDifferential(new StructureDefinition.StructureDefinitionDifferentialComponent());
 
@@ -695,13 +784,19 @@ public class Processor extends Operation {
         ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
         ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
 
-        if (resourceType.equals("Observation")) {
-            tr.setCode(toFhirObservationType(element.getType()));
-        } else if (resourceType.equals("Patient")) {
-            tr.setCode(toFhirPatientType(element.getType()));
-        } else {
-            tr.setCode(toFhirType(element.getType()));
+        String elementFhirType = getFhirTypeOfTargetElement(elementPath);
+        if (elementFhirType != null && elementFhirType.length() > 0) {
+            tr.setCode(elementFhirType);
         }
+//        else {
+//            if (resourceType.equals("Observation")) {
+//                tr.setCode(toFhirObservationType(element.getType()));
+//            } else if (resourceType.equals("Patient")) {
+//                tr.setCode(toFhirPatientType(element.getType()));
+//            } else {
+//                tr.setCode(toFhirType(element.getType()));
+//            }
+//        }
 
         ed.addType(tr);
         ed.setMustSupport(true);
@@ -805,93 +900,99 @@ public class Processor extends Operation {
     }
 
     public void writeProfiles(String scopePath) {
-        String profilesPath = getProfilesPath(scopePath);
-        ensureProfilesPath(scopePath);
+        if (profiles != null && profiles.size() > 0) {
+            String profilesPath = getProfilesPath(scopePath);
+            ensureProfilesPath(scopePath);
 
-        for (StructureDefinition sd : profiles) {
-            writeResource(profilesPath, sd);
+            for (StructureDefinition sd : profiles) {
+                writeResource(profilesPath, sd);
 
-            // Generate JSON fragment for inclusion in the IG:
-            /*
-                "StructureDefinition/<id>": {
-                    "source": "structuredefinition/structuredefinition-<id>.json",
-                    "defns": "StructureDefinition-<id>-definitions.html",
-                    "base": "StructureDefinition-<id>.html"
-                }
-             */
-            igJsonFragments.add(String.format("\t\t\"StructureDefinition/%s\": {\r\n\t\t\t\"source\": \"structuredefinition/structuredefinition-%s.json\",\r\n\t\t\t\"defns\": \"StructureDefinition-%s-definitions.html\",\r\n\t\t\t\"base\": \"StructureDefinition-%s.html\"\r\n\t\t}",
-                    sd.getId(), sd.getId(), sd.getId(), sd.getId()));
+                // Generate JSON fragment for inclusion in the IG:
+                /*
+                    "StructureDefinition/<id>": {
+                        "source": "structuredefinition/structuredefinition-<id>.json",
+                        "defns": "StructureDefinition-<id>-definitions.html",
+                        "base": "StructureDefinition-<id>.html"
+                    }
+                 */
+                igJsonFragments.add(String.format("\t\t\"StructureDefinition/%s\": {\r\n\t\t\t\"source\": \"structuredefinition/structuredefinition-%s.json\",\r\n\t\t\t\"defns\": \"StructureDefinition-%s-definitions.html\",\r\n\t\t\t\"base\": \"StructureDefinition-%s.html\"\r\n\t\t}",
+                        sd.getId(), sd.getId(), sd.getId(), sd.getId()));
 
-            // Generate XML fragment for the IG resource:
-            /*
-                <resource>
-                    <reference>
-                        <reference value="StructureDefinition/<id>"/>
-                    </reference>
-                    <groupingId value="main"/>
-                </resource>
-             */
-            igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"StructureDefinition/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", sd.getId()));
+                // Generate XML fragment for the IG resource:
+                /*
+                    <resource>
+                        <reference>
+                            <reference value="StructureDefinition/<id>"/>
+                        </reference>
+                        <groupingId value="main"/>
+                    </resource>
+                 */
+                igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"StructureDefinition/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", sd.getId()));
+            }
         }
     }
 
     public void writeCodeSystems(String scopePath) {
-        String codeSystemPath = getCodeSystemPath(scopePath);
-        ensureCodeSystemPath(scopePath);
+        if (codeSystems != null && codeSystems.size() > 0) {
+            String codeSystemPath = getCodeSystemPath(scopePath);
+            ensureCodeSystemPath(scopePath);
 
-        for (CodeSystem cs : codeSystems) {
-            writeResource(codeSystemPath, cs);
+            for (CodeSystem cs : codeSystems) {
+                writeResource(codeSystemPath, cs);
 
-            // Generate JSON fragment for inclusion in the IG:
-            /*
-                "CodeSystem/<id>": {
-                    "source": "codesystem/codesystem-<id>.json",
-                    "base": "CodeSystem-<id>.html"
-                }
-             */
-            igJsonFragments.add(String.format("\t\t\"CodeSystem/%s\": {\r\n\t\t\t\"source\": \"codesystem/codesystem-%s.json\",\r\n\t\t\t\"base\": \"CodeSystem-%s.html\"\r\n\t\t}",
-                    cs.getId(), cs.getId(), cs.getId()));
+                // Generate JSON fragment for inclusion in the IG:
+                /*
+                    "CodeSystem/<id>": {
+                        "source": "codesystem/codesystem-<id>.json",
+                        "base": "CodeSystem-<id>.html"
+                    }
+                 */
+                igJsonFragments.add(String.format("\t\t\"CodeSystem/%s\": {\r\n\t\t\t\"source\": \"codesystem/codesystem-%s.json\",\r\n\t\t\t\"base\": \"CodeSystem-%s.html\"\r\n\t\t}",
+                        cs.getId(), cs.getId(), cs.getId()));
 
-            // Generate XML fragment for the IG resource:
-            /*
-                <resource>
-                    <reference>
-                        <reference value="CodeSystem/<id>"/>
-                    </reference>
-                    <groupingId value="main"/>
-                </resource>
-             */
-            igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"CodeSystem/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", cs.getId()));
+                // Generate XML fragment for the IG resource:
+                /*
+                    <resource>
+                        <reference>
+                            <reference value="CodeSystem/<id>"/>
+                        </reference>
+                        <groupingId value="main"/>
+                    </resource>
+                 */
+                igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"CodeSystem/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", cs.getId()));
+            }
         }
     }
 
     public void writeValueSets(String scopePath) {
-        String valueSetPath = getValueSetPath(scopePath);
-        ensureValueSetPath(scopePath);
+        if (valueSets != null && valueSets.size() > 0) {
+            String valueSetPath = getValueSetPath(scopePath);
+            ensureValueSetPath(scopePath);
 
-        for (ValueSet vs : valueSets) {
-            writeResource(valueSetPath, vs);
+            for (ValueSet vs : valueSets) {
+                writeResource(valueSetPath, vs);
 
-            // Generate JSON fragment for inclusion in the IG:
-            /*
-                "ValueSet/<id>": {
-                    "source": "valueset/valueset-<id>.json",
-                    "base": "ValueSet-<id>.html"
-                }
-             */
-            igJsonFragments.add(String.format("\t\t\"ValueSet/%s\": {\r\n\t\t\t\"source\": \"valueset/valueset-%s.json\",\r\n\t\t\t\"base\": \"ValueSet-%s.html\"\r\n\t\t}",
-                    vs.getId(), vs.getId(), vs.getId()));
+                // Generate JSON fragment for inclusion in the IG:
+                /*
+                    "ValueSet/<id>": {
+                        "source": "valueset/valueset-<id>.json",
+                        "base": "ValueSet-<id>.html"
+                    }
+                 */
+                igJsonFragments.add(String.format("\t\t\"ValueSet/%s\": {\r\n\t\t\t\"source\": \"valueset/valueset-%s.json\",\r\n\t\t\t\"base\": \"ValueSet-%s.html\"\r\n\t\t}",
+                        vs.getId(), vs.getId(), vs.getId()));
 
-            // Generate XML fragment for the IG resource:
-            /*
-                <resource>
-                    <reference>
-                        <reference value="ValueSet/<id>"/>
-                    </reference>
-                    <groupingId value="main"/>
-                </resource>
-             */
-            igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"ValueSet/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", vs.getId()));
+                // Generate XML fragment for the IG resource:
+                /*
+                    <resource>
+                        <reference>
+                            <reference value="ValueSet/<id>"/>
+                        </reference>
+                        <groupingId value="main"/>
+                    </resource>
+                 */
+                igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"ValueSet/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", vs.getId()));
+            }
         }
     }
 
