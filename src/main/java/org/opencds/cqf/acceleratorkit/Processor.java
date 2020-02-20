@@ -36,7 +36,7 @@ public class Processor extends Operation {
     private boolean enableOpenMRS = false;
     private Map<String, String> supportedCodeSystems = new HashMap<String, String>();
 
-    private Map<String, StructureDefinition> structureDefinitions = new HashMap<String, StructureDefinition>();
+    private Map<String, StructureDefinition> fhirModelStructureDefinitions = new HashMap<String, StructureDefinition>();
     private Map<String, DictionaryElement> elementMap = new HashMap<String, DictionaryElement>();
     private List<StructureDefinition> extensions = new ArrayList<StructureDefinition>();
     private List<StructureDefinition> profiles = new ArrayList<StructureDefinition>();
@@ -101,7 +101,7 @@ public class Processor extends Operation {
         String modelVersion = "4.0.0";
 
         ResourceLoader loader = new ResourceLoader();
-        structureDefinitions = loader.loadPaths(inputPath, resourcePaths);
+        fhirModelStructureDefinitions = loader.loadPaths(inputPath, resourcePaths);
 
 //        FHIRClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(structureDefinitions);
 //        Map<String, TypeInfo> typeInfos = ciBuilder.build();
@@ -271,6 +271,9 @@ public class Processor extends Operation {
             fhirType.setFhirElementType(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4ResourceType")));
             fhirType.setBaseProfile(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4BaseProfile")));
             fhirType.setVersion(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4VersionNumber")));
+            fhirType.setCustomProfileId(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomProfileId")));
+            fhirType.setCustomValueSetName(SpreadsheetHelper.getCellAsString(row, getColId(colIds, " CustomValueSetName")));
+            fhirType.setExtensionNeeded(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ExtensionNeeded")));
         }
         return fhirType;
     }
@@ -428,6 +431,10 @@ public class Processor extends Operation {
                         case "openmrs entity": colIds.put("OpenMRSEntity", cell.getColumnIndex()); break;
                         case "openmrs entity id": colIds.put("OpenMRSEntityId", cell.getColumnIndex()); break;
 
+                        case "custom profile id": colIds.put("CustomProfileId", cell.getColumnIndex()); break;
+                        case "binding or custom value set name or reference": colIds.put("CustomValueSetName", cell.getColumnIndex()); break;
+                        case "extension needed": colIds.put("ExtensionNeeded", cell.getColumnIndex()); break;
+
                         // fhir resource details
                         case "hl7 fhir r4 - resource": colIds.put("FhirR4Resource", cell.getColumnIndex()); break;
                         case "hl7 fhir r4 - resource type": colIds.put("FhirR4ResourceType", cell.getColumnIndex()); break;
@@ -475,25 +482,21 @@ public class Processor extends Operation {
         }
     }
 
-    private boolean shouldCreateExtension(String baseProfile) {
-        if (baseProfile == null) {
-            return false;
-        }
+//    private boolean shouldCreateExtension(String baseProfile) {
+//        if (baseProfile == null) {
+//            return false;
+//        }
+//
+//        switch (baseProfile.toLowerCase().trim()) {
+//            case "extension needed":
+//                return true;
+//            default:
+//                return false;
+//        }
+//    }
 
-        switch (baseProfile.toLowerCase().trim()) {
-            case "extension needed":
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    private boolean shouldCreateProfile(String type, String baseProfile) {
-        if (type == null) {
-            return false;
-        }
-
-        if (baseProfile.toLowerCase().trim().equals("extension needed")) {
+    private boolean requiresProfile(String type, String extensionNeededIndicator) {
+        if (type == null || extensionNeededIndicator.toLowerCase().trim().equals("extension needed")) {
             return false;
         }
 
@@ -535,11 +538,13 @@ public class Processor extends Operation {
 
     private void processElementMap() {
         for (DictionaryElement element : elementMap.values()) {
-            if (shouldCreateProfile(element.getType(), element.getFhirElementPath().getBaseProfile())) {
-                profiles.add(createProfile(element));
-            } else if (shouldCreateExtension(element.getType())) {
-                extensions.add(createExtension(element));
+            if (requiresProfile(element.getType(), element.getFhirElementPath().getBaseProfile())) {
+                StructureDefinition profile = ensureProfile(element);
+                profiles.add(profile);
             }
+//            else if (shouldCreateExtension(element.getType())) {
+//                extensions.add(createExtension(element));
+//            }
         }
     }
 
@@ -641,7 +646,7 @@ public class Processor extends Operation {
     private String getFhirTypeOfTargetElement(DictionaryFhirElementPath elementPath) {
         try {
             String resourceType = elementPath.getResourceType();
-            StructureDefinition sd = structureDefinitions.get(resourceType);
+            StructureDefinition sd = fhirModelStructureDefinitions.get(resourceType);
 
             if (sd == null) {
                 System.out.println("StructureDefinition not found - " + resourceType);
@@ -690,11 +695,12 @@ public class Processor extends Operation {
         throw new NotImplementedException();
     }
 
-    private StructureDefinition createProfile(DictionaryElement element) {
+    private StructureDefinition ensureProfile(DictionaryElement element) {
         DictionaryFhirElementPath elementPath = element.getFhirElementPath();
         String resourceType = elementPath.getResourceType();
         String codePath = null;
         String choicesPath;
+
         switch (resourceType) {
             case "Observation":
                 // For observations...
@@ -725,44 +731,56 @@ public class Processor extends Operation {
                 throw new IllegalArgumentException("Unrecognized baseType: " + resourceType.toString());
         }
 
-        StructureDefinition sd = new StructureDefinition();
-        sd.setId(toId(element.getName()));
-        sd.setUrl(String.format("%s/StructureDefinition/%s", canonicalBase, sd.getId()));
-        // TODO: version
-        sd.setName(element.getName());
-        sd.setTitle(element.getLabel());
-        sd.setStatus(Enumerations.PublicationStatus.DRAFT);
-        sd.setExperimental(false);
-        // TODO: date
-        // TODO: publisher
-        // TODO: contact
-        sd.setDescription(element.getDescription());
-        // TODO: What to do with Notes?
-        sd.setFhirVersion(Enumerations.FHIRVersion._4_0_0);
-        sd.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
-        sd.setAbstract(false);
-        // TODO: Support resources other than Observation
-        sd.setType(resourceType);
-        // TODO: Use baseDefinition to derive from less specialized profiles
-        sd.setBaseDefinition(elementPath.getBaseProfile());
-        sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
-        sd.setDifferential(new StructureDefinition.StructureDefinitionDifferentialComponent());
-
+        StructureDefinition sd;
         List<ElementDefinition> elementDefinitions = new ArrayList<>();
-        // Add root element
-        ElementDefinition ed = new ElementDefinition();
-        ed.setId(resourceType);
-        ed.setPath(resourceType);
-        ed.setMustSupport(false);
-        elementDefinitions.add(ed);
 
-        // TODO: status
+        String customProfileId = element.getFhirElementPath().getCustomProfileId();
+        Optional<StructureDefinition> existingProfile = null;
+        if (customProfileId != null && customProfileId.length() > 0) {
+            existingProfile = profiles.stream().filter(p -> p.getId() == customProfileId).findFirst();
+        }
 
-        // TODO: category
+        if (existingProfile != null && !existingProfile.isEmpty()) {
+            sd = existingProfile.get();
+        } else {
+            sd = new StructureDefinition();
+            sd.setId(toId((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getName()));
+            sd.setUrl(String.format("%s/StructureDefinition/%s", canonicalBase, sd.getId()));
+            // TODO: version
+            sd.setName((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getName());
+            sd.setTitle((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getLabel());
+            sd.setStatus(Enumerations.PublicationStatus.DRAFT);
+            sd.setExperimental(false);
+            // TODO: date
+            // TODO: publisher
+            // TODO: contact
+            sd.setDescription((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getDescription());
+            // TODO: What to do with Notes?
+            sd.setFhirVersion(Enumerations.FHIRVersion._4_0_0);
+            sd.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
+            sd.setAbstract(false);
+            // TODO: Support resources other than Observation
+            sd.setType(resourceType);
+            // TODO: Use baseDefinition to derive from less specialized profiles
+            sd.setBaseDefinition(elementPath.getBaseProfile());
+            sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+            sd.setDifferential(new StructureDefinition.StructureDefinitionDifferentialComponent());
+
+            // Add root element
+            ElementDefinition ed = new ElementDefinition();
+            ed.setId(resourceType);
+            ed.setPath(resourceType);
+            ed.setMustSupport(false);
+            elementDefinitions.add(ed);
+
+            // TODO: status
+
+            // TODO: category
+        }
 
         if (codePath != null && !codePath.isEmpty() && element.getCode() != null) {
             // code - Fixed to the value of the OpenMRS code for this DictionaryElement
-            ed = new ElementDefinition();
+            ElementDefinition ed = new ElementDefinition();
             ed.setId(String.format("%s.%s", resourceType, codePath));
             ed.setPath(String.format("%s.%s", resourceType, codePath));
             ed.setMin(1);
@@ -777,7 +795,7 @@ public class Processor extends Operation {
         // TODO: effective[x]
 
         // value
-        ed = new ElementDefinition();
+        ElementDefinition ed = new ElementDefinition();
         ed.setId(String.format("%s.%s", resourceType, choicesPath));
         ed.setPath(String.format("%s.%s", resourceType, choicesPath));
         ed.setMin(toBoolean(element.getRequired()) ? 1 : 0);
@@ -831,7 +849,7 @@ public class Processor extends Operation {
             }
 
             ValueSet valueSet = new ValueSet();
-            valueSet.setId(sd.getId() + "-values");
+            valueSet.setId(toId(element.getName()) + "-values");//sd.getId() + "-values");
             valueSet.setUrl(String.format("%s/ValueSet/%s", canonicalBase, valueSet.getId()));
             // TODO: version
             valueSet.setName(element.getName() + "_values");

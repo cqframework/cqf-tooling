@@ -14,6 +14,7 @@ public class DictionaryFhirElementPath {
     public String getResourcePath() {
         return this.resourcePath;
     }
+
     private String resourceTypeAndPath = "Observation.value[x]";
     public String getResourceTypeAndPath() {
         return this.resourceTypeAndPath;
@@ -54,6 +55,18 @@ public class DictionaryFhirElementPath {
         return this.fhirElementType;
     }
     public void setFhirElementType(String fhirElementType) { this.fhirElementType = fhirElementType; }
+
+    private String customProfileId;
+    public String getCustomProfileId() { return this.customProfileId; }
+    public void setCustomProfileId(String customProfileId) { this.customProfileId = customProfileId; }
+
+    private String customValueSetName;
+    public String getCustomValueSetName() { return this.customValueSetName; }
+    public void setCustomValueSetName(String customValueSetName) { this.customValueSetName = customValueSetName; }
+
+    private String extensionNeeded;
+    public String getExtensionNeeded() { return this.extensionNeeded; }
+    public void setExtensionNeeded(String extensionNeeded) { this.extensionNeeded = extensionNeeded; }
 
     private String version;
     public String getVersion() {
