@@ -778,6 +778,9 @@ public class Processor extends Operation {
             // TODO: category
         }
 
+        // TODO: subject
+        // TODO: effective[x]
+
         if (codePath != null && !codePath.isEmpty() && element.getCode() != null) {
             // code - Fixed to the value of the OpenMRS code for this DictionaryElement
             ElementDefinition ed = new ElementDefinition();
@@ -789,111 +792,108 @@ public class Processor extends Operation {
             ed.setFixed(element.getCode().toCodeableConcept());
             elementDefinitions.add(ed);
         }
+        else {
+                // value
+                ElementDefinition ed = new ElementDefinition();
+                ed.setId(String.format("%s.%s", resourceType, choicesPath));
+                ed.setPath(String.format("%s.%s", resourceType, choicesPath));
+                ed.setMin(toBoolean(element.getRequired()) ? 1 : 0);
+                ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
+                ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
 
-        // TODO: subject
-
-        // TODO: effective[x]
-
-        // value
-        ElementDefinition ed = new ElementDefinition();
-        ed.setId(String.format("%s.%s", resourceType, choicesPath));
-        ed.setPath(String.format("%s.%s", resourceType, choicesPath));
-        ed.setMin(toBoolean(element.getRequired()) ? 1 : 0);
-        ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
-        ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
-
-        String elementFhirType = getFhirTypeOfTargetElement(elementPath);
-        if (elementFhirType != null && elementFhirType.length() > 0) {
-            tr.setCode(elementFhirType);
-        }
-//        else {
-//            if (resourceType.equals("Observation")) {
-//                tr.setCode(toFhirObservationType(element.getType()));
-//            } else if (resourceType.equals("Patient")) {
-//                tr.setCode(toFhirPatientType(element.getType()));
-//            } else {
-//                tr.setCode(toFhirType(element.getType()));
-//            }
-//        }
-
-        ed.addType(tr);
-        ed.setMustSupport(true);
-
-        // binding and CodeSystem/ValueSet for MultipleChoice elements
-        if (element.getChoices().size() > 0) {
-            CodeSystem codeSystem = new CodeSystem();
-            if (enableOpenMRS && element.getChoicesForSystem(openMRSSystem).size() > 0) {
-                codeSystem.setId(sd.getId() + "-codes");
-                codeSystem.setUrl(String.format("%s/CodeSystem/%s", canonicalBase, codeSystem.getId()));
-                // TODO: version
-                codeSystem.setName(element.getName() + "_codes");
-                codeSystem.setTitle(String.format("%s codes", element.getLabel()));
-                codeSystem.setStatus(Enumerations.PublicationStatus.DRAFT);
-                codeSystem.setExperimental(false);
-                // TODO: date
-                // TODO: publisher
-                // TODO: contact
-                codeSystem.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
-                codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-                codeSystem.setCaseSensitive(true);
-
-                // collect all the OpenMRS choices to add to the codeSystem
-                for (DictionaryCode code : element.getChoicesForSystem(openMRSSystem)) {
-                    CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent();
-                    concept.setCode(code.getCode());
-                    concept.setDisplay(code.getLabel());
-                    codeSystem.addConcept(concept);
+                String elementFhirType = getFhirTypeOfTargetElement(elementPath);
+                if (elementFhirType != null && elementFhirType.length() > 0) {
+                    tr.setCode(elementFhirType);
                 }
+        //        else {
+        //            if (resourceType.equals("Observation")) {
+        //                tr.setCode(toFhirObservationType(element.getType()));
+        //            } else if (resourceType.equals("Patient")) {
+        //                tr.setCode(toFhirPatientType(element.getType()));
+        //            } else {
+        //                tr.setCode(toFhirType(element.getType()));
+        //            }
+        //        }
 
-                codeSystems.add(codeSystem);
-            }
+                ed.addType(tr);
+                ed.setMustSupport(true);
 
-            ValueSet valueSet = new ValueSet();
-            valueSet.setId(toId(element.getName()) + "-values");//sd.getId() + "-values");
-            valueSet.setUrl(String.format("%s/ValueSet/%s", canonicalBase, valueSet.getId()));
-            // TODO: version
-            valueSet.setName(element.getName() + "_values");
-            valueSet.setTitle(String.format("%s values", element.getLabel()));
-            valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
-            valueSet.setExperimental(false);
-            // TODO: date
-            // TODO: publisher
-            // TODO: contact
-            valueSet.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
-            valueSet.setImmutable(true);
-            ValueSet.ValueSetComposeComponent compose = new ValueSet.ValueSetComposeComponent();
-            valueSet.setCompose(compose);
+                // binding and CodeSystem/ValueSet for MultipleChoice elements
+                if (element.getChoices().size() > 0) {
+                    CodeSystem codeSystem = new CodeSystem();
+                    if (enableOpenMRS && element.getChoicesForSystem(openMRSSystem).size() > 0) {
+                        codeSystem.setId(sd.getId() + "-codes");
+                        codeSystem.setUrl(String.format("%s/CodeSystem/%s", canonicalBase, codeSystem.getId()));
+                        // TODO: version
+                        codeSystem.setName(element.getName() + "_codes");
+                        codeSystem.setTitle(String.format("%s codes", element.getLabel()));
+                        codeSystem.setStatus(Enumerations.PublicationStatus.DRAFT);
+                        codeSystem.setExperimental(false);
+                        // TODO: date
+                        // TODO: publisher
+                        // TODO: contact
+                        codeSystem.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
+                        codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+                        codeSystem.setCaseSensitive(true);
 
-            // Group by Supported Terminology System
-            for (String codeSystemUrl : element.getCodeSystemUrls()) {
-                List<DictionaryCode> systemCodes = element.getChoicesForSystem(codeSystemUrl);
+                        // collect all the OpenMRS choices to add to the codeSystem
+                        for (DictionaryCode code : element.getChoicesForSystem(openMRSSystem)) {
+                            CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent();
+                            concept.setCode(code.getCode());
+                            concept.setDisplay(code.getLabel());
+                            codeSystem.addConcept(concept);
+                        }
 
-                if (systemCodes.size() > 0) {
-                    ValueSet.ConceptSetComponent conceptSet = new ValueSet.ConceptSetComponent();
-                    compose.addInclude(conceptSet);
-                    conceptSet.setSystem(codeSystemUrl);
-
-                    for (DictionaryCode code : systemCodes) {
-                        ValueSet.ConceptReferenceComponent conceptReference = new ValueSet.ConceptReferenceComponent();
-                        conceptReference.setCode(code.getCode());
-                        conceptReference.setDisplay(code.getLabel());
-                        conceptSet.addConcept(conceptReference);
+                        codeSystems.add(codeSystem);
                     }
+
+                    ValueSet valueSet = new ValueSet();
+                    valueSet.setId(toId(element.getName()) + "-values");//sd.getId() + "-values");
+                    valueSet.setUrl(String.format("%s/ValueSet/%s", canonicalBase, valueSet.getId()));
+                    // TODO: version
+                    valueSet.setName(toId(element.getName()) + "-values");
+                    valueSet.setTitle(String.format("%s values", element.getLabel()));
+                    valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
+                    valueSet.setExperimental(false);
+                    // TODO: date
+                    // TODO: publisher
+                    // TODO: contact
+                    valueSet.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
+                    valueSet.setImmutable(true);
+                    ValueSet.ValueSetComposeComponent compose = new ValueSet.ValueSetComposeComponent();
+                    valueSet.setCompose(compose);
+
+                    // Group by Supported Terminology System
+                    for (String codeSystemUrl : element.getCodeSystemUrls()) {
+                        List<DictionaryCode> systemCodes = element.getChoicesForSystem(codeSystemUrl);
+
+                        if (systemCodes.size() > 0) {
+                            ValueSet.ConceptSetComponent conceptSet = new ValueSet.ConceptSetComponent();
+                            compose.addInclude(conceptSet);
+                            conceptSet.setSystem(codeSystemUrl);
+
+                            for (DictionaryCode code : systemCodes) {
+                                ValueSet.ConceptReferenceComponent conceptReference = new ValueSet.ConceptReferenceComponent();
+                                conceptReference.setCode(code.getCode());
+                                conceptReference.setDisplay(code.getLabel());
+                                conceptSet.addConcept(conceptReference);
+                            }
+                        }
+                    }
+
+                    if (element.getChoicesForSystem(openMRSSystem).size() == element.getChoices().size()) {
+                        codeSystem.setValueSet(valueSet.getUrl());
+                    }
+
+                    valueSets.add(valueSet);
+
+                    ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
+                    binding.setStrength(Enumerations.BindingStrength.REQUIRED);
+                    binding.setValueSet(valueSet.getUrl());
+                    ed.setBinding(binding);
                 }
+                elementDefinitions.add(ed);
             }
-
-            if (element.getChoicesForSystem(openMRSSystem).size() == element.getChoices().size()) {
-                codeSystem.setValueSet(valueSet.getUrl());
-            }
-
-            valueSets.add(valueSet);
-
-            ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
-            binding.setStrength(Enumerations.BindingStrength.REQUIRED);
-            binding.setValueSet(valueSet.getUrl());
-            ed.setBinding(binding);
-        }
-        elementDefinitions.add(ed);
 
         for (ElementDefinition elementDef : elementDefinitions) {
             sd.getDifferential().addElement(elementDef);
