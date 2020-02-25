@@ -462,7 +462,7 @@ public class IOUtils
                 try {
                     resources.put(path, IOUtils.readResource(path, fhirContext, true));
                 } catch (Exception e) {
-                    //TODO: handle exception
+                    System.out.println("Error reading in Terminology from path: " + path + "\n" + e);
                 }
             }
             RuntimeResourceDefinition valuesetDefinition = (RuntimeResourceDefinition)getResourceDefinition(fhirContext, "ValueSet");
@@ -498,7 +498,7 @@ public class IOUtils
                 try {
                     resources.put(path, IOUtils.readResource(path, fhirContext, true));
                 } catch (Exception e) {
-                    //TODO: handle exception
+                    System.out.println("Error reading in Library from path: " + path + "\n" + e);
                 }
             }
             RuntimeResourceDefinition libraryDefinition = (RuntimeResourceDefinition)getResourceDefinition(fhirContext, "Library");
@@ -526,7 +526,7 @@ public class IOUtils
                 try {
                     resources.put(path, IOUtils.readResource(path, fhirContext, true));
                 } catch (Exception e) {
-                    //TODO: handle exception
+                    System.out.println("Error reading in Measure from path: " + path + "\n" + e);
                 }
             }
             RuntimeResourceDefinition measureDefinition = (RuntimeResourceDefinition)getResourceDefinition(fhirContext, "Measure");
