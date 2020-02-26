@@ -132,7 +132,7 @@ public class ResourceUtils
       String directoryPath = FilenameUtils.getFullPath(path);
       List<org.hl7.fhir.dstu3.model.RelatedArtifact> relatedArtifacts = getStu3RelatedArtifacts(path, fhirContext);
       for (org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
-        String dependencyLibraryName = IOUtils.formatFileName(relatedArtifact.getResource().getReference().split("Library/")[1], encoding);
+        String dependencyLibraryName = IOUtils.formatFileName(relatedArtifact.getResource().getReference().split("Library/")[1], encoding, fhirContext);
         String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
         IOUtils.putInListIfAbsent(dependencyLibraryPath, paths);
       }
@@ -156,7 +156,7 @@ public class ResourceUtils
       String directoryPath = FilenameUtils.getFullPath(path);
       List<org.hl7.fhir.r4.model.RelatedArtifact> relatedArtifacts = getR4RelatedArtifacts(path, fhirContext);
       for (org.hl7.fhir.r4.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
-        String dependencyLibraryName = IOUtils.formatFileName(relatedArtifact.getResource().split("Library/")[1], encoding);
+        String dependencyLibraryName = IOUtils.formatFileName(relatedArtifact.getResource().split("Library/")[1], encoding, fhirContext);
         String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
         IOUtils.putInListIfAbsent(dependencyLibraryPath, paths);
       }
@@ -181,11 +181,11 @@ public class ResourceUtils
       HashSet<String> dependencies = new HashSet<>();
         
       for (String valueSetId : valueSetIDs) {
-          ValueSetsProcessor.getCachedValueSets(igPath, fhirContext).entrySet().stream()
+          ValueSetsProcessor.getCachedValueSets(fhirContext).entrySet().stream()
           .filter(entry -> entry.getKey().equals(valueSetId))
           .forEach(entry -> valueSetResources.putIfAbsent(entry.getKey(), entry.getValue()));
       }
-      dependencies.addAll(valueSetResources.keySet());
+      dependencies.addAll(valueSetIDs);
 
       if(includeDependencies) {
         List<String> dependencyCqlPaths = IOUtils.getDependencyCqlPaths(cqlContentPath);
@@ -199,11 +199,12 @@ public class ResourceUtils
       }
 
       if (dependencies.size() != valueSetResources.size()) {
-        String message = (valueSetIDs.size() - valueSetResources.size()) + " missing ValueSets: ";
-        valueSetIDs.removeAll(valueSetResources.keySet());
-        for (String valueSetId : valueSetIDs) {
-          message += "\r\n" + valueSetId + " MISSING";
-        }        
+        String message = (dependencies.size() - valueSetResources.size()) + " missing ValueSets: \r\n";
+        dependencies.removeAll(valueSetResources.keySet());
+        for (String valueSetId : dependencies) {
+          message += valueSetId + " MISSING \r\n";
+        }   
+        //System.out.println(message);
         throw new Exception(message);
       }
       return valueSetResources;

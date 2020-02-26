@@ -2,7 +2,6 @@ package org.opencds.cqf.igtools;
 
 import static java.util.Arrays.asList;
 
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,16 +29,19 @@ public class RefreshIGArgumentProcessor {
     public static final String[] INCLUDE_TERMINOLOGY_OPTIONS = {"t", "include-terminology"};
     public static final String[] INCLUDE_PATIENT_SCENARIOS_OPTIONS = {"p", "include-patients"};
     public static final String[] VERSIONED_OPTIONS = {"v", "versioned"};
-    public static final String[] FHIR_URI_OPTIONS = {"fs", "fhir-uri"};   
+    public static final String[] FHIR_URI_OPTIONS = {"fs", "fhir-uri"};
+    public static final String[] RESOURCE_PATH_OPTIONS = {"rp", "resourcepath"};
 
     public OptionParser build() {
         OptionParser parser = new OptionParser();
 
         OptionSpecBuilder igPathBuilder = parser.acceptsAll(asList(IG_PATH_OPTIONS),"Limited to a single version of FHIR.");
+        OptionSpecBuilder resourcePathBuilder = parser.acceptsAll(asList(RESOURCE_PATH_OPTIONS),"Use multiple times to define multiple resource directories.");
         OptionSpecBuilder igVersionBuilder = parser.acceptsAll(asList(IG_VERSION_OPTIONS),"If ommitted the root of the IG Path will be used.");
         OptionSpecBuilder fhirUriBuilder = parser.acceptsAll(asList(FHIR_URI_OPTIONS),"If ommitted the final bundle will not be loaded to a FHIR server.");
     
         OptionSpec<String> igPath = igPathBuilder.withRequiredArg().describedAs("root directory of the ig");
+        OptionSpec<String> resourcePath = resourcePathBuilder.withOptionalArg().describedAs("directory of resources");
         OptionSpec<String> igVersion = igVersionBuilder.withOptionalArg().describedAs("ig fhir version");     
 
         //TODO: FHIR user / password (and other auth options)
@@ -64,16 +66,21 @@ public class RefreshIGArgumentProcessor {
         ArgUtils.ensure(OPERATION_OPTIONS[0], options);
 
         String igPath = (String)options.valueOf(IG_PATH_OPTIONS[0]);
-        igPath = Paths.get(igPath).toAbsolutePath().toString();        
-
+        List<String> resourcePaths = (List<String>)options.valuesOf(RESOURCE_PATH_OPTIONS[0]);
         //could not easily use the built-in default here because it is based on the value of the igPath argument.
-        String igVersion = ArgUtils.defaultValue(options, IG_VERSION_OPTIONS[0], IGProcessor.getIgVersion(igPath).toString());
+        String igVersion = (String)options.valueOf(IG_VERSION_OPTIONS[0]);
+        if(igVersion == null) {
+            igVersion = ArgUtils.defaultValue(options, IG_VERSION_OPTIONS[0], IGProcessor.getIgVersion(igPath).toString());
+        }
         Boolean includeELM = options.has(INCLUDE_ELM_OPTIONS[0]);  
         Boolean includeDependencies = options.has(INCLUDE_DEPENDENCY_LIBRARY_OPTIONS[0]);
         Boolean includeTerminology = options.has(INCLUDE_TERMINOLOGY_OPTIONS[0]);
         Boolean includePatientScenarios = options.has(INCLUDE_PATIENT_SCENARIOS_OPTIONS[0]);
         Boolean versioned = options.has(VERSIONED_OPTIONS[0]);
         String fhirUri = (String)options.valueOf(FHIR_URI_OPTIONS[0]);
+
+        ArrayList<String> paths = new ArrayList<String>();
+        paths.addAll(resourcePaths);
     
         RefreshIGParameters ip = new RefreshIGParameters();
         ip.igPath = igPath;
@@ -83,6 +90,7 @@ public class RefreshIGArgumentProcessor {
         ip.includeTerminology = includeTerminology;
         ip.includePatientScenarios = includePatientScenarios;
         ip.versioned = versioned;
+        ip.resourceDirs = paths;
         ip.fhirUri = fhirUri;
        
         return ip;
