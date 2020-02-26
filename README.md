@@ -5,3 +5,5 @@ This tooling provides various useful tools for building CQFramework related cont
 
 Documentation is provided in the [Main](https://github.com/cqframework/cqf-tooling/blob/master/src/main/java/org/opencds/cqf/Main.java) class.
 
+A build of the develop branch is maintained at: https://oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opencds.cqf&a=tooling&v=1.0-SNAPSHOT&c=jar-with-dependencies.
+
