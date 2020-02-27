@@ -107,7 +107,7 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
                 case "-outputpath":
                 case "-op":
                     setOutputPath(value);
-                    break;
+                    break;        
             }
         }
 

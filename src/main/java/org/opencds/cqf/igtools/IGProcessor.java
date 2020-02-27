@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.library.R4LibraryProcessor;
 import org.opencds.cqf.library.STU3LibraryProcessor;
 import org.opencds.cqf.measure.MeasureProcessor;
+import org.opencds.cqf.plandefinition.PlanDefinitionProcessor;
 import org.opencds.cqf.terminology.ValueSetsProcessor;
 import org.opencds.cqf.testcase.TestCaseProcessor;
 import org.opencds.cqf.utilities.BundleUtils;
@@ -185,6 +187,16 @@ public class IGProcessor {
             Boolean includeDependencies, Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned,
             FhirContext fhirContext, String fhirUri) {
 
+        bundleMeasures(refreshedLibraryNames, igPath, includeDependencies, includeTerminology, includePatientScenarios, versioned,
+                fhirContext, fhirUri, encoding);
+
+        bundlePlanDefinitions(refreshedLibraryNames, igPath, includeDependencies, includeTerminology, includePatientScenarios, versioned,
+                fhirContext, fhirUri, encoding);
+    }
+
+    private static void bundleMeasures(ArrayList<String> refreshedLibraryNames, String igPath, Boolean includeDependencies,
+            Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, FhirContext fhirContext, String fhirUri,
+            Encoding encoding) {
         // The set to bundle should be the union of the successfully refreshed Measures
         // and Libraries
         // Until we have the ability to refresh Measures, the set is the union of
@@ -235,7 +247,7 @@ public class IGProcessor {
                 String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
                 if (includeTerminology) {
                     shouldPersist = shouldPersist
-                            & bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding);
+                            & bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
                 }
 
                 if (includeDependencies) {
@@ -251,7 +263,7 @@ public class IGProcessor {
                 if (shouldPersist) {
                     String bundleDestPath = FilenameUtils.concat(getBundlesPath(igPath), refreshedLibraryName);
                     persistBundle(igPath, bundleDestPath, refreshedLibraryName, encoding, fhirContext, new ArrayList<IAnyResource>(resources.values()), fhirUri);
-                    bundleFiles(igPath, bundleDestPath, refreshedLibraryName, measureSourcePath, librarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios);
+                    bundleFiles(igPath, bundleDestPath, refreshedLibraryName, measureSourcePath, librarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion);
                     bundledMeasures.add(refreshedLibraryName);
                 }
             } catch (Exception e) {
@@ -283,11 +295,146 @@ public class IGProcessor {
         LogUtils.info(message);
     }
 
+    private static void bundlePlanDefinitions(ArrayList<String> refreshedLibraryNames, String igPath, Boolean includeDependencies,
+            Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, FhirContext fhirContext, String fhirUri,
+            Encoding encoding) {
+        
+        HashSet<String> planDefinitionSourcePaths = IOUtils.getPlanDefinitionPaths(fhirContext);
+        List<String> planDefinitionPathLibraryNames = new ArrayList<String>();
+        for (String planDefinitionSourcePath : planDefinitionSourcePaths) {
+            planDefinitionPathLibraryNames
+                    .add(FilenameUtils.getBaseName(planDefinitionSourcePath).replace(PlanDefinitionProcessor.ResourcePrefix, ""));
+        }
+
+        List<String> bundledPlanDefinitions = new ArrayList<String>();
+        for (String refreshedLibraryName : refreshedLibraryNames) {
+            try {
+                if (!planDefinitionPathLibraryNames.contains(refreshedLibraryName)) {
+                    continue;
+                }
+
+                Map<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+
+                String refreshedLibraryFileName = IOUtils.formatFileName(refreshedLibraryName, encoding, fhirContext);
+                String librarySourcePath;
+                try {
+                    librarySourcePath = IOUtils.getLibraryPathAssociatedWithCqlFileName(refreshedLibraryFileName, fhirContext);
+                } catch (Exception e) {
+                    LogUtils.putWarning(refreshedLibraryName, e.getMessage());
+                    continue;
+                } finally {
+                    LogUtils.warn(refreshedLibraryName);
+                }
+                
+                String planDefinitionSourcePath = "";
+                for (String path : planDefinitionSourcePaths) {
+                    if (path.endsWith(refreshedLibraryFileName))
+                    {
+                        planDefinitionSourcePath = path;
+                    }
+                }
+
+                Boolean shouldPersist = ResourceUtils.safeAddResource(planDefinitionSourcePath, resources, fhirContext);
+                shouldPersist = shouldPersist
+                        & ResourceUtils.safeAddResource(librarySourcePath, resources, fhirContext);
+
+                String cqlFileName = IOUtils.formatFileName(refreshedLibraryName, Encoding.CQL, fhirContext);
+                List<String> cqlLibrarySourcePaths = IOUtils.getCqlLibraryPaths().stream()
+                    .filter(path -> path.endsWith(cqlFileName))
+                    .collect(Collectors.toList());
+                String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
+                
+                if (includeTerminology) {
+                    shouldPersist = shouldPersist
+                            & bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
+                }
+
+                if (includeDependencies) {
+                    shouldPersist = shouldPersist
+                            & bundleDependencies(librarySourcePath, fhirContext, resources, encoding);
+                }
+
+                if (includePatientScenarios) {
+                    shouldPersist = shouldPersist
+                            & bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
+                }
+
+                List<String> activityDefinitionPaths =  bundleActivityDefinitions(planDefinitionSourcePath, fhirContext, resources, encoding, includeVersion, shouldPersist);
+
+                if (shouldPersist) {
+                    String bundleDestPath = FilenameUtils.concat(getBundlesPath(igPath), refreshedLibraryName);
+                    persistBundle(igPath, bundleDestPath, refreshedLibraryName, encoding, fhirContext, new ArrayList<IAnyResource>(resources.values()), fhirUri);
+                    bundleFiles(igPath, bundleDestPath, refreshedLibraryName, planDefinitionSourcePath, librarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion);
+                    addActivityDefinitionFilesToBundle(igPath, bundleDestPath, refreshedLibraryName, activityDefinitionPaths, fhirContext, encoding);
+                    addRequestAndResponseFilesToBundle(igPath, bundleDestPath, refreshedLibraryName);
+                    bundledPlanDefinitions.add(refreshedLibraryName);
+                }
+            } catch (Exception e) {
+                LogUtils.putWarning(refreshedLibraryName, e.getMessage());
+            } finally {
+                LogUtils.warn(refreshedLibraryName);
+            }
+        }
+        String message = "\r\n" + bundledPlanDefinitions.size() + " PlanDefinitions successfully bundled:";
+        for (String bundledPlanDefinition : bundledPlanDefinitions) {
+            message += "\r\n     " + bundledPlanDefinition + " BUNDLED";
+        }
+
+        ArrayList<String> failedPlanDefinitions = new ArrayList<>(planDefinitionPathLibraryNames);
+        planDefinitionPathLibraryNames.removeAll(bundledPlanDefinitions);
+        planDefinitionPathLibraryNames.retainAll(refreshedLibraryNames);
+        message += "\r\n" + planDefinitionPathLibraryNames.size() + " PlanDefinitions refreshed, but not bundled (due to issues):";
+        for (String notBundled : planDefinitionPathLibraryNames) {
+            message += "\r\n     " + notBundled + " REFRESHED";
+        }
+
+        failedPlanDefinitions.removeAll(bundledPlanDefinitions);
+        failedPlanDefinitions.removeAll(planDefinitionPathLibraryNames);
+        message += "\r\n" + failedPlanDefinitions.size() + " PlanDefinitions failed refresh:";
+        for (String failed : failedPlanDefinitions) {
+            message += "\r\n     " + failed + " FAILED";
+        }
+
+        LogUtils.info(message);
+    }
+
+    public static final String requestsPathElement = "input/pagecontent/requests/";  
+    public static final String responsesPathElement = "input/pagecontent/responses/";   
+    public static final String requestFilesPathElement = "requests/";  
+    public static final String responseFilesPathElement = "responses/"; 
+    private static void addRequestAndResponseFilesToBundle(String igPath, String bundleDestPath, String libraryName) {
+        String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, libraryName + "-" + bundleFilesPathElement);
+        String requestFilesPath = FilenameUtils.concat(igPath, requestsPathElement);
+        String responseFilesPath = FilenameUtils.concat(igPath, responsesPathElement);
+        String requestFilesDirectory = FilenameUtils.concat(bundleDestFilesPath, requestFilesPathElement);
+        IOUtils.initializeDirectory(requestFilesDirectory);
+        String responseFilesDirectory = FilenameUtils.concat(bundleDestFilesPath, responseFilesPathElement);
+        IOUtils.initializeDirectory(responseFilesDirectory);
+        List<String> requestDirectories = IOUtils.getDirectoryPaths(requestFilesPath, false);
+        for (String dir : requestDirectories) {
+            if (dir.endsWith(libraryName)) {
+                List<String> requestPaths = IOUtils.getFilePaths(dir, true);
+                for (String path : requestPaths) {
+                    IOUtils.copyFile(path, FilenameUtils.concat(requestFilesDirectory, FilenameUtils.getName(path)));
+                }
+            }
+        }
+        List<String> responseDirectories = IOUtils.getDirectoryPaths(responseFilesPath, false);
+        for (String dir : responseDirectories) {
+            if (dir.endsWith(libraryName)) {
+                List<String> responsePaths = IOUtils.getFilePaths(dir, true);
+                for (String path : responsePaths) {
+                    IOUtils.copyFile(path, FilenameUtils.concat(responseFilesDirectory, FilenameUtils.getName(path)));
+                }
+            } 
+        }
+    }
+
     public static Boolean bundleValueSets(String cqlContentPath, String igPath, FhirContext fhirContext,
-            Map<String, IAnyResource> resources, Encoding encoding) {
+            Map<String, IAnyResource> resources, Encoding encoding, Boolean includeDependencies, Boolean includeVersion) {
         Boolean shouldPersist = true;
         try {
-            Map<String, IAnyResource> dependencies = ResourceUtils.getDepValueSetResources(cqlContentPath, igPath, fhirContext, true);
+            Map<String, IAnyResource> dependencies = ResourceUtils.getDepValueSetResources(cqlContentPath, igPath, fhirContext, includeDependencies, includeVersion);
             for (IAnyResource resource : dependencies.values()) {
                 resources.putIfAbsent(resource.getId(), resource);
             }
@@ -296,6 +443,22 @@ public class IGProcessor {
             LogUtils.putWarning(cqlContentPath, e.getMessage());
         }
         return shouldPersist;
+    }
+
+    public static List<String> bundleActivityDefinitions(String planDefinitionPath, FhirContext fhirContext, Map<String, IAnyResource> resources,
+    Encoding encoding, Boolean includeVersion, Boolean shouldPersist) {
+        List<String> activityDefinitionPaths = new ArrayList<String>();
+        try {
+            Map<String, IAnyResource> activityDefinitions = ResourceUtils.getActivityDefinitionResources(planDefinitionPath, fhirContext, includeVersion);
+            for (Entry<String, IAnyResource> entry : activityDefinitions.entrySet()) {
+                resources.putIfAbsent(entry.getValue().getId(), entry.getValue());
+                activityDefinitionPaths.add(entry.getKey());
+            }
+        } catch (Exception e) {
+            shouldPersist = false;
+            LogUtils.putWarning(planDefinitionPath, e.getMessage());
+        }
+        return activityDefinitionPaths;
     }
 
     public static Boolean bundleDependencies(String path, FhirContext fhirContext, Map<String, IAnyResource> resources,
@@ -354,11 +517,17 @@ public class IGProcessor {
     }
 
     public static final String bundleFilesPathElement = "files/";    
-    private static void bundleFiles(String igPath, String bundleDestPath, String libraryName, String measureSourcePath, String librarySourcePath, FhirContext fhirContext, Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios) {
+    private static void addActivityDefinitionFilesToBundle(String igPath, String bundleDestPath, String libraryName, List<String> activityDefinitionPaths, FhirContext fhirContext, Encoding encoding) {
+        String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, libraryName + "-" + bundleFilesPathElement);
+        for (String path : activityDefinitionPaths) {
+            IOUtils.copyFile(path, FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(path)));
+        }
+    }
+    private static void bundleFiles(String igPath, String bundleDestPath, String libraryName, String resourceFocusSourcePath, String librarySourcePath, FhirContext fhirContext, Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios, Boolean includeVersion) {
         String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, libraryName + "-" + bundleFilesPathElement);
         IOUtils.initializeDirectory(bundleDestFilesPath);
 
-        IOUtils.copyFile(measureSourcePath, FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(measureSourcePath)));
+        IOUtils.copyFile(resourceFocusSourcePath, FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(resourceFocusSourcePath)));
         IOUtils.copyFile(librarySourcePath, FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(librarySourcePath)));
 
         String cqlFileName = IOUtils.formatFileName(libraryName, Encoding.CQL, fhirContext);
@@ -371,7 +540,7 @@ public class IGProcessor {
 
         if (includeTerminology) {  
             try {     
-                Map<String, IAnyResource> valuesets = ResourceUtils.getDepValueSetResources(cqlLibrarySourcePath, igPath, fhirContext, true);      
+                Map<String, IAnyResource> valuesets = ResourceUtils.getDepValueSetResources(cqlLibrarySourcePath, igPath, fhirContext, includeDependencies, includeVersion);      
                 if (!valuesets.isEmpty()) {
                     Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<IAnyResource>(valuesets.values()), fhirContext);
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  

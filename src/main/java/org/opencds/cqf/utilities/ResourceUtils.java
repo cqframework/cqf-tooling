@@ -25,11 +25,11 @@ import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
-import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 
 public class ResourceUtils 
 {
@@ -144,6 +144,7 @@ public class ResourceUtils
       for (org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
         String dependencyLibraryName = IOUtils.formatFileName(relatedArtifact.getResource().getReference().split("Library/")[1], encoding, fhirContext);
         String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
+        IOUtils.putAllInListIfAbsent(getStu3DepLibraryPaths(dependencyLibraryPath, fhirContext, encoding), paths);
         IOUtils.putInListIfAbsent(dependencyLibraryPath, paths);
       }
       return paths;
@@ -185,7 +186,7 @@ public class ResourceUtils
       return dependencyLibraries;
     }
     
-    public static Map<String, IAnyResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext, boolean includeDependencies) throws Exception {
+    public static Map<String, IAnyResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext, boolean includeDependencies, Boolean includeVersion) throws Exception {
       Map<String, IAnyResource> valueSetResources = new HashMap<String, IAnyResource>();
       List<String> valueSetIDs = getDepValueSetIDs(cqlContentPath);
       HashSet<String> dependencies = new HashSet<>();
@@ -198,9 +199,9 @@ public class ResourceUtils
       dependencies.addAll(valueSetIDs);
 
       if(includeDependencies) {
-        List<String> dependencyCqlPaths = IOUtils.getDependencyCqlPaths(cqlContentPath);
+        List<String> dependencyCqlPaths = IOUtils.getDependencyCqlPaths(cqlContentPath, includeVersion);
         for (String path : dependencyCqlPaths) {
-          Map<String, IAnyResource> dependencyValueSets = getDepValueSetResources(path, igPath, fhirContext, includeDependencies);
+          Map<String, IAnyResource> dependencyValueSets = getDepValueSetResources(path, igPath, fhirContext, includeDependencies, includeVersion);
           dependencies.addAll(dependencyValueSets.keySet());
           for (Entry<String, IAnyResource> entry : dependencyValueSets.entrySet()) {
             valueSetResources.putIfAbsent(entry.getKey(), entry.getValue());
@@ -220,12 +221,12 @@ public class ResourceUtils
       return valueSetResources;
     }   
 
-    public static ArrayList<String> getIncludedLibraryNames(String cqlContentPath) {
+    public static ArrayList<String> getIncludedLibraryNames(String cqlContentPath, Boolean includeVersion) {
       ArrayList<String> includedLibraryNames = new ArrayList<String>();
       ArrayList<IncludeDef> includedDefs = getIncludedDefs(cqlContentPath);
       for (IncludeDef def : includedDefs) {
         //TODO: replace true with versioned variable
-        IOUtils.putInListIfAbsent(getId(def.getPath(), def.getVersion(), true), includedLibraryNames);
+        IOUtils.putInListIfAbsent(getId(def.getPath(), def.getVersion(), includeVersion), includedLibraryNames);
       }
       return includedLibraryNames;
     }
@@ -309,7 +310,45 @@ public class ResourceUtils
           LogUtils.putWarning(path, e.getMessage());
       }  
       return added;
-    } 
+  }
+
+	public static Map<String, IAnyResource> getActivityDefinitionResources(String planDefinitionPath,
+			FhirContext fhirContext, Boolean includeVersion) {
+        Map<String, IAnyResource> activityDefinitions = new HashMap<String, IAnyResource>();
+        IAnyResource planDefinition = IOUtils.readResource(planDefinitionPath, fhirContext, true);
+        Object actionChild = resolveProperty(planDefinition, "action", fhirContext);
+        if (actionChild != null) {
+          if (actionChild instanceof Iterable)
+          {
+            for (Object action : (Iterable)actionChild) {
+              Object definitionChild = resolveProperty(action, "definition", fhirContext);
+              if (definitionChild != null) {
+                Object referenceChild = resolveProperty(definitionChild, "reference", fhirContext);
+                String activityDefinitionReference = referenceChild.toString();
+                String activityDefinitionId = activityDefinitionReference.replaceAll("ActivityDefinition/", "activitydefinition-").replaceAll("_", "-");
+                for (String path : IOUtils.getActivityDefinitionPaths(fhirContext)) {
+                  if (path.contains(activityDefinitionId)) {
+                    activityDefinitions.put(path, IOUtils.readResource(path, fhirContext));
+                  }
+                }
+              }
+            }
+          }
+          else {
+            Object definitionChild = resolveProperty(actionChild, "definition", fhirContext);
+            if (definitionChild != null) {
+              Object referenceChild = resolveProperty(definitionChild, "reference", fhirContext);
+              String activityDefinitionReference = (String)referenceChild;
+              for (String path : IOUtils.getActivityDefinitionPaths(fhirContext)) {
+                if (path.contains(activityDefinitionReference)) {
+                  activityDefinitions.put(path, IOUtils.readResource(path, fhirContext));
+                }
+              }
+            }
+          }
+        }
+        return activityDefinitions;
+  }
 
     public static Object resolveProperty(Object target, String path, FhirContext fhirContext) {
       if (target == null) {

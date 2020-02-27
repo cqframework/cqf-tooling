@@ -30,7 +30,7 @@ public class LogUtils
             String resource =  FilenameUtils.getBaseName(resourceException.getKey());           
             exceptionMessage += "\r\n          Resource could not be processed: " + resource + "\r\n                    "  + resourceExceptionMessage;
         }
-        ourLog.warn("Measure could not be processed: " + libraryName + exceptionMessage);
+        ourLog.warn(libraryName +" could not be processed: "  + exceptionMessage);
         resourceWarnings.clear(); 
     } 
 

@@ -19,7 +19,7 @@ public class HttpClientUtils {
             throws IOException {  
         try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
             HttpPost post = new HttpPost(fhirServerUrl);
-            post.addHeader("content-type", "application/json");
+            post.addHeader("content-type", "application/" + encoding.toString());
 
             String resourceString = IOUtils.parseResourceAsString(resource, encoding, fhirContext);
             StringEntity input = new StringEntity(resourceString);

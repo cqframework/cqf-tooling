@@ -62,7 +62,7 @@ public class VSACBatchValueSetGenerator extends Operation {
             VSACValueSetGenerator generator;
             for (File valueSet : valueSetFiles) {
                 if (!valueSet.getPath().endsWith(".xlsx")) continue;
-                String[] argsForSpreadsheet = { "-VsacXlsxToValueSet", "-pts=" + valueSet.getAbsolutePath() };
+                String[] argsForSpreadsheet = { "-VsacXlsxToValueSet", "-pts=" + valueSet.getAbsolutePath(), "-op=" + getOutputPath() };
                 generator =  new VSACValueSetGenerator();
                 generator.execute(argsForSpreadsheet);
             }
