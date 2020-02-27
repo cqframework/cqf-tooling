@@ -3,6 +3,7 @@ package org.opencds.cqf.modelinfo;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,10 +14,10 @@ import com.google.common.io.Files;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -31,7 +32,7 @@ public class ResourceLoader {
         String[] paths = resourcePaths.split(";");
         for (String path : paths) {
             System.out.println("Reading " + path + " StructureDefinitions");
-            resources.addAll(this.readStructureDefFromFolder(basePath + path));
+            resources.addAll(this.readStructureDefFromFolder(Paths.get(basePath, path).toString()));
         }
 
         System.out.println("Indexing StructureDefinitions by Id");
@@ -65,7 +66,7 @@ public class ResourceLoader {
     private List<StructureDefinition> readStructureDefFromFolder(String path) {
         Collection<File> files = getFiles(path);
 
-        IParser parser = FhirContext.forDstu3().newJsonParser();
+        IParser parser = FhirContext.forR4().newJsonParser();
 
         List<StructureDefinition> objects = new ArrayList<StructureDefinition>();
 

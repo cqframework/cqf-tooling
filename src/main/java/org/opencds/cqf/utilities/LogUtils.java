@@ -36,19 +36,15 @@ public class LogUtils
 
     private static String truncateMessage(String message) {   
         int maxSize = 500;     
-        int cutoffIndex = message.indexOf("\r\n");
-        cutoffIndex = cutoffIndex > -1 ? cutoffIndex : message.indexOf("\r");
-        cutoffIndex = cutoffIndex > -1 ? cutoffIndex : message.indexOf("\n");
-        cutoffIndex = cutoffIndex > maxSize ? maxSize : cutoffIndex;
-        int cutoffIndex2 = -1;
-        if (cutoffIndex > -1) {
-            cutoffIndex2 = message.indexOf("\r\n", cutoffIndex + 1);
-            cutoffIndex2 = cutoffIndex2 > -1 ? cutoffIndex2 : message.indexOf("\r", cutoffIndex + 1);
-            cutoffIndex2 = cutoffIndex2 > -1 ? cutoffIndex2 : message.indexOf("\n", cutoffIndex + 1);
-            cutoffIndex2 = cutoffIndex2 > maxSize ? maxSize : cutoffIndex2;
-        } 
-
-        cutoffIndex = cutoffIndex2 > -1 ? cutoffIndex2 : (cutoffIndex > -1 ? cutoffIndex : maxSize); 
+        String[] messages = message.split("\r\n");
+        int cutoffIndex = 0;
+        for (String string : messages) {
+            int stringIndex = cutoffIndex + string.length() + 4;
+            cutoffIndex = stringIndex > maxSize ? maxSize : stringIndex;
+            if(cutoffIndex == maxSize) {
+                break;
+            }
+        }
         return message.length() < cutoffIndex ? message : message.substring(0, cutoffIndex) + "...";
     }
 }

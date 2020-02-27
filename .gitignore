@@ -123,10 +123,8 @@ hs_err_pid*
 !/src/main/resources/org/opencds/cqf/measure/output/stu3/.gitkeep
 
 *.iml
-/.classpath
-/.project
-/.settings/org.eclipse.jdt.apt.core.prefs
-/.settings/org.eclipse.jdt.core.prefs
-/.settings/org.eclipse.m2e.core.prefs
-/.vscode/launch.json
-/*.factorypath
+.classpath
+.project
+.vscode/launch.json
+*.factorypath
+.settings
