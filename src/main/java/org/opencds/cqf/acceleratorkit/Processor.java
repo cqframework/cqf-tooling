@@ -29,7 +29,8 @@ public class Processor extends Operation {
     private String dataElementPages; // -dataelementpages (-dep) comma-separated list of the names of pages in the workbook to be processed
 
     // Canonical Base
-    private String canonicalBase = "http://fhir.org/guides/who/anc-cds"; // -canonicalbase (-cb) (without trailing slash, e.g. http://fhir.org/guides/who/anc-cds)
+    private String canonicalBase = null;
+    private Map<String, String> scopeCanonicalBaseMap = new HashMap<String, String>();
 
     private String openMRSSystem = "http://openmrs.org/concepts";
     // NOTE: for now, disable open MRS system/codes
@@ -62,11 +63,14 @@ public class Processor extends Operation {
                 case "pathtospreadsheet": case "pts": pathToSpreadsheet = value; break; // -pathtospreadsheet (-pts)
                 case "encoding": case "e": encoding = value.toLowerCase(); break; // -encoding (-e)
                 case "dataelementpages": case "dep": dataElementPages = value; break; // -dataelementpages (-dep)
-                case "canonicalbase": case "cb": canonicalBase = value; break; // -canonicalbase (-cb)
                 case "scopes": case "s": scopes = value; break; // -scopes (-s)
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
+
+        scopeCanonicalBaseMap.put("core", "http://hl7.org/fhir/dbcg/core/ImplementationGuide/core");
+        scopeCanonicalBaseMap.put("fp", "http://hl7.org/fhir/dbcg/fp-cds/ImplementationGuide/fp-cds");
+        scopeCanonicalBaseMap.put("sti", "http://hl7.org/fhir/dbcg/sti-cds/ImplementationGuide/sti-cds");
 
         if (pathToSpreadsheet == null) {
             throw new IllegalArgumentException("The path to the spreadsheet is required");
@@ -123,6 +127,10 @@ public class Processor extends Operation {
         // ensure scope folder exists
         String scopePath = getScopePath(scope);
         ensurePath(scopePath);
+
+        if (scope != null && scope.length() > 0) {
+            canonicalBase = scopeCanonicalBaseMap.get(scope.toLowerCase());
+        }
 
         // process workbook
         for (String page : dataElementPages.split(",")) {
@@ -320,6 +328,7 @@ public class Processor extends Operation {
         e.setGroup(group);
         e.setLabel(label);
         e.setType(type);
+        e.setMasterDataType(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MasterDataType")));
         e.setInfoIcon(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "InfoIcon")));
         e.setDue(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Due")));
         e.setRelevance(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Relevance")));
@@ -329,6 +338,7 @@ public class Processor extends Operation {
         e.setConstraint(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Constraint")));
         e.setRequired(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Required")));
         e.setEditable(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Editable")));
+        e.setScope(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Scope")));
         e.setCode(getPrimaryCode(name, row, colIds));
         e.setFhirElementPath(getFhirElementPath(row, colIds));
 
@@ -399,7 +409,7 @@ public class Processor extends Operation {
                             colIds.put("Scope", cell.getColumnIndex());
                             break;
                         case "master data type":
-                            colIds.put("DataType", cell.getColumnIndex());
+                            colIds.put("MasterDataType", cell.getColumnIndex());
                             break;
                         case "master data element label":
                             colIds.put("Name", cell.getColumnIndex());
@@ -456,9 +466,10 @@ public class Processor extends Operation {
             String rowScope = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Scope"));
             boolean scopeIsNull = scope == null;
             boolean scopeMatchesRowScope = rowScope != null && scope.toLowerCase().equals(rowScope.toLowerCase());
+
             if (scopeIsNull || scopeMatchesRowScope) {
-                String dataType = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "DataType"));
-                switch(dataType) {
+                String masterDataType = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MasterDataType"));
+                switch(masterDataType) {
                     case "Data Element":
                         DictionaryElement e = createDataElement(page, currentGroup, row, colIds);
                         if (e != null) {
@@ -470,9 +481,9 @@ public class Processor extends Operation {
                         break;
                     case "Calculation":
                     case "Slice":
-                    case "UI Element":
                         // TODO: Do we need to do anything with these?
-                        // Answer: No, this should be ignored. Per Joe and Jennifer
+                        break;
+                    case "UI Element":
                         break;
                     default:
                         // Currently unsupported/undocumented
@@ -495,27 +506,26 @@ public class Processor extends Operation {
 //        }
 //    }
 
-    private boolean requiresProfile(String type, String extensionNeededIndicator) {
-        if (type == null || extensionNeededIndicator.toLowerCase().trim().equals("extension needed")) {
+    private boolean requiresProfile(DictionaryElement element) {
+        if (element == null
+            || element.getMasterDataType() == null
+            || element.getFhirElementPath() == null
+            || (element.getFhirElementPath().getBaseProfile() != null
+                    && element.getFhirElementPath().getBaseProfile().toLowerCase().trim().equals("extension needed"))
+        ) {
             return false;
         }
 
-        switch (type.toLowerCase().trim()) {
-            case "checkbox":
-            case "coding":
-            case "coding - select one":
-            case "coding - select all that apply":
-            case "coding - (select all that apply":
-            case "date":
-            case "humanname":
-            case "image":
-            case "integer":
-            case "note":
-            case "qr code":
-            case "text":
-            case "mc (select one)":
-            case "mc (select multiple)":
+        switch (element.getMasterDataType().toLowerCase().trim()) {
+            case "data element":
+            case "input option":
                 return true;
+            case "calculation":
+            case "clice":
+                // TODO: Do we need to do anything with these?
+                return true;
+            case "ui element":
+                return false;
             default:
                 return false;
         }
@@ -538,7 +548,7 @@ public class Processor extends Operation {
 
     private void processElementMap() {
         for (DictionaryElement element : elementMap.values()) {
-            if (requiresProfile(element.getType(), element.getFhirElementPath().getBaseProfile())) {
+            if (requiresProfile(element)) {
                 StructureDefinition profile = ensureProfile(element);
                 profiles.add(profile);
             }
@@ -562,13 +572,16 @@ public class Processor extends Operation {
                 .replace("]", "")
                 .replace("\n", "")
                 // replace these with ndash
+                .replace(",", "-")
                 .replace("_", "-")
                 .replace("/", "-")
                 .replace(" ", "-")
                 // remove multiple ndash
                 .replace("----", "-")
                 .replace("---", "-")
-                .replace("--", "-");
+                .replace("--", "-")
+                .replace(">", "greater-than")
+                .replace("<", "less-than");
     }
 
     private boolean toBoolean(String value) {
@@ -587,61 +600,6 @@ public class Processor extends Operation {
             return type;
         }
     }
-//    private String toFhirType(String type) {
-//        switch (type.toLowerCase().trim()) {
-//            case "image":
-//                return "Attachment";
-//            case "note":
-//                return "Annotation";
-//            case "qr code":
-//                return "Attachment"; // TODO: Consider specifying mime type as QR Code here?
-//            case "text":
-//                return "markdown";
-//            case "date":
-//                return "date";
-//            case "datetime":
-//                return "dateTime";
-//            case "humanname":
-//                return "HumanName";
-//            case "time":
-//                return "time";
-//            case "checkbox":
-//                return "boolean";
-//            case "integer":
-//                return "integer";
-//            case "decimal":
-//                return "decimal";
-//            case "quantity":
-//                return "Quantity";
-//            case "codeableconcept":
-//            case "coding":
-//            case "coding - select one":
-//            case "coding - select all that apply":
-//            case "coding - (select all that apply":
-//            case "mc (select one)":
-//            case "mc (select multiple)":
-//                return "CodeableConcept";
-//            default:
-//                throw new IllegalArgumentException(String.format("Unknown type code %s", type));
-//        }
-//    }
-//
-//    private String toFhirObservationType(String type) {
-//        String fhirType = toFhirType(type);
-//        switch (fhirType) {
-//            case "markdown": return "string";
-//            case "date": return "dateTime";
-//            default: return fhirType;
-//        }
-//    }
-//
-//    private String toFhirPatientType(String type) {
-//        String fhirType = toFhirType(type);
-//        switch (fhirType) {
-//            case "markdown": return "string";
-//            default: return fhirType;
-//        }
-//    }
 
     private String getFhirTypeOfTargetElement(DictionaryFhirElementPath elementPath) {
         try {
@@ -712,10 +670,13 @@ public class Processor extends Operation {
             case "CarePlan":
             case "Communication":
             case "Condition":
+            case "Consent":
             case "Coverage":
             case "DeviceUseStatement":
+            case "DocumentReference":
             case "Encounter":
             case "HealthcareService":
+            case "Location":
             case "Medication":
             case "MedicationAdministration":
             case "MedicationDispense":
@@ -723,8 +684,10 @@ public class Processor extends Operation {
             case "OccupationalData":
             case "Patient":
             case "Practitioner":
+            case "PractitionerRole":
             case "Procedure":
             case "ServiceRequest":
+            case "Specimen":
                 choicesPath = elementPath.getResourcePath();
                 break;
             default:
@@ -734,10 +697,14 @@ public class Processor extends Operation {
         StructureDefinition sd;
         List<ElementDefinition> elementDefinitions = new ArrayList<>();
 
-        String customProfileId = element.getFhirElementPath().getCustomProfileId();
+        String customProfileId =
+                element.getFhirElementPath().getCustomProfileId() != null && element.getFhirElementPath().getCustomProfileId().length() > 0
+                        ? toId(element.getFhirElementPath().getCustomProfileId())
+                        : null;
+
         Optional<StructureDefinition> existingProfile = null;
         if (customProfileId != null && customProfileId.length() > 0) {
-            existingProfile = profiles.stream().filter(p -> p.getId() == customProfileId).findFirst();
+            existingProfile = profiles.stream().filter(p -> p.getId().equals(customProfileId)).findFirst();
         }
 
         if (existingProfile != null && !existingProfile.isEmpty()) {
@@ -791,31 +758,23 @@ public class Processor extends Operation {
             ed.setMustSupport(true);
             ed.setFixed(element.getCode().toCodeableConcept());
             elementDefinitions.add(ed);
-        }
-        else {
+        } else {
+            String elementId = String.format("%s.%s", resourceType, choicesPath);
+//            if (!elementExists(sd, elementId)) {
                 // value
                 ElementDefinition ed = new ElementDefinition();
-                ed.setId(String.format("%s.%s", resourceType, choicesPath));
-                ed.setPath(String.format("%s.%s", resourceType, choicesPath));
+                ed.setId(elementId);
+                ed.setPath(elementId);
                 ed.setMin(toBoolean(element.getRequired()) ? 1 : 0);
                 ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
-                ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
 
+                ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
                 String elementFhirType = getFhirTypeOfTargetElement(elementPath);
                 if (elementFhirType != null && elementFhirType.length() > 0) {
                     tr.setCode(elementFhirType);
+                    ed.addType(tr);
                 }
-        //        else {
-        //            if (resourceType.equals("Observation")) {
-        //                tr.setCode(toFhirObservationType(element.getType()));
-        //            } else if (resourceType.equals("Patient")) {
-        //                tr.setCode(toFhirPatientType(element.getType()));
-        //            } else {
-        //                tr.setCode(toFhirType(element.getType()));
-        //            }
-        //        }
 
-                ed.addType(tr);
                 ed.setMustSupport(true);
 
                 // binding and CodeSystem/ValueSet for MultipleChoice elements
@@ -893,7 +852,8 @@ public class Processor extends Operation {
                     ed.setBinding(binding);
                 }
                 elementDefinitions.add(ed);
-            }
+//            }
+        }
 
         for (ElementDefinition elementDef : elementDefinitions) {
             sd.getDifferential().addElement(elementDef);
@@ -901,6 +861,11 @@ public class Processor extends Operation {
 
         return sd;
     }
+
+//    private boolean elementExists(StructureDefinition sd, String elementId) {
+//        boolean sdContainsElement = sd.getDifferential().getElement().stream().anyMatch(element -> element.getId().equals(elementId));
+//        return  sdContainsElement;
+//    }
 
     public void writeResource(String path, Resource resource) {
         String outputFilePath = path + "/" + resource.getResourceType().toString().toLowerCase() + "-" + resource.getId() + "." + encoding;

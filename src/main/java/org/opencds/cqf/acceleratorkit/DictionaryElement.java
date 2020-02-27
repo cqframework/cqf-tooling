@@ -46,6 +46,14 @@ public class DictionaryElement {
         return this.name;
     }
 
+    private String masterDataType;
+    public String getMasterDataType() {
+        return this.masterDataType;
+    }
+    public void setMasterDataType(String masterDataType) {
+        this.masterDataType = masterDataType;
+    }
+
     private String infoIcon;
     public String getInfoIcon() {
         return this.infoIcon;
@@ -158,6 +166,14 @@ public class DictionaryElement {
     }
     public void setEditable(String editable) {
         this.editable = editable;
+    }
+
+    private String scope;
+    public String getScope() {
+        return this.scope;
+    }
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 
     private DictionaryCode code;
