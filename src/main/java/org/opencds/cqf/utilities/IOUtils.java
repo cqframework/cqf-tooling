@@ -462,7 +462,9 @@ public class IOUtils
                 try {
                     resources.put(path, IOUtils.readResource(path, fhirContext, true));
                 } catch (Exception e) {
-                    //TODO: handle exception
+                    if (path.toLowerCase().contains("valuesets") || path.toLowerCase().contains("valueset")) {
+                        System.out.println("Error reading in Terminology from path: " + path + "\n" + e);
+                    }
                 }
             }
             //TODO: move these to ResourceUtils
@@ -499,7 +501,9 @@ public class IOUtils
                 try {
                     resources.put(path, IOUtils.readResource(path, fhirContext, true));
                 } catch (Exception e) {
-                    //TODO: handle exception
+                    if(path.toLowerCase().contains("library")) {
+                        System.out.println("Error reading in Library from path: " + path + "\n" + e);
+                    }
                 }
             }
             //TODO: move these to ResourceUtils
@@ -528,7 +532,9 @@ public class IOUtils
                 try {
                     resources.put(path, IOUtils.readResource(path, fhirContext, true));
                 } catch (Exception e) {
-                    //TODO: handle exception
+                    if(path.toLowerCase().contains("measure")) {
+                        System.out.println("Error reading in Measure from path: " + path + "\n" + e);
+                    }
                 }
             }
             //TODO: move these to ResourceUtils
