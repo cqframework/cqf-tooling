@@ -27,6 +27,22 @@ import org.opencds.cqf.modelinfo.quick.QuickClassInfoBuilder;
 import org.opencds.cqf.modelinfo.quick.QuickModelInfoBuilder;
 
 public class StructureDefinitionToModelInfo extends Operation {
+    /*
+        resourcePaths: Semi-colon delimited list of paths to directories containing the resource definition files
+            This directory should contain the unzipped contents of the definitions.json.zip or definitions.xml.zip files
+                (i.e. all conformance resources published as part of the specification or ig)
+
+        Arguments for producing FHIR Model Info
+            -resourcePaths="4.0.1"
+            -modelName="FHIR"
+            -modelVersion="4.0.1"
+
+        Arguments for producing QUICK Model Info
+            -resourcePaths="4.0.0;US-Core/3.0.0;QI-Core/3.3.0"
+            -modelName="QUICK"
+            -modelVersion="3.3.0"
+
+     */
     @Override
     public void execute(String[] args) {
         String inputPath = Paths.get("..", "FHIR-Spec").toString();
@@ -41,21 +57,21 @@ public class StructureDefinitionToModelInfo extends Operation {
             setOutputPath("../cqf-tooling/src/main/resources/org/opencds/cqf/modelinfo");
         }
 
-        //String resourcePaths = "4.0.0";
-        String resourcePaths = "4.0.0;US-Core/3.0.0;QI-Core/3.3.0";
+        String resourcePaths = "4.0.1";
+        //String resourcePaths = "4.0.0;US-Core/3.0.0;QI-Core/3.3.0";
         if (args.length > 3) {
             resourcePaths = args[3];
         }
 
         // TODO : Can we autodetect this from the structure defintions?
         // Yes, would need to be an extension definition on the ImplementationGuide...
-        //String modelName = "FHIR";
-        String modelName = "QUICK";
+        String modelName = "FHIR";
+        //String modelName = "QUICK";
         if (args.length > 4) {
             modelName = args[4];
         }
-        //String modelVersion = "4.0.0";
-        String modelVersion = "3.3.0";
+        String modelVersion = "4.0.1";
+        //String modelVersion = "3.3.0";
         if (args.length > 5) {
             modelVersion = args[5];
         }        

@@ -54,9 +54,9 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
         // TODO: File naming?
         try {
             PrintWriter pw = new PrintWriter(this.fhirHelpersPath);
-            pw.println("library FHIRHelpers version '4.0.0'\n" +
+            pw.println(String.format("library FHIRHelpers version '%s'\n", this.settings.version) +
                     "\n" +
-                    "using FHIR version '4.0.0'\n" +
+                    String.format("using FHIR version '%s'\n", this.settings.version) +
                     "\n" +
                     "define function ToInterval(period FHIR.Period):\n" +
                     "    if period is null then\n" +
