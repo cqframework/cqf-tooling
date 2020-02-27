@@ -32,8 +32,9 @@
             "projectName": "tooling",
             "args": [
                 "-RefreshIG",
-                "-ip=C:\\src\\GitHub\\connectathon\\fhir3",
-                "-fs=http://cqm-sandbox.alphora.com/cqf-ruler-dstu3/fhir/",
+                "-ip=/src/connectathon/fhir3/",
+                "-iv=fhir3",
+                "-fs=http://localhost:8080/cqf-ruler-dstu3/fhir/",
                 "-t",
                 "-d",
                 "-v",
@@ -48,7 +49,8 @@
             "projectName": "tooling",
             "args": [
                 "-RefreshIG",
-                "-ip=C:\\src\\GitHub\\connectathon\\fhir4",
+                "-ip=/src/connectathon/fhir4/",
+                "-iv=fhir4",
                 "-fs=http://localhost:8080/cqf-ruler-r4/fhir/",
                 "-t",
                 "-d",
@@ -64,7 +66,7 @@
             "projectName": "tooling",
             "args": [
                 "-VsacXlsxToValueSet",
-                "-pts=C:\\src\\GitHub\\valueset-spreadsheet\\2.16.840.1.113883.3.3157.1004.20.xlsx",
+                "-pts=C:\\src\\GitHub\\valueset-spreadsheet\\2.16.840.1.113762.1.4.1108.15.xlsx",
                 "-op=C:\\src\\GitHub\\valueset-spreadsheet"
             ]
         }      

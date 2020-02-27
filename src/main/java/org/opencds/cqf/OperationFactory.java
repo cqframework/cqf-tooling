@@ -14,6 +14,7 @@ import org.opencds.cqf.qdm.QdmToQiCore;
 import org.opencds.cqf.quick.QuickPageGenerator;
 import org.opencds.cqf.terminology.*;
 
+
 class OperationFactory {
 
     static Operation createOperation(String operationName) {
@@ -51,11 +52,11 @@ class OperationFactory {
             case "RefreshR4Measure":
                 return new RefreshR4Measure();
             case "CqlToMeasure":
-                throw new NotImplementedException();
+                throw new NotImplementedException("CqlToMeasure");
             case "BundlesToBundle":
-                throw new NotImplementedException();
+                throw new NotImplementedException("BundlesToBundle");
             case "BundleToResources":
-                throw new NotImplementedException();
+                throw new NotImplementedException("BundleToResources");
             case "GenerateMIs":
                 return new StructureDefinitionToModelInfo();
             case "ProcessAcceleratorKit":
