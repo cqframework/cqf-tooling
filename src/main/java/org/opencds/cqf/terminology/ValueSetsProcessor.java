@@ -1,7 +1,6 @@
 package org.opencds.cqf.terminology;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -65,7 +64,7 @@ public class ValueSetsProcessor {
     }
 
     private static void IntitializeCachedValueSets(FhirContext fhirContext) {
-        List<String> allValueSetPaths = IOUtils.getValueSetPaths(fhirContext).stream().collect(Collectors.toList());
+        List<String> allValueSetPaths = IOUtils.getTerminologyPaths(fhirContext).stream().collect(Collectors.toList());
         List<IAnyResource> allValueSets = IOUtils.readResources(allValueSetPaths, fhirContext); 
             
         cachedValueSets = ValueSetsProcessor.copyToIDs(allValueSets, fhirContext);

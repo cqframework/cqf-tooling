@@ -26,6 +26,53 @@
         },
         {
             "type": "java",
+            "name": "CqlToSTU3LibraryOperation",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.Main",
+            "projectName": "tooling",
+            "args": [
+                "-CqlToSTU3Library",
+                "-ptcql=C:\\src\\GitHub\\connectathon\\fhir3\\cql\\EXM104_FHIR3-8.1.000.cql",
+                "-op=C:\\src\\GitHub\\connectathon\\fhir3\\resources\\library\\test"
+            ]
+        },
+        // mvn exec:java -Dexec.args="-CqlToSTU3Library -ptcql=test/ -op=out"
+        {
+            "type": "java",
+            "name": "APHL eICR FHIR4",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.Main",
+            "projectName": "tooling",
+            "args": [
+                "-RefreshIG",
+                "-ip=C:\\src\\GitHub\\aphl-ig",
+                "-rp=C:\\src\\GitHub\\aphl-ig\\input\\resources",
+                "-rp=C:\\src\\GitHub\\aphl-ig\\input\\pagecontent\\cql",
+                "-rp=C:\\src\\GitHub\\aphl-ig\\input\\vocabulary",
+                "-fs=http://localhost:8080/cqf-ruler-r4/fhir",
+                "-iv=fhir4",
+                "-e=json",
+                "-v",
+                "-t",
+                "-d",
+                "-p"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "VSAC Spreadsheet Directory To ValueSet Resources",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.Main",
+            "projectName": "tooling",
+            "args": [
+                "-VsacXlsxToValueSetBatch",
+                "-ptsd=C:\\src\\GitHub\\aphl-ig\\input\\vocabulary\\valueset\\spreadsheets",
+                "-vssrc=vsac",
+                "-op=C:\\src\\GitHub\\aphl-ig\\input\\vocabulary\\valueset\\spreadsheets"
+            ]
+        },
+        {
+            "type": "java",
             "name": "Opioid CDS FHIR3",
             "request": "launch",
             "mainClass": "org.opencds.cqf.Main",
@@ -57,6 +104,7 @@
                 "-rp=C:\\src\\GitHub\\connectathon\\fhir3\\resources",
                 "-rp=C:\\src\\GitHub\\connectathon\\fhir3\\cql",
                 "-iv=fhir3",
+                "-t",
                 "-d",
                 "-v",
                 "-p"
