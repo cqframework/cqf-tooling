@@ -99,10 +99,10 @@ public class Processor extends Operation {
     }
 
     private void loadFHIRModel() {
-        String inputPath = Paths.get("/Users/Adam/Src/cqframework/cqf-tooling/FHIR-Spec").toString();
+        String inputPath = Paths.get("/Users/Adam/Src/cqframework/FHIR-Spec").toString();
         String resourcePaths = "4.0.0/StructureDefinition";//US-Core/3.0.0;QI-Core/3.3.0";
-        String modelName = "FHIR";
-        String modelVersion = "4.0.0";
+//        String modelName = "FHIR";
+//        String modelVersion = "4.0.0";
 
         ResourceLoader loader = new ResourceLoader();
         fhirModelStructureDefinitions = loader.loadPaths(inputPath, resourcePaths);
@@ -385,6 +385,10 @@ public class Processor extends Operation {
         }
     }
 
+    private void addSlice(Row row, HashMap<String, Integer> colIds) {
+        ;
+    }
+
     private void processDataElementPage(Workbook workbook, String page, String scope) {
         Sheet sheet = workbook.getSheet(page);
         Iterator<Row> it = sheet.rowIterator();
@@ -482,6 +486,7 @@ public class Processor extends Operation {
                     case "Calculation":
                     case "Slice":
                         // TODO: Do we need to do anything with these?
+                        addSlice(row, colIds);
                         break;
                     case "UI Element":
                         break;
