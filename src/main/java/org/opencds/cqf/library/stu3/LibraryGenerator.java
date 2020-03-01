@@ -27,7 +27,11 @@ public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativePro
     @Override
     public void processLibrary(String id, CqlTranslator translator) {
         org.hl7.elm.r1.Library elm = translator.toELM();
-        Library library = populateMeta(id, elm.getIdentifier().getVersion());
+        Library library = loadIfExists();
+        if (library == null) {
+            library = createLibrary(nameToId(elm.getIdentifier().getId(), elm.getIdentifier().getVersion()),
+                    elm.getIdentifier().getId(), elm.getIdentifier().getVersion());
+        }
         if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
             for (IncludeDef def : elm.getIncludes().getDef()) {
                 addRelatedArtifact(library, def);
@@ -46,10 +50,13 @@ public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativePro
         IOUtils.writeResources(libraryMap, getOutputPath(), IOUtils.Encoding.parse(getEncoding()), getFhirContext());
     }
 
-    // Populate metadata
-    private Library populateMeta(String name, String version) {
+    private Library loadIfExists() {
+        return (Library)IOUtils.readResource(getPathToLibrary(), getFhirContext(), true);
+    }
+
+    private Library createLibrary(String id, String name, String version) {
         Library library = new Library();
-        library.setId(nameToId(name, version));
+        library.setId(id);
         library.setName(name);
         library.setVersion(version);
         library.setStatus(Enumerations.PublicationStatus.ACTIVE);
