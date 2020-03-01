@@ -5,7 +5,7 @@
     </p>
     <p style="margin-bottom: 5px;" th:if="${resource.hasDisplay()}">
         <b>display: </b>
-        <span th:narrative="${resource.display}"></span>
+        <span th:text="${resource.display}"></span>
     </p>
     <p style="margin-bottom: 5px;" th:if="${resource.hasUrl()}">
         <b>url: </b>
