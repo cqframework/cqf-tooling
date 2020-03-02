@@ -300,10 +300,12 @@ public class IGProcessor {
             Encoding encoding) {
         
         HashSet<String> planDefinitionSourcePaths = IOUtils.getPlanDefinitionPaths(fhirContext);
+
         List<String> planDefinitionPathLibraryNames = new ArrayList<String>();
         for (String planDefinitionSourcePath : planDefinitionSourcePaths) {
-            planDefinitionPathLibraryNames
-                    .add(FilenameUtils.getBaseName(planDefinitionSourcePath).replace(PlanDefinitionProcessor.ResourcePrefix, ""));
+            String name = FilenameUtils.getBaseName(planDefinitionSourcePath).replace(PlanDefinitionProcessor.ResourcePrefix, "");
+
+            planDefinitionPathLibraryNames.add(name);
         }
 
         List<String> bundledPlanDefinitions = new ArrayList<String>();
@@ -328,7 +330,7 @@ public class IGProcessor {
                 
                 String planDefinitionSourcePath = "";
                 for (String path : planDefinitionSourcePaths) {
-                    if (path.endsWith(refreshedLibraryFileName))
+                    if (FilenameUtils.removeExtension(path).endsWith(refreshedLibraryName))
                     {
                         planDefinitionSourcePath = path;
                     }
@@ -346,17 +348,17 @@ public class IGProcessor {
                 
                 if (includeTerminology) {
                     shouldPersist = shouldPersist
-                            & bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
+                        & bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
                 }
 
                 if (includeDependencies) {
                     shouldPersist = shouldPersist
-                            & bundleDependencies(librarySourcePath, fhirContext, resources, encoding);
+                        & bundleDependencies(librarySourcePath, fhirContext, resources, encoding);
                 }
 
                 if (includePatientScenarios) {
                     shouldPersist = shouldPersist
-                            & bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
+                        & bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
                 }
 
                 List<String> activityDefinitionPaths =  bundleActivityDefinitions(planDefinitionSourcePath, fhirContext, resources, encoding, includeVersion, shouldPersist);
@@ -717,6 +719,9 @@ public class IGProcessor {
         if (!directory.exists()) {
             throw new RuntimeException("Convention requires the following directory:" + pathElement);
         }
+        // TODO: This is a concept different from "resource directories". It is expected elsewhere (e.g., IOUtils.setupActivityDefinitionPaths)
+        // that resourceDirectories contains a set or proper "resource" directories. Adding non-resource directories
+        // leads to surprising results when bundling like picking up resources from the /tests directory.
         IOUtils.resourceDirectories.add(FilenameUtils.concat(igPath, pathElement));
     }
 
@@ -726,6 +731,9 @@ public class IGProcessor {
             System.out.println("No directory found by convention for: " + directory.getName());
         }
         else {
+            // TODO: This is a concept different from "resource directories". It is expected elsewhere (e.g., IOUtils.setupActivityDefinitionPaths)
+            // that resourceDirectories contains a set or proper "resource" directories. Adding non-resource directories
+            // leads to surprising results when bundling like picking up resources from the /tests directory.
             IOUtils.resourceDirectories.add(FilenameUtils.concat(igPath, pathElement));
         }
     }
