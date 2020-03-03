@@ -43,22 +43,18 @@ public class STU3LibraryProcessor {
     private static void refreshLibrary(Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, Boolean includeVersion, CqlTranslator translator, FhirContext fhirContext) {
         Library generatedLibrary = processLibrary(cqlContentPath, translator, includeVersion, fhirContext);
         mergeDiff(referenceLibrary, generatedLibrary, cqlContentPath, translator, fhirContext);
-        IOUtils.writeResource(generatedLibrary, outputPath, encoding, fhirContext);
+        IOUtils.writeResource(referenceLibrary, outputPath, encoding, fhirContext);
     }
 
-    private static void mergeDiff(Library referenceLibrary, Library generatedLibrary, String cqlContentPath, CqlTranslator translator,
-        FhirContext fhirContext) {
+    private static void mergeDiff(Library referenceLibrary, Library generatedLibrary, String cqlContentPath, CqlTranslator translator, FhirContext fhirContext) {
         referenceLibrary.getRelatedArtifact().clear();
-        generatedLibrary.getRelatedArtifact().stream()
-                .forEach(relatedArtifact -> referenceLibrary.addRelatedArtifact(relatedArtifact));
+        generatedLibrary.getRelatedArtifact().stream().forEach(relatedArtifact -> referenceLibrary.addRelatedArtifact(relatedArtifact));
 
         referenceLibrary.getDataRequirement().clear();
-        generatedLibrary.getDataRequirement().stream()
-                .forEach(dateRequirement -> referenceLibrary.addDataRequirement(dateRequirement));
+        generatedLibrary.getDataRequirement().stream().forEach(dateRequirement -> referenceLibrary.addDataRequirement(dateRequirement));
 
         referenceLibrary.getContent().clear();
-        generatedLibrary.getContent().stream()
-                .forEach(getContent -> attachContent(referenceLibrary, translator, IOUtils.getCqlString(cqlContentPath)));
+        attachContent(referenceLibrary, translator, IOUtils.getCqlString(cqlContentPath));
 
         BaseNarrativeProvider<Narrative> narrativeProvider = new NarrativeProvider();
         INarrative narrative = narrativeProvider.getNarrative(fhirContext, generatedLibrary);
@@ -99,7 +95,7 @@ public class STU3LibraryProcessor {
         library.setVersion(version);
         library.setStatus(Enumerations.PublicationStatus.ACTIVE);
         library.setExperimental(true);
-        library.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://hl7.org/fhir/codesystem-library-type.html")));
+        library.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://hl7.org/fhir/library-type").setDisplay("Logic Library")));
         return library;
     }
 
