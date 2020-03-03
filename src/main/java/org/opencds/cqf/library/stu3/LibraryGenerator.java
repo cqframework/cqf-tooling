@@ -61,7 +61,7 @@ public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativePro
         library.setVersion(version);
         library.setStatus(Enumerations.PublicationStatus.ACTIVE);
         library.setExperimental(true);
-        library.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://hl7.org/fhir/codesystem-library-type.html")));
+        library.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://hl7.org/fhir/library-type").setDisplay("Logic Library")));
         return library;
     }
 
