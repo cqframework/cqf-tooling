@@ -720,7 +720,7 @@ public class IGProcessor {
             throw new RuntimeException("Convention requires the following directory:" + pathElement);
         }
         // TODO: This is a concept different from "resource directories". It is expected elsewhere (e.g., IOUtils.setupActivityDefinitionPaths)
-        // that resourceDirectories contains a set or proper "resource" directories. Adding non-resource directories
+        // that resourceDirectories contains a set of proper "resource" directories. Adding non-resource directories
         // leads to surprising results when bundling like picking up resources from the /tests directory.
         IOUtils.resourceDirectories.add(FilenameUtils.concat(igPath, pathElement));
     }
@@ -732,7 +732,7 @@ public class IGProcessor {
         }
         else {
             // TODO: This is a concept different from "resource directories". It is expected elsewhere (e.g., IOUtils.setupActivityDefinitionPaths)
-            // that resourceDirectories contains a set or proper "resource" directories. Adding non-resource directories
+            // that resourceDirectories contains a set of proper "resource" directories. Adding non-resource directories
             // leads to surprising results when bundling like picking up resources from the /tests directory.
             IOUtils.resourceDirectories.add(FilenameUtils.concat(igPath, pathElement));
         }
