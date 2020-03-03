@@ -33,15 +33,15 @@
         </tr>
         <tr th:if="${resource.hasDescription()}">
             <th scope="row"><b>Description: </b></th>
-            <td style="padding-left: 25px; padding-right: 25px;" th:narrative="${resource.description}"></td>
+            <td style="padding-left: 25px; padding-right: 25px;" th:text="${resource.description}"></td>
         </tr>
         <tr th:if="${resource.hasPurpose()}">
             <th scope="row"><b>Purpose: </b></th>
-            <td style="padding-left: 25px; padding-right: 25px;" th:narrative="${resource.purpose}"></td>
+            <td style="padding-left: 25px; padding-right: 25px;" th:text="${resource.purpose}"></td>
         </tr>
         <tr th:if="${resource.hasUsage()}">
             <th scope="row"><b>Usage: </b></th>
-            <td style="padding-left: 25px; padding-right: 25px;" th:narrative="${resource.usage}"></td>
+            <td style="padding-left: 25px; padding-right: 25px;" th:text="${resource.usage}"></td>
         </tr>
         <th:block th:each="context, iter : ${resource.useContext}">
             <tr>
@@ -59,7 +59,7 @@
             <tr style="vertical-align: top;">
                 <th th:if="${iter.index == 0}" th:rowspan="${iter.size}"  scope="row"><b>Contributor: </b></th>
                 <td style="padding-left: 25px; padding-right: 25px;">
-                    <b><span th:narrative="${cont.type.toCode()}"></span>: </b><span th:narrative="${cont.name}"></span>
+                    <b><span th:text="${cont.type.toCode()}"></span>: </b><span th:text="${cont.name}"></span>
                 </td>
             </tr>
         </th:block>

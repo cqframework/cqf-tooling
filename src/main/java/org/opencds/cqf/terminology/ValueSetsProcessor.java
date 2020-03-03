@@ -3,9 +3,9 @@ package org.opencds.cqf.terminology;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.opencds.cqf.igtools.IGProcessor;
 import org.opencds.cqf.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -56,15 +56,15 @@ public class ValueSetsProcessor {
     }
 
     private static Map<String, IAnyResource> cachedValueSets = null;
-    public static Map<String, IAnyResource> getCachedValueSets(String igPath, FhirContext fhirContext) {
+    public static Map<String, IAnyResource> getCachedValueSets(FhirContext fhirContext) {
         if (cachedValueSets == null) {
-            IntitializeCachedValueSets(igPath, fhirContext);
+            IntitializeCachedValueSets(fhirContext);
         }
         return cachedValueSets;
     }
 
-    private static void IntitializeCachedValueSets(String igPath, FhirContext fhirContext) {
-        List<String> allValueSetPaths = IOUtils.getFilePaths(IGProcessor.getValueSetsPath(igPath), false);
+    private static void IntitializeCachedValueSets(FhirContext fhirContext) {
+        List<String> allValueSetPaths = IOUtils.getTerminologyPaths(fhirContext).stream().collect(Collectors.toList());
         List<IAnyResource> allValueSets = IOUtils.readResources(allValueSetPaths, fhirContext); 
             
         cachedValueSets = ValueSetsProcessor.copyToIDs(allValueSets, fhirContext);

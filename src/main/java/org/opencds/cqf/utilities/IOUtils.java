@@ -2,6 +2,7 @@ package org.opencds.cqf.utilities;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,12 +28,13 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.opencds.cqf.library.LibraryProcessor;
 
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.parser.IParser;
-
-import org.opencds.cqf.igtools.IGProcessor;
-import org.opencds.cqf.igtools.IGProcessor.IGVersion;
 
 public class IOUtils 
 {        
@@ -65,6 +68,8 @@ public class IOUtils
         }
     } 
 
+    public static ArrayList<String> resourceDirectories = new ArrayList<String>();
+
     public static String getIdFromFileName(String fileName) {
         return fileName.replaceAll("_", "-");
     }
@@ -89,7 +94,7 @@ public class IOUtils
 
     public static <T extends IAnyResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext) 
     {        
-        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(path, formatFileName(resource.getId(), encoding))))
+        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(path, formatFileName(resource.getIdElement().getIdPart(), encoding, fhirContext))))
         {
             writer.write(parseResource(resource, encoding, fhirContext));
             writer.flush();
@@ -145,7 +150,7 @@ public class IOUtils
     public static IAnyResource readResource(String path, FhirContext fhirContext, Boolean safeRead) 
     {        
         Encoding encoding = getEncoding(path);
-        if (encoding == Encoding.UNKNOWN) {
+        if (encoding == Encoding.UNKNOWN || encoding == Encoding.CQL) {
             return null;
         }
 
@@ -190,7 +195,7 @@ public class IOUtils
     {
         List<String> filePaths = new ArrayList<String>();
         File inputDir = new File(directoryPath);
-        ArrayList<File> files = new ArrayList<>(Arrays.asList(Optional.ofNullable(inputDir.listFiles()).orElseThrow()));
+        ArrayList<File> files = inputDir.isDirectory() ? new ArrayList<File>(Arrays.asList(Optional.ofNullable(inputDir.listFiles()).orElseThrow())) : new ArrayList<File>();
        
         for (File file : files) {
             if (file.isDirectory()) {
@@ -214,8 +219,15 @@ public class IOUtils
     public static List<String> getDirectoryPaths(String path, Boolean recursive)
     {
         List<String> directoryPaths = new ArrayList<String>();
+        List<File> directories = new ArrayList<File>();
         File parentDirectory = new File(path);
-        ArrayList<File> directories = new ArrayList<>(Arrays.asList(Optional.ofNullable(parentDirectory.listFiles()).orElseThrow()));
+        try {
+            directories = Arrays.asList(Optional.ofNullable(parentDirectory.listFiles()).orElseThrow());
+        } catch (Exception e) {
+            System.out.println("No paths found for the Directory " + path + ":");
+            return directoryPaths;
+        }
+        
        
         for (File directory : directories) {
             if (directory.isDirectory()) {
@@ -262,7 +274,7 @@ public class IOUtils
         return Encoding.parse(FilenameUtils.getExtension(path));
     }
 
-    //users should protect against Encoding.UNKNOWN
+    //users should protect against Encoding.UNKNOWN or Enconding.CQL
     private static IParser getParser(Encoding encoding, FhirContext fhirContext) 
     {
         switch (encoding) {
@@ -275,19 +287,20 @@ public class IOUtils
         }
     }
 
-    public static Boolean pathIncludesElement(String igPath, String pathElement)
+    public static Boolean pathEndsWithElement(String igPath, String pathElement)
     {
         Boolean result = false;
         try
         {
-            result = FilenameUtils.getName(igPath).equals(pathElement);
+            String baseElement = FilenameUtils.getBaseName(igPath).equals("") ? FilenameUtils.getBaseName(FilenameUtils.getFullPathNoEndSeparator(igPath)) : FilenameUtils.getBaseName(igPath);
+            result = baseElement.equals(pathElement);
         }
         catch (Exception e) {}
         return result;
     }
 
-    public static List<String> getDependencyCqlPaths(String cqlContentPath) throws Exception {
-        ArrayList<File> DependencyFiles = getDependencyCqlFiles(cqlContentPath);
+    public static List<String> getDependencyCqlPaths(String cqlContentPath, Boolean includeVersion) throws Exception {
+        ArrayList<File> DependencyFiles = getDependencyCqlFiles(cqlContentPath, includeVersion);
         ArrayList<String> DependencyPaths = new ArrayList<String>();
         for (File file : DependencyFiles) {
             DependencyPaths.add(file.getPath().toString());
@@ -295,13 +308,13 @@ public class IOUtils
         return DependencyPaths;
     }
 
-    public static ArrayList<File> getDependencyCqlFiles(String cqlContentPath) throws Exception {
+    public static ArrayList<File> getDependencyCqlFiles(String cqlContentPath, Boolean includeVersion) throws Exception {
         File cqlContent = new File(cqlContentPath);
         File cqlContentDir = cqlContent.getParentFile();
         if (!cqlContentDir.isDirectory()) {
             throw new IllegalArgumentException("The specified path to library files is not a directory");
         }
-        ArrayList<String> dependencyLibraries = ResourceUtils.getIncludedLibraryNames(cqlContentPath);
+        ArrayList<String> dependencyLibraries = ResourceUtils.getIncludedLibraryNames(cqlContentPath, includeVersion);
         File[] allCqlContentFiles = cqlContentDir.listFiles();
         if (allCqlContentFiles.length == 1) {
             return new ArrayList<File>();
@@ -388,16 +401,33 @@ public class IOUtils
         return "." + encoding.toString();
     }
 
-    public static String formatFileName(String baseName, Encoding encoding) {
-        String result = baseName + getFileExtension(encoding); 
-        //TODO: Fix for: FHIR IDs don't allow "_" and FHIR Library names can't include "-".
-        //Need to figure out better solution or make it a convention that IG filenames can't have "_" other than the IGVersion.
-        for (IGProcessor.IGVersion igVersion : IGVersion.values()) {
-            String igVersionToken = igVersion.toString().toUpperCase();
-            result = result.replace("-" + igVersionToken, "_" + igVersionToken);
+    public static String formatFileName(String baseName, Encoding encoding, FhirContext fhirContext) {
+        //I think this should really just be the version name i.e. DSTU3 or R4
+        String igVersionToken;
+        switch (fhirContext.getVersion().getVersion()) {
+            case DSTU3:
+                igVersionToken = "FHIR3";
+                break;
+            case R4:
+                igVersionToken = "FHIR4";
+                break;
+            default:
+                igVersionToken = "";
         }
+        String result = baseName + getFileExtension(encoding); 
+        result = result.replace("-" + igVersionToken, "_" + igVersionToken);
         return result;
     }    
+
+    public static List<String> putAllInListIfAbsent(List<String> values, List<String> list)
+    {
+        for (String value : values) {
+            if (!list.contains(value)) {
+                list.add(value);
+            }
+        }
+        return list;
+    }
 
     public static List<String> putInListIfAbsent(String value, List<String> list)
     {
@@ -405,5 +435,217 @@ public class IOUtils
             list.add(value);
         }
         return list;
+    }
+
+    public static String getLibraryPathAssociatedWithCqlFileName(String cqlPath, FhirContext fhirContext) throws FileNotFoundException {
+        String fileName = FilenameUtils.getName(cqlPath).replaceAll(".cql", ".json");
+        String libraryFileName = LibraryProcessor.ResourcePrefix + fileName;
+        for (String path : IOUtils.getLibraryPaths(fhirContext)) {
+            if(path.endsWith(libraryFileName)) {
+                return path;
+            }
+        }
+        throw new FileNotFoundException("Could not find a Library Resource Associated with: " + cqlPath);
+    }
+
+    private static HashSet<String> cqlLibraryPaths = new HashSet<String>();
+    public static HashSet<String> getCqlLibraryPaths() {
+        if (cqlLibraryPaths.isEmpty()) {
+            setupCqlLibraryPaths();
+        }
+        return cqlLibraryPaths;
+    }
+    private static void setupCqlLibraryPaths() {  
+        //need to add a error report for bad resource paths
+        for(String dir : resourceDirectories) {
+            List<String> filePaths = IOUtils.getFilePaths(dir, true);
+            filePaths.stream().filter(path -> path.contains(".cql")).forEach(path -> cqlLibraryPaths.add(path));
+        }
+    }
+
+    private static HashSet<String> terminologyPaths = new HashSet<String>();
+    public static HashSet<String> getTerminologyPaths(FhirContext fhirContext) {
+        if (terminologyPaths.isEmpty()) {
+            System.out.println("Reading terminology");
+            setupTerminologyPaths(fhirContext);
+        }
+        return terminologyPaths;
+    }
+    private static void setupTerminologyPaths(FhirContext fhirContext) {
+        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        for(String dir : resourceDirectories) {
+            for(String path : IOUtils.getFilePaths(dir, true))
+            {
+                try {
+                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                } catch (Exception e) {
+                    if (path.toLowerCase().contains("valuesets") || path.toLowerCase().contains("valueset")) {
+                        System.out.println("Error reading in Terminology from path: " + path + "\n" + e);
+                    }
+                }
+            }
+            //TODO: move these to ResourceUtils
+            RuntimeResourceDefinition valuesetDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "ValueSet");
+            RuntimeCompositeDatatypeDefinition conceptDefinition = (RuntimeCompositeDatatypeDefinition)ResourceUtils.getElementDefinition(fhirContext, "CodeableConcept");
+            RuntimeCompositeDatatypeDefinition codingDefinition = (RuntimeCompositeDatatypeDefinition)ResourceUtils.getElementDefinition(fhirContext, "Coding");
+            String valuesetClassName = valuesetDefinition.getImplementingClass().getName();
+            String conceptClassName = conceptDefinition.getImplementingClass().getName();
+            String codingClassName = codingDefinition.getImplementingClass().getName();
+            resources.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .filter(entry ->  
+                    valuesetClassName.equals(entry.getValue().getClass().getName())
+                    || conceptClassName.equals(entry.getValue().getClass().getName())
+                    || codingClassName.equals(entry.getValue().getClass().getName())
+                )
+                .forEach(entry -> terminologyPaths.add(entry.getKey()));
+        }
+    }
+
+    private static HashSet<String> libraryPaths = new HashSet<String>();
+    public static HashSet<String> getLibraryPaths(FhirContext fhirContext) {
+        if (libraryPaths.isEmpty()) {
+            System.out.println("Reading libraries");
+            setupLibraryPaths(fhirContext);
+        }
+        return libraryPaths;
+    }
+    private static void setupLibraryPaths(FhirContext fhirContext) {
+        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        for(String dir : resourceDirectories) {
+            for(String path : IOUtils.getFilePaths(dir, true))
+            {
+                try {
+                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                } catch (Exception e) {
+                    if(path.toLowerCase().contains("library")) {
+                        System.out.println("Error reading in Library from path: " + path + "\n" + e);
+                    }
+                }
+            }
+            //TODO: move these to ResourceUtils
+            RuntimeResourceDefinition libraryDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "Library");
+            String libraryClassName = libraryDefinition.getImplementingClass().getName();
+            resources.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .filter(entry ->  libraryClassName.equals(entry.getValue().getClass().getName()))
+                .forEach(entry -> libraryPaths.add(entry.getKey()));
+        }
+    }
+
+    private static HashSet<String> measurePaths = new HashSet<String>();
+    public static HashSet<String> getMeasurePaths(FhirContext fhirContext) {
+        if (measurePaths.isEmpty()) {
+            System.out.println("Reading measures");
+            setupMeasurePaths(fhirContext);
+        }
+        return measurePaths;
+    }
+    private static void setupMeasurePaths(FhirContext fhirContext) {
+        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        for(String dir : resourceDirectories) {
+            for(String path : IOUtils.getFilePaths(dir, true))
+            {
+                try {
+                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                } catch (Exception e) {
+                    if(path.toLowerCase().contains("measure")) {
+                        System.out.println("Error reading in Measure from path: " + path + "\n" + e);
+                    }
+                }
+            }
+            //TODO: move these to ResourceUtils
+            RuntimeResourceDefinition measureDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "Measure");
+            String measureClassName = measureDefinition.getImplementingClass().getName();
+            resources.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .filter(entry ->  measureClassName.equals(entry.getValue().getClass().getName()))
+                .forEach(entry -> measurePaths.add(entry.getKey()));
+        }
+    }
+
+    private static HashSet<String> measureReportPaths = new HashSet<String>();
+    public static HashSet<String> getMeasureReportPaths(FhirContext fhirContext) {
+        if (measureReportPaths.isEmpty()) {
+            System.out.println("Reading measurereports");
+            setupMeasureReportPaths(fhirContext);
+        }
+        return measureReportPaths;
+    }
+    private static void setupMeasureReportPaths(FhirContext fhirContext) {
+        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        for(String dir : resourceDirectories) {
+            for(String path : IOUtils.getFilePaths(dir, true))
+            {
+                try {
+                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                } catch (Exception e) {
+                    //TODO: handle exception
+                }
+            }
+            //TODO: move these to ResourceUtils
+            RuntimeResourceDefinition measureReportDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "MeasureReport");
+            String measureReportClassName = measureReportDefinition.getImplementingClass().getName();
+            resources.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .filter(entry ->  measureReportClassName.equals(entry.getValue().getClass().getName()))
+                .forEach(entry -> measureReportPaths.add(entry.getKey()));
+        }
+    }
+
+	private static HashSet<String> planDefinitionPaths = new HashSet<String>();
+    public static HashSet<String> getPlanDefinitionPaths(FhirContext fhirContext) {
+        if (planDefinitionPaths.isEmpty()) {
+            System.out.println("Reading plandefinitions");
+            setupPlanDefinitionPaths(fhirContext);
+        }
+        return planDefinitionPaths;
+    }
+    private static void setupPlanDefinitionPaths(FhirContext fhirContext) {
+        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        for(String dir : resourceDirectories) {
+            for(String path : IOUtils.getFilePaths(dir, true))
+            {
+                try {
+                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                } catch (Exception e) {
+                    //TODO: handle exception
+                }
+            }
+            RuntimeResourceDefinition planDefinitionDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "PlanDefinition");
+            String planDefinitionClassName = planDefinitionDefinition.getImplementingClass().getName();
+            resources.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .filter(entry ->  planDefinitionClassName.equals(entry.getValue().getClass().getName()))
+                .forEach(entry -> planDefinitionPaths.add(entry.getKey()));
+        }
+    }
+
+    private static HashSet<String> activityDefinitionPaths = new HashSet<String>();
+    public static HashSet<String> getActivityDefinitionPaths(FhirContext fhirContext) {
+        if (activityDefinitionPaths.isEmpty()) {
+            System.out.println("Reading activitydefinitions");
+            setupActivityDefinitionPaths(fhirContext);
+        }
+        return activityDefinitionPaths;
+    }
+    private static void setupActivityDefinitionPaths(FhirContext fhirContext) {
+        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        for(String dir : resourceDirectories) {
+            for(String path : IOUtils.getFilePaths(dir, true))
+            {
+                try {
+                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                } catch (Exception e) {
+                    //TODO: handle exception
+                }
+            }
+            RuntimeResourceDefinition activityDefinitionDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "ActivityDefinition");
+            String activityDefinitionClassName = activityDefinitionDefinition.getImplementingClass().getName();
+            resources.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .filter(entry ->  activityDefinitionClassName.equals(entry.getValue().getClass().getName()))
+                .forEach(entry -> activityDefinitionPaths.add(entry.getKey()));
+        }
     }
 }

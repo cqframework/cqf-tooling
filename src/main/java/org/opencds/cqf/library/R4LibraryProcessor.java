@@ -1,7 +1,7 @@
 package org.opencds.cqf.library;
 
 import java.util.Collections;
-import java.util.Map;
+import java.util.Optional;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -11,7 +11,6 @@ import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.elm.r1.ValueSetRef;
 import org.hl7.fhir.instance.model.api.INarrative;
-import org.opencds.cqf.library.stu3.NarrativeProvider;
 import org.opencds.cqf.utilities.IOUtils;
 import org.opencds.cqf.utilities.ResourceUtils;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
@@ -21,24 +20,25 @@ import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.*;
 
 public class R4LibraryProcessor {
-        public static Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding) {         
-        //TODO: this is the wrong path and libraryExists is always false
+        public static Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {         
         Library resource = (Library)IOUtils.readResource(libraryPath, fhirContext, true);
         Boolean libraryExists = resource != null;       
 
         CqlTranslator translator = getTranslator(cqlContentPath);
               
         if (libraryExists) {            
-            refreshLibrary(resource, cqlContentPath, libraryPath, encoding, translator, fhirContext);
+            refreshLibrary(resource, cqlContentPath, IOUtils.getParentDirectoryPath(libraryPath), encoding, includeVersion, translator, fhirContext);
         } else {
-            generateLibrary(cqlContentPath, libraryPath, encoding, translator, fhirContext);
+            Optional<String> anyOtherLibraryDirectory = IOUtils.getLibraryPaths(fhirContext).stream().findFirst();
+            String parentDirectory = anyOtherLibraryDirectory.isPresent() ? IOUtils.getParentDirectoryPath(anyOtherLibraryDirectory.get()) : IOUtils.getParentDirectoryPath(cqlContentPath);
+            generateLibrary(cqlContentPath, parentDirectory, encoding, includeVersion, translator, fhirContext);
         }
       
         return true;
     }
 
-    private static void refreshLibrary(Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, CqlTranslator translator, FhirContext fhirContext) {
-        Library generatedLibrary = processLibrary(cqlContentPath, translator, fhirContext);
+    private static void refreshLibrary(Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, Boolean includeVersion, CqlTranslator translator, FhirContext fhirContext) {
+        Library generatedLibrary = processLibrary(cqlContentPath, translator, includeVersion, fhirContext);
         mergeDiff(referenceLibrary, generatedLibrary, cqlContentPath, translator, fhirContext);
         IOUtils.writeResource(generatedLibrary, outputPath, encoding, fhirContext);
     }
@@ -62,19 +62,19 @@ public class R4LibraryProcessor {
         referenceLibrary.setText((Narrative)narrative);
     }
 
-    private static void generateLibrary(String cqlContentPath, String outputPath, Encoding encoding, CqlTranslator translator, FhirContext fhirContext) {
-        Library generatedLibrary = processLibrary(cqlContentPath, translator, fhirContext);
+    private static void generateLibrary(String cqlContentPath, String outputPath, Encoding encoding, Boolean includeVersion, CqlTranslator translator, FhirContext fhirContext) {
+        Library generatedLibrary = processLibrary(cqlContentPath, translator, includeVersion, fhirContext);
         IOUtils.writeResource(generatedLibrary, outputPath, encoding, fhirContext);
     }
 
-    private static Library processLibrary(String cqlContentPath, CqlTranslator translator, FhirContext fhirContext) {
+    private static Library processLibrary(String cqlContentPath, CqlTranslator translator, Boolean includeVersion, FhirContext fhirContext) {
         org.hl7.elm.r1.Library elm = translator.toELM();
         String id = elm.getIdentifier().getId();
         String version = elm.getIdentifier().getVersion();
-        Library library = populateMeta(id, version);
+        Library library = populateMeta(id, version, includeVersion);
         if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
             for (IncludeDef def : elm.getIncludes().getDef()) {
-                addRelatedArtifact(library, def);
+                addRelatedArtifact(library, def, includeVersion);
             }
         }
 
@@ -88,9 +88,12 @@ public class R4LibraryProcessor {
 
 
     // Populate metadata
-    private static Library populateMeta(String name, String version) {
+    private static Library populateMeta(String name, String version, Boolean includeVersion) {
         Library library = new Library();
-        ResourceUtils.setIgId(name, library, version);
+        if(!includeVersion) {
+            ResourceUtils.setIgId(name, library, "");
+        }
+        else ResourceUtils.setIgId(name, library, version);
         library.setName(name);
         library.setVersion(version);
         library.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -100,11 +103,11 @@ public class R4LibraryProcessor {
     }
 
     // Add Related Artifact
-    private static void addRelatedArtifact(Library library, IncludeDef def) {
+    private static void addRelatedArtifact(Library library, IncludeDef def, Boolean includeVersion) {
         library.addRelatedArtifact(
                 new RelatedArtifact()
                         .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
-                        .setResource("Library/" + getIncludedLibraryId(def)) //this is the reference name
+                        .setResource("Library/" + getIncludedLibraryId(def, includeVersion)) //this is the reference name
                 );
     }
 
@@ -153,19 +156,16 @@ public class R4LibraryProcessor {
     }
 
     //TODO: need to move to Library Processor
-    private static String getIncludedLibraryId(IncludeDef def) {
+    private static String getIncludedLibraryId(IncludeDef def, Boolean includeVersion) {
+        Library tempLibrary = new Library();
         String name = getIncludedLibraryName(def);
-        String version = def.getVersion();
-        return nameToId(name, version);
+        String version = includeVersion ? def.getVersion() : "";
+        ResourceUtils.setIgId(name, tempLibrary, version);
+        return tempLibrary.getId();
     }
 
     private static String getIncludedLibraryName(IncludeDef def) {
         return def.getPath();
-    }
-
-    private static String nameToId(String name, String version) {
-        String nameAndVersion = "library-" + name + "-" + version;
-        return nameAndVersion.replaceAll("_", "-");
     }
 
     private static CqlTranslator getTranslator(String cqlContentPath) {

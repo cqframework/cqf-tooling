@@ -1,15 +1,15 @@
 <th:block th:if="${not resource.empty}">
     <p style="padding-left: 25px; margin-bottom: 5px;" th:if="${resource.code.hasSystem()}">
         <b>system: </b>
-        <span th:narrative="${resource.code.system}"></span>
+        <span th:text="${resource.code.system}"></span>
     </p>
     <p style="padding-left: 25px; margin-bottom: 5px;" th:if="${resource.code.hasCode()}">
         <b>code: </b>
-        <span th:narrative="${resource.code.code}"></span>
+        <span th:text="${resource.code.code}"></span>
     </p>
     <p style="padding-left: 25px; margin-bottom: 5px;" th:if="${resource.code.hasDisplay()}">
         <b>display: </b>
-        <span th:narrative="${resource.code.display}"></span>
+        <span th:text="${resource.code.display}"></span>
     </p>
     <p style="padding-left: 25px; margin-bottom: 5px;" th:if="${resource.hasValueCodeableConcept()}">
         <b>value: </b>
