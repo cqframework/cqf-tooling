@@ -193,7 +193,7 @@ public class ResourceUtils
         
       for (String valueSetId : valueSetIDs) {
           ValueSetsProcessor.getCachedValueSets(fhirContext).entrySet().stream()
-          .filter(entry -> entry.getKey().equals(valueSetId))
+          .filter(entry -> entry.getKey().contains(valueSetId))
           .forEach(entry -> valueSetResources.putIfAbsent(entry.getKey(), entry.getValue()));
       }
       dependencies.addAll(valueSetIDs);
