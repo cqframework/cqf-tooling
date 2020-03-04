@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.hl7.fhir.r4.model.*;
 
+import org.jetbrains.annotations.NotNull;
 import org.opencds.cqf.Operation;
 import org.opencds.cqf.modelinfo.*;
 import org.opencds.cqf.terminology.SpreadsheetHelper;
@@ -99,19 +100,12 @@ public class Processor extends Operation {
     }
 
     private void loadFHIRModel() {
+        //TODO: Expose as an arg
         String inputPath = Paths.get("/Users/Adam/Src/cqframework/FHIR-Spec").toString();
-        String resourcePaths = "4.0.0/StructureDefinition";//US-Core/3.0.0;QI-Core/3.3.0";
-//        String modelName = "FHIR";
-//        String modelVersion = "4.0.0";
+        String resourcePaths = "4.0.0/StructureDefinition";
 
         ResourceLoader loader = new ResourceLoader();
         fhirModelStructureDefinitions = loader.loadPaths(inputPath, resourcePaths);
-
-//        FHIRClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(structureDefinitions);
-//        Map<String, TypeInfo> typeInfos = ciBuilder.build();
-//        ciBuilder.afterBuild();
-
-//        StructureDefinition sd = structureDefinitions.get("MedicationRequest");
     }
 
     private void processScope(Workbook workbook, String scope) {
@@ -386,7 +380,14 @@ public class Processor extends Operation {
     }
 
     private void addSlice(Row row, HashMap<String, Integer> colIds) {
-        ;
+        // if (has Custom Profile specified)
+        // then
+        //     if (exists)
+        //      then use it and add slice
+        //     else
+        //        create new profile, add slice
+        // else
+        // create profiles, but when adding elements, need to check for existing and slice.
     }
 
     private void processDataElementPage(Workbook workbook, String page, String scope) {
@@ -475,6 +476,7 @@ public class Processor extends Operation {
                 String masterDataType = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MasterDataType"));
                 switch(masterDataType) {
                     case "Data Element":
+                    case "Slice":
                         DictionaryElement e = createDataElement(page, currentGroup, row, colIds);
                         if (e != null) {
                             elementMap.put(e.getName(), e);
@@ -484,10 +486,10 @@ public class Processor extends Operation {
                         addInputOptionToParentElement(row, colIds);
                         break;
                     case "Calculation":
-                    case "Slice":
-                        // TODO: Do we need to do anything with these?
-                        addSlice(row, colIds);
-                        break;
+//                    case "Slice":
+//                        // TODO: Do we need to do anything with these?
+//                        addSlice(row, colIds);
+//                        break;
                     case "UI Element":
                         break;
                     default:
@@ -526,7 +528,7 @@ public class Processor extends Operation {
             case "input option":
                 return true;
             case "calculation":
-            case "clice":
+            case "slice":
                 // TODO: Do we need to do anything with these?
                 return true;
             case "ui element":
@@ -617,7 +619,7 @@ public class Processor extends Operation {
             }
 
             if (isChoiceType(elementPath)) {
-                String typePortion = getSpecifiedChoiceType(elementPath);
+                String typePortion = cleanseFhirType(elementPath.getFhirElementType());
                 return typePortion;
             }
 
@@ -641,23 +643,39 @@ public class Processor extends Operation {
         return elementPath.getResourcePath().indexOf("[x]") >= 0;
     }
 
-    private String getSpecifiedChoiceType(DictionaryFhirElementPath elementPath) {
-        return cleanseFhirType(elementPath.getFhirElementType());
-//        String choiceTypeDelimiter = "[x]";
-//        int chosenTypeIndex = path.indexOf(choiceTypeDelimiter) + choiceTypeDelimiter.length();
-//        String choiceElementName = path.substring(0, path.lastIndexOf(choiceTypeDelimiter)); // value
-//
-//        //value[x].valueDateTime
-//        String chosenType = path.substring(chosenTypeIndex, Math.min(path.indexOf(".", chosenTypeIndex) > 0 ? path.indexOf(".", chosenTypeIndex) : path.length(), path.length()));
-//        String typePortion = chosenType.replace(choiceElementName, "");
-//        return typePortion;
-
-    }
-
-    private StructureDefinition createExtension(DictionaryElement element) {
+    private StructureDefinition createExtensionStructureDefinition(DictionaryElement element) {
         throw new NotImplementedException();
     }
 
+
+    @NotNull
+    private StructureDefinition createProfileStructureDefinition(DictionaryElement element, DictionaryFhirElementPath elementPath, String resourceType, String customProfileId) {
+        StructureDefinition sd;
+        sd = new StructureDefinition();
+        sd.setId(toId((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getName()));
+        sd.setUrl(String.format("%s/StructureDefinition/%s", canonicalBase, sd.getId()));
+        // TODO: version
+        sd.setName((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getName());
+        sd.setTitle((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getLabel());
+        sd.setStatus(Enumerations.PublicationStatus.DRAFT);
+        sd.setExperimental(false);
+        // TODO: date
+        // TODO: publisher
+        // TODO: contact
+        sd.setDescription((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getDescription());
+        // TODO: What to do with Notes?
+        sd.setFhirVersion(Enumerations.FHIRVersion._4_0_0);
+        sd.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
+        sd.setAbstract(false);
+        // TODO: Support resources other than Observation
+        sd.setType(resourceType);
+        // TODO: Use baseDefinition to derive from less specialized profiles
+        sd.setBaseDefinition(elementPath.getBaseProfile());
+        sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+        sd.setDifferential(new StructureDefinition.StructureDefinitionDifferentialComponent());
+        return sd;
+    }
+    
     private StructureDefinition ensureProfile(DictionaryElement element) {
         DictionaryFhirElementPath elementPath = element.getFhirElementPath();
         String resourceType = elementPath.getResourceType();
@@ -702,10 +720,9 @@ public class Processor extends Operation {
         StructureDefinition sd;
         List<ElementDefinition> elementDefinitions = new ArrayList<>();
 
-        String customProfileId =
-                element.getFhirElementPath().getCustomProfileId() != null && element.getFhirElementPath().getCustomProfileId().length() > 0
-                        ? toId(element.getFhirElementPath().getCustomProfileId())
-                        : null;
+        String customProfileId = element.getFhirElementPath().getCustomProfileId() != null && element.getFhirElementPath().getCustomProfileId().length() > 0
+            ? toId(element.getFhirElementPath().getCustomProfileId())
+            : null;
 
         Optional<StructureDefinition> existingProfile = null;
         if (customProfileId != null && customProfileId.length() > 0) {
@@ -715,28 +732,7 @@ public class Processor extends Operation {
         if (existingProfile != null && !existingProfile.isEmpty()) {
             sd = existingProfile.get();
         } else {
-            sd = new StructureDefinition();
-            sd.setId(toId((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getName()));
-            sd.setUrl(String.format("%s/StructureDefinition/%s", canonicalBase, sd.getId()));
-            // TODO: version
-            sd.setName((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getName());
-            sd.setTitle((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getLabel());
-            sd.setStatus(Enumerations.PublicationStatus.DRAFT);
-            sd.setExperimental(false);
-            // TODO: date
-            // TODO: publisher
-            // TODO: contact
-            sd.setDescription((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getDescription());
-            // TODO: What to do with Notes?
-            sd.setFhirVersion(Enumerations.FHIRVersion._4_0_0);
-            sd.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
-            sd.setAbstract(false);
-            // TODO: Support resources other than Observation
-            sd.setType(resourceType);
-            // TODO: Use baseDefinition to derive from less specialized profiles
-            sd.setBaseDefinition(elementPath.getBaseProfile());
-            sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
-            sd.setDifferential(new StructureDefinition.StructureDefinitionDifferentialComponent());
+            sd = createProfileStructureDefinition(element, elementPath, resourceType, customProfileId);
 
             // Add root element
             ElementDefinition ed = new ElementDefinition();
@@ -856,6 +852,7 @@ public class Processor extends Operation {
                     binding.setValueSet(valueSet.getUrl());
                     ed.setBinding(binding);
                 }
+
                 elementDefinitions.add(ed);
 //            }
         }
