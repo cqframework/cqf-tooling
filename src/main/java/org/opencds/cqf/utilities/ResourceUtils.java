@@ -188,15 +188,15 @@ public class ResourceUtils
     
     public static Map<String, IAnyResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext, boolean includeDependencies, Boolean includeVersion) throws Exception {
       Map<String, IAnyResource> valueSetResources = new HashMap<String, IAnyResource>();
-      List<String> valueSetIDs = getDepValueSetIDs(cqlContentPath);
+      List<String> valueSetDefIDs = getDepELMValueSetDefIDs(cqlContentPath);
       HashSet<String> dependencies = new HashSet<>();
         
-      for (String valueSetId : valueSetIDs) {
+      for (String valueSetUrl : valueSetDefIDs) {
           ValueSetsProcessor.getCachedValueSets(fhirContext).entrySet().stream()
-          .filter(entry -> entry.getKey().contains(valueSetId))
+          .filter(entry -> entry.getKey().equals(valueSetUrl))
           .forEach(entry -> valueSetResources.putIfAbsent(entry.getKey(), entry.getValue()));
       }
-      dependencies.addAll(valueSetIDs);
+      dependencies.addAll(valueSetDefIDs);
 
       if(includeDependencies) {
         List<String> dependencyCqlPaths = IOUtils.getDependencyCqlPaths(cqlContentPath, includeVersion);
@@ -212,8 +212,8 @@ public class ResourceUtils
       if (dependencies.size() != valueSetResources.size()) {
         String message = (dependencies.size() - valueSetResources.size()) + " missing ValueSets: \r\n";
         dependencies.removeAll(valueSetResources.keySet());
-        for (String valueSetId : dependencies) {
-          message += valueSetId + " MISSING \r\n";
+        for (String valueSetUrl : dependencies) {
+          message += valueSetUrl + " MISSING \r\n";
         }   
         //System.out.println(message);
         throw new Exception(message);
@@ -231,13 +231,13 @@ public class ResourceUtils
       return includedLibraryNames;
     }
 
-    public static ArrayList<String> getDepValueSetIDs(String cqlContentPath) {
-      ArrayList<String> includedValueSetIDs = new ArrayList<String>();
+    public static ArrayList<String> getDepELMValueSetDefIDs(String cqlContentPath) {
+      ArrayList<String> includedValueSetDefIDs = new ArrayList<String>();
       ArrayList<ValueSetDef> valueSetDefs = getValueSetDefs(cqlContentPath);
       for (ValueSetDef def : valueSetDefs) {
-        IOUtils.putInListIfAbsent(def.getId(), includedValueSetIDs);
+        IOUtils.putInListIfAbsent(def.getId(), includedValueSetDefIDs);
       }
-      return includedValueSetIDs;
+      return includedValueSetDefIDs;
     }
 
     public static ArrayList<IncludeDef> getIncludedDefs(String cqlContentPath) {
