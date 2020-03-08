@@ -1,7 +1,9 @@
-package org.opencds.cqf.igtools;
+package org.opencds.cqf.operation;
 
 import org.opencds.cqf.Operation;
-import org.opencds.cqf.igtools.IGProcessor;
+import org.opencds.cqf.parameter.RefreshIGParameters;
+import org.opencds.cqf.processor.IGProcessor;
+import org.opencds.cqf.processor.argument.RefreshIGArgumentProcessor;
 
 public class RefreshIGOperation extends Operation {
 

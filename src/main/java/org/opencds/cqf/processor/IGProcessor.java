@@ -1,4 +1,4 @@
-package org.opencds.cqf.igtools;
+package org.opencds.cqf.processor;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,12 +20,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.MeasureReport;
 import org.hl7.fhir.MeasureReportStatus;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.opencds.cqf.library.R4LibraryProcessor;
-import org.opencds.cqf.library.STU3LibraryProcessor;
-import org.opencds.cqf.measure.MeasureProcessor;
-import org.opencds.cqf.plandefinition.PlanDefinitionProcessor;
-import org.opencds.cqf.terminology.ValueSetsProcessor;
-import org.opencds.cqf.testcase.TestCaseProcessor;
+import org.opencds.cqf.parameter.RefreshIGParameters;
 import org.opencds.cqf.utilities.BundleUtils;
 import org.opencds.cqf.utilities.HttpClientUtils;
 import org.opencds.cqf.utilities.IOUtils;

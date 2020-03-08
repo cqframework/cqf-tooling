@@ -1,4 +1,4 @@
-package org.opencds.cqf.library;
+package org.opencds.cqf.processor;
 
 public class LibraryProcessor {
     public static final String ResourcePrefix = "library-";   

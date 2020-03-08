@@ -1,4 +1,4 @@
-package org.opencds.cqf.igtools;
+package org.opencds.cqf.processor.argument;
 
 import static java.util.Arrays.asList;
 
@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.opencds.cqf.igtools.IGProcessor.IGVersion;
+import org.opencds.cqf.parameter.RefreshIGParameters;
+import org.opencds.cqf.processor.IGProcessor;
+import org.opencds.cqf.processor.IGProcessor.IGVersion;
 import org.opencds.cqf.utilities.ArgUtils;
 
 import joptsimple.OptionParser;

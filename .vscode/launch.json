@@ -117,6 +117,10 @@
             "args": [
                 "-RefreshIG",
                 "-ip=C:\\src\\GitHub\\connectathon\\fhir4",
+                "-rp=C:\\src\\GitHub\\connectathon\\fhir4\\resources",
+                "-rp=C:\\src\\GitHub\\connectathon\\fhir4\\cql",
+                "-fs=http://localhost:8080/cqf-ruler-r4/fhir",
+                "-iv=fhir4",
                 "-t",
                 "-d",
                 "-v",
