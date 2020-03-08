@@ -438,10 +438,14 @@ public class IOUtils
     }
 
     public static String getLibraryPathAssociatedWithCqlFileName(String cqlPath, FhirContext fhirContext) throws FileNotFoundException {
-        String fileName = FilenameUtils.getName(cqlPath).replaceAll(".cql", ".json");
+        String fileName = FilenameUtils.getName(cqlPath);
         String libraryFileName = LibraryProcessor.ResourcePrefix + fileName;
         for (String path : IOUtils.getLibraryPaths(fhirContext)) {
-            if(path.endsWith(libraryFileName)) {
+            // NOTE: A bit of a hack, but we need to support both xml and json encodings for existing resources and the
+            // long-term strategy is to revisit this and change the approach to use the references rather than file name
+            // matching, so this should be good for the near-term.
+            if (path.endsWith(libraryFileName.replaceAll(".cql", ".json"))
+                || path.endsWith(libraryFileName.replaceAll(".cql", ".xml"))) {
                 return path;
             }
         }
@@ -631,6 +635,9 @@ public class IOUtils
     }
     private static void setupActivityDefinitionPaths(FhirContext fhirContext) {
         HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        // BUG: resourceDirectories is being populated with all "per-convention" directories during validation. So,
+        // if you have resources in the /tests directory for example, they will be picked up from there, rather than
+        // from your resources directories.
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
             {
