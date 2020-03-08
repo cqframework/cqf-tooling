@@ -101,8 +101,6 @@
             "args": [
                 "-RefreshIG",
                 "-ip=C:\\src\\GitHub\\connectathon\\fhir3",
-                "-rp=C:\\src\\GitHub\\connectathon\\fhir3\\resources",
-                "-rp=C:\\src\\GitHub\\connectathon\\fhir3\\cql",
                 "-iv=fhir3",
                 "-t",
                 "-d",
