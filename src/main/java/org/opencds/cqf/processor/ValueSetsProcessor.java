@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.utilities.IOUtils;
+import org.opencds.cqf.utilities.LogUtils;
+import org.opencds.cqf.utilities.ResourceUtils;
+import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -72,5 +75,20 @@ public class ValueSetsProcessor {
     
     public static String getId(String baseId) {
         return "valuesets-" + baseId;
+    }
+
+    public static Boolean bundleValueSets(String cqlContentPath, String igPath, FhirContext fhirContext,
+            Map<String, IAnyResource> resources, Encoding encoding, Boolean includeDependencies, Boolean includeVersion) {
+        Boolean shouldPersist = true;
+        try {
+            Map<String, IAnyResource> dependencies = ResourceUtils.getDepValueSetResources(cqlContentPath, igPath, fhirContext, includeDependencies, includeVersion);
+            for (IAnyResource resource : dependencies.values()) {
+                resources.putIfAbsent(resource.getId(), resource);
+            }
+        } catch (Exception e) {
+            shouldPersist = false;
+            LogUtils.putWarning(cqlContentPath, e.getMessage());
+        }
+        return shouldPersist;
     }
 }
