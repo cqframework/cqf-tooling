@@ -21,8 +21,8 @@ import ca.uhn.fhir.context.FhirContext;
 
 import org.hl7.fhir.r4.model.*;
 
-public class R4LibraryProcessor {
-        public static Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {         
+public class R4LibraryProcessor implements LibraryProcessor{
+        public Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {         
         Library resource = (Library)IOUtils.readResource(libraryPath, fhirContext, true);
         Boolean libraryExists = resource != null;       
 

@@ -1,7 +1,6 @@
 package org.opencds.cqf.processor;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -23,9 +22,9 @@ import ca.uhn.fhir.context.FhirContext;
 
 import org.hl7.fhir.dstu3.model.*;
 
-public class STU3LibraryProcessor {
+public class STU3LibraryProcessor implements LibraryProcessor{
 
-    public static Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {         
+    public Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {         
         Library resource = (Library)IOUtils.readResource(libraryPath, fhirContext, true);
         Boolean libraryExists = resource != null;       
 

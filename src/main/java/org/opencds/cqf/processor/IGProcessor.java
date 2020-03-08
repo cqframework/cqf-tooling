@@ -78,15 +78,16 @@ public class IGProcessor {
 
         ensure(igPath, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
 
+        LibraryProcessor libraryProcessor;
         ArrayList<String> refreshedLibraryNames = null;
         switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:
-            refreshedLibraryNames = refreshStu3IG(igPath, encoding, includeELM, includeDependencies, includeTerminology,
-                    includePatientScenarios, versioned, fhirContext);
+            libraryProcessor = new STU3LibraryProcessor();
+            refreshedLibraryNames = refreshIgLibraryContent(libraryProcessor, igPath, encoding, includeELM, versioned, fhirContext);
             break;
         case R4:
-            refreshedLibraryNames = refreshR4IG(igPath, encoding, includeELM, includeDependencies, includeTerminology,
-                    includePatientScenarios, versioned, fhirContext);
+            libraryProcessor = new R4LibraryProcessor();
+            refreshedLibraryNames = refreshIgLibraryContent(libraryProcessor, igPath, encoding, includeELM, versioned, fhirContext);
             break;
         default:
             throw new IllegalArgumentException(
@@ -106,23 +107,7 @@ public class IGProcessor {
         versioned, fhirContext, fhirUri);
     }
 
-    private static ArrayList<String> refreshStu3IG(String igPath, Encoding outputEncodingEnum, Boolean includeELM, Boolean includeDependencies,
-            Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned, FhirContext fhirContext) {
-        ArrayList<String> refreshedLibraryNames = refreshStu3IgLibraryContent(igPath, outputEncodingEnum, includeELM, versioned, fhirContext);
-        // union with below when this is implemented.
-        // refreshMeasureContent();
-        return refreshedLibraryNames;
-    }
-
-    private static ArrayList<String> refreshR4IG(String igPath, Encoding outputEncodingEnum, Boolean includeELM, Boolean includeDependencies,
-            Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned, FhirContext fhirContext) {
-        ArrayList<String> refreshedLibraryNames = refreshR4LibraryContent(igPath, outputEncodingEnum, includeELM, versioned, fhirContext);
-        // union with below when this is implemented.
-        // refreshMeasureContent();
-        return refreshedLibraryNames;
-    }
-
-    public static ArrayList<String> refreshStu3IgLibraryContent(String igPath, Encoding outputEncoding, Boolean includeELM,
+    public static ArrayList<String> refreshIgLibraryContent(LibraryProcessor libraryProcessor, String igPath, Encoding outputEncoding, Boolean includeELM,
             Boolean versioned, FhirContext fhirContext) {
                 ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
                 HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
@@ -136,8 +121,7 @@ public class IGProcessor {
                         } catch (Exception e) {
                             libraryPath = "";
                         }
-                        
-                        STU3LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, outputEncoding, versioned);
+                        libraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, outputEncoding, versioned);
                         refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
                     } catch (Exception e) {
                         LogUtils.putWarning(path, e.getMessage());
@@ -146,33 +130,6 @@ public class IGProcessor {
                 }
         
                 return refreshedLibraryNames;
-    }
-
-    public static ArrayList<String> refreshR4LibraryContent(String igPath, Encoding outputEncoding, Boolean includeELM,
-            Boolean versioned, FhirContext fhirContext) {
-        ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
-        HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
-
-        for (String path : cqlContentPaths) {
-            try {
-                //ask about how to do this better
-                String libraryPath;
-                try {
-                    libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path, fhirContext);
-                } catch (Exception e) {
-                    libraryPath = "";
-                }
-                
-                R4LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, outputEncoding, versioned);
-                refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
-            } catch (Exception e) {
-                //TODO: need to protect against this everywhere
-                LogUtils.putWarning(path, e.getMessage() == null ? e.toString() : e.getMessage());
-            }
-            LogUtils.warn(path);
-        }
-
-        return refreshedLibraryNames;
     }
 
     // TODO: most of the work of the sub methods of this should probably be moved to
