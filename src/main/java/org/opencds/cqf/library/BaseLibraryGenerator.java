@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +53,8 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
         setRelevantCqlFiles();
         
         modelManager = new ModelManager();
-        sourceProvider = new GenericLibrarySourceProvider(pathToCqlContentDir);
+        sourceProvider = new DefaultLibrarySourceProvider(new File(pathToCQLContent).getParentFile().toPath());
+        //sourceProvider = new GenericLibrarySourceProvider(pathToCqlContentDir);
         libraryManager = new LibraryManager(modelManager);
         libraryManager.getLibrarySourceLoader().registerProvider(sourceProvider);
 
@@ -107,7 +109,7 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
                 case "-outputpath":
                 case "-op":
                     setOutputPath(value);
-                    break;
+                    break;        
             }
         }
 
@@ -118,7 +120,13 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
     }
 
     private void setRelevantCqlFiles() {
+        // TODO: I don't understand why we even need to do this, we've been given a CQL input file
+        // The expectation is that that file is in a directory with any required dependencies
+        // And we've been given an output file
+        // Shouldn't we _only_ be processing that file?
         File cqlContent = new File(pathToCQLContent);
+        cqlFiles = new File[] { cqlContent };
+/*
         cqlContentDir = cqlContent.getParentFile();
         pathToCqlContentDir = cqlContentDir.getPath();
         if (!cqlContentDir.isDirectory()) {
@@ -142,6 +150,7 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
 
         }
         cqlFiles = dependencyLibrarieFiles.toArray(new File[0]);
+*/
     }
 
     private void translateCqlFiles() {
@@ -207,19 +216,24 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
         }
     }
 
+    // TODO: This should be pulled from the ELM, not the CQL directly, why are we doing this this way?
     private ArrayList<String> getIncludedLibraries(String cql) {
         int includeDefinitionIndex = cql.indexOf("include");
-        String[] includedDefsAndBelow = cql.substring(includeDefinitionIndex).split("\\n");
-
-        int index = 0; 
+        int index = 0;
         ArrayList<String> relatedArtifacts = new ArrayList<>();
-        while (includedDefsAndBelow[index].startsWith("include")) {
-            String includedLibraryName = includedDefsAndBelow[index].replace("include ", "").split(" version ")[0];
-            String includedLibraryVersion = includedDefsAndBelow[index].replace("include ", "").split(" version ")[1].replaceAll("\'", "").split(" called")[0];
-            String includedLibraryId = includedLibraryName + "-" + includedLibraryVersion;
-            relatedArtifacts.add(includedLibraryId);
-            index++;
+
+        if (includeDefinitionIndex >= 0) {
+            String[] includedDefsAndBelow = cql.substring(includeDefinitionIndex).split("\\n");
+
+            while (includedDefsAndBelow[index].startsWith("include")) {
+                String includedLibraryName = includedDefsAndBelow[index].replace("include ", "").split(" version ")[0];
+                String includedLibraryVersion = includedDefsAndBelow[index].replace("include ", "").split(" version ")[1].replaceAll("\'", "").split(" called")[0];
+                String includedLibraryId = includedLibraryName + "-" + includedLibraryVersion;
+                relatedArtifacts.add(includedLibraryId);
+                index++;
+            }
         }
+
         return relatedArtifacts;
     }
     private String getIdFromSource(String cql) {

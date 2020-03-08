@@ -94,7 +94,7 @@ public class IOUtils
 
     public static <T extends IAnyResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext) 
     {        
-        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(path, formatFileName(resource.getId(), encoding, fhirContext))))
+        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(path, formatFileName(resource.getIdElement().getIdPart(), encoding, fhirContext))))
         {
             writer.write(parseResource(resource, encoding, fhirContext));
             writer.flush();
@@ -219,8 +219,15 @@ public class IOUtils
     public static List<String> getDirectoryPaths(String path, Boolean recursive)
     {
         List<String> directoryPaths = new ArrayList<String>();
+        List<File> directories = new ArrayList<File>();
         File parentDirectory = new File(path);
-        ArrayList<File> directories = new ArrayList<>(Arrays.asList(Optional.ofNullable(parentDirectory.listFiles()).orElseThrow()));
+        try {
+            directories = Arrays.asList(Optional.ofNullable(parentDirectory.listFiles()).orElseThrow());
+        } catch (Exception e) {
+            System.out.println("No paths found for the Directory " + path + ":");
+            return directoryPaths;
+        }
+        
        
         for (File directory : directories) {
             if (directory.isDirectory()) {
@@ -292,8 +299,8 @@ public class IOUtils
         return result;
     }
 
-    public static List<String> getDependencyCqlPaths(String cqlContentPath) throws Exception {
-        ArrayList<File> DependencyFiles = getDependencyCqlFiles(cqlContentPath);
+    public static List<String> getDependencyCqlPaths(String cqlContentPath, Boolean includeVersion) throws Exception {
+        ArrayList<File> DependencyFiles = getDependencyCqlFiles(cqlContentPath, includeVersion);
         ArrayList<String> DependencyPaths = new ArrayList<String>();
         for (File file : DependencyFiles) {
             DependencyPaths.add(file.getPath().toString());
@@ -301,13 +308,13 @@ public class IOUtils
         return DependencyPaths;
     }
 
-    public static ArrayList<File> getDependencyCqlFiles(String cqlContentPath) throws Exception {
+    public static ArrayList<File> getDependencyCqlFiles(String cqlContentPath, Boolean includeVersion) throws Exception {
         File cqlContent = new File(cqlContentPath);
         File cqlContentDir = cqlContent.getParentFile();
         if (!cqlContentDir.isDirectory()) {
             throw new IllegalArgumentException("The specified path to library files is not a directory");
         }
-        ArrayList<String> dependencyLibraries = ResourceUtils.getIncludedLibraryNames(cqlContentPath);
+        ArrayList<String> dependencyLibraries = ResourceUtils.getIncludedLibraryNames(cqlContentPath, includeVersion);
         File[] allCqlContentFiles = cqlContentDir.listFiles();
         if (allCqlContentFiles.length == 1) {
             return new ArrayList<File>();
@@ -412,6 +419,16 @@ public class IOUtils
         return result;
     }    
 
+    public static List<String> putAllInListIfAbsent(List<String> values, List<String> list)
+    {
+        for (String value : values) {
+            if (!list.contains(value)) {
+                list.add(value);
+            }
+        }
+        return list;
+    }
+
     public static List<String> putInListIfAbsent(String value, List<String> list)
     {
         if (!list.contains(value)) {
@@ -421,10 +438,14 @@ public class IOUtils
     }
 
     public static String getLibraryPathAssociatedWithCqlFileName(String cqlPath, FhirContext fhirContext) throws FileNotFoundException {
-        String fileName = FilenameUtils.getName(cqlPath).replaceAll(".cql", ".json");
+        String fileName = FilenameUtils.getName(cqlPath);
         String libraryFileName = LibraryProcessor.ResourcePrefix + fileName;
         for (String path : IOUtils.getLibraryPaths(fhirContext)) {
-            if(path.endsWith(libraryFileName)) {
+            // NOTE: A bit of a hack, but we need to support both xml and json encodings for existing resources and the
+            // long-term strategy is to revisit this and change the approach to use the references rather than file name
+            // matching, so this should be good for the near-term.
+            if (path.endsWith(libraryFileName.replaceAll(".cql", ".json"))
+                || path.endsWith(libraryFileName.replaceAll(".cql", ".xml"))) {
                 return path;
             }
         }
@@ -573,6 +594,65 @@ public class IOUtils
                 .filter(entry -> entry.getValue() != null)
                 .filter(entry ->  measureReportClassName.equals(entry.getValue().getClass().getName()))
                 .forEach(entry -> measureReportPaths.add(entry.getKey()));
+        }
+    }
+
+	private static HashSet<String> planDefinitionPaths = new HashSet<String>();
+    public static HashSet<String> getPlanDefinitionPaths(FhirContext fhirContext) {
+        if (planDefinitionPaths.isEmpty()) {
+            System.out.println("Reading plandefinitions");
+            setupPlanDefinitionPaths(fhirContext);
+        }
+        return planDefinitionPaths;
+    }
+    private static void setupPlanDefinitionPaths(FhirContext fhirContext) {
+        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        for(String dir : resourceDirectories) {
+            for(String path : IOUtils.getFilePaths(dir, true))
+            {
+                try {
+                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                } catch (Exception e) {
+                    //TODO: handle exception
+                }
+            }
+            RuntimeResourceDefinition planDefinitionDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "PlanDefinition");
+            String planDefinitionClassName = planDefinitionDefinition.getImplementingClass().getName();
+            resources.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .filter(entry ->  planDefinitionClassName.equals(entry.getValue().getClass().getName()))
+                .forEach(entry -> planDefinitionPaths.add(entry.getKey()));
+        }
+    }
+
+    private static HashSet<String> activityDefinitionPaths = new HashSet<String>();
+    public static HashSet<String> getActivityDefinitionPaths(FhirContext fhirContext) {
+        if (activityDefinitionPaths.isEmpty()) {
+            System.out.println("Reading activitydefinitions");
+            setupActivityDefinitionPaths(fhirContext);
+        }
+        return activityDefinitionPaths;
+    }
+    private static void setupActivityDefinitionPaths(FhirContext fhirContext) {
+        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        // BUG: resourceDirectories is being populated with all "per-convention" directories during validation. So,
+        // if you have resources in the /tests directory for example, they will be picked up from there, rather than
+        // from your resources directories.
+        for(String dir : resourceDirectories) {
+            for(String path : IOUtils.getFilePaths(dir, true))
+            {
+                try {
+                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                } catch (Exception e) {
+                    //TODO: handle exception
+                }
+            }
+            RuntimeResourceDefinition activityDefinitionDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "ActivityDefinition");
+            String activityDefinitionClassName = activityDefinitionDefinition.getImplementingClass().getName();
+            resources.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .filter(entry ->  activityDefinitionClassName.equals(entry.getValue().getClass().getName()))
+                .forEach(entry -> activityDefinitionPaths.add(entry.getKey()));
         }
     }
 }
