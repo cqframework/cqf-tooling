@@ -13,6 +13,7 @@ import org.hl7.elm.r1.ValueSetRef;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.opencds.cqf.library.BaseNarrativeProvider;
 import org.opencds.cqf.library.GenericLibrarySourceProvider;
+import org.opencds.cqf.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.utilities.IOUtils;
 import org.opencds.cqf.utilities.ResourceUtils;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
@@ -22,18 +23,34 @@ import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.*;
 
 public class R4LibraryProcessor implements LibraryProcessor{
-        public Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {         
+    private String cqlContentPath;
+    private String libraryPath;
+    private FhirContext fhirContext;
+    private Encoding encoding;
+    private Boolean versioned;
+
+    public Boolean refreshLibraryContent(RefreshLibraryParameters params) {  
+        cqlContentPath = params.cqlContentPath;
+        libraryPath = params.libraryPath;
+        fhirContext = params.fhirContext;
+        encoding = params.encoding;
+        versioned = params.versioned;       
         Library resource = (Library)IOUtils.readResource(libraryPath, fhirContext, true);
         Boolean libraryExists = resource != null;       
 
         CqlTranslator translator = getTranslator(cqlContentPath);
               
-        if (libraryExists) {            
-            refreshLibrary(resource, cqlContentPath, IOUtils.getParentDirectoryPath(libraryPath), encoding, includeVersion, translator, fhirContext);
+        if (libraryExists) {       
+            String libraryResourceDirPath = IOUtils.getParentDirectoryPath(libraryPath);
+            if(!IOUtils.resourceDirectories.contains(libraryResourceDirPath) )
+            {
+                IOUtils.resourceDirectories.add(libraryResourceDirPath);
+            }   
+            refreshLibrary(resource, cqlContentPath, IOUtils.getParentDirectoryPath(libraryPath), encoding, versioned, translator, fhirContext);
         } else {
             Optional<String> anyOtherLibraryDirectory = IOUtils.getLibraryPaths(fhirContext).stream().findFirst();
             String parentDirectory = anyOtherLibraryDirectory.isPresent() ? IOUtils.getParentDirectoryPath(anyOtherLibraryDirectory.get()) : IOUtils.getParentDirectoryPath(cqlContentPath);
-            generateLibrary(cqlContentPath, parentDirectory, encoding, includeVersion, translator, fhirContext);
+            generateLibrary(cqlContentPath, parentDirectory, encoding, versioned, translator, fhirContext);
         }
       
         return true;

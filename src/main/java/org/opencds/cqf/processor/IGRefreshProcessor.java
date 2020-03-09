@@ -6,6 +6,7 @@ import java.util.HashSet;
 
 import org.apache.commons.io.FilenameUtils;
 import org.opencds.cqf.parameter.RefreshIGParameters;
+import org.opencds.cqf.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.processor.IGProcessor.IGVersion;
 import org.opencds.cqf.utilities.IOUtils;
 import org.opencds.cqf.utilities.LogUtils;
@@ -41,11 +42,11 @@ public class IGRefreshProcessor {
         switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:
             libraryProcessor = new STU3LibraryProcessor();
-            refreshedLibraryNames = refreshIgLibraryContent(libraryProcessor, igPath, encoding, includeELM, versioned, fhirContext);
+            refreshedLibraryNames = refreshIgLibraryContent(libraryProcessor, igPath, encoding, includeELM, versioned, fhirContext, igVersion);
             break;
         case R4:
             libraryProcessor = new R4LibraryProcessor();
-            refreshedLibraryNames = refreshIgLibraryContent(libraryProcessor, igPath, encoding, includeELM, versioned, fhirContext);
+            refreshedLibraryNames = refreshIgLibraryContent(libraryProcessor, igPath, encoding, includeELM, versioned, fhirContext, igVersion);
             break;
         default:
             throw new IllegalArgumentException(
@@ -63,25 +64,31 @@ public class IGRefreshProcessor {
     }
 
     public static ArrayList<String> refreshIgLibraryContent(LibraryProcessor libraryProcessor, String igPath, Encoding outputEncoding, Boolean includeELM,
-            Boolean versioned, FhirContext fhirContext) {
+            Boolean versioned, FhirContext fhirContext, IGVersion igVersion) {
                 ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
                 HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
         
-                for (String path : cqlContentPaths) {
+                for (String cqlPath : cqlContentPaths) {
                     try {
                         //ask about how to do this better
                         String libraryPath;
                         try {
-                            libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path, fhirContext);
+                            libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(cqlPath, fhirContext);
                         } catch (Exception e) {
                             libraryPath = "";
                         }
-                        libraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, outputEncoding, versioned);
-                        refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
+                        RefreshLibraryParameters lp = new RefreshLibraryParameters();
+                        lp.cqlContentPath = cqlPath;
+                        lp.libraryPath = libraryPath;
+                        lp.fhirContext = fhirContext;
+                        lp.encoding = outputEncoding;
+                        lp.versioned = versioned;
+                        libraryProcessor.refreshLibraryContent(lp);
+                        refreshedLibraryNames.add(FilenameUtils.getBaseName(cqlPath));
                     } catch (Exception e) {
-                        LogUtils.putWarning(path, e.getMessage());
+                        LogUtils.putWarning(cqlPath, e.getMessage());
                     }
-                    LogUtils.warn(path);
+                    LogUtils.warn(cqlPath);
                 }
         
                 return refreshedLibraryNames;

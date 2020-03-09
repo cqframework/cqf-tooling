@@ -73,6 +73,21 @@
         },
         {
             "type": "java",
+            "name": "Refresh Library Operation",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.Main",
+            "projectName": "tooling",
+            "args": [
+                "-RefreshLibrary",
+                "-cql=C:\\src\\GitHub\\connectathon\\fhir4\\input\\pagecontent\\cql\\EXM104_FHIR4-8.1.000.cql",
+                "-lp=C:\\src\\GitHub\\connectathon\\fhir4\\input\\resources\\library\\library-EXM104_FHIR4-8.1.000.json",
+                "-e=json",
+                "-fv=fhir4",
+                "-v"
+            ]
+        },
+        {
+            "type": "java",
             "name": "Opioid CDS FHIR3",
             "request": "launch",
             "mainClass": "org.opencds.cqf.Main",

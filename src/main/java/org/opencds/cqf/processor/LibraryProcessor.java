@@ -3,6 +3,7 @@ package org.opencds.cqf.processor;
 import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.opencds.cqf.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.utilities.LogUtils;
 import org.opencds.cqf.utilities.ResourceUtils;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
@@ -30,5 +31,5 @@ public interface LibraryProcessor {
         return shouldPersist;
     }
 
-    public Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Boolean includeVersion);
+    public Boolean refreshLibraryContent(RefreshLibraryParameters params);
 }
