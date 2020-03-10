@@ -569,6 +569,7 @@ public class Processor extends Operation {
                 .replace("]", "")
                 .replace("\n", "")
                 // replace these with ndash
+                .replace(":", "-")
                 .replace(",", "-")
                 .replace("_", "-")
                 .replace("/", "-")
@@ -1048,7 +1049,10 @@ public class Processor extends Operation {
             String profilesPath = getProfilesPath(scopePath);
             ensureProfilesPath(scopePath);
 
+            Comparator<ElementDefinition> compareById = Comparator.comparing(Element::getId);
+
             for (StructureDefinition sd : profiles) {
+                sd.getDifferential().getElement().sort(compareById);
                 writeResource(profilesPath, sd);
 
                 // Generate JSON fragment for inclusion in the IG:
