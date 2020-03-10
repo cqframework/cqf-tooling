@@ -50,6 +50,12 @@ public class DictionaryFhirElementPath {
         this.baseProfile = baseProfile;
     }
 
+    private String masterDataElementPath;
+    public String getMasterDataElementPath() {
+        return this.masterDataElementPath;
+    }
+    public void setMasterDataElementPath(String masterDataElementPath) { this.masterDataElementPath = masterDataElementPath; }
+
     private String fhirElementType;
     public String getFhirElementType() {
         return this.fhirElementType;
@@ -59,6 +65,10 @@ public class DictionaryFhirElementPath {
     private String customProfileId;
     public String getCustomProfileId() { return this.customProfileId; }
     public void setCustomProfileId(String customProfileId) { this.customProfileId = customProfileId; }
+
+    private String additionalFHIRMappingDetails;
+    public String getAdditionalFHIRMappingDetails() { return this.additionalFHIRMappingDetails; }
+    public void setAdditionalFHIRMappingDetails(String additionalFHIRMappingDetails) { this.additionalFHIRMappingDetails = additionalFHIRMappingDetails; }
 
     private String customValueSetName;
     public String getCustomValueSetName() { return this.customValueSetName; }

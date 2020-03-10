@@ -270,12 +270,14 @@ public class Processor extends Operation {
         String resource = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4Resource"));
         if (resource != null && !resource.isEmpty()) {
             fhirType.setResource(resource);
+            fhirType.setMasterDataElementPath(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MasterDataElementPath")));
             fhirType.setFhirElementType(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4ResourceType")));
             fhirType.setBaseProfile(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4BaseProfile")));
             fhirType.setVersion(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4VersionNumber")));
             fhirType.setCustomProfileId(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomProfileId")));
             fhirType.setCustomValueSetName(SpreadsheetHelper.getCellAsString(row, getColId(colIds, " CustomValueSetName")));
             fhirType.setExtensionNeeded(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ExtensionNeeded")));
+            fhirType.setAdditionalFHIRMappingDetails(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4AdditionalFHIRMappingDetails")));
         }
         return fhirType;
     }
@@ -379,17 +381,6 @@ public class Processor extends Operation {
         }
     }
 
-    private void addSlice(Row row, HashMap<String, Integer> colIds) {
-        // if (has Custom Profile specified)
-        // then
-        //     if (exists)
-        //      then use it and add slice
-        //     else
-        //        create new profile, add slice
-        // else
-        // create profiles, but when adding elements, need to check for existing and slice.
-    }
-
     private void processDataElementPage(Workbook workbook, String page, String scope) {
         Sheet sheet = workbook.getSheet(page);
         Iterator<Row> it = sheet.rowIterator();
@@ -451,10 +442,13 @@ public class Processor extends Operation {
                         case "extension needed": colIds.put("ExtensionNeeded", cell.getColumnIndex()); break;
 
                         // fhir resource details
+                        case "master data element path": colIds.put("MasterDataElementPath", cell.getColumnIndex()); break;
                         case "hl7 fhir r4 - resource": colIds.put("FhirR4Resource", cell.getColumnIndex()); break;
                         case "hl7 fhir r4 - resource type": colIds.put("FhirR4ResourceType", cell.getColumnIndex()); break;
                         case "hl7 fhir r4 - base profile": colIds.put("FhirR4BaseProfile", cell.getColumnIndex()); break;
                         case "hl7 fhir r4 - version number": colIds.put("FhirR4VersionNumber", cell.getColumnIndex()); break;
+                        case "hl7 fhir r4 - additional fhir mapping details": colIds.put("FhirR4AdditionalFHIRMappingDetails", cell.getColumnIndex()); break;
+
 
                         // terminology
                         case "fhir code system": colIds.put("FhirCodeSystem", cell.getColumnIndex()); break;
@@ -486,10 +480,6 @@ public class Processor extends Operation {
                         addInputOptionToParentElement(row, colIds);
                         break;
                     case "Calculation":
-//                    case "Slice":
-//                        // TODO: Do we need to do anything with these?
-//                        addSlice(row, colIds);
-//                        break;
                     case "UI Element":
                         break;
                     default:
@@ -624,6 +614,15 @@ public class Processor extends Operation {
             }
 
             List<ElementDefinition> snapshotElements = sd.getSnapshot().getElement();
+
+            //Start of refactor to get away from bad Optional<> pattern
+//            for (ElementDefinition elementDef : snapshotElements) {
+//                if (elementDef.toString().toLowerCase().equals(elementPath.getResourceTypeAndPath().toLowerCase())) {
+//                    List<ElementDefinition.TypeRefComponent> types = elementDef.getType();
+//                    if ()
+//                }
+//            }
+
             Optional<ElementDefinition> type = snapshotElements.stream().filter(e -> e.toString().toLowerCase().equals(elementPath.getResourceTypeAndPath().toLowerCase())).findFirst();
 
             if (!type.isEmpty()) {
@@ -647,9 +646,12 @@ public class Processor extends Operation {
         throw new NotImplementedException();
     }
 
-
     @NotNull
-    private StructureDefinition createProfileStructureDefinition(DictionaryElement element, DictionaryFhirElementPath elementPath, String resourceType, String customProfileId) {
+    private StructureDefinition createProfileStructureDefinition(DictionaryElement element, String customProfileId) {
+
+        DictionaryFhirElementPath elementPath = element.getFhirElementPath();
+        String resourceType = elementPath.getResourceType();
+
         StructureDefinition sd;
         sd = new StructureDefinition();
         sd.setId(toId((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getName()));
@@ -673,14 +675,61 @@ public class Processor extends Operation {
         sd.setBaseDefinition(elementPath.getBaseProfile());
         sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
         sd.setDifferential(new StructureDefinition.StructureDefinitionDifferentialComponent());
+
+        // Add root element
+        ElementDefinition ed = new ElementDefinition();
+        ed.setId(resourceType);
+        ed.setPath(resourceType);
+        ed.setMustSupport(false);
+        sd.getDifferential().addElement(ed);
+//        elementDefinitions.add(ed);
+        // TODO: status
+        // TODO: category
+        // TODO: subject
+        // TODO: effective[x]
+
         return sd;
     }
     
     private StructureDefinition ensureProfile(DictionaryElement element) {
-        DictionaryFhirElementPath elementPath = element.getFhirElementPath();
-        String resourceType = elementPath.getResourceType();
+        StructureDefinition sd = null;
+        List<ElementDefinition> elementDefinitions = new ArrayList<>();
+
+        // If custom profile is specified, search for if it exists already.
+        String customProfileId = element.getFhirElementPath().getCustomProfileId();
+        if (customProfileId != null && customProfileId.length() > 0) {
+            customProfileId = toId(customProfileId);
+
+            for (StructureDefinition existingSD : profiles) {
+                if (existingSD.getId().equals(customProfileId)) {
+                    sd = existingSD;
+                }
+            }
+        }
+
+        // If the profile doesn't exist, create it with the root element.
+        if (sd == null) {
+            sd = createProfileStructureDefinition(element, customProfileId);
+        }
+
+//        if (element.getMasterDataType().toLowerCase().equals("slice")) {
+//            DictionaryElement sliceBaseElement = element
+//        }
+
+        // Ensure that the element is added to the StructureDefinition
+        ensureElement(element, sd);
+
+        return sd;
+    }
+
+    private void ensureElement(DictionaryElement element, StructureDefinition sd) {
+        //List<ElementDefinition> elementDefinitions = new ArrayList<>();
+        //List<ElementDefinition> elementDefinitions = sd.getDifferential().getElement();
         String codePath = null;
         String choicesPath;
+
+        DictionaryFhirElementPath elementPath = element.getFhirElementPath();
+        String resourceType = elementPath.getResourceType();
 
         switch (resourceType) {
             case "Observation":
@@ -717,38 +766,6 @@ public class Processor extends Operation {
                 throw new IllegalArgumentException("Unrecognized baseType: " + resourceType.toString());
         }
 
-        StructureDefinition sd;
-        List<ElementDefinition> elementDefinitions = new ArrayList<>();
-
-        String customProfileId = element.getFhirElementPath().getCustomProfileId() != null && element.getFhirElementPath().getCustomProfileId().length() > 0
-            ? toId(element.getFhirElementPath().getCustomProfileId())
-            : null;
-
-        Optional<StructureDefinition> existingProfile = null;
-        if (customProfileId != null && customProfileId.length() > 0) {
-            existingProfile = profiles.stream().filter(p -> p.getId().equals(customProfileId)).findFirst();
-        }
-
-        if (existingProfile != null && !existingProfile.isEmpty()) {
-            sd = existingProfile.get();
-        } else {
-            sd = createProfileStructureDefinition(element, elementPath, resourceType, customProfileId);
-
-            // Add root element
-            ElementDefinition ed = new ElementDefinition();
-            ed.setId(resourceType);
-            ed.setPath(resourceType);
-            ed.setMustSupport(false);
-            elementDefinitions.add(ed);
-
-            // TODO: status
-
-            // TODO: category
-        }
-
-        // TODO: subject
-        // TODO: effective[x]
-
         if (codePath != null && !codePath.isEmpty() && element.getCode() != null) {
             // code - Fixed to the value of the OpenMRS code for this DictionaryElement
             ElementDefinition ed = new ElementDefinition();
@@ -758,124 +775,266 @@ public class Processor extends Operation {
             ed.setMax("1");
             ed.setMustSupport(true);
             ed.setFixed(element.getCode().toCodeableConcept());
-            elementDefinitions.add(ed);
-        } else {
-            String elementId = String.format("%s.%s", resourceType, choicesPath);
-//            if (!elementExists(sd, elementId)) {
-                // value
-                ElementDefinition ed = new ElementDefinition();
-                ed.setId(elementId);
-                ed.setPath(elementId);
-                ed.setMin(toBoolean(element.getRequired()) ? 1 : 0);
-                ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
+            //elementDefinitions.add(ed);
+            sd.getDifferential().addElement(ed);
+        }
+        else {
+            Boolean isSlice = element.getMasterDataType().toLowerCase().equals("slice");
+            String masterDataElementPath = elementPath.getMasterDataElementPath();
+            Boolean isElementOfSlice = !isSlice &&  masterDataElementPath!= null && !masterDataElementPath.isEmpty() && masterDataElementPath.indexOf(".") > 0;
 
-                ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
-                String elementFhirType = getFhirTypeOfTargetElement(elementPath);
-                if (elementFhirType != null && elementFhirType.length() > 0) {
-                    tr.setCode(elementFhirType);
-                    ed.addType(tr);
+            String elementId;
+            String sliceName = null;
+            String slicePath = null;
+            if (isSlice || isElementOfSlice) {
+                int periodIndex = masterDataElementPath.indexOf(".");
+                sliceName = periodIndex > 0 ? masterDataElementPath.substring(0, periodIndex) : masterDataElementPath;
+                slicePath = periodIndex > 0 ? masterDataElementPath.substring(periodIndex + 1) : masterDataElementPath;
+
+                String resource = elementPath.getResourceTypeAndPath();
+                int elementPathStartIndex = resource.indexOf(slicePath);
+                if (isSlice) {
+                    elementId = String.format("%s:%s", resource, sliceName);
+                } else {
+                    elementId = String.format("%s:%s.%s", resource.substring(0, elementPathStartIndex - 1), sliceName, resource.substring(elementPathStartIndex));
                 }
+            } else {
+                elementId = String.format("%s.%s", resourceType, choicesPath);
+            }
 
-                ed.setMustSupport(true);
-
-                // binding and CodeSystem/ValueSet for MultipleChoice elements
-                if (element.getChoices().size() > 0) {
-                    CodeSystem codeSystem = new CodeSystem();
-                    if (enableOpenMRS && element.getChoicesForSystem(openMRSSystem).size() > 0) {
-                        codeSystem.setId(sd.getId() + "-codes");
-                        codeSystem.setUrl(String.format("%s/CodeSystem/%s", canonicalBase, codeSystem.getId()));
-                        // TODO: version
-                        codeSystem.setName(element.getName() + "_codes");
-                        codeSystem.setTitle(String.format("%s codes", element.getLabel()));
-                        codeSystem.setStatus(Enumerations.PublicationStatus.DRAFT);
-                        codeSystem.setExperimental(false);
-                        // TODO: date
-                        // TODO: publisher
-                        // TODO: contact
-                        codeSystem.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
-                        codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-                        codeSystem.setCaseSensitive(true);
-
-                        // collect all the OpenMRS choices to add to the codeSystem
-                        for (DictionaryCode code : element.getChoicesForSystem(openMRSSystem)) {
-                            CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent();
-                            concept.setCode(code.getCode());
-                            concept.setDisplay(code.getLabel());
-                            codeSystem.addConcept(concept);
-                        }
-
-                        codeSystems.add(codeSystem);
-                    }
-
-                    ValueSet valueSet = new ValueSet();
-                    valueSet.setId(toId(element.getName()) + "-values");//sd.getId() + "-values");
-                    valueSet.setUrl(String.format("%s/ValueSet/%s", canonicalBase, valueSet.getId()));
-                    // TODO: version
-                    valueSet.setName(toId(element.getName()) + "-values");
-                    valueSet.setTitle(String.format("%s values", element.getLabel()));
-                    valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
-                    valueSet.setExperimental(false);
-                    // TODO: date
-                    // TODO: publisher
-                    // TODO: contact
-                    valueSet.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
-                    valueSet.setImmutable(true);
-                    ValueSet.ValueSetComposeComponent compose = new ValueSet.ValueSetComposeComponent();
-                    valueSet.setCompose(compose);
-
-                    // Group by Supported Terminology System
-                    for (String codeSystemUrl : element.getCodeSystemUrls()) {
-                        List<DictionaryCode> systemCodes = element.getChoicesForSystem(codeSystemUrl);
-
-                        if (systemCodes.size() > 0) {
-                            ValueSet.ConceptSetComponent conceptSet = new ValueSet.ConceptSetComponent();
-                            compose.addInclude(conceptSet);
-                            conceptSet.setSystem(codeSystemUrl);
-
-                            for (DictionaryCode code : systemCodes) {
-                                ValueSet.ConceptReferenceComponent conceptReference = new ValueSet.ConceptReferenceComponent();
-                                conceptReference.setCode(code.getCode());
-                                conceptReference.setDisplay(code.getLabel());
-                                conceptSet.addConcept(conceptReference);
-                            }
-                        }
-                    }
-
-                    if (element.getChoicesForSystem(openMRSSystem).size() == element.getChoices().size()) {
-                        codeSystem.setValueSet(valueSet.getUrl());
-                    }
-
-                    valueSets.add(valueSet);
-
-                    ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
-                    binding.setStrength(Enumerations.BindingStrength.REQUIRED);
-                    binding.setValueSet(valueSet.getUrl());
-                    ed.setBinding(binding);
+            ElementDefinition existingElement = null;
+            for (ElementDefinition elementDef : sd.getDifferential().getElement()) {
+                if (elementDef.getId().equals(elementId)) {
+                    existingElement = elementDef;
+                    break;
                 }
+            }
 
-                elementDefinitions.add(ed);
+            // if the element doesn't exist, create it
+            if (existingElement == null) {
+                if (isSlice) {
+                    ensureSliceAndBaseElementWithSlicing(element, elementPath, sd, elementId, sliceName, null);
+                } else {
+                    ElementDefinition ed = new ElementDefinition();
+                    ed.setId(elementId);
+                    ed.setPath(elementPath.getResourceTypeAndPath());
+                    ed.setMin(toBoolean(element.getRequired()) ? 1 : 0);
+                    ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
+                    ed.setMustSupport(true);
+
+                    ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
+                    String elementFhirType = getFhirTypeOfTargetElement(elementPath);
+                    if (elementFhirType != null && elementFhirType.length() > 0) {
+                        tr.setCode(elementFhirType);
+                        ed.addType(tr);
+                    }
+
+                    ensureAndBindElementTerminology(element, sd, ed);
+                    sd.getDifferential().addElement(ed);
+                }
+            }
+//            else { // If the element exists, ensure slicing
+//                if (isSlice) {
+//                    ensureSliceAndBaseElementWithSlicing(element, elementPath, elementDefinitions, elementId, sliceName, existingElement);
+//                }
 //            }
         }
 
-        for (ElementDefinition elementDef : elementDefinitions) {
-            sd.getDifferential().addElement(elementDef);
+//        for (ElementDefinition elementDef : elementDefinitions) {
+//            sd.getDifferential().addElement(elementDef);
+//        }
+    }
+
+    private void ensureSliceAndBaseElementWithSlicing(DictionaryElement dictionaryElement, DictionaryFhirElementPath elementPath,
+        StructureDefinition sd, String elementId, String sliceName, ElementDefinition elementDefinition) {
+
+        // Ensure the base definition exists
+        String baseElementId = elementId.replace(":" + sliceName, "");
+        ElementDefinition existingBaseDefinition = null;
+        for (ElementDefinition ed : sd.getDifferential().getElement()) {
+            if (ed.getId().equals(baseElementId)) {
+                existingBaseDefinition = ed;
+            }
         }
 
-        return sd;
+        if (existingBaseDefinition != null) {
+            ElementDefinition.DiscriminatorType discriminatorType = ElementDefinition.DiscriminatorType.VALUE;
+            String discriminatorPath = elementPath.getAdditionalFHIRMappingDetails().split("=")[0].trim();
+            String resourceTypePath = elementPath.getResourceTypeAndPath();
+            discriminatorPath = discriminatorPath.replaceAll(resourceTypePath + ".", "");
+
+            ensureElementHasSlicingWithDiscriminator(existingBaseDefinition, discriminatorType, discriminatorPath);
+        }
+        else {
+            ElementDefinition ed = new ElementDefinition();
+            ed.setId(baseElementId);
+            ed.setPath(elementPath.getResourceTypeAndPath());
+            ed.setMin(toBoolean(dictionaryElement.getRequired()) ? 1 : 0);
+            //ed.setMax(isMultipleChoiceElement(dictionaryElement) ? "*" : "1");
+            ed.setMax("*");
+            ed.setMustSupport(true);
+
+            ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
+            String elementFhirType = getFhirTypeOfTargetElement(elementPath);
+            if (elementFhirType != null && elementFhirType.length() > 0) {
+                tr.setCode(elementFhirType);
+                ed.addType(tr);
+            }
+
+            ElementDefinition.DiscriminatorType discriminatorType = ElementDefinition.DiscriminatorType.VALUE;
+            String discriminatorPath = elementPath.getAdditionalFHIRMappingDetails().split("=")[0].trim();
+            String resourceTypePath = elementPath.getResourceTypeAndPath();
+            discriminatorPath = discriminatorPath.replaceAll(resourceTypePath + ".", "");
+
+            ensureElementHasSlicingWithDiscriminator(ed, discriminatorType, discriminatorPath);
+
+            sd.getDifferential().addElement(ed);
+        }
+
+        // Add the actual slice
+
+        /* Add the actual Slice (e.g., telecom:Telephone1) */
+        String discriminatorValue = elementPath.getAdditionalFHIRMappingDetails().split("=")[1].trim();
+        ElementDefinition sliceElement = new ElementDefinition();
+        sliceElement.setId(elementId);
+        sliceElement.setSliceName(sliceName);
+//        sliceElement.setBase()
+        sliceElement.setPath(elementPath.getResourceTypeAndPath());
+        // NOTE: Passing everything through as a string for now.
+        sliceElement.setFixed(new StringType(discriminatorValue));
+        sliceElement.setMin(toBoolean(dictionaryElement.getRequired()) ? 1 : 0);
+        sliceElement.setMax(isMultipleChoiceElement(dictionaryElement) ? "*" : "1");
+
+        sd.getDifferential().addElement(sliceElement);
+    }
+
+    private void ensureElementHasSlicingWithDiscriminator(ElementDefinition element, ElementDefinition.DiscriminatorType discriminatorType, String discriminatorPath) {
+        // If the element has a slicing component, ensure the discriminator exists on it.
+        if (element.hasSlicing()) {
+            // If discriminator does not exist on the slicing component add it else do nothing
+            ElementDefinition.ElementDefinitionSlicingComponent existingSlicingComponent = element.getSlicing();
+            ensureSlicingHasDiscriminator(existingSlicingComponent, discriminatorType, discriminatorPath);
+        } else {
+            /* Add Slicing to base element if it's not already there */
+            ElementDefinition.ElementDefinitionSlicingComponent slicingComponent = new ElementDefinition.ElementDefinitionSlicingComponent();
+            ensureSlicingHasDiscriminator(slicingComponent, discriminatorType, discriminatorPath);
+            element.setSlicing(slicingComponent);
+        }
+    }
+
+    private void ensureSlicingHasDiscriminator(ElementDefinition.ElementDefinitionSlicingComponent slicingComponent,
+        ElementDefinition.DiscriminatorType discriminatorType, String discriminatorPath) {
+
+        ElementDefinition.ElementDefinitionSlicingDiscriminatorComponent discriminator = null;
+        if (slicingComponent.getDiscriminator().stream().noneMatch(d -> d.getType() == discriminatorType && d.getPath().toLowerCase().equals(discriminatorPath.toLowerCase()))) {
+            discriminator = new ElementDefinition.ElementDefinitionSlicingDiscriminatorComponent();
+            discriminator.setType(discriminatorType);
+            discriminator.setPath(discriminatorPath);
+
+            slicingComponent.addDiscriminator(discriminator);
+        }
+    }
+
+    private void ensureAndBindElementTerminology(DictionaryElement element, StructureDefinition sd, ElementDefinition ed) {
+        // binding and CodeSystem/ValueSet for MultipleChoice elements
+        if (element.getChoices().size() > 0) {
+            CodeSystem codeSystem = new CodeSystem();
+            if (enableOpenMRS && element.getChoicesForSystem(openMRSSystem).size() > 0) {
+                codeSystem.setId(sd.getId() + "-codes");
+                codeSystem.setUrl(String.format("%s/CodeSystem/%s", canonicalBase, codeSystem.getId()));
+                // TODO: version
+                codeSystem.setName(element.getName() + "_codes");
+                codeSystem.setTitle(String.format("%s codes", element.getLabel()));
+                codeSystem.setStatus(Enumerations.PublicationStatus.DRAFT);
+                codeSystem.setExperimental(false);
+                // TODO: date
+                // TODO: publisher
+                // TODO: contact
+                codeSystem.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
+                codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+                codeSystem.setCaseSensitive(true);
+
+                // collect all the OpenMRS choices to add to the codeSystem
+                for (DictionaryCode code : element.getChoicesForSystem(openMRSSystem)) {
+                    CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent();
+                    concept.setCode(code.getCode());
+                    concept.setDisplay(code.getLabel());
+                    codeSystem.addConcept(concept);
+                }
+
+                codeSystems.add(codeSystem);
+            }
+
+            ValueSet valueSet = new ValueSet();
+            valueSet.setId(toId(element.getName()) + "-values");//sd.getId() + "-values");
+            valueSet.setUrl(String.format("%s/ValueSet/%s", canonicalBase, valueSet.getId()));
+            // TODO: version
+            valueSet.setName(toId(element.getName()) + "-values");
+            valueSet.setTitle(String.format("%s values", element.getLabel()));
+            valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
+            valueSet.setExperimental(false);
+            // TODO: date
+            // TODO: publisher
+            // TODO: contact
+            valueSet.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
+            valueSet.setImmutable(true);
+            ValueSet.ValueSetComposeComponent compose = new ValueSet.ValueSetComposeComponent();
+            valueSet.setCompose(compose);
+
+            // Group by Supported Terminology System
+            for (String codeSystemUrl : element.getCodeSystemUrls()) {
+                List<DictionaryCode> systemCodes = element.getChoicesForSystem(codeSystemUrl);
+
+                if (systemCodes.size() > 0) {
+                    ValueSet.ConceptSetComponent conceptSet = new ValueSet.ConceptSetComponent();
+                    compose.addInclude(conceptSet);
+                    conceptSet.setSystem(codeSystemUrl);
+
+                    for (DictionaryCode code : systemCodes) {
+                        ValueSet.ConceptReferenceComponent conceptReference = new ValueSet.ConceptReferenceComponent();
+                        conceptReference.setCode(code.getCode());
+                        conceptReference.setDisplay(code.getLabel());
+                        conceptSet.addConcept(conceptReference);
+                    }
+                }
+            }
+
+            if (element.getChoicesForSystem(openMRSSystem).size() == element.getChoices().size()) {
+                codeSystem.setValueSet(valueSet.getUrl());
+            }
+
+            valueSets.add(valueSet);
+
+            ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
+            binding.setStrength(Enumerations.BindingStrength.REQUIRED);
+            binding.setValueSet(valueSet.getUrl());
+            ed.setBinding(binding);
+        }
     }
 
 //    private boolean elementExists(StructureDefinition sd, String elementId) {
 //        boolean sdContainsElement = sd.getDifferential().getElement().stream().anyMatch(element -> element.getId().equals(elementId));
-//        return  sdContainsElement;
+//        return sdContainsElement;
 //    }
 
+//    private boolean sliceDiscriminatorExistsOnElement(ElementDefinition element, ElementDefinition.DiscriminatorType sliceType, String slicePath) {
+//        ElementDefinition.ElementDefinitionSlicingComponent slicingcomponent = element.get().getSlicing();
+//        if (slicingcomponent != null) {
+//            Boolean hasSlice = slicingcomponent.getDiscriminator().stream().anyMatch(d -> d.getType().equals(sliceType) && d.getPath().equals(slicePath));
+//            return hasSlice;
+//        } else {
+//            return false;
+//        }
+//    }
+
+    /* Write Methods */
     public void writeResource(String path, Resource resource) {
         String outputFilePath = path + "/" + resource.getResourceType().toString().toLowerCase() + "-" + resource.getId() + "." + encoding;
         try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
             writer.write(
-                    encoding.equals("json")
-                            ? FhirContext.forR4().newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-                            : FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                encoding.equals("json")
+                    ? FhirContext.forR4().newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                    : FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
             );
             writer.flush();
         } catch (IOException e) {
