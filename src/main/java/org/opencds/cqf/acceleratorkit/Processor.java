@@ -683,7 +683,7 @@ public class Processor extends Operation {
         ed.setPath(resourceType);
         ed.setMustSupport(false);
         sd.getDifferential().addElement(ed);
-//        elementDefinitions.add(ed);
+
         // TODO: status
         // TODO: category
         // TODO: subject
@@ -713,10 +713,6 @@ public class Processor extends Operation {
             sd = createProfileStructureDefinition(element, customProfileId);
         }
 
-//        if (element.getMasterDataType().toLowerCase().equals("slice")) {
-//            DictionaryElement sliceBaseElement = element
-//        }
-
         // Ensure that the element is added to the StructureDefinition
         ensureElement(element, sd);
 
@@ -724,8 +720,6 @@ public class Processor extends Operation {
     }
 
     private void ensureElement(DictionaryElement element, StructureDefinition sd) {
-        //List<ElementDefinition> elementDefinitions = new ArrayList<>();
-        //List<ElementDefinition> elementDefinitions = sd.getDifferential().getElement();
         String codePath = null;
         String choicesPath;
 
@@ -776,7 +770,6 @@ public class Processor extends Operation {
             ed.setMax("1");
             ed.setMustSupport(true);
             ed.setFixed(element.getCode().toCodeableConcept());
-            //elementDefinitions.add(ed);
             sd.getDifferential().addElement(ed);
         }
         else {
@@ -834,16 +827,7 @@ public class Processor extends Operation {
                     sd.getDifferential().addElement(ed);
                 }
             }
-//            else { // If the element exists, ensure slicing
-//                if (isSlice) {
-//                    ensureSliceAndBaseElementWithSlicing(element, elementPath, elementDefinitions, elementId, sliceName, existingElement);
-//                }
-//            }
         }
-
-//        for (ElementDefinition elementDef : elementDefinitions) {
-//            sd.getDifferential().addElement(elementDef);
-//        }
     }
 
     private void ensureSliceAndBaseElementWithSlicing(DictionaryElement dictionaryElement, DictionaryFhirElementPath elementPath,
@@ -1012,21 +996,6 @@ public class Processor extends Operation {
             ed.setBinding(binding);
         }
     }
-
-//    private boolean elementExists(StructureDefinition sd, String elementId) {
-//        boolean sdContainsElement = sd.getDifferential().getElement().stream().anyMatch(element -> element.getId().equals(elementId));
-//        return sdContainsElement;
-//    }
-
-//    private boolean sliceDiscriminatorExistsOnElement(ElementDefinition element, ElementDefinition.DiscriminatorType sliceType, String slicePath) {
-//        ElementDefinition.ElementDefinitionSlicingComponent slicingcomponent = element.get().getSlicing();
-//        if (slicingcomponent != null) {
-//            Boolean hasSlice = slicingcomponent.getDiscriminator().stream().anyMatch(d -> d.getType().equals(sliceType) && d.getPath().equals(slicePath));
-//            return hasSlice;
-//        } else {
-//            return false;
-//        }
-//    }
 
     /* Write Methods */
     public void writeResource(String path, Resource resource) {
