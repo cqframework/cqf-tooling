@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import ca.uhn.fhir.context.*;
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -19,6 +20,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseElement;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.opencds.cqf.library.GenericLibrarySourceProvider;
 import org.opencds.cqf.terminology.ValueSetsProcessor;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
@@ -188,15 +190,15 @@ public class ResourceUtils
     
     public static Map<String, IAnyResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext, boolean includeDependencies, Boolean includeVersion) throws Exception {
       Map<String, IAnyResource> valueSetResources = new HashMap<String, IAnyResource>();
-      List<String> valueSetIDs = getDepValueSetIDs(cqlContentPath);
+      List<String> valueSetDefIDs = getDepELMValueSetDefIDs(cqlContentPath);
       HashSet<String> dependencies = new HashSet<>();
         
-      for (String valueSetId : valueSetIDs) {
+      for (String valueSetUrl : valueSetDefIDs) {
           ValueSetsProcessor.getCachedValueSets(fhirContext).entrySet().stream()
-          .filter(entry -> entry.getKey().equals(valueSetId))
+          .filter(entry -> entry.getKey().equals(valueSetUrl))
           .forEach(entry -> valueSetResources.putIfAbsent(entry.getKey(), entry.getValue()));
       }
-      dependencies.addAll(valueSetIDs);
+      dependencies.addAll(valueSetDefIDs);
 
       if(includeDependencies) {
         List<String> dependencyCqlPaths = IOUtils.getDependencyCqlPaths(cqlContentPath, includeVersion);
@@ -212,8 +214,8 @@ public class ResourceUtils
       if (dependencies.size() != valueSetResources.size()) {
         String message = (dependencies.size() - valueSetResources.size()) + " missing ValueSets: \r\n";
         dependencies.removeAll(valueSetResources.keySet());
-        for (String valueSetId : dependencies) {
-          message += valueSetId + " MISSING \r\n";
+        for (String valueSetUrl : dependencies) {
+          message += valueSetUrl + " MISSING \r\n";
         }   
         //System.out.println(message);
         throw new Exception(message);
@@ -231,13 +233,13 @@ public class ResourceUtils
       return includedLibraryNames;
     }
 
-    public static ArrayList<String> getDepValueSetIDs(String cqlContentPath) {
-      ArrayList<String> includedValueSetIDs = new ArrayList<String>();
+    public static ArrayList<String> getDepELMValueSetDefIDs(String cqlContentPath) {
+      ArrayList<String> includedValueSetDefIDs = new ArrayList<String>();
       ArrayList<ValueSetDef> valueSetDefs = getValueSetDefs(cqlContentPath);
       for (ValueSetDef def : valueSetDefs) {
-        IOUtils.putInListIfAbsent(def.getId(), includedValueSetIDs);
+        IOUtils.putInListIfAbsent(def.getId(), includedValueSetDefIDs);
       }
-      return includedValueSetIDs;
+      return includedValueSetDefIDs;
     }
 
     public static ArrayList<IncludeDef> getIncludedDefs(String cqlContentPath) {
@@ -312,11 +314,11 @@ public class ResourceUtils
       return added;
   }
 
-	public static Map<String, IAnyResource> getActivityDefinitionResources(String planDefinitionPath,
-			FhirContext fhirContext, Boolean includeVersion) {
+	public static Map<String, IAnyResource> getActivityDefinitionResources(String planDefinitionPath, FhirContext fhirContext, Boolean includeVersion) {
         Map<String, IAnyResource> activityDefinitions = new HashMap<String, IAnyResource>();
         IAnyResource planDefinition = IOUtils.readResource(planDefinitionPath, fhirContext, true);
         Object actionChild = resolveProperty(planDefinition, "action", fhirContext);
+
         if (actionChild != null) {
           if (actionChild instanceof Iterable)
           {
@@ -324,11 +326,21 @@ public class ResourceUtils
               Object definitionChild = resolveProperty(action, "definition", fhirContext);
               if (definitionChild != null) {
                 Object referenceChild = resolveProperty(definitionChild, "reference", fhirContext);
-                String activityDefinitionReference = referenceChild.toString();
-                String activityDefinitionId = activityDefinitionReference.replaceAll("ActivityDefinition/", "activitydefinition-").replaceAll("_", "-");
+
+                String activityDefinitionId = null;
+                // NOTE: A bit of a hack. This whole method probably needs to be refactored to consider different FHIR
+                // versions and the respective ActivityDefinition differences between them.
+                if (fhirContext.getVersion().getVersion().isEquivalentTo(FhirVersionEnum.R4)) {
+                    activityDefinitionId = CanonicalUtils.getId((CanonicalType)referenceChild);
+                } else {
+                  String activityDefinitionReference = referenceChild.toString();
+                  activityDefinitionId = activityDefinitionReference.replaceAll("ActivityDefinition/", "activitydefinition-").replaceAll("_", "-");
+                }
+
                 for (String path : IOUtils.getActivityDefinitionPaths(fhirContext)) {
                   if (path.contains(activityDefinitionId)) {
                     activityDefinitions.put(path, IOUtils.readResource(path, fhirContext));
+                    break;
                   }
                 }
               }
@@ -338,7 +350,9 @@ public class ResourceUtils
             Object definitionChild = resolveProperty(actionChild, "definition", fhirContext);
             if (definitionChild != null) {
               Object referenceChild = resolveProperty(definitionChild, "reference", fhirContext);
+
               String activityDefinitionReference = (String)referenceChild;
+
               for (String path : IOUtils.getActivityDefinitionPaths(fhirContext)) {
                 if (path.contains(activityDefinitionReference)) {
                   activityDefinitions.put(path, IOUtils.readResource(path, fhirContext));
@@ -348,7 +362,7 @@ public class ResourceUtils
           }
         }
         return activityDefinitions;
-  }
+    }
 
     public static Object resolveProperty(Object target, String path, FhirContext fhirContext) {
       if (target == null) {
