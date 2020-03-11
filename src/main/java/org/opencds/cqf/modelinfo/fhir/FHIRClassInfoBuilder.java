@@ -35,15 +35,4 @@ public class FHIRClassInfoBuilder extends ClassInfoBuilder {
         this.buildFor("FHIR", (x -> x.getKind() == StructureDefinitionKind.RESOURCE
                 && (!x.hasDerivation() || x.getDerivation() == TypeDerivationRule.SPECIALIZATION)));
     }
-
-    @Override
-    protected void afterBuild() {
-        //Clean up Content Reference Specifiers
-        Collection<TypeInfo> typeInfoValues = this.getTypeInfos().values();
-        typeInfoValues.stream().map(x -> (ClassInfo)x).forEach(
-                x -> x.getElement().stream()
-                        .filter(y -> this.hasContentReferenceTypeSpecifier(y))
-                        .forEach(y -> this.fixupContentReferenceSpecifier("FHIR", y))
-        );
-    }
 }

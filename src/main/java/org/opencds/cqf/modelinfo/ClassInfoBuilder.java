@@ -22,7 +22,6 @@ public abstract class ClassInfoBuilder {
     protected Map<String, StructureDefinition> structureDefinitions;
     protected Map<String, TypeInfo> typeInfos = new HashMap<String, TypeInfo>();
     protected ClassInfoSettings settings;
-    //private boolean needsTopLevelSD = false;
 
     public ClassInfoBuilder(ClassInfoSettings settings, Map<String, StructureDefinition> structureDefinitions) {
         this.structureDefinitions = structureDefinitions;
@@ -30,7 +29,20 @@ public abstract class ClassInfoBuilder {
     }
 
     protected abstract void innerBuild();
-    protected abstract void afterBuild();
+    protected void afterBuild() {
+        //Clean up Content Reference Specifiers
+        Collection<TypeInfo> typeInfoValues = this.getTypeInfos().values();
+        for (TypeInfo ti : this.getTypeInfos().values()) {
+            if (ti instanceof ClassInfo) {
+                ClassInfo ci = (ClassInfo)ti;
+                for (ClassInfoElement cie : ci.getElement()) {
+                    if (hasContentReferenceTypeSpecifier(cie)) {
+                        fixupContentReferenceSpecifier(this.settings.modelName, cie);
+                    }
+                }
+            }
+        }
+    }
 
     public Map<String, TypeInfo> build() {
         this.innerBuild();
@@ -112,12 +124,21 @@ public abstract class ClassInfoBuilder {
         return this.getTypeName(typeSpecifier.getModelName(), typeSpecifier.getName());
     }
 
+    protected String mapTypeName(String typeName) {
+        if (this.settings.typeNameMappings != null && this.settings.typeNameMappings.containsKey(typeName)) {
+            return this.settings.typeNameMappings.get(typeName);
+        }
+
+        return typeName;
+    }
+
     protected String getTypeName(StructureDefinition sd) {
         String typeId = getTail(sd.getId());
         String typeName = sd.getName() == null ? capitalizePath(typeId) : sd.getName();
         if (typeName.startsWith(this.settings.modelPrefix)) {
             typeName = typeName.substring(this.settings.modelPrefix.length());
         }
+        typeName = mapTypeName(typeName);
         return typeName;
     }
 
@@ -168,15 +189,6 @@ public abstract class ClassInfoBuilder {
         }
         if (name.contains(".")) {
             int index = name.indexOf(".");
-            if (index > 0) {
-                return name.substring(index + 1);
-            }
-
-            return null;
-        }
-        // BTR -> Need to understand why this is here. If this is required at all, it should be a separate function, unHyphenate or something like that.
-        else if (name.contains("-")) {
-            int index = name.lastIndexOf("-");
             if (index > 0) {
                 return name.substring(index + 1);
             }
@@ -507,7 +519,7 @@ public abstract class ClassInfoBuilder {
         String qualifiedTypeName = getTypeName(modelName, typeName);
         try {
             if (!this.typeInfos.containsKey(qualifiedTypeName) && !this.settings.primitiveTypeMappings.containsKey(qualifiedTypeName) && !modelName.equals("System")) {
-                buildClassInfo(modelName, structureDefinitions.get(typeName), null);
+                buildClassInfo(modelName, structureDefinitions.get(typeName));
             }
         }
         catch (Exception e) {
@@ -546,8 +558,18 @@ public abstract class ClassInfoBuilder {
         return null;
     }
 
+    private boolean isMappedTypeName(String modelName, String typeName) {
+        return this.settings.useCQLPrimitives && this.settings.cqlTypeMappings.values().contains(modelName + "." + typeName);
+    }
+
     private String resolveMappedTypeName(String modelName, String typeName) {
+        // In FHIR 4.0.1, System type names consistent with FHIRPath type names are used to specify actual primitive types in the FHIR structure definitions.
         String mappedTypeName = null;
+        if (typeName.startsWith("http://hl7.org/fhirpath/")) {
+            mappedTypeName = typeName.substring("http://hl7.org/fhirpath/".length());
+            return mappedTypeName;
+        }
+
         if (this.settings.useCQLPrimitives) {
             mappedTypeName = this.settings.cqlTypeMappings.get(modelName + "." + typeName);
             if (mappedTypeName != null) {
@@ -652,6 +674,17 @@ public abstract class ClassInfoBuilder {
             String typeCode = this.typeCode(ed);
             String typeName;
             String typeId;
+            if (ed.getId().equals("Extension.url")) {
+                // This is special-case code because many underlying class representations reuse the FHIR.uri type
+                // to represent url-valued attributes
+                typeName = getTypeName(modelName, "uri");
+                if (this.settings.useCQLPrimitives && this.settings.primitiveTypeMappings.containsKey(typeName)) {
+                    return this.buildTypeSpecifier(this.settings.primitiveTypeMappings.get(typeName));
+                }
+                else {
+                    return this.buildTypeSpecifier(typeName);
+                }
+            }
             if (typeCode != null && typeCode.equals("Extension") && ed.getId().contains(":")
                     && ed.getType().get(0).hasProfile()) {
                 List<CanonicalType> extensionProfile = ed.getType().get(0).getProfile();
@@ -662,7 +695,7 @@ public abstract class ClassInfoBuilder {
                     typeName = getTypeName(sd);
                     String qualifiedTypeName = this.getTypeName(modelName, typeName);
                     if (!this.typeInfos.containsKey(qualifiedTypeName)) {
-                        buildClassInfo(modelName, sd, null);
+                        buildClassInfo(modelName, sd);
                     }
 
                     NamedTypeSpecifier nts = new NamedTypeSpecifier();
@@ -686,6 +719,25 @@ public abstract class ClassInfoBuilder {
                     return null;
                 }
             }
+            else if (typeCode != null && typeCode.equals("BackboneElement") && ed.hasSliceName()) {
+                // This is a slice, create a derived type out of the slice name
+                // ed.getPath() - is the base type for the slice
+                // ed.sliceName() - is the name of the type
+                String baseTypeName = capitalizePath(ed.getPath());
+                String qualifiedBaseTypeName = getTypeName(modelName, baseTypeName);
+                typeName = capitalizePath(ed.getPath()) + "." + ed.getSliceName();
+                String qualifiedTypeName = getTypeName(modelName, typeName);
+                if (!this.typeInfos.containsKey(qualifiedTypeName)) {
+                    ClassInfo sliceType = new ClassInfo().withNamespace(modelName).withName(typeName).withBaseType(qualifiedBaseTypeName).withRetrievable(false);
+                    this.typeInfos.put(qualifiedTypeName, sliceType);
+                }
+
+                NamedTypeSpecifier nts = new NamedTypeSpecifier();
+                nts.setModelName(modelName);
+                nts.setName(typeName);
+
+                return nts;
+            }
             else if (typeCode != null && typeCode.equals("code") && ed.hasBinding()
                     && ed.getBinding().getStrength() == BindingStrength.REQUIRED) {
                 Extension bindingExtension = this.extension(ed.getBinding(), "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName");
@@ -694,33 +746,19 @@ public abstract class ClassInfoBuilder {
                 }
 
                 else {
-                    /* BTR -> This shouldn't be necessary. If it turns out to be, document the reason and clean up this code...
-                    if (needsTopLevelSD && topLevelEd != null) {
-                        Extension topLevelBindingExtension = this.extension(topLevelEd.getBinding(), "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName");
-                        if (topLevelBindingExtension != null) {
-                            typeName = capitalizePath((StringType) (topLevelBindingExtension.getValue())).getValue();
-                        }
-                        else {
-                            typeName = null;
+                    TypeSpecifier ts = this.buildTypeSpecifier(modelName, ed.hasType() ? ed.getType() : null);
+                    if (ts instanceof NamedTypeSpecifier && ((NamedTypeSpecifier) ts).getName() == null) {
+                        String tn = this.getTypeName(modelName, root);
+                        if (this.settings.primitiveTypeMappings.containsKey(tn)) {
+                            ts = this.buildTypeSpecifier(this.settings.primitiveTypeMappings.get(this.getTypeName(modelName, root)));
+                        } else {
+                            ts = null;
                         }
                     }
-                    else {
-                    */
-                        TypeSpecifier ts = this.buildTypeSpecifier(modelName, ed.hasType() ? ed.getType() : null);
-                        if (ts instanceof NamedTypeSpecifier && ((NamedTypeSpecifier) ts).getName() == null) {
-                            String tn = this.getTypeName(modelName, root);
-                            if (this.settings.primitiveTypeMappings.containsKey(tn)) {
-                                ts = this.buildTypeSpecifier(this.settings.primitiveTypeMappings.get(this.getTypeName(modelName, root)));
-                            } else {
-                                ts = null;
-                            }
-                        }
-                        return ts;
-                    //}
+                    return ts;
                 }
 
                 if (!this.typeInfos.containsKey(this.getTypeName(modelName, typeName))) {
-                    //set targetPath here
                     if (!this.settings.useCQLPrimitives) {
                         List<ClassInfoElement> elements = new ArrayList<>();
                         ClassInfoElement cie = new ClassInfoElement();
@@ -768,9 +806,22 @@ public abstract class ClassInfoBuilder {
         }
     }
 
+    protected String determineTarget(TypeSpecifier typeSpecifier) {
+        if (typeSpecifier instanceof NamedTypeSpecifier) {
+            NamedTypeSpecifier namedTypeSpecifier = (NamedTypeSpecifier)typeSpecifier;
+            if (isMappedTypeName(namedTypeSpecifier.getModelName(), namedTypeSpecifier.getName())) {
+                return "value";
+            }
+        }
+
+        return null;
+    }
+
     // Builds a ClassInfoElement for the given ElementDefinition
     // This method assumes the given element is not a structure
     private ClassInfoElement buildClassInfoElement(String root, ElementDefinition ed, TypeSpecifier typeSpecifier) throws Exception {
+        String target = determineTarget(typeSpecifier);
+
         if (ed.getContentReference() != null) {
             NamedTypeSpecifier nts = new NamedTypeSpecifier();
             nts.setName(ed.getContentReference());
@@ -848,6 +899,10 @@ public abstract class ClassInfoBuilder {
 
         ClassInfoElement cie = new ClassInfoElement();
         cie.setName(name);
+        if (target != null) {
+            cie.setTarget(target);
+        }
+
         if (typeSpecifier instanceof NamedTypeSpecifier) {
             cie.setElementType(this.getTypeName((NamedTypeSpecifier) typeSpecifier));
         }
@@ -915,13 +970,8 @@ public abstract class ClassInfoBuilder {
 
         String id;
         String path;
-        //if (isExtension(ed) || ed.getId().contains(":")) {
-        //    path = ed.getId();
-        //}
-        //else {
-            id = ed.getId();
-            path = ed.getPath();
-        //}
+        id = ed.getId();
+        path = ed.getPath();
 
         TypeSpecifier typeSpecifier = this.buildElementTypeSpecifier(modelName, pathRoot, ed);
 
@@ -937,24 +987,6 @@ public abstract class ClassInfoBuilder {
             typeDefinition = null;
         }
             
-        /*
-        List<ElementDefinition> typeEds;
-        if (typeCode != null && typeCode.equals("ComplexType") && !this.isBackboneElement(typeDefinition)) {
-            typeEds = typeDefinition.getSnapshot().getElement();
-        }
-        else {
-            typeEds = structureEds;
-        }
-
-        String typeRoot;
-        if (typeCode != null && typeCode.equals("ComplexType") && !this.isBackboneElement(typeDefinition)) {
-            typeRoot = getTail(typeDefinition.getId());
-        }
-        else {
-            typeRoot = structureRoot;
-        }
-        */
-
         index.set(index.get() + 1);
         List<ClassInfoElement> elements = new ArrayList<>();
         while (index.get() < eds.size()) {
@@ -965,7 +997,7 @@ public abstract class ClassInfoBuilder {
                 if (cie != null && !(cie.getElementType() == null && cie.getElementTypeSpecifier() == null)) {
                     elements.add(cie);
                 }
-                elements.addAll(slices);
+                slices.addAll(elementSlices);
             }
             else {
                 break;
@@ -973,13 +1005,12 @@ public abstract class ClassInfoBuilder {
         }
 
         if (elements.size() > 0) {
-            if (typeDefinition != null && isBackboneElement(typeDefinition)) {
-                //String typeName = this.getComponentTypeName(path);
+            if (typeDefinition != null && (isBackboneElement(typeDefinition) || isElement(typeDefinition))) {
                 String typeName = this.capitalizePath(path);
 
                 ClassInfo componentClassInfo = new ClassInfo().withNamespace(modelName).withName(typeName).withLabel(null)
-                        .withBaseType(modelName + ".BackboneElement").withRetrievable(false).withElement(elements)
-                        .withPrimaryCodePath(null);
+                        .withBaseType(modelName + (isBackboneElement(typeDefinition) ? ".BackboneElement" : ".Element"))
+                        .withRetrievable(false).withElement(elements).withPrimaryCodePath(null);
 
                 this.typeInfos.put(this.getTypeName(modelName, typeName), componentClassInfo);
 
@@ -989,51 +1020,51 @@ public abstract class ClassInfoBuilder {
                 // The child elements are slices
                 slices.addAll(elements);
             }
- /*
-            else if (typeDefinition != null && isExtension(typeDefinition)) {
-                // If the element is an extension, the
-                // If this is an extension, the elements will be constraints on the existing
-                // elements of an extension (i.e. url and value)
-                // Use the type of the value element
-                String extensionTypeName;
-                if (elements.size() == 1) {
-                    String primitiveTypeName = this.settings.modelName + "." + unQualify(elements.get(0).getElementType()).toLowerCase();
-                    if (this.settings.primitiveTypeMappings.containsKey(primitiveTypeName)) {
-                        //set targetPath here
-                    }
-                }
-                if ((ed.getType().size() == 1)) {
-                    List<CanonicalType> canonicalTypeRefs = ed.getType().get(0).getProfile();
-                    if (canonicalTypeRefs.size() == 1) {
-                        extensionTypeName = this.resolveTypeName(canonicalTypeRefs.get(0).asStringValue());
-                    }
-                    else {
-                        extensionTypeName = path;
-                    }
-                }
-                else {
-                    extensionTypeName = path;
-                }
-
-                ClassInfo extensionClassInfo = new ClassInfo().withNamespace(modelName).withName(unQualify(extensionTypeName)).withLabel(null)
-                    .withBaseType(modelName + ".Extension").withRetrievable(false).withElement(elements)
-                    .withPrimaryCodePath(null);
-
-                this.typeInfos.put(this.getTypeName(modelName, path), extensionClassInfo);
-            }
-            else {
-                // element has children that are being ignored.
-            }
-*/
         }
 
-        return this.buildClassInfoElement(pathRoot, ed, typeSpecifier);
+        ClassInfoElement cie = buildClassInfoElement(pathRoot, ed, typeSpecifier);
+        if (cie != null && ed.hasSliceName()) {
+            // If the element is an extension slice, and there is a single slice collected, collapse it into the extension slice
+            // This effectively sets the type of the slice to the type of the "value" slice of the extension
+            if (this.isExtension(ed) && slices.size() == 1) {
+                boolean isList = cie.getElementTypeSpecifier() instanceof ListTypeSpecifier;
+                ClassInfoElement slice = slices.remove(0);
+                cie.setElementType(null);
+                cie.setElementTypeSpecifier(null);
+                if (slice.getElementType() != null) {
+                    if (isList) {
+                        cie.setElementTypeSpecifier(new ListTypeSpecifier().withElementType(slice.getElementType()));
+                    }
+                    else {
+                        cie.setElementType(slice.getElementType());
+                    }
+                }
+                else if (slice.getElementTypeSpecifier() != null) {
+                    if (isList) {
+                        if (!(slice.getElementTypeSpecifier() instanceof ListTypeSpecifier)) {
+                            cie.setElementTypeSpecifier(new ListTypeSpecifier().withElementTypeSpecifier(slice.getElementTypeSpecifier()));
+                        }
+                        else {
+                            cie.setElementTypeSpecifier(slice.getElementTypeSpecifier());
+                        }
+                    }
+                    else {
+                        cie.setElementTypeSpecifier(slice.getElementTypeSpecifier());
+                    }
+                }
+            }
+            slices.add(cie);
+            return null;
+        }
+        else {
+            return cie;
+        }
     }
 
     // Given a StructureDefinition, creates a ClassInfo to represent it
     // This approach uses the base type to guide the walk, which requires navigating
     // the derived profiles
-    private ClassInfo buildClassInfo(String modelName, StructureDefinition sd, StructureDefinition topLevelSd) throws Exception {
+    private ClassInfo buildClassInfo(String modelName, StructureDefinition sd) throws Exception {
         if (modelName == null) {
             modelName = this.resolveModelName(sd.getUrl());
         }
@@ -1050,19 +1081,7 @@ public abstract class ClassInfoBuilder {
         List<ClassInfoElement> elements = new ArrayList<>();
         String path = sd.getType(); // Type is used to navigate the elements, regardless of the baseDefinition
         String id = path; // Id starts with the Type
-        //List<ElementDefinition> topLevelEds =
-        //    (topLevelSd == null)
-        //            ? null
-        //            :
-        //                (topLevelSd.getKind() == StructureDefinitionKind.RESOURCE && topLevelSd.getDerivation() == StructureDefinition.TypeDerivationRule.CONSTRAINT) || !typeName.equals(path)
-        //                    ? topLevelSd.getSnapshot().getElement()
-        //                    : topLevelSd.getSnapshot().getElement();
-
         List<ElementDefinition> eds = sd.getSnapshot().getElement();
-        //    (sd.getKind() == StructureDefinitionKind.RESOURCE && sd.getDerivation() == StructureDefinition.TypeDerivationRule.CONSTRAINT) || !typeName.equals(path)
-        //        ? sd.getSnapshot().getElement()
-        //        : sd.getSnapshot().getElement();
-        
         StructureDefinition structure = null;
         if (!typeName.equals(path)) {
             structure = structureDefinitions.get(path);
@@ -1089,13 +1108,13 @@ public abstract class ClassInfoBuilder {
             }
         }
 
-        String baseDefinition = (topLevelSd == null) ? sd.getBaseDefinition() : topLevelSd.getBaseDefinition();
+        String baseDefinition = sd.getBaseDefinition();
         String baseTypeName = sd.getKind() == StructureDefinitionKind.RESOURCE
                 ? resolveBaseTypeName(sd.getType()) : resolveTypeName(baseDefinition);
 
         if (baseTypeName != null && !this.typeInfos.containsKey(baseTypeName)) {
             StructureDefinition baseSd = this.structureDefinitions.get(unQualify(baseTypeName));
-            buildClassInfo(modelName, baseSd, null);
+            buildClassInfo(modelName, baseSd);
         }
 
         // If this is an Extension and only has URL and value elements, set the base type to the type of the value element
@@ -1132,7 +1151,7 @@ public abstract class ClassInfoBuilder {
 
     protected void buildFor(String model, String id) {
         try {
-            this.buildClassInfo(model, structureDefinitions.get(id), null);
+            this.buildClassInfo(model, structureDefinitions.get(id));
         }
         catch (Exception e) {
             System.out.println("Error building ClassInfo for: " + id + " - " + e.getMessage());
@@ -1144,16 +1163,7 @@ public abstract class ClassInfoBuilder {
         for (StructureDefinition sd : structureDefinitions.values()) {
             if (predicate.test(sd)) {
                 try {
-                    //if StructureDefinition type is constrained/specialized from something other than a baseResource or baseType
-                    //StructureDefinition topLevelSd = getBaseDefinitionStructureDef(model, sd);
-                    //if (topLevelSd.getId() != sd.getId()) {
-                        //needsTopLevelSD = true;
-                    //    this.buildClassInfo(model, sd, topLevelSd);
-                    //}
-                    //else {
-                        //needsTopLevelSD = false;
-                        this.buildClassInfo(model, sd, null);
-                    //}
+                    this.buildClassInfo(model, sd);
                 }
                 catch (Exception e) {
                     System.out.println("Error building ClassInfo for: " + sd.getId() + " - " + e.getMessage());
@@ -1167,17 +1177,20 @@ public abstract class ClassInfoBuilder {
         return this.typeInfos;
     }
 
-    private TypeSpecifier resolveContentReference(String modelName, String path) throws Exception {
-        String root = this.getQualifier(this.stripRoot(path, "#"));
-        String elementPath = this.unQualify(this.stripRoot(path, "#"));
+    protected TypeSpecifier resolveContentReference(String modelName, String path) throws Exception {
+        String strippedPath = this.stripRoot(path, "#");
+        if (strippedPath.contains(":")) {
+            String[] paths = strippedPath.split(":");
+            if (paths.length != 2) {
+                throw new IllegalArgumentException("Could not resolve content reference for " + path);
+            }
 
-        /*if (root.equals("Observation") && elementPath.equals("referenceRange")) {
-            // TODO: Fix this hack, it is necessary because the way that QUICK profiles are built, they use the
-            // name of the profile as the name of the type (flattening, rather than deriving from base resource types),
-            // so because the Observation.ReferenceRange content reference is pointing to the Observation resource,
-            // that resource doesn't exist and results in a null reference exception
-            return new NamedTypeSpecifier().withModelName(modelName).withName("Observation.ReferenceRange");
-        }*/
+            strippedPath = getQualifier(paths[0]) + "." + paths[1];
+        }
+
+        // TODO: This won't work for deep references....
+        String root = this.getQualifier(strippedPath);
+        String elementPath = this.unQualify(strippedPath);
 
         TypeInfo rootType = this.resolveType(modelName + "." + root);
         ClassInfoElement element = this.forPath(((ClassInfo) rootType).getElement(), elementPath);
@@ -1223,12 +1236,20 @@ public abstract class ClassInfoBuilder {
     }
 
     protected Boolean hasContentReferenceTypeSpecifier(ClassInfoElement element) {
-
-        return element.getElementType() != null && element.getElementType().startsWith("#")
-                || this.isContentReferenceTypeSpecifier(element.getElementTypeSpecifier());
+        try {
+            return element.getElementType() != null && element.getElementType().startsWith("#")
+                    || this.isContentReferenceTypeSpecifier(element.getElementTypeSpecifier());
+        }
+        catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            throw ex;
+        }
     }
 
     protected ClassInfoElement fixupContentReferenceSpecifier(String modelName, ClassInfoElement element) {
+        if (element == null) {
+            throw new IllegalArgumentException("element is null");
+        }
         ClassInfoElement result = null;
         try {
             if (this.hasContentReferenceTypeSpecifier(element)) {

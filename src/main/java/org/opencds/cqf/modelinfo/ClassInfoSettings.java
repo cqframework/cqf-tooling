@@ -17,6 +17,7 @@ public class ClassInfoSettings {
     public Map<String, String> primitiveTypeMappings = new HashMap<String, String>();
     public Map<String, String> cqlTypeMappings = new HashMap<String, String>();
     public Map<String, String> primaryCodePath = new HashMap<String, String>();
+    public Map<String, String> typeNameMappings;
 
     public Map<String, String> urlToModel =  new HashMap<String, String>() {
         { 

@@ -10,6 +10,7 @@ class FHIRClassInfoSettings extends ClassInfoSettings {
 
     public FHIRClassInfoSettings() {
         this.modelName = "FHIR";
+        this.modelPrefix = "";
         this.codeableTypes = new HashSet<String>() {
             {
                 add("System.String");
