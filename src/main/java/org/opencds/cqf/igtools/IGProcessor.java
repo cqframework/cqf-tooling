@@ -129,32 +129,34 @@ public class IGProcessor {
 
     public static ArrayList<String> refreshStu3IgLibraryContent(String igPath, Encoding outputEncoding, Boolean includeELM,
             Boolean versioned, FhirContext fhirContext) {
-                ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
-                HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
-        
-                for (String path : cqlContentPaths) {
-                    try {
-                        //ask about how to do this better
-                        String libraryPath;
-                        try {
-                            libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path, fhirContext);
-                        } catch (Exception e) {
-                            libraryPath = "";
-                        }
-                        
-                        STU3LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, outputEncoding, versioned);
-                        refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
-                    } catch (Exception e) {
-                        LogUtils.putWarning(path, e.getMessage());
-                    }
-                    LogUtils.warn(path);
+        System.out.println("Refreshing libraries");
+        ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
+        HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
+
+        for (String path : cqlContentPaths) {
+            try {
+                //ask about how to do this better
+                String libraryPath;
+                try {
+                    libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path, fhirContext);
+                } catch (Exception e) {
+                    libraryPath = "";
                 }
-        
-                return refreshedLibraryNames;
+                
+                STU3LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, outputEncoding, versioned);
+                refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
+            } catch (Exception e) {
+                LogUtils.putWarning(path, e.getMessage());
+            }
+            LogUtils.warn(path);
+        }
+
+        return refreshedLibraryNames;
     }
 
     public static ArrayList<String> refreshR4LibraryContent(String igPath, Encoding outputEncoding, Boolean includeELM,
             Boolean versioned, FhirContext fhirContext) {
+        System.out.println("Refreshing libraries");
         ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
         HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
 
@@ -201,6 +203,7 @@ public class IGProcessor {
         // and Libraries
         // Until we have the ability to refresh Measures, the set is the union of
         // existing Measures and successfully refreshed Libraries
+        System.out.println("Bundling measures");
         HashSet<String> measureSourcePaths = IOUtils.getMeasurePaths(fhirContext);
         List<String> measurePathLibraryNames = new ArrayList<String>();
         for (String measureSourcePath : measureSourcePaths) {
@@ -298,7 +301,7 @@ public class IGProcessor {
     private static void bundlePlanDefinitions(ArrayList<String> refreshedLibraryNames, String igPath, Boolean includeDependencies,
             Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, FhirContext fhirContext, String fhirUri,
             Encoding encoding) {
-        
+        System.out.println("Bundling plandefinitions");
         HashSet<String> planDefinitionSourcePaths = IOUtils.getPlanDefinitionPaths(fhirContext);
 
         List<String> planDefinitionPathLibraryNames = new ArrayList<String>();
@@ -673,6 +676,8 @@ public class IGProcessor {
     public static final String testCasePathElement = "input/tests/";
     
     private static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, ArrayList<String> resourcePaths) {                
+        
+        System.out.println("Enforcing conventions");
         File directory = new File(getBundlesPath(igPath));
         if (!directory.exists()) {
             directory.mkdir();
