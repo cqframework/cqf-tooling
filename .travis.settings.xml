@@ -6,14 +6,6 @@
       <password>${env.OSSRH_PASSWORD}</password>
     </server>
   </servers>
-</settings><settings>
-  <servers>
-    <server>
-      <id>ossrh</id>
-      <username>${env.OSSRH_USERNAME}</username>
-      <password>${env.OSSRH_PASSWORD}</password>
-    </server>
-  </servers>
   <profiles>
       <profile>
         <id>ossrh</id>
