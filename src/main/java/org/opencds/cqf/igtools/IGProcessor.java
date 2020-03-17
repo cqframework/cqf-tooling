@@ -129,28 +129,23 @@ public class IGProcessor {
 
     public static ArrayList<String> refreshStu3IgLibraryContent(String igPath, Encoding outputEncoding, Boolean includeELM,
             Boolean versioned, FhirContext fhirContext) {
-        System.out.println("Refreshing libraries");
+        System.out.println("Refreshing libraries...");
         ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
         HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
 
         for (String path : cqlContentPaths) {
             try {
                 //ask about how to do this better
-                String libraryPath;
-                try {
-                    libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path, fhirContext);
-                } catch (Exception e) {
-                    LogUtils.putException(path, e);
-                    LogUtils.warn(path);
-                    continue;
-                }
+                String libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path, fhirContext);               
                 
                 STU3LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, outputEncoding, versioned);
                 refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
             } catch (Exception e) {
                 LogUtils.putException(path, e);
             }
-            LogUtils.warn(path);
+            finally {
+                LogUtils.warn(path);
+            }            
         }
 
         return refreshedLibraryNames;
@@ -158,27 +153,23 @@ public class IGProcessor {
 
     public static ArrayList<String> refreshR4LibraryContent(String igPath, Encoding outputEncoding, Boolean includeELM,
             Boolean versioned, FhirContext fhirContext) {
-        System.out.println("Refreshing libraries");
+        System.out.println("Refreshing libraries...");
         ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
         HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
 
         for (String path : cqlContentPaths) {
             try {
                 //ask about how to do this better
-                String libraryPath;
-                try {
-                    libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path, fhirContext);
-                } catch (Exception e) {
-                    libraryPath = "";
-                }
+                String libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path, fhirContext);
                 
                 R4LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, outputEncoding, versioned);
                 refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
             } catch (Exception e) {
-                //TODO: need to protect against this everywhere
                 LogUtils.putException(path, e);
             }
-            LogUtils.warn(path);
+            finally {
+                LogUtils.warn(path);
+            }
         }
 
         return refreshedLibraryNames;
@@ -205,7 +196,7 @@ public class IGProcessor {
         // and Libraries
         // Until we have the ability to refresh Measures, the set is the union of
         // existing Measures and successfully refreshed Libraries
-        System.out.println("Bundling measures");
+        System.out.println("Bundling measures...");
         HashSet<String> measureSourcePaths = IOUtils.getMeasurePaths(fhirContext);
         List<String> measurePathLibraryNames = new ArrayList<String>();
         for (String measureSourcePath : measureSourcePaths) {
@@ -276,7 +267,7 @@ public class IGProcessor {
                 LogUtils.warn(refreshedLibraryName);
             }
         }
-        String message = "\r\n" + bundledMeasures.size() + " Measures successfully bundled:";
+        String message = "\r\n********************MEASURE RESULTS:********************\r\n" + bundledMeasures.size() + " Measures successfully bundled:";
         for (String bundledMeasure : bundledMeasures) {
             message += "\r\n     " + bundledMeasure + " BUNDLED";
         }
@@ -295,6 +286,7 @@ public class IGProcessor {
         for (String failed : failedMeasures) {
             message += "\r\n     " + failed + " FAILED";
         }
+        message += "\r\n********************************************************";
 
         LogUtils.info(message);
     }
@@ -302,7 +294,7 @@ public class IGProcessor {
     private static void bundlePlanDefinitions(ArrayList<String> refreshedLibraryNames, String igPath, Boolean includeDependencies,
             Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, FhirContext fhirContext, String fhirUri,
             Encoding encoding) {
-        System.out.println("Bundling plandefinitions");
+        System.out.println("Bundling plandefinitions...");
         HashSet<String> planDefinitionSourcePaths = IOUtils.getPlanDefinitionPaths(fhirContext);
 
         List<String> planDefinitionPathLibraryNames = new ArrayList<String>();
@@ -328,10 +320,8 @@ public class IGProcessor {
                 } catch (Exception e) {
                     LogUtils.putException(refreshedLibraryName, e);
                     continue;
-                } finally {
-                    LogUtils.warn(refreshedLibraryName);
-                }
-                
+                } 
+                                
                 String planDefinitionSourcePath = "";
                 for (String path : planDefinitionSourcePaths) {
                     if (FilenameUtils.removeExtension(path).endsWith(refreshedLibraryName))
@@ -381,7 +371,7 @@ public class IGProcessor {
                 LogUtils.warn(refreshedLibraryName);
             }
         }
-        String message = "\r\n" + bundledPlanDefinitions.size() + " PlanDefinitions successfully bundled:";
+        String message = "\r\n***************PLANDEFINITION RESULTS:******************\r\n" + bundledPlanDefinitions.size() + " PlanDefinitions successfully bundled:";
         for (String bundledPlanDefinition : bundledPlanDefinitions) {
             message += "\r\n     " + bundledPlanDefinition + " BUNDLED";
         }
@@ -400,6 +390,7 @@ public class IGProcessor {
         for (String failed : failedPlanDefinitions) {
             message += "\r\n     " + failed + " FAILED";
         }
+        message += "\r\n********************************************************";
 
         LogUtils.info(message);
     }
@@ -513,12 +504,13 @@ public class IGProcessor {
         Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext);
         IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);
 
-        if (fhirUri != null && !fhirUri.equals("")) {
+        if (fhirUri != null && !fhirUri.equals("")) {  
             try {
                 HttpClientUtils.post(fhirUri, (IAnyResource) bundle, encoding, fhirContext);
-            } catch (IOException e) {
-                LogUtils.putException(((IAnyResource)bundle).getId(), new Exception("Error posting to FHIR Server: " + fhirUri + ".  Bundle not posted."));
-            }
+                LogUtils.info("Resource successfully posted to FHIR server (" + fhirUri + "): " + ((IAnyResource)bundle).getId());
+            } catch (Exception e) {
+                LogUtils.putException(((IAnyResource)bundle).getId(), e);             
+            }  
         }
     }
 
@@ -678,7 +670,7 @@ public class IGProcessor {
     
     private static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, ArrayList<String> resourcePaths) {                
         
-        System.out.println("Enforcing conventions");
+        System.out.println("Enforcing conventions...");
         File directory = new File(getBundlesPath(igPath));
         if (!directory.exists()) {
             directory.mkdir();

@@ -27,10 +27,12 @@ public class TestCaseProcessor
                 Object bundle = BundleUtils.bundleArtifacts(getId(FilenameUtils.getName(testCasePath)), resources, fhirContext);
                 IOUtils.writeBundle(bundle, libraryTestCasePath, encoding, fhirContext);
                 } catch (Exception e) {
-                    LogUtils.putException(path, e);
+                    LogUtils.putException(testCasePath, e);
+                }
+                finally {
+                    LogUtils.warn(testCasePath);
                 }
             }
-            LogUtils.warn(path);
         }    
     }
 

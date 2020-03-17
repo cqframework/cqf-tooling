@@ -508,7 +508,6 @@ public class IOUtils
     private static HashSet<String> libraryPaths = new HashSet<String>();
     public static HashSet<String> getLibraryPaths(FhirContext fhirContext) {
         if (libraryPaths.isEmpty()) {
-            System.out.println("Reading libraries");
             setupLibraryPaths(fhirContext);
         }
         return libraryPaths;
@@ -539,7 +538,6 @@ public class IOUtils
     private static HashSet<String> measurePaths = new HashSet<String>();
     public static HashSet<String> getMeasurePaths(FhirContext fhirContext) {
         if (measurePaths.isEmpty()) {
-            System.out.println("Reading measures");
             setupMeasurePaths(fhirContext);
         }
         return measurePaths;
