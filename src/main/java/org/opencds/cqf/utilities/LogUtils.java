@@ -12,8 +12,8 @@ public class LogUtils
     private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LogUtils.class);
     private static final Map<String, String> resourceWarnings = new LinkedHashMap<String, String>();    
 
-    public static void putWarning(String id, String warning) {
-        resourceWarnings.put(LocalDateTime.now().toString() + ": " + id, warning);
+    public static void putException(String id, Exception e) {
+        resourceWarnings.put(LocalDateTime.now().toString() + ": " + id,  e.getMessage() == null ? e.toString() : e.getMessage());
     }
 
     public static void info(String message) {

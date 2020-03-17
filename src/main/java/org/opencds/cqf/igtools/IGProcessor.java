@@ -140,13 +140,15 @@ public class IGProcessor {
                 try {
                     libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path, fhirContext);
                 } catch (Exception e) {
-                    libraryPath = "";
+                    LogUtils.putException(path, e);
+                    LogUtils.warn(path);
+                    continue;
                 }
                 
                 STU3LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, outputEncoding, versioned);
                 refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
             } catch (Exception e) {
-                LogUtils.putWarning(path, e.getMessage());
+                LogUtils.putException(path, e);
             }
             LogUtils.warn(path);
         }
@@ -174,7 +176,7 @@ public class IGProcessor {
                 refreshedLibraryNames.add(FilenameUtils.getBaseName(path));
             } catch (Exception e) {
                 //TODO: need to protect against this everywhere
-                LogUtils.putWarning(path, e.getMessage() == null ? e.toString() : e.getMessage());
+                LogUtils.putException(path, e);
             }
             LogUtils.warn(path);
         }
@@ -215,6 +217,7 @@ public class IGProcessor {
         for (String refreshedLibraryName : refreshedLibraryNames) {
             try {
                 if (!measurePathLibraryNames.contains(refreshedLibraryName)) {
+                    LogUtils.info("Skipped bundling - no Measure resource found for Library: " + refreshedLibraryName);
                     continue;
                 }
 
@@ -225,11 +228,9 @@ public class IGProcessor {
                 try {
                     librarySourcePath = IOUtils.getLibraryPathAssociatedWithCqlFileName(refreshedLibraryFileName, fhirContext);
                 } catch (Exception e) {
-                    LogUtils.putWarning(refreshedLibraryName, e.getMessage());
+                    LogUtils.putException(refreshedLibraryName, e);
                     continue;
-                } finally {
-                    LogUtils.warn(refreshedLibraryName);
-                }
+                } 
                 
                 String measureSourcePath = "";
                 for (String path : measureSourcePaths) {
@@ -270,7 +271,7 @@ public class IGProcessor {
                     bundledMeasures.add(refreshedLibraryName);
                 }
             } catch (Exception e) {
-                LogUtils.putWarning(refreshedLibraryName, e.getMessage());
+                LogUtils.putException(refreshedLibraryName, e);
             } finally {
                 LogUtils.warn(refreshedLibraryName);
             }
@@ -325,7 +326,7 @@ public class IGProcessor {
                 try {
                     librarySourcePath = IOUtils.getLibraryPathAssociatedWithCqlFileName(refreshedLibraryFileName, fhirContext);
                 } catch (Exception e) {
-                    LogUtils.putWarning(refreshedLibraryName, e.getMessage());
+                    LogUtils.putException(refreshedLibraryName, e);
                     continue;
                 } finally {
                     LogUtils.warn(refreshedLibraryName);
@@ -375,7 +376,7 @@ public class IGProcessor {
                     bundledPlanDefinitions.add(refreshedLibraryName);
                 }
             } catch (Exception e) {
-                LogUtils.putWarning(refreshedLibraryName, e.getMessage());
+                LogUtils.putException(refreshedLibraryName, e);
             } finally {
                 LogUtils.warn(refreshedLibraryName);
             }
@@ -445,7 +446,7 @@ public class IGProcessor {
             }
         } catch (Exception e) {
             shouldPersist = false;
-            LogUtils.putWarning(cqlContentPath, e.getMessage());
+            LogUtils.putException(cqlContentPath, e);
         }
         return shouldPersist;
     }
@@ -461,7 +462,7 @@ public class IGProcessor {
             }
         } catch (Exception e) {
             shouldPersist = false;
-            LogUtils.putWarning(planDefinitionPath, e.getMessage());
+            LogUtils.putException(planDefinitionPath, e);
         }
         return activityDefinitionPaths;
     }
@@ -476,7 +477,7 @@ public class IGProcessor {
             }
         } catch (Exception e) {
             shouldPersist = false;
-            LogUtils.putWarning(path, e.getMessage());
+            LogUtils.putException(path, e);
         }
         return shouldPersist;
     }
@@ -502,7 +503,7 @@ public class IGProcessor {
             }
         } catch (Exception e) {
             shouldPersist = false;
-            LogUtils.putWarning(igTestCasePath, e.getMessage());
+            LogUtils.putException(igTestCasePath, e);
         }
         return shouldPersist;
     }
@@ -516,7 +517,7 @@ public class IGProcessor {
             try {
                 HttpClientUtils.post(fhirUri, (IAnyResource) bundle, encoding, fhirContext);
             } catch (IOException e) {
-                LogUtils.putWarning(((IAnyResource)bundle).getId(), "Error posting to FHIR Server: " + fhirUri + ".  Bundle not posted.");
+                LogUtils.putException(((IAnyResource)bundle).getId(), new Exception("Error posting to FHIR Server: " + fhirUri + ".  Bundle not posted."));
             }
         }
     }
@@ -551,7 +552,7 @@ public class IGProcessor {
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  
                 }  
             }  catch (Exception e) {
-                LogUtils.putWarning(libraryName, e.getMessage());
+                LogUtils.putException(libraryName, e);
             }       
         }
         
