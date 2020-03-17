@@ -128,3 +128,4 @@ hs_err_pid*
 .vscode/launch.json
 *.factorypath
 .settings
+.flattened-pom.xml
