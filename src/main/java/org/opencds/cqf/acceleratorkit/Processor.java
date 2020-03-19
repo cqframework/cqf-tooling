@@ -143,31 +143,54 @@ public class Processor extends Operation {
                 if (profile.getId().equals(profileId)) {
                     for (StructureDefinition sd : extensionsList) {
                         List<ElementDefinition> differential =  sd.getDifferential().getElement();
-                        String extensionUrl = null;
+
+                        ElementDefinition extensionBaseElement = null;
                         for (ElementDefinition ed : differential) {
-                            if (ed.getId().equals("Extension.url")) {
-                                extensionUrl = ed.getFixed().toString();
+                            if (ed.getId().equals("Extension.extension")) {
+                                extensionBaseElement = ed;
+                                break;
                             }
                         }
 
-                        org.hl7.fhir.instance.model.api.IBaseDatatype extensionValue = sd.getDifferential().getExtensionFirstRep().getValue();
-                        Extension ext = new Extension();
-                        ext.setUrl(extensionUrl);
-                        ext.setValue(extensionValue);
-                        List<Extension> extList = new ArrayList<Extension>();
-                        extList.add(ext);
-                        profile.setExtension(extList);
+                        String extensionUrl = null;
+                        for (ElementDefinition ed : differential) {
+                            if (ed.getId().equals("Extension.url")) {
+                                extensionUrl = ((UriType)ed.getFixed()).getValueAsString();
+                                break;
+                            }
+                        }
+
+                        ElementDefinition extensionValueElement = null;
+                        for (ElementDefinition ed : differential) {
+                            if (ed.getId().equals("Extension.value[x]")) {
+                                extensionValueElement = ed;
+                                break;
+                            }
+                        }
+
+                        String extensionId = profile.getType() + ".extension:" + toId(sd.getName());
+                        String extensionName = toId(sd.getName());
+
+                        ElementDefinition extensionElement = new ElementDefinition();
+                        extensionElement.setId(extensionId);
+                        extensionElement.setPath(profile.getType() + ".extension");
+                        extensionElement.setSliceName(extensionName);
+                        extensionElement.setMin(extensionBaseElement.getMin());
+                        extensionElement.setMax(extensionBaseElement.getMax());
+
+                        ElementDefinition.TypeRefComponent typeRefComponent = new ElementDefinition.TypeRefComponent();
+                        List<CanonicalType> typeProfileList = new ArrayList<>();
+                        typeProfileList.add(new CanonicalType(sd.getUrl()));
+                        typeRefComponent.setProfile(typeProfileList);
+                        typeRefComponent.setCode("Extension");
+
+                        List<ElementDefinition.TypeRefComponent> typeRefList = new ArrayList<>();
+                        typeRefList.add(typeRefComponent);
+
+                        extensionElement.setType(typeRefList);
+
+                        profile.getDifferential().addElement(extensionElement);
                     }
-//                    else {
-//                        profile.getExtension().addAll(extensionsList);
-//                    }
-//                    profile.getExtension()
-//                    targetProfile = profile;
-//
-//                    List<StructureDefinition> extensionList = extensionsList;
-//                    for (StructureDefinition extension : extensionList) {
-//                        targetProfile.setExtension(extensionList);
-//                    }
                 }
             }
         });
@@ -588,12 +611,10 @@ public class Processor extends Operation {
         for (DictionaryElement element : elementMap.values()) {
             if (requiresProfile(element)) {
                 StructureDefinition profile = ensureProfile(element);
-                profiles.add(profile);
             }
             else if (requiresExtension(element)) {
                 StructureDefinition extension = ensureExtension(element);
                 profileExtensions.computeIfAbsent(toId(element.getFhirElementPath().getCustomProfileId()), k -> new ArrayList<>()).add(extension);
-                extensions.add(extension);
             }
         }
     }
@@ -683,7 +704,7 @@ public class Processor extends Operation {
 
             List<ElementDefinition> snapshotElements = sd.getSnapshot().getElement();
 
-            //Start of refactor to get away from bad Optional<> pattern
+//            //Start of refactor to get away from bad Optional<> pattern
 //            for (ElementDefinition elementDef : snapshotElements) {
 //                if (elementDef.toString().toLowerCase().equals(elementPath.getResourceTypeAndPath().toLowerCase())) {
 //                    List<ElementDefinition.TypeRefComponent> types = elementDef.getType();
@@ -711,13 +732,7 @@ public class Processor extends Operation {
     }
 
     private StructureDefinition createExtensionStructureDefinition(DictionaryElement element, String extensionId) {
-//        StructureDefinition sd;
-//        sd = new StructureDefinition();
-//        sd.setId(extensionId);
-//
-//        return sd;
         DictionaryFhirElementPath elementPath = element.getFhirElementPath();
-        String resourceType = elementPath.getResourceType();
 
         StructureDefinition sd;
         sd = new StructureDefinition();
@@ -762,7 +777,8 @@ public class Processor extends Operation {
         ElementDefinition extensionElement = new ElementDefinition();
         extensionElement.setId("Extension.extension");
         extensionElement.setPath("Extension.extension");
-        extensionElement.setMax("0");
+        extensionElement.setMin(toBoolean(element.getRequired()) ? 1 : 0);
+        extensionElement.setMax(isMultipleChoiceElement(element) ? "*" : "1");
         sd.getDifferential().addElement(extensionElement);
 
         // Add url element
@@ -779,14 +795,13 @@ public class Processor extends Operation {
 
         ElementDefinition.TypeRefComponent valueTypeRefComponent = new ElementDefinition.TypeRefComponent();
         String fhirType = cleanseFhirType(getExtensionFhirType(element.getType()));
-        //TODO: This is a hack. Should probably skip or something. 
-        if (fhirType == null || fhirType.isEmpty()) {
-            fhirType = "boolean";
+
+        if (fhirType != null && !fhirType.isEmpty()) {
+            valueTypeRefComponent.setCode(fhirType);
+            List<ElementDefinition.TypeRefComponent> valueTypeList = new ArrayList<ElementDefinition.TypeRefComponent>();
+            valueTypeList.add(valueTypeRefComponent);
+            valueElement.setType(valueTypeList);
         }
-        valueTypeRefComponent.setCode(fhirType);
-        List<ElementDefinition.TypeRefComponent> valueTypeList = new ArrayList<ElementDefinition.TypeRefComponent>();
-        valueTypeList.add(valueTypeRefComponent);
-        valueElement.setType(valueTypeList);
 
         valueElement.setShort(element.getLabel());
         valueElement.setDefinition(element.getDescription());
@@ -798,7 +813,6 @@ public class Processor extends Operation {
 
     private StructureDefinition ensureExtension(DictionaryElement element) {
         StructureDefinition sd = null;
-        //List<ElementDefinition> elementDefinitions = new ArrayList<>();
 
         // Search for extension and use it if it exists already.
         String extensionId = toId(element.getName());
@@ -818,8 +832,9 @@ public class Processor extends Operation {
             sd = createExtensionStructureDefinition(element, extensionId);
         }
 
-        // Ensure that the element is added to the StructureDefinition
-//        ensureElement(element, sd);
+        if (!extensions.contains(sd)) {
+            extensions.add(sd);
+        }
 
         return sd;
     }
@@ -893,6 +908,10 @@ public class Processor extends Operation {
         // Ensure that the element is added to the StructureDefinition
         ensureElement(element, sd);
 
+        if (!profiles.contains(sd)) {
+            profiles.add(sd);
+        }
+
         return sd;
     }
 
@@ -905,9 +924,8 @@ public class Processor extends Operation {
 
         switch (resourceType) {
             case "Observation":
-                // For observations...
                 codePath = "code";
-                choicesPath = elementPath.getResourcePath(); //"value[x]";
+                choicesPath = elementPath.getResourcePath();
                 break;
             case "AllergyIntolerance":
             case "Appointment":
@@ -940,6 +958,7 @@ public class Processor extends Operation {
 
         if (codePath != null && !codePath.isEmpty() && element.getCode() != null) {
             // code - Fixed to the value of the OpenMRS code for this DictionaryElement
+            // TODO: This should not be fixed, it should create and bind to a ValueSet - support multiple codes
             ElementDefinition ed = new ElementDefinition();
             ed.setId(String.format("%s.%s", resourceType, codePath));
             ed.setPath(String.format("%s.%s", resourceType, codePath));
@@ -955,8 +974,8 @@ public class Processor extends Operation {
             Boolean isElementOfSlice = !isSlice &&  masterDataElementPath!= null && !masterDataElementPath.isEmpty() && masterDataElementPath.indexOf(".") > 0;
 
             String elementId;
+            String slicePath;
             String sliceName = null;
-            String slicePath = null;
             if (isSlice || isElementOfSlice) {
                 int periodIndex = masterDataElementPath.indexOf(".");
                 sliceName = periodIndex > 0 ? masterDataElementPath.substring(0, periodIndex) : masterDataElementPath;
