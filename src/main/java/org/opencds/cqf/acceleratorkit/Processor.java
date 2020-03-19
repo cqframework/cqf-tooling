@@ -701,21 +701,17 @@ public class Processor extends Operation {
                 String typePortion = cleanseFhirType(elementPath.getFhirElementType());
                 return typePortion;
             }
-
+            
             List<ElementDefinition> snapshotElements = sd.getSnapshot().getElement();
+            ElementDefinition typeElement = null;
+            for (ElementDefinition elementDef : snapshotElements) {
+                if (elementDef.toString().toLowerCase().equals(elementPath.getResourceTypeAndPath().toLowerCase())) {
+                    typeElement = elementDef;
+                }
+            }
 
-//            //Start of refactor to get away from bad Optional<> pattern
-//            for (ElementDefinition elementDef : snapshotElements) {
-//                if (elementDef.toString().toLowerCase().equals(elementPath.getResourceTypeAndPath().toLowerCase())) {
-//                    List<ElementDefinition.TypeRefComponent> types = elementDef.getType();
-//                    if ()
-//                }
-//            }
-
-            Optional<ElementDefinition> type = snapshotElements.stream().filter(e -> e.toString().toLowerCase().equals(elementPath.getResourceTypeAndPath().toLowerCase())).findFirst();
-
-            if (!type.isEmpty()) {
-                String elementType = type.get().getType().get(0).getCode();
+            if (typeElement != null) {
+                String elementType = typeElement.getType().get(0).getCode();
                 return elementType;
             } else {
                 System.out.println("Could not find element: " + elementPath.getResourceTypeAndPath());
