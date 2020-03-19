@@ -130,3 +130,4 @@ hs_err_pid*
 .settings
 src/main/resources/org/opencds/cqf/acceleratorkit/output/*
 FHIR-Spec/*
+.flattened-pom.xml

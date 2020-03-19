@@ -304,12 +304,12 @@ public class ResourceUtils
             resources.putIfAbsent(resource.getId(), resource);
           } else {
             added = false;
-            LogUtils.putWarning(path, "Unable to add Resource: " + path);
+            LogUtils.putException(path, new Exception("Unable to add Resource: " + path));
           }
       }
       catch(Exception e) {
           added = false;
-          LogUtils.putWarning(path, e.getMessage());
+          LogUtils.putException(path, e);
       }  
       return added;
   }
