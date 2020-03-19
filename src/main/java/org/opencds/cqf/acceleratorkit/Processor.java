@@ -1,6 +1,7 @@
 package org.opencds.cqf.acceleratorkit;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -40,6 +41,7 @@ public class Processor extends Operation {
 
     private Map<String, StructureDefinition> fhirModelStructureDefinitions = new HashMap<String, StructureDefinition>();
     private Map<String, DictionaryElement> elementMap = new HashMap<String, DictionaryElement>();
+    private Map<String, List<StructureDefinition>> profileExtensions = new HashMap<>();
     private List<StructureDefinition> extensions = new ArrayList<StructureDefinition>();
     private List<StructureDefinition> profiles = new ArrayList<StructureDefinition>();
     private List<CodeSystem> codeSystems = new ArrayList<CodeSystem>();
@@ -111,6 +113,7 @@ public class Processor extends Operation {
     private void processScope(Workbook workbook, String scope) {
         // reset variables
         elementMap = new HashMap<>();
+        profileExtensions = new HashMap<>();
         extensions = new ArrayList<>();
         profiles = new ArrayList<>();
         codeSystems = new ArrayList<>();
@@ -134,8 +137,43 @@ public class Processor extends Operation {
         // process element map
         processElementMap();
 
+        // Add extensions to the appropriate profiles
+        profileExtensions.forEach((profileId, extensionsList) -> {
+            for (StructureDefinition profile : profiles) {
+                if (profile.getId().equals(profileId)) {
+                    for (StructureDefinition sd : extensionsList) {
+                        List<ElementDefinition> differential =  sd.getDifferential().getElement();
+                        String extensionUrl = null;
+                        for (ElementDefinition ed : differential) {
+                            if (ed.getId().equals("Extension.url")) {
+                                extensionUrl = ed.getFixed().toString();
+                            }
+                        }
+
+                        org.hl7.fhir.instance.model.api.IBaseDatatype extensionValue = sd.getDifferential().getExtensionFirstRep().getValue();
+                        Extension ext = new Extension();
+                        ext.setUrl(extensionUrl);
+                        ext.setValue(extensionValue);
+                        List<Extension> extList = new ArrayList<Extension>();
+                        extList.add(ext);
+                        profile.setExtension(extList);
+                    }
+//                    else {
+//                        profile.getExtension().addAll(extensionsList);
+//                    }
+//                    profile.getExtension()
+//                    targetProfile = profile;
+//
+//                    List<StructureDefinition> extensionList = extensionsList;
+//                    for (StructureDefinition extension : extensionList) {
+//                        targetProfile.setExtension(extensionList);
+//                    }
+                }
+            }
+        });
+
         // write all resources
-        //writeExtensions(scopePath);
+        writeExtensions(scopePath);
         writeProfiles(scopePath);
         writeCodeSystems(scopePath);
         writeValueSets(scopePath);
@@ -168,7 +206,7 @@ public class Processor extends Operation {
     }
 
     private void ensureExtensionsPath(String scopePath) {
-        String extensionsPath = getProfilesPath(scopePath);
+        String extensionsPath = getExtensionsPath(scopePath);
         ensurePath(extensionsPath);
     }
 
@@ -404,6 +442,9 @@ public class Processor extends Operation {
                         case "scope":
                             colIds.put("Scope", cell.getColumnIndex());
                             break;
+                        case "in new dd":
+                            colIds.put("InNewDD", cell.getColumnIndex());
+                            break;
                         case "master data type":
                             colIds.put("MasterDataType", cell.getColumnIndex());
                             break;
@@ -466,7 +507,10 @@ public class Processor extends Operation {
             boolean scopeIsNull = scope == null;
             boolean scopeMatchesRowScope = rowScope != null && scope.toLowerCase().equals(rowScope.toLowerCase());
 
-            if (scopeIsNull || scopeMatchesRowScope) {
+            String inNewDD = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "InNewDD"));
+            boolean shouldInclude = inNewDD.equals("ST") || inNewDD.equals("1");
+
+            if (shouldInclude && (scopeIsNull || scopeMatchesRowScope)) {
                 String masterDataType = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MasterDataType"));
                 switch(masterDataType) {
                     case "Data Element":
@@ -490,18 +534,15 @@ public class Processor extends Operation {
         }
     }
 
-//    private boolean shouldCreateExtension(String baseProfile) {
-//        if (baseProfile == null) {
-//            return false;
-//        }
-//
-//        switch (baseProfile.toLowerCase().trim()) {
-//            case "extension needed":
-//                return true;
-//            default:
-//                return false;
-//        }
-//    }
+    private boolean requiresExtension(DictionaryElement element) {
+        String baseProfile = element.getFhirElementPath().getBaseProfile();
+        if (baseProfile != null && element.getFhirElementPath().getBaseProfile().toLowerCase().trim().equals("extension needed")) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 
     private boolean requiresProfile(DictionaryElement element) {
         if (element == null
@@ -549,9 +590,11 @@ public class Processor extends Operation {
                 StructureDefinition profile = ensureProfile(element);
                 profiles.add(profile);
             }
-//            else if (shouldCreateExtension(element.getType())) {
-//                extensions.add(createExtension(element));
-//            }
+            else if (requiresExtension(element)) {
+                StructureDefinition extension = ensureExtension(element);
+                profileExtensions.computeIfAbsent(toId(element.getFhirElementPath().getCustomProfileId()), k -> new ArrayList<>()).add(extension);
+                extensions.add(extension);
+            }
         }
     }
 
@@ -591,6 +634,30 @@ public class Processor extends Operation {
             switch (type) {
                 case "Integer":
                     return "integer";
+                default:
+                    return type;
+            }
+        } else {
+            return type;
+        }
+    }
+
+    private String getExtensionFhirType(String type) {
+        if (type != null && type.length() > 0) {
+            switch (type) {
+                case "Boolean":
+                    return "boolean";
+                case "Integer":
+                    return "integer";
+                case "Note":
+                case "Text":
+                    return "string";
+                case "Time":
+                    return "time";
+                case "Coding":
+                case "Coding (Select all that apply":
+                case "Coding - Select all that apply":
+                    return "CodeableConcept";
                 default:
                     return type;
             }
@@ -643,8 +710,118 @@ public class Processor extends Operation {
         return elementPath.getResourcePath().indexOf("[x]") >= 0;
     }
 
-    private StructureDefinition createExtensionStructureDefinition(DictionaryElement element) {
-        throw new NotImplementedException();
+    private StructureDefinition createExtensionStructureDefinition(DictionaryElement element, String extensionId) {
+//        StructureDefinition sd;
+//        sd = new StructureDefinition();
+//        sd.setId(extensionId);
+//
+//        return sd;
+        DictionaryFhirElementPath elementPath = element.getFhirElementPath();
+        String resourceType = elementPath.getResourceType();
+
+        StructureDefinition sd;
+        sd = new StructureDefinition();
+        sd.setId(extensionId);
+        sd.setUrl(String.format("%s/StructureDefinition/%s", canonicalBase, sd.getId()));
+        // TODO: version
+        sd.setName(element.getName());
+        sd.setTitle(element.getLabel());
+        sd.setStatus(Enumerations.PublicationStatus.DRAFT);
+        sd.setExperimental(false);
+        // TODO: date
+        // TODO: publisher
+        // TODO: contact
+        sd.setDescription(element.getDescription());
+        // TODO: What to do with Notes?
+        sd.setFhirVersion(Enumerations.FHIRVersion._4_0_1);
+        sd.setKind(StructureDefinition.StructureDefinitionKind.COMPLEXTYPE);
+        sd.setAbstract(false);
+        // TODO: Support resources other than Observation
+        sd.setType("Extension");
+        // TODO: Use baseDefinition to derive from less specialized profiles
+        sd.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Extension");
+        sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+        sd.setDifferential(new StructureDefinition.StructureDefinitionDifferentialComponent());
+
+        // TODO: status
+        // TODO: category
+        // TODO: subject
+        // TODO: effective[x]
+
+        // Add root element
+        ElementDefinition rootElement = new ElementDefinition();
+        rootElement.setId("Extension");
+        rootElement.setPath("Extension");
+        rootElement.setShort(element.getLabel());
+        rootElement.setDefinition(element.getDescription());
+        rootElement.setMin(toBoolean(element.getRequired()) ? 1 : 0);
+        rootElement.setMax(isMultipleChoiceElement(element) ? "*" : "1");
+        sd.getDifferential().addElement(rootElement);
+
+        // Add extension element
+        ElementDefinition extensionElement = new ElementDefinition();
+        extensionElement.setId("Extension.extension");
+        extensionElement.setPath("Extension.extension");
+        extensionElement.setMax("0");
+        sd.getDifferential().addElement(extensionElement);
+
+        // Add url element
+        ElementDefinition urlElement = new ElementDefinition();
+        urlElement.setId("Extension.url");
+        urlElement.setPath("Extension.url");
+        urlElement.setFixed(new UriType(sd.getUrl()));
+        sd.getDifferential().addElement(urlElement);
+
+        // Add value[x] element
+        ElementDefinition valueElement = new ElementDefinition();
+        valueElement.setId("Extension.value[x]");
+        valueElement.setPath("Extension.value[x]");
+
+        ElementDefinition.TypeRefComponent valueTypeRefComponent = new ElementDefinition.TypeRefComponent();
+        String fhirType = cleanseFhirType(getExtensionFhirType(element.getType()));
+        //TODO: This is a hack. Should probably skip or something. 
+        if (fhirType == null || fhirType.isEmpty()) {
+            fhirType = "boolean";
+        }
+        valueTypeRefComponent.setCode(fhirType);
+        List<ElementDefinition.TypeRefComponent> valueTypeList = new ArrayList<ElementDefinition.TypeRefComponent>();
+        valueTypeList.add(valueTypeRefComponent);
+        valueElement.setType(valueTypeList);
+
+        valueElement.setShort(element.getLabel());
+        valueElement.setDefinition(element.getDescription());
+        valueElement.setMin(1);
+        sd.getDifferential().addElement(valueElement);
+
+        return sd;
+    }
+
+    private StructureDefinition ensureExtension(DictionaryElement element) {
+        StructureDefinition sd = null;
+        //List<ElementDefinition> elementDefinitions = new ArrayList<>();
+
+        // Search for extension and use it if it exists already.
+        String extensionId = toId(element.getName());
+        if (extensionId != null && extensionId.length() > 0) {
+            for (StructureDefinition existingExtension : extensions) {
+                if (existingExtension.getId().equals(existingExtension)) {
+                    sd = existingExtension;
+                }
+            }
+        }
+        else {
+            throw new IllegalArgumentException("No name specified for the element");
+        }
+
+        // If the extension doesn't exist, create it with the root element.
+        if (sd == null) {
+            sd = createExtensionStructureDefinition(element, extensionId);
+        }
+
+        // Ensure that the element is added to the StructureDefinition
+//        ensureElement(element, sd);
+
+        return sd;
     }
 
     @NotNull
@@ -667,7 +844,7 @@ public class Processor extends Operation {
         // TODO: contact
         sd.setDescription((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getDescription());
         // TODO: What to do with Notes?
-        sd.setFhirVersion(Enumerations.FHIRVersion._4_0_0);
+        sd.setFhirVersion(Enumerations.FHIRVersion._4_0_1);
         sd.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
         sd.setAbstract(false);
         // TODO: Support resources other than Observation
@@ -1010,6 +1187,42 @@ public class Processor extends Operation {
         } catch (IOException e) {
             e.printStackTrace();
             throw new IllegalArgumentException("Error writing resource: " + resource.getId());
+        }
+    }
+
+    public void writeExtensions(String scopePath) {
+        if (extensions != null && extensions.size() > 0) {
+            String extensionsPath = getExtensionsPath(scopePath);
+            ensureExtensionsPath(scopePath);
+
+           // Comparator<ElementDefinition> compareById = Comparator.comparing(Element::getId);
+
+            for (StructureDefinition sd : extensions) {
+                //sd.getDifferential().getElement().sort(compareById);
+                writeResource(extensionsPath, sd);
+
+                // Generate JSON fragment for inclusion in the IG:
+                /*
+                    "StructureDefinition/<id>": {
+                        "source": "structuredefinition/structuredefinition-<id>.json",
+                        "defns": "StructureDefinition-<id>-definitions.html",
+                        "base": "StructureDefinition-<id>.html"
+                    }
+                 */
+                igJsonFragments.add(String.format("\t\t\"StructureDefinition/%s\": {\r\n\t\t\t\"source\": \"structuredefinition/structuredefinition-%s.json\",\r\n\t\t\t\"defns\": \"StructureDefinition-%s-definitions.html\",\r\n\t\t\t\"base\": \"StructureDefinition-%s.html\"\r\n\t\t}",
+                        sd.getId(), sd.getId(), sd.getId(), sd.getId()));
+
+                // Generate XML fragment for the IG resource:
+                /*
+                    <resource>
+                        <reference>
+                            <reference value="StructureDefinition/<id>"/>
+                        </reference>
+                        <groupingId value="main"/>
+                    </resource>
+                 */
+                igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"StructureDefinition/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", sd.getId()));
+            }
         }
     }
 
