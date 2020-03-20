@@ -9,6 +9,7 @@ import java.util.HashMap;
 public class ClassInfoSettings {
     public String modelName;
     public String modelPrefix;
+    public String helpersLibraryName;
     public boolean useCQLPrimitives = false;
     public boolean createExtensionElements = false;
     public boolean createReferenceElements = false;

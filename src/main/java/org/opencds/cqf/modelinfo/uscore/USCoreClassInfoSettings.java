@@ -12,6 +12,7 @@ class USCoreClassInfoSettings extends ClassInfoSettings {
     public USCoreClassInfoSettings() {
         this.modelName = "USCore";
         this.modelPrefix = "USCore";
+        this.helpersLibraryName = "USCoreHelpers";
         this.useCQLPrimitives = true;
 
         this.codeableTypes = new HashSet<String>() {

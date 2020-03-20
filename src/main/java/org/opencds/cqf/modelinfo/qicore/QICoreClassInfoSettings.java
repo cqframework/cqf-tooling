@@ -12,6 +12,7 @@ class QICoreClassInfoSettings extends ClassInfoSettings {
     public QICoreClassInfoSettings() {
         this.modelName = "QICore";
         this.modelPrefix = "QICore";
+        this.helpersLibraryName = "QICoreHelpers";
         this.useCQLPrimitives = true;
 
         this.codeableTypes = new HashSet<String>() {

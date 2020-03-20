@@ -8,19 +8,16 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.hl7.elm_modelinfo.r1.*;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.Element;
-import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
+import org.w3._1999.xhtml.P;
 
 public abstract class ClassInfoBuilder {
     protected Map<String, StructureDefinition> structureDefinitions;
     protected Map<String, TypeInfo> typeInfos = new HashMap<String, TypeInfo>();
+    protected Map<String, String> typeTargets = new HashMap<String, String>();
     protected ClassInfoSettings settings;
 
     public ClassInfoBuilder(ClassInfoSettings settings, Map<String, StructureDefinition> structureDefinitions) {
@@ -121,7 +118,7 @@ public abstract class ClassInfoBuilder {
     }
 
     protected String getTypeName(NamedTypeSpecifier typeSpecifier) {
-        return this.getTypeName(typeSpecifier.getModelName(), typeSpecifier.getName());
+        return this.getTypeName(typeSpecifier.getNamespace(), typeSpecifier.getName());
     }
 
     protected String mapTypeName(String typeName) {
@@ -230,12 +227,6 @@ public abstract class ClassInfoBuilder {
             return path;
     }
 
-    // Returns the name of the component type used to represent anonymous nested
-    // structures
-    private String getComponentTypeName(String path) {
-        return this.capitalizePath(path) + "Component";
-    }
-
     // Strips the given root from the given path.
     // Throws an error if the path does not start with the root.
     protected String stripRoot(String path, String root) throws Exception {
@@ -253,7 +244,7 @@ public abstract class ClassInfoBuilder {
         return result;
     }
 
-    private String stripPath(String path) throws Exception {
+    static String stripPath(String path) throws Exception {
         int index = path.lastIndexOf(".");
         if (index == -1) {
             throw new Exception("Path " + path + " does not have any continuation represented by " + ".");
@@ -269,7 +260,7 @@ public abstract class ClassInfoBuilder {
     }
 
     // Strips the [x] suffix of an element name which indicates a choice in FHIR
-    private String stripChoice(String name) {
+    private static String stripChoice(String name) {
         int index = name.indexOf("[x]");
         if (index != -1) {
             return name.substring(0, index);
@@ -298,23 +289,6 @@ public abstract class ClassInfoBuilder {
         return result;
     }
 
-    private StructureDefinition getRootStructureDefinition(StructureDefinition sd) {
-        String baseSd = sd.getBaseDefinition();
-        if (baseSd == null) {
-            return sd;
-        }
-
-        return getRootStructureDefinition(structureDefinitions.get(getTail(baseSd)));
-    }
-
-    private StructureDefinition getTopLevelStructureDefinition(StructureDefinition sd, String path) {
-        if (getTail(sd.getId()).equals(path)) {
-            return sd;
-        }
-
-        return getTopLevelStructureDefinition(structureDefinitions.get(getTail(sd.getBaseDefinition())), path);
-    }
-
     // Returns the value of the given string as an integer if it is integer-valued,
     // nil otherwise.
     private Integer asInteger(String value) {
@@ -323,23 +297,6 @@ public abstract class ClassInfoBuilder {
         } catch (Exception e) {
             return null;
         }
-    }
-
-    // Returns true if the ElementDefinition describes a constraint only
-    // For now, since constraints cannot be represented in ModelInfo, no element
-    // will be created for these
-    // For now, we are assuming that if the element specifies a type, it should be
-    // declared
-    // This may be a type constraint, which can be expressed in ModelInfo, so that's
-    // okay, but if all
-    // the element is changing is the binding or cardinality, no element will be
-    // produced.
-    private Boolean isConstraintElement(ElementDefinition ed) {
-        if (ed.getType() != null && ed.getType().size() > 0) {
-            return true;
-        }
-
-        return false;
     }
 
     // Returns true if the ElementDefinition describes a Backbone Element
@@ -372,6 +329,22 @@ public abstract class ClassInfoBuilder {
     private String typeCode(ElementDefinition ed) {
         if (ed.getType() != null && ed.getType().size() == 1) {
             return ed.getType().get(0).getCode();
+        }
+
+        return null;
+    }
+
+    private String typeUrl(ElementDefinition ed) {
+        String typeCode = typeCode(ed);
+        if (typeCode != null) {
+            TypeRefComponent typeRef = ed.getType().get(0);
+            if (typeRef.hasProfile() && typeRef.getProfile().size() == 1) {
+                String typeId = getTail(typeRef.getProfile().get(0).asStringValue());
+                StructureDefinition sd = structureDefinitions.get(typeId);
+                if (sd != null) {
+                    return sd.getUrl();
+                }
+            }
         }
 
         return null;
@@ -531,7 +504,7 @@ public abstract class ClassInfoBuilder {
         if (modelName != null && typeName != null) {
             ensureClassInfo(modelName, typeName);
             NamedTypeSpecifier ts = new NamedTypeSpecifier();
-            ts.setModelName(modelName);
+            ts.setNamespace(modelName);
             ts.setName(typeName);
 
             return ts;
@@ -558,8 +531,45 @@ public abstract class ClassInfoBuilder {
         return null;
     }
 
+    private boolean isSystemTypeName(String typeName) {
+        return typeName.startsWith("System.");
+    }
+
+    private boolean isClassType(String typeName) {
+        if (isSystemTypeName(typeName)) {
+            switch (typeName) {
+                case "System.Boolean":
+                case "System.Integer":
+                case "System.Decimal":
+                case "System.String":
+                case "System.DateTime":
+                case "System.Date":
+                case "System.Time":
+                    return false;
+            }
+
+            return true;
+        }
+        else {
+            TypeInfo type = resolveType(typeName);
+            return type instanceof ClassInfo;
+        }
+    }
+
+    private boolean isClassType(TypeSpecifier typeSpecifier) {
+        if (typeSpecifier instanceof NamedTypeSpecifier) {
+            return isClassType(getTypeName((NamedTypeSpecifier)typeSpecifier));
+        }
+
+        return false;
+    }
+
     private boolean isMappedTypeName(String modelName, String typeName) {
         return this.settings.useCQLPrimitives && this.settings.cqlTypeMappings.values().contains(modelName + "." + typeName);
+    }
+
+    private boolean isPrimitiveMappedTypeName(String modelName, String typeName) {
+        return this.settings.useCQLPrimitives && this.settings.primitiveTypeMappings.values().contains(modelName + "." + typeName);
     }
 
     private String resolveMappedTypeName(String modelName, String typeName) {
@@ -622,12 +632,12 @@ public abstract class ClassInfoBuilder {
         }
     }
 
-    private TypeSpecifier buildTypeSpecifier(String modelName, List<TypeRefComponent> typeReferencRefComponents) {
+    private TypeSpecifier buildTypeSpecifier(String modelName, List<TypeRefComponent> typeReferenceRefComponents) {
 
-        if (typeReferencRefComponents == null) {
+        if (typeReferenceRefComponents == null) {
             return buildTypeSpecifier(modelName, (TypeRefComponent) null);
         } else {
-            List<TypeSpecifier> specifiers = typeReferencRefComponents.stream()
+            List<TypeSpecifier> specifiers = typeReferenceRefComponents.stream()
                     .map(x -> this.buildTypeSpecifier(modelName, x)).filter(distinctByKey(x -> x.toString()))
                     .collect(Collectors.toList());
 
@@ -660,6 +670,15 @@ public abstract class ClassInfoBuilder {
         }
 
         return null;
+    }
+
+    private boolean typeSpecifiersEqual(TypeSpecifier left, TypeSpecifier right) {
+        if (left instanceof NamedTypeSpecifier && right instanceof NamedTypeSpecifier) {
+            return this.getTypeName((NamedTypeSpecifier)left).equals(this.getTypeName((NamedTypeSpecifier)right));
+        }
+
+        // TODO: More sophisticated type specifier equality determination
+        return left.equals(right);
     }
 
     // Builds the type specifier for the given element
@@ -699,7 +718,7 @@ public abstract class ClassInfoBuilder {
                     }
 
                     NamedTypeSpecifier nts = new NamedTypeSpecifier();
-                    nts.setModelName(modelName);
+                    nts.setNamespace(modelName);
                     nts.setName(typeName);
 
                     return nts;
@@ -733,7 +752,7 @@ public abstract class ClassInfoBuilder {
                 }
 
                 NamedTypeSpecifier nts = new NamedTypeSpecifier();
-                nts.setModelName(modelName);
+                nts.setNamespace(modelName);
                 nts.setName(typeName);
 
                 return nts;
@@ -781,7 +800,7 @@ public abstract class ClassInfoBuilder {
                 }
 
                 NamedTypeSpecifier nts = new NamedTypeSpecifier();
-                nts.setModelName(modelName);
+                nts.setNamespace(modelName);
                 nts.setName(typeName);
 
                 return nts;
@@ -809,9 +828,52 @@ public abstract class ClassInfoBuilder {
     protected String determineTarget(TypeSpecifier typeSpecifier) {
         if (typeSpecifier instanceof NamedTypeSpecifier) {
             NamedTypeSpecifier namedTypeSpecifier = (NamedTypeSpecifier)typeSpecifier;
-            if (isMappedTypeName(namedTypeSpecifier.getModelName(), namedTypeSpecifier.getName())) {
-                return "value";
+            String qualifiedTypeName = this.getTypeName(namedTypeSpecifier);
+            if (isPrimitiveMappedTypeName(namedTypeSpecifier.getNamespace(), namedTypeSpecifier.getName())) {
+                return "%value.value";
             }
+            else if (isMappedTypeName(namedTypeSpecifier.getNamespace(), namedTypeSpecifier.getName())) {
+                switch (qualifiedTypeName) {
+                    case "System.Quantity": {
+                        return this.settings.helpersLibraryName + ".ToQuantity(%value)";
+                    }
+                    case "System.Ratio": {
+                        return this.settings.helpersLibraryName + ".ToRatio(%value)";
+                    }
+                    case "System.Code": {
+                        return this.settings.helpersLibraryName + ".ToCode(%value)";
+                    }
+                    case "System.Concept": {
+                        return this.settings.helpersLibraryName + ".ToConcept(%value)";
+                    }
+                    case "Interval<System.Quantity>":
+                    case "Interval<System.DateTime>": {
+                        return this.settings.helpersLibraryName + ".ToInterval(%value)";
+                    }
+                    default: return null;
+                }
+            }
+            else {
+                if (typeTargets.containsKey(qualifiedTypeName)) {
+                    return typeTargets.get(qualifiedTypeName);
+                }
+            }
+        }
+        else if (typeSpecifier instanceof ChoiceTypeSpecifier) {
+            ChoiceTypeSpecifier choiceTypeSpecifier = (ChoiceTypeSpecifier)typeSpecifier;
+            StringBuilder target = new StringBuilder();
+            for (TypeSpecifier choice : choiceTypeSpecifier.getChoice()) {
+                if (target.length() > 0) {
+                    target.append(";"); // Separator for target per choice type
+                }
+                if (choice instanceof NamedTypeSpecifier) {
+                    NamedTypeSpecifier namedChoice = (NamedTypeSpecifier)choice;
+                    target.append(getTypeName(namedChoice));
+                    target.append(":");
+                    target.append(determineTarget(namedChoice));
+                }
+            }
+            return target.toString();
         }
 
         return null;
@@ -828,54 +890,18 @@ public abstract class ClassInfoBuilder {
             typeSpecifier = nts;
         }
 
+        System.out.println(String.format("Building ClassInfoElement for element %s", ed.getId()));
+
         // If the base is different than the path, it indicates the element is a restatement (or constraint) on an element
         // defined in a base class. If the path and id are different, it indicates a slice definition, which should only
         // be returned for the core slice element.
         if (ed.hasBase() && ed.getBase().hasPath() && !ed.getBase().getPath().startsWith(root)
                 || !ed.getId().equals(ed.getPath())) {
-            if (ed.getSliceName() == null) {
+            if (ed.getSliceName() == null && !(ed.getBase() != null && ed.getPath().endsWith("[x]") && ed.getType() != null && ed.getType().size() == 1)) {
+                System.out.println(String.format("Element %s is a restatement (and not a choice constraint) of a base element, no ClassInfoElement created.", ed.getId()));
                 return null;
             }
         }
-
-        /*
-        else {
-            if (ed.hasBase() && ed.getBase().hasPath() && ed.getId().contains(":")) {
-                String[] elementPathSplitByExtensions = ed.getId().split(":");
-                if (elementPathSplitByExtensions[elementPathSplitByExtensions.length - 1].contains(".")) {
-                    // This is needed for cases when there is an extension or constraint that then
-                    // has an element
-                    String[] elementPathSplit = ed.getId()
-                            .split(ed.getId().substring(ed.getId().lastIndexOf(":"), ed.getId().lastIndexOf(".")));
-                    String elementPath = elementPathSplit[0] + elementPathSplit[1];
-                    if ( !elementPath.contains(ed.getBase().getPath().toLowerCase()) && !ed.getBase().getPath().contains("value[x]")) {
-                        return null;
-                    }
-                }
-                else if ( elementPathSplitByExtensions[elementPathSplitByExtensions.length - 1].contains("-")) {
-                    // This is needed for cases when there is an extension or constraint that then
-                    // has an element
-                    String[] elementPathSplit = ed.getId()
-                            .split(ed.getId().substring(ed.getId().lastIndexOf(":"), ed.getId().lastIndexOf("-")));
-                    String elementPath = elementPathSplit[0] + elementPathSplit[elementPathSplit.length - 1];
-                    if ( !elementPath.contains(ed.getBase().getPath().toLowerCase())) {
-                        return null;
-                    }
-                }
-                else {
-                    String[] elementPathSplit = ed.getId().split(ed.getId().substring(ed.getId().lastIndexOf(":")));
-                    String elementPath = elementPathSplit[0];
-                    if ( !elementPath.contains(ed.getBase().getPath()) && !elementPath.contains("extension")) {
-                        return null;
-                    }
-                }
-
-            }
-            else if ( !ed.getId().contains(ed.getBase().getPath())) {
-                return null;
-            }
-        }
-        */
 
         if (ed.getMax() != null) {
             if ((ed.getMax().equals("*") || (this.asInteger(ed.getMax()) > 1))) {
@@ -889,13 +915,14 @@ public abstract class ClassInfoBuilder {
                 typeSpecifier = lts;
             }
             else if (this.asInteger(ed.getMax()) == 0) {
+                System.out.println(String.format("Element %s has max cardinality 0, no ClassInfoElement created", ed.getId()));
                 return null;
             }
         }
 
         String name = ed.getSliceName() != null
                 ? ed.getSliceName()
-                : this.stripChoice(this.stripPath(ed.getPath()));
+                : stripChoice(stripPath(ed.getPath()));
 
         ClassInfoElement cie = new ClassInfoElement();
         cie.setName(name);
@@ -910,50 +937,49 @@ public abstract class ClassInfoBuilder {
             cie.setElementTypeSpecifier(typeSpecifier);
         }
 
+        System.out.println(String.format("Done building ClassInfoElement %s: %s", cie.getName(), cie.toString()));
+
         return cie;
-    }
-
-    private boolean checkContinuationById(String extensionPath, ElementDefinition e) {
-        return e.getId().startsWith(extensionPath) && e.getId().split(extensionPath).length > 1
-                && (e.getId().split(extensionPath)[1].startsWith(".") || e.getId().split(extensionPath)[1].startsWith("-")) && !e.getId().equals(extensionPath);
-    }
-
-    private boolean checkContinuationByPath(String path, ElementDefinition e) {
-        return e.getPath().startsWith(path) && e.getPath().split(path).length > 1
-                && (e.getPath().split(path)[1].startsWith(".") || e.getPath().split(path)[1].startsWith("-")) && !e.getPath().equals(path);
-    }
-
-    private boolean isNextAContinuationOfElementExtension(String path, ElementDefinition e) {
-        if (e.getId().contains(":")) {
-            if (path.contains(":")) {
-                return checkContinuationById(path, e);
-            }
-
-            else {
-                return (path.endsWith("extension")) ? false : true;
-            }
-        }
-         else {
-            return checkContinuationByPath(path, e);
-        }
     }
 
     private boolean isNextAContinuationOfElement(String id, String path, ElementDefinition e) {
         // If the id of the element starts with the given id and the next character in the id is a '.' or ':'
         String nextId = e.getId();
         return nextId.startsWith(id) && nextId.length() > id.length() && (nextId.charAt(id.length()) == '.' || nextId.charAt(id.length()) == ':');
+    }
 
-        /*
-        if (this.isExtension(e)) {
-            return isNextAContinuationOfElementExtension(path, e);
+    private ClassInfoElement mergeElements(ClassInfoElement cie, ClassInfoElement slice) {
+        if (cie == null) {
+            return slice;
         }
-        else if (path.contains(":")) {
-            return checkContinuationById(path, e);
+
+        boolean isList = cie.getElementTypeSpecifier() instanceof ListTypeSpecifier;
+        cie.setTarget(slice.getTarget());
+        cie.setElementType(null);
+        cie.setElementTypeSpecifier(null);
+        if (slice.getElementType() != null) {
+            if (isList) {
+                cie.setElementTypeSpecifier(new ListTypeSpecifier().withElementType(slice.getElementType()));
+            }
+            else {
+                cie.setElementType(slice.getElementType());
+            }
         }
-        else {
-            return checkContinuationByPath(path, e);
+        else if (slice.getElementTypeSpecifier() != null) {
+            if (isList) {
+                if (!(slice.getElementTypeSpecifier() instanceof ListTypeSpecifier)) {
+                    cie.setElementTypeSpecifier(new ListTypeSpecifier().withElementTypeSpecifier(slice.getElementTypeSpecifier()));
+                }
+                else {
+                    cie.setElementTypeSpecifier(slice.getElementTypeSpecifier());
+                }
+            }
+            else {
+                cie.setElementTypeSpecifier(slice.getElementTypeSpecifier());
+            }
         }
-        */
+
+        return cie;
     }
 
     // Visits the given element definition and returns a ClassInfoElement. If the
@@ -963,15 +989,33 @@ public abstract class ClassInfoBuilder {
     // On return, index will be updated to the index of the next element to be
     // processed
     // This visit should not be used on the root element of a structure definition
-    private ClassInfoElement visitElementDefinition(String modelName, String pathRoot, List<ElementDefinition> eds,
-            String structureRoot, List<ElementDefinition> structureEds, AtomicReference<Integer> index, List<ClassInfoElement> slices)
+    private ClassInfoElement visitElementDefinition(String modelName, String pathRoot,
+            List<ElementDefinition> eds, AtomicReference<Integer> index, SliceInfo sliceInfo, SliceList slices)
             throws Exception {
         ElementDefinition ed = eds.get(index.get());
 
-        String id;
-        String path;
-        id = ed.getId();
-        path = ed.getPath();
+        String id = ed.getId();
+        String path = ed.getPath();
+        System.out.println(String.format("Visiting element %s, path %s", id, path));
+
+        if (ed.getSlicing() != null && !ed.getSlicing().isEmpty()) {
+            sliceInfo = new SliceInfo(ed, sliceInfo);
+            slices.setSliceInfo(sliceInfo);
+        }
+
+        if (ed.hasSliceName()) {
+            if (sliceInfo == null) {
+                System.out.println(String.format("WARNING: Slice %s is not defined as part of a valid slicing", ed.getSliceName()));
+            }
+            else {
+                sliceInfo.setSliceName(ed.getSliceName());
+                System.out.println(String.format("Started slice %s of slicing root %s", sliceInfo.getSliceName(), sliceInfo.getSliceRoot().getId()));
+            }
+        }
+
+        if (sliceInfo != null && !sliceInfo.isTypeSlicing() && !sliceInfo.getSliceRoot().getId().equals(ed.getId())) {
+            sliceInfo.resolveSlicePath(ed);
+        }
 
         TypeSpecifier typeSpecifier = this.buildElementTypeSpecifier(modelName, pathRoot, ed);
 
@@ -992,12 +1036,24 @@ public abstract class ClassInfoBuilder {
         while (index.get() < eds.size()) {
             ElementDefinition e = eds.get(index.get());
             if (isNextAContinuationOfElement(id, path, e)) {
-                List<ClassInfoElement> elementSlices = new ArrayList<ClassInfoElement>();
-                ClassInfoElement cie = this.visitElementDefinition(modelName, pathRoot, eds, /*typeRoot*/ null, structureEds, index, elementSlices);
+                SliceList elementSlices = new SliceList();
+                ClassInfoElement cie = this.visitElementDefinition(modelName, pathRoot, eds, index, sliceInfo, elementSlices);
                 if (cie != null && !(cie.getElementType() == null && cie.getElementTypeSpecifier() == null)) {
                     elements.add(cie);
                 }
-                slices.addAll(elementSlices);
+
+                for (ClassInfoElement slice : elementSlices.getSlices()) {
+                    // Slices other than type slices are reported to the containing element (or class)
+                    System.out.println(String.format("Adding slice %s to slice list of element %s", slice.getName(), ed.getId()));
+                    if (elementSlices.getSliceInfo() != null) {
+                        // The slices have been collected at the discriminator, so bubbling them past this point means they need to be qualified
+                        // by the path of the current element
+                        if (slice.getTarget() != null) {
+                            slice.setTarget(slice.getTarget().replace("%value.", "%value." + stripPath(ed.getPath()) + "."));
+                        }
+                    }
+                    slices.getSlices().add(slice);
+                }
             }
             else {
                 break;
@@ -1015,50 +1071,131 @@ public abstract class ClassInfoBuilder {
                 this.typeInfos.put(this.getTypeName(modelName, typeName), componentClassInfo);
 
                 typeSpecifier = this.buildTypeSpecifier(modelName, typeName);
+                // Elements have been added to the type of the element
+                elements.clear();
             }
-            else {
-                // The child elements are slices
-                slices.addAll(elements);
+        }
+
+        // If this is a slice of a backbone element and there are slices, add the slices to the constructed type for the slice
+        if (ed.hasSliceName() && isBackboneElement(ed) && (slices.getSlices().size() > 0)) {
+            // In this case, the type was constructed as part of the buildElementTypeSpecifier call earlier
+            // If the typeSpecifier is not a constructed type as expected, allow the slices to bubble up one level
+            if (typeSpecifier instanceof NamedTypeSpecifier && !isSystemTypeName(getTypeName((NamedTypeSpecifier)typeSpecifier))) {
+                TypeInfo elementTypeInfo = resolveType(getTypeName((NamedTypeSpecifier)typeSpecifier));
+                if (elementTypeInfo instanceof ClassInfo) {
+                    ClassInfo elementClassInfo = (ClassInfo)elementTypeInfo;
+                    for (ClassInfoElement slice : slices.getSlices()) {
+                        System.out.println(String.format("Adding slice %s to constructed type %s.", slice.getName(), elementClassInfo.getName()));
+                        elementClassInfo.getElement().add(slice);
+                    }
+                    slices.getSlices().clear();
+                }
             }
         }
 
         ClassInfoElement cie = buildClassInfoElement(pathRoot, ed, typeSpecifier);
-        if (cie != null && ed.hasSliceName()) {
-            // If the element is an extension slice, and there is a single slice collected, collapse it into the extension slice
-            // This effectively sets the type of the slice to the type of the "value" slice of the extension
-            if (this.isExtension(ed) && slices.size() == 1) {
-                boolean isList = cie.getElementTypeSpecifier() instanceof ListTypeSpecifier;
-                ClassInfoElement slice = slices.remove(0);
-                cie.setElementType(null);
-                cie.setElementTypeSpecifier(null);
-                if (slice.getElementType() != null) {
-                    if (isList) {
-                        cie.setElementTypeSpecifier(new ListTypeSpecifier().withElementType(slice.getElementType()));
-                    }
-                    else {
-                        cie.setElementType(slice.getElementType());
-                    }
+
+        // If this element is a slice, set the target map for the element
+        if (ed.hasSliceName() && sliceInfo != null) {
+            if (elements.size() == 1) {
+                System.out.println(String.format("Element %s is the only element for slice %s, collapsing into the slice.", elements.get(0).getName(), ed.getSliceName()));
+                cie = mergeElements(cie, elements.remove(0));
+            }
+            else if (elements.size() > 1) {
+                throw new IllegalArgumentException("Multiple slices encountered");
+            }
+
+            if (cie != null) {
+                if (sliceInfo.isExtensionSlicing() && !sliceInfo.hasSliceMap()) {
+                    ed.getType().get(0).getProfile().get(0);
+                    sliceInfo.addSliceMap(String.format("url=%s", typeUrl(ed)));
                 }
-                else if (slice.getElementTypeSpecifier() != null) {
-                    if (isList) {
-                        if (!(slice.getElementTypeSpecifier() instanceof ListTypeSpecifier)) {
-                            cie.setElementTypeSpecifier(new ListTypeSpecifier().withElementTypeSpecifier(slice.getElementTypeSpecifier()));
-                        }
-                        else {
-                            cie.setElementTypeSpecifier(slice.getElementTypeSpecifier());
-                        }
+                String targetMap = sliceInfo.getSliceMap();
+                if (targetMap != null && !targetMap.isEmpty()) {
+                    if (cie.getTarget() != null && !cie.getTarget().isEmpty()) {
+                        targetMap = cie.getTarget().replace("%value", targetMap + (isClassType(typeSpecifier) ? ".value" : ""));
                     }
-                    else {
-                        cie.setElementTypeSpecifier(slice.getElementTypeSpecifier());
-                    }
+                    cie.setTarget(targetMap);
                 }
             }
-            slices.add(cie);
-            return null;
+
+            if (!sliceInfo.isTypeSlicing()) {
+                System.out.println(String.format("Element %s is a slice of element %s, adding to slice list.", cie.getName(), sliceInfo.getSliceRoot().getId()));
+                slices.getSlices().add(cie);
+                cie = null;
+            }
         }
-        else {
-            return cie;
+
+        // If this is a slice root, process the slices...
+        if (sliceInfo != null && sliceInfo.getSliceRoot().getId().equals(ed.getId())) {
+            if (sliceInfo.isTypeSlicing()) {
+                if (elements.size() >= 1) {
+                    if (elements.size() > 1) {
+                        throw new IllegalArgumentException("Multiple type slices encountered");
+                    }
+                    System.out.println(String.format("Element %s is the only element of a type-discriminated slicing of element %s, collapsing into the element.", elements.get(0).getName(), ed.getId()));
+                    cie = mergeElements(cie, elements.remove(0));
+                }
+            }
+            else {
+                // These are slices, report them to the containing element as sub-elements
+                slices.getSlices().addAll(elements);
+                elements.clear();
+            }
         }
+
+        // If this is a not a slice and not a slicing root, but there are slices (slices.size() > 0)
+        if (!ed.hasSliceName() && !(sliceInfo != null && sliceInfo.getSliceRoot().getId().equals(ed.getId())) && (slices.getSlices().size() > 0)) {
+
+            if (!(typeSpecifier instanceof NamedTypeSpecifier)) {
+                throw new IllegalArgumentException("Derived type for slicing support only supported for named types");
+            }
+
+            if (!(isClassType(getTypeName((NamedTypeSpecifier)typeSpecifier)))) {
+                throw new IllegalArgumentException("Derived type for slicing support on primitives not implemented");
+            }
+
+            // The element should be represented as a type with elements for the slices
+            // Construct an element-specific type that is derived from the type of the current element
+            // Add the slices to the elements of the new type
+            // However, constructing derived types based on System data types is cumbersome and confusing
+            // So if the element is of a system type, allow the slices to bubble up one level
+            if (!(isSystemTypeName(getTypeName((NamedTypeSpecifier)typeSpecifier)))) {
+                String typeName = capitalizePath(ed.getId().replace(':', '.'));
+                String qualifiedTypeName = getTypeName(modelName, typeName);
+                if (this.typeInfos.containsKey(qualifiedTypeName)) {
+                    System.out.println(String.format("WARNING: Duplicate type %s", qualifiedTypeName));
+                }
+
+                ClassInfo elementType = new ClassInfo().withNamespace(modelName).withName(typeName).withBaseTypeSpecifier(typeSpecifier).withRetrievable(false);
+                for (ClassInfoElement slice : slices.getSlices()) {
+                    System.out.println(String.format("Adding slice %s to derived type %s", slice.getName(), qualifiedTypeName));
+                    elementType.getElement().add(slice);
+                }
+                this.typeInfos.put(qualifiedTypeName, elementType);
+                slices.getSlices().clear();
+
+                NamedTypeSpecifier nts = new NamedTypeSpecifier();
+                nts.setNamespace(modelName);
+                nts.setName(typeName);
+
+                typeSpecifier = nts;
+
+                if (cie == null) {
+                    cie = new ClassInfoElement().withName(stripPath(stripChoice(ed.getPath()))).withElementType(getTypeName(nts));
+                }
+                else {
+                    cie.setElementType(getTypeName(nts));
+                    cie.setElementTypeSpecifier(null);
+                }
+            }
+        }
+
+        for (ClassInfoElement slice : elements) {
+            System.out.println(String.format("WARNING: Element %s ignored", slice.getName()));
+        }
+
+        return cie;
     }
 
     // Given a StructureDefinition, creates a ClassInfo to represent it
@@ -1082,26 +1219,22 @@ public abstract class ClassInfoBuilder {
         String path = sd.getType(); // Type is used to navigate the elements, regardless of the baseDefinition
         String id = path; // Id starts with the Type
         List<ElementDefinition> eds = sd.getSnapshot().getElement();
-        StructureDefinition structure = null;
-        if (!typeName.equals(path)) {
-            structure = structureDefinitions.get(path);
-        }
-
-        List<ElementDefinition> structureEds = null;
-        if (structure != null) {
-            structureEds = structure.getSnapshot().getElement();
-        }
+        SliceList elementSlices = null;
 
         while (index.get() < eds.size()) {
             ElementDefinition e = eds.get(index.get());
             if (isNextAContinuationOfElement(id, path, e)) {
-                List<ClassInfoElement> elementSlices = new ArrayList<ClassInfoElement>();
-                ClassInfoElement cie = this.visitElementDefinition(modelName, path, eds, structure == null ? null : getTail(structure.getId()),
-                        structureEds, index, elementSlices);
+                elementSlices = new SliceList();
+                ClassInfoElement cie = this.visitElementDefinition(modelName, path, eds, index, null, elementSlices);
                 if (cie != null && !(cie.getElementType() == null && cie.getElementTypeSpecifier() == null)) {
                     elements.add(cie);
                 }
-                elements.addAll(elementSlices);
+
+                // Slices of the element, if any
+                for (ClassInfoElement slice : elementSlices.getSlices()) {
+                    System.out.println(String.format("Adding slice %s to elements for %s", slice.getName(), typeName));
+                    elements.add(slice);
+                }
             }
             else {
                 break;
@@ -1117,14 +1250,17 @@ public abstract class ClassInfoBuilder {
             buildClassInfo(modelName, baseSd);
         }
 
-        // If this is an Extension and only has URL and value elements, set the base type to the type of the value element
-        if (baseTypeName != null && unQualify(baseTypeName).equals("Extension") && elements.size() == 2 && elements.get(0).getName().equals("url") && elements.get(1).getName().startsWith("value")) {
+        if (baseTypeName != null && unQualify(baseTypeName).equals("Extension") && elements.size() == 2
+                && elements.get(0).getName().equals("url") && elements.get(1).getName().startsWith("value")) {
             if (elements.get(1).getElementType() != null) {
                 info.setBaseType(elements.get(1).getElementType());
             }
             else {
                 info.setBaseTypeSpecifier(elements.get(1).getElementTypeSpecifier());
             }
+
+            // Set up target type map
+            typeTargets.put(qualifiedTypeName, elements.get(1).getTarget());
         }
         else {
             // Set base type, elements, and primary code path
@@ -1133,6 +1269,7 @@ public abstract class ClassInfoBuilder {
                     .withPrimaryCodePath(this.primaryCodePath(elements, typeName));
         }
 
+        System.out.println(String.format("Done building ClassInfo for %s", typeName));
         return info;
     }
 

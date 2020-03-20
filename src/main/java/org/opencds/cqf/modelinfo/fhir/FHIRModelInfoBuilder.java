@@ -72,6 +72,12 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
                     "    else\n" +
                     "        System.Quantity { value: quantity.value.value, unit: quantity.unit.value }\n" +
                     "\n" +
+                    "define function ToRatio(ratio FHIR.Ratio):\n" +
+                    "    if ratio is null then\n" +
+                    "        null\n" +
+                    "    else\n" +
+                    "        System.Ratio { numerator: ToQuantity(ratio.numerator), denominator: ToQuantity(ratio.denominator) }\n" +
+                    "\n" +
                     "define function ToInterval(range FHIR.Range):\n" +
                     "    if range is null then\n" +
                     "        null\n" +

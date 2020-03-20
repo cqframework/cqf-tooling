@@ -11,6 +11,7 @@ class FHIRClassInfoSettings extends ClassInfoSettings {
     public FHIRClassInfoSettings() {
         this.modelName = "FHIR";
         this.modelPrefix = "";
+        this.helpersLibraryName = "FHIRHelpers";
         this.codeableTypes = new HashSet<String>() {
             {
                 add("System.String");
