@@ -21,6 +21,10 @@
         <hapi_version>4.1.0</hapi_version>
     </properties>
 
+    <name>cqf-tooling</name>
+    <description>CQF Tooling</description>
+    <url>https://github.com/cqframework/cqf-tooling/tree/master</url>
+
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -29,8 +33,19 @@
         </license>
     </licenses>
 
+    <developers>
+        <developer>
+            <name>Josh Reynolds</name>
+        </developer>
+        <developer>
+            <name>Chris Schuler</name>
+        </developer>
+    </developers>
+
     <scm>
+        <connection>scm:git:git://github.com/cqframework/cqf-tooling.git</connection>
         <developerConnection>scm:git:https://github.com/cqframework/cqf-tooling/</developerConnection>
+        <url>http://github.com/cqframework/cqf-tooling.git/tree/master</url>
     </scm>
 
     <distributionManagement>
