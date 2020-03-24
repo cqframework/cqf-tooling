@@ -43,7 +43,9 @@
     </developers>
 
     <scm>
+        <connection>scm:git:git://github.com/cqframework/cqf-tooling.git</connection>
         <developerConnection>scm:git:https://github.com/cqframework/cqf-tooling/</developerConnection>
+        <url>http://github.com/cqframework/cqf-tooling.git/tree/master</url>
     </scm>
 
     <distributionManagement>
