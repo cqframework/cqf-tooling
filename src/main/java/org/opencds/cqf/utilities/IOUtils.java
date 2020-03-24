@@ -470,7 +470,6 @@ public class IOUtils
     private static HashSet<String> terminologyPaths = new HashSet<String>();
     public static HashSet<String> getTerminologyPaths(FhirContext fhirContext) {
         if (terminologyPaths.isEmpty()) {
-            System.out.println("Reading terminology");
             setupTerminologyPaths(fhirContext);
         }
         return terminologyPaths;
@@ -509,7 +508,6 @@ public class IOUtils
     private static HashSet<String> libraryPaths = new HashSet<String>();
     public static HashSet<String> getLibraryPaths(FhirContext fhirContext) {
         if (libraryPaths.isEmpty()) {
-            System.out.println("Reading libraries");
             setupLibraryPaths(fhirContext);
         }
         return libraryPaths;
@@ -540,7 +538,6 @@ public class IOUtils
     private static HashSet<String> measurePaths = new HashSet<String>();
     public static HashSet<String> getMeasurePaths(FhirContext fhirContext) {
         if (measurePaths.isEmpty()) {
-            System.out.println("Reading measures");
             setupMeasurePaths(fhirContext);
         }
         return measurePaths;
@@ -571,7 +568,6 @@ public class IOUtils
     private static HashSet<String> measureReportPaths = new HashSet<String>();
     public static HashSet<String> getMeasureReportPaths(FhirContext fhirContext) {
         if (measureReportPaths.isEmpty()) {
-            System.out.println("Reading measurereports");
             setupMeasureReportPaths(fhirContext);
         }
         return measureReportPaths;
@@ -600,7 +596,6 @@ public class IOUtils
 	private static HashSet<String> planDefinitionPaths = new HashSet<String>();
     public static HashSet<String> getPlanDefinitionPaths(FhirContext fhirContext) {
         if (planDefinitionPaths.isEmpty()) {
-            System.out.println("Reading plandefinitions");
             setupPlanDefinitionPaths(fhirContext);
         }
         return planDefinitionPaths;
