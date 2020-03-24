@@ -166,10 +166,10 @@ class USCoreClassInfoSettings extends ClassInfoSettings {
                 put("Measure", "topic");
                 put("MeasureReport", "measure.topic");
                 put("Medication", "code");
-                put("MedicationAdministration", "medicationCodeableConcept");
-                put("MedicationDispense", "medicationCodeableConcept");
-                put("MedicationRequest", "medicationCodeableConcept");
-                put("MedicationStatement", "medicationCodeableConcept");
+                put("MedicationAdministration", "medication");
+                put("MedicationDispense", "medication");
+                put("MedicationRequest", "medication");
+                put("MedicationStatement", "medication");
                 put("MessageDefinition", "event");
                 put("Observation", "code");
                 put("OperationOutcome", "issue.code");
