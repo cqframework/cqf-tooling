@@ -1,8 +1,6 @@
 package org.opencds.cqf.acceleratorkit;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.apache.commons.collections.map.MultiValueMap;
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -264,56 +262,103 @@ public class Processor extends Operation {
         return scopePath + "/input/vocabulary/valueset";
     }
 
-    private DictionaryCode getTerminologyCode(String codeSystemKey, String label, Row row, HashMap<String, Integer> colIds) {
+    private List<DictionaryCode> getTerminologyCodes(String codeSystemKey, String label, Row row, HashMap<String, Integer> colIds) {
+        List<DictionaryCode> codes = new ArrayList<>();
         String system = supportedCodeSystems.get(codeSystemKey);
-        String codeValue = SpreadsheetHelper.getCellAsString(row, getColId(colIds, codeSystemKey));
-        String display = String.format("%s (%s)", label, codeSystemKey);
-        if (codeValue != null && !codeValue.isEmpty()) {
-            return getCode(system, label, display, codeValue, null);
+        String codeListString = SpreadsheetHelper.getCellAsString(row, getColId(colIds, codeSystemKey));
+        if (codeListString != null && !codeListString.isEmpty()) {
+            List<String> codesList = Arrays.asList(codeListString.split(";"));
+            String display;
+            for (String c : codesList) {
+                display = String.format("%s (%s)", label, codeSystemKey);
+                codes.add(getCode(system, label, display, c, null));
+            }
         }
-        return null;
+
+        return codes;
     }
 
-    private DictionaryCode getFhirCode(String label, Row row, HashMap<String, Integer> colIds) {
+    private List<DictionaryCode> getFhirCodes(String label, Row row, HashMap<String, Integer> colIds) {
+        List<DictionaryCode> codes = new ArrayList<>();
         String system = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
         String display = String.format("%s (%s)", label, "FHIR");
         if (system != null && !system.isEmpty()) {
-            String codeValue = SpreadsheetHelper.getCellAsString(row, getColId(colIds,"FhirR4Code"));
-            if (codeValue != null && !codeValue.isEmpty()) {
-                return getCode(system, label, display, codeValue, null);
-            }
-        }
-        return null;
-    }
+            String codeListString = SpreadsheetHelper.getCellAsString(row, getColId(colIds,"FhirR4Code"));
+            if (codeListString != null && !codeListString.isEmpty()) {
+                List<String> codesList = Arrays.asList(codeListString.split(";"));
 
-    private DictionaryCode getOpenMRSCode(String label, Row row, HashMap<String, Integer> colIds) {
-        String system = openMRSSystem;
-        String parent = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "OpenMRSEntityParent"));
-        String display = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "OpenMRSEntity"));
-        String codeValue = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "OpenMRSEntityId"));
-        if (codeValue != null && !codeValue.isEmpty()) {
-            return getCode(system, display, label, codeValue, parent);
-        }
-        return null;
-    }
-
-    private DictionaryCode getPrimaryCode(String label, Row row, HashMap<String, Integer> colIds) {
-        DictionaryCode code = null;
-        if (enableOpenMRS) {
-            code = getOpenMRSCode(label, row, colIds);
-        }
-        if (code == null) {
-            code = getFhirCode(label, row, colIds);
-        }
-        if (code == null) {
-            for (String codeSystemKey : supportedCodeSystems.keySet()) {
-                code = getTerminologyCode(codeSystemKey, label, row, colIds);
-                if (code != null) {
-                    break;
+                for (String c : codesList) {
+                    codes.add(getCode(system, label, display, c, null));
                 }
             }
         }
-        return code;
+        return codes;
+    }
+
+    private List<DictionaryCode> getOpenMRSCodes(String label, Row row, HashMap<String, Integer> colIds) {
+        List<DictionaryCode> codes = new ArrayList<>();
+        String system = openMRSSystem;
+        String parent = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "OpenMRSEntityParent"));
+        String display = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "OpenMRSEntity"));
+        String codeListString = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "OpenMRSEntityId"));
+        if (codeListString != null && !codeListString.isEmpty()) {
+            List<String> codesList = Arrays.asList(codeListString.split(";"));
+
+            for (String c : codesList) {
+                codes.add(getCode(system, label, display, c, parent));
+            }
+        }
+        return codes;
+    }
+
+//    private List<DictionaryCode> getAllCodesForElement(String label, Row row, HashMap<String, Integer> colIds) {
+//        List<DictionaryCode> codes = new ArrayList<>();
+//
+//        for (String codeSystemKey : supportedCodeSystems.keySet()) {
+//            DictionaryCode code = getTerminologyCode(codeSystemKey, label, row, colIds);
+//            if (code != null) {
+//                codes.add(code);
+//            }
+//        }
+//
+//        return codes;
+//    }
+
+    private DictionaryCode getPrimaryCode(String label, Row row, HashMap<String, Integer> colIds) {
+        List<DictionaryCode> codes = new ArrayList<>();
+        DictionaryCode primaryCode = null;
+        if (enableOpenMRS) {
+            List<DictionaryCode> openMRSCodes = getOpenMRSCodes(label, row, colIds);
+            if (openMRSCodes != null && !openMRSCodes.isEmpty()) {
+                primaryCode = openMRSCodes.get(0);
+                codes.addAll(openMRSCodes);
+            }
+        }
+
+        List<DictionaryCode> fhirCodes = getFhirCodes(label, row, colIds);
+        if (fhirCodes != null && !fhirCodes.isEmpty()) {
+            if (primaryCode == null) {
+                primaryCode = fhirCodes.get(0);
+            }
+            codes.addAll(fhirCodes);
+        }
+
+        for (String codeSystemKey : supportedCodeSystems.keySet()) {
+            List<DictionaryCode> terminologyCodes = getTerminologyCodes(codeSystemKey, label, row, colIds);
+            if (terminologyCodes != null && !terminologyCodes.isEmpty()) {
+                if (primaryCode == null) {
+                    primaryCode = terminologyCodes.get(0);
+                }
+                codes.addAll(terminologyCodes);
+            }
+        }
+
+        // If more than one code is specified for the element, raise a warning.
+        if (codes != null && codes.size() > 1) {
+            System.out.println(String.format("Element \"%s\" has multiple codes. %s was selected as the Primary code", label, primaryCode.getCode()));
+        }
+
+        return primaryCode;
     }
 
     private DictionaryCode getCode(String system, String label, String display, String codeValue, String parent) {
@@ -412,29 +457,29 @@ public class Processor extends Operation {
                 if (choices != null && !choices.isEmpty()) {
                     choices = choices.trim();
 
-                    DictionaryCode code;
+                    List<DictionaryCode> codes;
                     if (enableOpenMRS) {
                         // Open MRS choices
-                        code = getOpenMRSCode(choices, row, colIds);
-                        if (code != null) {
-                            currentElement.getChoices().add(code);
+                        codes = getOpenMRSCodes(choices, row, colIds);
+                        if (codes != null && !codes.isEmpty()) {
+                            currentElement.getChoices().addAll(codes);
                         }
                     }
 
                     // FHIR choices
                     String fhirCodeSystem = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
                     if (fhirCodeSystem != null && !fhirCodeSystem.isEmpty()) {
-                        code = getFhirCode(choices, row, colIds);
-                        if (code != null) {
-                            currentElement.getChoices().add(code);
+                        codes = getFhirCodes(choices, row, colIds);
+                        if (codes != null && !codes.isEmpty()) {
+                            currentElement.getChoices().addAll(codes);
                         }
                     }
 
                     // Other Terminology choices
                     for (String codeSystemKey : supportedCodeSystems.keySet()) {
-                        code = getTerminologyCode(codeSystemKey, choices, row, colIds);
-                        if (code != null) {
-                            currentElement.getChoices().add(code);
+                        codes = getTerminologyCodes(codeSystemKey, choices, row, colIds);
+                        if (codes != null && !codes.isEmpty()) {
+                            currentElement.getChoices().addAll(codes);
                         }
                     }
                 }
@@ -497,10 +542,6 @@ public class Processor extends Operation {
                         case "validation required": colIds.put("Constraint", cell.getColumnIndex()); break;
                         case "required": colIds.put("Required", cell.getColumnIndex()); break;
                         case "editable": colIds.put("Editable", cell.getColumnIndex()); break;
-                        case "openmrs entity parent": colIds.put("OpenMRSEntityParent", cell.getColumnIndex()); break;
-                        case "openmrs entity": colIds.put("OpenMRSEntity", cell.getColumnIndex()); break;
-                        case "openmrs entity id": colIds.put("OpenMRSEntityId", cell.getColumnIndex()); break;
-
                         case "custom profile id": colIds.put("CustomProfileId", cell.getColumnIndex()); break;
                         case "binding or custom value set name or reference": colIds.put("CustomValueSetName", cell.getColumnIndex()); break;
                         case "extension needed": colIds.put("ExtensionNeeded", cell.getColumnIndex()); break;
@@ -521,6 +562,9 @@ public class Processor extends Operation {
                         case "snomed-ct": colIds.put("SNOMED-CT", cell.getColumnIndex()); break;
                         case "loinc": colIds.put("LOINC", cell.getColumnIndex()); break;
                         case "rxnorm": colIds.put("RxNorm", cell.getColumnIndex()); break;
+                        case "openmrs entity parent": colIds.put("OpenMRSEntityParent", cell.getColumnIndex()); break;
+                        case "openmrs entity": colIds.put("OpenMRSEntity", cell.getColumnIndex()); break;
+                        case "openmrs entity id": colIds.put("OpenMRSEntityId", cell.getColumnIndex()); break;
                     }
                 }
                 continue;
@@ -653,6 +697,8 @@ public class Processor extends Operation {
     private String cleanseFhirType(String type) {
         if (type != null && type.length() > 0) {
             switch (type) {
+                case "DateTime":
+                    return "dateTime";
                 case "Integer":
                     return "integer";
                 default:
@@ -678,6 +724,7 @@ public class Processor extends Operation {
                 case "Coding":
                 case "Coding (Select all that apply":
                 case "Coding - Select all that apply":
+                case "Coding - Select One":
                     return "CodeableConcept";
                 default:
                     return type;
@@ -701,7 +748,7 @@ public class Processor extends Operation {
                 String typePortion = cleanseFhirType(elementPath.getFhirElementType());
                 return typePortion;
             }
-            
+
             List<ElementDefinition> snapshotElements = sd.getSnapshot().getElement();
             ElementDefinition typeElement = null;
             for (ElementDefinition elementDef : snapshotElements) {
@@ -747,9 +794,7 @@ public class Processor extends Operation {
         sd.setFhirVersion(Enumerations.FHIRVersion._4_0_1);
         sd.setKind(StructureDefinition.StructureDefinitionKind.COMPLEXTYPE);
         sd.setAbstract(false);
-        // TODO: Support resources other than Observation
         sd.setType("Extension");
-        // TODO: Use baseDefinition to derive from less specialized profiles
         sd.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Extension");
         sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
         sd.setDifferential(new StructureDefinition.StructureDefinitionDifferentialComponent());
@@ -767,6 +812,11 @@ public class Processor extends Operation {
         rootElement.setDefinition(element.getDescription());
         rootElement.setMin(toBoolean(element.getRequired()) ? 1 : 0);
         rootElement.setMax(isMultipleChoiceElement(element) ? "*" : "1");
+
+        if (element.getCode() != null) {
+            rootElement.setFixed(element.getCode().toCodeableConcept());
+        }
+
         sd.getDifferential().addElement(rootElement);
 
         // Add extension element
@@ -798,6 +848,8 @@ public class Processor extends Operation {
             valueTypeList.add(valueTypeRefComponent);
             valueElement.setType(valueTypeList);
         }
+
+        ensureAndBindElementTerminology(element, sd, valueElement);
 
         valueElement.setShort(element.getLabel());
         valueElement.setDefinition(element.getDescription());
@@ -953,8 +1005,6 @@ public class Processor extends Operation {
         }
 
         if (codePath != null && !codePath.isEmpty() && element.getCode() != null) {
-            // code - Fixed to the value of the OpenMRS code for this DictionaryElement
-            // TODO: This should not be fixed, it should create and bind to a ValueSet - support multiple codes
             ElementDefinition ed = new ElementDefinition();
             ed.setId(String.format("%s.%s", resourceType, codePath));
             ed.setPath(String.format("%s.%s", resourceType, codePath));
@@ -964,7 +1014,7 @@ public class Processor extends Operation {
             ed.setFixed(element.getCode().toCodeableConcept());
             sd.getDifferential().addElement(ed);
         }
-        else {
+//        else {
             Boolean isSlice = element.getMasterDataType().toLowerCase().equals("slice");
             String masterDataElementPath = elementPath.getMasterDataElementPath();
             Boolean isElementOfSlice = !isSlice &&  masterDataElementPath!= null && !masterDataElementPath.isEmpty() && masterDataElementPath.indexOf(".") > 0;
@@ -984,7 +1034,8 @@ public class Processor extends Operation {
                 } else {
                     elementId = String.format("%s:%s.%s", resource.substring(0, elementPathStartIndex - 1), sliceName, resource.substring(elementPathStartIndex));
                 }
-            } else {
+            }
+            else {
                 elementId = String.format("%s.%s", resourceType, choicesPath);
             }
 
@@ -1019,7 +1070,7 @@ public class Processor extends Operation {
                     sd.getDifferential().addElement(ed);
                 }
             }
-        }
+//        }
     }
 
     private void ensureSliceAndBaseElementWithSlicing(DictionaryElement dictionaryElement, DictionaryFhirElementPath elementPath,
@@ -1210,10 +1261,7 @@ public class Processor extends Operation {
             String extensionsPath = getExtensionsPath(scopePath);
             ensureExtensionsPath(scopePath);
 
-           // Comparator<ElementDefinition> compareById = Comparator.comparing(Element::getId);
-
             for (StructureDefinition sd : extensions) {
-                //sd.getDifferential().getElement().sort(compareById);
                 writeResource(extensionsPath, sd);
 
                 // Generate JSON fragment for inclusion in the IG:
@@ -1223,7 +1271,7 @@ public class Processor extends Operation {
                         "defns": "StructureDefinition-<id>-definitions.html",
                         "base": "StructureDefinition-<id>.html"
                     }
-                 */
+                */
                 igJsonFragments.add(String.format("\t\t\"StructureDefinition/%s\": {\r\n\t\t\t\"source\": \"structuredefinition/structuredefinition-%s.json\",\r\n\t\t\t\"defns\": \"StructureDefinition-%s-definitions.html\",\r\n\t\t\t\"base\": \"StructureDefinition-%s.html\"\r\n\t\t}",
                         sd.getId(), sd.getId(), sd.getId(), sd.getId()));
 
