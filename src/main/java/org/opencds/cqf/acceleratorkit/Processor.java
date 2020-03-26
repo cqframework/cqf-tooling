@@ -39,7 +39,7 @@ public class Processor extends Operation {
 
     private Map<String, StructureDefinition> fhirModelStructureDefinitions = new HashMap<String, StructureDefinition>();
     private Map<String, DictionaryElement> elementMap = new HashMap<String, DictionaryElement>();
-    private Map<String, List<StructureDefinition>> profileExtensions = new HashMap<>();
+    private List<DictionaryProfileElementExtension> profileExtensions = new ArrayList<>();
     private List<StructureDefinition> extensions = new ArrayList<StructureDefinition>();
     private List<StructureDefinition> profiles = new ArrayList<StructureDefinition>();
     private List<CodeSystem> codeSystems = new ArrayList<CodeSystem>();
@@ -111,7 +111,7 @@ public class Processor extends Operation {
     private void processScope(Workbook workbook, String scope) {
         // reset variables
         elementMap = new HashMap<>();
-        profileExtensions = new HashMap<>();
+        profileExtensions = new ArrayList<>();
         extensions = new ArrayList<>();
         profiles = new ArrayList<>();
         codeSystems = new ArrayList<>();
@@ -136,62 +136,76 @@ public class Processor extends Operation {
         processElementMap();
 
         // Add extensions to the appropriate profiles
-        profileExtensions.forEach((profileId, extensionsList) -> {
+        for (DictionaryProfileElementExtension profileElementExtension : profileExtensions) {
             for (StructureDefinition profile : profiles) {
-                if (profile.getId().equals(profileId)) {
-                    for (StructureDefinition sd : extensionsList) {
-                        List<ElementDefinition> differential =  sd.getDifferential().getElement();
+                if (profile.getId().equals(profileElementExtension.getProfileId())) {
+                    StructureDefinition extensionDefinition = profileElementExtension.getExtension();
 
-                        ElementDefinition extensionBaseElement = null;
-                        for (ElementDefinition ed : differential) {
-                            if (ed.getId().equals("Extension.extension")) {
-                                extensionBaseElement = ed;
-                                break;
-                            }
-                        }
-
-                        String extensionUrl = null;
-                        for (ElementDefinition ed : differential) {
-                            if (ed.getId().equals("Extension.url")) {
-                                extensionUrl = ((UriType)ed.getFixed()).getValueAsString();
-                                break;
-                            }
-                        }
-
-                        ElementDefinition extensionValueElement = null;
-                        for (ElementDefinition ed : differential) {
-                            if (ed.getId().equals("Extension.value[x]")) {
-                                extensionValueElement = ed;
-                                break;
-                            }
-                        }
-
-                        String extensionId = profile.getType() + ".extension:" + toId(sd.getName());
-                        String extensionName = toId(sd.getName());
-
-                        ElementDefinition extensionElement = new ElementDefinition();
-                        extensionElement.setId(extensionId);
-                        extensionElement.setPath(profile.getType() + ".extension");
-                        extensionElement.setSliceName(extensionName);
-                        extensionElement.setMin(extensionBaseElement.getMin());
-                        extensionElement.setMax(extensionBaseElement.getMax());
-
-                        ElementDefinition.TypeRefComponent typeRefComponent = new ElementDefinition.TypeRefComponent();
-                        List<CanonicalType> typeProfileList = new ArrayList<>();
-                        typeProfileList.add(new CanonicalType(sd.getUrl()));
-                        typeRefComponent.setProfile(typeProfileList);
-                        typeRefComponent.setCode("Extension");
-
-                        List<ElementDefinition.TypeRefComponent> typeRefList = new ArrayList<>();
-                        typeRefList.add(typeRefComponent);
-
-                        extensionElement.setType(typeRefList);
-
-                        profile.getDifferential().addElement(extensionElement);
+                    String extensionName = null;
+                    String[] resourcePathComponents = profileElementExtension.getResourcePath().split("\\.");
+                    if (resourcePathComponents.length == 1) {
+                        extensionName = resourcePathComponents[0];
                     }
+                    else if (resourcePathComponents.length > 1) {
+                        extensionName = resourcePathComponents[resourcePathComponents.length - 1];
+                    }
+                    else {
+                        extensionName = profile.getName();
+                    }
+
+                    List<ElementDefinition> extensionDifferential =  extensionDefinition.getDifferential().getElement();
+
+                    ElementDefinition extensionBaseElement = null;
+                    for (ElementDefinition ed : extensionDifferential) {
+                        if (ed.getId().equals("Extension.extension")) {
+                            extensionBaseElement = ed;
+                            break;
+                        }
+                    }
+
+//                    String extensionUrl = null;
+//                    for (ElementDefinition ed : extensionDifferential) {
+//                        if (ed.getId().equals("Extension.url")) {
+//                            extensionUrl = ((UriType)ed.getFixed()).getValueAsString();
+//                            break;
+//                        }
+//                    }
+//
+//                    ElementDefinition extensionValueElement = null;
+//                    for (ElementDefinition ed : extensionDifferential) {
+//                        if (ed.getId().equals("Extension.value[x]")) {
+//                            extensionValueElement = ed;
+//                            break;
+//                        }
+//                    }
+
+                    String resourcePath = profileElementExtension.getResourcePath();
+                    String pathToElementBeingExtended = resourcePath.substring(0, resourcePath.indexOf(extensionName) - 1);
+                    String extensionId = pathToElementBeingExtended + ".extension:" + extensionName;
+//                    String extensionName = toId(extensionDefinition.getName());
+
+                    ElementDefinition extensionElement = new ElementDefinition();
+                    extensionElement.setId(extensionId);
+                    extensionElement.setPath(pathToElementBeingExtended + ".extension");
+                    extensionElement.setSliceName(extensionName);
+                    extensionElement.setMin(extensionBaseElement.getMin());
+                    extensionElement.setMax(extensionBaseElement.getMax());
+
+                    ElementDefinition.TypeRefComponent typeRefComponent = new ElementDefinition.TypeRefComponent();
+                    List<CanonicalType> typeProfileList = new ArrayList<>();
+                    typeProfileList.add(new CanonicalType(extensionDefinition.getUrl()));
+                    typeRefComponent.setProfile(typeProfileList);
+                    typeRefComponent.setCode("Extension");
+
+                    List<ElementDefinition.TypeRefComponent> typeRefList = new ArrayList<>();
+                    typeRefList.add(typeRefComponent);
+
+                    extensionElement.setType(typeRefList);
+
+                    profile.getDifferential().addElement(extensionElement);
                 }
             }
-        });
+        }
 
         // write all resources
         writeExtensions(scopePath);
@@ -615,8 +629,8 @@ public class Processor extends Operation {
         if (element == null
             || element.getMasterDataType() == null
             || element.getFhirElementPath() == null
-            || (element.getFhirElementPath().getBaseProfile() != null
-                    && element.getFhirElementPath().getBaseProfile().toLowerCase().trim().equals("extension needed"))
+//            || (element.getFhirElementPath().getBaseProfile() != null
+//                && element.getFhirElementPath().getBaseProfile().toLowerCase().trim().equals("extension needed"))
         ) {
             return false;
         }
@@ -656,10 +670,15 @@ public class Processor extends Operation {
             if (requiresProfile(element)) {
                 StructureDefinition profile = ensureProfile(element);
             }
-            else if (requiresExtension(element)) {
-                StructureDefinition extension = ensureExtension(element);
-                profileExtensions.computeIfAbsent(toId(element.getFhirElementPath().getCustomProfileId()), k -> new ArrayList<>()).add(extension);
-            }
+//            else if (requiresExtension(element)) {
+//                StructureDefinition extension = ensureExtension(element);
+//                DictionaryProfileElementExtension profileElementExtensionEntry = new DictionaryProfileElementExtension();
+//                profileElementExtensionEntry.setProfileId(toId(element.getFhirElementPath().getCustomProfileId()));
+//                profileElementExtensionEntry.setResourcePath(element.getFhirElementPath().getResourceTypeAndPath());
+//                profileElementExtensionEntry.setElement(element);
+//                profileElementExtensionEntry.setExtension(extension);
+//                profileExtensions.add(profileElementExtensionEntry);
+//            }
         }
     }
 
@@ -912,8 +931,16 @@ public class Processor extends Operation {
         sd.setAbstract(false);
         // TODO: Support resources other than Observation
         sd.setType(resourceType);
-        // TODO: Use baseDefinition to derive from less specialized profiles
-        sd.setBaseDefinition(elementPath.getBaseProfile());
+
+        String baseResource = "http://hl7.org/fhir/StructureDefinition/" + resourceType;
+        String baseProfileValue = elementPath.getBaseProfile();
+        if (baseProfileValue == null || baseProfileValue.isEmpty() || baseProfileValue.toLowerCase().equals("extension needed") || baseProfileValue.toLowerCase().equals("fhir")) {
+            sd.setBaseDefinition(baseResource);
+        }
+        else {
+            sd.setBaseDefinition(baseProfileValue);
+        }
+
         sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
         sd.setDifferential(new StructureDefinition.StructureDefinitionDifferentialComponent());
 
@@ -953,8 +980,19 @@ public class Processor extends Operation {
             sd = createProfileStructureDefinition(element, customProfileId);
         }
 
-        // Ensure that the element is added to the StructureDefinition
-        ensureElement(element, sd);
+        if (requiresExtension(element)) {
+            StructureDefinition extension = ensureExtension(element);
+            DictionaryProfileElementExtension profileElementExtensionEntry = new DictionaryProfileElementExtension();
+            profileElementExtensionEntry.setProfileId(toId(element.getFhirElementPath().getCustomProfileId()));
+            profileElementExtensionEntry.setResourcePath(element.getFhirElementPath().getResourceTypeAndPath());
+            profileElementExtensionEntry.setElement(element);
+            profileElementExtensionEntry.setExtension(extension);
+            profileExtensions.add(profileElementExtensionEntry);
+        }
+        else {
+            // Ensure that the element is added to the StructureDefinition
+            ensureElement(element, sd);
+        }
 
         if (!profiles.contains(sd)) {
             profiles.add(sd);
