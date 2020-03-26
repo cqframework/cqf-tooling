@@ -589,7 +589,7 @@ public class Processor extends Operation {
             boolean scopeMatchesRowScope = rowScope != null && scope.toLowerCase().equals(rowScope.toLowerCase());
 
             String inNewDD = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "InNewDD"));
-            boolean shouldInclude = inNewDD.equals("ST") || inNewDD.equals("1");
+            boolean shouldInclude = inNewDD != null && (inNewDD.equals("ST") || inNewDD.equals("1"));
 
             if (shouldInclude && (scopeIsNull || scopeMatchesRowScope)) {
                 String masterDataType = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MasterDataType"));
@@ -670,15 +670,6 @@ public class Processor extends Operation {
             if (requiresProfile(element)) {
                 StructureDefinition profile = ensureProfile(element);
             }
-//            else if (requiresExtension(element)) {
-//                StructureDefinition extension = ensureExtension(element);
-//                DictionaryProfileElementExtension profileElementExtensionEntry = new DictionaryProfileElementExtension();
-//                profileElementExtensionEntry.setProfileId(toId(element.getFhirElementPath().getCustomProfileId()));
-//                profileElementExtensionEntry.setResourcePath(element.getFhirElementPath().getResourceTypeAndPath());
-//                profileElementExtensionEntry.setElement(element);
-//                profileElementExtensionEntry.setExtension(extension);
-//                profileExtensions.add(profileElementExtensionEntry);
-//            }
         }
     }
 
