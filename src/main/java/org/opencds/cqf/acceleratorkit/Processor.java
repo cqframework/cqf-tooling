@@ -1046,89 +1046,88 @@ public class Processor extends Operation {
             ed.setFixed(element.getCode().toCodeableConcept());
             sd.getDifferential().addElement(ed);
         }
-//        else {
-            Boolean isSlice = element.getMasterDataType().toLowerCase().equals("slice");
-            String masterDataElementPath = elementPath.getMasterDataElementPath();
-            Boolean isElementOfSlice = !isSlice &&  masterDataElementPath!= null && !masterDataElementPath.isEmpty() && masterDataElementPath.indexOf(".") > 0;
 
-            String elementId;
-            String slicePath;
-            String sliceName = null;
-            if (isSlice || isElementOfSlice) {
-                int periodIndex = masterDataElementPath.indexOf(".");
-                sliceName = periodIndex > 0 ? masterDataElementPath.substring(0, periodIndex) : masterDataElementPath;
-                slicePath = periodIndex > 0 ? masterDataElementPath.substring(periodIndex + 1) : masterDataElementPath;
+        Boolean isSlice = element.getMasterDataType().toLowerCase().equals("slice");
+        String masterDataElementPath = elementPath.getMasterDataElementPath();
+        Boolean isElementOfSlice = !isSlice &&  masterDataElementPath!= null && !masterDataElementPath.isEmpty() && masterDataElementPath.indexOf(".") > 0;
 
-                String resource = elementPath.getResourceTypeAndPath();
-                int elementPathStartIndex = resource.indexOf(slicePath);
-                if (isSlice) {
-                    elementId = String.format("%s:%s", resource, sliceName);
-                } else {
-                    elementId = String.format("%s:%s.%s", resource.substring(0, elementPathStartIndex - 1), sliceName, resource.substring(elementPathStartIndex));
+        String elementId;
+        String slicePath;
+        String sliceName = null;
+        if (isSlice || isElementOfSlice) {
+            int periodIndex = masterDataElementPath.indexOf(".");
+            sliceName = periodIndex > 0 ? masterDataElementPath.substring(0, periodIndex) : masterDataElementPath;
+            slicePath = periodIndex > 0 ? masterDataElementPath.substring(periodIndex + 1) : masterDataElementPath;
+
+            String resource = elementPath.getResourceTypeAndPath();
+            int elementPathStartIndex = resource.indexOf(slicePath);
+            if (isSlice) {
+                elementId = String.format("%s:%s", resource, sliceName);
+            } else {
+                elementId = String.format("%s:%s.%s", resource.substring(0, elementPathStartIndex - 1), sliceName, resource.substring(elementPathStartIndex));
+            }
+        }
+        else {
+            elementId = String.format("%s.%s", resourceType, choicesPath);
+        }
+
+        ElementDefinition existingElement = null;
+        for (ElementDefinition elementDef : sd.getDifferential().getElement()) {
+            if (elementDef.getId().equals(elementId)) {
+                existingElement = elementDef;
+                break;
+            }
+        }
+
+        // if the element doesn't exist, create it
+        if (existingElement == null) {
+            if (isSlice) {
+                ensureSliceAndBaseElementWithSlicing(element, elementPath, sd, elementId, sliceName, null);
+            } else {
+                ElementDefinition ed = new ElementDefinition();
+                ed.setId(elementId);
+                ed.setPath(elementPath.getResourceTypeAndPath());
+                ed.setMin(toBoolean(element.getRequired()) ? 1 : 0);
+                ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
+                ed.setMustSupport(true);
+
+                ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
+                String elementFhirType = getFhirTypeOfTargetElement(elementPath);
+                if (elementFhirType != null && elementFhirType.length() > 0) {
+                    tr.setCode(elementFhirType);
+                    ed.addType(tr);
                 }
+
+                ensureAndBindElementTerminology(element, sd, ed);
+                sd.getDifferential().addElement(ed);
             }
-            else {
-                elementId = String.format("%s.%s", resourceType, choicesPath);
-            }
+        }
+        else {
+            // If this is a choice type, append the current element's type to the type list.
+            if (isChoiceType(elementPath)) {
+                List<ElementDefinition.TypeRefComponent> existingTypes = existingElement.getType();
 
-            ElementDefinition existingElement = null;
-            for (ElementDefinition elementDef : sd.getDifferential().getElement()) {
-                if (elementDef.getId().equals(elementId)) {
-                    existingElement = elementDef;
-                    break;
-                }
-            }
-
-            // if the element doesn't exist, create it
-            if (existingElement == null) {
-                if (isSlice) {
-                    ensureSliceAndBaseElementWithSlicing(element, elementPath, sd, elementId, sliceName, null);
-                } else {
-                    ElementDefinition ed = new ElementDefinition();
-                    ed.setId(elementId);
-                    ed.setPath(elementPath.getResourceTypeAndPath());
-                    ed.setMin(toBoolean(element.getRequired()) ? 1 : 0);
-                    ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
-                    ed.setMustSupport(true);
-
-                    ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
-                    String elementFhirType = getFhirTypeOfTargetElement(elementPath);
-                    if (elementFhirType != null && elementFhirType.length() > 0) {
-                        tr.setCode(elementFhirType);
-                        ed.addType(tr);
-                    }
-
-                    ensureAndBindElementTerminology(element, sd, ed);
-                    sd.getDifferential().addElement(ed);
-                }
-            }
-            else {
-                // If this is a choice type, append the current element's type to the type list.
-                if (isChoiceType(elementPath)) {
-                    List<ElementDefinition.TypeRefComponent> existingTypes = existingElement.getType();
-
-                    ElementDefinition.TypeRefComponent elementType = null;
-                    String elementFhirType = getFhirTypeOfTargetElement(elementPath);
-                    if (elementFhirType != null && elementFhirType.length() > 0) {
-                        for (ElementDefinition.TypeRefComponent type : existingTypes) {
-                            if (type.getCode().equals(elementFhirType)) {
-                                elementType = type;
-                                break;
-                            }
+                ElementDefinition.TypeRefComponent elementType = null;
+                String elementFhirType = getFhirTypeOfTargetElement(elementPath);
+                if (elementFhirType != null && elementFhirType.length() > 0) {
+                    for (ElementDefinition.TypeRefComponent type : existingTypes) {
+                        if (type.getCode().equals(elementFhirType)) {
+                            elementType = type;
+                            break;
                         }
                     }
-
-                    if (elementType == null) {
-                        elementType = new ElementDefinition.TypeRefComponent();
-                        elementType.setCode(elementFhirType);
-                        existingElement.addType(elementType);
-                    }
-
-                    ensureAndBindElementTerminology(element, sd, existingElement);
                 }
 
+                if (elementType == null) {
+                    elementType = new ElementDefinition.TypeRefComponent();
+                    elementType.setCode(elementFhirType);
+                    existingElement.addType(elementType);
+                }
+
+                ensureAndBindElementTerminology(element, sd, existingElement);
             }
-//        }
+
+        }
     }
 
     private void ensureSliceAndBaseElementWithSlicing(DictionaryElement dictionaryElement, DictionaryFhirElementPath elementPath,
@@ -1318,23 +1317,6 @@ public class Processor extends Operation {
                         if (!conceptReferences.contains(conceptReference)) {
                             conceptSet.addConcept(conceptReference);
                         }
-
-
-
-
-//                        ValueSet.ConceptReferenceComponent conceptReference = null;
-//                        for (ValueSet.ConceptReferenceComponent cr : conceptReferences) {
-//                            if (cr.getCode().equals(code.getCode()) && cr.getDisplay().equals(code.getLabel())) {
-//                                conceptReference = cr;
-//                            }
-//                        }
-//
-//                        if (conceptReference == null) {
-//                            conceptReference = new ValueSet.ConceptReferenceComponent();
-//                            conceptReference.setCode(code.getCode());
-//                            conceptReference.setDisplay(code.getLabel());
-//                            conceptSet.addConcept(conceptReference);
-//                        }
                     }
                 }
             }
