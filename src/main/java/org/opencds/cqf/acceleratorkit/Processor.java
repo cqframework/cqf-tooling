@@ -396,6 +396,7 @@ public class Processor extends Operation {
             fhirType.setVersion(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4VersionNumber")));
             fhirType.setCustomProfileId(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomProfileId")));
             fhirType.setCustomValueSetName(SpreadsheetHelper.getCellAsString(row, getColId(colIds, " CustomValueSetName")));
+            fhirType.setBindingStrength(SpreadsheetHelper.getCellAsString(row, getColId(colIds, " BindingStrength")));
             fhirType.setExtensionNeeded(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ExtensionNeeded")));
             fhirType.setAdditionalFHIRMappingDetails(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4AdditionalFHIRMappingDetails")));
         }
@@ -462,7 +463,7 @@ public class Processor extends Operation {
     }
 
     private void addInputOptionToParentElement(Row row, HashMap<String, Integer> colIds) {
-        String parentName = SpreadsheetHelper.getCellAsString(row, getColId(colIds,"InputOptionParent"));
+        String parentName = SpreadsheetHelper.getCellAsString(row, getColId(colIds,"InputOptionParent")).trim();
         if (parentName != null || !parentName.isEmpty())
         {
             DictionaryElement currentElement = elementMap.get(parentName);
@@ -558,6 +559,7 @@ public class Processor extends Operation {
                         case "editable": colIds.put("Editable", cell.getColumnIndex()); break;
                         case "custom profile id": colIds.put("CustomProfileId", cell.getColumnIndex()); break;
                         case "binding or custom value set name or reference": colIds.put("CustomValueSetName", cell.getColumnIndex()); break;
+                        case "binding strength": colIds.put("BindingStrength", cell.getColumnIndex()); break;
                         case "extension needed": colIds.put("ExtensionNeeded", cell.getColumnIndex()); break;
 
                         // fhir resource details
@@ -707,6 +709,8 @@ public class Processor extends Operation {
     private String cleanseFhirType(String type) {
         if (type != null && type.length() > 0) {
             switch (type) {
+                case "Boolean":
+                    return "boolean";
                 case "DateTime":
                     return "dateTime";
                 case "Integer":
@@ -899,7 +903,6 @@ public class Processor extends Operation {
 
     @NotNull
     private StructureDefinition createProfileStructureDefinition(DictionaryElement element, String customProfileId) {
-
         DictionaryFhirElementPath elementPath = element.getFhirElementPath();
         String resourceType = elementPath.getResourceType();
 
@@ -1099,6 +1102,32 @@ public class Processor extends Operation {
                     sd.getDifferential().addElement(ed);
                 }
             }
+            else {
+                // If this is a choice type, append the current element's type to the type list.
+                if (isChoiceType(elementPath)) {
+                    List<ElementDefinition.TypeRefComponent> existingTypes = existingElement.getType();
+
+                    ElementDefinition.TypeRefComponent elementType = null;
+                    String elementFhirType = getFhirTypeOfTargetElement(elementPath);
+                    if (elementFhirType != null && elementFhirType.length() > 0) {
+                        for (ElementDefinition.TypeRefComponent type : existingTypes) {
+                            if (type.getCode().equals(elementFhirType)) {
+                                elementType = type;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (elementType == null) {
+                        elementType = new ElementDefinition.TypeRefComponent();
+                        elementType.setCode(elementFhirType);
+                        existingElement.addType(elementType);
+                    }
+
+                    ensureAndBindElementTerminology(element, sd, existingElement);
+                }
+
+            }
 //        }
     }
 
@@ -1263,7 +1292,7 @@ public class Processor extends Operation {
             valueSets.add(valueSet);
 
             ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
-            binding.setStrength(Enumerations.BindingStrength.REQUIRED);
+            binding.setStrength(element.getFhirElementPath().getBindingStrength());
             binding.setValueSet(valueSet.getUrl());
             ed.setBinding(binding);
         }

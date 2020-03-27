@@ -1,5 +1,7 @@
 package org.opencds.cqf.acceleratorkit;
 
+import org.hl7.fhir.r4.model.Enumerations;
+
 import java.util.Arrays;
 
 /**
@@ -73,6 +75,23 @@ public class DictionaryFhirElementPath {
     private String customValueSetName;
     public String getCustomValueSetName() { return this.customValueSetName; }
     public void setCustomValueSetName(String customValueSetName) { this.customValueSetName = customValueSetName; }
+
+    private String bindingStrength;
+    public Enumerations.BindingStrength getBindingStrength() {
+        if (this.bindingStrength == null || this.bindingStrength.isEmpty() || this.bindingStrength.isBlank()) {
+            return Enumerations.BindingStrength.REQUIRED;
+        }
+
+        switch (this.bindingStrength.toLowerCase()) {
+            case "example":
+                return Enumerations.BindingStrength.EXAMPLE;
+            case "extensible":
+                return Enumerations.BindingStrength.EXTENSIBLE;
+            default:
+                return Enumerations.BindingStrength.REQUIRED;
+        }
+    }
+    public void setBindingStrength(String bindingStrength) { this.bindingStrength = bindingStrength; }
 
     private String extensionNeeded;
     public String getExtensionNeeded() { return this.extensionNeeded; }
