@@ -395,8 +395,8 @@ public class Processor extends Operation {
             fhirType.setBaseProfile(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4BaseProfile")));
             fhirType.setVersion(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4VersionNumber")));
             fhirType.setCustomProfileId(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomProfileId")));
-            fhirType.setCustomValueSetName(SpreadsheetHelper.getCellAsString(row, getColId(colIds, " CustomValueSetName")));
-            fhirType.setBindingStrength(SpreadsheetHelper.getCellAsString(row, getColId(colIds, " BindingStrength")));
+            fhirType.setCustomValueSetName(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomValueSetName")));
+            fhirType.setBindingStrength(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "BindingStrength")));
             fhirType.setExtensionNeeded(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ExtensionNeeded")));
             fhirType.setAdditionalFHIRMappingDetails(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4AdditionalFHIRMappingDetails")));
         }
@@ -1251,36 +1251,90 @@ public class Processor extends Operation {
                 codeSystems.add(codeSystem);
             }
 
-            ValueSet valueSet = new ValueSet();
-            valueSet.setId(toId(element.getName()) + "-values");//sd.getId() + "-values");
-            valueSet.setUrl(String.format("%s/ValueSet/%s", canonicalBase, valueSet.getId()));
-            // TODO: version
-            valueSet.setName(toId(element.getName()) + "-values");
-            valueSet.setTitle(String.format("%s values", element.getLabel()));
-            valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
-            valueSet.setExperimental(false);
-            // TODO: date
-            // TODO: publisher
-            // TODO: contact
-            valueSet.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
-            valueSet.setImmutable(true);
-            ValueSet.ValueSetComposeComponent compose = new ValueSet.ValueSetComposeComponent();
-            valueSet.setCompose(compose);
+            // Ensure the ValueSet
+            String valueSetName = element.getFhirElementPath().getCustomValueSetName();
+            if (valueSetName == null || valueSetName.isEmpty() || valueSetName.isBlank()) {
+                valueSetName = toId(element.getName());
+            }
+
+            String valueSetId = toId(valueSetName);
+            ValueSet valueSet = null;
+            Boolean valueSetExisted = false;
+            for (ValueSet vs : valueSets) {
+                if (vs.getId().equals(valueSetId)) {
+                    valueSet = vs;
+                    valueSetExisted = true;
+                }
+            }
+
+            if (valueSet == null) {
+                valueSet = new ValueSet();
+                valueSet.setId(valueSetId + "-values");
+                valueSet.setUrl(String.format("%s/ValueSet/%s", canonicalBase, valueSet.getId()));
+                // TODO: version
+                valueSet.setName(valueSetId + "-values");
+                valueSet.setTitle(String.format("%s values", element.getLabel()));
+                valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
+                valueSet.setExperimental(false);
+                // TODO: date
+                // TODO: publisher
+                // TODO: contact
+                valueSet.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
+                valueSet.setImmutable(true);
+            }
+
+            // Ensure Compose element
+            ValueSet.ValueSetComposeComponent compose = valueSet.getCompose();
+            if (compose == null) {
+                compose = new ValueSet.ValueSetComposeComponent();
+                valueSet.setCompose(compose);
+            }
 
             // Group by Supported Terminology System
             for (String codeSystemUrl : element.getCodeSystemUrls()) {
                 List<DictionaryCode> systemCodes = element.getChoicesForSystem(codeSystemUrl);
 
                 if (systemCodes.size() > 0) {
-                    ValueSet.ConceptSetComponent conceptSet = new ValueSet.ConceptSetComponent();
-                    compose.addInclude(conceptSet);
-                    conceptSet.setSystem(codeSystemUrl);
+                    List<ValueSet.ConceptSetComponent> conceptSets = compose.getInclude();
+                    ValueSet.ConceptSetComponent conceptSet = null;
+                    for (ValueSet.ConceptSetComponent cs : conceptSets) {
+                        if (cs.getSystem().equals(codeSystemUrl)) {
+                            conceptSet = cs;
+                        }
+                    }
+
+                    if (conceptSet == null) {
+                        conceptSet = new ValueSet.ConceptSetComponent();
+                        compose.addInclude(conceptSet);
+                        conceptSet.setSystem(codeSystemUrl);
+                    }
 
                     for (DictionaryCode code : systemCodes) {
+                        List<ValueSet.ConceptReferenceComponent> conceptReferences = conceptSet.getConcept();
                         ValueSet.ConceptReferenceComponent conceptReference = new ValueSet.ConceptReferenceComponent();
                         conceptReference.setCode(code.getCode());
                         conceptReference.setDisplay(code.getLabel());
-                        conceptSet.addConcept(conceptReference);
+
+                        if (!conceptReferences.contains(conceptReference)) {
+                            conceptSet.addConcept(conceptReference);
+                        }
+
+
+
+
+//                        ValueSet.ConceptReferenceComponent conceptReference = null;
+//                        for (ValueSet.ConceptReferenceComponent cr : conceptReferences) {
+//                            if (cr.getCode().equals(code.getCode()) && cr.getDisplay().equals(code.getLabel())) {
+//                                conceptReference = cr;
+//                            }
+//                        }
+//
+//                        if (conceptReference == null) {
+//                            conceptReference = new ValueSet.ConceptReferenceComponent();
+//                            conceptReference.setCode(code.getCode());
+//                            conceptReference.setDisplay(code.getLabel());
+//                            conceptSet.addConcept(conceptReference);
+//                        }
                     }
                 }
             }
@@ -1289,14 +1343,27 @@ public class Processor extends Operation {
                 codeSystem.setValueSet(valueSet.getUrl());
             }
 
-            valueSets.add(valueSet);
+            // If the ValueSet did not already exists, add it to the valueSets collection
+            if (!valueSetExisted) {
+                valueSets.add(valueSet);
+            }
 
+            // Bind the current element to the valueSet
             ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
             binding.setStrength(element.getFhirElementPath().getBindingStrength());
             binding.setValueSet(valueSet.getUrl());
             ed.setBinding(binding);
         }
     }
+
+//    public void ensureCodeInValueSet(String codeSystemUrl, ValueSet valueSet, DictionaryCode code) {
+//
+//    }
+
+//    public void ensureComposeInValueSet(ValueSet valueSet) {
+//        ValueSet.ValueSetComposeComponent compose = new ValueSet.ValueSetComposeComponent();
+//        valueSet.setCompose(compose);
+//    }
 
     /* Write Methods */
     public void writeResource(String path, Resource resource) {
