@@ -135,6 +135,22 @@ public class Processor extends Operation {
         // process element map
         processElementMap();
 
+        // attached the generated extensions to the profiles that reference them
+        attachExtensions();
+
+        // write all resources
+        writeExtensions(scopePath);
+        writeProfiles(scopePath);
+        writeCodeSystems(scopePath);
+        writeValueSets(scopePath);
+
+        //ig.json is deprecated and resources a located by convention. If our output isn't satisfying convention, we should
+        //modify the tooling to match the convention.
+        //writeIgJsonFragments(scopePath);
+        //writeIgResourceFragments(scopePath);
+    }
+
+    private void attachExtensions() {
         // Add extensions to the appropriate profiles
         for (DictionaryProfileElementExtension profileElementExtension : profileExtensions) {
             for (StructureDefinition profile : profiles) {
@@ -163,26 +179,9 @@ public class Processor extends Operation {
                         }
                     }
 
-//                    String extensionUrl = null;
-//                    for (ElementDefinition ed : extensionDifferential) {
-//                        if (ed.getId().equals("Extension.url")) {
-//                            extensionUrl = ((UriType)ed.getFixed()).getValueAsString();
-//                            break;
-//                        }
-//                    }
-//
-//                    ElementDefinition extensionValueElement = null;
-//                    for (ElementDefinition ed : extensionDifferential) {
-//                        if (ed.getId().equals("Extension.value[x]")) {
-//                            extensionValueElement = ed;
-//                            break;
-//                        }
-//                    }
-
                     String resourcePath = profileElementExtension.getResourcePath();
                     String pathToElementBeingExtended = resourcePath.substring(0, resourcePath.indexOf(extensionName) - 1);
                     String extensionId = pathToElementBeingExtended + ".extension:" + extensionName;
-//                    String extensionName = toId(extensionDefinition.getName());
 
                     ElementDefinition extensionElement = new ElementDefinition();
                     extensionElement.setId(extensionId);
@@ -206,17 +205,6 @@ public class Processor extends Operation {
                 }
             }
         }
-
-        // write all resources
-        writeExtensions(scopePath);
-        writeProfiles(scopePath);
-        writeCodeSystems(scopePath);
-        writeValueSets(scopePath);
-
-        //ig.json is deprecated and resources a located by convention. If our output isn't satisfying convention, we should
-        //modify the tooling to match the convention.
-        //writeIgJsonFragments(scopePath);
-        //writeIgResourceFragments(scopePath);
     }
 
     private void ensurePath(String path) {
@@ -324,19 +312,6 @@ public class Processor extends Operation {
         }
         return codes;
     }
-
-//    private List<DictionaryCode> getAllCodesForElement(String label, Row row, HashMap<String, Integer> colIds) {
-//        List<DictionaryCode> codes = new ArrayList<>();
-//
-//        for (String codeSystemKey : supportedCodeSystems.keySet()) {
-//            DictionaryCode code = getTerminologyCode(codeSystemKey, label, row, colIds);
-//            if (code != null) {
-//                codes.add(code);
-//            }
-//        }
-//
-//        return codes;
-//    }
 
     private DictionaryCode getPrimaryCode(String label, Row row, HashMap<String, Integer> colIds) {
         List<DictionaryCode> codes = new ArrayList<>();
@@ -450,6 +425,8 @@ public class Processor extends Operation {
         e.setDue(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Due")));
         e.setRelevance(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Relevance")));
         e.setDescription(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Description")));
+        e.setDataElementLabel(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "DataElementLabel")));
+        e.setDataElementName(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "DataElementName")));
         e.setNotes(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Notes")));
         e.setCalculation(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Calculation")));
         e.setConstraint(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Constraint")));
@@ -549,6 +526,8 @@ public class Processor extends Operation {
                         // info icon not used in FHIR?
                         //case "info icon": colIds.put("InfoIcon", cell.getColumnIndex()); break;
                         case "description": colIds.put("Description", cell.getColumnIndex()); break;
+                        case "data element label": colIds.put("DataElementLabel", cell.getColumnIndex()); break;
+                        case "data element name": colIds.put("DataElementName", cell.getColumnIndex()); break;
                         case "notes": colIds.put("Notes", cell.getColumnIndex()); break;
                         case "data type": colIds.put("Type", cell.getColumnIndex()); break;
                         case "multiple choice": colIds.put("MultipleChoiceType", cell.getColumnIndex()); break;
@@ -617,9 +596,17 @@ public class Processor extends Operation {
         }
     }
 
+    private void processElementMap() {
+        for (DictionaryElement element : elementMap.values()) {
+            if (requiresProfile(element)) {
+                StructureDefinition profile = ensureProfile(element);
+            }
+        }
+    }
+
     private boolean requiresExtension(DictionaryElement element) {
         String baseProfile = element.getFhirElementPath().getBaseProfile();
-        if (baseProfile != null && element.getFhirElementPath().getBaseProfile().toLowerCase().trim().equals("extension needed")) {
+        if (baseProfile != null && baseProfile.toLowerCase().trim().equals("extension needed")) {
             return true;
         }
         else {
@@ -664,14 +651,6 @@ public class Processor extends Operation {
                 return true;
             default:
                 return false;
-        }
-    }
-
-    private void processElementMap() {
-        for (DictionaryElement element : elementMap.values()) {
-            if (requiresProfile(element)) {
-                StructureDefinition profile = ensureProfile(element);
-            }
         }
     }
 
@@ -796,8 +775,8 @@ public class Processor extends Operation {
         sd.setId(extensionId);
         sd.setUrl(String.format("%s/StructureDefinition/%s", canonicalBase, sd.getId()));
         // TODO: version
-        sd.setName(element.getName());
-        sd.setTitle(element.getLabel());
+        sd.setTitle(element.getDataElementLabel());
+        sd.setName(element.getDataElementName());
         sd.setStatus(Enumerations.PublicationStatus.DRAFT);
         sd.setExperimental(false);
         // TODO: date
@@ -822,7 +801,9 @@ public class Processor extends Operation {
         ElementDefinition rootElement = new ElementDefinition();
         rootElement.setId("Extension");
         rootElement.setPath("Extension");
-        rootElement.setShort(element.getLabel());
+        rootElement.setShort(element.getDataElementLabel());
+        rootElement.setLabel(element.getDataElementName());
+        rootElement.setComment(element.getNotes());
         rootElement.setDefinition(element.getDescription());
         rootElement.setMin(toBoolean(element.getRequired()) ? 1 : 0);
         rootElement.setMax(isMultipleChoiceElement(element) ? "*" : "1");
@@ -911,8 +892,9 @@ public class Processor extends Operation {
         sd.setId(toId((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getName()));
         sd.setUrl(String.format("%s/StructureDefinition/%s", canonicalBase, sd.getId()));
         // TODO: version
-        sd.setName((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getName());
-        sd.setTitle((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getLabel());
+        sd.setName((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getDataElementName());
+        sd.setTitle((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getDataElementLabel());
+
         sd.setStatus(Enumerations.PublicationStatus.DRAFT);
         sd.setExperimental(false);
         // TODO: date
@@ -941,6 +923,9 @@ public class Processor extends Operation {
         // Add root element
         ElementDefinition ed = new ElementDefinition();
         ed.setId(resourceType);
+        ed.setShort(element.getDataElementLabel());
+        ed.setLabel(element.getDataElementName());
+        ed.setComment(element.getNotes());
         ed.setPath(resourceType);
         ed.setMustSupport(false);
         sd.getDifferential().addElement(ed);
@@ -1012,6 +997,9 @@ public class Processor extends Operation {
             case "CarePlan":
             case "Communication":
             case "Condition":
+                //codePath = elementPath.getResourcePath();
+                choicesPath = elementPath.getResourcePath();
+                break;
             case "Consent":
             case "Coverage":
             case "DeviceUseStatement":
@@ -1036,7 +1024,7 @@ public class Processor extends Operation {
                 throw new IllegalArgumentException("Unrecognized baseType: " + resourceType.toString());
         }
 
-        if (codePath != null && !codePath.isEmpty() && element.getCode() != null) {
+        if (codePath != null && !codePath.isEmpty() && element.getCode() != null && element.getFhirElementPath().getResourcePath().equals(codePath)) {
             ElementDefinition ed = new ElementDefinition();
             ed.setId(String.format("%s.%s", resourceType, codePath));
             ed.setPath(String.format("%s.%s", resourceType, codePath));
@@ -1223,111 +1211,11 @@ public class Processor extends Operation {
     private void ensureAndBindElementTerminology(DictionaryElement element, StructureDefinition sd, ElementDefinition ed) {
         // binding and CodeSystem/ValueSet for MultipleChoice elements
         if (element.getChoices().size() > 0) {
-            CodeSystem codeSystem = new CodeSystem();
-            if (enableOpenMRS && element.getChoicesForSystem(openMRSSystem).size() > 0) {
-                codeSystem.setId(sd.getId() + "-codes");
-                codeSystem.setUrl(String.format("%s/CodeSystem/%s", canonicalBase, codeSystem.getId()));
-                // TODO: version
-                codeSystem.setName(element.getName() + "_codes");
-                codeSystem.setTitle(String.format("%s codes", element.getLabel()));
-                codeSystem.setStatus(Enumerations.PublicationStatus.DRAFT);
-                codeSystem.setExperimental(false);
-                // TODO: date
-                // TODO: publisher
-                // TODO: contact
-                codeSystem.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
-                codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-                codeSystem.setCaseSensitive(true);
-
-                // collect all the OpenMRS choices to add to the codeSystem
-                for (DictionaryCode code : element.getChoicesForSystem(openMRSSystem)) {
-                    CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent();
-                    concept.setCode(code.getCode());
-                    concept.setDisplay(code.getLabel());
-                    codeSystem.addConcept(concept);
-                }
-
-                codeSystems.add(codeSystem);
-            }
-
-            // Ensure the ValueSet
-            String valueSetName = element.getFhirElementPath().getCustomValueSetName();
-            if (valueSetName == null || valueSetName.isEmpty() || valueSetName.isBlank()) {
-                valueSetName = toId(element.getName());
-            }
-
-            String valueSetId = toId(valueSetName);
-            ValueSet valueSet = null;
-            Boolean valueSetExisted = false;
-            for (ValueSet vs : valueSets) {
-                if (vs.getId().equals(valueSetId)) {
-                    valueSet = vs;
-                    valueSetExisted = true;
-                }
-            }
-
-            if (valueSet == null) {
-                valueSet = new ValueSet();
-                valueSet.setId(valueSetId + "-values");
-                valueSet.setUrl(String.format("%s/ValueSet/%s", canonicalBase, valueSet.getId()));
-                // TODO: version
-                valueSet.setName(valueSetId + "-values");
-                valueSet.setTitle(String.format("%s values", element.getLabel()));
-                valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
-                valueSet.setExperimental(false);
-                // TODO: date
-                // TODO: publisher
-                // TODO: contact
-                valueSet.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
-                valueSet.setImmutable(true);
-            }
-
-            // Ensure Compose element
-            ValueSet.ValueSetComposeComponent compose = valueSet.getCompose();
-            if (compose == null) {
-                compose = new ValueSet.ValueSetComposeComponent();
-                valueSet.setCompose(compose);
-            }
-
-            // Group by Supported Terminology System
-            for (String codeSystemUrl : element.getCodeSystemUrls()) {
-                List<DictionaryCode> systemCodes = element.getChoicesForSystem(codeSystemUrl);
-
-                if (systemCodes.size() > 0) {
-                    List<ValueSet.ConceptSetComponent> conceptSets = compose.getInclude();
-                    ValueSet.ConceptSetComponent conceptSet = null;
-                    for (ValueSet.ConceptSetComponent cs : conceptSets) {
-                        if (cs.getSystem().equals(codeSystemUrl)) {
-                            conceptSet = cs;
-                        }
-                    }
-
-                    if (conceptSet == null) {
-                        conceptSet = new ValueSet.ConceptSetComponent();
-                        compose.addInclude(conceptSet);
-                        conceptSet.setSystem(codeSystemUrl);
-                    }
-
-                    for (DictionaryCode code : systemCodes) {
-                        List<ValueSet.ConceptReferenceComponent> conceptReferences = conceptSet.getConcept();
-                        ValueSet.ConceptReferenceComponent conceptReference = new ValueSet.ConceptReferenceComponent();
-                        conceptReference.setCode(code.getCode());
-                        conceptReference.setDisplay(code.getLabel());
-
-                        if (!conceptReferences.contains(conceptReference)) {
-                            conceptSet.addConcept(conceptReference);
-                        }
-                    }
-                }
-            }
+            CodeSystem codeSystem = createCodeSystem(element, sd);
+            ValueSet valueSet = ensureValueSet(element);
 
             if (element.getChoicesForSystem(openMRSSystem).size() == element.getChoices().size()) {
                 codeSystem.setValueSet(valueSet.getUrl());
-            }
-
-            // If the ValueSet did not already exists, add it to the valueSets collection
-            if (!valueSetExisted) {
-                valueSets.add(valueSet);
             }
 
             // Bind the current element to the valueSet
@@ -1336,16 +1224,132 @@ public class Processor extends Operation {
             binding.setValueSet(valueSet.getUrl());
             ed.setBinding(binding);
         }
+        // if the element is not a multiple choice element or an extension and has as code, bind it as the fixed value for the element.
+        else if (element.getCode() != null && !requiresExtension(element)) {
+            //ed.setFixed(element.getCode().toCodeableConcept());
+            DictionaryCode code = element.getCode();
+            List<Coding> codes = new ArrayList<>();
+            Coding coding = new Coding();
+            coding.setCode(code.getCode());
+            coding.setSystem(code.getSystem());
+            coding.setDisplay(code.getDisplay());
+
+            codes.add(coding);
+            
+            ed.setCode(codes);
+        }
     }
 
-//    public void ensureCodeInValueSet(String codeSystemUrl, ValueSet valueSet, DictionaryCode code) {
-//
-//    }
+    @NotNull
+    private ValueSet ensureValueSet(DictionaryElement element) {
+        // Ensure the ValueSet
+        String valueSetName = element.getFhirElementPath().getCustomValueSetName();
+        if (valueSetName == null || valueSetName.isEmpty() || valueSetName.isBlank()) {
+            valueSetName = toId(element.getName());
+        }
 
-//    public void ensureComposeInValueSet(ValueSet valueSet) {
-//        ValueSet.ValueSetComposeComponent compose = new ValueSet.ValueSetComposeComponent();
-//        valueSet.setCompose(compose);
-//    }
+        String valueSetId = toId(valueSetName);
+        ValueSet valueSet = null;
+        Boolean valueSetExisted = false;
+        for (ValueSet vs : valueSets) {
+            if (vs.getId().equals(valueSetId)) {
+                valueSet = vs;
+                valueSetExisted = true;
+            }
+        }
+
+        if (valueSet == null) {
+            valueSet = new ValueSet();
+            valueSet.setId(valueSetId + "-values");
+            valueSet.setUrl(String.format("%s/ValueSet/%s", canonicalBase, valueSet.getId()));
+            // TODO: version
+            valueSet.setName(valueSetId + "-values");
+            valueSet.setTitle(String.format("%s values", element.getLabel()));
+            valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
+            valueSet.setExperimental(false);
+            // TODO: date
+            // TODO: publisher
+            // TODO: contact
+            valueSet.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
+            valueSet.setImmutable(true);
+        }
+
+        // Ensure Compose element
+        ValueSet.ValueSetComposeComponent compose = valueSet.getCompose();
+        if (compose == null) {
+            compose = new ValueSet.ValueSetComposeComponent();
+            valueSet.setCompose(compose);
+        }
+
+        // Group by Supported Terminology System
+        for (String codeSystemUrl : element.getCodeSystemUrls()) {
+            List<DictionaryCode> systemCodes = element.getChoicesForSystem(codeSystemUrl);
+
+            if (systemCodes.size() > 0) {
+                List<ValueSet.ConceptSetComponent> conceptSets = compose.getInclude();
+                ValueSet.ConceptSetComponent conceptSet = null;
+                for (ValueSet.ConceptSetComponent cs : conceptSets) {
+                    if (cs.getSystem().equals(codeSystemUrl)) {
+                        conceptSet = cs;
+                    }
+                }
+
+                if (conceptSet == null) {
+                    conceptSet = new ValueSet.ConceptSetComponent();
+                    compose.addInclude(conceptSet);
+                    conceptSet.setSystem(codeSystemUrl);
+                }
+
+                for (DictionaryCode code : systemCodes) {
+                    List<ValueSet.ConceptReferenceComponent> conceptReferences = conceptSet.getConcept();
+                    ValueSet.ConceptReferenceComponent conceptReference = new ValueSet.ConceptReferenceComponent();
+                    conceptReference.setCode(code.getCode());
+                    conceptReference.setDisplay(code.getLabel());
+
+                    if (!conceptReferences.contains(conceptReference)) {
+                        conceptSet.addConcept(conceptReference);
+                    }
+                }
+            }
+        }
+
+        // If the ValueSet did not already exist, add it to the valueSets collection
+        if (!valueSetExisted) {
+            valueSets.add(valueSet);
+        }
+        return valueSet;
+    }
+
+    @NotNull
+    private CodeSystem createCodeSystem(DictionaryElement element, StructureDefinition sd) {
+        CodeSystem codeSystem = new CodeSystem();
+        if (enableOpenMRS && element.getChoicesForSystem(openMRSSystem).size() > 0) {
+            codeSystem.setId(sd.getId() + "-codes");
+            codeSystem.setUrl(String.format("%s/CodeSystem/%s", canonicalBase, codeSystem.getId()));
+            // TODO: version
+            codeSystem.setName(element.getName() + "_codes");
+            codeSystem.setTitle(String.format("%s codes", element.getLabel()));
+            codeSystem.setStatus(Enumerations.PublicationStatus.DRAFT);
+            codeSystem.setExperimental(false);
+            // TODO: date
+            // TODO: publisher
+            // TODO: contact
+            codeSystem.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
+            codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+            codeSystem.setCaseSensitive(true);
+
+            // collect all the OpenMRS choices to add to the codeSystem
+            for (DictionaryCode code : element.getChoicesForSystem(openMRSSystem)) {
+                CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent();
+                concept.setCode(code.getCode());
+                concept.setDisplay(code.getLabel());
+                codeSystem.addConcept(concept);
+            }
+
+            codeSystems.add(codeSystem);
+        }
+        return codeSystem;
+    }
 
     /* Write Methods */
     public void writeResource(String path, Resource resource) {

@@ -86,6 +86,22 @@ public class DictionaryElement {
         this.description = description;
     }
 
+    private String dataElementLabel;
+    public String getDataElementLabel() {
+        return this.dataElementLabel;
+    }
+    public void setDataElementLabel(String dataElementLabel) {
+        this.dataElementLabel = dataElementLabel;
+    }
+
+    private String dataElementName;
+    public String getDataElementName() {
+        return this.dataElementName;
+    }
+    public void setDataElementName(String dataElementName) {
+        this.dataElementName = dataElementName;
+    }
+
     private String notes;
     public String getNotes() {
         return this.notes;
