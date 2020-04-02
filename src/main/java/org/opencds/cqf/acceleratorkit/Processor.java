@@ -157,17 +157,7 @@ public class Processor extends Operation {
                 if (profile.getId().equals(profileElementExtension.getProfileId())) {
                     StructureDefinition extensionDefinition = profileElementExtension.getExtension();
 
-                    String extensionName = null;
-                    String[] resourcePathComponents = profileElementExtension.getResourcePath().split("\\.");
-                    if (resourcePathComponents.length == 1) {
-                        extensionName = resourcePathComponents[0];
-                    }
-                    else if (resourcePathComponents.length > 1) {
-                        extensionName = resourcePathComponents[resourcePathComponents.length - 1];
-                    }
-                    else {
-                        extensionName = profile.getName();
-                    }
+                    String extensionName = getExtensionName(profileElementExtension.getResourcePath(), profile.getName());
 
                     List<ElementDefinition> extensionDifferential =  extensionDefinition.getDifferential().getElement();
 
@@ -272,6 +262,7 @@ public class Processor extends Operation {
             List<String> codesList = Arrays.asList(codeListString.split(";"));
             String display;
             for (String c : codesList) {
+                //TODO: This is wrong. We need a solution for constructing Display. Likely needs to be in input in the Data Dictionary.
                 display = String.format("%s (%s)", label, codeSystemKey);
                 codes.add(getCode(system, label, display, c, null));
             }
@@ -775,8 +766,10 @@ public class Processor extends Operation {
         sd.setId(extensionId);
         sd.setUrl(String.format("%s/StructureDefinition/%s", canonicalBase, sd.getId()));
         // TODO: version
+
+        String extensionName = getExtensionName(element.getFhirElementPath().getResourcePath(), element.getDataElementName());
+        sd.setName(extensionName);
         sd.setTitle(element.getDataElementLabel());
-        sd.setName(element.getDataElementName());
         sd.setStatus(Enumerations.PublicationStatus.DRAFT);
         sd.setExperimental(false);
         // TODO: date
@@ -854,11 +847,27 @@ public class Processor extends Operation {
         return sd;
     }
 
+    private String getExtensionName(String resourcePath, String dataElementName) {
+        String extensionName = null;
+        String[] resourcePathComponents = resourcePath.split("\\.");
+        if (resourcePathComponents.length == 1) {
+            extensionName = resourcePathComponents[0];
+        } else if (resourcePathComponents.length > 1) {
+            extensionName = resourcePathComponents[resourcePathComponents.length - 1];
+        } else {
+            extensionName = dataElementName;
+        }
+        return extensionName;
+    }
+
     private StructureDefinition ensureExtension(DictionaryElement element) {
         StructureDefinition sd = null;
 
+        String extensionName = getExtensionName(element.getFhirElementPath().getResourcePath(), element.getDataElementName());
+
         // Search for extension and use it if it exists already.
-        String extensionId = toId(element.getName());
+//        String extensionId = toId(element.getName());
+        String extensionId = toId(extensionName);
         if (extensionId != null && extensionId.length() > 0) {
             for (StructureDefinition existingExtension : extensions) {
                 if (existingExtension.getId().equals(existingExtension)) {
@@ -988,11 +997,12 @@ public class Processor extends Operation {
         String resourceType = elementPath.getResourceType();
 
         switch (resourceType) {
+            case "AllergyIntolerance":
             case "Observation":
                 codePath = "code";
                 choicesPath = elementPath.getResourcePath();
                 break;
-            case "AllergyIntolerance":
+//            case "AllergyIntolerance":
             case "Appointment":
             case "CarePlan":
             case "Communication":
@@ -1023,6 +1033,9 @@ public class Processor extends Operation {
             default:
                 throw new IllegalArgumentException("Unrecognized baseType: " + resourceType.toString());
         }
+
+        //TODO: Ensure the Primary Code Path Element. If we're currently processing the Primary Code path element, it should override or merge with an already-created one if it exists.
+//        ensurePrimaryCodePathElement(element, sd);
 
         if (codePath != null && !codePath.isEmpty() && element.getCode() != null && element.getFhirElementPath().getResourcePath().equals(codePath)) {
             ElementDefinition ed = new ElementDefinition();
@@ -1117,6 +1130,17 @@ public class Processor extends Operation {
 
         }
     }
+
+//    private void ensurePrimaryCodePathElement(DictionaryElement element, StructureDefinition sd) {
+//        ElementDefinition ed = new ElementDefinition();
+//        ed.setId(String.format("%s.%s", resourceType, codePath));
+//        ed.setPath(String.format("%s.%s", resourceType, codePath));
+//        ed.setMin(1);
+//        ed.setMax("1");
+//        ed.setMustSupport(true);
+//        ed.setFixed(element.getCode().toCodeableConcept());
+//        sd.getDifferential().addElement(ed);
+//    }
 
     private void ensureSliceAndBaseElementWithSlicing(DictionaryElement dictionaryElement, DictionaryFhirElementPath elementPath,
         StructureDefinition sd, String elementId, String sliceName, ElementDefinition elementDefinition) {
@@ -1226,7 +1250,6 @@ public class Processor extends Operation {
         }
         // if the element is not a multiple choice element or an extension and has as code, bind it as the fixed value for the element.
         else if (element.getCode() != null && !requiresExtension(element)) {
-            //ed.setFixed(element.getCode().toCodeableConcept());
             DictionaryCode code = element.getCode();
             List<Coding> codes = new ArrayList<>();
             Coding coding = new Coding();
@@ -1235,7 +1258,7 @@ public class Processor extends Operation {
             coding.setDisplay(code.getDisplay());
 
             codes.add(coding);
-            
+
             ed.setCode(codes);
         }
     }
