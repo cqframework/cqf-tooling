@@ -44,6 +44,7 @@ public class IGProcessor {
         }
     }
 
+    //mega ig method
     public static void publishIG(RefreshIGParameters params) {
         String igPath = params.igPath;
         IGVersion igVersion = params.igVersion;
@@ -62,10 +63,16 @@ public class IGProcessor {
 
         igPath = Paths.get(igPath).toAbsolutePath().toString();
 
+        //refreshcontent
         IGRefreshProcessor.refreshIG(params);
+        
+        //validate
 
+        //package
         IGBundleProcessor.bundleIg(IGRefreshProcessor.refreshedLibraryNames, igPath, encoding, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
         versioned, fhirContext, fhirUri);
+
+        //test
     }
 
     

@@ -59,7 +59,7 @@ public class R4LibraryProcessor implements LibraryProcessor{
     private static void refreshLibrary(Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, Boolean includeVersion, CqlTranslator translator, FhirContext fhirContext) {
         Library generatedLibrary = processLibrary(cqlContentPath, translator, includeVersion, fhirContext);
         mergeDiff(referenceLibrary, generatedLibrary, cqlContentPath, translator, fhirContext);
-        IOUtils.writeResource(generatedLibrary, outputPath, encoding, fhirContext);
+        IOUtils.writeResource(referenceLibrary, outputPath, encoding, fhirContext);
     }
 
     private static void mergeDiff(Library referenceLibrary, Library generatedLibrary, String cqlContentPath, CqlTranslator translator,
