@@ -87,7 +87,7 @@ public class Processor extends Operation {
 
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
 
-        loadFHIRModel();
+//        loadFHIRModel();
 
         if (scopes == null) {
             processScope(workbook, null);
@@ -99,14 +99,14 @@ public class Processor extends Operation {
         }
     }
 
-    private void loadFHIRModel() {
-        //TODO: Expose as an arg
-        String inputPath = Paths.get("/Users/Adam/Src/cqframework/FHIR-Spec").toString();
-        String resourcePaths = "4.0.0/StructureDefinition";
-
-        ResourceLoader loader = new ResourceLoader();
-        fhirModelStructureDefinitions = loader.loadPaths(inputPath, resourcePaths);
-    }
+//    private void loadFHIRModel() {
+//        //TODO: Expose as an arg
+//        String inputPath = Paths.get("/Users/Adam/Src/cqframework/FHIR-Spec").toString();
+//        String resourcePaths = "4.0.0/StructureDefinition";
+//
+//        ResourceLoader loader = new ResourceLoader();
+//        fhirModelStructureDefinitions = loader.loadPaths(inputPath, resourcePaths);
+//    }
 
     private void processScope(Workbook workbook, String scope) {
         // reset variables
@@ -335,7 +335,7 @@ public class Processor extends Operation {
 
         // If more than one code is specified for the element, raise a warning.
         if (codes != null && codes.size() > 1) {
-            System.out.println(String.format("Element \"%s\" has multiple codes. %s was selected as the Primary code", label, primaryCode.getCode()));
+            System.out.println(String.format("Element %s - \"%s\" has multiple codes. %s was selected as the Primary code", row.getCell(0).toString().replace(".0", ""), label, primaryCode.getCode()));
         }
 
         return primaryCode;
@@ -472,6 +472,10 @@ public class Processor extends Operation {
 
     private void processDataElementPage(Workbook workbook, String page, String scope) {
         Sheet sheet = workbook.getSheet(page);
+        if (sheet == null) {
+            throw new IllegalArgumentException(String.format("Sheet %s not found", page));
+        }
+
         Iterator<Row> it = sheet.rowIterator();
         HashMap<String, Integer> colIds = new HashMap<String, Integer>();
         String currentGroup = null;
@@ -720,34 +724,34 @@ public class Processor extends Operation {
 
     private String getFhirTypeOfTargetElement(DictionaryFhirElementPath elementPath) {
         try {
-            String resourceType = elementPath.getResourceType();
-            StructureDefinition sd = fhirModelStructureDefinitions.get(resourceType);
-
-            if (sd == null) {
-                System.out.println("StructureDefinition not found - " + resourceType);
-                return null;
-            }
-
+//            String resourceType = elementPath.getResourceType();
+//            StructureDefinition sd = fhirModelStructureDefinitions.get(resourceType);
+//
+//            if (sd == null) {
+//                System.out.println("StructureDefinition not found - " + resourceType);
+//                return null;
+//            }
+            String type = null;
             if (isChoiceType(elementPath)) {
-                String typePortion = cleanseFhirType(elementPath.getFhirElementType());
-                return typePortion;
+                type = cleanseFhirType(elementPath.getFhirElementType());
             }
+            return type;
 
-            List<ElementDefinition> snapshotElements = sd.getSnapshot().getElement();
-            ElementDefinition typeElement = null;
-            for (ElementDefinition elementDef : snapshotElements) {
-                if (elementDef.toString().toLowerCase().equals(elementPath.getResourceTypeAndPath().toLowerCase())) {
-                    typeElement = elementDef;
-                }
-            }
+//            List<ElementDefinition> snapshotElements = sd.getSnapshot().getElement();
+//            ElementDefinition typeElement = null;
+//            for (ElementDefinition elementDef : snapshotElements) {
+//                if (elementDef.toString().toLowerCase().equals(elementPath.getResourceTypeAndPath().toLowerCase())) {
+//                    typeElement = elementDef;
+//                }
+//            }
 
-            if (typeElement != null) {
-                String elementType = typeElement.getType().get(0).getCode();
-                return elementType;
-            } else {
-                System.out.println("Could not find element: " + elementPath.getResourceTypeAndPath());
-                return null;
-            }
+//            if (typeElement != null) {
+//                String elementType = typeElement.getType().get(0).getCode();
+//                return elementType;
+//            } else {
+//                System.out.println("Could not find element: " + elementPath.getResourceTypeAndPath());
+//                return null;
+//            }
         } catch (Exception e) {
             e.printStackTrace();
             throw new NoSuchElementException("Unable to determine FHIR Type for: " + elementPath.getResourceTypeAndPath());
@@ -866,7 +870,6 @@ public class Processor extends Operation {
         String extensionName = getExtensionName(element.getFhirElementPath().getResourcePath(), element.getDataElementName());
 
         // Search for extension and use it if it exists already.
-//        String extensionId = toId(element.getName());
         String extensionId = toId(extensionName);
         if (extensionId != null && extensionId.length() > 0) {
             for (StructureDefinition existingExtension : extensions) {
@@ -1002,12 +1005,10 @@ public class Processor extends Operation {
                 codePath = "code";
                 choicesPath = elementPath.getResourcePath();
                 break;
-//            case "AllergyIntolerance":
             case "Appointment":
             case "CarePlan":
             case "Communication":
             case "Condition":
-                //codePath = elementPath.getResourcePath();
                 choicesPath = elementPath.getResourcePath();
                 break;
             case "Consent":
@@ -1034,18 +1035,56 @@ public class Processor extends Operation {
                 throw new IllegalArgumentException("Unrecognized baseType: " + resourceType.toString());
         }
 
-        //TODO: Ensure the Primary Code Path Element. If we're currently processing the Primary Code path element, it should override or merge with an already-created one if it exists.
-//        ensurePrimaryCodePathElement(element, sd);
+        // For Observations, it is a valid scenario for the Data Dictionary (DD) to not have a Data Element entry for the primary code path element - Observation.code.
+        // In this case, the tooling should ensure that this element is created. The fixed code for this element should be the code specified by the Data
+        // Element record mapped to Observation.value[x]. For all other resource types it is invalid to not have a primary code path element entry in the DD
+//        if (resourceType.equals("Observation") && !element.getFhirElementPath().getResourceTypeAndPath().equals("Observation.code")) {
+//            ElementDefinition ed = new ElementDefinition();
+//            ed.setId(String.format("%s.%s", resourceType, codePath));
+//            ed.setPath(String.format("%s.%s", resourceType, codePath));
+//            ed.setMin(1);
+//            ed.setMax("1");
+//            ed.setMustSupport(true);
+//            ed.setFixed(element.getCode().toCodeableConcept());
+//            sd.getDifferential().addElement(ed);
+//        }
 
-        if (codePath != null && !codePath.isEmpty() && element.getCode() != null && element.getFhirElementPath().getResourcePath().equals(codePath)) {
-            ElementDefinition ed = new ElementDefinition();
-            ed.setId(String.format("%s.%s", resourceType, codePath));
-            ed.setPath(String.format("%s.%s", resourceType, codePath));
-            ed.setMin(1);
-            ed.setMax("1");
-            ed.setMustSupport(true);
-            ed.setFixed(element.getCode().toCodeableConcept());
-            sd.getDifferential().addElement(ed);
+        if (codePath != null && !codePath.isEmpty() && element.getCode() != null) {
+            String elementId = String.format("%s.%s", resourceType, codePath);
+            String primaryCodePath = String.format("%s.%s", resourceType, codePath);
+
+            ElementDefinition existingPrimaryCodePathElement = null;
+            for (ElementDefinition elementDef : sd.getDifferential().getElement()) {
+                if (elementDef.getId().equals(elementId)) {
+                    existingPrimaryCodePathElement = elementDef;
+                    break;
+                }
+            }
+
+            Boolean isPrimaryCodePath = element.getFhirElementPath().getResourceTypeAndPath().equals(primaryCodePath);
+            Boolean isPreferredCodePath = isPrimaryCodePath || element.getFhirElementPath().getResourceTypeAndPath().equals("Observation.value[x]");
+
+            // The problem is what if we stomp the Observation.code code with the Observation.value[x] code. How do we ensure that .code has priority. Maybe in the if code == null or path is Observation.code (always set it if it's .code
+            if (existingPrimaryCodePathElement == null) {
+                ElementDefinition ed = new ElementDefinition();
+                ed.setId(elementId);
+                ed.setPath(elementId);
+                ed.setMin(1);
+                ed.setMax("1");
+                ed.setMustSupport(true);
+                if (isPreferredCodePath) {
+                    ed.setFixed(element.getCode().toCodeableConcept());
+                }
+
+                sd.getDifferential().addElement(ed);
+            }
+            else {
+                Type existingCode = existingPrimaryCodePathElement.getFixed();
+                // The code in the Primary Code Path Data Element entry should always have priority over the preferred (value[x])
+                if ((existingCode == null || isPrimaryCodePath) && (isPreferredCodePath)) {
+                    existingPrimaryCodePathElement.setFixed(element.getCode().toCodeableConcept());
+                }
+            }
         }
 
         Boolean isSlice = element.getMasterDataType().toLowerCase().equals("slice");
@@ -1130,17 +1169,6 @@ public class Processor extends Operation {
 
         }
     }
-
-//    private void ensurePrimaryCodePathElement(DictionaryElement element, StructureDefinition sd) {
-//        ElementDefinition ed = new ElementDefinition();
-//        ed.setId(String.format("%s.%s", resourceType, codePath));
-//        ed.setPath(String.format("%s.%s", resourceType, codePath));
-//        ed.setMin(1);
-//        ed.setMax("1");
-//        ed.setMustSupport(true);
-//        ed.setFixed(element.getCode().toCodeableConcept());
-//        sd.getDifferential().addElement(ed);
-//    }
 
     private void ensureSliceAndBaseElementWithSlicing(DictionaryElement dictionaryElement, DictionaryFhirElementPath elementPath,
         StructureDefinition sd, String elementId, String sliceName, ElementDefinition elementDefinition) {
