@@ -63,6 +63,8 @@ class OperationFactory {
                 return new Processor();
             case "BundleResources":
                 return new BundleResources();
+            case "PostBundlesInDir":
+                return new PostBundlesInDirOperation();
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operationName);
         }

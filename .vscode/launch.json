@@ -150,6 +150,20 @@
                 "-pts=C:\\src\\GitHub\\valueset-spreadsheet\\2.16.840.1.113762.1.4.1108.15.xlsx",
                 "-op=C:\\src\\GitHub\\valueset-spreadsheet"
             ]
+        },
+        {
+            "type": "java",
+            "name": "PostBundles to Fhir Uri",
+            "request": "launch",
+            "mainClass": "jreyno77.com.github.Main",
+            "projectName": "tooling",
+            "args": [
+                "-PostBundlesInDir",
+                "-dp=C:\\src\\GitHub\\hedis-ig-r4\\bundles\\MRP-FHIR\\MRP-FHIR-files",
+                "-fs=http://localhost:8080/cqf-ruler-r4/fhir",
+                "-fv=fhir4",
+                "-e=json"
+            ]
         }      
     ]
 }
