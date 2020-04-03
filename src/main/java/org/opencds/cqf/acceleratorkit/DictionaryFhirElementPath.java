@@ -93,6 +93,10 @@ public class DictionaryFhirElementPath {
     }
     public void setBindingStrength(String bindingStrength) { this.bindingStrength = bindingStrength; }
 
+    private String unitOfMeasure;
+    public String getUnitOfMeasure() { return this.unitOfMeasure; }
+    public void setUnitOfMeasure(String unitOfMeasure) { this.unitOfMeasure = unitOfMeasure; }
+
     private String extensionNeeded;
     public String getExtensionNeeded() { return this.extensionNeeded; }
     public void setExtensionNeeded(String extensionNeeded) { this.extensionNeeded = extensionNeeded; }

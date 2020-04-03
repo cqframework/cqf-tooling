@@ -60,11 +60,11 @@ public class Processor extends Operation {
             String value = flagAndValue[1];
 
             switch (flag.replace("-", "").toLowerCase()) {
+                case "scopes": case "s": scopes = value; break; // -scopes (-s)
                 case "outputpath": case "op": setOutputPath(value); break; // -outputpath (-op)
                 case "pathtospreadsheet": case "pts": pathToSpreadsheet = value; break; // -pathtospreadsheet (-pts)
                 case "encoding": case "e": encoding = value.toLowerCase(); break; // -encoding (-e)
                 case "dataelementpages": case "dep": dataElementPages = value; break; // -dataelementpages (-dep)
-                case "scopes": case "s": scopes = value; break; // -scopes (-s)
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
@@ -120,8 +120,11 @@ public class Processor extends Operation {
         igResourceFragments = new ArrayList<>();
 
         // ensure scope folder exists
-        String scopePath = getScopePath(scope);
-        ensurePath(scopePath);
+//        String scopePath = getScopePath(scope);
+//        ensurePath(scopePath);
+
+        String outputPath = getOutputPath();
+        ensurePath(outputPath);
 
         if (scope != null && scope.length() > 0) {
             canonicalBase = scopeCanonicalBaseMap.get(scope.toLowerCase());
@@ -139,10 +142,10 @@ public class Processor extends Operation {
         attachExtensions();
 
         // write all resources
-        writeExtensions(scopePath);
-        writeProfiles(scopePath);
-        writeCodeSystems(scopePath);
-        writeValueSets(scopePath);
+        writeExtensions(outputPath);
+        writeProfiles(outputPath);
+        writeCodeSystems(outputPath);
+        writeValueSets(outputPath);
 
         //ig.json is deprecated and resources a located by convention. If our output isn't satisfying convention, we should
         //modify the tooling to match the convention.
@@ -209,14 +212,14 @@ public class Processor extends Operation {
         }
     }
 
-    private String getScopePath(String scope) {
-        if (scope == null) {
-            return getOutputPath();
-        }
-        else {
-            return getOutputPath() + "/" + scope;
-        }
-    }
+//    private String getScopePath(String scope) {
+//        if (scope == null) {
+//            return getOutputPath();
+//        }
+//        else {
+//            return getOutputPath() + "/" + scope;
+//        }
+//    }
 
     private void ensureExtensionsPath(String scopePath) {
         String extensionsPath = getExtensionsPath(scopePath);
@@ -363,6 +366,7 @@ public class Processor extends Operation {
             fhirType.setCustomProfileId(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomProfileId")));
             fhirType.setCustomValueSetName(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomValueSetName")));
             fhirType.setBindingStrength(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "BindingStrength")));
+            fhirType.setUnitOfMeasure(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "UnitOfMeasure")));
             fhirType.setExtensionNeeded(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ExtensionNeeded")));
             fhirType.setAdditionalFHIRMappingDetails(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4AdditionalFHIRMappingDetails")));
         }
@@ -473,7 +477,7 @@ public class Processor extends Operation {
     private void processDataElementPage(Workbook workbook, String page, String scope) {
         Sheet sheet = workbook.getSheet(page);
         if (sheet == null) {
-            throw new IllegalArgumentException(String.format("Sheet %s not found", page));
+            System.out.println(String.format("Sheet %s not found in the Workbook, so no processing was done.", page));
         }
 
         Iterator<Row> it = sheet.rowIterator();
@@ -534,6 +538,7 @@ public class Processor extends Operation {
                         case "custom profile id": colIds.put("CustomProfileId", cell.getColumnIndex()); break;
                         case "binding or custom value set name or reference": colIds.put("CustomValueSetName", cell.getColumnIndex()); break;
                         case "binding strength": colIds.put("BindingStrength", cell.getColumnIndex()); break;
+                        case "ucum": colIds.put("UnitOfMeasure", cell.getColumnIndex()); break;
                         case "extension needed": colIds.put("ExtensionNeeded", cell.getColumnIndex()); break;
 
                         // fhir resource details
@@ -713,6 +718,7 @@ public class Processor extends Operation {
                 case "Coding (Select all that apply":
                 case "Coding - Select all that apply":
                 case "Coding - Select One":
+                case "Coding - Select one":
                     return "CodeableConcept";
                 default:
                     return type;
@@ -773,7 +779,7 @@ public class Processor extends Operation {
 
         String extensionName = getExtensionName(element.getFhirElementPath().getResourcePath(), element.getDataElementName());
         sd.setName(extensionName);
-        sd.setTitle(element.getDataElementLabel());
+        sd.setTitle(element.getLabel());
         sd.setStatus(Enumerations.PublicationStatus.DRAFT);
         sd.setExperimental(false);
         // TODO: date
@@ -897,22 +903,24 @@ public class Processor extends Operation {
     @NotNull
     private StructureDefinition createProfileStructureDefinition(DictionaryElement element, String customProfileId) {
         DictionaryFhirElementPath elementPath = element.getFhirElementPath();
+        String customProfileIdRaw = elementPath.getCustomProfileId();
+        Boolean hasCustomProfileIdRaw = customProfileIdRaw != null && !customProfileIdRaw.isEmpty() && !customProfileIdRaw.isBlank();
         String resourceType = elementPath.getResourceType();
 
         StructureDefinition sd;
         sd = new StructureDefinition();
-        sd.setId(toId((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getName()));
-        sd.setUrl(String.format("%s/StructureDefinition/%s", canonicalBase, sd.getId()));
+        sd.setId(customProfileId);
+        sd.setUrl(String.format("%s/StructureDefinition/%s", canonicalBase, customProfileId));
         // TODO: version
-        sd.setName((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getDataElementName());
-        sd.setTitle((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getDataElementLabel());
+        sd.setName(hasCustomProfileIdRaw ? customProfileIdRaw : element.getName());
+        sd.setTitle(hasCustomProfileIdRaw ? customProfileIdRaw : element.getLabel());
 
         sd.setStatus(Enumerations.PublicationStatus.DRAFT);
         sd.setExperimental(false);
         // TODO: date
         // TODO: publisher
         // TODO: contact
-        sd.setDescription((customProfileId != null && customProfileId.length() > 0) ? customProfileId : element.getDescription());
+        sd.setDescription(element.getDescription());
         // TODO: What to do with Notes?
         sd.setFhirVersion(Enumerations.FHIRVersion._4_0_1);
         sd.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
@@ -955,14 +963,12 @@ public class Processor extends Operation {
         List<ElementDefinition> elementDefinitions = new ArrayList<>();
 
         // If custom profile is specified, search for if it exists already.
-        String customProfileId = element.getFhirElementPath().getCustomProfileId();
-        if (customProfileId != null && customProfileId.length() > 0) {
-            customProfileId = toId(customProfileId);
-
-            for (StructureDefinition existingSD : profiles) {
-                if (existingSD.getId().equals(customProfileId)) {
-                    sd = existingSD;
-                }
+        String customProfileIdRaw = element.getFhirElementPath().getCustomProfileId();
+        Boolean hasCustomProfileIdRaw = customProfileIdRaw != null && !customProfileIdRaw.isBlank() && !customProfileIdRaw.isEmpty();
+        String customProfileId = toId(hasCustomProfileIdRaw ? customProfileIdRaw : element.getName());
+        for (StructureDefinition existingSD : profiles) {
+            if (existingSD.getId().equals(customProfileId)) {
+                sd = existingSD;
             }
         }
 
@@ -974,7 +980,7 @@ public class Processor extends Operation {
         if (requiresExtension(element)) {
             StructureDefinition extension = ensureExtension(element);
             DictionaryProfileElementExtension profileElementExtensionEntry = new DictionaryProfileElementExtension();
-            profileElementExtensionEntry.setProfileId(toId(element.getFhirElementPath().getCustomProfileId()));
+            profileElementExtensionEntry.setProfileId(customProfileId);
             profileElementExtensionEntry.setResourcePath(element.getFhirElementPath().getResourceTypeAndPath());
             profileElementExtensionEntry.setElement(element);
             profileElementExtensionEntry.setExtension(extension);
@@ -1038,17 +1044,6 @@ public class Processor extends Operation {
         // For Observations, it is a valid scenario for the Data Dictionary (DD) to not have a Data Element entry for the primary code path element - Observation.code.
         // In this case, the tooling should ensure that this element is created. The fixed code for this element should be the code specified by the Data
         // Element record mapped to Observation.value[x]. For all other resource types it is invalid to not have a primary code path element entry in the DD
-//        if (resourceType.equals("Observation") && !element.getFhirElementPath().getResourceTypeAndPath().equals("Observation.code")) {
-//            ElementDefinition ed = new ElementDefinition();
-//            ed.setId(String.format("%s.%s", resourceType, codePath));
-//            ed.setPath(String.format("%s.%s", resourceType, codePath));
-//            ed.setMin(1);
-//            ed.setMax("1");
-//            ed.setMustSupport(true);
-//            ed.setFixed(element.getCode().toCodeableConcept());
-//            sd.getDifferential().addElement(ed);
-//        }
-
         if (codePath != null && !codePath.isEmpty() && element.getCode() != null) {
             String elementId = String.format("%s.%s", resourceType, codePath);
             String primaryCodePath = String.format("%s.%s", resourceType, codePath);
@@ -1064,7 +1059,6 @@ public class Processor extends Operation {
             Boolean isPrimaryCodePath = element.getFhirElementPath().getResourceTypeAndPath().equals(primaryCodePath);
             Boolean isPreferredCodePath = isPrimaryCodePath || element.getFhirElementPath().getResourceTypeAndPath().equals("Observation.value[x]");
 
-            // The problem is what if we stomp the Observation.code code with the Observation.value[x] code. How do we ensure that .code has priority. Maybe in the if code == null or path is Observation.code (always set it if it's .code
             if (existingPrimaryCodePathElement == null) {
                 ElementDefinition ed = new ElementDefinition();
                 ed.setId(elementId);
@@ -1124,15 +1118,43 @@ public class Processor extends Operation {
             if (isSlice) {
                 ensureSliceAndBaseElementWithSlicing(element, elementPath, sd, elementId, sliceName, null);
             } else {
+                String elementFhirType = getFhirTypeOfTargetElement(elementPath);
+
                 ElementDefinition ed = new ElementDefinition();
                 ed.setId(elementId);
-                ed.setPath(elementPath.getResourceTypeAndPath());
+
+                String typeAndPath = null;
+                if (isChoiceType(elementPath)) {
+                    typeAndPath = elementPath.getResourceTypeAndPath().replace("[x]", elementFhirType);
+                    String unitOfMeasure = element.getFhirElementPath().getUnitOfMeasure();
+
+                    // If this is a choice type, then the ID of the element needs to be set to the specified type, not ...[x]
+                    ed.setId(typeAndPath);
+
+                    ElementDefinition unitElement = new ElementDefinition();
+                    unitElement.setId(typeAndPath + ".unit");
+                    unitElement.setPath(typeAndPath + ".unit");
+                    unitElement.setMin(1);
+                    unitElement.setMax("1");
+                    unitElement.setMustSupport(true);
+                    ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
+                    if (elementFhirType != null && elementFhirType.length() > 0) {
+                        tr.setCode(unitOfMeasure);
+                        unitElement.addType(tr);
+                    }
+
+                    //sd.getDifferential().addElement(unitElement);
+                }
+                else {
+                    typeAndPath = elementPath.getResourceTypeAndPath();
+                }
+                ed.setPath(typeAndPath);
+
                 ed.setMin(toBoolean(element.getRequired()) ? 1 : 0);
                 ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
                 ed.setMustSupport(true);
 
                 ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
-                String elementFhirType = getFhirTypeOfTargetElement(elementPath);
                 if (elementFhirType != null && elementFhirType.length() > 0) {
                     tr.setCode(elementFhirType);
                     ed.addType(tr);
