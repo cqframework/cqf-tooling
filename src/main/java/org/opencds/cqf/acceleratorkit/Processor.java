@@ -1102,7 +1102,14 @@ public class Processor extends Operation {
             }
         }
         else {
-            elementId = String.format("%s.%s", resourceType, choicesPath);
+            if (isChoiceType(elementPath)) {
+                String elementFhirType = getFhirTypeOfTargetElement(elementPath);
+                elementFhirType = elementFhirType.substring(0, 1).toUpperCase() + elementFhirType.substring(1);
+                elementId = elementPath.getResourceTypeAndPath().replace("[x]", elementFhirType);
+            }
+            else {
+                elementId = String.format("%s.%s", resourceType, choicesPath);
+            }
         }
 
         ElementDefinition existingElement = null;
@@ -1122,37 +1129,29 @@ public class Processor extends Operation {
 
                 ElementDefinition ed = new ElementDefinition();
                 ed.setId(elementId);
+                ed.setPath(elementId);
+                ed.setMin(toBoolean(element.getRequired()) ? 1 : 0);
+                ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
+                ed.setMustSupport(true);
 
-                String typeAndPath = null;
-                if (isChoiceType(elementPath)) {
-                    typeAndPath = elementPath.getResourceTypeAndPath().replace("[x]", elementFhirType);
-                    String unitOfMeasure = element.getFhirElementPath().getUnitOfMeasure();
-
-                    // If this is a choice type, then the ID of the element needs to be set to the specified type, not ...[x]
-                    ed.setId(typeAndPath);
-
+                String unitOfMeasure = element.getFhirElementPath().getUnitOfMeasure();
+                Boolean hasUnitOfMeasure = unitOfMeasure != null && !unitOfMeasure.isBlank() && !unitOfMeasure.isEmpty();
+                if (isChoiceType(elementPath) && hasUnitOfMeasure) {
                     ElementDefinition unitElement = new ElementDefinition();
-                    unitElement.setId(typeAndPath + ".unit");
-                    unitElement.setPath(typeAndPath + ".unit");
+                    unitElement.setId(elementId + ".unit");
+                    unitElement.setPath(elementId + ".unit");
                     unitElement.setMin(1);
                     unitElement.setMax("1");
                     unitElement.setMustSupport(true);
                     ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
                     if (elementFhirType != null && elementFhirType.length() > 0) {
-                        tr.setCode(unitOfMeasure);
+                        tr.setCode("string");
                         unitElement.addType(tr);
                     }
+                    unitElement.setFixed(new StringType(unitOfMeasure));
 
-                    //sd.getDifferential().addElement(unitElement);
+                    sd.getDifferential().addElement(unitElement);
                 }
-                else {
-                    typeAndPath = elementPath.getResourceTypeAndPath();
-                }
-                ed.setPath(typeAndPath);
-
-                ed.setMin(toBoolean(element.getRequired()) ? 1 : 0);
-                ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
-                ed.setMustSupport(true);
 
                 ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
                 if (elementFhirType != null && elementFhirType.length() > 0) {
