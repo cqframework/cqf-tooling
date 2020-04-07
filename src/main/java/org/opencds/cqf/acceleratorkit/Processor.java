@@ -1143,6 +1143,8 @@ public class Processor extends Operation {
                     unitElement.setMin(1);
                     unitElement.setMax("1");
                     unitElement.setMustSupport(true);
+
+                    //TODO: This should be a code, not fixed string
                     ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
                     if (elementFhirType != null && elementFhirType.length() > 0) {
                         tr.setCode("string");
@@ -1283,18 +1285,28 @@ public class Processor extends Operation {
 
     private void ensureAndBindElementTerminology(DictionaryElement element, StructureDefinition sd, ElementDefinition ed) {
         // binding and CodeSystem/ValueSet for MultipleChoice elements
-        if (element.getChoices().size() > 0) {
-            CodeSystem codeSystem = createCodeSystem(element, sd);
-            ValueSet valueSet = ensureValueSet(element);
+        String customValueSetName = element.getFhirElementPath().getCustomValueSetName();
+        Boolean hasCustomValueSetName = customValueSetName != null && !customValueSetName.isBlank() && !customValueSetName.isEmpty();
 
-            if (element.getChoicesForSystem(openMRSSystem).size() == element.getChoices().size()) {
-                codeSystem.setValueSet(valueSet.getUrl());
+        //TODO: hasCustomerValueSetName might be sufficient here?
+        if (element.getChoices().size() > 0 || hasCustomValueSetName) {
+            String valueSetUrl = null;
+            if (hasCustomValueSetName && element.getChoices().size() == 0 && customValueSetName.startsWith("http")) {
+                valueSetUrl = customValueSetName;
             }
+            else {
+                CodeSystem codeSystem = createCodeSystem(element, sd);
+                ValueSet valueSet = ensureValueSet(element);
 
+                if (element.getChoicesForSystem(openMRSSystem).size() == element.getChoices().size()) {
+                    codeSystem.setValueSet(valueSet.getUrl());
+                }
+                valueSetUrl = valueSet.getUrl();
+            }
             // Bind the current element to the valueSet
             ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
             binding.setStrength(element.getFhirElementPath().getBindingStrength());
-            binding.setValueSet(valueSet.getUrl());
+            binding.setValueSet(valueSetUrl);
             ed.setBinding(binding);
         }
         // if the element is not a multiple choice element or an extension and has as code, bind it as the fixed value for the element.
@@ -1320,7 +1332,7 @@ public class Processor extends Operation {
             valueSetName = toId(element.getName());
         }
 
-        String valueSetId = toId(valueSetName);
+        String valueSetId = toId(valueSetName) + "-values";
         ValueSet valueSet = null;
         Boolean valueSetExisted = false;
         for (ValueSet vs : valueSets) {
@@ -1332,10 +1344,10 @@ public class Processor extends Operation {
 
         if (valueSet == null) {
             valueSet = new ValueSet();
-            valueSet.setId(valueSetId + "-values");
+            valueSet.setId(valueSetId);
             valueSet.setUrl(String.format("%s/ValueSet/%s", canonicalBase, valueSet.getId()));
             // TODO: version
-            valueSet.setName(valueSetId + "-values");
+            valueSet.setName(valueSetId);
             valueSet.setTitle(String.format("%s values", element.getLabel()));
             valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
             valueSet.setExperimental(false);
