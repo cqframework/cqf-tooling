@@ -1310,7 +1310,7 @@ public class Processor extends Operation {
             ed.setBinding(binding);
         }
         // if the element is not a multiple choice element or an extension and has as code, bind it as the fixed value for the element.
-        else if (element.getCode() != null && !requiresExtension(element)) {
+        if (element.getChoices().size() == 0 && element.getCode() != null && !requiresExtension(element)) {
             DictionaryCode code = element.getCode();
             List<Coding> codes = new ArrayList<>();
             Coding coding = new Coding();
