@@ -2,6 +2,7 @@ package org.opencds.cqf.acceleratorkit;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Bryn on 8/18/2019.
@@ -45,6 +46,14 @@ public class DictionaryElement {
         return this.name;
     }
 
+    private String masterDataType;
+    public String getMasterDataType() {
+        return this.masterDataType;
+    }
+    public void setMasterDataType(String masterDataType) {
+        this.masterDataType = masterDataType;
+    }
+
     private String infoIcon;
     public String getInfoIcon() {
         return this.infoIcon;
@@ -63,7 +72,7 @@ public class DictionaryElement {
 
     private String relevance;
     public String getRelevance() {
-        return relevance;
+        return this.relevance;
     }
     public void setRelevance(String relevance) {
         this.relevance = relevance;
@@ -77,11 +86,26 @@ public class DictionaryElement {
         this.description = description;
     }
 
+    private String dataElementLabel;
+    public String getDataElementLabel() {
+        return this.dataElementLabel;
+    }
+    public void setDataElementLabel(String dataElementLabel) {
+        this.dataElementLabel = dataElementLabel;
+    }
+
+    private String dataElementName;
+    public String getDataElementName() {
+        return this.dataElementName;
+    }
+    public void setDataElementName(String dataElementName) {
+        this.dataElementName = dataElementName;
+    }
+
     private String notes;
     public String getNotes() {
         return this.notes;
     }
-
     public void setNotes(String notes) {
         this.notes = notes;
     }
@@ -97,9 +121,35 @@ public class DictionaryElement {
     private List<DictionaryCode> choices;
     public List<DictionaryCode> getChoices() {
         if (this.choices == null) {
-            this.choices = new ArrayList<DictionaryCode>();
+            this.choices = new ArrayList<>();
         }
         return this.choices;
+    }
+    public List<DictionaryCode> getValidChoices() {
+        return this.getChoices().stream()
+                .filter((c) -> !c.getCode().trim().isEmpty())
+                .collect(Collectors.toList());
+    }
+    public List<DictionaryCode> getChoicesForSystem(String system) {
+        if (this.choices == null) {
+            this.choices = new ArrayList<>();
+        }
+        List<DictionaryCode> codes = this.getValidChoices().stream()
+                .filter((c) -> c.getSystem() == system)
+                .collect(Collectors.toList());
+        return codes;
+    }
+
+    private ArrayList<String> codeSystemUrls;
+    public List<String> getCodeSystemUrls() {
+        if (this.codeSystemUrls == null) {
+            this.codeSystemUrls = new ArrayList<>();
+        }
+        List<String> codeSystemUrls = this.getValidChoices().stream()
+                .map((c) -> c.getSystem())
+                .distinct()
+                .collect(Collectors.toList());
+        return codeSystemUrls;
     }
 
     private String calculation;
@@ -134,12 +184,28 @@ public class DictionaryElement {
         this.editable = editable;
     }
 
+    private String scope;
+    public String getScope() {
+        return this.scope;
+    }
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
+
     private DictionaryCode code;
     public DictionaryCode getCode() {
         return this.code;
     }
     public void setCode(DictionaryCode code) {
         this.code = code;
+    }
+
+    private DictionaryFhirElementPath fhirElementPath;
+    public DictionaryFhirElementPath getFhirElementPath() {
+        return this.fhirElementPath;
+    }
+    public void setFhirElementPath(DictionaryFhirElementPath fhirElementPath) {
+        this.fhirElementPath = fhirElementPath;
     }
 
     @Override
