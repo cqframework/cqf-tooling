@@ -33,6 +33,7 @@ public class Processor extends Operation {
     private Map<String, String> scopeCanonicalBaseMap = new HashMap<String, String>();
 
     private String openMRSSystem = "http://openmrs.org/concepts";
+    private String whoCodeSystemBase = "http://who.int/cg";
     // NOTE: for now, disable open MRS system/codes
     private boolean enableOpenMRS = false;
     private Map<String, String> supportedCodeSystems = new HashMap<String, String>();
@@ -282,9 +283,43 @@ public class Processor extends Operation {
             String codeListString = SpreadsheetHelper.getCellAsString(row, getColId(colIds,"FhirR4Code"));
             if (codeListString != null && !codeListString.isEmpty()) {
                 List<String> codesList = Arrays.asList(codeListString.split(";"));
-
                 for (String c : codesList) {
                     codes.add(getCode(system, label, display, c, null));
+                }
+            }
+
+            if (system.startsWith(whoCodeSystemBase)) {
+                CodeSystem codeSystem = null;
+                for (CodeSystem cs : codeSystems) {
+                    if (cs.getUrl().equals(system + "-codes")) {
+                        codeSystem = cs;
+                    }
+                }
+
+                if (codeSystem == null)
+                {
+                    String codeSystemName = system.substring(system.indexOf("CodeSystem/") + "CodeSystem/".length());
+                    codeSystem = createCodeSystem(codeSystemName, whoCodeSystemBase, "WHO Extended Codes CodeSystem", "Set of codes identified as being needed but not found in existing Code Systems");
+                }
+
+                for (DictionaryCode code : codes) {
+                    CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent();
+                    concept.setCode(code.getCode());
+                    concept.setDisplay(code.getLabel());
+
+                    String parentLabel = null;
+                    String parentName = SpreadsheetHelper.getCellAsString(row, getColId(colIds,"InputOptionParent"));
+                    if (parentName != null && !parentName.trim().isEmpty()) {
+                        parentName = parentName.trim();
+                        DictionaryElement currentElement = elementMap.get(parentName);
+                        if (currentElement != null) {
+                            parentLabel = currentElement.getDataElementLabel();
+                        }
+                    }
+
+                    String definition = parentLabel != null ? String.format("%s - %s", parentLabel, code.getLabel()) : code.getLabel();
+                    concept.setDefinition(definition);
+                    codeSystem.addConcept(concept);
                 }
             }
         }
@@ -1288,17 +1323,29 @@ public class Processor extends Operation {
         String customValueSetName = element.getFhirElementPath().getCustomValueSetName();
         Boolean hasCustomValueSetName = customValueSetName != null && !customValueSetName.isBlank() && !customValueSetName.isEmpty();
 
-        //TODO: hasCustomerValueSetName might be sufficient here?
+        //TODO: hasCustomValueSetName might be sufficient here?
         if (element.getChoices().size() > 0 || hasCustomValueSetName) {
             String valueSetUrl = null;
             if (hasCustomValueSetName && element.getChoices().size() == 0 && customValueSetName.startsWith("http")) {
                 valueSetUrl = customValueSetName;
             }
             else {
-                CodeSystem codeSystem = createCodeSystem(element, sd);
+                //TOOD: This needs some TLC, but had to decouple createCodeSystem from openMRS codes to facilitate the extended codes pattern.
+                CodeSystem codeSystem = null;
+                if (enableOpenMRS && element.getChoicesForSystem(openMRSSystem).size() > 0) {
+                    codeSystem = createCodeSystem(element.getName(), canonicalBase, null, null);
+                    // collect all the OpenMRS choices to add to the codeSystem
+                    for (DictionaryCode code : element.getChoicesForSystem(openMRSSystem)) {
+                        CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent();
+                        concept.setCode(code.getCode());
+                        concept.setDisplay(code.getLabel());
+                        codeSystem.addConcept(concept);
+                    }
+                }
+
                 ValueSet valueSet = ensureValueSet(element);
 
-                if (element.getChoicesForSystem(openMRSSystem).size() == element.getChoices().size()) {
+                if (codeSystem != null && element.getChoicesForSystem(openMRSSystem).size() == element.getChoices().size()) {
                     codeSystem.setValueSet(valueSet.getUrl());
                 }
                 valueSetUrl = valueSet.getUrl();
@@ -1405,33 +1452,25 @@ public class Processor extends Operation {
     }
 
     @NotNull
-    private CodeSystem createCodeSystem(DictionaryElement element, StructureDefinition sd) {
+    private CodeSystem createCodeSystem(String name, String canonicalBase, String title, String description) {
         CodeSystem codeSystem = new CodeSystem();
-        if (enableOpenMRS && element.getChoicesForSystem(openMRSSystem).size() > 0) {
-            codeSystem.setId(sd.getId() + "-codes");
-            codeSystem.setUrl(String.format("%s/CodeSystem/%s", canonicalBase, codeSystem.getId()));
-            // TODO: version
-            codeSystem.setName(element.getName() + "_codes");
-            codeSystem.setTitle(String.format("%s codes", element.getLabel()));
-            codeSystem.setStatus(Enumerations.PublicationStatus.DRAFT);
-            codeSystem.setExperimental(false);
-            // TODO: date
-            // TODO: publisher
-            // TODO: contact
-            codeSystem.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
-            codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-            codeSystem.setCaseSensitive(true);
 
-            // collect all the OpenMRS choices to add to the codeSystem
-            for (DictionaryCode code : element.getChoicesForSystem(openMRSSystem)) {
-                CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent();
-                concept.setCode(code.getCode());
-                concept.setDisplay(code.getLabel());
-                codeSystem.addConcept(concept);
-            }
+        codeSystem.setId(toId(name) + "-codes");
+        codeSystem.setUrl(String.format("%s/CodeSystem/%s", canonicalBase, codeSystem.getId()));
+        // TODO: version
+        codeSystem.setName(name + "_codes");
+        codeSystem.setTitle(String.format("%s codes", title != null ? title : name));
+        codeSystem.setStatus(Enumerations.PublicationStatus.DRAFT);
+        codeSystem.setExperimental(false);
+        // TODO: date
+        // TODO: publisher
+        // TODO: contact
+        codeSystem.setDescription(description != null ? description : String.format("Codes representing possible values for the %s element", name));
+        codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+        codeSystem.setCaseSensitive(true);
 
-            codeSystems.add(codeSystem);
-        }
+        codeSystems.add(codeSystem);
+
         return codeSystem;
     }
 
