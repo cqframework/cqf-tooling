@@ -70,9 +70,9 @@ public class Processor extends Operation {
             }
         }
 
-        scopeCanonicalBaseMap.put("core", "http://hl7.org/fhir/dbcg/core/ImplementationGuide/core");
-        scopeCanonicalBaseMap.put("fp", "http://hl7.org/fhir/dbcg/fp-cds/ImplementationGuide/fp-cds");
-        scopeCanonicalBaseMap.put("sti", "http://hl7.org/fhir/dbcg/sti-cds/ImplementationGuide/sti-cds");
+        scopeCanonicalBaseMap.put("core", "http://fhir.org/guides/who/core");
+        scopeCanonicalBaseMap.put("fp", "http://fhir.org/guides/who/fp-cds");
+        scopeCanonicalBaseMap.put("sti", "http://fhir.org/guides/who/sti-cds");
 
         if (pathToSpreadsheet == null) {
             throw new IllegalArgumentException("The path to the spreadsheet is required");
@@ -455,7 +455,9 @@ public class Processor extends Operation {
         e.setDue(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Due")));
         e.setRelevance(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Relevance")));
         e.setDescription(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Description")));
-        e.setDataElementLabel(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "DataElementLabel")));
+        e.setDataElementLabel(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "DataElementLabel")) != null
+            ? SpreadsheetHelper.getCellAsString(row, getColId(colIds, "DataElementLabel")).trim()
+            : null);
         e.setDataElementName(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "DataElementName")));
         e.setNotes(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Notes")));
         e.setCalculation(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Calculation")));
@@ -825,6 +827,14 @@ public class Processor extends Operation {
         sd.setFhirVersion(Enumerations.FHIRVersion._4_0_1);
         sd.setKind(StructureDefinition.StructureDefinitionKind.COMPLEXTYPE);
         sd.setAbstract(false);
+
+        StructureDefinition.StructureDefinitionContextComponent context = new StructureDefinition.StructureDefinitionContextComponent();
+        context.setType(StructureDefinition.ExtensionContextType.ELEMENT);
+        context.setExpression(element.getFhirElementPath().getResourceType());
+        List<StructureDefinition.StructureDefinitionContextComponent> contextList = new ArrayList();
+        contextList.add(context);
+        sd.setContext(contextList);
+
         sd.setType("Extension");
         sd.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Extension");
         sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
