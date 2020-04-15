@@ -11,6 +11,7 @@
         <version.major>1</version.major>
         <version.minor>1</version.minor>
         <version.patch>0</version.patch>
+        
         <!-- NOTE: Building under the release profile automatically drops the -SNAPSHOT extension -->
         <revision>${version.major}.${version.minor}.${version.patch}-SNAPSHOT</revision>
 
@@ -370,6 +371,14 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.1.2</version>
+                    <configuration>
+                    <archive>                   
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -531,6 +540,8 @@
                                         <mainClass>
                                         org.opencds.cqf.Main
                                         </mainClass>
+                                        <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                        <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                                     </manifest>
                                 </archive>
                                 <descriptorRefs>
