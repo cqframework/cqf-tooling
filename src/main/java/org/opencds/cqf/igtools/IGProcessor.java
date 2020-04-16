@@ -23,6 +23,8 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.library.R4LibraryProcessor;
 import org.opencds.cqf.library.STU3LibraryProcessor;
 import org.opencds.cqf.measure.MeasureProcessor;
+import org.opencds.cqf.measure.r4.RefreshR4Measure;
+import org.opencds.cqf.measure.stu3.RefreshStu3Measure;
 import org.opencds.cqf.plandefinition.PlanDefinitionProcessor;
 import org.opencds.cqf.terminology.ValueSetsProcessor;
 import org.opencds.cqf.testcase.TestCaseProcessor;
@@ -113,18 +115,20 @@ public class IGProcessor {
 
     private static ArrayList<String> refreshStu3IG(String igPath, Encoding outputEncodingEnum, Boolean includeELM, Boolean includeDependencies,
             Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned, FhirContext fhirContext) {
-        ArrayList<String> refreshedLibraryNames = refreshStu3IgLibraryContent(igPath, outputEncodingEnum, includeELM, versioned, fhirContext);
-        // union with below when this is implemented.
-        // refreshMeasureContent();
-        return refreshedLibraryNames;
+        ArrayList<String> refreshedResourcesNames = refreshStu3IgLibraryContent(igPath, outputEncodingEnum, includeELM, versioned, fhirContext);
+
+        List<String> refreshedMeasureNames = refreshStu3IgMeasureContent(igPath, outputEncodingEnum, versioned, fhirContext);
+        refreshedResourcesNames.addAll(refreshedMeasureNames);
+        return refreshedResourcesNames;
     }
 
     private static ArrayList<String> refreshR4IG(String igPath, Encoding outputEncodingEnum, Boolean includeELM, Boolean includeDependencies,
             Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned, FhirContext fhirContext) {
-        ArrayList<String> refreshedLibraryNames = refreshR4LibraryContent(igPath, outputEncodingEnum, includeELM, versioned, fhirContext);
-        // union with below when this is implemented.
-        // refreshMeasureContent();
-        return refreshedLibraryNames;
+        ArrayList<String> refreshedResourcesNames = refreshR4LibraryContent(igPath, outputEncodingEnum, includeELM, versioned, fhirContext);
+
+        List<String> refreshedMeasureNames = refreshR4IgMeasureContent(igPath, outputEncodingEnum, versioned, fhirContext);
+        refreshedResourcesNames.addAll(refreshedMeasureNames);
+        return refreshedResourcesNames;
     }
 
     public static ArrayList<String> refreshStu3IgLibraryContent(String igPath, Encoding outputEncoding, Boolean includeELM,
@@ -173,6 +177,48 @@ public class IGProcessor {
         }
 
         return refreshedLibraryNames;
+    }
+
+    public static ArrayList<String> refreshStu3IgMeasureContent(String igPath, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext) {
+        System.out.println("Refreshing measures...");
+        ArrayList<String> refreshedMeasureNames = new ArrayList<String>();
+        HashSet<String> measurePaths = IOUtils.getMeasurePaths(fhirContext);
+
+        for (String path : measurePaths) {
+            try {
+                RefreshStu3Measure refresher = new RefreshStu3Measure(path);
+                refresher.refreshGeneratedContent();
+                refreshedMeasureNames.add(FilenameUtils.getBaseName(path));
+            } catch (Exception e) {
+                LogUtils.putException(path, e);
+            }
+            finally {
+                LogUtils.warn(path);
+            }
+        }
+
+        return refreshedMeasureNames;
+    }
+
+    public static ArrayList<String> refreshR4IgMeasureContent(String igPath, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext) {
+        System.out.println("Refreshing measures...");
+        ArrayList<String> refreshedMeasureNames = new ArrayList<String>();
+        HashSet<String> measurePaths = IOUtils.getMeasurePaths(fhirContext);
+
+        for (String path : measurePaths) {
+            try {
+                RefreshR4Measure refresher = new RefreshR4Measure(path);
+                refresher.refreshGeneratedContent();
+                refreshedMeasureNames.add(FilenameUtils.getBaseName(path));
+            } catch (Exception e) {
+                LogUtils.putException(path, e);
+            }
+            finally {
+                LogUtils.warn(path);
+            }
+        }
+
+        return refreshedMeasureNames;
     }
 
     // TODO: most of the work of the sub methods of this should probably be moved to

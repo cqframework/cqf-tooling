@@ -93,8 +93,18 @@ public class IOUtils
     }
 
     public static <T extends IAnyResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext) 
-    {        
-        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(path, formatFileName(resource.getIdElement().getIdPart(), encoding, fhirContext))))
+    {
+        // If the path is to a specific resource file, just re-use that file path/name.
+        String outputPath = null;
+        File file = new File(path);
+        if (file.isFile()) {
+            outputPath = path;
+        }
+        else {
+            outputPath = FilenameUtils.concat(path, formatFileName(resource.getIdElement().getIdPart(), encoding, fhirContext));
+        }
+
+        try (FileOutputStream writer = new FileOutputStream(outputPath))
         {
             writer.write(parseResource(resource, encoding, fhirContext));
             writer.flush();

@@ -11,6 +11,7 @@ import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.elm.r1.ValueSetRef;
 import org.hl7.fhir.instance.model.api.INarrative;
+import org.opencds.cqf.common.r4.CqfmSoftwareSystemHelper;
 import org.opencds.cqf.utilities.IOUtils;
 import org.opencds.cqf.utilities.ResourceUtils;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
@@ -20,7 +21,9 @@ import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.*;
 
 public class R4LibraryProcessor {
-        public static Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {         
+    private static CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
+
+    public static Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {
         Library resource = (Library)IOUtils.readResource(libraryPath, fhirContext, true);
         Boolean libraryExists = resource != null;       
 
@@ -40,6 +43,7 @@ public class R4LibraryProcessor {
     private static void refreshLibrary(Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, Boolean includeVersion, CqlTranslator translator, FhirContext fhirContext) {
         Library generatedLibrary = processLibrary(cqlContentPath, translator, includeVersion, fhirContext);
         mergeDiff(referenceLibrary, generatedLibrary, cqlContentPath, translator, fhirContext);
+        cqfmHelper.ensureToolingExtensionAndDevice(referenceLibrary);
         IOUtils.writeResource(generatedLibrary, outputPath, encoding, fhirContext);
     }
 
@@ -80,6 +84,7 @@ public class R4LibraryProcessor {
 
         resolveDataRequirements(library, translator);
         attachContent(library, translator, IOUtils.getCqlString(cqlContentPath));
+        cqfmHelper.ensureToolingExtensionAndDevice(library);
         BaseNarrativeProvider<Narrative> narrativeProvider = new org.opencds.cqf.library.r4.NarrativeProvider();
         INarrative narrative = narrativeProvider.getNarrative(fhirContext, library);
         library.setText((Narrative) narrative);
