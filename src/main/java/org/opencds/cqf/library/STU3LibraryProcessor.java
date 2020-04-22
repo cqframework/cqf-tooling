@@ -12,6 +12,7 @@ import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.elm.r1.ValueSetRef;
 import org.hl7.fhir.instance.model.api.INarrative;
+import org.opencds.cqf.common.stu3.CqfmSoftwareSystemHelper;
 import org.opencds.cqf.library.stu3.NarrativeProvider;
 import org.opencds.cqf.utilities.IOUtils;
 import org.opencds.cqf.utilities.ResourceUtils;
@@ -22,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.dstu3.model.*;
 
 public class STU3LibraryProcessor {
+    private static CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
 
     public static Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {         
         Library resource = (Library)IOUtils.readResource(libraryPath, fhirContext, true);
@@ -43,6 +45,7 @@ public class STU3LibraryProcessor {
     private static void refreshLibrary(Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, Boolean includeVersion, CqlTranslator translator, FhirContext fhirContext) {
         Library generatedLibrary = processLibrary(cqlContentPath, translator, includeVersion, fhirContext);
         mergeDiff(referenceLibrary, generatedLibrary, cqlContentPath, translator, fhirContext);
+        cqfmHelper.ensureToolingExtensionAndDevice(referenceLibrary);
         IOUtils.writeResource(referenceLibrary, outputPath, encoding, fhirContext);
     }
 
@@ -79,6 +82,7 @@ public class STU3LibraryProcessor {
 
         resolveDataRequirements(library, translator);
         attachContent(library, translator, IOUtils.getCqlString(cqlContentPath));
+        cqfmHelper.ensureToolingExtensionAndDevice(library);
         BaseNarrativeProvider<Narrative> narrativeProvider = new NarrativeProvider();
         INarrative narrative = narrativeProvider.getNarrative(fhirContext, library);
         library.setText((Narrative) narrative);
