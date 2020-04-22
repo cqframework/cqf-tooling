@@ -79,6 +79,12 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
         else {
             String version = Main.class.getPackage().getImplementationVersion();
             Device.DeviceVersionComponent versionComponent = new Device.DeviceVersionComponent(new StringType(version));
+            for (Device.DeviceVersionComponent vc : cqfToolingDevice.getVersion()) {
+                if (vc.getValue().equals(versionComponent.getValue())) {
+                    return;
+                }
+            }
+
             cqfToolingDevice.addVersion(versionComponent);
         }
     }
