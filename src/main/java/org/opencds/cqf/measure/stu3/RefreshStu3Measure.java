@@ -3,25 +3,35 @@ package org.opencds.cqf.measure.stu3;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.XmlParser;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import org.hl7.fhir.dstu3.model.Measure;
-import org.hl7.fhir.dstu3.model.Narrative;
-import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.*;
+import org.opencds.cqf.Main;
+import org.opencds.cqf.common.stu3.CqfmSoftwareSystemHelper;
 import org.opencds.cqf.measure.RefreshGeneratedContent;
+import org.opencds.cqf.utilities.IOUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class RefreshStu3Measure extends RefreshGeneratedContent {
 
-    private FhirContext context = FhirContext.forDstu3();
-    private JsonParser jsonParser = (JsonParser) context.newJsonParser();
-    private XmlParser xmlParser = (XmlParser) context.newXmlParser();
+    private JsonParser jsonParser;
+    private XmlParser xmlParser;
+    private CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
 
     public RefreshStu3Measure() {
-        super("src/main/resources/org/opencds/cqf/measure/output/stu3", "-RefreshStu3Measure");
+        super("src/main/resources/org/opencds/cqf/measure/output/stu3", "-RefreshStu3Measure", FhirContext.forDstu3());
+        jsonParser = (JsonParser)this.getContext().newJsonParser();
+        xmlParser = (XmlParser)this.getContext().newXmlParser();
+    }
+
+    public RefreshStu3Measure(String pathToMeasures) {
+        super(pathToMeasures, "-RefreshStu3Measure", FhirContext.forDstu3(), null, pathToMeasures);
+        jsonParser = (JsonParser)this.getContext().newJsonParser();
+        xmlParser = (XmlParser)this.getContext().newXmlParser();
     }
 
     @Override
@@ -29,32 +39,41 @@ public class RefreshStu3Measure extends RefreshGeneratedContent {
         File measureDir = new File(this.getPathToMeasures());
         if (measureDir.isDirectory()) {
             for (File f : Optional.ofNullable(measureDir.listFiles()).orElseThrow()) {
-                Measure measure = null;
-                if (f.isFile()) {
-                    try {
-                        if (f.getName().endsWith("xml")) {
-                            measure = (Measure) xmlParser.parseResource(new FileInputStream(f));
-                        }
-                        else {
-                            measure = (Measure) jsonParser.parseResource(new FileInputStream(f));
-                        }
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                        throw new RuntimeException("Error parsing " + f.getName());
-                    }
-                }
-                if (measure == null) {
-                    continue;
-                }
-                output(refreshMeasure(measure));
+                refreshMeasureFromFile(f);
             }
         }
-        else {
-
+        else if (measureDir.isFile()){
+            refreshMeasureFromFile(measureDir);
         }
     }
 
+    private void refreshMeasureFromFile(File f) {
+        Measure measure = null;
+        IOUtils.Encoding encoding = null;
+
+        if (f.isFile()) {
+            try {
+                if (f.getName().endsWith("xml")) {
+                    measure = (Measure)xmlParser.parseResource(new FileInputStream(f));
+                    encoding = IOUtils.Encoding.XML;
+                }
+                else {
+                    measure = (Measure)jsonParser.parseResource(new FileInputStream(f));
+                    encoding = IOUtils.Encoding.JSON;
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Error parsing " + f.getName());
+            }
+        }
+        if (measure == null) {
+            return;
+        }
+        output(refreshMeasure(measure), encoding);
+    }
+
     public Measure refreshMeasure(Measure measure) {
+        cqfmHelper.ensureToolingExtensionAndDevice(measure);
 //        CqfMeasure cqfMeasure = this.dataRequirementsProvider.createCqfMeasure(measure, this.libraryResourceProvider);
 //
 //        // Ensure All Related Artifacts for all referenced Libraries
@@ -77,6 +96,6 @@ public class RefreshStu3Measure extends RefreshGeneratedContent {
 //        measure.setText(n.copy());
 //        // logger.info("Narrative: " + n.getDivAsString());
 //        return measure;
-        return null;
+        return measure;
     }
 }

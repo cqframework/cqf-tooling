@@ -1,19 +1,32 @@
 package org.opencds.cqf.measure;
 
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.Operation;
+import org.opencds.cqf.igtools.IGProcessor;
+import org.opencds.cqf.utilities.IOUtils;
 
 public abstract class RefreshGeneratedContent extends Operation {
 
+    private FhirContext context;
     private String pathToMeasures; // -ptm
     private String pathToLibraries; // -ptl
     private String operationName;
 
     private String encoding; // -e (json|xml)
 
-    public RefreshGeneratedContent(String outputPath, String operationName) {
+    public RefreshGeneratedContent(String outputPath, String operationName, FhirContext context) {
         setOutputPath(outputPath);
         this.operationName = operationName;
+        this.context = context;
+    }
+
+    public RefreshGeneratedContent(String outputPath, String operationName, FhirContext context, String pathToLibraries, String pathToMeasures) {
+        setOutputPath(outputPath);
+        this.operationName = operationName;
+        this.context = context;
+        this.pathToLibraries = pathToLibraries;
+        this.pathToMeasures = pathToMeasures;
     }
 
     @Override
@@ -43,16 +56,22 @@ public abstract class RefreshGeneratedContent extends Operation {
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
+
+        refreshGeneratedContent();
     }
 
-    public void output(IAnyResource resource) {
-
+    public void output(IAnyResource resource, IOUtils.Encoding encoding) {
+        IOUtils.writeResource(resource, pathToMeasures, encoding, context);
     }
 
     public abstract void refreshGeneratedContent();
 
     public String getPathToMeasures() {
         return pathToMeasures;
+    }
+
+    public FhirContext getContext() {
+        return context;
     }
 
     public String getPathToLibraries() {
