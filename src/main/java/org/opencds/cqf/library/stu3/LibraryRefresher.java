@@ -61,8 +61,7 @@ public class LibraryRefresher extends BaseLibraryGenerator<Library, NarrativePro
         .forEach(dateRequirement -> referenceLibrary.addDataRequirement(dateRequirement));
 
         referenceLibrary.getContent().clear();
-        generatedLibrary.getContent().stream()
-        .forEach(getContent -> attachContent(referenceLibrary, generatedLibraryTranslator, getCqlMap().get(id)));
+        attachContent(referenceLibrary, generatedLibraryTranslator, getCqlMap().get(id));
 
         referenceLibrary.setText(getNarrativeProvider().getNarrative(getFhirContext(), generatedLibrary));
 
@@ -78,7 +77,7 @@ public class LibraryRefresher extends BaseLibraryGenerator<Library, NarrativePro
     // Populate metadata
     private Library populateMeta(String name, String version) {
         Library library = new Library();
-        library.setId(nameToId(name));
+        library.setId(nameToId(name, version));
         library.setName(name);
         library.setVersion(version);
         library.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -131,15 +130,17 @@ public class LibraryRefresher extends BaseLibraryGenerator<Library, NarrativePro
     //helpers
     private String getIncludedLibraryId(IncludeDef def) {
         String name = getIncludedLibraryName(def);
-        return nameToId(name);
+        String version = def.getVersion();
+        return nameToId(name, version);
     }
 
     private String getIncludedLibraryName(IncludeDef def) {
         return def.getPath();
     }
 
-    private String nameToId(String name) {
-        return name.replaceAll("_", "-").toLowerCase();
+    private String nameToId(String name, String version) {
+        String nameAndVersion = "library-" + name + "-" + version;
+        return nameAndVersion.replaceAll("_", "-");
     }
 
     private String createFileName(String id, String encoding) {

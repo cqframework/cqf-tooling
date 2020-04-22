@@ -54,8 +54,7 @@ public class R4LibraryProcessor {
                 .forEach(dateRequirement -> referenceLibrary.addDataRequirement(dateRequirement));
 
         referenceLibrary.getContent().clear();
-        generatedLibrary.getContent().stream()
-                .forEach(getContent -> attachContent(referenceLibrary, translator, IOUtils.getCqlString(cqlContentPath)));
+        attachContent(referenceLibrary, translator, IOUtils.getCqlString(cqlContentPath));
 
         BaseNarrativeProvider<Narrative> narrativeProvider = new org.opencds.cqf.library.r4.NarrativeProvider();
         INarrative narrative = narrativeProvider.getNarrative(fhirContext, generatedLibrary);

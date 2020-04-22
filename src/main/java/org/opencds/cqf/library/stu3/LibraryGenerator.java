@@ -29,7 +29,7 @@ public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativePro
         org.hl7.elm.r1.Library elm = translator.toELM();
         Library library = loadIfExists();
         if (library == null) {
-            library = createLibrary(nameToId(elm.getIdentifier().getId()),
+            library = createLibrary(nameToId(elm.getIdentifier().getId(), elm.getIdentifier().getVersion()),
                     elm.getIdentifier().getId(), elm.getIdentifier().getVersion());
         }
         if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
@@ -118,15 +118,16 @@ public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativePro
     private String getIncludedLibraryId(IncludeDef def) {
         String name = getIncludedLibraryName(def);
         String version = def.getVersion();
-        return nameToId(name);
+        return nameToId(name, version);
     }
 
     private String getIncludedLibraryName(IncludeDef def) {
         return def.getPath();
     }
 
-    private String nameToId(String name) {
-        return name.replaceAll("_", "-").toLowerCase();
+    private String nameToId(String name, String version) {
+        String nameAndVersion = "library-" + name + "-" + version;
+        return nameAndVersion.replaceAll("_", "-");
     }
 
     private String createFileName(String id, String encoding) {
