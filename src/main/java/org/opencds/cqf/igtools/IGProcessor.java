@@ -288,17 +288,17 @@ public class IGProcessor {
                 String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
                 if (includeTerminology) {
                     shouldPersist = shouldPersist
-                            & bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
+                        & bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
                 }
 
                 if (includeDependencies) {
                     shouldPersist = shouldPersist
-                            & bundleDependencies(librarySourcePath, fhirContext, resources, encoding);
+                        & bundleDependencies(librarySourcePath, fhirContext, resources, encoding);
                 }
 
                 if (includePatientScenarios) {
                     shouldPersist = shouldPersist
-                            & bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
+                        & bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
                 }
 
                 if (shouldPersist) {
@@ -509,8 +509,14 @@ public class IGProcessor {
         Boolean shouldPersist = true;
         try {
             Map<String, IAnyResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding);
+
+            String currentResourceID = FilenameUtils.getBaseName(path);
             for (IAnyResource resource : dependencies.values()) {
                 resources.putIfAbsent(resource.getId(), resource);
+
+                // NOTE: Assuming dependency library will be in directory of dependent.
+                String dependencyPath = path.replace(currentResourceID, FilenameUtils.getBaseName(resource.getId()));
+                bundleDependencies(dependencyPath, fhirContext, resources, encoding);
             }
         } catch (Exception e) {
             shouldPersist = false;
@@ -596,6 +602,8 @@ public class IGProcessor {
         
         if (includeDependencies) {
             Map<String, IAnyResource> depLibraries = ResourceUtils.getDepLibraryResources(librarySourcePath, fhirContext, encoding);
+
+            //TODO: Needs to be recursive
             if (!depLibraries.isEmpty()) {
                 String depLibrariesID = "library-deps-" + libraryName;
                 Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<IAnyResource>(depLibraries.values()), fhirContext);            
