@@ -1,11 +1,6 @@
 package org.opencds.cqf.igtools;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -139,7 +134,6 @@ public class IGProcessor {
 
         for (String path : cqlContentPaths) {
             try {
-                //ask about how to do this better
                 String libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path, fhirContext);               
                 
                 STU3LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, outputEncoding, versioned);
@@ -163,7 +157,6 @@ public class IGProcessor {
 
         for (String path : cqlContentPaths) {
             try {
-                //ask about how to do this better
                 String libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path, fhirContext);
                 
                 R4LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, outputEncoding, versioned);
@@ -238,10 +231,8 @@ public class IGProcessor {
     private static void bundleMeasures(ArrayList<String> refreshedLibraryNames, String igPath, Boolean includeDependencies,
             Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, FhirContext fhirContext, String fhirUri,
             Encoding encoding) {
-        // The set to bundle should be the union of the successfully refreshed Measures
-        // and Libraries
-        // Until we have the ability to refresh Measures, the set is the union of
-        // existing Measures and successfully refreshed Libraries
+        // The set to bundle should be the union of the successfully refreshed Measures and Libraries
+        // Until we have the ability to refresh Measures, the set is the union of existing Measures and successfully refreshed Libraries
         System.out.println("Bundling measures...");
         HashSet<String> measureSourcePaths = IOUtils.getMeasurePaths(fhirContext);
         List<String> measurePathLibraryNames = new ArrayList<String>();
@@ -261,14 +252,12 @@ public class IGProcessor {
                 Map<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
 
                 String refreshedLibraryFileName = IOUtils.formatFileName(refreshedLibraryName, encoding, fhirContext);
-                String librarySourcePath;
-                try {
-                    librarySourcePath = IOUtils.getLibraryPathAssociatedWithCqlFileName(refreshedLibraryFileName, fhirContext);
-                } catch (Exception e) {
-                    LogUtils.putException(refreshedLibraryName, e);
+                String librarySourcePath = IOUtils.getLibraryPathAssociatedWithCqlFileName(refreshedLibraryFileName, fhirContext);
+                if (librarySourcePath == null) {
+                    LogUtils.putException(refreshedLibraryName, new FileNotFoundException("Could not find a Library Resource Associated with: " + refreshedLibraryFileName));
                     continue;
-                } 
-                
+                }
+
                 String measureSourcePath = "";
                 for (String path : measureSourcePaths) {
                     if (path.endsWith(refreshedLibraryFileName))
@@ -360,13 +349,11 @@ public class IGProcessor {
                 Map<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
 
                 String refreshedLibraryFileName = IOUtils.formatFileName(refreshedLibraryName, encoding, fhirContext);
-                String librarySourcePath;
-                try {
-                    librarySourcePath = IOUtils.getLibraryPathAssociatedWithCqlFileName(refreshedLibraryFileName, fhirContext);
-                } catch (Exception e) {
-                    LogUtils.putException(refreshedLibraryName, e);
+                String librarySourcePath = IOUtils.getLibraryPathAssociatedWithCqlFileName(refreshedLibraryFileName, fhirContext);
+                if (librarySourcePath == null) {
+                    LogUtils.putException(refreshedLibraryName, new FileNotFoundException("Could not find a Library Resource Associated with: " + refreshedLibraryFileName));
                     continue;
-                } 
+                }
                                 
                 String planDefinitionSourcePath = "";
                 for (String path : planDefinitionSourcePaths) {
