@@ -447,19 +447,21 @@ public class IOUtils
         return list;
     }
 
-    public static String getLibraryPathAssociatedWithCqlFileName(String cqlPath, FhirContext fhirContext) throws FileNotFoundException {
+    public static String getLibraryPathAssociatedWithCqlFileName(String cqlPath, FhirContext fhirContext) {
+        String libraryPath = null;
         String fileName = FilenameUtils.getName(cqlPath);
         String libraryFileName = LibraryProcessor.ResourcePrefix + fileName;
         for (String path : IOUtils.getLibraryPaths(fhirContext)) {
-            // NOTE: A bit of a hack, but we need to support both xml and json encodings for existing resources and the
-            // long-term strategy is to revisit this and change the approach to use the references rather than file name
-            // matching, so this should be good for the near-term.
+            // NOTE: A bit of a hack, but we need to support both xml and json encodings for existing resources and the long-term strategy is
+            // to revisit this and change the approach to use the references rather than file name matching, so this should be good for the near-term.
             if (path.endsWith(libraryFileName.replaceAll(".cql", ".json"))
                 || path.endsWith(libraryFileName.replaceAll(".cql", ".xml"))) {
-                return path;
+                libraryPath = path;
+                break;
             }
         }
-        throw new FileNotFoundException("Could not find a Library Resource Associated with: " + cqlPath);
+
+        return libraryPath;
     }
 
     private static HashSet<String> cqlLibraryPaths = new HashSet<String>();

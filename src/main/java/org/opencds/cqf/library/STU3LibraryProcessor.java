@@ -26,11 +26,15 @@ public class STU3LibraryProcessor {
     private static CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
 
     public static Boolean refreshLibraryContent(String igCanonicalBase, String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {
-        Library resource = (Library)IOUtils.readResource(libraryPath, fhirContext, true);
-        Boolean libraryExists = resource != null;       
-
         CqlTranslator translator = getTranslator(cqlContentPath);
-              
+
+        Boolean libraryExists = false;
+        Library resource = null;
+        if (libraryPath != null) {
+            resource = (Library)IOUtils.readResource(libraryPath, fhirContext, true);
+            libraryExists = resource != null;
+        }
+
         if (libraryExists) {            
             refreshLibrary(igCanonicalBase, resource, cqlContentPath, IOUtils.getParentDirectoryPath(libraryPath), encoding, includeVersion, translator, fhirContext);
         } else {
