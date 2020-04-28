@@ -1,11 +1,6 @@
 package org.opencds.cqf.igtools;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -139,7 +134,6 @@ public class IGProcessor {
 
         for (String path : cqlContentPaths) {
             try {
-                //ask about how to do this better
                 String libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path, fhirContext);               
                 
                 STU3LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, outputEncoding, versioned);
@@ -163,7 +157,6 @@ public class IGProcessor {
 
         for (String path : cqlContentPaths) {
             try {
-                //ask about how to do this better
                 String libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(path, fhirContext);
                 
                 R4LibraryProcessor.refreshLibraryContent(path, libraryPath, fhirContext, outputEncoding, versioned);
@@ -238,10 +231,8 @@ public class IGProcessor {
     private static void bundleMeasures(ArrayList<String> refreshedLibraryNames, String igPath, Boolean includeDependencies,
             Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, FhirContext fhirContext, String fhirUri,
             Encoding encoding) {
-        // The set to bundle should be the union of the successfully refreshed Measures
-        // and Libraries
-        // Until we have the ability to refresh Measures, the set is the union of
-        // existing Measures and successfully refreshed Libraries
+        // The set to bundle should be the union of the successfully refreshed Measures and Libraries
+        // Until we have the ability to refresh Measures, the set is the union of existing Measures and successfully refreshed Libraries
         System.out.println("Bundling measures...");
         HashSet<String> measureSourcePaths = IOUtils.getMeasurePaths(fhirContext);
         List<String> measurePathLibraryNames = new ArrayList<String>();
@@ -261,14 +252,12 @@ public class IGProcessor {
                 Map<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
 
                 String refreshedLibraryFileName = IOUtils.formatFileName(refreshedLibraryName, encoding, fhirContext);
-                String librarySourcePath;
-                try {
-                    librarySourcePath = IOUtils.getLibraryPathAssociatedWithCqlFileName(refreshedLibraryFileName, fhirContext);
-                } catch (Exception e) {
-                    LogUtils.putException(refreshedLibraryName, e);
+                String librarySourcePath = IOUtils.getLibraryPathAssociatedWithCqlFileName(refreshedLibraryFileName, fhirContext);
+                if (librarySourcePath == null) {
+                    LogUtils.putException(refreshedLibraryName, new FileNotFoundException("Could not find a Library Resource Associated with: " + refreshedLibraryFileName));
                     continue;
-                } 
-                
+                }
+
                 String measureSourcePath = "";
                 for (String path : measureSourcePaths) {
                     if (path.endsWith(refreshedLibraryFileName))
@@ -288,17 +277,17 @@ public class IGProcessor {
                 String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
                 if (includeTerminology) {
                     shouldPersist = shouldPersist
-                            & bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
+                        & bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
                 }
 
                 if (includeDependencies) {
                     shouldPersist = shouldPersist
-                            & bundleDependencies(librarySourcePath, fhirContext, resources, encoding);
+                        & bundleDependencies(librarySourcePath, fhirContext, resources, encoding);
                 }
 
                 if (includePatientScenarios) {
                     shouldPersist = shouldPersist
-                            & bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
+                        & bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
                 }
 
                 if (shouldPersist) {
@@ -360,13 +349,11 @@ public class IGProcessor {
                 Map<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
 
                 String refreshedLibraryFileName = IOUtils.formatFileName(refreshedLibraryName, encoding, fhirContext);
-                String librarySourcePath;
-                try {
-                    librarySourcePath = IOUtils.getLibraryPathAssociatedWithCqlFileName(refreshedLibraryFileName, fhirContext);
-                } catch (Exception e) {
-                    LogUtils.putException(refreshedLibraryName, e);
+                String librarySourcePath = IOUtils.getLibraryPathAssociatedWithCqlFileName(refreshedLibraryFileName, fhirContext);
+                if (librarySourcePath == null) {
+                    LogUtils.putException(refreshedLibraryName, new FileNotFoundException("Could not find a Library Resource Associated with: " + refreshedLibraryFileName));
                     continue;
-                } 
+                }
                                 
                 String planDefinitionSourcePath = "";
                 for (String path : planDefinitionSourcePaths) {
@@ -509,8 +496,14 @@ public class IGProcessor {
         Boolean shouldPersist = true;
         try {
             Map<String, IAnyResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding);
+
+            String currentResourceID = FilenameUtils.getBaseName(path);
             for (IAnyResource resource : dependencies.values()) {
                 resources.putIfAbsent(resource.getId(), resource);
+
+                // NOTE: Assuming dependency library will be in directory of dependent.
+                String dependencyPath = path.replace(currentResourceID, FilenameUtils.getBaseName(resource.getId()));
+                bundleDependencies(dependencyPath, fhirContext, resources, encoding);
             }
         } catch (Exception e) {
             shouldPersist = false;
@@ -596,6 +589,8 @@ public class IGProcessor {
         
         if (includeDependencies) {
             Map<String, IAnyResource> depLibraries = ResourceUtils.getDepLibraryResources(librarySourcePath, fhirContext, encoding);
+
+            //TODO: Needs to be recursive
             if (!depLibraries.isEmpty()) {
                 String depLibrariesID = "library-deps-" + libraryName;
                 Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<IAnyResource>(depLibraries.values()), fhirContext);            

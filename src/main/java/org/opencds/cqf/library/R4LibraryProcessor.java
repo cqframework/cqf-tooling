@@ -24,10 +24,14 @@ public class R4LibraryProcessor {
     private static CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
 
     public static Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {
-        Library resource = (Library)IOUtils.readResource(libraryPath, fhirContext, true);
-        Boolean libraryExists = resource != null;       
-
         CqlTranslator translator = getTranslator(cqlContentPath);
+
+        Boolean libraryExists = false;
+        Library resource = null;
+        if (libraryPath != null) {
+            resource = (Library) IOUtils.readResource(libraryPath, fhirContext, true);
+            libraryExists = resource != null;
+        }
               
         if (libraryExists) {            
             refreshLibrary(resource, cqlContentPath, IOUtils.getParentDirectoryPath(libraryPath), encoding, includeVersion, translator, fhirContext);
@@ -44,7 +48,7 @@ public class R4LibraryProcessor {
         Library generatedLibrary = processLibrary(cqlContentPath, translator, includeVersion, fhirContext);
         mergeDiff(referenceLibrary, generatedLibrary, cqlContentPath, translator, fhirContext);
         cqfmHelper.ensureToolingExtensionAndDevice(referenceLibrary);
-        IOUtils.writeResource(generatedLibrary, outputPath, encoding, fhirContext);
+        IOUtils.writeResource(referenceLibrary, outputPath, encoding, fhirContext);
     }
 
     private static void mergeDiff(Library referenceLibrary, Library generatedLibrary, String cqlContentPath, CqlTranslator translator,
@@ -58,8 +62,7 @@ public class R4LibraryProcessor {
                 .forEach(dateRequirement -> referenceLibrary.addDataRequirement(dateRequirement));
 
         referenceLibrary.getContent().clear();
-        generatedLibrary.getContent().stream()
-                .forEach(getContent -> attachContent(referenceLibrary, translator, IOUtils.getCqlString(cqlContentPath)));
+        attachContent(referenceLibrary, translator, IOUtils.getCqlString(cqlContentPath));
 
         BaseNarrativeProvider<Narrative> narrativeProvider = new org.opencds.cqf.library.r4.NarrativeProvider();
         INarrative narrative = narrativeProvider.getNarrative(fhirContext, generatedLibrary);
@@ -103,7 +106,7 @@ public class R4LibraryProcessor {
         library.setVersion(version);
         library.setStatus(Enumerations.PublicationStatus.ACTIVE);
         library.setExperimental(true);
-        library.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://hl7.org/fhir/codesystem-library-type.html")));
+        library.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://terminology.hl7.org/CodeSystem/library-type")));
         return library;
     }
 

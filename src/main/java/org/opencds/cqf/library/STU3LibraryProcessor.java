@@ -25,12 +25,16 @@ import org.hl7.fhir.dstu3.model.*;
 public class STU3LibraryProcessor {
     private static CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
 
-    public static Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {         
-        Library resource = (Library)IOUtils.readResource(libraryPath, fhirContext, true);
-        Boolean libraryExists = resource != null;       
-
+    public static Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {
         CqlTranslator translator = getTranslator(cqlContentPath);
-              
+
+        Boolean libraryExists = false;
+        Library resource = null;
+        if (libraryPath != null) {
+            resource = (Library)IOUtils.readResource(libraryPath, fhirContext, true);
+            libraryExists = resource != null;
+        }
+
         if (libraryExists) {            
             refreshLibrary(resource, cqlContentPath, IOUtils.getParentDirectoryPath(libraryPath), encoding, includeVersion, translator, fhirContext);
         } else {
