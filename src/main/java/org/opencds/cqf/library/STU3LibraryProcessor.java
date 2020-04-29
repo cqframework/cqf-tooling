@@ -57,8 +57,8 @@ public class STU3LibraryProcessor {
         referenceLibrary.getRelatedArtifact().clear();
         generatedLibrary.getRelatedArtifact().stream().forEach(relatedArtifact -> referenceLibrary.addRelatedArtifact(relatedArtifact));
 
-//        referenceLibrary.getDataRequirement().clear();
-//        generatedLibrary.getDataRequirement().stream().forEach(dateRequirement -> referenceLibrary.addDataRequirement(dateRequirement));
+        referenceLibrary.getDataRequirement().clear();
+        generatedLibrary.getDataRequirement().stream().forEach(dateRequirement -> referenceLibrary.addDataRequirement(dateRequirement));
 
         referenceLibrary.getContent().clear();
         attachContent(referenceLibrary, translator, IOUtils.getCqlString(cqlContentPath));
