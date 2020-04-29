@@ -11,15 +11,15 @@
         <version.major>1</version.major>
         <version.minor>1</version.minor>
         <version.patch>0</version.patch>
-        
+
         <!-- NOTE: Building under the release profile automatically drops the -SNAPSHOT extension -->
         <revision>${version.major}.${version.minor}.${version.patch}-SNAPSHOT</revision>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <cqframework_version>1.4.9-SNAPSHOT</cqframework_version>
-        <hapi_version>4.1.0</hapi_version>
+        <cqframework.version>1.4.9-SNAPSHOT</cqframework.version>
+        <hapi.version>4.2.0</hapi.version>
     </properties>
 
     <name>cqf-tooling</name>
@@ -113,7 +113,7 @@
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-structures-dstu3</artifactId>
-            <version>${hapi_version}</version>
+            <version>${hapi.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>stax</groupId>
@@ -130,7 +130,7 @@
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-structures-r4</artifactId>
-            <version>${hapi_version}</version>
+            <version>${hapi.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>stax</groupId>
@@ -204,7 +204,7 @@
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-base</artifactId>
-            <version>${hapi_version}</version>
+            <version>${hapi.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>stax</groupId>
@@ -220,7 +220,7 @@
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-converter</artifactId>
-            <version>${hapi_version}</version>
+            <version>${hapi.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>stax</groupId>
@@ -236,7 +236,7 @@
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-jpaserver-base</artifactId>
-            <version>${hapi_version}</version>
+            <version>${hapi.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>stax</groupId>
@@ -253,7 +253,7 @@
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>cql-formatter</artifactId>
-            <version>${cqframework_version}</version>
+            <version>${cqframework.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>jaxb</groupId>
@@ -264,7 +264,7 @@
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>quick</artifactId>
-            <version>${cqframework_version}</version>
+            <version>${cqframework.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>jaxb</groupId>
@@ -275,7 +275,7 @@
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>qdm</artifactId>
-            <version>${cqframework_version}</version>
+            <version>${cqframework.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>jaxb</groupId>
@@ -286,7 +286,7 @@
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>model</artifactId>
-            <version>${cqframework_version}</version>
+            <version>${cqframework.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>jaxb</groupId>
@@ -297,7 +297,7 @@
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>elm</artifactId>
-            <version>${cqframework_version}</version>
+            <version>${cqframework.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>jaxb</groupId>
@@ -308,7 +308,7 @@
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>cql-to-elm</artifactId>
-            <version>${cqframework_version}</version>
+            <version>${cqframework.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>jaxb</groupId>
@@ -319,7 +319,7 @@
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>cql</artifactId>
-            <version>${cqframework_version}</version>
+            <version>${cqframework.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>jaxb</groupId>
@@ -372,13 +372,13 @@
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.1.2</version>
                     <configuration>
-                    <archive>                   
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                        </manifest>
-                    </archive>
-                </configuration>
+                        <archive>
+                            <manifest>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            </manifest>
+                        </archive>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
