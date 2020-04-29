@@ -24,6 +24,8 @@ public class R4LibraryProcessor {
     private static CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
 
     public static Boolean refreshLibraryContent(String igCanonicalBase, String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {
+        CqlTranslator translator = getTranslator(cqlContentPath);
+
         Boolean libraryExists = false;
         Library resource = null;
         if (libraryPath != null) {

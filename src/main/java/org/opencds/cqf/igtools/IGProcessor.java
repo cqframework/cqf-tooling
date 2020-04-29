@@ -73,6 +73,7 @@ public class IGProcessor {
         IOUtils.resourceDirectories.addAll(resourceDirs);
 
         FhirContext fhirContext = getIgFhirContext(igVersion);
+        Boolean igResourcePathIsSpecified = igResourcePath != null && !igResourcePath.isEmpty() && !igResourcePath.isBlank();
         Object implementationGuide = null;
         String igCanonicalBase = null;
 
@@ -83,14 +84,22 @@ public class IGProcessor {
         ArrayList<String> refreshedLibraryNames = null;
         switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:
-            implementationGuide = IOUtils.readResource(igResourcePath, fhirContext, true);
-            igCanonicalBase = IGUtils.getStu3ImplementationGuideCanonicalBase((org.hl7.fhir.dstu3.model.ImplementationGuide)implementationGuide);
+            if (igResourcePathIsSpecified) {
+                implementationGuide = IOUtils.readResource(igResourcePath, fhirContext, true);
+                if (implementationGuide != null) {
+                    igCanonicalBase = IGUtils.getStu3ImplementationGuideCanonicalBase((org.hl7.fhir.dstu3.model.ImplementationGuide) implementationGuide);
+                }
+            }
             refreshedLibraryNames = refreshStu3IG(igCanonicalBase, igPath, encoding, includeELM, includeDependencies, includeTerminology,
                     includePatientScenarios, versioned, fhirContext);
             break;
         case R4:
-            implementationGuide = IOUtils.readResource(igResourcePath, fhirContext, true);
-            igCanonicalBase = IGUtils.getR4ImplementationGuideCanonicalBase((org.hl7.fhir.r4.model.ImplementationGuide)implementationGuide);
+            if (igResourcePathIsSpecified) {
+                implementationGuide = IOUtils.readResource(igResourcePath, fhirContext, true);
+                if (implementationGuide != null) {
+                    igCanonicalBase = IGUtils.getR4ImplementationGuideCanonicalBase((org.hl7.fhir.r4.model.ImplementationGuide) implementationGuide);
+                }
+            }
             refreshedLibraryNames = refreshR4IG(igCanonicalBase, igPath, encoding, includeELM, includeDependencies, includeTerminology,
                     includePatientScenarios, versioned, fhirContext);
             break;
