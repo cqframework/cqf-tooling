@@ -25,7 +25,7 @@ import org.hl7.fhir.dstu3.model.*;
 public class STU3LibraryProcessor {
     private static CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
 
-    public static Boolean refreshLibraryContent(String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {
+    public static Boolean refreshLibraryContent(String igCanonicalBase, String cqlContentPath, String libraryPath, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {
         CqlTranslator translator = getTranslator(cqlContentPath);
 
         Boolean libraryExists = false;
@@ -36,18 +36,18 @@ public class STU3LibraryProcessor {
         }
 
         if (libraryExists) {            
-            refreshLibrary(resource, cqlContentPath, IOUtils.getParentDirectoryPath(libraryPath), encoding, includeVersion, translator, fhirContext);
+            refreshLibrary(igCanonicalBase, resource, cqlContentPath, IOUtils.getParentDirectoryPath(libraryPath), encoding, includeVersion, translator, fhirContext);
         } else {
             Optional<String> anyOtherLibrary = IOUtils.getLibraryPaths(fhirContext).stream().findFirst();
             String parentDirectory = anyOtherLibrary.isPresent() ? IOUtils.getParentDirectoryPath(anyOtherLibrary.get()) : IOUtils.getParentDirectoryPath(cqlContentPath);
-            generateLibrary(cqlContentPath, parentDirectory, encoding, includeVersion, translator, fhirContext);
+            generateLibrary(igCanonicalBase, cqlContentPath, parentDirectory, encoding, includeVersion, translator, fhirContext);
         }
       
         return true;
     }
 
-    private static void refreshLibrary(Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, Boolean includeVersion, CqlTranslator translator, FhirContext fhirContext) {
-        Library generatedLibrary = processLibrary(cqlContentPath, translator, includeVersion, fhirContext);
+    private static void refreshLibrary(String igCanonicalBase, Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, Boolean includeVersion, CqlTranslator translator, FhirContext fhirContext) {
+        Library generatedLibrary = processLibrary(igCanonicalBase, cqlContentPath, translator, includeVersion, fhirContext);
         mergeDiff(referenceLibrary, generatedLibrary, cqlContentPath, translator, fhirContext);
         cqfmHelper.ensureToolingExtensionAndDevice(referenceLibrary);
         IOUtils.writeResource(referenceLibrary, outputPath, encoding, fhirContext);
@@ -68,19 +68,19 @@ public class STU3LibraryProcessor {
         referenceLibrary.setText((Narrative)narrative);
     }
 
-    private static void generateLibrary(String cqlContentPath, String outputPath, Encoding encoding, Boolean includeVersion, CqlTranslator translator, FhirContext fhirContext) {
-        Library generatedLibrary = processLibrary(cqlContentPath, translator, includeVersion, fhirContext);
+    private static void generateLibrary(String igCanonicalBase, String cqlContentPath, String outputPath, Encoding encoding, Boolean includeVersion, CqlTranslator translator, FhirContext fhirContext) {
+        Library generatedLibrary = processLibrary(igCanonicalBase, cqlContentPath, translator, includeVersion, fhirContext);
         IOUtils.writeResource(generatedLibrary, outputPath, encoding, fhirContext);
     }
 
-    private static Library processLibrary(String cqlContentPath, CqlTranslator translator, Boolean includeVersion, FhirContext fhirContext) {
+    private static Library processLibrary(String igCanonicalBase, String cqlContentPath, CqlTranslator translator, Boolean includeVersion, FhirContext fhirContext) {
         org.hl7.elm.r1.Library elm = translator.toELM();
         String id = elm.getIdentifier().getId();
         String version = elm.getIdentifier().getVersion();
         Library library = populateMeta(id, version, includeVersion);
         if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
             for (IncludeDef def : elm.getIncludes().getDef()) {
-                addRelatedArtifact(library, def, includeVersion);
+                addRelatedArtifact(igCanonicalBase, library, def, includeVersion);
             }
         }
 
@@ -108,11 +108,18 @@ public class STU3LibraryProcessor {
     }
 
     // Add Related Artifact
-    private static void addRelatedArtifact(Library library, IncludeDef def, Boolean includeVersion) {
+    private static void addRelatedArtifact(String igCanonicalBase, Library library, IncludeDef def, Boolean includeVersion) {
+        if (igCanonicalBase != null) {
+            igCanonicalBase = igCanonicalBase + "/";
+        }
+        else {
+            igCanonicalBase = "";
+        }
+
         library.addRelatedArtifact(
-                new RelatedArtifact()
-                        .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
-                        .setResource(new Reference().setReference("Library/" + getIncludedLibraryId(def, includeVersion))) //this is the reference name
+            new RelatedArtifact()
+                .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .setResource(new Reference().setReference(igCanonicalBase + "Library/" + getResourceCanonicalReference(def, includeVersion))) //this is the reference name
         );
     }
 
@@ -161,6 +168,12 @@ public class STU3LibraryProcessor {
     }
 
     //helpers
+    private static String getResourceCanonicalReference(IncludeDef def, Boolean includeVersion) {
+        String version = includeVersion ? "|" + def.getVersion() : "";
+        String reference = def.getPath() + version;
+        return reference;
+    }
+
     private static String getIncludedLibraryId(IncludeDef def, Boolean includeVersion) {
         Library tempLibrary = new Library();
         String name = getIncludedLibraryName(def);
