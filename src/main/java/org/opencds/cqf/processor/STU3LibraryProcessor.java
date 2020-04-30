@@ -42,7 +42,7 @@ public class STU3LibraryProcessor implements LibraryProcessor{
 
         CqlTranslator translator = getTranslator(cqlContentPath);
               
-        if (libraryExists) {          
+        if (libraryExists) {            
             String libraryResourceDirPath = IOUtils.getParentDirectoryPath(libraryPath);
             if(!IOUtils.resourceDirectories.contains(libraryResourceDirPath) )
             {

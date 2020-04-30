@@ -63,16 +63,26 @@ public class IGProcessor {
 
         igPath = Paths.get(igPath).toAbsolutePath().toString();
 
+        //Use case 1
+        //scafold basic templating for the type of content, Measure, PlanDefinition, or Questionnaire
+        //Give it a name and generate all the files, cql, library, measure... should be very basic template
+        //ScaffoldProcessor.scaffold(ScaffoldParameters);
+
+        //Use case 2 while developing in Atom refresh content and run tests for either entire IG or targeted Artifact
         //refreshcontent
         IGRefreshProcessor.refreshIG(params);
-        
         //validate
+        //ValidateProcessor.validate(ValidateParameters);
+        //run all tests
+        //IGTestProcessor.testIg(IGTestParameters);
 
-        //package
+        //Use case 3
+        //package everything
         IGBundleProcessor.bundleIg(IGRefreshProcessor.refreshedLibraryNames, igPath, encoding, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
         versioned, fhirContext, fhirUri);
-
-        //test
+        //test everything
+        //IGTestProcessor.testIg(IGTestParameters);
+        //Publish?
     }
 
     

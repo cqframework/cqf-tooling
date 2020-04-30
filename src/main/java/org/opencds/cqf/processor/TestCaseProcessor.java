@@ -15,17 +15,25 @@ public class TestCaseProcessor
 {         
     public static void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext)
     {
+        System.out.println("Refreshing tests");     
         List<String> libaryTestCasePaths = IOUtils.getDirectoryPaths(path, false); 
         for (String libraryTestCasePath : libaryTestCasePaths) {
             List<String> testCasePaths = IOUtils.getDirectoryPaths(libraryTestCasePath, false); 
             for (String testCasePath : testCasePaths) {
+                try {
                 List<String> paths = IOUtils.getFilePaths(testCasePath, true);
                 List<IAnyResource> resources = IOUtils.readResources(paths, fhirContext);
                 ensureIds(testCasePath, resources);
                 Object bundle = BundleUtils.bundleArtifacts(getId(FilenameUtils.getName(testCasePath)), resources, fhirContext);
                 IOUtils.writeBundle(bundle, libraryTestCasePath, encoding, fhirContext);
+                } catch (Exception e) {
+                    LogUtils.putException(testCasePath, e);
+                }
+                finally {
+                    LogUtils.warn(testCasePath);
+                }
             }
-        }        
+        }    
     }
 
     public static List<IAnyResource> getTestCaseResources(String path, FhirContext fhirContext)
@@ -78,7 +86,6 @@ public class TestCaseProcessor
         }
         return shouldPersist;
     }
-    
 
     //TODO: the bundle needs to have -expectedresults added too
     public static void bundleTestCaseFiles(String igPath, String libraryName, String destPath, FhirContext fhirContext) {    

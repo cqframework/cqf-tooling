@@ -40,7 +40,7 @@ public class R4LibraryProcessor implements LibraryProcessor{
 
         CqlTranslator translator = getTranslator(cqlContentPath);
               
-        if (libraryExists) {       
+        if (libraryExists) {            
             String libraryResourceDirPath = IOUtils.getParentDirectoryPath(libraryPath);
             if(!IOUtils.resourceDirectories.contains(libraryResourceDirPath) )
             {
@@ -59,7 +59,7 @@ public class R4LibraryProcessor implements LibraryProcessor{
     private static void refreshLibrary(Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, Boolean includeVersion, CqlTranslator translator, FhirContext fhirContext) {
         Library generatedLibrary = processLibrary(cqlContentPath, translator, includeVersion, fhirContext);
         mergeDiff(referenceLibrary, generatedLibrary, cqlContentPath, translator, fhirContext);
-        IOUtils.writeResource(referenceLibrary, outputPath, encoding, fhirContext);
+        IOUtils.writeResource(generatedLibrary, outputPath, encoding, fhirContext);
     }
 
     private static void mergeDiff(Library referenceLibrary, Library generatedLibrary, String cqlContentPath, CqlTranslator translator,
