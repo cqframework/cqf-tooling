@@ -82,7 +82,7 @@ public class TestCaseProcessor
             }
         } catch (Exception e) {
             shouldPersist = false;
-            LogUtils.putWarning(igTestCasePath, e.getMessage());
+            LogUtils.putException(igTestCasePath, e);
         }
         return shouldPersist;
     }

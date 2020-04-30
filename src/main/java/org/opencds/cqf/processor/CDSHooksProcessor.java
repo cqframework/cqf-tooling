@@ -58,7 +58,7 @@ public class CDSHooksProcessor {
             }
         } catch (Exception e) {
             shouldPersist = false;
-            LogUtils.putWarning(planDefinitionPath, e.getMessage());
+            LogUtils.putException(planDefinitionPath, e.getMessage());
         }
         return activityDefinitionPaths;
     }

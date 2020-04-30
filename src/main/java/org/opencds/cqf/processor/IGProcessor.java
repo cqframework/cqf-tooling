@@ -78,7 +78,7 @@ public class IGProcessor {
 
         //Use case 3
         //package everything
-        IGBundleProcessor.bundleIg(IGRefreshProcessor.refreshedLibraryNames, igPath, encoding, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
+        IGBundleProcessor.bundleIg(IGRefreshProcessor.refreshedResourcesNames, igPath, encoding, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
         versioned, fhirContext, fhirUri);
         //test everything
         //IGTestProcessor.testIg(IGTestParameters);

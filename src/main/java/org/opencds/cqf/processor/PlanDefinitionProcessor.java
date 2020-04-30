@@ -49,7 +49,7 @@ public class PlanDefinitionProcessor {
                 try {
                     librarySourcePath = IOUtils.getLibraryPathAssociatedWithCqlFileName(refreshedLibraryFileName, fhirContext);
                 } catch (Exception e) {
-                    LogUtils.putWarning(refreshedLibraryName, e.getMessage());
+                    LogUtils.putException(refreshedLibraryName, e);
                     continue;
                 } finally {
                     LogUtils.warn(refreshedLibraryName);
@@ -99,7 +99,7 @@ public class PlanDefinitionProcessor {
                     bundledPlanDefinitions.add(refreshedLibraryName);
                 }
             } catch (Exception e) {
-                LogUtils.putWarning(refreshedLibraryName, e.getMessage());
+                LogUtils.putException(refreshedLibraryName, e);
             } finally {
                 LogUtils.warn(refreshedLibraryName);
             }
@@ -136,7 +136,7 @@ public class PlanDefinitionProcessor {
             try {
                 HttpClientUtils.post(fhirUri, (IAnyResource) bundle, encoding, fhirContext);
             } catch (IOException e) {
-                LogUtils.putWarning(((IAnyResource)bundle).getId(), "Error posting to FHIR Server: " + fhirUri + ".  Bundle not posted.");
+                LogUtils.putException(((IAnyResource)bundle).getId(), "Error posting to FHIR Server: " + fhirUri + ".  Bundle not posted.");
             }
         }
     }
@@ -164,7 +164,7 @@ public class PlanDefinitionProcessor {
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  
                 }  
             }  catch (Exception e) {
-                LogUtils.putWarning(libraryName, e.getMessage());
+                LogUtils.putException(libraryName, e.getMessage());
             }       
         }
         

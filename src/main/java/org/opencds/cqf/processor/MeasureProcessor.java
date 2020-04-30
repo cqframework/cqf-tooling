@@ -10,11 +10,11 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.opencds.cqf.utilities.BundleUtils;
-import org.opencds.cqf.utilities.HttpClientUtils;
+import org.opencds.cqf.measure.RefreshGeneratedContent;
+import org.opencds.cqf.measure.r4.RefreshR4Measure;
+import org.opencds.cqf.measure.stu3.RefreshStu3Measure;
+import org.opencds.cqf.utilities.*;
 import org.opencds.cqf.utilities.IOUtils;
-import org.opencds.cqf.utilities.LogUtils;
-import org.opencds.cqf.utilities.ResourceUtils;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -24,6 +24,39 @@ public class MeasureProcessor
     public static final String ResourcePrefix = "measure-";   
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
+    }
+
+    public static ArrayList<String> refreshIgMeasureContent(String igPath, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext) {
+        System.out.println("Refreshing measures...");
+        ArrayList<String> refreshedMeasureNames = new ArrayList<String>();
+        HashSet<String> measurePaths = IOUtils.getMeasurePaths(fhirContext);
+        RefreshGeneratedContent refresher = null;
+
+        for (String path : measurePaths) {
+            try {
+                switch (fhirContext.getVersion().getVersion()) {
+                    case DSTU3:
+                        refresher = new RefreshStu3Measure(path);
+                        break;
+                    case R4:
+                        refresher = new RefreshR4Measure(path);
+                        break;
+                    default:
+                        throw new IllegalArgumentException(
+                            "Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+                }
+
+                refresher.refreshGeneratedContent();
+                refreshedMeasureNames.add(FilenameUtils.getBaseName(path));
+            } catch (Exception e) {
+                LogUtils.putException(path, e);
+            }
+            finally {
+                LogUtils.warn(path);
+            }
+        }
+
+        return refreshedMeasureNames;
     }
 
     public static void bundleMeasures(ArrayList<String> refreshedLibraryNames, String igPath, Boolean includeDependencies,
@@ -54,7 +87,7 @@ public class MeasureProcessor
                 try {
                     librarySourcePath = IOUtils.getLibraryPathAssociatedWithCqlFileName(refreshedLibraryFileName, fhirContext);
                 } catch (Exception e) {
-                    LogUtils.putWarning(refreshedLibraryName, e.getMessage());
+                    LogUtils.putException(refreshedLibraryName, e);
                     continue;
                 } finally {
                     LogUtils.warn(refreshedLibraryName);
@@ -99,7 +132,7 @@ public class MeasureProcessor
                     bundledMeasures.add(refreshedLibraryName);
                 }
             } catch (Exception e) {
-                LogUtils.putWarning(refreshedLibraryName, e.getMessage());
+                LogUtils.putException(refreshedLibraryName, e);
             } finally {
                 LogUtils.warn(refreshedLibraryName);
             }
@@ -136,7 +169,7 @@ public class MeasureProcessor
             try {
                 HttpClientUtils.post(fhirUri, (IAnyResource) bundle, encoding, fhirContext);
             } catch (IOException e) {
-                LogUtils.putWarning(((IAnyResource)bundle).getId(), "Error posting to FHIR Server: " + fhirUri + ".  Bundle not posted.");
+                LogUtils.putException(((IAnyResource)bundle).getId(), "Error posting to FHIR Server: " + fhirUri + ".  Bundle not posted.");
             }
         }
     }
@@ -164,7 +197,7 @@ public class MeasureProcessor
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  
                 }  
             }  catch (Exception e) {
-                LogUtils.putWarning(libraryName, e.getMessage());
+                LogUtils.putException(libraryName, e.getMessage());
             }       
         }
         

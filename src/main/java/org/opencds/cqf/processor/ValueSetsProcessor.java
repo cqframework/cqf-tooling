@@ -87,7 +87,7 @@ public class ValueSetsProcessor {
             }
         } catch (Exception e) {
             shouldPersist = false;
-            LogUtils.putWarning(cqlContentPath, e.getMessage());
+            LogUtils.putException(cqlContentPath, e.getMessage());
         }
         return shouldPersist;
     }

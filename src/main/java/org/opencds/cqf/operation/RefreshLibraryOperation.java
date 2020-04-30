@@ -60,14 +60,14 @@ public class RefreshLibraryOperation extends Operation {
                 try {
                     params.libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(params.cqlContentPath, params.fhirContext);
                 } catch (Exception e) {
-                    LogUtils.putWarning(params.cqlContentPath, e.getMessage());
+                    LogUtils.putException(params.cqlContentPath, e);
                     LogUtils.warn(params.cqlContentPath);
                 }
             }
             libraryProcessor.refreshLibraryContent(params);
             return params.libraryPath;
         } catch (Exception e) {
-            LogUtils.putWarning(params.cqlContentPath, e.getMessage());
+            LogUtils.putException(params.cqlContentPath, e);
         }
         LogUtils.warn(params.cqlContentPath);
         return null;

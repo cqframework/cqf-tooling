@@ -2,6 +2,7 @@ package org.opencds.cqf.processor;
 
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.utilities.LogUtils;
@@ -21,12 +22,18 @@ public interface LibraryProcessor {
         Boolean shouldPersist = true;
         try {
             Map<String, IAnyResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding);
+
+            String currentResourceID = FilenameUtils.getBaseName(path);
             for (IAnyResource resource : dependencies.values()) {
                 resources.putIfAbsent(resource.getId(), resource);
+
+                // NOTE: Assuming dependency library will be in directory of dependent.
+                String dependencyPath = path.replace(currentResourceID, FilenameUtils.getBaseName(resource.getId()));
+                bundleLibraryDependencies(dependencyPath, fhirContext, resources, encoding);
             }
         } catch (Exception e) {
             shouldPersist = false;
-            LogUtils.putWarning(path, e.getMessage());
+            LogUtils.putException(path, e);
         }
         return shouldPersist;
     }

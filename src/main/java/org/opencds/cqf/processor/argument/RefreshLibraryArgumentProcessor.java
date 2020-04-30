@@ -17,6 +17,7 @@ import org.opencds.cqf.utilities.IOUtils.Encoding;
 public class RefreshLibraryArgumentProcessor {
     public static final String[] OPERATION_OPTIONS = {"RefreshLibrary"};
 
+    public static final String[] IG_CANONICAL_BASE = {"igcb", "igCanonicalBase"};
     public static final String[] CQL_PATH_OPTIONS = {"cql", "content", "cqlPath", "cqlContentPath", "contentPath", "cp"};
     public static final String[] Library_PATH_OPTIONS = {"library", "libraryPath", "resourcePath", "lp", "cp"};
     public static final String[] FHIR_VERSION_OPTIONS = {"fv", "fhir-version"};
@@ -26,11 +27,13 @@ public class RefreshLibraryArgumentProcessor {
     public OptionParser build() {
         OptionParser parser = new OptionParser();
 
+        OptionSpecBuilder igCanonicalBaseBuilder = parser.acceptsAll(asList(IG_CANONICAL_BASE),"resource canonical base");
         OptionSpecBuilder cqlPathBuilder = parser.acceptsAll(asList(CQL_PATH_OPTIONS),"Library will be created in the same folder as the cql");
         OptionSpecBuilder libraryPathBuilder = parser.acceptsAll(asList(Library_PATH_OPTIONS),"If omitted, the library will be created in the same folder as the cql");
         OptionSpecBuilder fhirVersionBuilder = parser.acceptsAll(asList(FHIR_VERSION_OPTIONS),"Limited to a single version of FHIR.");
         OptionSpecBuilder outputEncodingBuilder = parser.acceptsAll(asList(OUTPUT_ENCODING), "If omitted, output will be generated using JSON encoding.");
-    
+
+        OptionSpec<String> igCanonicalBasePath = igCanonicalBaseBuilder.withOptionalArg().describedAs("resource canonical base");
         OptionSpec<String> cqlPath = cqlPathBuilder.withRequiredArg().describedAs("path to the cql content");
         OptionSpec<String> libraryPath = libraryPathBuilder.withOptionalArg().describedAs("path to the library");
         OptionSpec<String> fhirVersion = fhirVersionBuilder.withRequiredArg().describedAs("fhir version");
@@ -50,6 +53,7 @@ public class RefreshLibraryArgumentProcessor {
 
         ArgUtils.ensure(OPERATION_OPTIONS[0], options);
 
+        String igCanonicalBase = (String)options.valueOf(IG_CANONICAL_BASE[0]);
         String cqlPath = (String)options.valueOf(CQL_PATH_OPTIONS[0]);
         String fhirVersion = (String)options.valueOf(FHIR_VERSION_OPTIONS[0]);
         String encoding = (String)options.valueOf(OUTPUT_ENCODING[0]);
@@ -64,6 +68,7 @@ public class RefreshLibraryArgumentProcessor {
         Boolean versioned = options.has(VERSIONED_OPTIONS[0]);
     
         RefreshLibraryParameters lp = new RefreshLibraryParameters();
+        lp.igCanonicalBase = igCanonicalBase;
         lp.cqlContentPath = cqlPath;
         lp.fhirContext = IGProcessor.getIgFhirContext(IGVersion.parse(fhirVersion));
         lp.encoding = outputEncodingEnum;
