@@ -125,10 +125,6 @@ public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativePro
         return def.getPath();
     }
 
-    private String nameToId(String name) {
-        return name.replaceAll("_", "-").toLowerCase();
-    }
-
     private String nameToId(String name, String version) {
         String nameAndVersion = "library-" + name + "-" + version;
         return nameAndVersion.replaceAll("_", "-");

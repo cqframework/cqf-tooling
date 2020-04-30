@@ -61,8 +61,7 @@ public class LibraryRefresher extends BaseLibraryGenerator<Library, NarrativePro
         .forEach(dateRequirement -> referenceLibrary.addDataRequirement(dateRequirement));
 
         referenceLibrary.getContent().clear();
-        generatedLibrary.getContent().stream()
-        .forEach(getContent -> attachContent(referenceLibrary, generatedLibraryTranslator, getCqlMap().get(id)));
+        attachContent(referenceLibrary, generatedLibraryTranslator, getCqlMap().get(id));
 
         referenceLibrary.setText(getNarrativeProvider().getNarrative(getFhirContext(), generatedLibrary));
 
@@ -83,7 +82,7 @@ public class LibraryRefresher extends BaseLibraryGenerator<Library, NarrativePro
         library.setVersion(version);
         library.setStatus(Enumerations.PublicationStatus.ACTIVE);
         library.setExperimental(true);
-        library.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://hl7.org/fhir/codesystem-library-type.html")));
+        library.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://terminology.hl7.org/CodeSystem/library-type")));
         return library;
     }
 
@@ -118,13 +117,13 @@ public class LibraryRefresher extends BaseLibraryGenerator<Library, NarrativePro
     // Base64 encode content
     private void attachContent(Library library, CqlTranslator translator, String cql) {
         library.addContent(
-                new Attachment()
-                        .setContentType("application/elm+xml")
-                        .setData(translator.toXml().getBytes())
+            new Attachment()
+                .setContentType("application/elm+xml")
+                .setData(translator.toXml().getBytes())
         ).addContent(
-                new Attachment()
-                        .setContentType("text/cql")
-                        .setData(cql.getBytes())
+            new Attachment()
+                .setContentType("text/cql")
+                .setData(cql.getBytes())
         );
     }
 
@@ -137,10 +136,6 @@ public class LibraryRefresher extends BaseLibraryGenerator<Library, NarrativePro
 
     private String getIncludedLibraryName(IncludeDef def) {
         return def.getPath();
-    }
-
-    private String nameToId(String name) {
-        return name.replaceAll("_", "-").toLowerCase();
     }
 
     private String nameToId(String name, String version) {

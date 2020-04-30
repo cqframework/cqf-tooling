@@ -28,7 +28,7 @@ public class SpreadsheetHelper {
 
     public static String getCellAsString(Cell cell) {
         if (cell == null) {
-            throw new IllegalArgumentException("Cell is null");
+            return null;
         }
         cell.setCellType(CellType.STRING);
         return cell.getStringCellValue();

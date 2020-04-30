@@ -11,6 +11,7 @@ import org.opencds.cqf.operation.*;
 import org.opencds.cqf.qdm.QdmToQiCore;
 import org.opencds.cqf.quick.QuickPageGenerator;
 import org.opencds.cqf.terminology.*;
+import org.opencds.cqf.terminology.distributable.DistributableValueSetGenerator;
 
 
 class OperationFactory {
@@ -23,6 +24,8 @@ class OperationFactory {
                 return new QuickPageGenerator();
             case "VsacXlsxToValueSet":
                 return new VSACValueSetGenerator();
+            case "DistributableXlsxToValueSet":
+                return new DistributableValueSetGenerator();
             case "VsacMultiXlsxToValueSet":
                 return new CMSFlatMultiValueSetGenerator();
             case "VsacXlsxToValueSetBatch":

@@ -37,7 +37,7 @@ public class FHIRClassInfoBuilder extends ClassInfoBuilder {
     }
 
     @Override
-    protected void afterBuild() {
+    public void afterBuild() {
         //Clean up Content Reference Specifiers
         Collection<TypeInfo> typeInfoValues = this.getTypeInfos().values();
         typeInfoValues.stream().map(x -> (ClassInfo)x).forEach(

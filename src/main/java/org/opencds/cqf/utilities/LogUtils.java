@@ -16,8 +16,8 @@ public class LogUtils
         resourceWarnings.put(LocalDateTime.now().toString() + ": " + id,  e.getMessage() == null ? e.toString() : e.getMessage());
     }
 
-    public static void putWarning(String id, String warning) {
-        resourceWarnings.put(LocalDateTime.now().toString() + ": " + id, warning);
+    public static void putException(String id, Exception e) {
+        resourceWarnings.put(LocalDateTime.now().toString() + ": " + id,  e.getMessage() == null ? e.toString() : e.getMessage());
     }
 
     public static void info(String message) {
