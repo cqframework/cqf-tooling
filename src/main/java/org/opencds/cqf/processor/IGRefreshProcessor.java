@@ -37,6 +37,7 @@ public class IGRefreshProcessor {
         Boolean includePatientScenarios = params.includePatientScenarios;
         Boolean versioned = params.versioned;
         String fhirUri = params.fhirUri;
+        String measureToRefreshPath = params.measureToRefreshPath;
         ArrayList<String> resourceDirs = params.resourceDirs;
 
         IOUtils.resourceDirectories.addAll(resourceDirs);
@@ -51,7 +52,6 @@ public class IGRefreshProcessor {
         IGProcessor.ensure(igPath, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
 
         LibraryProcessor libraryProcessor;
-        List<String> refreshedMeasureNames = new ArrayList<String>();
         switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:
             libraryProcessor = new STU3LibraryProcessor();
@@ -72,12 +72,14 @@ public class IGRefreshProcessor {
 
             if (urlValue != null && !urlValue.isEmpty() && !urlValue.isBlank()) {
                 igCanonicalBase = IGUtils.getImplementationGuideCanonicalBase(urlValue);
+
             }
         }
 
         refreshedResourcesNames = refreshIgLibraryContent(igCanonicalBase, libraryProcessor, igPath, encoding, includeELM, versioned, fhirContext, igVersion);
 
-        refreshedMeasureNames = MeasureProcessor.refreshIgMeasureContent(igPath, encoding, versioned, fhirContext);
+        List<String> refreshedMeasureNames = new ArrayList<String>();
+        refreshedMeasureNames = MeasureProcessor.refreshIgMeasureContent(igPath, encoding, versioned, fhirContext, measureToRefreshPath);
         refreshedResourcesNames.addAll(refreshedMeasureNames);
 
         if (refreshedResourcesNames.isEmpty()) {
@@ -86,7 +88,7 @@ public class IGRefreshProcessor {
         }
 
         if (includePatientScenarios) {
-            TestCaseProcessor.refreshTestCases(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), encoding, fhirContext);
+            TestCaseProcessor.refreshTestCases(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), encoding, fhirContext, refreshedResourcesNames);
         }
     }
 

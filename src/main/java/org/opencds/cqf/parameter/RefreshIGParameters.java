@@ -21,4 +21,5 @@ public class RefreshIGParameters {
     public String fhirUri;
     public ArrayList<String> resourceDirs;
     public Boolean conformant;
+    public String measureToRefreshPath;
 }

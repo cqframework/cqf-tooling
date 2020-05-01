@@ -60,6 +60,7 @@ public class PlanDefinitionProcessor {
                     if (FilenameUtils.removeExtension(path).endsWith(refreshedLibraryName))
                     {
                         planDefinitionSourcePath = path;
+                        break;
                     }
                 }
 

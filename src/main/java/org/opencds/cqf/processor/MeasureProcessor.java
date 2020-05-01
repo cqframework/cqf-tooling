@@ -26,11 +26,17 @@ public class MeasureProcessor
         return ResourcePrefix + baseId;
     }
 
-    public static ArrayList<String> refreshIgMeasureContent(String igPath, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext) {
+    public static ArrayList<String> refreshIgMeasureContent(String igPath, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, String measureToRefreshPath) {
         System.out.println("Refreshing measures...");
         ArrayList<String> refreshedMeasureNames = new ArrayList<String>();
         HashSet<String> measurePaths = IOUtils.getMeasurePaths(fhirContext);
         RefreshGeneratedContent refresher = null;
+
+        // Filter to specific measure if specified in arguments.
+        Boolean hasMeasureToRefreshpath = measureToRefreshPath != null && !measureToRefreshPath.isEmpty() && !measureToRefreshPath.isBlank();
+        if (hasMeasureToRefreshpath) {
+            measurePaths.removeIf(mp -> !mp.equals(measureToRefreshPath));
+        }
 
         for (String path : measurePaths) {
             try {
@@ -47,7 +53,7 @@ public class MeasureProcessor
                 }
 
                 refresher.refreshGeneratedContent();
-                refreshedMeasureNames.add(FilenameUtils.getBaseName(path));
+                refreshedMeasureNames.add(FilenameUtils.getBaseName(path).replace(MeasureProcessor.ResourcePrefix, ""));
             } catch (Exception e) {
                 LogUtils.putException(path, e);
             }
@@ -112,17 +118,17 @@ public class MeasureProcessor
                 String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
                 if (includeTerminology) {
                     shouldPersist = shouldPersist
-                            & ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
+                        & ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
                 }
 
                 if (includeDependencies) {
                     shouldPersist = shouldPersist
-                            & LibraryProcessor.bundleLibraryDependencies(librarySourcePath, fhirContext, resources, encoding);
+                        & LibraryProcessor.bundleLibraryDependencies(librarySourcePath, fhirContext, resources, encoding);
                 }
 
                 if (includePatientScenarios) {
                     shouldPersist = shouldPersist
-                            & TestCaseProcessor.bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
+                        & TestCaseProcessor.bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
                 }
 
                 if (shouldPersist) {

@@ -2,6 +2,7 @@ package org.opencds.cqf.processor;
 
 import java.util.*;
 
+import com.sun.istack.Nullable;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.utilities.BundleUtils;
@@ -12,12 +13,22 @@ import org.opencds.cqf.utilities.ResourceUtils;
 import ca.uhn.fhir.context.FhirContext;
 
 public class TestCaseProcessor
-{         
-    public static void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext)
+{
+    public static void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext) {
+        refreshTestCases(path, encoding, fhirContext, null);
+    }
+
+    public static void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, @Nullable ArrayList<String> refreshedResourcesNames)
     {
         System.out.println("Refreshing tests");     
-        List<String> libaryTestCasePaths = IOUtils.getDirectoryPaths(path, false); 
-        for (String libraryTestCasePath : libaryTestCasePaths) {
+        List<String> libraryTestCasePaths = IOUtils.getDirectoryPaths(path, false);
+
+        List<String> libraryTestCasePathsToBundle = new ArrayList<String>();
+        if (refreshedResourcesNames != null && !refreshedResourcesNames.isEmpty()) {
+            libraryTestCasePaths.removeIf(tcp -> !refreshedResourcesNames.contains(FilenameUtils.getName(tcp)));
+        }
+
+        for (String libraryTestCasePath : libraryTestCasePaths) {
             List<String> testCasePaths = IOUtils.getDirectoryPaths(libraryTestCasePath, false); 
             for (String testCasePath : testCasePaths) {
                 try {

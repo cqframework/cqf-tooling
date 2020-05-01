@@ -36,6 +36,7 @@ public class RefreshIGArgumentProcessor {
     public static final String[] INCLUDE_PATIENT_SCENARIOS_OPTIONS = {"p", "include-patients"};
     public static final String[] VERSIONED_OPTIONS = {"v", "versioned"};
     public static final String[] FHIR_URI_OPTIONS = {"fs", "fhir-uri"};
+    public static final String[] MEASURE_TO_REFRESH_PATH = {"mtrp", "measure-to-refresh-path"};
     public static final String[] RESOURCE_PATH_OPTIONS = {"rp", "resourcepath"};
 
     public OptionParser build() {
@@ -47,12 +48,14 @@ public class RefreshIGArgumentProcessor {
         OptionSpecBuilder igVersionBuilder = parser.acceptsAll(asList(IG_VERSION_OPTIONS),"If omitted the root of the IG Path will be used.");
         OptionSpecBuilder igOutputEncodingBuilder = parser.acceptsAll(asList(IG_OUTPUT_ENCODING), "If omitted, output will be generated using JSON encoding.");
         OptionSpecBuilder fhirUriBuilder = parser.acceptsAll(asList(FHIR_URI_OPTIONS),"If omitted the final bundle will not be loaded to a FHIR server.");
+        OptionSpecBuilder measureToRefreshPathBuilder = parser.acceptsAll(asList(MEASURE_TO_REFRESH_PATH), "Path to Measure to refresh.");
 
-        OptionSpec<String> igResourcePath = igResourcePathBuilder.withRequiredArg().describedAs("Path to the file containing the ImplementationGuide FHIR Resource.");
+        OptionSpec<String> igResourcePath = igResourcePathBuilder.withOptionalArg().describedAs("Path to the file containing the ImplementationGuide FHIR Resource.");
         OptionSpec<String> igPath = igPathBuilder.withRequiredArg().describedAs("root directory of the ig");
         OptionSpec<String> resourcePath = resourcePathBuilder.withOptionalArg().describedAs("directory of resources");
         OptionSpec<String> igVersion = igVersionBuilder.withOptionalArg().describedAs("ig fhir version");
         OptionSpec<String> igOutputEncoding = igOutputEncodingBuilder.withOptionalArg().describedAs("desired output encoding for resources");
+        OptionSpec<String> measureToRefreshPath = measureToRefreshPathBuilder.withOptionalArg().describedAs("Path to Measure to refresh.");
 
         //TODO: FHIR user / password (and other auth options)
         OptionSpec<String> fhirUri = fhirUriBuilder.withOptionalArg().describedAs("uri of fhir server");  
@@ -94,6 +97,7 @@ public class RefreshIGArgumentProcessor {
         Boolean includePatientScenarios = options.has(INCLUDE_PATIENT_SCENARIOS_OPTIONS[0]);
         Boolean versioned = options.has(VERSIONED_OPTIONS[0]);
         String fhirUri = (String)options.valueOf(FHIR_URI_OPTIONS[0]);
+        String measureToRefreshPath = (String)options.valueOf(MEASURE_TO_REFRESH_PATH[0]);
 
         ArrayList<String> paths = new ArrayList<String>();
         paths.addAll(resourcePaths);
@@ -110,6 +114,7 @@ public class RefreshIGArgumentProcessor {
         ip.versioned = versioned;
         ip.resourceDirs = paths;
         ip.fhirUri = fhirUri;
+        ip.measureToRefreshPath = measureToRefreshPath;
        
         return ip;
     }
