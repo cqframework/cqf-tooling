@@ -22,7 +22,7 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.opencds.cqf.library.GenericLibrarySourceProvider;
-import org.opencds.cqf.terminology.ValueSetsProcessor;
+import org.opencds.cqf.processor.ValueSetsProcessor;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;

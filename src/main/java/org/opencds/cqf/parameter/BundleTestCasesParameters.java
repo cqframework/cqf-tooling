@@ -1,6 +1,6 @@
-package org.opencds.cqf.bundler;
+package org.opencds.cqf.parameter;
 
-import org.opencds.cqf.igtools.IGProcessor.IGVersion;
+import org.opencds.cqf.processor.IGProcessor.IGVersion;
 
 public class BundleTestCasesParameters {  
     public String path;

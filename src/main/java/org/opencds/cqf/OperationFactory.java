@@ -3,13 +3,11 @@ package org.opencds.cqf;
 //import org.opencds.cqf.jsonschema.SchemaGenerator;
 import org.apache.commons.lang.NotImplementedException;
 import org.opencds.cqf.acceleratorkit.Processor;
-import org.opencds.cqf.bundler.BundleResources;
-import org.opencds.cqf.igtools.IgBundler;
-import org.opencds.cqf.igtools.RefreshIGOperation;
 import org.opencds.cqf.library.r4.LibraryGenerator;
 import org.opencds.cqf.measure.r4.RefreshR4Measure;
 import org.opencds.cqf.measure.stu3.RefreshStu3Measure;
 import org.opencds.cqf.modelinfo.StructureDefinitionToModelInfo;
+import org.opencds.cqf.operation.*;
 import org.opencds.cqf.qdm.QdmToQiCore;
 import org.opencds.cqf.quick.QuickPageGenerator;
 import org.opencds.cqf.terminology.*;
@@ -50,6 +48,8 @@ class OperationFactory {
                 return new IgBundler();
             case "RefreshIG":
                 return new RefreshIGOperation();
+            case "RefreshLibrary":
+                return new RefreshLibraryOperation();
             case "RefreshStu3Measure":
                 return new RefreshStu3Measure();
             case "RefreshR4Measure":
@@ -66,6 +66,8 @@ class OperationFactory {
                 return new Processor();
             case "BundleResources":
                 return new BundleResources();
+            case "PostBundlesInDir":
+                return new PostBundlesInDirOperation();
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operationName);
         }
