@@ -1,4 +1,4 @@
-package org.opencds.cqf.bundler;
+package org.opencds.cqf.operation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -11,6 +11,7 @@ import java.util.List;
 
 public class BundleResources extends Operation {
 
+    private String encoding; // -encoding (-e)
     private String pathToDirectory; // -pathtodir (-ptd)
     private String version; // -version (-v) Can be dstu2, stu3, or r4
 
@@ -32,6 +33,10 @@ public class BundleResources extends Operation {
             String value = flagAndValue[1];
 
             switch (flag.replace("-", "").toLowerCase()) {
+                case "encoding":
+                case "e":
+                    encoding = value.toLowerCase();
+                    break;
                 case "outputpath":
                 case "op":
                     setOutputPath(value);
@@ -154,13 +159,14 @@ public class BundleResources extends Operation {
             theResources.add(theResource);
         }
     }
-
-
+    
     // Output
     public void output(IBaseResource resource, FhirContext context) {
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + getOutputPath().substring(getOutputPath().lastIndexOf("/")) + "-bundle.json")) {
+        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + getOutputPath().substring(getOutputPath().lastIndexOf("/")) + "-bundle." + encoding)) {
             writer.write(
-                    context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                encoding.equals("json")
+                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
             );
             writer.flush();
         } catch (IOException e) {
