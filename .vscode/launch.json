@@ -100,7 +100,7 @@
             "projectName": "tooling",
             "args": [
                 "-RefreshIG",
-                "-ip=../connectathon/fhir3/",     
+                "-ip=../connectathon/fhir3/",
                 "-iv=fhir3",
                 "-t",
                 "-d",
@@ -116,8 +116,7 @@
             "projectName": "tooling",
             "args": [
                 "-RefreshIG",
-                "-ip=../connectathon/fhir4/",           
-                "-iv=fhir4",
+                "-ip=C:\\src\\GitHub\\connectathon\\fhir4",
                 "-t",
                 "-d",
                 "-v",
