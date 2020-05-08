@@ -47,6 +47,7 @@ public class IGProcessor {
     //mega ig method
     public static void publishIG(RefreshIGParameters params) {
         String igPath = params.igPath;
+        String igResourcePath = params.igResourcePath;
         IGVersion igVersion = params.igVersion;
         Encoding encoding = params.outputEncoding;
         Boolean includeELM = params.includeELM;
@@ -54,6 +55,7 @@ public class IGProcessor {
         Boolean includeTerminology = params.includeTerminology;
         Boolean includePatientScenarios = params.includePatientScenarios;
         Boolean versioned = params.versioned;
+        Boolean cdsHooksIg = params.cdsHooksIg;
         String fhirUri = params.fhirUri;
         ArrayList<String> resourceDirs = params.resourceDirs;
 
@@ -79,7 +81,7 @@ public class IGProcessor {
         //Use case 3
         //package everything
         IGBundleProcessor.bundleIg(IGRefreshProcessor.refreshedResourcesNames, igPath, encoding, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
-        versioned, fhirContext, fhirUri);
+        versioned, cdsHooksIg, fhirContext, fhirUri);
         //test everything
         //IGTestProcessor.testIg(IGTestParameters);
         //Publish?

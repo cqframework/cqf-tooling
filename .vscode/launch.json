@@ -45,6 +45,7 @@
             "projectName": "tooling",
             "args": [
                 "-RefreshIG",
+                "-igrp=C:\\src\\GitHub\\aphl-ig\\input\\aphl-ig.xml",
                 "-ip=C:\\src\\GitHub\\aphl-ig",
                 "-rp=C:\\src\\GitHub\\aphl-ig\\input\\resources",
                 "-rp=C:\\src\\GitHub\\aphl-ig\\input\\pagecontent\\cql",

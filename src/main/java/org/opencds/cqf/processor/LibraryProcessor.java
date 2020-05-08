@@ -22,13 +22,12 @@ public interface LibraryProcessor {
         Boolean shouldPersist = true;
         try {
             Map<String, IAnyResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding);
-
             String currentResourceID = FilenameUtils.getBaseName(path);
             for (IAnyResource resource : dependencies.values()) {
                 resources.putIfAbsent(resource.getId(), resource);
 
                 // NOTE: Assuming dependency library will be in directory of dependent.
-                String dependencyPath = path.replace(currentResourceID, FilenameUtils.getBaseName(resource.getId()));
+                String dependencyPath = path.replace(currentResourceID, resource.getId().replace("Library/", ""));
                 bundleLibraryDependencies(dependencyPath, fhirContext, resources, encoding);
             }
         } catch (Exception e) {

@@ -134,16 +134,24 @@ public class R4LibraryProcessor implements LibraryProcessor{
     private static void addRelatedArtifact(String igCanonicalBase, Library library, IncludeDef def, Boolean includeVersion) {
         if (igCanonicalBase != null) {
             igCanonicalBase = igCanonicalBase + "/";
-        }
-        else {
-            igCanonicalBase = "";
-        }
-
-        library.addRelatedArtifact(
+            library.addRelatedArtifact(
             new RelatedArtifact()
                 .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
                 .setResource(igCanonicalBase + "Library/" + getResourceCanonicalReference(def, includeVersion))
             );
+        }
+        else {
+            if (includeVersion) {
+                throw new IllegalArgumentException("Ask Bryn About This!!!");
+            }
+            library.addRelatedArtifact(
+                new RelatedArtifact()
+                    .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
+            .setResource("Library/" + getIncludedLibraryId(def, includeVersion)) //this is the reference name
+            );
+        }
+
+        
     }
 
     // Resolve DataRequirements
