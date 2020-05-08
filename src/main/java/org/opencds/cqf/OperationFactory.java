@@ -15,7 +15,6 @@ import org.opencds.cqf.quick.QuickPageGenerator;
 import org.opencds.cqf.terminology.*;
 import org.opencds.cqf.terminology.distributable.DistributableValueSetGenerator;
 
-
 class OperationFactory {
 
     static Operation createOperation(String operationName) {
@@ -66,6 +65,10 @@ class OperationFactory {
                 return new Processor();
             case "BundleResources":
                 return new BundleResources();
+            case "ValidateCqfMeasuresStu3Profiles":
+                return new org.opencds.cqf.validation.profiles.cqfmeasures.stu3.CqfMeasureProfileValidation();
+            case "ValidateCqfMeasuresR4Profiles":
+                return new org.opencds.cqf.validation.profiles.cqfmeasures.r4.CqfMeasureProfileValidation();
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operationName);
         }

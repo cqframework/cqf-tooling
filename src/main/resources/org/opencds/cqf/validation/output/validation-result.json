@@ -1,0 +1,59 @@
+{
+  "resourceType": "OperationOutcome",
+  "issue": [
+    {
+      "severity": "error",
+      "code": "processing",
+      "diagnostics": "cvc-complex-type.2.4.a: Invalid content was found starting with element '{\"http://www.w3.org/1999/xhtml\":p}'. One of '{\"http://www.w3.org/1999/xhtml\":a, \"http://www.w3.org/1999/xhtml\":tt, \"http://www.w3.org/1999/xhtml\":i, \"http://www.w3.org/1999/xhtml\":b, \"http://www.w3.org/1999/xhtml\":big, \"http://www.w3.org/1999/xhtml\":small, \"http://www.w3.org/1999/xhtml\":em, \"http://www.w3.org/1999/xhtml\":strong, \"http://www.w3.org/1999/xhtml\":dfn, \"http://www.w3.org/1999/xhtml\":code, \"http://www.w3.org/1999/xhtml\":q, \"http://www.w3.org/1999/xhtml\":samp, \"http://www.w3.org/1999/xhtml\":kbd, \"http://www.w3.org/1999/xhtml\":var, \"http://www.w3.org/1999/xhtml\":cite, \"http://www.w3.org/1999/xhtml\":abbr, \"http://www.w3.org/1999/xhtml\":acronym, \"http://www.w3.org/1999/xhtml\":sub, \"http://www.w3.org/1999/xhtml\":sup, \"http://www.w3.org/1999/xhtml\":br, \"http://www.w3.org/1999/xhtml\":span, \"http://www.w3.org/1999/xhtml\":bdo, \"http://www.w3.org/1999/xhtml\":map}' is expected.",
+      "location": [
+        "Line[35] Col[20]",
+        "Line 35, Col 20"
+      ]
+    },
+    {
+      "severity": "error",
+      "code": "processing",
+      "diagnostics": "cvc-complex-type.2.4.b: The content of element 'table' is not complete. One of '{\"http://www.w3.org/1999/xhtml\":caption, \"http://www.w3.org/1999/xhtml\":col, \"http://www.w3.org/1999/xhtml\":colgroup, \"http://www.w3.org/1999/xhtml\":thead, \"http://www.w3.org/1999/xhtml\":tfoot, \"http://www.w3.org/1999/xhtml\":tbody, \"http://www.w3.org/1999/xhtml\":tr}' is expected.",
+      "location": [
+        "Line[232] Col[9]",
+        "Line 232, Col 9"
+      ]
+    },
+    {
+      "severity": "error",
+      "code": "processing",
+      "diagnostics": "cvc-complex-type.2.4.b: The content of element 'ul' is not complete. One of '{\"http://www.w3.org/1999/xhtml\":li}' is expected.",
+      "location": [
+        "Line[460] Col[43]",
+        "Line 460, Col 43"
+      ]
+    },
+    {
+      "severity": "error",
+      "code": "processing",
+      "diagnostics": "cvc-complex-type.2.4.b: The content of element 'ul' is not complete. One of '{\"http://www.w3.org/1999/xhtml\":li}' is expected.",
+      "location": [
+        "Line[466] Col[43]",
+        "Line 466, Col 43"
+      ]
+    },
+    {
+      "severity": "error",
+      "code": "processing",
+      "diagnostics": "cvc-complex-type.2.4.b: The content of element 'table' is not complete. One of '{\"http://www.w3.org/1999/xhtml\":caption, \"http://www.w3.org/1999/xhtml\":col, \"http://www.w3.org/1999/xhtml\":colgroup, \"http://www.w3.org/1999/xhtml\":thead, \"http://www.w3.org/1999/xhtml\":tfoot, \"http://www.w3.org/1999/xhtml\":tbody, \"http://www.w3.org/1999/xhtml\":tr}' is expected.",
+      "location": [
+        "Line[493] Col[9]",
+        "Line 493, Col 9"
+      ]
+    },
+    {
+      "severity": "error",
+      "code": "processing",
+      "diagnostics": "cvc-complex-type.2.4.d: Invalid content was found starting with element 'system'. No child element is expected at this point.",
+      "location": [
+        "Line[565] Col[52]",
+        "Line 565, Col 52"
+      ]
+    }
+  ]
+}
