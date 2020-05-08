@@ -28,7 +28,7 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.opencds.cqf.library.LibraryProcessor;
+import org.opencds.cqf.processor.LibraryProcessor;
 
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -93,8 +93,18 @@ public class IOUtils
     }
 
     public static <T extends IAnyResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext) 
-    {        
-        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(path, formatFileName(resource.getIdElement().getIdPart(), encoding, fhirContext))))
+    {
+        // If the path is to a specific resource file, just re-use that file path/name.
+        String outputPath = null;
+        File file = new File(path);
+        if (file.isFile()) {
+            outputPath = path;
+        }
+        else {
+            outputPath = FilenameUtils.concat(path, formatFileName(resource.getIdElement().getIdPart(), encoding, fhirContext));
+        }
+
+        try (FileOutputStream writer = new FileOutputStream(outputPath))
         {
             writer.write(parseResource(resource, encoding, fhirContext));
             writer.flush();
@@ -437,19 +447,21 @@ public class IOUtils
         return list;
     }
 
-    public static String getLibraryPathAssociatedWithCqlFileName(String cqlPath, FhirContext fhirContext) throws FileNotFoundException {
+    public static String getLibraryPathAssociatedWithCqlFileName(String cqlPath, FhirContext fhirContext) {
+        String libraryPath = null;
         String fileName = FilenameUtils.getName(cqlPath);
         String libraryFileName = LibraryProcessor.ResourcePrefix + fileName;
         for (String path : IOUtils.getLibraryPaths(fhirContext)) {
-            // NOTE: A bit of a hack, but we need to support both xml and json encodings for existing resources and the
-            // long-term strategy is to revisit this and change the approach to use the references rather than file name
-            // matching, so this should be good for the near-term.
+            // NOTE: A bit of a hack, but we need to support both xml and json encodings for existing resources and the long-term strategy is
+            // to revisit this and change the approach to use the references rather than file name matching, so this should be good for the near-term.
             if (path.endsWith(libraryFileName.replaceAll(".cql", ".json"))
                 || path.endsWith(libraryFileName.replaceAll(".cql", ".xml"))) {
-                return path;
+                libraryPath = path;
+                break;
             }
         }
-        throw new FileNotFoundException("Could not find a Library Resource Associated with: " + cqlPath);
+
+        return libraryPath;
     }
 
     private static HashSet<String> cqlLibraryPaths = new HashSet<String>();

@@ -22,7 +22,7 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.opencds.cqf.library.GenericLibrarySourceProvider;
-import org.opencds.cqf.terminology.ValueSetsProcessor;
+import org.opencds.cqf.processor.ValueSetsProcessor;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -164,12 +164,13 @@ public class ResourceUtils
       return dependencyLibraries;
     }
 
+    // if | exists there is a version
     private static List<String> getR4DepLibraryPaths(String path, FhirContext fhirContext, Encoding encoding) {
       List<String> paths = new ArrayList<String>();
       String directoryPath = FilenameUtils.getFullPath(path);
       List<org.hl7.fhir.r4.model.RelatedArtifact> relatedArtifacts = getR4RelatedArtifacts(path, fhirContext);
       for (org.hl7.fhir.r4.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
-        String dependencyLibraryName = IOUtils.formatFileName(relatedArtifact.getResource().split("Library/")[1], encoding, fhirContext);
+        String dependencyLibraryName = IOUtils.formatFileName(relatedArtifact.getResource().split("Library/")[1].replaceAll("\\|", "-"), encoding, fhirContext);
         String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
         IOUtils.putInListIfAbsent(dependencyLibraryPath, paths);
       }
