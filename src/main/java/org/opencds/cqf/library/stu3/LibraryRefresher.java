@@ -8,6 +8,7 @@ import org.hl7.elm.r1.ValueSetRef;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.library.BaseLibraryGenerator;
+import org.opencds.cqf.processor.LibraryProcessor;
 import org.opencds.cqf.utilities.IOUtils;
 
 import java.util.*;
@@ -139,7 +140,7 @@ public class LibraryRefresher extends BaseLibraryGenerator<Library, NarrativePro
     }
 
     private String nameToId(String name, String version) {
-        String nameAndVersion = "library-" + name + "-" + version;
+        String nameAndVersion = LibraryProcessor.ResourcePrefix + name + "-" + version;
         return nameAndVersion.replaceAll("_", "-");
     }
 

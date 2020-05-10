@@ -46,8 +46,6 @@ public class IGRefreshProcessor {
         IAnyResource implementationGuide = null;
         String igCanonicalBase = null;
 
-        igPath = Paths.get(igPath).toAbsolutePath().toString();
-
         IGProcessor.ensure(igPath, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
 
         LibraryProcessor libraryProcessor;
@@ -65,7 +63,7 @@ public class IGRefreshProcessor {
         }
 
         if (igResourcePathIsSpecified) {
-            implementationGuide = IOUtils.readResource(igResourcePath, fhirContext, true);
+            implementationGuide = IOUtils.readResource(igResourcePath, fhirContext, false);
 
             Object urlProperty = ResourceUtils.resolveProperty(implementationGuide, "url", fhirContext);
             String urlValue = ResourceUtils.resolveProperty(urlProperty, "value", fhirContext).toString();
