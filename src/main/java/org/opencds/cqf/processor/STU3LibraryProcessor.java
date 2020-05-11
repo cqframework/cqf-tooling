@@ -75,7 +75,7 @@ public class STU3LibraryProcessor implements LibraryProcessor{
     }
 
     private static void mergeDiff(Library referenceLibrary, Library generatedLibrary, String cqlContentPath, CqlTranslator translator, FhirContext fhirContext) {
-        referenceLibrary.getRelatedArtifact().clear();
+        referenceLibrary.getRelatedArtifact().removeIf(a -> a.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON);
         generatedLibrary.getRelatedArtifact().stream().forEach(relatedArtifact -> referenceLibrary.addRelatedArtifact(relatedArtifact));
 
         referenceLibrary.getDataRequirement().clear();
