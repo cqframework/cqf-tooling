@@ -38,7 +38,7 @@ public class SliceInfo {
     private List<String> sliceMap = new ArrayList<String>();
     public String getSliceMap() throws Exception {
         if (hasSliceMap() && !isTypeSlicing()) {
-            return "%" + String.format("value.%s[%s]", stripPath(sliceRoot.getId()), String.join(",", this.sliceMap));
+            return "%" + String.format("parent.%s[%s]", stripPath(sliceRoot.getId()), String.join(",", this.sliceMap));
         }
 
         return null;
@@ -111,7 +111,7 @@ public class SliceInfo {
                 throw new IllegalArgumentException(String.format("Value slicing on type %s is not supported for slicing of %s",
                         type.fhirType(), this.sliceRoot.getId()));
             }
-            sliceMap.add(String.format("%s=%s", valueSlicingPath, type.primitiveValue()));
+            sliceMap.add(String.format("%s='%s'", valueSlicingPath, type.primitiveValue()));
         }
 
         // Because of the possibility of slicing under slicing, child slicings must report slice paths up the chain

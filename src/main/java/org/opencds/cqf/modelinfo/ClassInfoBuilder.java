@@ -1049,7 +1049,7 @@ public abstract class ClassInfoBuilder {
                         // The slices have been collected at the discriminator, so bubbling them past this point means they need to be qualified
                         // by the path of the current element
                         if (slice.getTarget() != null) {
-                            slice.setTarget(slice.getTarget().replace("%value.", "%value." + stripPath(ed.getPath()) + "."));
+                            slice.setTarget(slice.getTarget().replace("%parent.", "%parent." + stripPath(ed.getPath()) + "."));
                         }
                     }
                     slices.getSlices().add(slice);
@@ -1108,7 +1108,7 @@ public abstract class ClassInfoBuilder {
             if (cie != null) {
                 if (sliceInfo.isExtensionSlicing() && !sliceInfo.hasSliceMap()) {
                     ed.getType().get(0).getProfile().get(0);
-                    sliceInfo.addSliceMap(String.format("url=%s", typeUrl(ed)));
+                    sliceInfo.addSliceMap(String.format("url='%s'", typeUrl(ed)));
                 }
                 String targetMap = sliceInfo.getSliceMap();
                 if (targetMap != null && !targetMap.isEmpty()) {
@@ -1163,16 +1163,26 @@ public abstract class ClassInfoBuilder {
             if (!(isSystemTypeName(getTypeName((NamedTypeSpecifier)typeSpecifier)))) {
                 String typeName = capitalizePath(ed.getId().replace(':', '.'));
                 String qualifiedTypeName = getTypeName(modelName, typeName);
+                ClassInfo elementType = null;
                 if (this.typeInfos.containsKey(qualifiedTypeName)) {
-                    System.out.println(String.format("WARNING: Duplicate type %s", qualifiedTypeName));
+                    System.out.println(String.format("WARNING: Adding slices to existing type %s.", qualifiedTypeName));
+                    elementType = (ClassInfo)typeInfos.get(qualifiedTypeName);
+                }
+                else {
+                    elementType = new ClassInfo().withNamespace(modelName).withName(typeName).withBaseTypeSpecifier(typeSpecifier).withRetrievable(false);
+                    this.typeInfos.put(qualifiedTypeName, elementType);
                 }
 
-                ClassInfo elementType = new ClassInfo().withNamespace(modelName).withName(typeName).withBaseTypeSpecifier(typeSpecifier).withRetrievable(false);
                 for (ClassInfoElement slice : slices.getSlices()) {
                     System.out.println(String.format("Adding slice %s to derived type %s", slice.getName(), qualifiedTypeName));
-                    elementType.getElement().add(slice);
+                    if (elementType.getElement().stream().noneMatch(x -> x.getName().equals(slice.getName()))) {
+                        elementType.getElement().add(slice);
+                    }
+                    else {
+                        System.out.println(String.format("WARNING: Duplicate element %s not added to derived type %s", slice.getName(), qualifiedTypeName));
+                    }
                 }
-                this.typeInfos.put(qualifiedTypeName, elementType);
+                //this.typeInfos.put(qualifiedTypeName, elementType);
                 slices.getSlices().clear();
 
                 NamedTypeSpecifier nts = new NamedTypeSpecifier();
