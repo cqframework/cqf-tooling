@@ -1,15 +1,15 @@
 package org.opencds.cqf.processor;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
-import org.hl7.elm.r1.IncludeDef;
-import org.hl7.elm.r1.Retrieve;
-import org.hl7.elm.r1.ValueSetDef;
-import org.hl7.elm.r1.ValueSetRef;
+import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
+import org.hl7.elm.r1.*;
+import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.opencds.cqf.library.BaseNarrativeProvider;
 import org.opencds.cqf.library.GenericLibrarySourceProvider;
@@ -23,6 +23,7 @@ import org.opencds.cqf.utilities.IOUtils.Encoding;
 import ca.uhn.fhir.context.FhirContext;
 
 import org.hl7.fhir.dstu3.model.*;
+import org.opencds.cqf.utilities.STU3FHIRUtils;
 
 public class STU3LibraryProcessor implements LibraryProcessor{
     private String igCanonicalBase;
@@ -137,10 +138,14 @@ public class STU3LibraryProcessor implements LibraryProcessor{
             igCanonicalBase = "";
         }
 
+        //TODO: addding the resource prefix here is a temporary workaround until the rest of the tooling can get rid of it.
+        //HACK: This FHIRHelpers-specific code is a total HACK to simplify refresh for the connectathon. Should be removed and never committed.
+        String prefix = def.getPath().contains("FHIRHelpers") ? "" : LibraryProcessor.ResourcePrefix;
+
         library.addRelatedArtifact(
             new RelatedArtifact()
                 .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
-                .setResource(new Reference().setReference(igCanonicalBase + "Library/" + getResourceCanonicalReference(def, includeVersion))) //this is the reference name
+                .setResource(new Reference().setReference(igCanonicalBase + "Library/" + prefix + getResourceCanonicalReference(def, includeVersion))) //this is the reference name
         );
     }
 
@@ -149,15 +154,27 @@ public class STU3LibraryProcessor implements LibraryProcessor{
         for (Retrieve retrieve : translator.toRetrieves()) {
             DataRequirement dataReq = new DataRequirement();
             dataReq.setType(retrieve.getDataType().getLocalPart());
+
+            // Set profile if specified
+            if (retrieve.getTemplateId() != null) {
+                dataReq.setProfile(Collections.singletonList(new org.hl7.fhir.dstu3.model.UriType(retrieve.getTemplateId())));
+            }
+
             if (retrieve.getCodeProperty() != null) {
                 DataRequirement.DataRequirementCodeFilterComponent codeFilter = new DataRequirement.DataRequirementCodeFilterComponent();
                 codeFilter.setPath(retrieve.getCodeProperty());
+
+                // TODO: Support retrieval when the target is a CodeSystemRef
+
                 if (retrieve.getCodes() instanceof ValueSetRef) {
-                    Type valueSetName = new StringType(getValueSetId(((ValueSetRef) retrieve.getCodes()).getName(), translator));
-                    codeFilter.setValueSet(valueSetName);
+                    ValueSetRef vsr = (ValueSetRef)retrieve.getCodes();
+                    Map<String, TranslatedLibrary> translatedLibraries = translator.getTranslatedLibraries();
+                    TranslatedLibrary translatedLibrary = translator.getTranslatedLibrary();
+                    codeFilter.setValueSet(new org.hl7.fhir.dstu3.model.Reference(STU3FHIRUtils.toReference(STU3FHIRUtils.resolveValueSetRef(vsr, translatedLibrary, translatedLibraries))));
                 }
                 dataReq.setCodeFilter(Collections.singletonList(codeFilter));
             }
+
             // TODO - Date filters - we want to populate this with a $data-requirements request as there isn't a good way through elm analysis
             library.addDataRequirement(dataReq);
         }
