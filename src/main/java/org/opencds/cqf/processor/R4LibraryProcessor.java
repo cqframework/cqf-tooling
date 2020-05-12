@@ -136,12 +136,15 @@ public class R4LibraryProcessor implements LibraryProcessor{
             library.addRelatedArtifact(
             new RelatedArtifact()
                 .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
-                .setResource(igCanonicalBase + "Library/" + getResourceCanonicalReference(def, includeVersion))
+                //TODO: we probably want to replace this "-library" behavior with a switch (or get rid of it altogether)
+                //HACK: this is not a safe implementation.  Someone could run without -v and everthing else would still get the "library-".
+                //Doing this for the connectathon.
+                .setResource(igCanonicalBase + "Library/" + (includeVersion ? LibraryProcessor.ResourcePrefix : "") + getResourceCanonicalReference(def, includeVersion))
             );
         }
         else {
             if (includeVersion) {
-                throw new IllegalArgumentException("Ask Bryn About This!!!");
+                throw new IllegalArgumentException("-v argument requires -igrp with a valid url.");
             }
             library.addRelatedArtifact(
                 new RelatedArtifact()

@@ -2,6 +2,7 @@ package org.opencds.cqf.processor.argument;
 
 import static java.util.Arrays.asList;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -78,7 +79,10 @@ public class RefreshIGArgumentProcessor {
         ArgUtils.ensure(OPERATION_OPTIONS[0], options);
 
         String igResourcePath = (String)options.valueOf(IG_RESOURCE_PATH_OPTIONS[0]);
-        String igPath = (String)options.valueOf(IG_PATH_OPTIONS[0]);
+        igResourcePath = (igResourcePath.equals("") || igResourcePath == null) ? igResourcePath : Paths.get(igResourcePath).toAbsolutePath().toString();
+        String igPath = (String)options.valueOf(IG_PATH_OPTIONS[0]);               
+        igPath = Paths.get(igPath).toAbsolutePath().toString();        
+
         List<String> resourcePaths = (List<String>)options.valuesOf(RESOURCE_PATH_OPTIONS[0]);
         //could not easily use the built-in default here because it is based on the value of the igPath argument.
         String igVersion = (String)options.valueOf(IG_VERSION_OPTIONS[0]);
