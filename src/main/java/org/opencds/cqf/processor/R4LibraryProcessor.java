@@ -74,9 +74,8 @@ public class R4LibraryProcessor implements LibraryProcessor{
 
     private static void mergeDiff(Library referenceLibrary, Library generatedLibrary, String cqlContentPath, CqlTranslator translator,
         FhirContext fhirContext) {
-        referenceLibrary.getRelatedArtifact().clear();
-        generatedLibrary.getRelatedArtifact().stream()
-            .forEach(relatedArtifact -> referenceLibrary.addRelatedArtifact(relatedArtifact));
+        referenceLibrary.getRelatedArtifact().removeIf(a -> a.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON);
+        generatedLibrary.getRelatedArtifact().stream().forEach(relatedArtifact -> referenceLibrary.addRelatedArtifact(relatedArtifact));
 
         referenceLibrary.getDataRequirement().clear();
         generatedLibrary.getDataRequirement().stream().forEach(dateRequirement -> referenceLibrary.addDataRequirement(dateRequirement));
