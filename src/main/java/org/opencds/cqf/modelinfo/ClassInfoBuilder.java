@@ -327,6 +327,11 @@ public abstract class ClassInfoBuilder {
 
     // Returns the type code for the element if there is only one type ref
     private String typeCode(ElementDefinition ed) {
+        // In FHIR 4.0.1, the typeCode for the Resource.id element is incorrectly specified as a System.String
+        if (this.settings.modelName.equals("FHIR") && ed.getPath().equals("Resource.id")) {
+            return "FHIR.string";
+        }
+
         if (ed.getType() != null && ed.getType().size() == 1) {
             return ed.getType().get(0).getCode();
         }

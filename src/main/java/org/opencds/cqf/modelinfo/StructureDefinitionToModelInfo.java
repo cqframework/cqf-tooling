@@ -72,8 +72,8 @@ public class StructureDefinitionToModelInfo extends Operation {
             setOutputPath("../cqf-tooling/src/main/resources/org/opencds/cqf/modelinfo");
         }
 
-        //String resourcePaths = "4.0.1";
-        String resourcePaths = "4.0.1;US-Core/3.1.0";
+        String resourcePaths = "4.0.1";
+        //String resourcePaths = "4.0.1;US-Core/3.1.0";
         //String resourcePaths = "4.0.1;US-Core/3.1.0;QI-Core/4.0.0";
         if (args.length > 3) {
             resourcePaths = args[3];
@@ -81,15 +81,15 @@ public class StructureDefinitionToModelInfo extends Operation {
 
         // TODO : Can we autodetect this from the structure defintions?
         // Yes, would need to be an extension definition on the ImplementationGuide...
-        //String modelName = "FHIR";
-        String modelName = "USCore";
+        String modelName = "FHIR";
+        //String modelName = "USCore";
         //String modelName = "QICore";
         //String modelName = "QUICK";
         if (args.length > 4) {
             modelName = args[4];
         }
-        //String modelVersion = "4.0.1";
-        String modelVersion = "3.1.0";
+        String modelVersion = "4.0.1";
+        //String modelVersion = "3.1.0";
         //String modelVersion = "4.0.0";
         //String modelVersion = "3.3.0";
         if (args.length > 5) {
