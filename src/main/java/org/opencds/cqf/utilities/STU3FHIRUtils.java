@@ -8,9 +8,9 @@ import java.util.Map;
 
 public class STU3FHIRUtils {
 
-    public static org.hl7.fhir.r5.model.Coding toCoding(Code code, TranslatedLibrary library, LibraryManager libraryManager) {
+    public static model.Coding toCoding(Code code, TranslatedLibrary library, LibraryManager libraryManager) {
         CodeSystemDef codeSystemDef = resolveCodeSystemRef(code.getSystem(), library, libraryManager);
-        org.hl7.fhir.r5.model.Coding coding = new org.hl7.fhir.r5.model.Coding();
+        Coding coding = new Coding();
         coding.setCode(code.getCode());
         coding.setDisplay(code.getDisplay());
         coding.setSystem(codeSystemDef.getId());
@@ -18,8 +18,8 @@ public class STU3FHIRUtils {
         return coding;
     }
 
-    public static org.hl7.fhir.r5.model.CodeableConcept toCodeableConcept(Concept concept, TranslatedLibrary library, LibraryManager libraryManager) {
-        org.hl7.fhir.r5.model.CodeableConcept codeableConcept = new org.hl7.fhir.r5.model.CodeableConcept();
+    public static CodeableConcept toCodeableConcept(Concept concept, TranslatedLibrary library, LibraryManager libraryManager) {
+        CodeableConcept codeableConcept = new CodeableConcept();
         codeableConcept.setText(concept.getDisplay());
         for (Code code : concept.getCode()) {
             codeableConcept.addCoding(toCoding(code, library, libraryManager));
