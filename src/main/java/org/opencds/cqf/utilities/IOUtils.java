@@ -455,7 +455,10 @@ public class IOUtils
             // NOTE: A bit of a hack, but we need to support both xml and json encodings for existing resources and the long-term strategy is
             // to revisit this and change the approach to use the references rather than file name matching, so this should be good for the near-term.
             if (path.endsWith(libraryFileName.replaceAll(".cql", ".json"))
-                || path.endsWith(libraryFileName.replaceAll(".cql", ".xml"))) {
+                || path.endsWith(libraryFileName.replaceAll(".cql", ".xml"))
+                || path.endsWith(fileName.replaceAll(".cql", ".json"))
+                || path.endsWith(fileName.replaceAll(".cql", ".xml")))
+                {
                 libraryPath = path;
                 break;
             }
