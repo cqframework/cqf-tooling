@@ -89,7 +89,7 @@ public class Processor extends Operation {
 
         //TODO: Determing and add correct URLS for these Systems
         supportedCodeSystems.put("CIEL", "http://hl7.org/fhir/sid/ciel");
-        supportedCodeSystems.put("ICD-11", "http://hl7.org/fhir/sid/icd-10");
+        supportedCodeSystems.put("ICD-11", "http://hl7.org/fhir/sid/icd-11");
 
 
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
@@ -617,11 +617,6 @@ public class Processor extends Operation {
             String inNewDD = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "InNewDD"));
             boolean shouldInclude = inNewDD == null || (inNewDD.equals("ST") || inNewDD.equals("1"));
 
-            //NOTE: Added for Dev of COVID case reporting project, but should consider leaving as general behavior - we can't really process without FhirR4Resource.
-            String resource = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "FhirR4Resource"));
-            boolean resourceIsSpecified = resource != null;
-            shouldInclude = shouldInclude && resourceIsSpecified;
-
             if (shouldInclude && (scopeIsNull || scopeMatchesRowScope)) {
                 String masterDataType = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "MasterDataType"));
                 switch(masterDataType) {
@@ -775,6 +770,7 @@ public class Processor extends Operation {
                     return "integer";
                 case "Note":
                 case "Text":
+                case "text":
                     return "string";
                 case "Time":
                     return "time";
