@@ -2,13 +2,14 @@ package org.opencds.cqf.utilities;
 
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.elm.r1.*;
 
 import java.util.Map;
 
 public class STU3FHIRUtils {
 
-    public static model.Coding toCoding(Code code, TranslatedLibrary library, LibraryManager libraryManager) {
+    public static Coding toCoding(Code code, TranslatedLibrary library, LibraryManager libraryManager) {
         CodeSystemDef codeSystemDef = resolveCodeSystemRef(code.getSystem(), library, libraryManager);
         Coding coding = new Coding();
         coding.setCode(code.getCode());

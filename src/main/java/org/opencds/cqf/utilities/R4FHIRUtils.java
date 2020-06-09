@@ -2,15 +2,16 @@ package org.opencds.cqf.utilities;
 
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.elm.r1.*;
 
 import java.util.Map;
 
 public class R4FHIRUtils {
 
-    public static org.hl7.fhir.r4.model.Coding toCoding(Code code, TranslatedLibrary library, LibraryManager libraryManager) {
+    public static Coding toCoding(Code code, TranslatedLibrary library, LibraryManager libraryManager) {
         CodeSystemDef codeSystemDef = resolveCodeSystemRef(code.getSystem(), library, libraryManager);
-        org.hl7.fhir.r4.model.Coding coding = new org.hl7.fhir.r4.model.Coding();
+        Coding coding = new Coding();
         coding.setCode(code.getCode());
         coding.setDisplay(code.getDisplay());
         coding.setSystem(codeSystemDef.getId());
@@ -18,8 +19,8 @@ public class R4FHIRUtils {
         return coding;
     }
 
-    public static org.hl7.fhir.r4.model.CodeableConcept toCodeableConcept(Concept concept, TranslatedLibrary library, LibraryManager libraryManager) {
-        org.hl7.fhir.r4.model.CodeableConcept codeableConcept = new org.hl7.fhir.r4.model.CodeableConcept();
+    public static CodeableConcept toCodeableConcept(Concept concept, TranslatedLibrary library, LibraryManager libraryManager) {
+        CodeableConcept codeableConcept = new CodeableConcept();
         codeableConcept.setText(concept.getDisplay());
         for (Code code : concept.getCode()) {
             codeableConcept.addCoding(toCoding(code, library, libraryManager));
