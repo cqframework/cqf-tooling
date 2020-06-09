@@ -138,17 +138,14 @@ public class R4LibraryProcessor implements LibraryProcessor{
         if (igCanonicalBase != null) {
             igCanonicalBase = igCanonicalBase + "/";
 
-            //TODO: addding the resource prefix here is a temporary workaround until the rest of the tooling can get rid of it.
-            //HACK: This FHIRHelpers-specific code is a total HACK to simplify refresh for the connectathon. Should be removed and never committed.
-            String prefix = def.getPath().contains("FHIRHelpers") ? "" : LibraryProcessor.ResourcePrefix;
-
+            //TODO: adding the resource prefix here is a temporary workaround until the rest of the tooling can get rid of it.
             library.addRelatedArtifact(
                 new RelatedArtifact()
                     .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
                     //TODO: we probably want to replace this "-library" behavior with a switch (or get rid of it altogether)
                     //HACK: this is not a safe implementation.  Someone could run without -v and everything else would still get the "library-".
                     //Doing this for the connectathon.
-                    .setResource(igCanonicalBase + "Library/" + (includeVersion ? prefix : "") + getResourceCanonicalReference(def, includeVersion))
+                    .setResource(igCanonicalBase + "Library/" + (includeVersion ? LibraryProcessor.ResourcePrefix : "") + getResourceCanonicalReference(def, includeVersion))
             );
         }
         else {
