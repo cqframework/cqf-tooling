@@ -59,6 +59,10 @@ public class CodeSystemLookupDictionary {
         CDCREC                      2.16.840.1.113883.6.238         ->      https://terminology.hl7.org/CodeSystem-PHRaceAndEthnicityCDC.html
         CDT                         2.16.840.1.113883.6.13          ->      https://terminology.hl7.org/CodeSystem-CD2.html
         mediaType                   2.16.840.1.113883.5.79          ->      https://terminology.hl7.org/CodeSystem-v3-mediatypes.html
+        SOP                         2.16.840.1.113883.3.221.5       ->      urn:oid:2.16.840.1.113883.3.221.5
+        UCUM                        1.3.6.1.4.1.12009.10.3.1        ->      urn:oid:1.3.6.1.4.1.12009.10.3.1
+        UCUM                        2.16.840.1.113883.6.8           ->      https://terminology.hl7.org/NamingSystem-v3-ucum.html
+        UMLS                        2.16.840.1.113883.6.86          ->      https://terminology.hl7.org/CodeSystem-umls.html
 
     */
 
@@ -80,7 +84,8 @@ public class CodeSystemLookupDictionary {
             case "2.16.840.1.113883.4.642.1.1093": return "http://terminology.hl7.org/CodeSystem/discharge-disposition";
             case "2.16.840.1.113883.5.43": return "http://terminology.hl7.org/CodeSystem/v3-EntityNamePartQualifier";
             case "2.16.840.1.113883.5.45": return "http://terminology.hl7.org/CodeSystem/v3-EntityNameUse";
-            case "2.16.840.1.113883.6.14": case "2.16.840.1.113883.6.285": return "http://terminology.hl7.org/CodeSystem/HCPCS";
+            case "2.16.840.1.113883.6.14": return "http://terminology.hl7.org/CodeSystem/HCPCS";
+            case "2.16.840.1.113883.6.285": return "urn:oid:2.16.840.1.113883.6.285";
             case "2.16.840.1.113883.6.3": return "http://terminology.hl7.org/CodeSystem/icd10";
             case "2.16.840.1.113883.6.4": return "http://www.cms.gov/Medicare/Coding/ICD10";
             case "2.16.840.1.113883.6.90": return "http://hl7.org/fhir/sid/icd-10-cm";
@@ -112,6 +117,10 @@ public class CodeSystemLookupDictionary {
             case "2.16.840.1.113883.6.238": return "http://terminology.hl7.org/CodeSystem/PHRaceAndEthnicityCDC";
             case "2.16.840.1.113883.6.13": return "http://terminology.hl7.org/CodeSystem/CD2";
             case "2.16.840.1.113883.5.79": return "http://terminology.hl7.org/CodeSystem/v3-mediatypes";
+            case "2.16.840.1.113883.3.221.5": return "urn:oid:2.16.840.1.113883.3.221.5";
+            case "1.3.6.1.4.1.12009.10.3.1": return "urn:oid:1.3.6.1.4.1.12009.10.3.1";
+            case "2.16.840.1.113883.6.8": return "http://unitsofmeasure.org";
+            case "2.16.840.1.113883.6.86": return "http://terminology.hl7.org/CodeSystem/umls";
             default: throw new IllegalArgumentException("Unknown CodeSystem oid: " + oid);
         }
     }
@@ -170,6 +179,9 @@ public class CodeSystemLookupDictionary {
             case "Modifier": return "http://www.ama-assn.org/go/cpt";
             case "CDT": return "http://terminology.hl7.org/CodeSystem/CD2";
             case "mediaType": return "http://terminology.hl7.org/CodeSystem/v3-mediatypes";
+            case "SOP":  return "urn:oid:2.16.840.1.113883.3.221.5";
+            case "UCUM": return "http://unitsofmeasure.org";
+            case "UMLS": return "http://terminology.hl7.org/CodeSystem/umls";
             default: throw new IllegalArgumentException("Unknown CodeSystem name: " + name);
         }
     }
