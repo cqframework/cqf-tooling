@@ -73,6 +73,7 @@ public class Processor extends Operation {
         scopeCanonicalBaseMap.put("core", "http://fhir.org/guides/who/core");
         scopeCanonicalBaseMap.put("fp", "http://fhir.org/guides/who/fp-cds");
         scopeCanonicalBaseMap.put("sti", "http://fhir.org/guides/who/sti-cds");
+        scopeCanonicalBaseMap.put("cr", "http://fhir.org/guides/cqframework/cr");
 
         if (pathToSpreadsheet == null) {
             throw new IllegalArgumentException("The path to the spreadsheet is required");
@@ -85,6 +86,11 @@ public class Processor extends Operation {
         supportedCodeSystems.put("SNOMED-CT", "http://snomed.info/sct");
         supportedCodeSystems.put("LOINC", "http://loinc.org");
         supportedCodeSystems.put("RxNorm", "http://www.nlm.nih.gov/research/umls/rxnorm");
+
+        //TODO: Determing and add correct URLS for these Systems
+        supportedCodeSystems.put("CIEL", "http://hl7.org/fhir/sid/ciel");
+        supportedCodeSystems.put("ICD-11", "http://hl7.org/fhir/sid/icd-11");
+
 
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
 
@@ -261,7 +267,7 @@ public class Processor extends Operation {
     private List<DictionaryCode> getTerminologyCodes(String codeSystemKey, String label, Row row, HashMap<String, Integer> colIds) {
         List<DictionaryCode> codes = new ArrayList<>();
         String system = supportedCodeSystems.get(codeSystemKey);
-        String codeListString = SpreadsheetHelper.getCellAsString(row, getColId(colIds, codeSystemKey));
+        String codeListString = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, codeSystemKey));
         if (codeListString != null && !codeListString.isEmpty()) {
             List<String> codesList = Arrays.asList(codeListString.split(";"));
             String display;
@@ -277,10 +283,10 @@ public class Processor extends Operation {
 
     private List<DictionaryCode> getFhirCodes(String label, Row row, HashMap<String, Integer> colIds) {
         List<DictionaryCode> codes = new ArrayList<>();
-        String system = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
+        String system = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "FhirCodeSystem"));
         String display = String.format("%s (%s)", label, "FHIR");
         if (system != null && !system.isEmpty()) {
-            String codeListString = SpreadsheetHelper.getCellAsString(row, getColId(colIds,"FhirR4Code"));
+            String codeListString = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds,"FhirR4Code"));
             if (codeListString != null && !codeListString.isEmpty()) {
                 List<String> codesList = Arrays.asList(codeListString.split(";"));
                 for (String c : codesList) {
@@ -299,7 +305,7 @@ public class Processor extends Operation {
                 if (codeSystem == null)
                 {
                     String codeSystemName = system.substring(system.indexOf("CodeSystem/") + "CodeSystem/".length());
-                    codeSystem = createCodeSystem(codeSystemName, whoCodeSystemBase, "WHO Extended Codes CodeSystem", "Set of codes identified as being needed but not found in existing Code Systems");
+                    codeSystem = createCodeSystem(codeSystemName, whoCodeSystemBase, "Extended Codes CodeSystem", "Set of codes identified as being needed but not found in existing Code Systems");
                 }
 
                 for (DictionaryCode code : codes) {
@@ -308,7 +314,7 @@ public class Processor extends Operation {
                     concept.setDisplay(code.getLabel());
 
                     String parentLabel = null;
-                    String parentName = SpreadsheetHelper.getCellAsString(row, getColId(colIds,"InputOptionParent"));
+                    String parentName = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds,"InputOptionParent"));
                     if (parentName != null && !parentName.trim().isEmpty()) {
                         parentName = parentName.trim();
                         DictionaryElement currentElement = elementMap.get(parentName);
@@ -329,9 +335,9 @@ public class Processor extends Operation {
     private List<DictionaryCode> getOpenMRSCodes(String label, Row row, HashMap<String, Integer> colIds) {
         List<DictionaryCode> codes = new ArrayList<>();
         String system = openMRSSystem;
-        String parent = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "OpenMRSEntityParent"));
-        String display = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "OpenMRSEntity"));
-        String codeListString = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "OpenMRSEntityId"));
+        String parent = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "OpenMRSEntityParent"));
+        String display = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "OpenMRSEntity"));
+        String codeListString = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "OpenMRSEntityId"));
         if (codeListString != null && !codeListString.isEmpty()) {
             List<String> codesList = Arrays.asList(codeListString.split(";"));
 
@@ -391,19 +397,19 @@ public class Processor extends Operation {
 
     private DictionaryFhirElementPath getFhirElementPath(Row row, HashMap<String, Integer> colIds) {
         DictionaryFhirElementPath fhirType = new DictionaryFhirElementPath();
-        String resource = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4Resource"));
+        String resource = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "FhirR4Resource")).trim();
         if (resource != null && !resource.isEmpty()) {
             fhirType.setResource(resource);
-            fhirType.setMasterDataElementPath(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MasterDataElementPath")));
-            fhirType.setFhirElementType(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4ResourceType")));
-            fhirType.setBaseProfile(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4BaseProfile")));
-            fhirType.setVersion(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4VersionNumber")));
-            fhirType.setCustomProfileId(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomProfileId")));
-            fhirType.setCustomValueSetName(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomValueSetName")));
-            fhirType.setBindingStrength(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "BindingStrength")));
-            fhirType.setUnitOfMeasure(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "UnitOfMeasure")));
-            fhirType.setExtensionNeeded(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ExtensionNeeded")));
-            fhirType.setAdditionalFHIRMappingDetails(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4AdditionalFHIRMappingDetails")));
+            fhirType.setMasterDataElementPath(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "MasterDataElementPath")));
+            fhirType.setFhirElementType(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "FhirR4ResourceType")));
+            fhirType.setBaseProfile(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "FhirR4BaseProfile")));
+            fhirType.setVersion(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "FhirR4VersionNumber")));
+            fhirType.setCustomProfileId(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "CustomProfileId")));
+            fhirType.setCustomValueSetName(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "CustomValueSetName")));
+            fhirType.setBindingStrength(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "BindingStrength")));
+            fhirType.setUnitOfMeasure(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "UnitOfMeasure")));
+            fhirType.setExtensionNeeded(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "ExtensionNeeded")));
+            fhirType.setAdditionalFHIRMappingDetails(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "FhirR4AdditionalFHIRMappingDetails")));
         }
         return fhirType;
     }
@@ -415,21 +421,21 @@ public class Processor extends Operation {
 
         return -1;
     }
-
+    
     private DictionaryElement createDataElement(String page, String group, Row row, HashMap<String, Integer> colIds) {
-        //String label = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Label"));
-        String type = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Type"));
+        //String label = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "Label"));
+        String type = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "Type"));
         if (type != null) {
             type = type.trim();
             if (type.equals("Coding")) {
-                String choiceType = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MultipleChoiceType"));
+                String choiceType = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "MultipleChoiceType"));
                 if (choiceType != null) {
                     choiceType = choiceType.trim();
                     type = type + " - " + choiceType;
                 }
             }
         }
-        String name = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Name"));
+        String name = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "Name"));
         if (name.isEmpty()) {
             return null;
         }
@@ -450,21 +456,21 @@ public class Processor extends Operation {
         e.setGroup(group);
         e.setLabel(label);
         e.setType(type);
-        e.setMasterDataType(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MasterDataType")));
-        e.setInfoIcon(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "InfoIcon")));
-        e.setDue(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Due")));
-        e.setRelevance(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Relevance")));
-        e.setDescription(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Description")));
-        e.setDataElementLabel(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "DataElementLabel")) != null
-            ? SpreadsheetHelper.getCellAsString(row, getColId(colIds, "DataElementLabel")).trim()
+        e.setMasterDataType(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "MasterDataType")));
+        e.setInfoIcon(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "InfoIcon")));
+        e.setDue(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "Due")));
+        e.setRelevance(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "Relevance")));
+        e.setDescription(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "Description")));
+        e.setDataElementLabel(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "DataElementLabel")) != null
+            ? SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "DataElementLabel")).trim()
             : null);
-        e.setDataElementName(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "DataElementName")));
-        e.setNotes(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Notes")));
-        e.setCalculation(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Calculation")));
-        e.setConstraint(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Constraint")));
-        e.setRequired(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Required")));
-        e.setEditable(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Editable")));
-        e.setScope(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Scope")));
+        e.setDataElementName(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "DataElementName")));
+        e.setNotes(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "Notes")));
+        e.setCalculation(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "Calculation")));
+        e.setConstraint(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "Constraint")));
+        e.setRequired(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "Required")));
+        e.setEditable(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "Editable")));
+        e.setScope(SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "Scope")));
         e.setCode(getPrimaryCode(name, row, colIds));
         e.setFhirElementPath(getFhirElementPath(row, colIds));
 
@@ -472,12 +478,12 @@ public class Processor extends Operation {
     }
 
     private void addInputOptionToParentElement(Row row, HashMap<String, Integer> colIds) {
-        String parentName = SpreadsheetHelper.getCellAsString(row, getColId(colIds,"InputOptionParent")).trim();
+        String parentName = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds,"InputOptionParent")).trim();
         if (parentName != null || !parentName.isEmpty())
         {
             DictionaryElement currentElement = elementMap.get(parentName);
             if (currentElement != null) {
-                String choices = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Name"));
+                String choices = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "Name"));
                 if (choices != null && !choices.isEmpty()) {
                     choices = choices.trim();
 
@@ -491,7 +497,7 @@ public class Processor extends Operation {
                     }
 
                     // FHIR choices
-                    String fhirCodeSystem = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
+                    String fhirCodeSystem = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "FhirCodeSystem"));
                     if (fhirCodeSystem != null && !fhirCodeSystem.isEmpty()) {
                         codes = getFhirCodes(choices, row, colIds);
                         if (codes != null && !codes.isEmpty()) {
@@ -594,6 +600,8 @@ public class Processor extends Operation {
                         case "snomed-ct": colIds.put("SNOMED-CT", cell.getColumnIndex()); break;
                         case "loinc": colIds.put("LOINC", cell.getColumnIndex()); break;
                         case "rxnorm": colIds.put("RxNorm", cell.getColumnIndex()); break;
+                        case "icd-11": colIds.put("ICD-11", cell.getColumnIndex()); break;
+                        case "ciel": colIds.put("CIEL", cell.getColumnIndex()); break;
                         case "openmrs entity parent": colIds.put("OpenMRSEntityParent", cell.getColumnIndex()); break;
                         case "openmrs entity": colIds.put("OpenMRSEntity", cell.getColumnIndex()); break;
                         case "openmrs entity id": colIds.put("OpenMRSEntityId", cell.getColumnIndex()); break;
@@ -602,15 +610,15 @@ public class Processor extends Operation {
                 continue;
             }
 
-            String rowScope = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Scope"));
+            String rowScope = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "Scope"));
             boolean scopeIsNull = scope == null;
             boolean scopeMatchesRowScope = rowScope != null && scope.toLowerCase().equals(rowScope.toLowerCase());
 
-            String inNewDD = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "InNewDD"));
-            boolean shouldInclude = inNewDD != null && (inNewDD.equals("ST") || inNewDD.equals("1"));
+            String inNewDD = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "InNewDD"));
+            boolean shouldInclude = inNewDD == null || (inNewDD.equals("ST") || inNewDD.equals("1"));
 
             if (shouldInclude && (scopeIsNull || scopeMatchesRowScope)) {
-                String masterDataType = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MasterDataType"));
+                String masterDataType = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds, "MasterDataType"));
                 switch(masterDataType) {
                     case "Data Element":
                     case "Slice":
@@ -727,10 +735,21 @@ public class Processor extends Operation {
             switch (type) {
                 case "Boolean":
                     return "boolean";
+                case "Coded":
+                    return "code";
+                case "Coded variables":
+                case "CodableConcept":
+                    return "CodeableConcept";
                 case "DateTime":
+                case "DD/MM/YYYY":
                     return "dateTime";
                 case "Integer":
+                case "###":
                     return "integer";
+                case "Free text":
+                case "free text":
+                case "Text":
+                    return "string";
                 default:
                     return type;
             }
@@ -739,15 +758,19 @@ public class Processor extends Operation {
         }
     }
 
+    // TODO: why is this different from "cleanse.." above?
     private String getExtensionFhirType(String type) {
         if (type != null && type.length() > 0) {
             switch (type) {
                 case "Boolean":
                     return "boolean";
+                case "Coded":
+                    return "code";
                 case "Integer":
                     return "integer";
                 case "Note":
                 case "Text":
+                case "text":
                     return "string";
                 case "Time":
                     return "time";
@@ -767,7 +790,7 @@ public class Processor extends Operation {
 
     private String getFhirTypeOfTargetElement(DictionaryFhirElementPath elementPath) {
         try {
-//            String resourceType = elementPath.getResourceType();
+//            String resourceType = elementPath.getResourceType().trim();
 //            StructureDefinition sd = fhirModelStructureDefinitions.get(resourceType);
 //
 //            if (sd == null) {
@@ -950,7 +973,7 @@ public class Processor extends Operation {
         DictionaryFhirElementPath elementPath = element.getFhirElementPath();
         String customProfileIdRaw = elementPath.getCustomProfileId();
         Boolean hasCustomProfileIdRaw = customProfileIdRaw != null && !customProfileIdRaw.isEmpty() && !customProfileIdRaw.isBlank();
-        String resourceType = elementPath.getResourceType();
+        String resourceType = elementPath.getResourceType().trim();
 
         StructureDefinition sd;
         sd = new StructureDefinition();
@@ -1048,7 +1071,7 @@ public class Processor extends Operation {
         String choicesPath;
 
         DictionaryFhirElementPath elementPath = element.getFhirElementPath();
-        String resourceType = elementPath.getResourceType();
+        String resourceType = elementPath.getResourceType().trim();
 
         switch (resourceType) {
             case "AllergyIntolerance":
@@ -1074,6 +1097,7 @@ public class Processor extends Operation {
             case "MedicationDispense":
             case "MedicationStatement":
             case "OccupationalData":
+            case "Organization":
             case "Patient":
             case "Practitioner":
             case "PractitionerRole":

@@ -45,6 +45,15 @@ public class SpreadsheetHelper {
         return null;
     }
 
+    public static String getCellAsStringTrimmed(Row row, int cellIndex) {
+        String rawValue = getCellAsString(row, cellIndex);
+        String trimmedValue = null;
+        if (rawValue != null) {
+            trimmedValue = rawValue.trim();
+        }
+        return trimmedValue;
+    }
+
     public static void resolveValueSet(org.hl7.fhir.dstu3.model.ValueSet vs, Map<Integer, ValueSet> codesBySystem) {
         vs.setCompose(new org.hl7.fhir.dstu3.model.ValueSet.ValueSetComposeComponent());
         for (Map.Entry<Integer, org.opencds.cqf.terminology.ValueSet> entry : codesBySystem.entrySet()) {
