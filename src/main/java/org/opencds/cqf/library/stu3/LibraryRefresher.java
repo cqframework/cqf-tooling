@@ -36,7 +36,7 @@ public class LibraryRefresher extends BaseLibraryGenerator<Library, NarrativePro
 
         resolveDataRequirements(generatedLibrary, translator);
         attachContent(generatedLibrary, translator, getCqlMap().get(id));
-        generatedLibrary.setText(getNarrativeProvider().getNarrative(getFhirContext(), generatedLibrary));
+        // generatedLibrary.setText(getNarrativeProvider().getNarrative(getFhirContext(), generatedLibrary));
         Library refreshedLibrary = refreshLibrary(generatedLibrary, id, translator);
         libraryMap.put(id, refreshedLibrary);
     }
@@ -62,7 +62,7 @@ public class LibraryRefresher extends BaseLibraryGenerator<Library, NarrativePro
         referenceLibrary.getContent().clear();
         attachContent(referenceLibrary, generatedLibraryTranslator, getCqlMap().get(id));
 
-        referenceLibrary.setText(getNarrativeProvider().getNarrative(getFhirContext(), generatedLibrary));
+        // referenceLibrary.setText(getNarrativeProvider().getNarrative(getFhirContext(), generatedLibrary));
 
         return referenceLibrary;
     }
