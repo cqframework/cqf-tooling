@@ -40,7 +40,7 @@ public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativePro
 
         resolveDataRequirements(library, translator);
         attachContent(library, translator, getCqlMap().get(id));
-        library.setText(getNarrativeProvider().getNarrative(getFhirContext(), library));
+        // library.setText(getNarrativeProvider().getNarrative(getFhirContext(), library));
         libraryMap.put(id, library);
     }
 

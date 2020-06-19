@@ -85,9 +85,9 @@ public class STU3LibraryProcessor implements LibraryProcessor{
         referenceLibrary.getContent().clear();
         attachContent(referenceLibrary, translator, IOUtils.getCqlString(cqlContentPath));
 
-        BaseNarrativeProvider<Narrative> narrativeProvider = new NarrativeProvider();
-        INarrative narrative = narrativeProvider.getNarrative(fhirContext, generatedLibrary);
-        referenceLibrary.setText((Narrative)narrative);
+        // BaseNarrativeProvider<Narrative> narrativeProvider = new NarrativeProvider();
+        // INarrative narrative = narrativeProvider.getNarrative(fhirContext, generatedLibrary);
+        // referenceLibrary.setText((Narrative)narrative);
     }
 
     private static void generateLibrary(String igCanonicalBase, String cqlContentPath, String outputPath, Encoding encoding, Boolean includeVersion, CqlTranslator translator, FhirContext fhirContext) {
@@ -109,9 +109,9 @@ public class STU3LibraryProcessor implements LibraryProcessor{
         resolveDataRequirements(library, translator);
         attachContent(library, translator, IOUtils.getCqlString(cqlContentPath));
         cqfmHelper.ensureToolingExtensionAndDevice(library);
-        BaseNarrativeProvider<Narrative> narrativeProvider = new NarrativeProvider();
-        INarrative narrative = narrativeProvider.getNarrative(fhirContext, library);
-        library.setText((Narrative) narrative);
+        // BaseNarrativeProvider<Narrative> narrativeProvider = new NarrativeProvider();
+        // INarrative narrative = narrativeProvider.getNarrative(fhirContext, library);
+        // library.setText((Narrative) narrative);
         return library;
     }
 
