@@ -39,7 +39,7 @@ public class RefreshStu3Measure extends RefreshGeneratedContent {
     public void refreshGeneratedContent() {
         File measureDir = new File(this.getPathToMeasures());
         if (measureDir.isDirectory()) {
-            for (File f : Optional.ofNullable(measureDir.listFiles()).orElseThrow(() -> new NoSuchElementException())) {
+            for (File f : Optional.ofNullable(measureDir.listFiles()).<NoSuchElementException>orElseThrow(() -> new NoSuchElementException())) {
                 refreshMeasureFromFile(f);
             }
         }

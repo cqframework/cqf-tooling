@@ -204,7 +204,7 @@ public class IOUtils
     {
         List<String> filePaths = new ArrayList<String>();
         File inputDir = new File(directoryPath);
-        ArrayList<File> files = inputDir.isDirectory() ? new ArrayList<File>(Arrays.asList(Optional.ofNullable(inputDir.listFiles()).orElseThrow(() -> new NoSuchElementException()))) : new ArrayList<File>();
+        ArrayList<File> files = inputDir.isDirectory() ? new ArrayList<File>(Arrays.asList(Optional.ofNullable(inputDir.listFiles()).<NoSuchElementException>orElseThrow(() -> new NoSuchElementException()))) : new ArrayList<File>();
        
         for (File file : files) {
             if (file.isDirectory()) {
@@ -231,7 +231,7 @@ public class IOUtils
         List<File> directories = new ArrayList<File>();
         File parentDirectory = new File(path);
         try {
-            directories = Arrays.asList(Optional.ofNullable(parentDirectory.listFiles()).orElseThrow(() -> new NoSuchElementException()));
+            directories = Arrays.asList(Optional.ofNullable(parentDirectory.listFiles()).<NoSuchElementException>orElseThrow(() -> new NoSuchElementException()));
         } catch (Exception e) {
             System.out.println("No paths found for the Directory " + path + ":");
             return directoryPaths;

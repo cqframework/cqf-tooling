@@ -146,7 +146,7 @@ public class STU3LibraryProcessor implements LibraryProcessor{
         library.setVersion(version);
         library.setStatus(Enumerations.PublicationStatus.ACTIVE);
         library.setExperimental(true);
-        library.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://terminology.hl7.org/CodeSystem/library-type")));
+        library.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://hl7.org/fhir/library-type")));
         library.setUrl((igCanonicalBase + "Library/"+  (includeVersion ? LibraryProcessor.ResourcePrefix : "")  + name));
         return library;
     }
