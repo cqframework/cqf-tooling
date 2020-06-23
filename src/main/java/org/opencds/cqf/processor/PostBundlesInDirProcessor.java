@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.opencds.cqf.parameter.PostBundlesInDirParameters;
+import org.opencds.cqf.utilities.HttpClientUtils;
+import org.opencds.cqf.utilities.IOUtils;
+import org.opencds.cqf.utilities.IOUtils.Encoding;
+import org.opencds.cqf.utilities.ResourceUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import org.opencds.cqf.parameter.PostBundlesInDirParameters;
-import org.opencds.cqf.utilities.IOUtils;
-import org.opencds.cqf.utilities.ResourceUtils;
-import org.opencds.cqf.utilities.HttpClientUtils;
-import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 public class PostBundlesInDirProcessor {
     public enum FHIRVersion {

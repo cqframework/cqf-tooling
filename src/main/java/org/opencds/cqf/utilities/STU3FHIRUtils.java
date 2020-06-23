@@ -1,11 +1,23 @@
 package org.opencds.cqf.utilities;
 
+import java.util.Map;
+
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.elm.r1.*;
-
-import java.util.Map;
+import org.hl7.elm.r1.Code;
+import org.hl7.elm.r1.CodeDef;
+import org.hl7.elm.r1.CodeRef;
+import org.hl7.elm.r1.CodeSystemDef;
+import org.hl7.elm.r1.CodeSystemRef;
+import org.hl7.elm.r1.Concept;
+import org.hl7.elm.r1.ConceptDef;
+import org.hl7.elm.r1.ConceptRef;
+import org.hl7.elm.r1.IncludeDef;
+import org.hl7.elm.r1.ValueSetDef;
+import org.hl7.elm.r1.ValueSetRef;
+import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
 
 public class STU3FHIRUtils {
 

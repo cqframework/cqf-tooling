@@ -1,14 +1,14 @@
 package org.opencds.cqf.terminology;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.opencds.cqf.Operation;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 public class GenericValueSetGenerator extends Operation {
 

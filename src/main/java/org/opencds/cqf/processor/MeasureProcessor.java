@@ -33,7 +33,7 @@ public class MeasureProcessor
         RefreshGeneratedContent refresher = null;
 
         // Filter to specific measure if specified in arguments.
-        Boolean hasMeasureToRefreshpath = measureToRefreshPath != null && !measureToRefreshPath.isEmpty() && !measureToRefreshPath.isBlank();
+        Boolean hasMeasureToRefreshpath = measureToRefreshPath != null && !measureToRefreshPath.isEmpty();
         if (hasMeasureToRefreshpath) {
             measurePaths.removeIf(mp -> !mp.equals(measureToRefreshPath));
         }

@@ -2,12 +2,6 @@ package org.opencds.cqf.processor.argument;
 
 import static java.util.Arrays.asList;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang3.tuple.Pair;
 import org.opencds.cqf.parameter.BundleTestCasesParameters;
 import org.opencds.cqf.processor.IGProcessor;
 import org.opencds.cqf.processor.IGProcessor.IGVersion;
@@ -17,7 +11,6 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
-import joptsimple.util.KeyValuePair;
 
 
 public class BundleTestCasesArgumentProcessor {

@@ -8,22 +8,27 @@ import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
-import org.hl7.elm.r1.*;
+import org.hl7.elm.r1.IncludeDef;
+import org.hl7.elm.r1.Retrieve;
+import org.hl7.elm.r1.ValueSetDef;
+import org.hl7.elm.r1.ValueSetRef;
+import org.hl7.fhir.dstu3.model.Attachment;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.DataRequirement;
+import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Library;
-import org.hl7.fhir.instance.model.api.INarrative;
-import org.opencds.cqf.library.BaseNarrativeProvider;
-import org.opencds.cqf.library.GenericLibrarySourceProvider;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.opencds.cqf.common.stu3.CqfmSoftwareSystemHelper;
-import org.opencds.cqf.library.stu3.NarrativeProvider;
+import org.opencds.cqf.library.GenericLibrarySourceProvider;
 import org.opencds.cqf.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.utilities.IOUtils;
-import org.opencds.cqf.utilities.ResourceUtils;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
+import org.opencds.cqf.utilities.ResourceUtils;
+import org.opencds.cqf.utilities.STU3FHIRUtils;
 
 import ca.uhn.fhir.context.FhirContext;
-
-import org.hl7.fhir.dstu3.model.*;
-import org.opencds.cqf.utilities.STU3FHIRUtils;
 
 public class STU3LibraryProcessor implements LibraryProcessor{
     private String igCanonicalBase;
@@ -85,6 +90,8 @@ public class STU3LibraryProcessor implements LibraryProcessor{
         referenceLibrary.getContent().clear();
         attachContent(referenceLibrary, translator, IOUtils.getCqlString(cqlContentPath));
 
+        referenceLibrary.setUrl(generatedLibrary.getUrl());
+
         // BaseNarrativeProvider<Narrative> narrativeProvider = new NarrativeProvider();
         // INarrative narrative = narrativeProvider.getNarrative(fhirContext, generatedLibrary);
         // referenceLibrary.setText((Narrative)narrative);
@@ -99,7 +106,7 @@ public class STU3LibraryProcessor implements LibraryProcessor{
         org.hl7.elm.r1.Library elm = translator.toELM();
         String id = elm.getIdentifier().getId();
         String version = elm.getIdentifier().getVersion();
-        Library library = populateMeta(id, version, includeVersion);
+        Library library = populateMeta(igCanonicalBase, id, version, includeVersion);
         if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
             for (IncludeDef def : elm.getIncludes().getDef()) {
                 addRelatedArtifact(igCanonicalBase, library, def, includeVersion);
@@ -117,15 +124,30 @@ public class STU3LibraryProcessor implements LibraryProcessor{
 
 
     // Populate metadata
-    private static Library populateMeta(String name, String version, Boolean includeVersion) {
+    private static Library populateMeta(String igCanonicalBase, String name, String version, Boolean includeVersion) {
+        if (igCanonicalBase != null) {
+            igCanonicalBase = igCanonicalBase + "/";
+        }
+        else {
+            igCanonicalBase = "";
+        }
+
+        // Special case for FHIRHelpers
+        if (name.equals("FHIRHelpers")) {
+            igCanonicalBase = "http://hl7.org/fhir/";
+        }
+
         Library library = new Library();
-        version = includeVersion ? version : "";
-        ResourceUtils.setIgId(name, library, version);
+        if(!includeVersion) {
+            ResourceUtils.setIgId(name, library, "");
+        }
+        else ResourceUtils.setIgId(name, library, version);
         library.setName(name);
         library.setVersion(version);
         library.setStatus(Enumerations.PublicationStatus.ACTIVE);
         library.setExperimental(true);
-        library.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://hl7.org/fhir/library-type").setDisplay("Logic Library")));
+        library.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://hl7.org/fhir/library-type")));
+        library.setUrl((igCanonicalBase + "Library/"+  (includeVersion ? LibraryProcessor.ResourcePrefix : "")  + name));
         return library;
     }
 
@@ -136,6 +158,11 @@ public class STU3LibraryProcessor implements LibraryProcessor{
         }
         else {
             igCanonicalBase = "";
+        }
+
+        // Special case for FHIRHelpers
+        if (def.getPath().equals("FHIRHelpers")) {
+            igCanonicalBase = "http://hl7.org/fhir/";
         }
 
         //TODO: adding the resource prefix here is a temporary workaround until the rest of the tooling can get rid of it.

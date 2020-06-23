@@ -1,10 +1,10 @@
 package org.opencds.cqf.acceleratorkit;
 
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 
 /**
  * Created by Bryn on 8/18/2019.

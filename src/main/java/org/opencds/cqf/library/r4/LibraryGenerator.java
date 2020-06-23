@@ -1,16 +1,25 @@
 package org.opencds.cqf.library.r4;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.ValueSetRef;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DataRequirement;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.opencds.cqf.library.BaseLibraryGenerator;
 
-import java.io.*;
-import java.util.Collections;
-import java.util.Map;
+import ca.uhn.fhir.context.FhirContext;
 
 public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativeProvider> {
 

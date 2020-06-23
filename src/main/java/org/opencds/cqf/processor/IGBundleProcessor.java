@@ -1,6 +1,7 @@
 package org.opencds.cqf.processor;
 
 import java.util.ArrayList;
+
 import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;

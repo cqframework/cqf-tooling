@@ -11,6 +11,7 @@ import org.opencds.cqf.utilities.IOUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class RefreshR4Measure extends RefreshGeneratedContent {
@@ -35,7 +36,7 @@ public class RefreshR4Measure extends RefreshGeneratedContent {
     public void refreshGeneratedContent() {
         File measureDir = new File(this.getPathToMeasures());
         if (measureDir.isDirectory()) {
-            for (File f : Optional.ofNullable(measureDir.listFiles()).orElseThrow()) {
+            for (File f : Optional.ofNullable(measureDir.listFiles()).<NoSuchElementException>orElseThrow(() -> new NoSuchElementException())) {
                 refreshMeasureFromFile(f);
             }
         }

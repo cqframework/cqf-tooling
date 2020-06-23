@@ -1,15 +1,13 @@
 package org.opencds.cqf.library;
 
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
-import org.hl7.elm.r1.VersionedIdentifier;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
+
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
+import org.hl7.elm.r1.VersionedIdentifier;
 
 public class GenericLibrarySourceProvider implements LibrarySourceProvider {
 

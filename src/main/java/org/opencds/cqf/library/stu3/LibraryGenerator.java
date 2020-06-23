@@ -1,17 +1,30 @@
 package org.opencds.cqf.library.stu3;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.ValueSetRef;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Attachment;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.DataRequirement;
+import org.hl7.fhir.dstu3.model.Enumerations;
+import org.hl7.fhir.dstu3.model.Library;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.library.BaseLibraryGenerator;
 import org.opencds.cqf.utilities.IOUtils;
 
-import java.nio.file.Path;
-import java.util.*;
+import ca.uhn.fhir.context.FhirContext;
 
 public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativeProvider> {
 
