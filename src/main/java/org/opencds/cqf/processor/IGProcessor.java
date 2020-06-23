@@ -15,9 +15,9 @@ import org.apache.commons.io.FilenameUtils;
 import org.opencds.cqf.parameter.RefreshIGParameters;
 import org.opencds.cqf.utilities.IOUtils;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
+import org.opencds.cqf.utilities.LogUtils;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.opencds.cqf.utilities.LogUtils;
 
 public class IGProcessor {
     public enum IGVersion {

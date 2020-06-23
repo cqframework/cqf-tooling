@@ -1,11 +1,11 @@
 package org.opencds.cqf.jsonschema;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class Primitives {
 

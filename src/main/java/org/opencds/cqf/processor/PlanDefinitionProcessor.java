@@ -3,7 +3,6 @@ package org.opencds.cqf.processor;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,9 +14,9 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.utilities.BundleUtils;
 import org.opencds.cqf.utilities.HttpClientUtils;
 import org.opencds.cqf.utilities.IOUtils;
+import org.opencds.cqf.utilities.IOUtils.Encoding;
 import org.opencds.cqf.utilities.LogUtils;
 import org.opencds.cqf.utilities.ResourceUtils;
-import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
 

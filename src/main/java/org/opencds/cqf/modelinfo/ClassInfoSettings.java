@@ -1,9 +1,9 @@
 package org.opencds.cqf.modelinfo;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 
 public class ClassInfoSettings {

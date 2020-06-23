@@ -1,11 +1,11 @@
 package org.opencds.cqf.jsonschema;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 public class FhirSchemaElement {
 

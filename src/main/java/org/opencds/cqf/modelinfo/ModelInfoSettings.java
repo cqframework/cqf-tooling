@@ -1,8 +1,8 @@
 package org.opencds.cqf.modelinfo;
 
-import org.hl7.elm_modelinfo.r1.ConversionInfo;
-
 import java.util.Collection;
+
+import org.hl7.elm_modelinfo.r1.ConversionInfo;
 
 public class ModelInfoSettings {
 

@@ -1,8 +1,8 @@
 package org.opencds.cqf.terminology;
 
-import org.opencds.cqf.Operation;
-
 import java.io.File;
+
+import org.opencds.cqf.Operation;
 
 public class VSACBatchValueSetGenerator extends Operation {
 

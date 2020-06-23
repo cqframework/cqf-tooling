@@ -1,21 +1,37 @@
 package org.opencds.cqf.acceleratorkit;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.hl7.fhir.r4.model.*;
-
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Element;
+import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.jetbrains.annotations.NotNull;
 import org.opencds.cqf.Operation;
-import org.opencds.cqf.modelinfo.*;
 import org.opencds.cqf.terminology.SpreadsheetHelper;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.*;
+import ca.uhn.fhir.context.FhirContext;
 
 /**
  * Created by Bryn on 8/18/2019.
@@ -479,7 +495,7 @@ public class Processor extends Operation {
 
     private void addInputOptionToParentElement(Row row, HashMap<String, Integer> colIds) {
         String parentName = SpreadsheetHelper.getCellAsStringTrimmed(row, getColId(colIds,"InputOptionParent")).trim();
-        if (parentName != null || !parentName.isEmpty())
+        if (parentName != null && !parentName.isEmpty())
         {
             DictionaryElement currentElement = elementMap.get(parentName);
             if (currentElement != null) {
@@ -854,7 +870,7 @@ public class Processor extends Operation {
         StructureDefinition.StructureDefinitionContextComponent context = new StructureDefinition.StructureDefinitionContextComponent();
         context.setType(StructureDefinition.ExtensionContextType.ELEMENT);
         context.setExpression(element.getFhirElementPath().getResourceType());
-        List<StructureDefinition.StructureDefinitionContextComponent> contextList = new ArrayList();
+        List<StructureDefinition.StructureDefinitionContextComponent> contextList = new ArrayList<>();
         contextList.add(context);
         sd.setContext(contextList);
 
@@ -972,7 +988,7 @@ public class Processor extends Operation {
     private StructureDefinition createProfileStructureDefinition(DictionaryElement element, String customProfileId) {
         DictionaryFhirElementPath elementPath = element.getFhirElementPath();
         String customProfileIdRaw = elementPath.getCustomProfileId();
-        Boolean hasCustomProfileIdRaw = customProfileIdRaw != null && !customProfileIdRaw.isEmpty() && !customProfileIdRaw.isBlank();
+        Boolean hasCustomProfileIdRaw = customProfileIdRaw != null && !customProfileIdRaw.isEmpty();
         String resourceType = elementPath.getResourceType().trim();
 
         StructureDefinition sd;
@@ -1032,7 +1048,7 @@ public class Processor extends Operation {
 
         // If custom profile is specified, search for if it exists already.
         String customProfileIdRaw = element.getFhirElementPath().getCustomProfileId();
-        Boolean hasCustomProfileIdRaw = customProfileIdRaw != null && !customProfileIdRaw.isBlank() && !customProfileIdRaw.isEmpty();
+        Boolean hasCustomProfileIdRaw = customProfileIdRaw != null && !customProfileIdRaw.isEmpty();
         String customProfileId = toId(hasCustomProfileIdRaw ? customProfileIdRaw : element.getName());
         for (StructureDefinition existingSD : profiles) {
             if (existingSD.getId().equals(customProfileId)) {
@@ -1204,7 +1220,7 @@ public class Processor extends Operation {
                 ed.setMustSupport(true);
 
                 String unitOfMeasure = element.getFhirElementPath().getUnitOfMeasure();
-                Boolean hasUnitOfMeasure = unitOfMeasure != null && !unitOfMeasure.isBlank() && !unitOfMeasure.isEmpty();
+                Boolean hasUnitOfMeasure = unitOfMeasure != null && !unitOfMeasure.isEmpty();
                 if (isChoiceType(elementPath) && hasUnitOfMeasure) {
                     ElementDefinition unitElement = new ElementDefinition();
                     unitElement.setId(elementId + ".unit");
@@ -1355,7 +1371,7 @@ public class Processor extends Operation {
     private void ensureAndBindElementTerminology(DictionaryElement element, StructureDefinition sd, ElementDefinition ed) {
         // binding and CodeSystem/ValueSet for MultipleChoice elements
         String customValueSetName = element.getFhirElementPath().getCustomValueSetName();
-        Boolean hasCustomValueSetName = customValueSetName != null && !customValueSetName.isBlank() && !customValueSetName.isEmpty();
+        Boolean hasCustomValueSetName = customValueSetName != null && !customValueSetName.isEmpty();
 
         //TODO: hasCustomValueSetName might be sufficient here?
         if (element.getChoices().size() > 0 || hasCustomValueSetName) {
@@ -1409,7 +1425,7 @@ public class Processor extends Operation {
     private ValueSet ensureValueSet(DictionaryElement element) {
         // Ensure the ValueSet
         String valueSetName = element.getFhirElementPath().getCustomValueSetName();
-        if (valueSetName == null || valueSetName.isEmpty() || valueSetName.isBlank()) {
+        if (valueSetName == null || valueSetName.isEmpty()) {
             valueSetName = toId(element.getName());
         }
 

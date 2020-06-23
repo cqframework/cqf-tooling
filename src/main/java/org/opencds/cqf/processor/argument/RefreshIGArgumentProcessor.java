@@ -4,23 +4,18 @@ import static java.util.Arrays.asList;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.opencds.cqf.parameter.RefreshIGParameters;
 import org.opencds.cqf.processor.IGProcessor;
 import org.opencds.cqf.processor.IGProcessor.IGVersion;
 import org.opencds.cqf.utilities.ArgUtils;
+import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
-import joptsimple.util.KeyValuePair;
-import org.opencds.cqf.utilities.IOUtils;
-import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 
 public class RefreshIGArgumentProcessor {

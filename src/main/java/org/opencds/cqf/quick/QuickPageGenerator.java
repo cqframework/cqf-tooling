@@ -1,19 +1,25 @@
 package org.opencds.cqf.quick;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang.StringEscapeUtils;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.opencds.cqf.Operation;
 
-import java.io.*;
-import java.util.*;
-import java.util.stream.Collectors;
+import ca.uhn.fhir.context.FhirContext;
 
 public class QuickPageGenerator extends Operation {
 

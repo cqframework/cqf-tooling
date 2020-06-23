@@ -1,42 +1,24 @@
 package org.opencds.cqf.measure.stu3;
 
-import com.google.common.base.Strings;
-//import com.vladsch.flexmark.ext.autolink.*;
-//import com.vladsch.flexmark.ext.gfm.strikethrough.*;
-//import com.vladsch.flexmark.ext.gfm.tasklist.*;
-//import com.vladsch.flexmark.ext.tables.*;
-//import com.vladsch.flexmark.html.*;
-//import com.vladsch.flexmark.parser.*;
-//import com.vladsch.flexmark.util.ast.KeepType;
-//import com.vladsch.flexmark.util.ast.Node;
-//import com.vladsch.flexmark.util.data.MutableDataSet;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.LibraryManager;
-import org.cqframework.cql.cql2elm.ModelManager;
-//import org.cqframework.cql.elm.execution.*;
-import org.cqframework.cql.tools.formatter.CqlFormatterVisitor;
-import org.cqframework.cql.tools.formatter.CqlFormatterVisitor.FormatResult;
 import org.hl7.elm.r1.ValueSetRef;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterComponent;
-import org.hl7.fhir.dstu3.model.Measure.MeasureGroupComponent;
-import org.hl7.fhir.dstu3.model.Measure.MeasureGroupPopulationComponent;
-import org.hl7.fhir.dstu3.model.Measure.MeasureGroupStratifierComponent;
-import org.hl7.fhir.dstu3.model.Measure.MeasureSupplementalDataComponent;
+import org.hl7.fhir.dstu3.model.Library;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.Type;
 import org.opencds.cqf.library.LibraryResourceProvider;
 //import org.opencds.cqf.cql.execution.LibraryLoader;
 //import org.opencds.cqf.dstu3.helpers.DataElementType;
 //import org.opencds.cqf.dstu3.helpers.LibraryHelper;
 //import org.opencds.cqf.dstu3.providers.CqfMeasure.TerminologyRef;
 //import org.opencds.cqf.dstu3.providers.CqfMeasure.TerminologyRef.TerminologyRefType;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 
 public class DataRequirementsProvider {

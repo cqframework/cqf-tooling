@@ -12,20 +12,23 @@ import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.elm.r1.ValueSetRef;
-import org.hl7.fhir.instance.model.api.INarrative;
-import org.opencds.cqf.library.BaseNarrativeProvider;
+import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DataRequirement;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.opencds.cqf.common.r4.CqfmSoftwareSystemHelper;
 import org.opencds.cqf.library.GenericLibrarySourceProvider;
 import org.opencds.cqf.parameter.RefreshLibraryParameters;
-import org.opencds.cqf.common.r4.CqfmSoftwareSystemHelper;
 import org.opencds.cqf.utilities.IOUtils;
+import org.opencds.cqf.utilities.IOUtils.Encoding;
 import org.opencds.cqf.utilities.R4FHIRUtils;
 import org.opencds.cqf.utilities.ResourceUtils;
-import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
-
-import org.hl7.fhir.r4.model.*;
-import org.opencds.cqf.utilities.STU3FHIRUtils;
 
 public class R4LibraryProcessor implements LibraryProcessor{
     private String igCanonicalBase;
@@ -87,6 +90,8 @@ public class R4LibraryProcessor implements LibraryProcessor{
         referenceLibrary.getContent().clear();
         attachContent(referenceLibrary, translator, IOUtils.getCqlString(cqlContentPath));
 
+        referenceLibrary.setUrl(generatedLibrary.getUrl());
+
         // BaseNarrativeProvider<Narrative> narrativeProvider = new org.opencds.cqf.library.r4.NarrativeProvider();
         // INarrative narrative = narrativeProvider.getNarrative(fhirContext, generatedLibrary);
         // referenceLibrary.setText((Narrative)narrative);
@@ -101,7 +106,7 @@ public class R4LibraryProcessor implements LibraryProcessor{
         org.hl7.elm.r1.Library elm = translator.toELM();
         String id = elm.getIdentifier().getId();
         String version = elm.getIdentifier().getVersion();
-        Library library = populateMeta(id, version, includeVersion);
+        Library library = populateMeta(igCanonicalBase, id, version, includeVersion);
         if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
             for (IncludeDef def : elm.getIncludes().getDef()) {
                 addRelatedArtifact(igCanonicalBase, library, def, includeVersion);
@@ -117,9 +122,20 @@ public class R4LibraryProcessor implements LibraryProcessor{
         return library;
     }
 
-
     // Populate metadata
-    private static Library populateMeta(String name, String version, Boolean includeVersion) {
+    private static Library populateMeta(String igCanonicalBase, String name, String version, Boolean includeVersion) {
+        if (igCanonicalBase != null) {
+            igCanonicalBase = igCanonicalBase + "/";
+        }
+        else {
+            igCanonicalBase = "";
+        }
+
+        // Special case for FHIRHelpers
+        if (name.equals("FHIRHelpers")) {
+            igCanonicalBase = "http://hl7.org/fhir/";
+        }
+
         Library library = new Library();
         if(!includeVersion) {
             ResourceUtils.setIgId(name, library, "");
@@ -130,6 +146,7 @@ public class R4LibraryProcessor implements LibraryProcessor{
         library.setStatus(Enumerations.PublicationStatus.ACTIVE);
         library.setExperimental(true);
         library.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://terminology.hl7.org/CodeSystem/library-type")));
+        library.setUrl((igCanonicalBase + "Library/"+  (includeVersion ? LibraryProcessor.ResourcePrefix : "")  + name));
         return library;
     }
 
@@ -137,6 +154,12 @@ public class R4LibraryProcessor implements LibraryProcessor{
     private static void addRelatedArtifact(String igCanonicalBase, Library library, IncludeDef def, Boolean includeVersion) {
         if (igCanonicalBase != null) {
             igCanonicalBase = igCanonicalBase + "/";
+
+
+            // Special case for FHIRHelpers
+            if (def.getPath().equals("FHIRHelpers")) {
+                igCanonicalBase = "http://hl7.org/fhir/";
+            }
 
             //TODO: adding the resource prefix here is a temporary workaround until the rest of the tooling can get rid of it.
             library.addRelatedArtifact(

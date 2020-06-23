@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class RefreshStu3Measure extends RefreshGeneratedContent {
@@ -38,7 +39,7 @@ public class RefreshStu3Measure extends RefreshGeneratedContent {
     public void refreshGeneratedContent() {
         File measureDir = new File(this.getPathToMeasures());
         if (measureDir.isDirectory()) {
-            for (File f : Optional.ofNullable(measureDir.listFiles()).orElseThrow()) {
+            for (File f : Optional.ofNullable(measureDir.listFiles()).orElseThrow(() -> new NoSuchElementException())) {
                 refreshMeasureFromFile(f);
             }
         }
