@@ -78,7 +78,7 @@ public class DictionaryFhirElementPath {
 
     private String bindingStrength;
     public Enumerations.BindingStrength getBindingStrength() {
-        if (this.bindingStrength == null || this.bindingStrength.isEmpty() || this.bindingStrength.isBlank()) {
+        if (this.bindingStrength == null || this.bindingStrength.isEmpty()) {
             return Enumerations.BindingStrength.REQUIRED;
         }
 

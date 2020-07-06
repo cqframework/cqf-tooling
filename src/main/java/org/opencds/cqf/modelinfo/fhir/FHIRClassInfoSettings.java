@@ -1,7 +1,7 @@
 package org.opencds.cqf.modelinfo.fhir;
 
-import java.util.HashSet;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.opencds.cqf.modelinfo.ClassInfoSettings;
 

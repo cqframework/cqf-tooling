@@ -13,6 +13,12 @@ import java.io.PrintWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.hl7.elm_modelinfo.r1.ClassInfo;
+import org.hl7.elm_modelinfo.r1.ConversionInfo;
+import org.hl7.elm_modelinfo.r1.ModelInfo;
+import org.hl7.elm_modelinfo.r1.TypeInfo;
+import org.opencds.cqf.modelinfo.ModelInfoBuilder;
+
 public class FHIRModelInfoBuilder extends ModelInfoBuilder {
     private String fhirHelpersPath;
     private ContextInfoBuilder contextInfoBuilder;

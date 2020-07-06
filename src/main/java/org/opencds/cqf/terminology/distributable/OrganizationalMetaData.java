@@ -1,6 +1,11 @@
 package org.opencds.cqf.terminology.distributable;
 
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ContactDetail;
+import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.ValueSet;
 
 public class OrganizationalMetaData {
 

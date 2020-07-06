@@ -1,10 +1,7 @@
 package org.opencds.cqf.parameter;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.opencds.cqf.processor.IGProcessor.IGVersion;
 import org.opencds.cqf.utilities.IOUtils;
 
@@ -18,7 +15,9 @@ public class RefreshIGParameters {
     public Boolean includeTerminology;
     public Boolean includePatientScenarios;
     public Boolean versioned;
+    public Boolean cdsHooksIg;
     public String fhirUri;
     public ArrayList<String> resourceDirs;
     public Boolean conformant;
+    public String measureToRefreshPath;
 }

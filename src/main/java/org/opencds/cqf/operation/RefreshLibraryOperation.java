@@ -46,7 +46,7 @@ public class RefreshLibraryOperation extends Operation {
             LogUtils.info("No libraries successfully refreshed.");
             LogUtils.warn(params.cqlContentPath);
         }
-        else if (refreshedLibraryName.isEmpty() || refreshedLibraryName.isBlank() || refreshedLibraryName.equals("")) {
+        else if (refreshedLibraryName.isEmpty() || refreshedLibraryName.equals("")) {
             System.out.println("Library successfully generated");
         }
         else {

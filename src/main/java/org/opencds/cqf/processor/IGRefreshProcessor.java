@@ -1,26 +1,21 @@
 package org.opencds.cqf.processor;
 
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.parameter.RefreshIGParameters;
 import org.opencds.cqf.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.processor.IGProcessor.IGVersion;
 import org.opencds.cqf.utilities.IGUtils;
 import org.opencds.cqf.utilities.IOUtils;
-import org.opencds.cqf.utilities.LogUtils;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
+import org.opencds.cqf.utilities.LogUtils;
+import org.opencds.cqf.utilities.ResourceUtils;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.opencds.cqf.utilities.ResourceUtils;
 
 public class IGRefreshProcessor {
 
@@ -37,21 +32,19 @@ public class IGRefreshProcessor {
         Boolean includePatientScenarios = params.includePatientScenarios;
         Boolean versioned = params.versioned;
         String fhirUri = params.fhirUri;
+        String measureToRefreshPath = params.measureToRefreshPath;
         ArrayList<String> resourceDirs = params.resourceDirs;
 
         IOUtils.resourceDirectories.addAll(resourceDirs);
 
         FhirContext fhirContext = IGProcessor.getIgFhirContext(igVersion);
-        Boolean igResourcePathIsSpecified = igResourcePath != null && !igResourcePath.isEmpty() && !igResourcePath.isBlank();
+        Boolean igResourcePathIsSpecified = igResourcePath != null && !igResourcePath.isEmpty();
         IAnyResource implementationGuide = null;
         String igCanonicalBase = null;
-
-        igPath = Paths.get(igPath).toAbsolutePath().toString();
 
         IGProcessor.ensure(igPath, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
 
         LibraryProcessor libraryProcessor;
-        List<String> refreshedMeasureNames = new ArrayList<String>();
         switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:
             libraryProcessor = new STU3LibraryProcessor();
@@ -65,19 +58,21 @@ public class IGRefreshProcessor {
         }
 
         if (igResourcePathIsSpecified) {
-            implementationGuide = IOUtils.readResource(igResourcePath, fhirContext, true);
+            implementationGuide = IOUtils.readResource(igResourcePath, fhirContext, false);
 
             Object urlProperty = ResourceUtils.resolveProperty(implementationGuide, "url", fhirContext);
             String urlValue = ResourceUtils.resolveProperty(urlProperty, "value", fhirContext).toString();
 
-            if (urlValue != null && !urlValue.isEmpty() && !urlValue.isBlank()) {
+            if (urlValue != null && !urlValue.isEmpty()) {
                 igCanonicalBase = IGUtils.getImplementationGuideCanonicalBase(urlValue);
+
             }
         }
 
         refreshedResourcesNames = refreshIgLibraryContent(igCanonicalBase, libraryProcessor, igPath, encoding, includeELM, versioned, fhirContext, igVersion);
 
-        refreshedMeasureNames = MeasureProcessor.refreshIgMeasureContent(igPath, encoding, versioned, fhirContext);
+        List<String> refreshedMeasureNames = new ArrayList<String>();
+        refreshedMeasureNames = MeasureProcessor.refreshIgMeasureContent(igPath, encoding, versioned, fhirContext, measureToRefreshPath);
         refreshedResourcesNames.addAll(refreshedMeasureNames);
 
         if (refreshedResourcesNames.isEmpty()) {
@@ -86,12 +81,13 @@ public class IGRefreshProcessor {
         }
 
         if (includePatientScenarios) {
-            TestCaseProcessor.refreshTestCases(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), encoding, fhirContext);
+            TestCaseProcessor.refreshTestCases(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), encoding, fhirContext, refreshedResourcesNames);
         }
     }
 
     public static ArrayList<String> refreshIgLibraryContent(String igCanonicalBase, LibraryProcessor libraryProcessor, String igPath, Encoding outputEncoding, Boolean includeELM,
             Boolean versioned, FhirContext fhirContext, IGVersion igVersion) {
+                LogUtils.info("Refreshing libraries...");
                 ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
                 HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
         

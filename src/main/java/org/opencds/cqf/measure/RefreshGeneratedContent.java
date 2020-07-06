@@ -1,10 +1,10 @@
 package org.opencds.cqf.measure;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.Operation;
-import org.opencds.cqf.igtools.IGProcessor;
 import org.opencds.cqf.utilities.IOUtils;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public abstract class RefreshGeneratedContent extends Operation {
 

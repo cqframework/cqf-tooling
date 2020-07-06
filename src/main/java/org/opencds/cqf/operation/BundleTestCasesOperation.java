@@ -4,8 +4,8 @@ import org.opencds.cqf.Operation;
 import org.opencds.cqf.parameter.BundleTestCasesParameters;
 import org.opencds.cqf.processor.TestCaseProcessor;
 import org.opencds.cqf.processor.argument.BundleTestCasesArgumentProcessor;
-import org.opencds.cqf.utilities.ResourceUtils;
 import org.opencds.cqf.utilities.IOUtils.Encoding;
+import org.opencds.cqf.utilities.ResourceUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 

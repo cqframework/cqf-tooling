@@ -45,6 +45,7 @@
             "projectName": "tooling",
             "args": [
                 "-RefreshIG",
+                "-igrp=C:\\src\\GitHub\\aphl-ig\\input\\aphl-ig.xml",
                 "-ip=C:\\src\\GitHub\\aphl-ig",
                 "-rp=C:\\src\\GitHub\\aphl-ig\\input\\resources",
                 "-rp=C:\\src\\GitHub\\aphl-ig\\input\\pagecontent\\cql",
@@ -131,7 +132,24 @@
             "projectName": "tooling",
             "args": [
                 "-RefreshIG",
-                "-ip=C:\\src\\GitHub\\connectathon\\fhir4",
+                "-ip=../connectathon/fhir4/",
+                "-iv=fhir4",
+                "-t",
+                "-d",
+                "-v",
+                "-p"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Connectathon FHIR401",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.Main",
+            "projectName": "tooling",
+            "args": [
+                "-RefreshIG",
+                "-ip=../connectathon/fhir401/",
+                "-igrp=../connectathon/fhir401/input/connectathon.xml",
                 "-iv=fhir4",
                 "-t",
                 "-d",

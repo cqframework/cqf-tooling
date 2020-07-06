@@ -1,5 +1,6 @@
 package org.opencds.cqf.processor;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,9 +14,9 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.utilities.BundleUtils;
 import org.opencds.cqf.utilities.HttpClientUtils;
 import org.opencds.cqf.utilities.IOUtils;
+import org.opencds.cqf.utilities.IOUtils.Encoding;
 import org.opencds.cqf.utilities.LogUtils;
 import org.opencds.cqf.utilities.ResourceUtils;
-import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -23,7 +24,7 @@ public class PlanDefinitionProcessor {
     public static final String ResourcePrefix = "plandefinition-";
 
     public static void bundlePlanDefinitions(ArrayList<String> refreshedLibraryNames, String igPath, Boolean includeDependencies,
-            Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, FhirContext fhirContext, String fhirUri,
+            Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean cdsHooksIg, FhirContext fhirContext, String fhirUri,
             Encoding encoding) {
         
         HashSet<String> planDefinitionSourcePaths = IOUtils.getPlanDefinitionPaths(fhirContext);
@@ -60,6 +61,7 @@ public class PlanDefinitionProcessor {
                     if (FilenameUtils.removeExtension(path).endsWith(refreshedLibraryName))
                     {
                         planDefinitionSourcePath = path;
+                        break;
                     }
                 }
 
@@ -95,7 +97,9 @@ public class PlanDefinitionProcessor {
                     persistBundle(igPath, bundleDestPath, refreshedLibraryName, encoding, fhirContext, new ArrayList<IAnyResource>(resources.values()), fhirUri);
                     bundleFiles(igPath, bundleDestPath, refreshedLibraryName, planDefinitionSourcePath, librarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion);
                     CDSHooksProcessor.addActivityDefinitionFilesToBundle(igPath, bundleDestPath, refreshedLibraryName, activityDefinitionPaths, fhirContext, encoding);
-                    CDSHooksProcessor.addRequestAndResponseFilesToBundle(igPath, bundleDestPath, refreshedLibraryName);
+                    if (cdsHooksIg != null && cdsHooksIg) { 
+                        CDSHooksProcessor.addRequestAndResponseFilesToBundle(igPath, bundleDestPath, refreshedLibraryName);
+                    }
                     bundledPlanDefinitions.add(refreshedLibraryName);
                 }
             } catch (Exception e) {
@@ -137,6 +141,9 @@ public class PlanDefinitionProcessor {
                 HttpClientUtils.post(fhirUri, (IAnyResource) bundle, encoding, fhirContext);
             } catch (IOException e) {
                 LogUtils.putException(((IAnyResource)bundle).getId(), "Error posting to FHIR Server: " + fhirUri + ".  Bundle not posted.");
+                File dir = new File("C:\\src\\GitHub\\logs");
+                dir.mkdir();
+                IOUtils.writeBundle(bundle, dir.getAbsolutePath(), encoding, fhirContext);
             }
         }
     }

@@ -1,11 +1,18 @@
 package org.opencds.cqf.terminology.distributable;
 
-import ca.uhn.fhir.context.FhirContext;
-import org.apache.commons.lang.WordUtils;
-import org.hl7.fhir.r4.model.*;
-
 import java.time.Instant;
 import java.util.Date;
+
+import org.apache.commons.lang.WordUtils;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.MarkdownType;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.ValueSet;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class DistributableValueSetMeta {
 

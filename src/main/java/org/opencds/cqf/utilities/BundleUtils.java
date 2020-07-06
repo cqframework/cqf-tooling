@@ -54,13 +54,14 @@ public class BundleUtils {
         bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
         for (IAnyResource resource : resources)
         {            
+            String resourceRef = (resource.getIdElement().getResourceType() == null) ? resource.fhirType() + "/" + resource.getId() : resource.getId();
             bundle.addEntry(
             new org.hl7.fhir.r4.model.Bundle.BundleEntryComponent()
                     .setResource((org.hl7.fhir.r4.model.Resource) resource)
                     .setRequest(
                             new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent()
                                     .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
-                                    .setUrl(((org.hl7.fhir.r4.model.Resource) resource).getId())
+                                    .setUrl(resourceRef)//shouldnt this be canonicalUrl?
                     )
             );
         }

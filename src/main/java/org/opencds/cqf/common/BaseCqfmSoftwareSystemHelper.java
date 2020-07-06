@@ -1,7 +1,5 @@
 package org.opencds.cqf.common;
 
-import org.hl7.fhir.dstu3.model.Device;
-
 public abstract class BaseCqfmSoftwareSystemHelper {
     private static String cqfToolingDeviceID = "cqf-tooling";
     private static String cqfToolingDeviceReferenceID = "#" + cqfToolingDeviceID;

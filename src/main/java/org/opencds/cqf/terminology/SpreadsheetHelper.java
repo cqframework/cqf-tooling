@@ -1,18 +1,19 @@
 package org.opencds.cqf.terminology;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Map;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Map;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 
 public class SpreadsheetHelper {
 
@@ -43,6 +44,15 @@ public class SpreadsheetHelper {
         }
 
         return null;
+    }
+
+    public static String getCellAsStringTrimmed(Row row, int cellIndex) {
+        String rawValue = getCellAsString(row, cellIndex);
+        String trimmedValue = null;
+        if (rawValue != null) {
+            trimmedValue = rawValue.trim();
+        }
+        return trimmedValue;
     }
 
     public static void resolveValueSet(org.hl7.fhir.dstu3.model.ValueSet vs, Map<Integer, ValueSet> codesBySystem) {

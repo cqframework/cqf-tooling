@@ -2,7 +2,6 @@ package org.opencds.cqf.utilities;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -19,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.apache.commons.io.FilenameUtils;
@@ -30,7 +30,6 @@ import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.processor.LibraryProcessor;
 
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -205,7 +204,7 @@ public class IOUtils
     {
         List<String> filePaths = new ArrayList<String>();
         File inputDir = new File(directoryPath);
-        ArrayList<File> files = inputDir.isDirectory() ? new ArrayList<File>(Arrays.asList(Optional.ofNullable(inputDir.listFiles()).orElseThrow())) : new ArrayList<File>();
+        ArrayList<File> files = inputDir.isDirectory() ? new ArrayList<File>(Arrays.asList(Optional.ofNullable(inputDir.listFiles()).<NoSuchElementException>orElseThrow(() -> new NoSuchElementException()))) : new ArrayList<File>();
        
         for (File file : files) {
             if (file.isDirectory()) {
@@ -232,7 +231,7 @@ public class IOUtils
         List<File> directories = new ArrayList<File>();
         File parentDirectory = new File(path);
         try {
-            directories = Arrays.asList(Optional.ofNullable(parentDirectory.listFiles()).orElseThrow());
+            directories = Arrays.asList(Optional.ofNullable(parentDirectory.listFiles()).<NoSuchElementException>orElseThrow(() -> new NoSuchElementException()));
         } catch (Exception e) {
             System.out.println("No paths found for the Directory " + path + ":");
             return directoryPaths;
@@ -455,7 +454,10 @@ public class IOUtils
             // NOTE: A bit of a hack, but we need to support both xml and json encodings for existing resources and the long-term strategy is
             // to revisit this and change the approach to use the references rather than file name matching, so this should be good for the near-term.
             if (path.endsWith(libraryFileName.replaceAll(".cql", ".json"))
-                || path.endsWith(libraryFileName.replaceAll(".cql", ".xml"))) {
+                || path.endsWith(libraryFileName.replaceAll(".cql", ".xml"))
+                || path.endsWith(fileName.replaceAll(".cql", ".json"))
+                || path.endsWith(fileName.replaceAll(".cql", ".xml")))
+                {
                 libraryPath = path;
                 break;
             }

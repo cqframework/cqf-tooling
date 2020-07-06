@@ -1,10 +1,11 @@
 package org.opencds.cqf.library.stu3;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.Narrative;
-import org.opencds.cqf.library.BaseNarrativeProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.library.BaseNarrativeProvider;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class NarrativeProvider extends BaseNarrativeProvider<Narrative> {
     public NarrativeProvider() {
