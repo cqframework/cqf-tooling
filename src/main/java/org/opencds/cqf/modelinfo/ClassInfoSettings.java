@@ -1,14 +1,15 @@
 package org.opencds.cqf.modelinfo;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 
 public class ClassInfoSettings {
     public String modelName;
     public String modelPrefix;
+    public String helpersLibraryName;
     public boolean useCQLPrimitives = false;
     public boolean createExtensionElements = false;
     public boolean createReferenceElements = false;
@@ -17,6 +18,7 @@ public class ClassInfoSettings {
     public Map<String, String> primitiveTypeMappings = new HashMap<String, String>();
     public Map<String, String> cqlTypeMappings = new HashMap<String, String>();
     public Map<String, String> primaryCodePath = new HashMap<String, String>();
+    public Map<String, String> typeNameMappings;
 
     public Map<String, String> urlToModel =  new HashMap<String, String>() {
         { 

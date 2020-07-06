@@ -1,23 +1,27 @@
 package org.opencds.cqf.library;
 
-import ca.uhn.fhir.context.FhirContext;
-import lombok.Getter;
-import lombok.Setter;
-import org.cqframework.cql.cql2elm.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.CqlTranslatorException;
+import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
+import org.cqframework.cql.cql2elm.LibraryManager;
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
+import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.Operation;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import org.cqframework.cql.cql2elm.CqlTranslator;
+import ca.uhn.fhir.context.FhirContext;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -189,12 +193,12 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
             options.add(CqlTranslator.Options.EnableDateRangeOptimization);
 
             CqlTranslator translator =
-                    CqlTranslator.fromFile(
-                            cqlFile,
-                            modelManager,
-                            libraryManager,
-                            options.toArray(new CqlTranslator.Options[0])
-                    );
+                CqlTranslator.fromFile(
+                    cqlFile,
+                    modelManager,
+                    libraryManager,
+                    options.toArray(new CqlTranslator.Options[0])
+                );
 
             if (translator.getErrors().size() > 0) {
                 System.err.println("Translation failed due to errors:");
@@ -276,9 +280,7 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
         this.operationName = operationName;
     }
 
-    protected String getEncoding() {
-        return encoding;
-    }
+    protected String getEncoding() { return encoding; }
 
     protected Map<String, L> getLibraryMap() {
         return libraryMap;

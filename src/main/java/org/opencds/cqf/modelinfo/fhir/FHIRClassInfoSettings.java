@@ -1,7 +1,7 @@
 package org.opencds.cqf.modelinfo.fhir;
 
-import java.util.HashSet;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.opencds.cqf.modelinfo.ClassInfoSettings;
 
@@ -10,6 +10,8 @@ class FHIRClassInfoSettings extends ClassInfoSettings {
 
     public FHIRClassInfoSettings() {
         this.modelName = "FHIR";
+        this.modelPrefix = "";
+        this.helpersLibraryName = "FHIRHelpers";
         this.codeableTypes = new HashSet<String>() {
             {
                 add("System.String");
@@ -121,10 +123,10 @@ class FHIRClassInfoSettings extends ClassInfoSettings {
                 put("Measure", "topic");
                 put("MeasureReport", "measure.topic");
                 put("Medication", "code");
-                put("MedicationAdministration", "medicationCodeableConcept");
-                put("MedicationDispense", "medicationCodeableConcept");
-                put("MedicationRequest", "medicationCodeableConcept");
-                put("MedicationStatement", "medicationCodeableConcept");
+                put("MedicationAdministration", "medication");
+                put("MedicationDispense", "medication");
+                put("MedicationRequest", "medication");
+                put("MedicationStatement", "medication");
                 put("MessageDefinition", "event");
                 put("Observation", "code");
                 put("OperationOutcome", "issue.code");

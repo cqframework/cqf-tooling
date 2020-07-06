@@ -7,8 +7,6 @@ import java.util.Map;
 import org.hl7.elm_modelinfo.r1.ClassInfo;
 import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
-import org.hl7.fhir.r4.model.StructureDefinition.TypeDerivationRule;
 import org.opencds.cqf.modelinfo.ClassInfoBuilder;
 
 public class QuickClassInfoBuilder extends ClassInfoBuilder {
@@ -90,16 +88,5 @@ public class QuickClassInfoBuilder extends ClassInfoBuilder {
         this.buildFor("QUICK", "qicore-task");
         this.buildFor("QUICK", "Questionnaire");
         this.buildFor("QUICK", "QuestionnaireResponse");
-    }
-
-    @Override
-    protected void afterBuild() {
-        //Clean up Content Reference Specifiers
-        Collection<TypeInfo> typeInfoValues = this.getTypeInfos().values();
-        typeInfoValues.stream().map(x -> (ClassInfo)x).forEach(
-                x -> x.getElement().stream()
-                        .filter(y -> this.hasContentReferenceTypeSpecifier(y))
-                        .forEach(y -> this.fixupContentReferenceSpecifier("QUICK", y))
-        );
     }
 }

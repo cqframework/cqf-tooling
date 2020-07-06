@@ -2,7 +2,6 @@ package org.opencds.cqf.utilities;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
 
 public class ArgUtils {
 

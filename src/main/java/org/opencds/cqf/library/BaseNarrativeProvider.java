@@ -1,11 +1,12 @@
 package org.opencds.cqf.library;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.INarrative;
+import org.opencds.cqf.common.JarEnabledCustomThymeleafNarrativeGenerator;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.narrative2.ThymeleafNarrativeGenerator;
-import org.opencds.cqf.common.JarEnabledCustomThymeleafNarrativeGenerator;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.INarrative;
 
 public abstract class BaseNarrativeProvider<T extends INarrative> {
     private INarrativeGenerator generator;

@@ -45,6 +45,7 @@
             "projectName": "tooling",
             "args": [
                 "-RefreshIG",
+                "-igrp=C:\\src\\GitHub\\aphl-ig\\input\\aphl-ig.xml",
                 "-ip=C:\\src\\GitHub\\aphl-ig",
                 "-rp=C:\\src\\GitHub\\aphl-ig\\input\\resources",
                 "-rp=C:\\src\\GitHub\\aphl-ig\\input\\pagecontent\\cql",
@@ -69,6 +70,21 @@
                 "-ptsd=C:\\src\\GitHub\\aphl-ig\\input\\vocabulary\\valueset\\spreadsheets",
                 "-vssrc=vsac",
                 "-op=C:\\src\\GitHub\\aphl-ig\\input\\vocabulary\\valueset\\spreadsheets"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Refresh Library Operation",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.Main",
+            "projectName": "tooling",
+            "args": [
+                "-RefreshLibrary",
+                "-cql=C:\\src\\GitHub\\connectathon\\fhir4\\input\\pagecontent\\cql\\EXM104_FHIR4-8.1.000.cql",
+                "-lp=C:\\src\\GitHub\\connectathon\\fhir4\\input\\resources\\library\\library-EXM104_FHIR4-8.1.000.json",
+                "-e=json",
+                "-fv=fhir4",
+                "-v"
             ]
         },
         {
@@ -116,7 +132,25 @@
             "projectName": "tooling",
             "args": [
                 "-RefreshIG",
-                "-ip=C:\\src\\GitHub\\connectathon\\fhir4",
+                "-ip=../connectathon/fhir4/",
+                "-iv=fhir4",
+                "-t",
+                "-d",
+                "-v",
+                "-p"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Connectathon FHIR401",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.Main",
+            "projectName": "tooling",
+            "args": [
+                "-RefreshIG",
+                "-ip=../connectathon/fhir401/",
+                "-igrp=../connectathon/fhir401/input/connectathon.xml",
+                "-iv=fhir4",
                 "-t",
                 "-d",
                 "-v",
@@ -133,6 +167,20 @@
                 "-VsacXlsxToValueSet",
                 "-pts=C:\\src\\GitHub\\valueset-spreadsheet\\2.16.840.1.113762.1.4.1108.15.xlsx",
                 "-op=C:\\src\\GitHub\\valueset-spreadsheet"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "PostBundles to Fhir Uri",
+            "request": "launch",
+            "mainClass": "jreyno77.com.github.Main",
+            "projectName": "tooling",
+            "args": [
+                "-PostBundlesInDir",
+                "-dp=C:\\src\\GitHub\\hedis-ig-r4\\bundles\\MRP-FHIR\\MRP-FHIR-files",
+                "-fs=http://localhost:8080/cqf-ruler-r4/fhir",
+                "-fv=fhir4",
+                "-e=json"
             ]
         }      
     ]

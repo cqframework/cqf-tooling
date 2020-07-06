@@ -1,14 +1,18 @@
 package org.opencds.cqf.qdm;
 
-import info.bliki.wiki.model.WikiModel;
-import org.apache.commons.lang.StringUtils;
-import org.opencds.cqf.Operation;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
+import org.opencds.cqf.Operation;
+
+import info.bliki.wiki.model.WikiModel;
 
 public class QdmToQiCore extends Operation {
 

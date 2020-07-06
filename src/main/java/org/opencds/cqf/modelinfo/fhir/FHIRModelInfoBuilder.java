@@ -3,23 +3,31 @@ package org.opencds.cqf.modelinfo.fhir;
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.elm_modelinfo.r1.TypeInfo;
+import org.hl7.fhir.r4.model.CompartmentDefinition;
+import org.opencds.cqf.modelinfo.Atlas;
+import org.opencds.cqf.modelinfo.ContextInfoBuilder;
 import org.opencds.cqf.modelinfo.ModelInfoBuilder;
 import org.hl7.elm_modelinfo.r1.ClassInfo;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import org.hl7.elm_modelinfo.r1.ClassInfo;
+import org.hl7.elm_modelinfo.r1.ConversionInfo;
+import org.hl7.elm_modelinfo.r1.ModelInfo;
+import org.hl7.elm_modelinfo.r1.TypeInfo;
+import org.opencds.cqf.modelinfo.ModelInfoBuilder;
 
 public class FHIRModelInfoBuilder extends ModelInfoBuilder {
     private String fhirHelpersPath;
+    private ContextInfoBuilder contextInfoBuilder;
 
-    public FHIRModelInfoBuilder(String version, Collection<TypeInfo> typeInfos, String fhirHelpersPath) {
-        super(typeInfos);
+    public FHIRModelInfoBuilder(String version, Map<String, TypeInfo> typeInfos, Atlas atlas, String fhirHelpersPath) {
+        super(typeInfos.values());
         this.fhirHelpersPath = fhirHelpersPath;
         this.settings = new FHIRModelInfoSettings(version);
+        this.contextInfoBuilder = new ContextInfoBuilder(settings, atlas, typeInfos);
     }
 
     private List<ClassInfo> getFhirElementInfos() {
@@ -70,6 +78,12 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
                     "    else\n" +
                     "        System.Quantity { value: quantity.value.value, unit: quantity.unit.value }\n" +
                     "\n" +
+                    "define function ToRatio(ratio FHIR.Ratio):\n" +
+                    "    if ratio is null then\n" +
+                    "        null\n" +
+                    "    else\n" +
+                    "        System.Ratio { numerator: ToQuantity(ratio.numerator), denominator: ToQuantity(ratio.denominator) }\n" +
+                    "\n" +
                     "define function ToInterval(range FHIR.Range):\n" +
                     "    if range is null then\n" +
                     "        null\n" +
@@ -106,6 +120,7 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
 
     @Override
     protected ModelInfo afterBuild(ModelInfo mi) {
+        mi.withContextInfo(this.contextInfoBuilder.build().values());
         // Apply fixups
         return mi;
     };

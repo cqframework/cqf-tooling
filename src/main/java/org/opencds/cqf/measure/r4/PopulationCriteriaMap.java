@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
-
 import org.hl7.fhir.r4.model.Type;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;

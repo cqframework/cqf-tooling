@@ -1,13 +1,13 @@
 package org.opencds.cqf.library.stu3;
 
-import org.hl7.fhir.dstu3.model.Library;
-import org.opencds.cqf.library.LibraryResourceProvider;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.hl7.fhir.dstu3.model.Library;
+import org.opencds.cqf.library.LibraryResourceProvider;
 
 public class InMemoryLibraryResourceProvider implements LibraryResourceProvider {
 
