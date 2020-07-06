@@ -10,21 +10,21 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
+import org.hl7.elm_modelinfo.r1.*;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 import java.nio.file.Paths;
 import java.util.Map;
 
-import org.hl7.elm_modelinfo.r1.ConversionInfo;
-import org.hl7.elm_modelinfo.r1.ClassInfo;
-import org.hl7.elm_modelinfo.r1.TypeInfo;
-import org.hl7.elm_modelinfo.r1.ModelInfo;
-
 import org.opencds.cqf.Operation;
 import org.opencds.cqf.modelinfo.fhir.FHIRClassInfoBuilder;
 import org.opencds.cqf.modelinfo.fhir.FHIRModelInfoBuilder;
+import org.opencds.cqf.modelinfo.qicore.QICoreClassInfoBuilder;
+import org.opencds.cqf.modelinfo.qicore.QICoreModelInfoBuilder;
 import org.opencds.cqf.modelinfo.quick.QuickClassInfoBuilder;
 import org.opencds.cqf.modelinfo.quick.QuickModelInfoBuilder;
+import org.opencds.cqf.modelinfo.uscore.USCoreClassInfoBuilder;
+import org.opencds.cqf.modelinfo.uscore.USCoreModelInfoBuilder;
 
 public class StructureDefinitionToModelInfo extends Operation {
     /*
@@ -37,10 +37,25 @@ public class StructureDefinitionToModelInfo extends Operation {
             -modelName="FHIR"
             -modelVersion="4.0.1"
 
-        Arguments for producing QUICK Model Info
+        Arguments for producing USCore 3.0.0 Model Info
+            -resourcePaths="4.0.0;US-Core/3.0.0
+            -modelName="USCore"
+            -modelVersion="3.0.0
+
+        Arguments for producing QICore 3.3.0 Model Info
             -resourcePaths="4.0.0;US-Core/3.0.0;QI-Core/3.3.0"
-            -modelName="QUICK"
+            -modelName="QICore"
             -modelVersion="3.3.0"
+
+        Arguments for producing USCore 3.1.0 Model Info
+            -resourcePaths="4.0.1;US-Core/3.1.0"
+            -modelName="USCore"
+            -modelVersion="3.1.0"
+
+        Arguments for producing QICore 4.0.0 Model Info
+            -resourcePaths="4.0.1;US-Core/3.1.0;QI-Core/4.0.0"
+            -modelName="QICore"
+            -modelVersion="4.0.0"
 
      */
     @Override
@@ -58,7 +73,8 @@ public class StructureDefinitionToModelInfo extends Operation {
         }
 
         String resourcePaths = "4.0.1";
-        //String resourcePaths = "4.0.0;US-Core/3.0.0;QI-Core/3.3.0";
+        //String resourcePaths = "4.0.1;US-Core/3.1.0";
+        //String resourcePaths = "4.0.1;US-Core/3.1.0;QI-Core/4.0.0";
         if (args.length > 3) {
             resourcePaths = args[3];
         }
@@ -66,33 +82,55 @@ public class StructureDefinitionToModelInfo extends Operation {
         // TODO : Can we autodetect this from the structure defintions?
         // Yes, would need to be an extension definition on the ImplementationGuide...
         String modelName = "FHIR";
+        //String modelName = "USCore";
+        //String modelName = "QICore";
         //String modelName = "QUICK";
         if (args.length > 4) {
             modelName = args[4];
         }
         String modelVersion = "4.0.1";
+        //String modelVersion = "3.1.0";
+        //String modelVersion = "4.0.0";
         //String modelVersion = "3.3.0";
         if (args.length > 5) {
             modelVersion = args[5];
         }        
 
-        ResourceLoader loader = new ResourceLoader();
-        Map<String, StructureDefinition> structureDefinitions = loader.loadPaths(inputPath, resourcePaths);
+        Atlas atlas = new Atlas();
+        atlas.loadPaths(inputPath, resourcePaths);
 
         ModelInfoBuilder miBuilder;
         ModelInfo mi;
 
         if (modelName.equals("FHIR")) {
-            ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(structureDefinitions);
+            ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(atlas.getStructureDefinitions());
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             ciBuilder.afterBuild();
 
             String fhirHelpersPath = this.getOutputPath() + "/" + modelName + "Helpers-" + modelVersion + ".cql";
-            miBuilder = new FHIRModelInfoBuilder(modelVersion, typeInfos.values(), fhirHelpersPath);
+            miBuilder = new FHIRModelInfoBuilder(modelVersion, typeInfos, atlas, fhirHelpersPath);
+            mi = miBuilder.build();
+        }
+        else if (modelName.equals("USCore")) {
+            ClassInfoBuilder ciBuilder = new USCoreClassInfoBuilder(atlas.getStructureDefinitions());
+            Map<String, TypeInfo> typeInfos = ciBuilder.build();
+            ciBuilder.afterBuild();
+
+            String helpersPath = this.getOutputPath() + "/" + modelName + "Helpers-" + modelVersion + ".cql";
+            miBuilder = new USCoreModelInfoBuilder(modelVersion, typeInfos, atlas, helpersPath);
+            mi = miBuilder.build();
+        }
+        else if (modelName.equals("QICore")) {
+            ClassInfoBuilder ciBuilder = new QICoreClassInfoBuilder(atlas.getStructureDefinitions());
+            Map<String, TypeInfo> typeInfos = ciBuilder.build();
+            ciBuilder.afterBuild();
+
+            String helpersPath = this.getOutputPath() + "/" + modelName + "Helpers-" + modelVersion + ".cql";
+            miBuilder = new QICoreModelInfoBuilder(modelVersion, typeInfos, atlas, helpersPath);
             mi = miBuilder.build();
         }
         else if (modelName.equals("QUICK")) {
-            ClassInfoBuilder ciBuilder = new QuickClassInfoBuilder(structureDefinitions);
+            ClassInfoBuilder ciBuilder = new QuickClassInfoBuilder(atlas.getStructureDefinitions());
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             ciBuilder.afterBuild();
 
@@ -101,7 +139,7 @@ public class StructureDefinitionToModelInfo extends Operation {
         }
         else {
             //should blowup
-            ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(structureDefinitions);
+            ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(atlas.getStructureDefinitions());
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             miBuilder = new ModelInfoBuilder(typeInfos.values());
             mi = miBuilder.build();
@@ -125,7 +163,7 @@ public class StructureDefinitionToModelInfo extends Operation {
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             jaxbMarshaller.marshal(jbe, sw);
 
-            String fileName = modelName + "-" + "modelinfo" + "-" + modelVersion + ".xml";
+            String fileName = modelName.toLowerCase() + "-" + "modelinfo" + "-" + modelVersion + ".xml";
             writeOutput(fileName, sw.toString());
         } catch (Exception e) {
             System.err.println("error" + e.getMessage());

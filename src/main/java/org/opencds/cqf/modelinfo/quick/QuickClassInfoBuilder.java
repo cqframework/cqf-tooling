@@ -89,15 +89,4 @@ public class QuickClassInfoBuilder extends ClassInfoBuilder {
         this.buildFor("QUICK", "Questionnaire");
         this.buildFor("QUICK", "QuestionnaireResponse");
     }
-
-    @Override
-    protected void afterBuild() {
-        //Clean up Content Reference Specifiers
-        Collection<TypeInfo> typeInfoValues = this.getTypeInfos().values();
-        typeInfoValues.stream().map(x -> (ClassInfo)x).forEach(
-                x -> x.getElement().stream()
-                        .filter(y -> this.hasContentReferenceTypeSpecifier(y))
-                        .forEach(y -> this.fixupContentReferenceSpecifier("QUICK", y))
-        );
-    }
 }

@@ -1,70 +1,34 @@
-package org.opencds.cqf.modelinfo.fhir;
+package org.opencds.cqf.modelinfo.uscore;
 
-import org.hl7.elm_modelinfo.r1.ConversionInfo;
+import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.Map;
+
 import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.elm_modelinfo.r1.TypeInfo;
-import org.hl7.fhir.r4.model.CompartmentDefinition;
 import org.opencds.cqf.modelinfo.Atlas;
 import org.opencds.cqf.modelinfo.ContextInfoBuilder;
 import org.opencds.cqf.modelinfo.ModelInfoBuilder;
-import org.hl7.elm_modelinfo.r1.ClassInfo;
 
-import java.io.PrintWriter;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import org.hl7.elm_modelinfo.r1.ClassInfo;
-import org.hl7.elm_modelinfo.r1.ConversionInfo;
-import org.hl7.elm_modelinfo.r1.ModelInfo;
-import org.hl7.elm_modelinfo.r1.TypeInfo;
-import org.opencds.cqf.modelinfo.ModelInfoBuilder;
-
-public class FHIRModelInfoBuilder extends ModelInfoBuilder {
-    private String fhirHelpersPath;
+public class USCoreModelInfoBuilder extends ModelInfoBuilder {
+    private String helpersPath;
     private ContextInfoBuilder contextInfoBuilder;
 
-    public FHIRModelInfoBuilder(String version, Map<String, TypeInfo> typeInfos, Atlas atlas, String fhirHelpersPath) {
+    public USCoreModelInfoBuilder(String version, Map<String, TypeInfo> typeInfos, Atlas atlas, String helpersPath) {
         super(typeInfos.values());
-        this.fhirHelpersPath = fhirHelpersPath;
-        this.settings = new FHIRModelInfoSettings(version);
+        this.settings = new USCoreModelInfoSettings(version);
+        this.helpersPath = helpersPath;
         this.contextInfoBuilder = new ContextInfoBuilder(settings, atlas, typeInfos);
     }
 
-    private List<ClassInfo> getFhirElementInfos() {
-        return  this.typeInfos.stream().map(x -> (ClassInfo)x)
-        .filter(x -> x != null && x.getBaseType() != null && x.getBaseType().equals("FHIR.Element"))
-        .filter(x -> x.getElement().size() == 1).collect(Collectors.toList());
-    }
-    
     @Override
     protected void beforeBuild() {
-        List<ClassInfo> fhirElementInfos = this.getFhirElementInfos();
-        //ClassInfo sd = fhirElementInfos.stream().map(x -> (ClassInfo)x).filter(x -> x.getName().equals("dateTime")).findFirst().get();
-        fhirElementInfos.stream().filter(x -> x.getElement().get(0).getElementType() != null)
-        .map(x -> new ConversionInfo()
-            .withFromType("FHIR." + x.getName())
-            .withToType(x.getElement().get(0).getElementType())
-            .withFunctionName("FHIRHelpers.To" + this.unQualify(x.getElement().get(0).getElementType())))
-        .forEach(x -> this.settings.conversionInfos.add(x));
-
-        // TODO: Figure out why primitives are not being added to the conversion lists here
-        List<String> statements = new ArrayList<>();
-        //ClassInfo ci = fhirElementInfos.stream().filter(x -> x.getName().equals("string")).findFirst().get();
-        fhirElementInfos.stream().filter(x -> x.getElement().get(0).getElementType() != null)
-        .sorted(Comparator.comparing(ClassInfo::getName))
-        .forEach(x -> {
-            String sourceTypeName = x.getName();
-            String targetTypeName = x.getElement().get(0).getElementType();
-            String functionName = "To" + this.unQualify(targetTypeName);
-            statements.add("define function " + functionName + "(value " + sourceTypeName + "): value.value");
-        });
-
         // TODO: File naming?
         try {
-            PrintWriter pw = new PrintWriter(this.fhirHelpersPath);
-            pw.println(String.format("library FHIRHelpers version '%s'\n", this.settings.version) +
+            PrintWriter pw = new PrintWriter(this.helpersPath);
+            pw.println(String.format("library USCoreHelpers version '%s'\n", this.settings.version) +
                     "\n" +
-                    String.format("using FHIR version '%s'\n", this.settings.version) +
+                    "using FHIR version '4.0.1'\n" +
                     "\n" +
                     "define function ToInterval(period FHIR.Period):\n" +
                     "    if period is null then\n" +
@@ -109,12 +73,33 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
                     "            codes: concept.coding C return ToCode(C),\n" +
                     "            display: concept.text.value\n" +
                     "        }\n" +
+/*
+                    "\n" +
+                    "define function GetExtension(resource DomainResource, url String):\n" +
+                    "   singleton from (\n" +
+                    "       resource.extension E\n" +
+                    "           where E.url.value = url\n" +
+                    "   )\n" +
+                    "\n" +
+                    "define function GetExtensions(resource DomainResource, url String):\n" +
+                    "   resource.extension E\n" +
+                    "       where E.url.value = url\n" +
+                    "\n" +
+                    "define function GetExtension(element Element, url String):\n" +
+                    "   singleton from (\n" +
+                    "       element.extension E\n" +
+                    "           where E.url.value = url\n" +
+                    "   )\n" +
+                    "\n" +
+                    "define function GetExtensions(element Element, url String):\n" +
+                    "   element.extension E\n" +
+                    "       where E.url.value = url\n" +
+ */
                     "\n");
-            statements.stream().forEach(x -> pw.println(x));
             pw.close();
         }
         catch (Exception e) {
-            System.out.println("Unable to write FileHelpers");
+            System.out.println("Unable to write USCoreHelpers");
         }
     }
 
