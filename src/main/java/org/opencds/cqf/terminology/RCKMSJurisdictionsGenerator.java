@@ -17,6 +17,7 @@ public class RCKMSJurisdictionsGenerator extends Operation {
 
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
     private String encoding = "json"; // -encoding (-e)
+    private String phaState;
 
     // Code sheet defaults
     private int codeSheetNum = 0; // -codesheetnum (-csn)
@@ -122,12 +123,15 @@ public class RCKMSJurisdictionsGenerator extends Operation {
             String phaId = SpreadsheetHelper.getCellAsString(row.getCell(idCol));
             String pha_State = SpreadsheetHelper.getCellAsString(row.getCell(stateCol));
             String phaStateArr[] = pha_State.split("_");
-            String phaState = String.join(" ", phaStateArr);
+            phaState = String.join(" ", phaStateArr);
+            phaState = WordUtils.capitalizeFully(phaState);
             String phaZip = SpreadsheetHelper.getCellAsString(row.getCell(postalcodeCol));
-            
+
             if (row.getRowNum() < codeListRow) {
                 continue;
             }
+
+            convertStateToCode();
 
             if(!phaCodes.contains(phaId)) {
                 concept = new CodeSystem.ConceptDefinitionComponent();      
@@ -141,7 +145,7 @@ public class RCKMSJurisdictionsGenerator extends Operation {
                     concept.addProperty(conceptPropType);
                 conceptPropState = new CodeSystem.ConceptPropertyComponent();
                     conceptPropState.setCode("state");
-                    conceptPropState.setValue(new CodeType(WordUtils.capitalizeFully(phaState)));
+                    conceptPropState.setValue(new CodeType(phaState));
                     concept.addProperty(conceptPropState);
                 if (!phaZip.equals("(null)")){
                 conceptProp = new CodeSystem.ConceptPropertyComponent();
@@ -157,5 +161,72 @@ public class RCKMSJurisdictionsGenerator extends Operation {
                     concept.addProperty(conceptProp);      
             }                             
         }      
+    }
+
+    public void convertStateToCode() {
+        switch (phaState) {
+            case "Alaska": phaState = "AK"; break;
+            case "Alabama": phaState = "AL"; break;
+            case "Arkansas": phaState = "AR"; break;
+            case "American Samoa": phaState = "AS"; break;
+            case "Arizona": phaState = "AZ"; break;
+            case "California": phaState = "CA"; break;
+            case "Colorado": phaState = "CO"; break;
+            case "Connecticut": phaState = "CT"; break;
+            case "District Of Columbia": phaState = "DC"; break;
+            case "Delaware": phaState = "DE"; break;
+            case "Florida": phaState = "FL"; break;
+            case "Federated States Of Micronesia": phaState = "FM"; break;
+            case "Georgia": phaState = "GA"; break;
+            case "Guam": phaState = "GU"; break;
+            case "Hawaii": phaState = "HI"; break;
+            case "Iowa": phaState = "IA"; break;
+            case "Idaho": phaState = "ID"; break;
+            case "Illinois": phaState = "IL"; break;
+            case "Indiana": phaState = "IN"; break;
+            case "Kansas": phaState = "KS"; break;
+            case "Kentucky": phaState = "KY"; break;
+            case "Louisiana": phaState = "LA"; break;
+            case "Massachusetts": phaState = "MA"; break;
+            case "Maryland": phaState = "MD"; break;
+            case "Maine": phaState = "ME"; break;
+            case "Marshall Islands": phaState = "MH"; break;
+            case "Michigan": phaState = "MI"; break;
+            case "Minnesota": phaState = "MN"; break;
+            case "Missouri": phaState = "MO"; break;
+            case "Northern Mariana Islands": phaState = "MP"; break;
+            case "Mississippi": phaState = "MS"; break;
+            case "Montana": phaState = "MT"; break;
+            case "North Carolina": phaState = "NC"; break;
+            case "North Dakota": phaState = "ND"; break;
+            case "Nebraska": phaState = "NE"; break;
+            case "New Hampshire": phaState = "NH"; break;
+            case "New Jersey": phaState = "NJ"; break;
+            case "New Mexico": phaState = "NM"; break;
+            case "Nevada": phaState = "NV"; break;
+            case "New York": phaState = "NY"; break;
+            case "Ohio": phaState = "OH"; break;
+            case "Oklahoma": phaState = "OK"; break;
+            case "Oregon": phaState = "OR"; break;
+            case "Pennsylvania": phaState = "PA"; break;
+            case "Puerto Rico": phaState = "PR"; break;
+            case "Palau": phaState = "PW"; break;
+            case "Rhode Island": phaState = "RI"; break;
+            case "South Carolina": phaState = "SC"; break;
+            case "South Dakota": phaState = "SD"; break;
+            case "Tennessee": phaState = "TN"; break;
+            case "Texas": phaState = "TX"; break;
+            case "U.S. Minor Outlying Islands": phaState = "UM"; break;
+            case "Utah": phaState = "UT"; break;
+            case "Virginia": phaState = "VA"; break;
+            case "Virgin Islands of the U.S.": phaState = "VI"; break;
+            case "Virgin Islands": phaState = "VI"; break;
+            case "Vermont": phaState = "VT"; break;
+            case "Washington": phaState = "WA"; break;
+            case "Wisconsin": phaState = "WI"; break;
+            case "West Virginia": phaState = "WV"; break;
+            case "Wyoming": phaState = "WY"; break;
+            default: throw new IllegalArgumentException("Unknown State: " + phaState);
+        }
     }
 }
