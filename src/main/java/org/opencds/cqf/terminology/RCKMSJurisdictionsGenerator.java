@@ -93,6 +93,7 @@ public class RCKMSJurisdictionsGenerator extends Operation {
         cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
         cs.setDescription("This code system describes jurisdictions that require public health reporting.");
         cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+        cs.setCaseSensitive(false);
         CodeSystem.PropertyComponent propertyType = new CodeSystem.PropertyComponent();
             propertyType.setCode("type");
             propertyType.setUri("http://hl7.org/fhir/us/ecr/CodeSystem/ersd-jurisdiction-types");
