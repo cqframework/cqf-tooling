@@ -20,11 +20,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.Operation;
 
 import ca.uhn.fhir.context.FhirContext;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends BaseNarrativeProvider> extends Operation {
 
     private T narrativeProvider;
