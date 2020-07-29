@@ -28,7 +28,7 @@
             "type": "java",
             "name": "CqlToSTU3LibraryOperation",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.Main",
+            "mainClass": "org.opencds.cqf.tooling.Main",
             "projectName": "tooling",
             "args": [
                 "-CqlToSTU3Library",
@@ -41,7 +41,7 @@
             "type": "java",
             "name": "APHL eICR FHIR4",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.Main",
+            "mainClass": "org.opencds.cqf.tooling.Main",
             "projectName": "tooling",
             "args": [
                 "-RefreshIG",
@@ -63,7 +63,7 @@
             "type": "java",
             "name": "VSAC Spreadsheet Directory To ValueSet Resources",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.Main",
+            "mainClass": "org.opencds.cqf.tooling.Main",
             "projectName": "tooling",
             "args": [
                 "-VsacXlsxToValueSetBatch",
@@ -76,7 +76,7 @@
             "type": "java",
             "name": "Refresh Library Operation",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.Main",
+            "mainClass": "org.opencds.cqf.tooling.Main",
             "projectName": "tooling",
             "args": [
                 "-RefreshLibrary",
@@ -91,7 +91,7 @@
             "type": "java",
             "name": "Opioid CDS FHIR3",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.Main",
+            "mainClass": "org.opencds.cqf.tooling.Main",
             "projectName": "tooling",
             "args": [
                 "-RefreshIG",
@@ -112,7 +112,7 @@
             "type": "java",
             "name": "Connectathon FHIR3",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.Main",
+            "mainClass": "org.opencds.cqf.tooling.Main",
             "projectName": "tooling",
             "args": [
                 "-RefreshIG",
@@ -128,7 +128,7 @@
             "type": "java",
             "name": "Connectathon FHIR4",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.Main",
+            "mainClass": "org.opencds.cqf.tooling.Main",
             "projectName": "tooling",
             "args": [
                 "-RefreshIG",
@@ -144,7 +144,7 @@
             "type": "java",
             "name": "Connectathon FHIR401",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.Main",
+            "mainClass": "org.opencds.cqf.tooling.Main",
             "projectName": "tooling",
             "args": [
                 "-RefreshIG",
@@ -161,7 +161,7 @@
             "type": "java",
             "name": "Single VSAC ValueSet Spreadsheet Resource Generation",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.Main",
+            "mainClass": "org.opencds.cqf.tooling.Main",
             "projectName": "tooling",
             "args": [
                 "-VsacXlsxToValueSet",
