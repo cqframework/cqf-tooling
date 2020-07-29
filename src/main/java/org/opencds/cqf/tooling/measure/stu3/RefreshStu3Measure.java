@@ -24,7 +24,7 @@ public class RefreshStu3Measure extends RefreshGeneratedContent {
     private CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
 
     public RefreshStu3Measure() {
-        super("src/main/resources/org/opencds/cqf/measure/output/stu3", "-RefreshStu3Measure", FhirContext.forDstu3());
+        super("src/main/resources/org/opencds/cqf/tooling/measure/output/stu3", "-RefreshStu3Measure", FhirContext.forDstu3());
         jsonParser = (JsonParser)this.getContext().newJsonParser();
         xmlParser = (XmlParser)this.getContext().newXmlParser();
     }

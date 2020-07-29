@@ -40,7 +40,7 @@ public class QuickPageGenerator extends Operation {
         }
         else {
             // default
-            setOutputPath("src/main/resources/org/opencds/cqf/quick/output");
+            setOutputPath("src/main/resources/org/opencds/cqf/tooling/quick/output");
         }
 
         // resolving and processing definitions for the operation

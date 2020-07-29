@@ -56,7 +56,7 @@ public class IgBundler extends Operation
     @Override
     public void execute(String[] args)
     {
-        setOutputPath("src/main/resources/org/opencds/cqf/igtools/output"); // default
+        setOutputPath("src/main/resources/org/opencds/cqf/tooling/igtools/output"); // default
 
         for (String arg : args) {
             if (arg.equals("-BundleIg")) continue;

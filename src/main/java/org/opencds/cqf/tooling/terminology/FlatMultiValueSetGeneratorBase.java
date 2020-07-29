@@ -27,7 +27,7 @@ import ca.uhn.fhir.parser.IParser;
 public abstract class FlatMultiValueSetGeneratorBase extends Operation {
 
     private String pathToSpreadsheet;        // -pathtospreadsheet (-pts)
-    private String outputPath = "src/main/resources/org/opencds/cqf/terminology/output";  // -outputpath (-op)
+    private String outputPath = "src/main/resources/org/opencds/cqf/tooling/terminology/output";  // -outputpath (-op)
     private String encoding = "json";        // -encoding (-e) { "xml", "json" }
     private String publisher;                // -publisher (-p)                   // Publisher name
     private String publisherNamespace;       // -publishernamespace (-pns)        // Publisher namespace

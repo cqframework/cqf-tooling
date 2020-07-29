@@ -34,7 +34,7 @@ public class DistributableValueSetGenerator extends Operation {
 
     @Override
     public void execute(String[] args) {
-        setOutputPath("src/main/resources/org/opencds/cqf/terminology/output");
+        setOutputPath("src/main/resources/org/opencds/cqf/tooling/terminology/output");
 
         for (String arg : args) {
             if (arg.equals("-DistributableXlsxToValueSet")) continue;

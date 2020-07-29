@@ -2,7 +2,7 @@ package org.opencds.cqf.tooling.terminology;
 
 public class HEDISValueSetGenerator extends FlatMultiValueSetGeneratorBase {
 
-    private static final String outputPath = "src/main/resources/org/opencds/cqf/terminology/output/hedis";  // -outputpath (-op)
+    private static final String outputPath = "src/main/resources/org/opencds/cqf/tooling/terminology/output/hedis";  // -outputpath (-op)
     private static final String encoding = "json";                                              // -encoding (-e)
     private static final String publisher = "National Committee for Quality Assurance (NCQA)";  // -publisher (-p)
     private static final String publisherNamespace = "http://ncqa.org/fhir/hedis";              // -publishernamespace (-pns)

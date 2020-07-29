@@ -96,7 +96,7 @@ public class GenericValueSetGenerator extends Operation {
 
     @Override
     public void execute(String[] args) {
-        setOutputPath("src/main/resources/org/opencds/cqf/terminology/output"); // default
+        setOutputPath("src/main/resources/org/opencds/cqf/tooling/terminology/output"); // default
 
         for (String arg : args) {
             if (arg.equals("-XlsxToValueSet")) {

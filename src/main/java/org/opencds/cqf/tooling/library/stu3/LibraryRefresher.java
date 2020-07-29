@@ -32,7 +32,7 @@ public class LibraryRefresher extends BaseLibraryGenerator<Library, NarrativePro
     public LibraryRefresher() {
         setNarrativeProvider(new NarrativeProvider());
         setFhirContext(FhirContext.forDstu3());
-        setOutputPath("src/main/resources/org/opencds/cqf/library/output/stu3");
+        setOutputPath("src/main/resources/org/opencds/cqf/tooling/library/output/stu3");
         setOperationName("-refreshLibrary");
     }
 

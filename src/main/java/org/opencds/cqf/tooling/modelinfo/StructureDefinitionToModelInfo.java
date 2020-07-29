@@ -69,7 +69,7 @@ public class StructureDefinitionToModelInfo extends Operation {
             setOutputPath(args[2]);
         }
         else {
-            setOutputPath("../cqf-tooling/src/main/resources/org/opencds/cqf/modelinfo");
+            setOutputPath("../cqf-tooling/src/main/resources/org/opencds/cqf/tooling/modelinfo");
         }
 
         String resourcePaths = "4.0.1";

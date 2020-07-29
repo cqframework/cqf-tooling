@@ -21,7 +21,7 @@ public class RefreshR4Measure extends RefreshGeneratedContent {
     private CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
 
     public RefreshR4Measure() {
-        super("src/main/resources/org/opencds/cqf/measure/output/r4", "-RefreshR4Measure", FhirContext.forR4());
+        super("src/main/resources/org/opencds/cqf/tooling/measure/output/r4", "-RefreshR4Measure", FhirContext.forR4());
         jsonParser = (JsonParser)this.getContext().newJsonParser();
         xmlParser = (XmlParser)this.getContext().newXmlParser();
     }

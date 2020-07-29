@@ -2,7 +2,7 @@ package org.opencds.cqf.tooling.terminology;
 
 public class CMSFlatMultiValueSetGenerator extends FlatMultiValueSetGeneratorBase {
 
-    private static final String outputPath = "src/main/resources/org/opencds/cqf/terminology/output/vsac";  // -outputpath (-op)
+    private static final String outputPath = "src/main/resources/org/opencds/cqf/tooling/terminology/output/vsac";  // -outputpath (-op)
     private static final String encoding = "json";                                  // -encoding (-e)
     private static final String publisher = "NLM";                                  // -publisher (-p)
     private static final String publisherNamespace = "http://cts.nlm.nih.gov/fhir"; // -publishernamespace (-pns)

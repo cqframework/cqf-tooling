@@ -174,7 +174,7 @@ public class QuickAtlas {
 
     /**
      * Read and store all the FHIR types provided in the file "profile-types.xml" (obtained from http://hl7.org/fhir/definitions.xml.zip).
-     * This file MUST be stored in the src/main/resources/org/opencds/cqf/quick directory in this project.
+     * This file MUST be stored in the src/main/resources/org/opencds/cqf/tooling/quick directory in this project.
      * Excludes Element and BackboneElement types.
      */
     private void resolveFhirTypes() {
@@ -200,7 +200,7 @@ public class QuickAtlas {
 
     /**
      * Read and store all the FHIR profiles provided in the file "profile-resources.xml" (obtained from http://hl7.org/fhir/definitions.xml.zip).
-     * This file MUST be stored in the src/main/resources/org/opencds/cqf/quick directory in this project.
+     * This file MUST be stored in the src/main/resources/org/opencds/cqf/tooling/quick directory in this project.
      * Excludes Resource profile.
      */
     private void resolveFhirProfiles() {
@@ -225,7 +225,7 @@ public class QuickAtlas {
 
     /**
      * Read and store all the FHIR extensions provided in the file "extension-definitions.xml" (obtained from http://hl7.org/fhir/definitions.xml.zip).
-     * This file MUST be stored in the src/main/resources/org/opencds/cqf/quick directory in this project.
+     * This file MUST be stored in the src/main/resources/org/opencds/cqf/tooling/quick directory in this project.
      */
     private void resolveFhirExtensions() {
         InputStream is = this.getClass().getResourceAsStream("extension-definitions.xml");

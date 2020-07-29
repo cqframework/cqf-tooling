@@ -66,7 +66,7 @@ public class Processor extends Operation {
 
     @Override
     public void execute(String[] args) {
-        setOutputPath("src/main/resources/org/opencds/cqf/acceleratorkit/output"); // default
+        setOutputPath("src/main/resources/org/opencds/cqf/tooling/acceleratorkit/output"); // default
         for (String arg : args) {
             if (arg.equals("-ProcessAcceleratorKit")) continue;
             String[] flagAndValue = arg.split("=");

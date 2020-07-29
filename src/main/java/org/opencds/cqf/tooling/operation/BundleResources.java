@@ -26,7 +26,7 @@ public class BundleResources extends Operation {
 
     @Override
     public void execute(String[] args) {
-        setOutputPath("src/main/resources/org/opencds/cqf/bundle/output"); // default
+        setOutputPath("src/main/resources/org/opencds/cqf/tooling/bundle/output"); // default
 
         for (String arg : args) {
             if (arg.equals("-BundleResources")) continue;

@@ -32,7 +32,7 @@ public class QdmToQiCore extends Operation {
             setOutputPath(args[1]);
         }
         else {
-            setOutputPath("src/main/resources/org/opencds/cqf/qdm/output");
+            setOutputPath("src/main/resources/org/opencds/cqf/tooling/qdm/output");
         }
 
         // For each type, scrape the html

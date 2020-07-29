@@ -13,7 +13,7 @@ package org.opencds.cqf.tooling;
         - | = OR (typically used for shorthand args)
 
     Note:
-        - The default output directory is src/main/java/resources/org/opencds/cqf/{package}/output
+        - The default output directory is src/main/java/resources/org/opencds/cqf/tooling/{package}/output
             - If an output directory path is specified in the params, it MUST NOT have any spaces
         - The default encoding for org.opencds.cqf.qdm.output is JSON
             - XML is also supported
@@ -87,7 +87,7 @@ package org.opencds.cqf.tooling;
             - mvn exec:java -Dexec.args="[-BundleResources] [-pathtodirectory | -ptd] (-outputpath | -op) (-version | -v) "
             - Example: mvn exec:java -Dexec.args="-BundleResources -ptd=/Users/adam/Src/cqframework/opioid-cds-r4/quickstartcontent -op=/Users/adam/Src/cqframework/opioid-cds-r4/quickstartcontentbundle -v=r4"
             - This tooling consolidates all resources from files in the 'pathtodirectory' directory into a single FHIR Bundle.
-            - Default output path: src/main/resources/org/opencds/cqf/bundle/output
+            - Default output path: src/main/resources/org/opencds/cqf/tooling/bundle/output
             - version = FHIR version { dstu2, stu3, r4 }
                 Default version: Dstu3
 
