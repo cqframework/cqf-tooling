@@ -1,8 +1,5 @@
 package org.opencds.cqf.tooling.modelinfo.uscore;
 
-import java.util.ArrayList;
-
-import org.hl7.elm_modelinfo.r1.ConversionInfo;
 import org.opencds.cqf.tooling.modelinfo.ModelInfoSettings;
 
 public class USCoreModelInfoSettings extends ModelInfoSettings {

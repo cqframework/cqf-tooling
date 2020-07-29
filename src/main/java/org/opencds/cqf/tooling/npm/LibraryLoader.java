@@ -1,4 +1,4 @@
-package org.opencds.cqf.npm;
+package org.opencds.cqf.tooling.npm;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,7 +8,6 @@ import org.hl7.fhir.convertors.VersionConvertor_30_50;
 import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.FHIRFormatError;
-import org.hl7.fhir.r5.elementmodel.Manager.FhirFormat;
 import org.hl7.fhir.r5.formats.JsonParser;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.utilities.VersionUtilities;

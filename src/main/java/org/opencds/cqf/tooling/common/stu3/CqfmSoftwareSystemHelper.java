@@ -1,11 +1,19 @@
 package org.opencds.cqf.tooling.common.stu3;
 
-import org.hl7.fhir.dstu3.model.*;
-import org.opencds.cqf.tooling.Main;
-import org.opencds.cqf.tooling.common.BaseCqfmSoftwareSystemHelper;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Device;
+import org.hl7.fhir.dstu3.model.DomainResource;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.Meta;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.ResourceType;
+import org.opencds.cqf.tooling.Main;
+import org.opencds.cqf.tooling.common.BaseCqfmSoftwareSystemHelper;
 
 public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 

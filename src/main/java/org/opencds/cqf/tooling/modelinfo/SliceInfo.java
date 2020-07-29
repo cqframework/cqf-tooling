@@ -1,12 +1,12 @@
 package org.opencds.cqf.tooling.modelinfo;
 
-import org.hl7.fhir.r4.model.ElementDefinition;
-import org.hl7.fhir.r4.model.Type;
+import static org.opencds.cqf.tooling.modelinfo.ClassInfoBuilder.stripPath;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.opencds.cqf.tooling.modelinfo.ClassInfoBuilder.stripPath;
+import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.Type;
 
 /*
 Tracks slices at the root of the slice list

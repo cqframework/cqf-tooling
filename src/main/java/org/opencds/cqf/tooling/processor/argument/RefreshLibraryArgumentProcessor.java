@@ -6,12 +6,12 @@ import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.processor.IGProcessor;
 import org.opencds.cqf.tooling.processor.IGProcessor.IGVersion;
 import org.opencds.cqf.tooling.utilities.ArgUtils;
+import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
-import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
 
 public class RefreshLibraryArgumentProcessor {

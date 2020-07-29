@@ -1,9 +1,9 @@
 package org.opencds.cqf.tooling.modelinfo;
 
-import org.hl7.elm_modelinfo.r1.ClassInfoElement;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.hl7.elm_modelinfo.r1.ClassInfoElement;
 
 public class SliceList {
     public SliceList() {

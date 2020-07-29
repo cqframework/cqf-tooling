@@ -1,11 +1,8 @@
 package org.opencds.cqf.tooling.modelinfo.quick;
 
 
-import java.util.Collection;
 import java.util.Map;
 
-import org.hl7.elm_modelinfo.r1.ClassInfo;
-import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.opencds.cqf.tooling.modelinfo.ClassInfoBuilder;
 

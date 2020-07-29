@@ -1,8 +1,8 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
-import org.hl7.fhir.r4.model.Enumerations;
-
 import java.util.Arrays;
+
+import org.hl7.fhir.r4.model.Enumerations;
 
 /**
  * Created by Bryn on 8/18/2019.

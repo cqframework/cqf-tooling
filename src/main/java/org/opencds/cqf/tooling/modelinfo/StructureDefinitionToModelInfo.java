@@ -1,21 +1,20 @@
 package org.opencds.cqf.tooling.modelinfo;
 
-import javax.xml.bind.Marshaller;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
-
-import org.hl7.elm_modelinfo.r1.*;
-import org.hl7.fhir.r4.model.StructureDefinition;
-
 import java.nio.file.Paths;
 import java.util.Map;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.Marshaller;
+import javax.xml.namespace.QName;
+
+import org.hl7.elm_modelinfo.r1.ClassInfo;
+import org.hl7.elm_modelinfo.r1.ConversionInfo;
+import org.hl7.elm_modelinfo.r1.ModelInfo;
+import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.modelinfo.fhir.FHIRClassInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.fhir.FHIRModelInfoBuilder;

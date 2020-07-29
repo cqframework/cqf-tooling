@@ -1,22 +1,18 @@
 package org.opencds.cqf.tooling.modelinfo.fhir;
 
-import org.hl7.elm_modelinfo.r1.ConversionInfo;
-import org.hl7.elm_modelinfo.r1.ModelInfo;
-import org.hl7.elm_modelinfo.r1.TypeInfo;
-import org.hl7.fhir.r4.model.CompartmentDefinition;
-import org.opencds.cqf.tooling.modelinfo.Atlas;
-import org.opencds.cqf.tooling.modelinfo.ContextInfoBuilder;
-import org.opencds.cqf.tooling.modelinfo.ModelInfoBuilder;
-import org.hl7.elm_modelinfo.r1.ClassInfo;
-
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.hl7.elm_modelinfo.r1.ClassInfo;
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.elm_modelinfo.r1.TypeInfo;
+import org.opencds.cqf.tooling.modelinfo.Atlas;
+import org.opencds.cqf.tooling.modelinfo.ContextInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.ModelInfoBuilder;
 
 public class FHIRModelInfoBuilder extends ModelInfoBuilder {

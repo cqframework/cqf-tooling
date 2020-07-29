@@ -3,15 +3,14 @@ package org.opencds.cqf.tooling.processor.argument;
 import static java.util.Arrays.asList;
 
 import org.opencds.cqf.tooling.parameter.PostBundlesInDirParameters;
-
 import org.opencds.cqf.tooling.processor.PostBundlesInDirProcessor.FHIRVersion;
 import org.opencds.cqf.tooling.utilities.ArgUtils;
+import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
-import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
 
 public class PostBundlesInDirArgumentProcessor {

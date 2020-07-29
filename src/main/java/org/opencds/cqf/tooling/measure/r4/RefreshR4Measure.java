@@ -1,18 +1,19 @@
 package org.opencds.cqf.tooling.measure.r4;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.JsonParser;
-import ca.uhn.fhir.parser.XmlParser;
-import org.hl7.fhir.r4.model.Measure;
-import org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper;
-import org.opencds.cqf.tooling.measure.RefreshGeneratedContent;
-import org.opencds.cqf.tooling.utilities.IOUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+
+import org.hl7.fhir.r4.model.Measure;
+import org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper;
+import org.opencds.cqf.tooling.measure.RefreshGeneratedContent;
+import org.opencds.cqf.tooling.utilities.IOUtils;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.JsonParser;
+import ca.uhn.fhir.parser.XmlParser;
 
 public class RefreshR4Measure extends RefreshGeneratedContent {
 

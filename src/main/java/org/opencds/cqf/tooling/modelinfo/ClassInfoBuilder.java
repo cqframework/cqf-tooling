@@ -1,18 +1,34 @@
 package org.opencds.cqf.tooling.modelinfo;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.hl7.elm_modelinfo.r1.*;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.elm_modelinfo.r1.ChoiceTypeSpecifier;
+import org.hl7.elm_modelinfo.r1.ClassInfo;
+import org.hl7.elm_modelinfo.r1.ClassInfoElement;
+import org.hl7.elm_modelinfo.r1.IntervalTypeSpecifier;
+import org.hl7.elm_modelinfo.r1.ListTypeSpecifier;
+import org.hl7.elm_modelinfo.r1.NamedTypeSpecifier;
+import org.hl7.elm_modelinfo.r1.TypeInfo;
+import org.hl7.elm_modelinfo.r1.TypeSpecifier;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.Element;
+import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
-import org.w3._1999.xhtml.P;
 
 public abstract class ClassInfoBuilder {
     protected Map<String, StructureDefinition> structureDefinitions;

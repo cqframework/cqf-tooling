@@ -1,14 +1,18 @@
 package org.opencds.cqf.tooling.modelinfo;
 
-import org.hl7.elm_modelinfo.r1.*;
-import org.hl7.fhir.r4.model.CompartmentDefinition;
-import org.hl7.fhir.r4.model.SearchParameter;
-import org.hl7.fhir.r4.model.StringType;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.hl7.elm_modelinfo.r1.ClassInfo;
+import org.hl7.elm_modelinfo.r1.ContextInfo;
+import org.hl7.elm_modelinfo.r1.NamedTypeSpecifier;
+import org.hl7.elm_modelinfo.r1.RelationshipInfo;
+import org.hl7.elm_modelinfo.r1.TypeInfo;
+import org.hl7.fhir.r4.model.CompartmentDefinition;
+import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.StringType;
 
 public class ContextInfoBuilder {
     protected Atlas atlas;

@@ -1,8 +1,7 @@
 package org.opencds.cqf.tooling.modelinfo.uscore;
 
-import java.util.HashSet;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 
 import org.opencds.cqf.tooling.modelinfo.ClassInfoSettings;
 

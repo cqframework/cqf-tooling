@@ -1,21 +1,19 @@
 package org.opencds.cqf.tooling.measure.stu3;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.JsonParser;
-import ca.uhn.fhir.parser.XmlParser;
-import org.hl7.fhir.dstu3.model.*;
-import org.opencds.cqf.tooling.Main;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
+import org.hl7.fhir.dstu3.model.Measure;
 import org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper;
 import org.opencds.cqf.tooling.measure.RefreshGeneratedContent;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.JsonParser;
+import ca.uhn.fhir.parser.XmlParser;
 
 public class RefreshStu3Measure extends RefreshGeneratedContent {
 
