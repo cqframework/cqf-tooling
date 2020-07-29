@@ -122,7 +122,12 @@ package org.opencds.cqf;
             - This tooling converts a WHO accelerator kit data dictionary to a set of profiles, questionnaires, plan definitions, and libraries
             - mvn exec:java -Dexec.args="-ProcessAcceleratorKit [-pathtospreadsheet | -pts] [-dataelementpages | -dep] (-outputpath | -op) (-encoding | -e)"
             - Example: mvn exec:java -Dexec.args="-ProcessAcceleratorKit -pts=ANC-Primary-Data-Dictionary.xlsx -dep=""ANC Reg,Quick Check,Profile,S&F,PE,Tests,C&T"""
-*/
+
+        - Jurisdiction List Converter
+            - This tooling converts an RCKMS list of jurisdictions from an Excel file to a CodeSystem
+            - mvn exec:java -Dexec.args="-JurisdictionListConverter [-pathtospreadsheet | -pts] (outputpath | -op)"
+            - Example: mvn exec:java -Dexec.args="-JurisdictionsXlsxToCodeSystem -pts=C:/Users/marks/Repos/DCG/aphl-ig/input/vocabulary/codesystem/spreadsheets/rckms-jurisdictions.xlsx -op=C:/Users/marks/Repos/DCG/aphl-ig/input/vocabulary/codesystem"
+        */
 
 public class Main {
 
