@@ -30,7 +30,7 @@ import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class R4LibraryProcessor implements LibraryProcessor{
+public class R4LibraryProcessor extends LibraryProcessor {
     private String igCanonicalBase;
     private String cqlContentPath;
     private String libraryPath;

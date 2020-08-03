@@ -30,7 +30,7 @@ import org.opencds.cqf.tooling.utilities.STU3FHIRUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class STU3LibraryProcessor implements LibraryProcessor{
+public class STU3LibraryProcessor extends LibraryProcessor {
     private String igCanonicalBase;
     private String cqlContentPath;
     private String libraryPath;
