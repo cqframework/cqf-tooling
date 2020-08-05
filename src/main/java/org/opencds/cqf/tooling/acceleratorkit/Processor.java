@@ -1526,7 +1526,7 @@ public class Processor extends Operation {
 
     /* Write Methods */
     public void writeResource(String path, Resource resource) {
-        String outputFilePath = path + "/" + resource.getResourceType().toString().toLowerCase() + "-" + resource.getId() + "." + encoding;
+        String outputFilePath = path + "/" + resource.getResourceType().toString().toLowerCase() + "-" + resource.getIdElement().getIdPart() + "." + encoding;
         try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
             writer.write(
                 encoding.equals("json")
@@ -1536,7 +1536,7 @@ public class Processor extends Operation {
             writer.flush();
         } catch (IOException e) {
             e.printStackTrace();
-            throw new IllegalArgumentException("Error writing resource: " + resource.getId());
+            throw new IllegalArgumentException("Error writing resource: " + resource.getIdElement().getIdPart());
         }
     }
 

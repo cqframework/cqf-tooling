@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.processor.IGProcessor.IGVersion;
@@ -39,7 +39,7 @@ public class IGRefreshProcessor {
 
         FhirContext fhirContext = IGProcessor.getIgFhirContext(igVersion);
         Boolean igResourcePathIsSpecified = igResourcePath != null && !igResourcePath.isEmpty();
-        IAnyResource implementationGuide = null;
+        IBaseResource implementationGuide = null;
         String igCanonicalBase = null;
 
         IGProcessor.ensure(igPath, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);

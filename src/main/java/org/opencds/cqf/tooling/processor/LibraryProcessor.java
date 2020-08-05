@@ -3,7 +3,7 @@ package org.opencds.cqf.tooling.processor;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.LogUtils;
@@ -17,17 +17,17 @@ public interface LibraryProcessor {
         return ResourcePrefix + baseId;
     }
 
-    public static Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IAnyResource> resources,
+    public static Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
             Encoding encoding) {
         Boolean shouldPersist = true;
         try {
-            Map<String, IAnyResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding);
+            Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding);
             String currentResourceID = FilenameUtils.getBaseName(path);
-            for (IAnyResource resource : dependencies.values()) {
-                resources.putIfAbsent(resource.getId(), resource);
+            for (IBaseResource resource : dependencies.values()) {
+                resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
 
                 // NOTE: Assuming dependency library will be in directory of dependent.
-                String dependencyPath = path.replace(currentResourceID, resource.getId().replace("Library/", ""));
+                String dependencyPath = path.replace(currentResourceID, resource.getIdElement().getIdPart().replace("Library/", ""));
                 bundleLibraryDependencies(dependencyPath, fhirContext, resources, encoding);
             }
         } catch (Exception e) {

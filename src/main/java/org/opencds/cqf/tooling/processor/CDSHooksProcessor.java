@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.FilenameUtils;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.LogUtils;
@@ -47,13 +47,13 @@ public class CDSHooksProcessor {
         }
     }
 
-    public static List<String> bundleActivityDefinitions(String planDefinitionPath, FhirContext fhirContext, Map<String, IAnyResource> resources,
+    public static List<String> bundleActivityDefinitions(String planDefinitionPath, FhirContext fhirContext, Map<String, IBaseResource> resources,
     Encoding encoding, Boolean includeVersion, Boolean shouldPersist) {
         List<String> activityDefinitionPaths = new ArrayList<String>();
         try {
-            Map<String, IAnyResource> activityDefinitions = ResourceUtils.getActivityDefinitionResources(planDefinitionPath, fhirContext, includeVersion);
-            for (Entry<String, IAnyResource> entry : activityDefinitions.entrySet()) {
-                resources.putIfAbsent(entry.getValue().getId(), entry.getValue());
+            Map<String, IBaseResource> activityDefinitions = ResourceUtils.getActivityDefinitionResources(planDefinitionPath, fhirContext, includeVersion);
+            for (Entry<String, IBaseResource> entry : activityDefinitions.entrySet()) {
+                resources.putIfAbsent(entry.getValue().getIdElement().getIdPart(), entry.getValue());
                 activityDefinitionPaths.add(entry.getKey());
             }
         } catch (Exception e) {
