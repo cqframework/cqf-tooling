@@ -67,6 +67,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
             String filePath = fileMap.get(refreshedLibrary.getId());
             org.hl7.fhir.dstu3.model.Library library = (org.hl7.fhir.dstu3.model.Library) VersionConvertor_30_50.convertResource(refreshedLibrary, false);
+            cqfmHelper.ensureToolingExtensionAndDevice(library, fhirContext);
             IOUtils.writeResource(library, filePath, IOUtils.getEncoding(filePath), fhirContext);
         }
     }

@@ -77,6 +77,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
         for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
             String filePath = fileMap.get(refreshedLibrary.getId());
             Library library = (Library) VersionConvertor_40_50.convertResource(refreshedLibrary);
+            cqfmHelper.ensureToolingExtensionAndDevice(library, fhirContext);
             IOUtils.writeResource(library, filePath, IOUtils.getEncoding(filePath), fhirContext);
         }
     }

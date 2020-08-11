@@ -143,9 +143,11 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 
         if (resource.hasContained()) {
             List<Resource> containedWithoutDevice = resource.getContained().stream()
-                    .filter(containedResource -> !(containedResource.getId().equals(this.getCqfToolingDeviceReferenceID())
-                            && containedResource.getResourceType() == ResourceType.Device))
-                    .collect(Collectors.toList());
+                .filter(containedResource -> !(containedResource.getId().equals(this.getCqfToolingDeviceReferenceID())
+                        && containedResource.getResourceType() == ResourceType.Device))
+                .filter(containedResource -> !(containedResource.getId().equals(this.getCqfToolingDeviceID())
+                        && containedResource.getResourceType() == ResourceType.Device))
+                .collect(Collectors.toList());
 
             if (!containedWithoutDevice.isEmpty())
                 resource.setContained(containedWithoutDevice);
