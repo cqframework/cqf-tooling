@@ -72,7 +72,7 @@ public class RefreshStu3Measure extends RefreshGeneratedContent {
     }
 
     public Measure refreshMeasure(Measure measure) {
-        cqfmHelper.ensureToolingExtensionAndDevice(measure);
+        cqfmHelper.ensureToolingExtensionAndDevice(measure, this.getContext());
 //        CqfMeasure cqfMeasure = this.dataRequirementsProvider.createCqfMeasure(measure, this.libraryResourceProvider);
 //
 //        // Ensure All Related Artifacts for all referenced Libraries

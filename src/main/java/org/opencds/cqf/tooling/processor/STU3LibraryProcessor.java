@@ -121,7 +121,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
     private static void refreshLibrary(String igCanonicalBase, Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, Boolean versioned, CqlTranslator translator, FhirContext fhirContext) {
         Library generatedLibrary = processLibrary(igCanonicalBase, cqlContentPath, translator, versioned, fhirContext);
         mergeDiff(referenceLibrary, generatedLibrary, cqlContentPath, translator, fhirContext);
-        cqfmHelper.ensureToolingExtensionAndDevice(referenceLibrary);
+        cqfmHelper.ensureToolingExtensionAndDevice(referenceLibrary, fhirContext);
         IOUtils.writeResource(referenceLibrary, outputPath, encoding, fhirContext);
     }
 
@@ -160,7 +160,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
 
         resolveDataRequirements(library, translator);
         attachContent(library, translator, IOUtils.getCqlString(cqlContentPath));
-        cqfmHelper.ensureToolingExtensionAndDevice(library);
+        cqfmHelper.ensureToolingExtensionAndDevice(library, fhirContext);
         // BaseNarrativeProvider<Narrative> narrativeProvider = new NarrativeProvider();
         // INarrative narrative = narrativeProvider.getNarrative(fhirContext, library);
         // library.setText((Narrative) narrative);

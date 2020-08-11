@@ -157,6 +157,7 @@ public class IGProcessor extends BaseProcessor {
     public static final String measurePathElement = "input/resources/measure/";
     public static final String valuesetsPathElement = "input/vocabulary/valueset/";
     public static final String testCasePathElement = "input/tests/";
+    public static final String devicePathElement = "input/resources/device/";
     
     public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, ArrayList<String> resourcePaths) {                
         File directory = new File(getBundlesPath(igPath));
@@ -177,6 +178,8 @@ public class IGProcessor extends BaseProcessor {
             checkForDirectory(igPath, IGProcessor.valuesetsPathElement);
             checkForDirectory(igPath, IGProcessor.testCasePathElement);
         }
+        checkForDirectory(igPath, IGProcessor.devicePathElement);
+
         HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
     }
 
