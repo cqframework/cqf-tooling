@@ -1,8 +1,8 @@
 package org.opencds.cqf.tooling.processor;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -12,6 +12,8 @@ import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.elm.r1.ValueSetRef;
+import org.hl7.fhir.convertors.VersionConvertor_30_50;
+import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -20,6 +22,7 @@ import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.formats.FormatUtilities;
 import org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper;
 import org.opencds.cqf.tooling.library.GenericLibrarySourceProvider;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
@@ -30,23 +33,63 @@ import org.opencds.cqf.tooling.utilities.STU3FHIRUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class STU3LibraryProcessor implements LibraryProcessor{
+public class STU3LibraryProcessor extends LibraryProcessor {
     private String igCanonicalBase;
     private String cqlContentPath;
     private String libraryPath;
     private FhirContext fhirContext;
     private Encoding encoding;
-    private Boolean versioned;
     private static CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
 
+    /*
+    Refresh all library resources in the given libraryPath
+     */
+    public void refreshLibraries(String libraryPath) {
+        File file = new File(libraryPath);
+        Map<String, String> fileMap = new HashMap<String, String>();
+        List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
+        if (file.isDirectory()) {
+            for (File libraryFile : file.listFiles()) {
+                org.hl7.fhir.dstu3.model.Resource resource = (org.hl7.fhir.dstu3.model.Resource) IOUtils.readResource(libraryFile.getAbsolutePath(), fhirContext);
+                org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) VersionConvertor_30_50.convertResource(resource, false);
+                fileMap.put(library.getId(), libraryFile.getAbsolutePath());
+                libraries.add(library);
+            }
+        }
+        else {
+            org.hl7.fhir.dstu3.model.Resource resource = (org.hl7.fhir.dstu3.model.Resource) IOUtils.readResource(file.getAbsolutePath(), fhirContext);
+            org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) VersionConvertor_30_50.convertResource(resource, false);
+            fileMap.put(library.getId(), file.getAbsolutePath());
+            libraries.add(library);
+        }
+
+        List<org.hl7.fhir.r5.model.Library> refreshedLibraries = super.refreshGeneratedContent(libraries);
+        for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
+            String filePath = fileMap.get(refreshedLibrary.getId());
+            org.hl7.fhir.dstu3.model.Library library = (org.hl7.fhir.dstu3.model.Library) VersionConvertor_30_50.convertResource(refreshedLibrary, false);
+            IOUtils.writeResource(library, filePath, IOUtils.getEncoding(filePath), fhirContext);
+        }
+    }
+
+    @Override
     public Boolean refreshLibraryContent(RefreshLibraryParameters params) {
-        igCanonicalBase = params.igCanonicalBase;
-        cqlContentPath = params.cqlContentPath;
+        if (params.parentContext != null) {
+            initialize(parentContext);
+        }
+        else {
+            initialize(params.ini);
+            igCanonicalBase = params.igCanonicalBase;
+            cqlContentPath = params.cqlContentPath;
+        }
+
         libraryPath = params.libraryPath;
         fhirContext = params.fhirContext;
         encoding = params.encoding;
         versioned = params.versioned;
 
+        refreshLibraries(libraryPath);
+
+/*
         CqlTranslator translator = getTranslator(cqlContentPath);
 
         Boolean libraryExists = false;
@@ -69,6 +112,8 @@ public class STU3LibraryProcessor implements LibraryProcessor{
             String parentDirectory = anyOtherLibrary.isPresent() ? IOUtils.getParentDirectoryPath(anyOtherLibrary.get()) : IOUtils.getParentDirectoryPath(cqlContentPath);
             generateLibrary(igCanonicalBase, cqlContentPath, parentDirectory, encoding, versioned, translator, fhirContext);
         }
+
+ */
       
         return true;
     }

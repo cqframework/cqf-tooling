@@ -150,6 +150,39 @@ public class IOUtils
         }
     }
 
+    public static String getTypeQualifiedResourceId(String path, FhirContext fhirContext) {
+        IAnyResource resource = readResource(path, fhirContext, true);
+        if (resource != null) {
+            return resource.getIdElement().getResourceType() + "/" + resource.getIdElement().getIdPart();
+        }
+
+        return null;
+    }
+
+    public static String getCanonicalResourceVersion(IAnyResource resource, FhirContext fhirContext) {
+        switch (fhirContext.getVersion().getVersion()) {
+            case DSTU3:
+                if (resource instanceof org.hl7.fhir.dstu3.model.MetadataResource) {
+                    return ((org.hl7.fhir.dstu3.model.MetadataResource)resource).getVersion();
+                }
+                break;
+            case R4:
+                if (resource instanceof org.hl7.fhir.r4.model.MetadataResource) {
+                    return ((org.hl7.fhir.r4.model.MetadataResource)resource).getVersion();
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+        }
+
+        return null;
+    }
+
+    public static String getCanonicalResourceVersion(String path, FhirContext fhirContext) {
+        IAnyResource resource = readResource(path, fhirContext, true);
+        return getCanonicalResourceVersion(path, fhirContext);
+    }
+
     public static IAnyResource readResource(String path, FhirContext fhirContext) {
         return readResource(path, fhirContext, false);
     }
@@ -172,6 +205,12 @@ public class IOUtils
         {
             IParser parser = getParser(encoding, fhirContext);
             File file = new File(path);
+
+            if (!file.exists()) {
+                String[] paths = file.getParent().split("\\\\");
+                file = new File(Paths.get(file.getParent(), paths[paths.length - 1] + "-" + file.getName()).toString());
+            }
+
             if (safeRead) {
                 if (!file.exists()) {
                     return null;
@@ -220,9 +259,27 @@ public class IOUtils
         return filePaths;
     }
 
+    public static String getResourceFileName(String resourcePath, IAnyResource resource, Encoding encoding, FhirContext fhirContext, boolean versioned) {
+        String resourceVersion = IOUtils.getCanonicalResourceVersion(resource, fhirContext);
+        String result = Paths.get(resourcePath, resource.getIdElement().getResourceType(),
+                resource.getIdElement().getIdPart() + ((versioned && resourceVersion != null && !(resource.getIdElement().getIdPart().endsWith(resourceVersion))) ? ("-" + resourceVersion) : ""))
+                + getFileExtension(encoding);
+        return result;
+    }
+
+    // Returns the parent directory if it is named resources, otherwise, the parent of that
+    public static String getResourceDirectory(String path) {
+        String result = getParentDirectoryPath(path);
+        if (!result.toLowerCase().endsWith("resources")) {
+            result = getParentDirectoryPath(result);
+        }
+
+        return result;
+    }
+
     public static String getParentDirectoryPath(String path) {
         File file = new File(path);
-        return file.getParent().toString();
+        return file.getParent();
     }
 
     public static List<String> getDirectoryPaths(String path, Boolean recursive)
