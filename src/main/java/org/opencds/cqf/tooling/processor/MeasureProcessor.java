@@ -126,7 +126,7 @@ public class MeasureProcessor
 
                 if (includeDependencies) {
                     shouldPersist = shouldPersist
-                        & LibraryProcessor.bundleLibraryDependencies(librarySourcePath, fhirContext, resources, encoding);
+                        & LibraryProcessor.bundleLibraryDependencies(librarySourcePath, fhirContext, resources, encoding, includeVersion);
                 }
 
                 if (includePatientScenarios) {

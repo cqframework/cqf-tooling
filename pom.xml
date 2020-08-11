@@ -20,7 +20,7 @@
 
         <cqframework.version>1.4.9</cqframework.version>
         <hapi.version>5.0.2</hapi.version>
-        <core.version>5.0.14</core.version>
+        <core.version>5.0.22</core.version>
     </properties>
 
     <name>cqf-tooling</name>

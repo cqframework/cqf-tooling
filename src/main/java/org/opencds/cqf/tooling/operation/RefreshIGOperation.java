@@ -20,7 +20,8 @@ public class RefreshIGOperation extends Operation {
             System.err.println(e.getMessage());
             System.exit(1);
         }
-        IGProcessor.publishIG(params);
-    }   
+        IGProcessor processor = new IGProcessor();
+        processor.publishIG(params);
+    }
 }
 

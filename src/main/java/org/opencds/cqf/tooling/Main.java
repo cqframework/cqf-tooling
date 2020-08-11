@@ -83,6 +83,10 @@ package org.opencds.cqf.tooling;
         - Refresh Measure(s)
             - command: mvn exec:java -Dexec.args="[-RefreshStu3Measure|RefreshR4Measure] [-ptm| pathToMeasures] [-ptl|pathToLibraries] (-e|encoding) (-o|-output)"
 
+        - Refresh Library
+            - command: mvn exec:java -Dexec.args"-RefreshLibrary -ini -fv|fhir-version -lp|libraryPath
+            - Example: mvn exec:java -Dexec.args="-RefreshLibrary -ini=C:\Users\Bryn\Documents\Src\HL7\sample-ig\ig.ini -fv=fhir4 -lp=C:\Users\Bryn\Documents\Src\HL7\sample-ig\input\examples\Library-example.json"
+
         - Bundle Resources
             - mvn exec:java -Dexec.args="[-BundleResources] [-pathtodirectory | -ptd] (-outputpath | -op) (-version | -v) "
             - Example: mvn exec:java -Dexec.args="-BundleResources -ptd=/Users/adam/Src/cqframework/opioid-cds-r4/quickstartcontent -op=/Users/adam/Src/cqframework/opioid-cds-r4/quickstartcontentbundle -v=r4"

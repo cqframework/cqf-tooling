@@ -4,7 +4,6 @@ import static java.util.Arrays.asList;
 
 import org.opencds.cqf.tooling.parameter.BundleTestCasesParameters;
 import org.opencds.cqf.tooling.processor.IGProcessor;
-import org.opencds.cqf.tooling.processor.IGProcessor.IGVersion;
 import org.opencds.cqf.tooling.utilities.ArgUtils;
 
 import joptsimple.OptionParser;
@@ -43,11 +42,11 @@ public class BundleTestCasesArgumentProcessor {
 
         String path = (String)options.valueOf(PATH_OPTIONS[0]);
         //could not easily use the built-in default here because it is based on the value of the igPath argument.
-        String igVersion = ArgUtils.defaultValue(options, IG_VERSION_OPTIONS[0], IGProcessor.getIgVersion(path).toString());
+        String igVersion = (String)options.valueOf(IG_VERSION_OPTIONS[0]);
 
         BundleTestCasesParameters ip = new BundleTestCasesParameters();
         ip.path = path;
-        ip.igVersion = IGVersion.parse(igVersion);
+        ip.igVersion = igVersion;
 
         return ip;
     }

@@ -13,16 +13,16 @@ import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.Resource;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.Library;
+import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.opencds.cqf.tooling.npm.LibraryLoader;
-import org.opencds.cqf.tooling.npm.NpmPackageManager;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
+import org.opencds.cqf.tooling.utilities.IGUtils;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
@@ -36,17 +36,17 @@ public class LibraryProcessor extends BaseProcessor {
     }
 
     public static Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IAnyResource> resources,
-            Encoding encoding) {
+            Encoding encoding, boolean versioned) {
         Boolean shouldPersist = true;
         try {
             Map<String, IAnyResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding);
-            String currentResourceID = FilenameUtils.getBaseName(path);
+            String currentResourceID = IOUtils.getTypeQualifiedResourceId(path, fhirContext);
             for (IAnyResource resource : dependencies.values()) {
                 resources.putIfAbsent(resource.getId(), resource);
 
                 // NOTE: Assuming dependency library will be in directory of dependent.
-                String dependencyPath = path.replace(currentResourceID, resource.getId().replace("Library/", ""));
-                bundleLibraryDependencies(dependencyPath, fhirContext, resources, encoding);
+                String dependencyPath = IOUtils.getResourceFileName(IOUtils.getResourceDirectory(path), resource, encoding, fhirContext, versioned);
+                bundleLibraryDependencies(dependencyPath, fhirContext, resources, encoding, versioned);
             }
         } catch (Exception e) {
             shouldPersist = false;
@@ -58,18 +58,74 @@ public class LibraryProcessor extends BaseProcessor {
     private UcumService ucumService;
     private List<String> binaryPaths;
     private CqlProcessor cqlProcessor;
+    protected boolean versioned;
 
-    protected Resource refreshGeneratedContent(Library sourceLibrary) {
-        // Find the text/cql content element
-        // Pull the file name from the id element that starts with "ig-loader-"
-        // Get the source file information from the CqlProcessor (loadFile)
-        // If loadFile returns an Attachment, set the Attachment of the library to the result of loadFile
-        // Then look up the sourceFileInformation and process it:
-        return null;
+    /*
+    Refreshes generated content in the given library.
+    The name element of the library resource is used to find the cql file (filename = <name>.cql)
+    The CqlProcessor is used to get the CqlSourceFileInformation
+    Sets
+        * cqlContent
+        * elmXmlContent
+        * elmJsonContent
+        * dataRequirements
+        * relatedArtifacts
+        * parameters
+
+     Does not set publisher-level information (id, name, url, version, publisher, contact, jurisdiction)
+     Does not generate narrative
+     */
+    protected Library refreshGeneratedContent(Library sourceLibrary) {
+        String libraryName = sourceLibrary.getName();
+        if (versioned) {
+            libraryName += "-" + sourceLibrary.getVersion();
+        }
+        String fileName = libraryName + ".cql";
+        Attachment attachment = null;
+        try {
+            attachment = loadFile(fileName);
+        } catch (IOException e) {
+            logMessage(String.format("Error loading CQL source for library %s", libraryName));
+            e.printStackTrace();
+        }
+
+        if (attachment != null) {
+            sourceLibrary.getContent().clear();
+            sourceLibrary.getContent().add(attachment);
+            CqlProcessor.CqlSourceFileInformation info = cqlProcessor.getFileInformation(attachment.getUrl());
+            attachment.setUrlElement(null);
+            if (info != null) {
+                //f.getErrors().addAll(info.getErrors());
+                if (info.getElm() != null) {
+                    sourceLibrary.addContent().setContentType("application/elm+xml").setData(info.getElm());
+                }
+                if (info.getJsonElm() != null) {
+                    sourceLibrary.addContent().setContentType("application/elm+json").setData(info.getJsonElm());
+                }
+                sourceLibrary.getDataRequirement().clear();
+                sourceLibrary.getDataRequirement().addAll(info.getDataRequirements());
+                sourceLibrary.getRelatedArtifact().removeIf(n -> n.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON);
+                sourceLibrary.getRelatedArtifact().addAll(info.getRelatedArtifacts());
+                sourceLibrary.getParameter().clear();
+                sourceLibrary.getParameter().addAll(info.getParameters());
+            } else {
+                logMessage(String.format(String.format("No cql info found for ", fileName)));
+                //f.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, ValidationMessage.IssueType.NOTFOUND, "Library", "No cql info found for "+f.getName(), ValidationMessage.IssueSeverity.ERROR));
+            }
+        }
+
+        return sourceLibrary;
     }
 
-    public List<Resource> refreshGeneratedContent(List<Library> sourceLibraries) throws IOException {
-        binaryPaths = extractBinaryPaths(sourceIg);
+    protected List<Library> refreshGeneratedContent(List<Library> sourceLibraries) {
+        try {
+            binaryPaths = IGUtils.extractBinaryPaths(rootDir, sourceIg);
+        }
+        catch (IOException e) {
+            logMessage(String.format("Errors occurred extracting binary path from IG: ", e.getMessage()));
+            throw new IllegalArgumentException("Could not obtain binary path from IG");
+        }
+
         LibraryLoader reader = new LibraryLoader(fhirVersion);
         try {
             ucumService = new UcumEssenceService(UcumEssenceService.class.getResourceAsStream("/ucum-essence.xml"));
@@ -82,24 +138,11 @@ public class LibraryProcessor extends BaseProcessor {
 
         cqlProcessor.execute();
 
-        List<Resource> resources = new ArrayList<Resource>();
+        List<Library> resources = new ArrayList<Library>();
         for (Library library : sourceLibraries) {
             resources.add(refreshGeneratedContent(library));
         }
         return resources;
-    }
-
-    private List<String> extractBinaryPaths(ImplementationGuide sourceIg) throws IOException {
-        List<String> result = new ArrayList<String>();
-
-        for (ImplementationGuide.ImplementationGuideDefinitionParameterComponent p : sourceIg.getDefinition().getParameter()) {
-            // documentation for this list: https://confluence.hl7.org/display/FHIR/Implementation+Guide+Parameters
-            if (p.getCode().equals("path-binary")) {
-                result.add(Utilities.path(rootDir, p.getValue()));
-            }
-        }
-
-        return result;
     }
 
     private Attachment loadFile(String fn) throws FileNotFoundException, IOException {
@@ -118,22 +161,6 @@ public class LibraryProcessor extends BaseProcessor {
 
 /*
     private void performLibraryCQLProcessing(FetchedFile f, org.hl7.fhir.r5.model.Library lib, Attachment attachment) {
-        CqlProcessor.CqlSourceFileInformation info = cqlProcessor.getFileInformation(attachment.getUrl());
-        if (info != null) {
-            f.getErrors().addAll(info.getErrors());
-            lib.addContent().setContentType("application/elm+xml").setData(info.getElm());
-            if (info.getJsonElm() != null) {
-                lib.addContent().setContentType("application/elm+json").setData(info.getJsonElm());
-            }
-            lib.getDataRequirement().clear();
-            lib.getDataRequirement().addAll(info.getDataRequirements());
-            lib.getRelatedArtifact().removeIf(n -> n.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON);
-            lib.getRelatedArtifact().addAll(info.getRelatedArtifacts());
-            lib.getParameter().clear();
-            lib.getParameter().addAll(info.getParameters());
-        } else {
-            f.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, ValidationMessage.IssueType.NOTFOUND, "Library", "No cql info found for "+f.getName(), ValidationMessage.IssueSeverity.ERROR));
-        }
 
     }
  */

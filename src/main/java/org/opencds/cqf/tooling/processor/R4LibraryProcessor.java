@@ -1,8 +1,8 @@
 package org.opencds.cqf.tooling.processor;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -12,6 +12,8 @@ import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.elm.r1.ValueSetRef;
+import org.hl7.fhir.convertors.VersionConvertor_40_50;
+import org.hl7.fhir.r4.formats.FormatUtilities;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -36,17 +38,68 @@ public class R4LibraryProcessor extends LibraryProcessor {
     private String libraryPath;
     private FhirContext fhirContext;
     private Encoding encoding;
-    private Boolean versioned;
     private static CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
 
+    /*
+    Refresh all library resources in the given libraryPath
+     */
+    public void refreshLibraries(String libraryPath) {
+        File file = new File(libraryPath);
+        Map<String, String> fileMap = new HashMap<String, String>();
+        List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
+
+        if (file.isDirectory()) {
+            for (File libraryFile : file.listFiles()) {
+                org.hl7.fhir.r4.model.Resource resource = null;
+                try {
+                    resource = FormatUtilities.loadFile(libraryFile.getAbsolutePath());
+                } catch (IOException e) {
+                    logMessage(String.format("Exceptions occurred loading resource file %s", libraryFile.getAbsolutePath()));
+                }
+                org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) VersionConvertor_40_50.convertResource(resource);
+                fileMap.put(library.getId(), libraryFile.getAbsolutePath());
+                libraries.add(library);
+            }
+        }
+        else {
+            org.hl7.fhir.r4.model.Resource resource = null;
+            try {
+                resource = FormatUtilities.loadFile(file.getAbsolutePath());
+            } catch (IOException e) {
+                logMessage(String.format("Exceptions occurred loading resource file %s", file.getAbsolutePath()));
+            }
+            org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) VersionConvertor_40_50.convertResource(resource);
+            fileMap.put(library.getId(), file.getAbsolutePath());
+            libraries.add(library);
+        }
+
+        List<org.hl7.fhir.r5.model.Library> refreshedLibraries = super.refreshGeneratedContent(libraries);
+        for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
+            String filePath = fileMap.get(refreshedLibrary.getId());
+            Library library = (Library) VersionConvertor_40_50.convertResource(refreshedLibrary);
+            IOUtils.writeResource(library, filePath, IOUtils.getEncoding(filePath), fhirContext);
+        }
+    }
+
+    @Override
     public Boolean refreshLibraryContent(RefreshLibraryParameters params) {
-        igCanonicalBase = params.igCanonicalBase;
-        cqlContentPath = params.cqlContentPath;
+        if (params.parentContext != null) {
+            initialize(params.parentContext);
+        }
+        else {
+            initialize(params.ini);
+            igCanonicalBase = params.igCanonicalBase;
+            cqlContentPath = params.cqlContentPath;
+        }
+
         libraryPath = params.libraryPath;
         fhirContext = params.fhirContext;
         encoding = params.encoding;
         versioned = params.versioned;
 
+        refreshLibraries(libraryPath);
+
+        /*
         CqlTranslator translator = getTranslator(cqlContentPath);
 
         Boolean libraryExists = false;
@@ -68,7 +121,8 @@ public class R4LibraryProcessor extends LibraryProcessor {
             String parentDirectory = anyOtherLibraryDirectory.isPresent() ? IOUtils.getParentDirectoryPath(anyOtherLibraryDirectory.get()) : IOUtils.getParentDirectoryPath(cqlContentPath);
             generateLibrary(igCanonicalBase, cqlContentPath, parentDirectory, encoding, versioned, translator, fhirContext);
         }
-      
+        */
+
         return true;
     }
 

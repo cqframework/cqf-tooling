@@ -4,7 +4,6 @@ import static java.util.Arrays.asList;
 
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.processor.IGProcessor;
-import org.opencds.cqf.tooling.processor.IGProcessor.IGVersion;
 import org.opencds.cqf.tooling.utilities.ArgUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
@@ -17,6 +16,7 @@ import joptsimple.OptionSpecBuilder;
 public class RefreshLibraryArgumentProcessor {
     public static final String[] OPERATION_OPTIONS = {"RefreshLibrary"};
 
+    public static final String[] INI = {"ini"};
     public static final String[] IG_CANONICAL_BASE = {"igcb", "igCanonicalBase"};
     public static final String[] CQL_PATH_OPTIONS = {"cql", "content", "cqlPath", "cqlContentPath", "contentPath", "cp"};
     public static final String[] Library_PATH_OPTIONS = {"library", "libraryPath", "resourcePath", "lp", "cp"};
@@ -27,16 +27,18 @@ public class RefreshLibraryArgumentProcessor {
     public OptionParser build() {
         OptionParser parser = new OptionParser();
 
+        OptionSpecBuilder iniBuilder = parser.acceptsAll(asList(INI), "IG ini file");
         OptionSpecBuilder igCanonicalBaseBuilder = parser.acceptsAll(asList(IG_CANONICAL_BASE),"resource canonical base");
         OptionSpecBuilder cqlPathBuilder = parser.acceptsAll(asList(CQL_PATH_OPTIONS),"Library will be created in the same folder as the cql");
         OptionSpecBuilder libraryPathBuilder = parser.acceptsAll(asList(Library_PATH_OPTIONS),"If omitted, the library will be created in the same folder as the cql");
         OptionSpecBuilder fhirVersionBuilder = parser.acceptsAll(asList(FHIR_VERSION_OPTIONS),"Limited to a single version of FHIR.");
         OptionSpecBuilder outputEncodingBuilder = parser.acceptsAll(asList(OUTPUT_ENCODING), "If omitted, output will be generated using JSON encoding.");
 
+        OptionSpec<String> ini = iniBuilder.withOptionalArg().describedAs("IG ini file");
         OptionSpec<String> igCanonicalBasePath = igCanonicalBaseBuilder.withOptionalArg().describedAs("resource canonical base");
-        OptionSpec<String> cqlPath = cqlPathBuilder.withRequiredArg().describedAs("path to the cql content");
-        OptionSpec<String> libraryPath = libraryPathBuilder.withOptionalArg().describedAs("path to the library");
-        OptionSpec<String> fhirVersion = fhirVersionBuilder.withRequiredArg().describedAs("fhir version");
+        OptionSpec<String> cqlPath = cqlPathBuilder.withOptionalArg().describedAs("path to the cql content");
+        OptionSpec<String> libraryPath = libraryPathBuilder.withRequiredArg().describedAs("path to the library");
+        OptionSpec<String> fhirVersion = fhirVersionBuilder.withOptionalArg().describedAs("fhir version");
         OptionSpec<String> outputEncoding = outputEncodingBuilder.withOptionalArg().describedAs("desired output encoding for resources");
 
         parser.acceptsAll(asList(OPERATION_OPTIONS),"The operation to run.");
@@ -53,6 +55,7 @@ public class RefreshLibraryArgumentProcessor {
 
         ArgUtils.ensure(OPERATION_OPTIONS[0], options);
 
+        String ini = (String)options.valueOf(INI[0]);
         String igCanonicalBase = (String)options.valueOf(IG_CANONICAL_BASE[0]);
         String cqlPath = (String)options.valueOf(CQL_PATH_OPTIONS[0]);
         String fhirVersion = (String)options.valueOf(FHIR_VERSION_OPTIONS[0]);
@@ -68,9 +71,10 @@ public class RefreshLibraryArgumentProcessor {
         Boolean versioned = options.has(VERSIONED_OPTIONS[0]);
     
         RefreshLibraryParameters lp = new RefreshLibraryParameters();
+        lp.ini = ini;
         lp.igCanonicalBase = igCanonicalBase;
         lp.cqlContentPath = cqlPath;
-        lp.fhirContext = IGProcessor.getIgFhirContext(IGVersion.parse(fhirVersion));
+        lp.fhirContext = IGProcessor.getIgFhirContext(fhirVersion);
         lp.encoding = outputEncodingEnum;
         lp.versioned = versioned;
         lp.libraryPath = libraryPath;

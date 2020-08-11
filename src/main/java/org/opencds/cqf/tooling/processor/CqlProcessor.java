@@ -13,6 +13,7 @@ import org.fhir.ucum.UcumService;
 import org.hl7.cql.model.*;
 import org.hl7.elm.r1.*;
 import org.hl7.elm.r1.Expression;
+import org.hl7.fhir.convertors.VersionConvertorResourceNameMapper;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.context.IWorkerContext.ILoggingService;
 import org.hl7.fhir.r5.model.*;
@@ -32,8 +33,8 @@ public class CqlProcessor {
         private byte[] elm;
         private byte[] jsonElm;
         private List<ValidationMessage> errors = new ArrayList<>();
-        private List<DataRequirement> dataRequirements = new ArrayList<>();
         private List<RelatedArtifact> relatedArtifacts = new ArrayList<>();
+        private List<DataRequirement> dataRequirements = new ArrayList<>();
         private List<ParameterDefinition> parameters = new ArrayList<>();
         public byte[] getElm() {
             return elm;
@@ -50,11 +51,11 @@ public class CqlProcessor {
         public List<ValidationMessage> getErrors() {
             return errors;
         }
-        public List<DataRequirement> getDataRequirements() {
-            return dataRequirements;
-        }
         public List<RelatedArtifact> getRelatedArtifacts() {
             return relatedArtifacts;
+        }
+        public List<DataRequirement> getDataRequirements() {
+            return dataRequirements;
         }
         public List<ParameterDefinition> getParameters() {
             return parameters;
@@ -220,7 +221,9 @@ public class CqlProcessor {
         // Construct FhirLibrarySourceProvider
         ModelManager modelManager = new ModelManager();
         LibraryManager libraryManager = new LibraryManager(modelManager);
-        libraryManager.getLibrarySourceLoader().registerProvider(new NpmLibrarySourceProvider(packages, reader, logger));
+        if (packages != null) {
+            libraryManager.getLibrarySourceLoader().registerProvider(new NpmLibrarySourceProvider(packages, reader, logger));
+        }
         libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
         libraryManager.getLibrarySourceLoader().registerProvider(new DefaultLibrarySourceProvider(Paths.get(folder)));
 
@@ -237,10 +240,12 @@ public class CqlProcessor {
             libraryManager.getNamespaceManager().addNamespace(namespaceInfo);
         }
 
-        for (NpmPackage p : packages) {
-            if (p.name() != null && !p.name().isEmpty() && p.canonical() != null && !p.canonical().isEmpty()) {
-                NamespaceInfo ni = new NamespaceInfo(p.name(), p.canonical());
-                libraryManager.getNamespaceManager().addNamespace(ni);
+        if (packages != null) {
+            for (NpmPackage p : packages) {
+                if (p.name() != null && !p.name().isEmpty() && p.canonical() != null && !p.canonical().isEmpty()) {
+                    NamespaceInfo ni = new NamespaceInfo(p.name(), p.canonical());
+                    libraryManager.getNamespaceManager().addNamespace(ni);
+                }
             }
         }
     }

@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.processor.IGProcessor;
-import org.opencds.cqf.tooling.processor.IGProcessor.IGVersion;
 import org.opencds.cqf.tooling.utilities.ArgUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
@@ -22,9 +21,9 @@ public class RefreshIGArgumentProcessor {
 
     public static final String[] OPERATION_OPTIONS = {"RefreshIG"};
 
-    public static final String[] IG_RESOURCE_PATH_OPTIONS = {"igrp", "ig-resource-path"};
+    public static final String[] INI_OPTIONS = {"ini"};
+    public static final String[] ROOT_DIR_OPTIONS = {"root-dir"};
     public static final String[] IG_PATH_OPTIONS = {"ip", "ig-path"};
-    public static final String[] IG_VERSION_OPTIONS = {"iv", "ig-version"};
     public static final String[] IG_OUTPUT_ENCODING = {"e", "encoding"};
     public static final String[] INCLUDE_ELM_OPTIONS = {"elm", "include-elm"};
     public static final String[] INCLUDE_DEPENDENCY_LIBRARY_OPTIONS = {"d", "include-dependencies"};
@@ -39,18 +38,18 @@ public class RefreshIGArgumentProcessor {
     public OptionParser build() {
         OptionParser parser = new OptionParser();
 
-        OptionSpecBuilder igResourcePathBuilder = parser.acceptsAll(asList(IG_RESOURCE_PATH_OPTIONS),"Path to the file containing the ImplementationGuide FHIR Resource.");
-        OptionSpecBuilder igPathBuilder = parser.acceptsAll(asList(IG_PATH_OPTIONS),"Limited to a single version of FHIR.");
+        OptionSpecBuilder iniBuilder = parser.acceptsAll(asList(INI_OPTIONS), "Path to ig ini file");
+        OptionSpecBuilder rootDirBuilder = parser.acceptsAll(asList(ROOT_DIR_OPTIONS), "Root directory of the ig");
+        OptionSpecBuilder igPathBuilder = parser.acceptsAll(asList(IG_PATH_OPTIONS),"Path to the IG, relative to the root directory");
         OptionSpecBuilder resourcePathBuilder = parser.acceptsAll(asList(RESOURCE_PATH_OPTIONS),"Use multiple times to define multiple resource directories.");
-        OptionSpecBuilder igVersionBuilder = parser.acceptsAll(asList(IG_VERSION_OPTIONS),"If omitted the root of the IG Path will be used.");
         OptionSpecBuilder igOutputEncodingBuilder = parser.acceptsAll(asList(IG_OUTPUT_ENCODING), "If omitted, output will be generated using JSON encoding.");
         OptionSpecBuilder fhirUriBuilder = parser.acceptsAll(asList(FHIR_URI_OPTIONS),"If omitted the final bundle will not be loaded to a FHIR server.");
         OptionSpecBuilder measureToRefreshPathBuilder = parser.acceptsAll(asList(MEASURE_TO_REFRESH_PATH), "Path to Measure to refresh.");
 
-        OptionSpec<String> igResourcePath = igResourcePathBuilder.withOptionalArg().describedAs("Path to the file containing the ImplementationGuide FHIR Resource.");
-        OptionSpec<String> igPath = igPathBuilder.withRequiredArg().describedAs("root directory of the ig");
+        OptionSpec<String> ini = iniBuilder.withOptionalArg().describedAs("Path to the IG ini file");
+        OptionSpec<String> rootDir = rootDirBuilder.withOptionalArg().describedAs("Root directory of the IG");
+        OptionSpec<String> igPath = igPathBuilder.withRequiredArg().describedAs("Path to the IG, relative to the root directory");
         OptionSpec<String> resourcePath = resourcePathBuilder.withOptionalArg().describedAs("directory of resources");
-        OptionSpec<String> igVersion = igVersionBuilder.withOptionalArg().describedAs("ig fhir version");
         OptionSpec<String> igOutputEncoding = igOutputEncodingBuilder.withOptionalArg().describedAs("desired output encoding for resources");
         OptionSpec<String> measureToRefreshPath = measureToRefreshPathBuilder.withOptionalArg().describedAs("Path to Measure to refresh.");
 
@@ -76,17 +75,13 @@ public class RefreshIGArgumentProcessor {
 
         ArgUtils.ensure(OPERATION_OPTIONS[0], options);
 
-        String igResourcePath = (String)options.valueOf(IG_RESOURCE_PATH_OPTIONS[0]);
-        igResourcePath = (igResourcePath.equals("") || igResourcePath == null) ? igResourcePath : Paths.get(igResourcePath).toAbsolutePath().toString();
-        String igPath = (String)options.valueOf(IG_PATH_OPTIONS[0]);               
-        igPath = Paths.get(igPath).toAbsolutePath().toString();        
+        String ini = (String)options.valueOf(INI_OPTIONS[0]);
+
+        String rootDir = (String)options.valueOf(ROOT_DIR_OPTIONS[0]);
+        String igPath = (String)options.valueOf(IG_PATH_OPTIONS[0]);
 
         List<String> resourcePaths = (List<String>)options.valuesOf(RESOURCE_PATH_OPTIONS[0]);
         //could not easily use the built-in default here because it is based on the value of the igPath argument.
-        String igVersion = (String)options.valueOf(IG_VERSION_OPTIONS[0]);
-        if(igVersion == null) {
-            igVersion = ArgUtils.defaultValue(options, IG_VERSION_OPTIONS[0], IGProcessor.getIgVersion(igPath).toString());
-        }
         String igEncoding = (String)options.valueOf(IG_OUTPUT_ENCODING[0]);
         Encoding outputEncodingEnum = Encoding.JSON;
         if (igEncoding != null) {
@@ -105,9 +100,9 @@ public class RefreshIGArgumentProcessor {
         paths.addAll(resourcePaths);
     
         RefreshIGParameters ip = new RefreshIGParameters();
-        ip.igResourcePath = igResourcePath;
+        ip.ini = ini;
+        ip.rootDir = rootDir;
         ip.igPath = igPath;
-        ip.igVersion = IGVersion.parse(igVersion);
         ip.outputEncoding = outputEncodingEnum;
         ip.includeELM = includeELM;
         ip.includeDependencies = includeDependencies;
