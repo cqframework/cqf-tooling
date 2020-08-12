@@ -72,7 +72,7 @@ public class RefreshR4Measure extends RefreshGeneratedContent {
     }
 
     public Measure refreshMeasure(Measure measure) {
-        cqfmHelper.ensureToolingExtensionAndDevice(measure);
+        cqfmHelper.ensureToolingExtensionAndDevice(measure, this.getContext());
         return measure;
     }
 }
