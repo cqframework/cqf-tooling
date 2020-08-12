@@ -7,10 +7,8 @@ import org.opencds.cqf.tooling.parameter.MeasureTestParameters;
 import org.opencds.cqf.tooling.processor.argument.ExecuteMeasureTestArgumentProcessor;
 import org.opencds.cqf.tooling.utilities.FhirContextCache;
 import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 
 public class ExecuteMeasureTestOperation extends Operation {
 

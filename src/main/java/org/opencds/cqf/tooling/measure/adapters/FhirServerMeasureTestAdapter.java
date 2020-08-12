@@ -2,7 +2,6 @@ package org.opencds.cqf.tooling.measure.adapters;
 
 import java.util.Objects;
 
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -31,6 +30,6 @@ public abstract class FhirServerMeasureTestAdapter extends MeasureTestAdapter {
 
     @Override
     protected IBaseResource evaluate() {
-        
+        return null;
     }
 }

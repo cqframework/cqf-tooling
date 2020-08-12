@@ -1,12 +1,12 @@
 package org.opencds.cqf.tooling.utilities;
 
-import org.hl7.fhir.r5.model.ImplementationGuide;
-import org.hl7.fhir.utilities.Utilities;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.hl7.fhir.r5.model.ImplementationGuide;
+import org.hl7.fhir.utilities.Utilities;
 
 public class IGUtils {
     public static String getImplementationGuideCanonicalBase(String url) {

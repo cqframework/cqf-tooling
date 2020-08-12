@@ -1,13 +1,7 @@
 package org.opencds.cqf.tooling.utilities;
 
-import java.util.Objects;
-
-import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-import joptsimple.ValueConverter;
 
 public class ArgUtils {
     public static final String[] HELP_OPTIONS = {"h", "help", "?"};

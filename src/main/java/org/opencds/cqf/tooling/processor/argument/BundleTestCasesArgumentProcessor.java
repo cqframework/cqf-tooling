@@ -3,7 +3,6 @@ package org.opencds.cqf.tooling.processor.argument;
 import static java.util.Arrays.asList;
 
 import org.opencds.cqf.tooling.parameter.BundleTestCasesParameters;
-import org.opencds.cqf.tooling.processor.IGProcessor;
 import org.opencds.cqf.tooling.utilities.ArgUtils;
 
 import joptsimple.OptionParser;

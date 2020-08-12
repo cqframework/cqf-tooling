@@ -1,6 +1,6 @@
 package org.opencds.cqf.tooling.measure;
 
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
@@ -59,7 +59,7 @@ public abstract class RefreshGeneratedContent extends Operation {
         refreshGeneratedContent();
     }
 
-    public void output(IAnyResource resource, IOUtils.Encoding encoding) {
+    public void output(IBaseResource resource, IOUtils.Encoding encoding) {
         IOUtils.writeResource(resource, pathToMeasures, encoding, context);
     }
 

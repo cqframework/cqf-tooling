@@ -28,7 +28,6 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.processor.LibraryProcessor;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -156,7 +155,7 @@ public class IOUtils
     }
 
     public static String getTypeQualifiedResourceId(String path, FhirContext fhirContext) {
-        IAnyResource resource = readResource(path, fhirContext, true);
+        IBaseResource resource = readResource(path, fhirContext, true);
         if (resource != null) {
             return resource.getIdElement().getResourceType() + "/" + resource.getIdElement().getIdPart();
         }
@@ -164,7 +163,7 @@ public class IOUtils
         return null;
     }
 
-    public static String getCanonicalResourceVersion(IAnyResource resource, FhirContext fhirContext) {
+    public static String getCanonicalResourceVersion(IBaseResource resource, FhirContext fhirContext) {
         switch (fhirContext.getVersion().getVersion()) {
             case DSTU3:
                 if (resource instanceof org.hl7.fhir.dstu3.model.MetadataResource) {
@@ -184,7 +183,7 @@ public class IOUtils
     }
 
     public static String getCanonicalResourceVersion(String path, FhirContext fhirContext) {
-        IAnyResource resource = readResource(path, fhirContext, true);
+        IBaseResource resource = readResource(path, fhirContext, true);
         return getCanonicalResourceVersion(path, fhirContext);
     }
 
@@ -264,7 +263,7 @@ public class IOUtils
         return filePaths;
     }
 
-    public static String getResourceFileName(String resourcePath, IAnyResource resource, Encoding encoding, FhirContext fhirContext, boolean versioned) {
+    public static String getResourceFileName(String resourcePath, IBaseResource resource, Encoding encoding, FhirContext fhirContext, boolean versioned) {
         String resourceVersion = IOUtils.getCanonicalResourceVersion(resource, fhirContext);
         String result = Paths.get(resourcePath, resource.getIdElement().getResourceType(),
                 resource.getIdElement().getIdPart() + ((versioned && resourceVersion != null && !(resource.getIdElement().getIdPart().endsWith(resourceVersion))) ? ("-" + resourceVersion) : ""))
@@ -735,7 +734,7 @@ public class IOUtils
         return devicePaths;
     }
     private static void setupDevicePaths(FhirContext fhirContext) {
-        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        HashMap<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
             {

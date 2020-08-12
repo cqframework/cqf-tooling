@@ -7,9 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.JsonParser;
-import ca.uhn.fhir.parser.XmlParser;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Device;
@@ -23,6 +20,10 @@ import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.tooling.Main;
 import org.opencds.cqf.tooling.common.BaseCqfmSoftwareSystemHelper;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.JsonParser;
+import ca.uhn.fhir.parser.XmlParser;
 
 public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 
