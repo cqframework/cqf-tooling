@@ -7,6 +7,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public abstract class FhirServerMeasureTestAdapter extends MeasureTestAdapter {
 
@@ -30,6 +31,6 @@ public abstract class FhirServerMeasureTestAdapter extends MeasureTestAdapter {
 
     @Override
     protected IBaseResource evaluate() {
-        return null;
+        throw new NotImplementedException();
     }
 }
