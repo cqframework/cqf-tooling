@@ -721,4 +721,34 @@ public class IOUtils
                 .forEach(entry -> activityDefinitionPaths.add(entry.getKey()));
         }
     }
+
+    private static HashSet<String> devicePaths = new HashSet<String>();
+    public static HashSet<String> getDevicePaths(FhirContext fhirContext) {
+        if (devicePaths.isEmpty()) {
+            setupDevicePaths(fhirContext);
+        }
+        return devicePaths;
+    }
+    private static void setupDevicePaths(FhirContext fhirContext) {
+        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        for(String dir : resourceDirectories) {
+            for(String path : IOUtils.getFilePaths(dir, true))
+            {
+                try {
+                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                } catch (Exception e) {
+                    if(path.toLowerCase().contains("device")) {
+                        System.out.println("Error reading in Device from path: " + path + "\n" + e);
+                    }
+                }
+            }
+            //TODO: move these to ResourceUtils
+            RuntimeResourceDefinition deviceDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "Device");
+            String deviceClassName = deviceDefinition.getImplementingClass().getName();
+            resources.entrySet().stream()
+                    .filter(entry -> entry.getValue() != null)
+                    .filter(entry ->  deviceClassName.equals(entry.getValue().getClass().getName()))
+                    .forEach(entry -> devicePaths.add(entry.getKey()));
+        }
+    }
 }
