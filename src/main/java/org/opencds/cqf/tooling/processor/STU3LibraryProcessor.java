@@ -1,7 +1,6 @@
 package org.opencds.cqf.tooling.processor;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -13,7 +12,6 @@ import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.elm.r1.ValueSetRef;
 import org.hl7.fhir.convertors.VersionConvertor_30_50;
-import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -22,7 +20,6 @@ import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
-import org.hl7.fhir.dstu3.formats.FormatUtilities;
 import org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper;
 import org.opencds.cqf.tooling.library.GenericLibrarySourceProvider;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
@@ -44,7 +41,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
     /*
     Refresh all library resources in the given libraryPath
      */
-    public void refreshLibraries(String libraryPath) {
+    protected List<String> refreshLibraries(String libraryPath) {
         File file = new File(libraryPath);
         Map<String, String> fileMap = new HashMap<String, String>();
         List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
@@ -63,16 +60,21 @@ public class STU3LibraryProcessor extends LibraryProcessor {
             libraries.add(library);
         }
 
+        List<String> refreshedLibraryNames = new ArrayList<String>();
         List<org.hl7.fhir.r5.model.Library> refreshedLibraries = super.refreshGeneratedContent(libraries);
         for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
             String filePath = fileMap.get(refreshedLibrary.getId());
             org.hl7.fhir.dstu3.model.Library library = (org.hl7.fhir.dstu3.model.Library) VersionConvertor_30_50.convertResource(refreshedLibrary, false);
+            cqfmHelper.ensureToolingExtensionAndDevice(library);
             IOUtils.writeResource(library, filePath, IOUtils.getEncoding(filePath), fhirContext);
+            refreshedLibraryNames.add(refreshedLibrary.getName());
         }
+
+        return refreshedLibraryNames;
     }
 
     @Override
-    public Boolean refreshLibraryContent(RefreshLibraryParameters params) {
+    public List<String> refreshLibraryContent(RefreshLibraryParameters params) {
         if (params.parentContext != null) {
             initialize(parentContext);
         }
@@ -87,7 +89,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         encoding = params.encoding;
         versioned = params.versioned;
 
-        refreshLibraries(libraryPath);
+        return refreshLibraries(libraryPath);
 
 /*
         CqlTranslator translator = getTranslator(cqlContentPath);
@@ -114,8 +116,6 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         }
 
  */
-      
-        return true;
     }
 
     private static void refreshLibrary(String igCanonicalBase, Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, Boolean versioned, CqlTranslator translator, FhirContext fhirContext) {
