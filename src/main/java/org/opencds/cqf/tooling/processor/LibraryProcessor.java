@@ -11,11 +11,9 @@ import org.apache.commons.io.FilenameUtils;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
-import org.hl7.fhir.Resource;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Attachment;
-import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
@@ -33,6 +31,34 @@ public class LibraryProcessor extends BaseProcessor {
     public static final String ResourcePrefix = "library-";   
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
+    }
+
+    public static List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext) {
+        System.out.println("Refreshing libraries...");
+        ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
+
+        LibraryProcessor libraryProcessor;
+        switch (fhirContext.getVersion().getVersion()) {
+            case DSTU3:
+                libraryProcessor = new STU3LibraryProcessor();
+                break;
+            case R4:
+                libraryProcessor = new R4LibraryProcessor();
+                break;
+            default:
+                throw new IllegalArgumentException(
+                        "Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+        }
+
+        String libraryPath = FilenameUtils.concat(parentContext.rootDir, IGProcessor.libraryPathElement);
+        RefreshLibraryParameters params = new RefreshLibraryParameters();
+        params.libraryPath = libraryPath;
+        params.parentContext = parentContext;
+        params.fhirContext = fhirContext;
+        params.encoding = outputEncoding;
+        params.versioned = versioned;
+        params.libraryPath = libraryPath;
+        return libraryProcessor.refreshLibraryContent(params);
     }
 
     public static Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IAnyResource> resources,
@@ -145,7 +171,7 @@ public class LibraryProcessor extends BaseProcessor {
         return resources;
     }
 
-    private Attachment loadFile(String fn) throws FileNotFoundException, IOException {
+    private Attachment loadFile(String fn) throws IOException {
         for (String dir : binaryPaths) {
             File f = new File(Utilities.path(dir, fn));
             if (f.exists()) {
@@ -159,13 +185,7 @@ public class LibraryProcessor extends BaseProcessor {
         return null;
     }
 
-/*
-    private void performLibraryCQLProcessing(FetchedFile f, org.hl7.fhir.r5.model.Library lib, Attachment attachment) {
-
-    }
- */
-
-    public Boolean refreshLibraryContent(RefreshLibraryParameters params) {
-        return false;
+    public List<String> refreshLibraryContent(RefreshLibraryParameters params) {
+        return new ArrayList<String>();
     }
 }
