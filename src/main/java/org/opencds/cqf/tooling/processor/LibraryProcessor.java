@@ -57,7 +57,6 @@ public class LibraryProcessor extends BaseProcessor {
         params.fhirContext = fhirContext;
         params.encoding = outputEncoding;
         params.versioned = versioned;
-        params.libraryPath = libraryPath;
         return libraryProcessor.refreshLibraryContent(params);
     }
 
@@ -179,10 +178,10 @@ public class LibraryProcessor extends BaseProcessor {
 
                 if (existingLibrary == null) {
                     Library newLibrary = new Library();
-                    newLibrary.setId(fileInfo.getIdentifier().getId());
                     newLibrary.setName(fileInfo.getIdentifier().getId());
                     newLibrary.setVersion(fileInfo.getIdentifier().getVersion());
-                    newLibrary.setUrl(String.format("%s/Library/%s", canonicalBase, fileInfo.getIdentifier().getId()));
+                    newLibrary.setUrl(String.format("%s/Library/%s", (newLibrary.getName().equals("FHIRHelpers") ? "http://hl7.org/fhir" : canonicalBase), fileInfo.getIdentifier().getId()));
+                    newLibrary.setId(LibraryProcessor.getId(newLibrary.getName()) + (versioned ? "-" + newLibrary.getVersion() : ""));
                     sourceLibraries.add(newLibrary);
                 }
             }
