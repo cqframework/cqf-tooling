@@ -164,6 +164,30 @@ public class LibraryProcessor extends BaseProcessor {
 
         cqlProcessor.execute();
 
+        // For each CQL file, ensure that there is a Library resource with a matching name and version
+        for (CqlProcessor.CqlSourceFileInformation fileInfo : cqlProcessor.getAllFileInformation()) {
+            if (fileInfo.getIdentifier() != null && fileInfo.getIdentifier().getId() != null && !fileInfo.getIdentifier().getId().equals("")) {
+                Library existingLibrary = null;
+                for (Library sourceLibrary : sourceLibraries) {
+                    if (fileInfo.getIdentifier().getId().equals(sourceLibrary.getName())
+                            && (fileInfo.getIdentifier().getVersion() == null || fileInfo.getIdentifier().getVersion().equals(sourceLibrary.getVersion()))
+                    ) {
+                        existingLibrary = sourceLibrary;
+                        break;
+                    }
+                }
+
+                if (existingLibrary == null) {
+                    Library newLibrary = new Library();
+                    newLibrary.setId(fileInfo.getIdentifier().getId());
+                    newLibrary.setName(fileInfo.getIdentifier().getId());
+                    newLibrary.setVersion(fileInfo.getIdentifier().getVersion());
+                    newLibrary.setUrl(String.format("%s/Library/%s", canonicalBase, fileInfo.getIdentifier().getId()));
+                    sourceLibraries.add(newLibrary);
+                }
+            }
+        }
+
         List<Library> resources = new ArrayList<Library>();
         for (Library library : sourceLibraries) {
             resources.add(refreshGeneratedContent(library));
