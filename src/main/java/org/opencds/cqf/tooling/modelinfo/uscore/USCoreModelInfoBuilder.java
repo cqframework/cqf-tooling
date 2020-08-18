@@ -29,18 +29,25 @@ public class USCoreModelInfoBuilder extends ModelInfoBuilder {
                     "\n" +
                     "using FHIR version '4.0.1'\n" +
                     "\n" +
-                    "define function ToInterval(period FHIR.Period):\n" +
-                    "    if period is null then\n" +
-                    "        null\n" +
-                    "    else\n" +
-                    "        Interval[period.\"start\".value, period.\"end\".value]\n" +
-                    "\n" +
-                    "define function ToQuantity(quantity FHIR.Quantity):\n" +
-                    "    if quantity is null then\n" +
-                    "        null\n" +
-                    "    else\n" +
-                    "        System.Quantity { value: quantity.value.value, unit: quantity.unit.value }\n" +
-                    "\n" +
+                    "define function ToInterval(period FHIR.Period):\n"+
+                    "    if period is null then\n"+
+                    "        null\n"+
+                    "    else\n"+
+                    "        if period.\"start\" is null then\n"+
+                    "            Interval(period.\"start\".value, period.\"end\".value]\n"+
+                    "        else\n"+
+                    "            Interval[period.\"start\".value, period.\"end\".value]\n"+
+                    "\n"+
+                    "define function ToQuantity(quantity FHIR.Quantity):\n"+
+                    "    case\n"+
+                    "        when quantity is null then null\n"+
+                    "        when quantity.value is null then null\n"+
+                    "        when quantity.system is null or quantity.system.value = \'http://unitsofmeasure.org\' then\n"+
+                    "            System.Quantity { value: quantity.value.value, unit: quantity.code.value }\n"+
+                    "        else\n"+
+                    "            Message(null, true, \'FHIRHelpers.ToQuantity.InvalidFHIRQuantity\', \'Error\', \'Invalid FHIR Quantity code: \' & quantity.code.value)\n"+
+                    "    end\n"+
+                    "\n"+
                     "define function ToRatio(ratio FHIR.Ratio):\n" +
                     "    if ratio is null then\n" +
                     "        null\n" +
