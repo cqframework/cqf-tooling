@@ -107,6 +107,7 @@ public class MeasureProcessor
                     if (path.endsWith(refreshedLibraryFileName))
                     {
                         measureSourcePath = path;
+                        break;
                     }
                 }
 

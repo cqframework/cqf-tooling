@@ -98,27 +98,17 @@ public class IGProcessor extends BaseProcessor {
 
         IGProcessor.ensure(rootDir, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
 
-        LibraryProcessor libraryProcessor;
-        switch (fhirContext.getVersion().getVersion()) {
-            case DSTU3:
-                libraryProcessor = new STU3LibraryProcessor();
-                break;
-            case R4:
-                libraryProcessor = new R4LibraryProcessor();
-                break;
-            default:
-                throw new IllegalArgumentException(
-                        "Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
-        }
+        List<String> refreshedLibraryNames;
+        refreshedLibraryNames = LibraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
+        // Only add measures, not libraries
+        //refreshedResourcesNames.addAll(refreshedLibraryNames);
 
-        refreshedResourcesNames = refreshIgLibraryContent(libraryProcessor, encoding, includeELM, versioned, fhirContext);
-
-        List<String> refreshedMeasureNames = new ArrayList<String>();
+        List<String> refreshedMeasureNames;
         refreshedMeasureNames = MeasureProcessor.refreshIgMeasureContent(rootDir, encoding, versioned, fhirContext, measureToRefreshPath);
         refreshedResourcesNames.addAll(refreshedMeasureNames);
 
         if (refreshedResourcesNames.isEmpty()) {
-            LogUtils.info("No libraries successfully refreshed.");
+            LogUtils.info("No resources successfully refreshed.");
             return;
         }
 
@@ -205,23 +195,5 @@ public class IGProcessor extends BaseProcessor {
             // leads to surprising results when bundling like picking up resources from the /tests directory.
             IOUtils.resourceDirectories.add(FilenameUtils.concat(igPath, pathElement));
         }
-    }
-
-    public ArrayList<String> refreshIgLibraryContent(LibraryProcessor libraryProcessor, Encoding outputEncoding, Boolean includeELM,
-                                                            Boolean versioned, FhirContext fhirContext) {
-        LogUtils.info("Refreshing libraries...");
-        ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
-        HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
-
-        String libraryPath = FilenameUtils.concat(rootDir, libraryPathElement);
-        RefreshLibraryParameters params = new RefreshLibraryParameters();
-        params.parentContext = this;
-        params.fhirContext = fhirContext;
-        params.encoding = outputEncoding;
-        params.versioned = versioned;
-        params.libraryPath = libraryPath;
-        libraryProcessor.refreshLibraryContent(params);
-
-        return refreshedLibraryNames;
     }
 }
