@@ -89,7 +89,13 @@ public class R4LibraryProcessor extends LibraryProcessor {
             }    
             cqfmHelper.ensureToolingExtensionAndDevice(library, fhirContext);
             IOUtils.writeResource(library, filePath, fileEncoding, fhirContext);
-            refreshedLibraryNames.add(refreshedLibrary.getName());
+            String refreshedLibraryName;
+            if (this.versioned && refreshedLibrary.getVersion() != null) {
+                refreshedLibraryName = refreshedLibrary.getName() + "-" + refreshedLibrary.getVersion();
+            } else {
+                refreshedLibraryName = refreshedLibrary.getName();
+            }
+            refreshedLibraryNames.add(refreshedLibraryName);
         }
 
         return refreshedLibraryNames;
