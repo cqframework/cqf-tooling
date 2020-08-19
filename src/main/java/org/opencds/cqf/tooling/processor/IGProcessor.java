@@ -101,7 +101,7 @@ public class IGProcessor extends BaseProcessor {
         List<String> refreshedLibraryNames;
         refreshedLibraryNames = LibraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
         // Only add measures, not libraries
-        refreshedResourcesNames.addAll(refreshedLibraryNames);
+        //refreshedResourcesNames.addAll(refreshedLibraryNames);
 
         List<String> refreshedMeasureNames;
         refreshedMeasureNames = MeasureProcessor.refreshIgMeasureContent(rootDir, encoding, versioned, fhirContext, measureToRefreshPath);
