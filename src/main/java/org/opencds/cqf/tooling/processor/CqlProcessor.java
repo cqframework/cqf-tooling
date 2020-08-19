@@ -3,11 +3,7 @@ package org.opencds.cqf.tooling.processor;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
