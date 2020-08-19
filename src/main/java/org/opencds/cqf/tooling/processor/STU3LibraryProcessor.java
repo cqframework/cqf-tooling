@@ -1,11 +1,7 @@
 package org.opencds.cqf.tooling.processor;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -45,7 +41,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
     /*
     Refresh all library resources in the given libraryPath
      */
-    public void refreshLibraries(String libraryPath) {
+    protected List<String> refreshLibraries(String libraryPath) {
         File file = new File(libraryPath);
         Map<String, String> fileMap = new HashMap<String, String>();
         List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
@@ -64,17 +60,27 @@ public class STU3LibraryProcessor extends LibraryProcessor {
             libraries.add(library);
         }
 
+        List<String> refreshedLibraryNames = new ArrayList<String>();
         List<org.hl7.fhir.r5.model.Library> refreshedLibraries = super.refreshGeneratedContent(libraries);
         for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
             String filePath = fileMap.get(refreshedLibrary.getId());
             org.hl7.fhir.dstu3.model.Library library = (org.hl7.fhir.dstu3.model.Library) VersionConvertor_30_50.convertResource(refreshedLibrary, false);
             cqfmHelper.ensureToolingExtensionAndDevice(library, fhirContext);
             IOUtils.writeResource(library, filePath, IOUtils.getEncoding(filePath), fhirContext);
+            String refreshedLibraryName;
+            if (this.versioned && refreshedLibrary.getVersion() != null) {
+                refreshedLibraryName = refreshedLibrary.getName() + "-" + refreshedLibrary.getVersion();
+            } else {
+                refreshedLibraryName = refreshedLibrary.getName();
+            }
+            refreshedLibraryNames.add(refreshedLibraryName);
         }
+
+        return refreshedLibraryNames;
     }
 
     @Override
-    public Boolean refreshLibraryContent(RefreshLibraryParameters params) {
+    public List<String> refreshLibraryContent(RefreshLibraryParameters params) {
         if (params.parentContext != null) {
             initialize(parentContext);
         }
@@ -89,7 +95,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         encoding = params.encoding;
         versioned = params.versioned;
 
-        refreshLibraries(libraryPath);
+        return refreshLibraries(libraryPath);
 
 /*
         CqlTranslator translator = getTranslator(cqlContentPath);
@@ -116,8 +122,6 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         }
 
  */
-      
-        return true;
     }
 
     private static void refreshLibrary(String igCanonicalBase, Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, Boolean versioned, CqlTranslator translator, FhirContext fhirContext) {

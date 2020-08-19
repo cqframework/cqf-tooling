@@ -76,18 +76,27 @@ public class PlanDefinitionProcessor {
                 String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
                 
                 if (includeTerminology) {
-                    shouldPersist = shouldPersist
-                        & ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
+                    boolean result = ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
+                    if (shouldPersist && !result) {
+                        LogUtils.info("PlanDefinitions will not be bundled because ValuSet bundling failed.");
+                    }
+                    shouldPersist = shouldPersist & result;
                 }
 
                 if (includeDependencies) {
-                    shouldPersist = shouldPersist
-                        & LibraryProcessor.bundleLibraryDependencies(librarySourcePath, fhirContext, resources, encoding, includeVersion);
+                    boolean result = LibraryProcessor.bundleLibraryDependencies(librarySourcePath, fhirContext, resources, encoding, includeVersion);
+                    if (shouldPersist && !result) {
+                        LogUtils.info("PlanDefinitions will not be bundled because Library Dependency bundling failed.");
+                    }
+                    shouldPersist = shouldPersist & result;
                 }
 
                 if (includePatientScenarios) {
-                    shouldPersist = shouldPersist
-                        & TestCaseProcessor.bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
+                    boolean result = TestCaseProcessor.bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
+                    if (shouldPersist && !result) {
+                        LogUtils.info("PlanDefinitions will not be bundled because Test Case bundling failed.");
+                    }
+                    shouldPersist = shouldPersist & result;
                 }
 
                 List<String> activityDefinitionPaths =  CDSHooksProcessor.bundleActivityDefinitions(planDefinitionSourcePath, fhirContext, resources, encoding, includeVersion, shouldPersist);

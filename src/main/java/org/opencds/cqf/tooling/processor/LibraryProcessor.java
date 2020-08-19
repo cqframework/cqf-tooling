@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
@@ -30,6 +31,33 @@ public class LibraryProcessor extends BaseProcessor {
     public static final String ResourcePrefix = "library-";   
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
+    }
+    
+    public static List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext) {
+        System.out.println("Refreshing libraries...");
+        ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
+
+        LibraryProcessor libraryProcessor;
+        switch (fhirContext.getVersion().getVersion()) {
+            case DSTU3:
+                libraryProcessor = new STU3LibraryProcessor();
+                break;
+            case R4:
+                libraryProcessor = new R4LibraryProcessor();
+                break;
+            default:
+                throw new IllegalArgumentException(
+                        "Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+        }
+
+        String libraryPath = FilenameUtils.concat(parentContext.rootDir, IGProcessor.libraryPathElement);
+        RefreshLibraryParameters params = new RefreshLibraryParameters();
+        params.libraryPath = libraryPath;
+        params.parentContext = parentContext;
+        params.fhirContext = fhirContext;
+        params.encoding = outputEncoding;
+        params.versioned = versioned;
+        return libraryProcessor.refreshLibraryContent(params);
     }
 
     public static Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
@@ -135,6 +163,30 @@ public class LibraryProcessor extends BaseProcessor {
 
         cqlProcessor.execute();
 
+        // For each CQL file, ensure that there is a Library resource with a matching name and version
+        for (CqlProcessor.CqlSourceFileInformation fileInfo : cqlProcessor.getAllFileInformation()) {
+            if (fileInfo.getIdentifier() != null && fileInfo.getIdentifier().getId() != null && !fileInfo.getIdentifier().getId().equals("")) {
+                Library existingLibrary = null;
+                for (Library sourceLibrary : sourceLibraries) {
+                    if (fileInfo.getIdentifier().getId().equals(sourceLibrary.getName())
+                            && (fileInfo.getIdentifier().getVersion() == null || fileInfo.getIdentifier().getVersion().equals(sourceLibrary.getVersion()))
+                    ) {
+                        existingLibrary = sourceLibrary;
+                        break;
+                    }
+                }
+
+                if (existingLibrary == null) {
+                    Library newLibrary = new Library();
+                    newLibrary.setName(fileInfo.getIdentifier().getId());
+                    newLibrary.setVersion(fileInfo.getIdentifier().getVersion());
+                    newLibrary.setUrl(String.format("%s/Library/%s", (newLibrary.getName().equals("FHIRHelpers") ? "http://hl7.org/fhir" : canonicalBase), fileInfo.getIdentifier().getId()));
+                    newLibrary.setId(LibraryProcessor.getId(newLibrary.getName()) + (versioned ? "-" + newLibrary.getVersion() : ""));
+                    sourceLibraries.add(newLibrary);
+                }
+            }
+        }
+
         List<Library> resources = new ArrayList<Library>();
         for (Library library : sourceLibraries) {
             resources.add(refreshGeneratedContent(library));
@@ -142,7 +194,7 @@ public class LibraryProcessor extends BaseProcessor {
         return resources;
     }
 
-    private Attachment loadFile(String fn) throws FileNotFoundException, IOException {
+    private Attachment loadFile(String fn) throws IOException {
         for (String dir : binaryPaths) {
             File f = new File(Utilities.path(dir, fn));
             if (f.exists()) {
@@ -156,13 +208,7 @@ public class LibraryProcessor extends BaseProcessor {
         return null;
     }
 
-/*
-    private void performLibraryCQLProcessing(FetchedFile f, org.hl7.fhir.r5.model.Library lib, Attachment attachment) {
-
-    }
- */
-
-    public Boolean refreshLibraryContent(RefreshLibraryParameters params) {
-        return false;
+    public List<String> refreshLibraryContent(RefreshLibraryParameters params) {
+        return new ArrayList<String>();
     }
 }

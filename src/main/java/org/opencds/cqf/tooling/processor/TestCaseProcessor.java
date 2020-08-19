@@ -22,7 +22,7 @@ public class TestCaseProcessor
         refreshTestCases(path, encoding, fhirContext, null);
     }
 
-    public static void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, @Nullable ArrayList<String> refreshedResourcesNames)
+    public static void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, @Nullable List<String> refreshedResourcesNames)
     {
         System.out.println("Refreshing tests");     
         List<String> libraryTestCasePaths = IOUtils.getDirectoryPaths(path, false);
