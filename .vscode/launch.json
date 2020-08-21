@@ -45,18 +45,18 @@
             "projectName": "tooling",
             "args": [
                 "-RefreshIG",
-                "-igrp=../aphl-ig/input/aphl-ig.xml",
                 "-ip=../aphl-ig",
                 "-rp=../aphl-ig/input/resources",
                 "-rp=../input/pagecontent/cql",
                 "-rp=../aphl-ig/input/vocabulary",
                 "-fs=http://localhost:8080/cqf-ruler-r4/fhir",
-                "-iv=fhir4",
                 "-e=json",
                 "-v",
                 "-t",
                 "-d",
-                "-p"
+                "-p",
+                "-ini=../aphl-ig/ig.ini",
+                "-cdsig"
             ]
         },
         {
