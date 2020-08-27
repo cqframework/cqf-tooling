@@ -67,7 +67,13 @@ public class STU3LibraryProcessor extends LibraryProcessor {
             org.hl7.fhir.dstu3.model.Library library = (org.hl7.fhir.dstu3.model.Library) VersionConvertor_30_50.convertResource(refreshedLibrary, false);
             cqfmHelper.ensureToolingExtensionAndDevice(library, fhirContext);
             IOUtils.writeResource(library, filePath, IOUtils.getEncoding(filePath), fhirContext);
-            refreshedLibraryNames.add(refreshedLibrary.getName());
+            String refreshedLibraryName;
+            if (this.versioned && refreshedLibrary.getVersion() != null) {
+                refreshedLibraryName = refreshedLibrary.getName() + "-" + refreshedLibrary.getVersion();
+            } else {
+                refreshedLibraryName = refreshedLibrary.getName();
+            }
+            refreshedLibraryNames.add(refreshedLibraryName);
         }
 
         return refreshedLibraryNames;
