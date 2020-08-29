@@ -82,7 +82,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
     @Override
     public List<String> refreshLibraryContent(RefreshLibraryParameters params) {
         if (params.parentContext != null) {
-            initialize(parentContext);
+            initialize(params.parentContext);
         }
         else {
             initialize(params.ini);
