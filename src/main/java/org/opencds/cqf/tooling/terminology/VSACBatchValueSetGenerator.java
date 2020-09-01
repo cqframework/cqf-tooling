@@ -37,6 +37,7 @@ public class VSACBatchValueSetGenerator extends Operation {
                 case "baseurl":
                 case "burl":
                     baseUrl = value;
+                    break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
