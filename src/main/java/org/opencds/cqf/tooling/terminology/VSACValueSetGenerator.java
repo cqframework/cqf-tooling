@@ -38,6 +38,7 @@ public class VSACValueSetGenerator extends Operation {
     private int systemNameCol = 2; // -systemnamecol (-snc)
     private int versionCol = 3; // -versioncol (-vc)
     private int systemOidCol = 4; // -systemoidcol (-soc)
+    private String baseUrl; // -baseurl (-burl)
 
     private Map<Integer, org.opencds.cqf.tooling.terminology.ValueSet> codesBySystem = new HashMap<>();
 
@@ -69,12 +70,16 @@ public class VSACValueSetGenerator extends Operation {
                 case "systemnamecol": case "snc": systemNameCol = Integer.valueOf(value); break;
                 case "versioncol": case "vc": versionCol = Integer.valueOf(value); break;
                 case "systemoidcol": case "soc": systemOidCol = Integer.valueOf(value); break;
+                case "baseurl": case "burl": baseUrl = value; break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
 
         if (pathToSpreadsheet == null) {
             throw new IllegalArgumentException("The path to the spreadsheet is required");
+        }
+        if (baseUrl == null) {
+            baseUrl = VSAC_BASE_URL;
         }
 
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
@@ -111,7 +116,7 @@ public class VSACValueSetGenerator extends Operation {
         if (id != null) {
             vs.setId(id);
         }
-        vs.setUrl(VSAC_BASE_URL + id);
+        vs.setUrl(baseUrl + id);
         String publisher = getSecondStringInRow(metaSheet, metaStewardRow);
         if (publisher != null) {
             vs.setPublisher(publisher);
