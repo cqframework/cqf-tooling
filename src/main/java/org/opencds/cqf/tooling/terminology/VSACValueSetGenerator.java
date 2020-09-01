@@ -78,6 +78,7 @@ public class VSACValueSetGenerator extends Operation {
         if (pathToSpreadsheet == null) {
             throw new IllegalArgumentException("The path to the spreadsheet is required");
         }
+        
         if (baseUrl == null) {
             baseUrl = VSAC_BASE_URL;
         }
