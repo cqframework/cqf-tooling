@@ -43,7 +43,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
     /*
     Refresh all library resources in the given libraryPath
      */
-    protected List<String> refreshLibraries(String libraryPath) {
+    protected List<String> refreshLibraries(String libraryPath, Encoding encoding) {
         File file = new File(libraryPath);
         Map<String, String> fileMap = new HashMap<String, String>();
         List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
@@ -76,11 +76,26 @@ public class R4LibraryProcessor extends LibraryProcessor {
         List<String> refreshedLibraryNames = new ArrayList<String>();
         List<org.hl7.fhir.r5.model.Library> refreshedLibraries = super.refreshGeneratedContent(libraries);
         for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
-            String filePath = fileMap.get(refreshedLibrary.getId());
             Library library = (Library) VersionConvertor_40_50.convertResource(refreshedLibrary);
+            String filePath = null;
+            Encoding fileEncoding = null;            
+            if (fileMap.containsKey(refreshedLibrary.getId()))
+            {
+                filePath = fileMap.get(refreshedLibrary.getId());
+                fileEncoding = IOUtils.getEncoding(filePath);
+            } else {
+                filePath = libraryPath;
+                fileEncoding = encoding;
+            }    
             cqfmHelper.ensureToolingExtensionAndDevice(library, fhirContext);
-            IOUtils.writeResource(library, filePath, IOUtils.getEncoding(filePath), fhirContext);
-            refreshedLibraryNames.add(refreshedLibrary.getName());
+            IOUtils.writeResource(library, filePath, fileEncoding, fhirContext);
+            String refreshedLibraryName;
+            if (this.versioned && refreshedLibrary.getVersion() != null) {
+                refreshedLibraryName = refreshedLibrary.getName() + "-" + refreshedLibrary.getVersion();
+            } else {
+                refreshedLibraryName = refreshedLibrary.getName();
+            }
+            refreshedLibraryNames.add(refreshedLibraryName);
         }
 
         return refreshedLibraryNames;
@@ -102,7 +117,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
         encoding = params.encoding;
         versioned = params.versioned;
 
-        return refreshLibraries(libraryPath);
+        return refreshLibraries(libraryPath, encoding);
 
         /*
         CqlTranslator translator = getTranslator(cqlContentPath);

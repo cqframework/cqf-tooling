@@ -57,7 +57,6 @@ public class LibraryProcessor extends BaseProcessor {
         params.fhirContext = fhirContext;
         params.encoding = outputEncoding;
         params.versioned = versioned;
-        params.libraryPath = libraryPath;
         return libraryProcessor.refreshLibraryContent(params);
     }
 
@@ -163,6 +162,30 @@ public class LibraryProcessor extends BaseProcessor {
                 packageId, canonicalBase);
 
         cqlProcessor.execute();
+
+        // For each CQL file, ensure that there is a Library resource with a matching name and version
+        for (CqlProcessor.CqlSourceFileInformation fileInfo : cqlProcessor.getAllFileInformation()) {
+            if (fileInfo.getIdentifier() != null && fileInfo.getIdentifier().getId() != null && !fileInfo.getIdentifier().getId().equals("")) {
+                Library existingLibrary = null;
+                for (Library sourceLibrary : sourceLibraries) {
+                    if (fileInfo.getIdentifier().getId().equals(sourceLibrary.getName())
+                            && (fileInfo.getIdentifier().getVersion() == null || fileInfo.getIdentifier().getVersion().equals(sourceLibrary.getVersion()))
+                    ) {
+                        existingLibrary = sourceLibrary;
+                        break;
+                    }
+                }
+
+                if (existingLibrary == null) {
+                    Library newLibrary = new Library();
+                    newLibrary.setName(fileInfo.getIdentifier().getId());
+                    newLibrary.setVersion(fileInfo.getIdentifier().getVersion());
+                    newLibrary.setUrl(String.format("%s/Library/%s", (newLibrary.getName().equals("FHIRHelpers") ? "http://hl7.org/fhir" : canonicalBase), fileInfo.getIdentifier().getId()));
+                    newLibrary.setId(LibraryProcessor.getId(newLibrary.getName()) + (versioned ? "-" + newLibrary.getVersion() : ""));
+                    sourceLibraries.add(newLibrary);
+                }
+            }
+        }
 
         List<Library> resources = new ArrayList<Library>();
         for (Library library : sourceLibraries) {
