@@ -19,7 +19,7 @@ import ca.uhn.fhir.parser.IParser;
 
 public class VSACValueSetGenerator extends Operation {
 
-    private final String VSAC_BASE_URL = "http://cts.nlm.nih.gov/fhir/ValueSet/";
+    public static final String VSAC_BASE_URL = "http://cts.nlm.nih.gov/fhir/ValueSet/";
 
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
     private String encoding = "json"; // -encoding (-e)
