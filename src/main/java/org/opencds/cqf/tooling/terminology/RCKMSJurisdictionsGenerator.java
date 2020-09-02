@@ -18,7 +18,7 @@ import ca.uhn.fhir.parser.IParser;
 
 public class RCKMSJurisdictionsGenerator extends Operation {
 
-    private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
+    private String pathToSource; // -pathtosource (-pts)
     private String encoding = "json"; // -encoding (-e)
     private String phaState;
 
@@ -46,7 +46,7 @@ public class RCKMSJurisdictionsGenerator extends Operation {
 
             switch (flag.replace("-", "").toLowerCase()) {
                 case "outputpath": case "op": setOutputPath(value); break; // -outputpath (-op)
-                case "pathtospreadsheet": case "pts": pathToSpreadsheet = value; break;
+                case "pathtosource": case "pts": pathToSource = value; break;
                 case "encoding": case "e": encoding = value.toLowerCase(); break;
                 case "codesheetnum": case "csn": codeSheetNum = Integer.valueOf(value); break;
                 case "codelistrow": case "clr": codeListRow = Integer.valueOf(value); break;
@@ -59,11 +59,11 @@ public class RCKMSJurisdictionsGenerator extends Operation {
             }
         }
 
-        if (pathToSpreadsheet == null) {
+        if (pathToSource == null) {
             throw new IllegalArgumentException("The path to the spreadsheet is required");
         }
 
-        Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
+        Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSource);
         CodeSystem cs = new CodeSystem();
         writeCodeSystem(cs, workbook);
         writeCodeSystemToFile(cs, encoding);
@@ -130,6 +130,8 @@ public class RCKMSJurisdictionsGenerator extends Operation {
             phaState = String.join(" ", phaStateArr);
             phaState = WordUtils.capitalizeFully(phaState);
             String phaZip = SpreadsheetHelper.getCellAsString(row.getCell(postalcodeCol));
+            int phaZipInt; 
+            String newPhaZip;
 
             if (row.getRowNum() < codeListRow) {
                 continue;
@@ -152,16 +154,20 @@ public class RCKMSJurisdictionsGenerator extends Operation {
                     conceptPropState.setValue(new CodeType(phaState));
                     concept.addProperty(conceptPropState);
                 if (!phaZip.equals("(null)")){
-                conceptProp = new CodeSystem.ConceptPropertyComponent();
-                    conceptProp.setCode("postalcode");
-                    conceptProp.setValue(new CodeType(phaZip));
-                    concept.addProperty(conceptProp);      
+                    phaZipInt = Integer.parseInt(phaZip);
+                    newPhaZip = String.format("%05d", phaZipInt);
+                    conceptProp = new CodeSystem.ConceptPropertyComponent();
+                        conceptProp.setCode("postalcode");
+                        conceptProp.setValue(new CodeType(newPhaZip));
+                        concept.addProperty(conceptProp);      
                 }
                 phaCodes.add(phaId);   
             }  else {
+                phaZipInt = Integer.parseInt(phaZip);
+                newPhaZip = String.format("%05d", phaZipInt);
                 conceptProp = new CodeSystem.ConceptPropertyComponent();
                     conceptProp.setCode("postalcode");
-                    conceptProp.setValue(new CodeType(phaZip));
+                    conceptProp.setValue(new CodeType(newPhaZip));
                     concept.addProperty(conceptProp);      
             }                             
         }      

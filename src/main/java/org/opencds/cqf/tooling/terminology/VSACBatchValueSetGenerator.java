@@ -8,6 +8,7 @@ public class VSACBatchValueSetGenerator extends Operation {
 
     private String pathToSpreadsheetDirectory; // -pathtospreadsheetdir (-ptsd)
     private String valueSetSource = "vsac"; //vsac or cms
+    private String baseUrl; // -baseurl (-burl)
 
     @Override
     public void execute(String[] args) {
@@ -33,6 +34,10 @@ public class VSACBatchValueSetGenerator extends Operation {
                 case "vssrc":
                     valueSetSource = value;
                     break;
+                case "baseurl":
+                case "burl":
+                    baseUrl = value;
+                    break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
@@ -50,6 +55,9 @@ public class VSACBatchValueSetGenerator extends Operation {
             throw new RuntimeException("The specified path to valueset files is empty");
         }
         if (valueSetSource.equals("cms")) {
+            if (baseUrl != null) {
+                throw new RuntimeException("baseUrl flag is not valid with valueSetSource flag set to 'cms'");
+            }
             CMSFlatMultiValueSetGenerator generator;
             for (File valueSet : valueSetFiles) {
                 if (!valueSet.getPath().endsWith(".xlsx")) continue;
@@ -60,9 +68,12 @@ public class VSACBatchValueSetGenerator extends Operation {
         }
         else if (valueSetSource.equals("vsac")) {
             VSACValueSetGenerator generator;
+            if (baseUrl == null) {
+                baseUrl = VSACValueSetGenerator.VSAC_BASE_URL;
+            }
             for (File valueSet : valueSetFiles) {
                 if (!valueSet.getPath().endsWith(".xlsx")) continue;
-                String[] argsForSpreadsheet = { "-VsacXlsxToValueSet", "-pts=" + valueSet.getAbsolutePath(), "-op=" + getOutputPath() };
+                String[] argsForSpreadsheet = { "-VsacXlsxToValueSet", "-pts=" + valueSet.getAbsolutePath(), "-op=" + getOutputPath(), "-burl=" + baseUrl };
                 generator =  new VSACValueSetGenerator();
                 generator.execute(argsForSpreadsheet);
             }

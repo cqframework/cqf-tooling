@@ -129,14 +129,13 @@ package org.opencds.cqf.tooling;
 
         - Jurisdiction List Converter
             - This tooling converts an RCKMS list of jurisdictions from an Excel file to a CodeSystem
-            - mvn exec:java -Dexec.args="-JurisdictionListConverter [-pathtospreadsheet | -pts] (outputpath | -op)"
-            - Example: mvn exec:java -Dexec.args="-JurisdictionsXlsxToCodeSystem -pts=C:/Users/marks/Repos/DCG/aphl-ig/input/vocabulary/codesystem/spreadsheets/rckms-jurisdictions.xlsx -op=C:/Users/marks/Repos/DCG/aphl-ig/input/vocabulary/codesystem"
-
+            - mvn exec:java -Dexec.args="-JurisdictionListConverter [-pathtosource | -pts] (outputpath | -op)"
+            - Example: mvn exec:java -Dexec.args="-JurisdictionsXlsxToCodeSystem -pts=C:/Users/me/aphl-ig/input/vocabulary/codesystem/sources/rckms-jurisdictions.xlsx -op=C:/Users/me/aphl-ig/input/vocabulary/codesystem"
+            
         - Measure Test
             - Executes a particular Measure Test case
             -
             - Example: mvn exec: java -Dexec.args="-ExecuteMeasureTest -test-path /home/jp/repos/connectathon/fhir401/input/tests/EXM104-9.1.000/tests-numer-EXM104-bundle.json -content-path /home/jp/repos/connectathon/fhir401/input/bundles/EXM104-9.1.000-bundle.json -fhir-server http://192.168.2.194:8082/cqf-ruler-r4/fhir"
-
         */
 
 public class Main {
