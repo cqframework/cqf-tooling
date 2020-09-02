@@ -1,7 +1,11 @@
 package org.opencds.cqf.tooling.measure.adapters;
 
+import java.util.List;
 import java.util.Objects;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -49,17 +53,33 @@ public class ContentLoadingFhirServerMeasureTestAdapter extends FhirServerMeasur
     }
 
     private void validateContentBundle() {
-        // TODO: Make sure there's content and whatnot
+        if (this.contentBundle == null) {
+            throw new IllegalArgumentException("contentBundle can not be null if a contentPath was specified");
+        }
+
+        if (!this.contentBundle.fhirType().equals("Bundle") || !(this.contentBundle instanceof IBaseBundle)) {
+            throw new IllegalArgumentException("contentBundle is not a Bundle Resource");
+        }
+
+        IBaseBundle bundle = (IBaseBundle)this.contentBundle;
+
+        List<? extends IBaseResource> measures = BundleUtil.toListOfResourcesOfType(this.fhirContext, bundle,
+                this.fhirContext.getResourceDefinition("Measure").getImplementingClass());
+
+        //TODO: Ideally we should be ensuring that the measure being tested is included in the bundle (by measure ID).
+        if (measures == null || measures.size() == 0) {
+            throw new IllegalArgumentException("Content bundle does not contain a Measure.");
+        }
     }
 
     @Override
-    public IBaseResource getActual() {
+    public IMeasureReportAdapter getActualMeasureReportAdapter() {
         this.ensureContentAndData();
         return this.evaluate();
     }
 
     private void ensureContentAndData() {
+        this.postBundle((IBaseBundle)this.contentBundle);
         this.postBundle((IBaseBundle)this.testBundle);
-        this.postBundle((IBaseBundle)this.contentBundle); 
     }
 }

@@ -18,7 +18,7 @@ public class CqlEvaluatorMeasureTestAdapter extends MeasureTestAdapter {
     }
 
     @Override
-    public IBaseResource getActual() {
+    public IMeasureReportAdapter getActualMeasureReportAdapter() {
         // 1. Get Measure and Patient Ids from Expected
         // 2. Run evaluator with Measure, Patient, Content context
         // 3. Parse the result
@@ -26,7 +26,7 @@ public class CqlEvaluatorMeasureTestAdapter extends MeasureTestAdapter {
     }
 
     @Override
-    protected IBaseResource evaluate() {
+    protected IMeasureReportAdapter evaluate() {
         throw new NotImplementedException();
     }
 }

@@ -1,10 +1,13 @@
 package org.opencds.cqf.tooling.measure.adapters;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -15,6 +18,8 @@ public abstract class MeasureTestAdapter {
     protected String testPath;
     protected FhirContext fhirContext;
     protected IBaseResource testBundle;
+    protected IMeasureReportAdapter expectedReportAdapter;
+    protected IMeasureReportAdapter actualReportAdapter;
 
     private IBaseResource expectedReport;
 
@@ -29,6 +34,7 @@ public abstract class MeasureTestAdapter {
         }
 
         validateTestBundle();
+        this.expectedReportAdapter = getMeasureReportAdapter(this.expectedReport);
     }
 
     public MeasureTestAdapter(FhirContext fhirContext, IBaseResource testBundle) {
@@ -36,6 +42,22 @@ public abstract class MeasureTestAdapter {
         this.testBundle = Objects.requireNonNull(testBundle, "testBundle can not be null.");
 
         validateTestBundle();
+        this.expectedReportAdapter = getMeasureReportAdapter(this.expectedReport);
+    }
+
+
+    protected IMeasureReportAdapter getMeasureReportAdapter(IBaseResource measureReport) {
+        //TODO: R5?
+        IMeasureReportAdapter measureReportAdapter;
+        if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
+            measureReportAdapter = new Dstu3MeasureReportAdapter((org.hl7.fhir.dstu3.model.MeasureReport)measureReport);
+        } else if (fhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
+            measureReportAdapter = new R4MeasureReportAdapter((org.hl7.fhir.r4.model.MeasureReport)measureReport);
+        } else {
+            throw new IllegalArgumentException("Unsupported or unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+        }
+
+        return measureReportAdapter;
     }
 
     private void validateTestBundle() {
@@ -59,39 +81,44 @@ public abstract class MeasureTestAdapter {
         this.expectedReport = measureReports.get(0);
     }
 
-    protected abstract IBaseResource evaluate();
+    protected abstract IMeasureReportAdapter evaluate();
 
-    public abstract IBaseResource getActual();
+    public abstract IMeasureReportAdapter getActualMeasureReportAdapter();
 
-    public IBaseResource getExpected() {
-        return this.expectedReport;
+    public IMeasureReportAdapter getExpectedMeasureReportAdapter() {
+        return this.expectedReportAdapter;
     }
 
-    protected String getPeriodStart() {
-        return null;
+    protected Date getPeriodStart() {
+        Date periodStart = this.expectedReportAdapter.getPeriodStart();
+        return periodStart;
     }
 
-    protected String getPeroidEnd() {
-        return null;
+    protected Date getPeriodEnd() {
+        Date periodEnd = this.expectedReportAdapter.getPeriodEnd();
+        return periodEnd;
     }
 
     protected String getMeasureId() {
-        return null;
+        String measureId = this.expectedReportAdapter.getMeasureId();
+        return measureId;
     }
 
     protected String getReportType() {
-        return null;
+        String reportType = this.expectedReportAdapter.getReportType();
+        return reportType;
     }
 
     protected String getPatientId () {
-        return null;
+        String patientId = this.expectedReportAdapter.getPatientId();
+        return patientId;
     }
 
-    protected String getPractitioner() {
-        return null;
-    }
+//    protected String getPractitioner() {
+//        return null;
+//    }
 
-    protected String getlastReceivedOn() {
-        return null;
-    }
+//    protected String getLastReceivedOn() {
+//        return null;
+//    }
 }

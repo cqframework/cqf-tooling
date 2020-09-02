@@ -3,11 +3,9 @@ package org.opencds.cqf.tooling.measure;
 import java.io.File;
 import java.util.Objects;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.tooling.measure.adapters.ContentLoadingFhirServerMeasureTestAdapter;
-import org.opencds.cqf.tooling.measure.adapters.CqlEvaluatorMeasureTestAdapter;
-import org.opencds.cqf.tooling.measure.adapters.MeasureTestAdapter;
-import org.opencds.cqf.tooling.measure.adapters.ReadOnlyFhirServerMeasureTestAdapter;
+import org.hl7.fhir.Parameters;
+import org.hl7.fhir.ParametersParameter;
+import org.opencds.cqf.tooling.measure.adapters.*;
 import org.opencds.cqf.tooling.measure.comparer.MeasureReportComparer;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -22,15 +20,36 @@ public class MeasureTestProcessor {
         this.fhirContext = fhirContext;
     }
 
-    public IBaseResource executeMeasureTest(String testPath, String contentPath, String fhirServer)
+    public Parameters executeMeasureTest(String testPath, String contentPath, String fhirServer)
     {
         MeasureTestAdapter adapter = getMeasureTestAdapter(testPath, contentPath, fhirServer);
         MeasureReportComparer comparer = new MeasureReportComparer(this.fhirContext);
 
-        IBaseResource actual = adapter.getActual();
-        IBaseResource expected = adapter.getExpected();
+        IMeasureReportAdapter expected = adapter.getExpectedMeasureReportAdapter();
+        String measureId = expected.getMeasureId();
+        System.out.println("Testing Measure '" + measureId + "'");
 
-        return comparer.compare(actual, expected);
+        IMeasureReportAdapter actual = adapter.getActualMeasureReportAdapter();
+
+        Parameters results = comparer.compare(actual, expected);
+        logTestResults(measureId, results);
+        return results;
+    }
+
+    private void logTestResults(String measureId, Parameters results) {
+        //TODO: Can do whatever we want here, just printing to out for now - just hacked together console output.
+        System.out.println("Test results for Measure '" + measureId + "':");
+        for (ParametersParameter parameter : results.getParameter()) {
+            String assertionString = "";
+
+            if (parameter.getName().getValue().indexOf("Test Passed") >= 0) {
+                assertionString = ": ";
+            }
+            else {
+                assertionString = " matched expected value: ";
+            }
+            System.out.println(parameter.getName().getValue() + assertionString + parameter.getValueBoolean().isValue().toString());
+        }
     }
 
     public MeasureTestAdapter getMeasureTestAdapter(String testPath, String contentPath, String fhirServer) {
@@ -51,14 +70,12 @@ public class MeasureTestProcessor {
         }
         
         IGenericClient fhirClient = this.fhirContext.newRestfulGenericClient(fhirServer);
-        
+
         if (contentPath == null) {
             return new ReadOnlyFhirServerMeasureTestAdapter(this.fhirContext, fhirClient, testPath);
         }
         else {
             return new ContentLoadingFhirServerMeasureTestAdapter(this.fhirContext, fhirClient, testPath, contentPath);
         }
-
     }
-    
 }

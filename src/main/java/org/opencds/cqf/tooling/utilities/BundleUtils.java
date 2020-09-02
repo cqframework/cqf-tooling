@@ -1,5 +1,6 @@
 package org.opencds.cqf.tooling.utilities;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,12 +37,12 @@ public class BundleUtils {
         {
             bundle.addEntry(
             new org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent()
-                    .setResource((org.hl7.fhir.dstu3.model.Resource) resource)
-                    .setRequest(
-                            new org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent()
-                                    .setMethod(org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.PUT)
-                                    .setUrl(((org.hl7.fhir.dstu3.model.Resource) resource).getId())
-                    )
+                .setResource((org.hl7.fhir.dstu3.model.Resource) resource)
+                .setRequest(
+                    new org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent()
+                        .setMethod(org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.PUT)
+                        .setUrl(((org.hl7.fhir.dstu3.model.Resource) resource).getId())
+                )
             );
         }
         return bundle;
@@ -57,14 +58,24 @@ public class BundleUtils {
             String resourceRef = (resource.getIdElement().getResourceType() == null) ? resource.fhirType() + "/" + resource.getIdElement().getIdPart() : resource.getIdElement().getIdPart() ;
             bundle.addEntry(
             new org.hl7.fhir.r4.model.Bundle.BundleEntryComponent()
-                    .setResource((org.hl7.fhir.r4.model.Resource) resource)
-                    .setRequest(
-                            new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent()
-                                    .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
-                                    .setUrl(resourceRef)//shouldnt this be canonicalUrl?
-                    )
+                .setResource((org.hl7.fhir.r4.model.Resource) resource)
+                .setRequest(
+                    new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent()
+                        .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
+                        .setUrl(resourceRef)//shouldn't this be canonicalUrl?
+                )
             );
         }
         return bundle;
+    }
+
+    public static void postBundle(IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri, IBaseResource bundle) {
+        if (fhirUri != null && !fhirUri.equals("")) {
+            try {
+                HttpClientUtils.post(fhirUri, bundle, encoding, fhirContext);
+            } catch (IOException e) {
+                LogUtils.putException(bundle.getIdElement().getIdPart(), "Error posting to FHIR Server: " + fhirUri + ".  Bundle not posted.");
+            }
+        }
     }
 }

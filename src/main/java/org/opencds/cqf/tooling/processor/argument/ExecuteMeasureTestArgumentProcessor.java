@@ -42,7 +42,7 @@ public class ExecuteMeasureTestArgumentProcessor {
             .describedAs("path to measure content bundle");
 
         OptionSpec<FhirVersionEnum> fhirVersion = fhirVersionBuilder.withRequiredArg()
-            .describedAs("fhir version").withValuesConvertedBy(new FhirVersionEnumConverter()).defaultsTo(FhirVersionEnum.DSTU3);
+            .describedAs("fhir version").withValuesConvertedBy(new FhirVersionEnumConverter()).defaultsTo(FhirVersionEnum.R4);
         OptionSpec<Encoding> outputEncoding = outputEncodingBuilder.withRequiredArg()
             .describedAs("desired output encoding for resources").withValuesConvertedBy(new EncodingConverter()).defaultsTo(Encoding.JSON);
 
