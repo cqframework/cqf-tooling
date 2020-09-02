@@ -52,7 +52,6 @@ public abstract class FhirServerMeasureTestAdapter extends MeasureTestAdapter {
             //TODO: Error/Message handling
             return null;
         }
-        //GET http://localhost:8080/cqf-ruler-dstu3/fhir/Measure/measure-drr/$evaluate-measure?patient=drr-in-2&periodStart=2018-01-01&periodEnd=2018-12-31
     }
 
     private IMeasureReportAdapter parseEvaluatedResponse(String response) {
