@@ -1,20 +1,16 @@
 package org.opencds.cqf.tooling.measure.adapters;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Objects;
 
 import ca.uhn.fhir.parser.IParser;
-import org.hl7.fhir.MeasureReport;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import org.omg.CORBA.portable.ApplicationException;
 import org.opencds.cqf.tooling.utilities.HttpClientUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public abstract class FhirServerMeasureTestAdapter extends MeasureTestAdapter {
 
