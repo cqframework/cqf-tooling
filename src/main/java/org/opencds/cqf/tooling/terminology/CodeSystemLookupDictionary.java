@@ -33,6 +33,7 @@ public class CodeSystemLookupDictionary {
         ICS10CM                     2.16.840.1.113883.6.90          ->      https://terminology.hl7.org/CodeSystem-icd10CM.html
         ICD9                        2.16.840.1.113883.6.42          ->      https://terminology.hl7.org/CodeSystem-icd9.html
         ICD9CM                      2.16.840.1.113883.6.2           ->      https://terminology.hl7.org/CodeSystem-icd9cm.html
+        ICD9PCS                     2.16.840.1.113883.6.104         ->      urn:oid:2.16.840.1.113883.6.104
         LOINC                       2.16.840.1.113883.6.1           ->      https://terminology.hl7.org/NamingSystem-v3-loinc.html
         LanguageAbilityMode         2.16.840.1.113883.5.60          ->      https://terminology.hl7.org/CodeSystem-v3-LanguageAbilityMode.html
         LanguageAbilityProficiency  2.16.840.1.113883.5.61          ->      https://terminology.hl7.org/CodeSystem-v3-LanguageAbilityProficiency.html
@@ -41,6 +42,7 @@ public class CodeSystemLookupDictionary {
         NCI                         2.16.840.1.113883.3.26.1.1      ->      https://terminology.hl7.org/CodeSystem-v3-nciThesaurus.html
         NDFRT                       2.16.840.1.113883.3.26.1.5      ->      https://terminology.hl7.org/CodeSystem-nciVersionOfNDF-RT.html
         NUCCPT                      2.16.840.1.113883.6.101         ->      https://terminology.hl7.org/CodeSystem-v3-nuccProviderCodes.html
+        Provider Taxonomy           2.16.840.1.113883.6.101         ->      https://terminology.hl7.org/CodeSystem-v3-nuccProviderCodes.html
         NullFlavor                  2.16.840.1.113883.5.1008        ->      https://terminology.hl7.org/CodeSystem-v3-NullFlavor.html
         ObservationInterpretation   2.16.840.1.113883.5.83          ->      https://terminology.hl7.org/CodeSystem-v3-ObservationInterpretation.html
         ObservationValue            2.16.840.1.113883.5.1063        ->      https://terminology.hl7.org/CodeSystem-v3-ObservationValue.html
@@ -91,6 +93,7 @@ public class CodeSystemLookupDictionary {
             case "2.16.840.1.113883.6.90": return "http://hl7.org/fhir/sid/icd-10-cm";
             case "2.16.840.1.113883.6.42": return "http://terminology.hl7.org/CodeSystem/icd9";
             case "2.16.840.1.113883.6.2": return "http://terminology.hl7.org/CodeSystem/icd9cm";
+            case "2.16.840.1.113883.6.104": return "urn:oid:2.16.840.1.113883.6.104";
             case "2.16.840.1.113883.6.1": return "http://loinc.org";
             case "2.16.840.1.113883.5.60": return "http://terminology.hl7.org/CodeSystem/v3-LanguageAbilityMode";
             case "2.16.840.1.113883.5.61": return "http://terminology.hl7.org/CodeSystem/v3-LanguageAbilityProficiency";
@@ -98,7 +101,7 @@ public class CodeSystemLookupDictionary {
             case "2.16.840.1.113883.5.2": return "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus";
             case "2.16.840.1.113883.3.26.1.1": return "http://ncithesaurus-stage.nci.nih.gov";
             case "2.16.840.1.113883.3.26.1.5": return "http://terminology.hl7.org/CodeSystem/nciVersionOfNDF-RT";
-            case "2.16.840.1.113883.6.101": return "http://nucc.org/provider-taxonomy";
+            case "2.16.840.1.113883.6.101": return "https://terminology.hl7.org/CodeSystem-v3-nuccProviderCodes.html";
             case "2.16.840.1.113883.5.1008": return "http://terminology.hl7.org/CodeSystem/v3-NullFlavor";
             case "2.16.840.1.113883.5.83": return "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation";
             case "2.16.840.1.113883.5.1063": return "http://terminology.hl7.org/CodeSystem/v3-ObservationValue";
@@ -151,6 +154,7 @@ public class CodeSystemLookupDictionary {
             case "ICD10PCS": return "http://www.cms.gov/Medicare/Coding/ICD10";
             case "ICD9": return "http://terminology.hl7.org/CodeSystem/icd9";
             case "ICD9CM": return "http://terminology.hl7.org/CodeSystem/icd9cm";
+            case "ICD9PCS": return "urn:oid:2.16.840.1.113883.6.104";
             case "LOINC": return "http://loinc.org";
             case "LanguageAbilityMode": return "http://terminology.hl7.org/CodeSystem/v3-LanguageAbilityMode";
             case "LanguageAbilityProficiency": return "http://terminology.hl7.org/CodeSystem/v3-LanguageAbilityProficiency";
@@ -158,7 +162,8 @@ public class CodeSystemLookupDictionary {
             case "MaritalStatus": return "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus";
             case "NCI": return "http://ncithesaurus-stage.nci.nih.gov";
             case "NDFRT": return "http://terminology.hl7.org/CodeSystem/nciVersionOfNDF-RT";
-            case "NUCCPT": return "http://nucc.org/provider-taxonomy";
+            case "NUCCPT": return "https://terminology.hl7.org/CodeSystem-v3-nuccProviderCodes.html";
+            case "Provider Taxonomy": return "https://terminology.hl7.org/CodeSystem-v3-nuccProviderCodes.html";
             case "NullFlavor": return "http://terminology.hl7.org/CodeSystem/v3-NullFlavor";
             case "ObservationInterpretation": return "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation";
             case "ObservationValue": return "http://terminology.hl7.org/CodeSystem/v3-ObservationValue";
