@@ -101,7 +101,7 @@ public class CodeSystemLookupDictionary {
             case "2.16.840.1.113883.5.2": return "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus";
             case "2.16.840.1.113883.3.26.1.1": return "http://ncithesaurus-stage.nci.nih.gov";
             case "2.16.840.1.113883.3.26.1.5": return "http://terminology.hl7.org/CodeSystem/nciVersionOfNDF-RT";
-            case "2.16.840.1.113883.6.101": return "https://terminology.hl7.org/CodeSystem-v3-nuccProviderCodes.html";
+            case "2.16.840.1.113883.6.101": return "http://nucc.org/provider-taxonomy";
             case "2.16.840.1.113883.5.1008": return "http://terminology.hl7.org/CodeSystem/v3-NullFlavor";
             case "2.16.840.1.113883.5.83": return "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation";
             case "2.16.840.1.113883.5.1063": return "http://terminology.hl7.org/CodeSystem/v3-ObservationValue";
@@ -162,8 +162,8 @@ public class CodeSystemLookupDictionary {
             case "MaritalStatus": return "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus";
             case "NCI": return "http://ncithesaurus-stage.nci.nih.gov";
             case "NDFRT": return "http://terminology.hl7.org/CodeSystem/nciVersionOfNDF-RT";
-            case "NUCCPT": return "https://terminology.hl7.org/CodeSystem-v3-nuccProviderCodes.html";
-            case "Provider Taxonomy": return "https://terminology.hl7.org/CodeSystem-v3-nuccProviderCodes.html";
+            case "NUCCPT": return "http://nucc.org/provider-taxonomy";
+            case "Provider Taxonomy": return "http://nucc.org/provider-taxonomy";
             case "NullFlavor": return "http://terminology.hl7.org/CodeSystem/v3-NullFlavor";
             case "ObservationInterpretation": return "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation";
             case "ObservationValue": return "http://terminology.hl7.org/CodeSystem/v3-ObservationValue";
