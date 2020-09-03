@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.LogUtils;
@@ -14,7 +14,7 @@ import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import ca.uhn.fhir.context.FhirContext;
 
 public class ValueSetsProcessor {
-    private static Map<String, IAnyResource> copyToUrls(List<IAnyResource> valueSets, FhirContext fhirContext) {
+    private static Map<String, IBaseResource> copyToUrls(List<IBaseResource> valueSets, FhirContext fhirContext) {
         switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:
             return copyToStu3Urls(valueSets, fhirContext);
@@ -26,9 +26,9 @@ public class ValueSetsProcessor {
         }
     }
 
-    private static Map<String, IAnyResource> copyToStu3Urls(List<IAnyResource> valueSets, FhirContext fhirContext) {
-        Map<String, IAnyResource> valueSetUrls = new HashMap<String, IAnyResource>();
-        for (IAnyResource resource : valueSets) {
+    private static Map<String, IBaseResource> copyToStu3Urls(List<IBaseResource> valueSets, FhirContext fhirContext) {
+        Map<String, IBaseResource> valueSetUrls = new HashMap<String, IBaseResource>();
+        for (IBaseResource resource : valueSets) {
             if (resource instanceof org.hl7.fhir.dstu3.model.ValueSet) {
                 valueSetUrls.putIfAbsent(((org.hl7.fhir.dstu3.model.ValueSet)resource).getUrl(), resource);
             } else if (resource instanceof org.hl7.fhir.dstu3.model.Bundle) {
@@ -42,9 +42,9 @@ public class ValueSetsProcessor {
         return valueSetUrls;
     }
 
-    private static Map<String, IAnyResource> copyToR4Urls(List<IAnyResource> valueSets, FhirContext fhirContext) {
-        Map<String, IAnyResource> valueSetUrls = new HashMap<String, IAnyResource>();
-        for (IAnyResource resource : valueSets) {
+    private static Map<String, IBaseResource> copyToR4Urls(List<IBaseResource> valueSets, FhirContext fhirContext) {
+        Map<String, IBaseResource> valueSetUrls = new HashMap<String, IBaseResource>();
+        for (IBaseResource resource : valueSets) {
             if (resource instanceof org.hl7.fhir.r4.model.ValueSet) {
                 valueSetUrls.putIfAbsent(((org.hl7.fhir.r4.model.ValueSet)resource).getUrl(), resource);
             } else if (resource instanceof org.hl7.fhir.r4.model.Bundle) {
@@ -58,8 +58,8 @@ public class ValueSetsProcessor {
         return valueSetUrls;
     }
 
-    private static Map<String, IAnyResource> cachedValueSets = null;
-    public static Map<String, IAnyResource> getCachedValueSets(FhirContext fhirContext) {
+    private static Map<String, IBaseResource> cachedValueSets = null;
+    public static Map<String, IBaseResource> getCachedValueSets(FhirContext fhirContext) {
         if (cachedValueSets == null) {
             IntitializeCachedValueSets(fhirContext);
         }
@@ -68,7 +68,7 @@ public class ValueSetsProcessor {
 
     private static void IntitializeCachedValueSets(FhirContext fhirContext) {
         List<String> allValueSetPaths = IOUtils.getTerminologyPaths(fhirContext).stream().collect(Collectors.toList());
-        List<IAnyResource> allValueSets = IOUtils.readResources(allValueSetPaths, fhirContext); 
+        List<IBaseResource> allValueSets = IOUtils.readResources(allValueSetPaths, fhirContext); 
             
         cachedValueSets = ValueSetsProcessor.copyToUrls(allValueSets, fhirContext);
     }
@@ -78,12 +78,12 @@ public class ValueSetsProcessor {
     }
 
     public static Boolean bundleValueSets(String cqlContentPath, String igPath, FhirContext fhirContext,
-            Map<String, IAnyResource> resources, Encoding encoding, Boolean includeDependencies, Boolean includeVersion) {
+            Map<String, IBaseResource> resources, Encoding encoding, Boolean includeDependencies, Boolean includeVersion) {
         Boolean shouldPersist = true;
         try {
-            Map<String, IAnyResource> dependencies = ResourceUtils.getDepValueSetResources(cqlContentPath, igPath, fhirContext, includeDependencies, includeVersion);
-            for (IAnyResource resource : dependencies.values()) {
-                resources.putIfAbsent(resource.getId(), resource);
+            Map<String, IBaseResource> dependencies = ResourceUtils.getDepValueSetResources(cqlContentPath, igPath, fhirContext, includeDependencies, includeVersion);
+            for (IBaseResource resource : dependencies.values()) {
+                resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
             }
         } catch (Exception e) {
             shouldPersist = false;

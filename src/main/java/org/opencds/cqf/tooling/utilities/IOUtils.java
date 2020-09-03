@@ -27,7 +27,7 @@ import org.cqframework.cql.cql2elm.CqlTranslatorException;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.tracking.TrackBack;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.processor.LibraryProcessor;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -54,7 +54,11 @@ public class IOUtils
         }
 
         public static Encoding parse(String value) {
-            switch (value) {
+            if (value == null) {
+                return UNKNOWN;
+            }
+            
+            switch (value.trim().toLowerCase()) {
                 case "cql":
                     return CQL;
                 case "json": 
@@ -73,7 +77,7 @@ public class IOUtils
         return fileName.replaceAll("_", "-");
     }
 
-    public static byte[] parseResource(IAnyResource resource, Encoding encoding, FhirContext fhirContext) 
+    public static byte[] parseResource(IBaseResource resource, Encoding encoding, FhirContext fhirContext) 
     {
         if (encoding == Encoding.UNKNOWN) {
             return new byte[] { };
@@ -82,7 +86,7 @@ public class IOUtils
         return parser.setPrettyPrint(true).encodeResourceToString(resource).getBytes();
     }
 
-    public static String parseResourceAsString(IAnyResource resource, Encoding encoding, FhirContext fhirContext) 
+    public static String encodeResourceAsString(IBaseResource resource, Encoding encoding, FhirContext fhirContext) 
     {
         if (encoding == Encoding.UNKNOWN) {
             return "";
@@ -91,7 +95,7 @@ public class IOUtils
         return parser.setPrettyPrint(true).encodeResourceToString(resource).toString();
     }
 
-    public static <T extends IAnyResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext) 
+    public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext) 
     {
         // If the path is to a specific resource file, just re-use that file path/name.
         String outputPath = null;
@@ -116,7 +120,7 @@ public class IOUtils
         }
     }
 
-    public static <T extends IAnyResource> void writeResources(Map<String, T> resources, String path, Encoding encoding, FhirContext fhirContext)
+    public static <T extends IBaseResource> void writeResources(Map<String, T> resources, String path, Encoding encoding, FhirContext fhirContext)
     {        
         for (Map.Entry<String, T> set : resources.entrySet())
         {
@@ -151,7 +155,7 @@ public class IOUtils
     }
 
     public static String getTypeQualifiedResourceId(String path, FhirContext fhirContext) {
-        IAnyResource resource = readResource(path, fhirContext, true);
+        IBaseResource resource = readResource(path, fhirContext, true);
         if (resource != null) {
             return resource.getIdElement().getResourceType() + "/" + resource.getIdElement().getIdPart();
         }
@@ -159,7 +163,7 @@ public class IOUtils
         return null;
     }
 
-    public static String getCanonicalResourceVersion(IAnyResource resource, FhirContext fhirContext) {
+    public static String getCanonicalResourceVersion(IBaseResource resource, FhirContext fhirContext) {
         switch (fhirContext.getVersion().getVersion()) {
             case DSTU3:
                 if (resource instanceof org.hl7.fhir.dstu3.model.MetadataResource) {
@@ -179,24 +183,24 @@ public class IOUtils
     }
 
     public static String getCanonicalResourceVersion(String path, FhirContext fhirContext) {
-        IAnyResource resource = readResource(path, fhirContext, true);
+        IBaseResource resource = readResource(path, fhirContext, true);
         return getCanonicalResourceVersion(path, fhirContext);
     }
 
-    public static IAnyResource readResource(String path, FhirContext fhirContext) {
+    public static IBaseResource readResource(String path, FhirContext fhirContext) {
         return readResource(path, fhirContext, false);
     }
     
     //users should always check for null
-    private static Map<String, IAnyResource> cachedResources = new HashMap<String, IAnyResource>();
-    public static IAnyResource readResource(String path, FhirContext fhirContext, Boolean safeRead) 
+    private static Map<String, IBaseResource> cachedResources = new HashMap<String, IBaseResource>();
+    public static IBaseResource readResource(String path, FhirContext fhirContext, Boolean safeRead) 
     {        
         Encoding encoding = getEncoding(path);
         if (encoding == Encoding.UNKNOWN || encoding == Encoding.CQL) {
             return null;
         }
 
-        IAnyResource resource = cachedResources.get(path);     
+        IBaseResource resource = cachedResources.get(path);     
         if (resource != null) {
             return resource;
         } 
@@ -216,7 +220,7 @@ public class IOUtils
                     return null;
                 }
             }
-            resource = (IAnyResource)parser.parseResource(new FileReader(file));
+            resource = (IBaseResource)parser.parseResource(new FileReader(file));
             cachedResources.put(path, resource);
         }
         catch (Exception e)
@@ -226,12 +230,12 @@ public class IOUtils
         return resource;
     }
 
-    public static List<IAnyResource> readResources(List<String> paths, FhirContext fhirContext) 
+    public static List<IBaseResource> readResources(List<String> paths, FhirContext fhirContext) 
     {
-        List<IAnyResource> resources = new ArrayList<>();
+        List<IBaseResource> resources = new ArrayList<>();
         for (String path : paths)
         {
-            IAnyResource resource = readResource(path, fhirContext);
+            IBaseResource resource = readResource(path, fhirContext);
             if (resource != null) {
                 resources.add(resource);
             }
@@ -259,7 +263,7 @@ public class IOUtils
         return filePaths;
     }
 
-    public static String getResourceFileName(String resourcePath, IAnyResource resource, Encoding encoding, FhirContext fhirContext, boolean versioned) {
+    public static String getResourceFileName(String resourcePath, IBaseResource resource, Encoding encoding, FhirContext fhirContext, boolean versioned) {
         String resourceVersion = IOUtils.getCanonicalResourceVersion(resource, fhirContext);
         String result = Paths.get(resourcePath, resource.getIdElement().getResourceType(),
                 resource.getIdElement().getIdPart() + ((versioned && resourceVersion != null && !(resource.getIdElement().getIdPart().endsWith(resourceVersion))) ? ("-" + resourceVersion) : ""))
@@ -546,7 +550,7 @@ public class IOUtils
         return terminologyPaths;
     }
     private static void setupTerminologyPaths(FhirContext fhirContext) {
-        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        HashMap<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
             {
@@ -584,7 +588,7 @@ public class IOUtils
         return libraryPaths;
     }
     private static void setupLibraryPaths(FhirContext fhirContext) {
-        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        HashMap<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
             {
@@ -614,7 +618,7 @@ public class IOUtils
         return measurePaths;
     }
     private static void setupMeasurePaths(FhirContext fhirContext) {
-        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        HashMap<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
             {
@@ -644,7 +648,7 @@ public class IOUtils
         return measureReportPaths;
     }
     private static void setupMeasureReportPaths(FhirContext fhirContext) {
-        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        HashMap<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
             {
@@ -672,7 +676,7 @@ public class IOUtils
         return planDefinitionPaths;
     }
     private static void setupPlanDefinitionPaths(FhirContext fhirContext) {
-        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        HashMap<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
             {
@@ -700,7 +704,7 @@ public class IOUtils
         return activityDefinitionPaths;
     }
     private static void setupActivityDefinitionPaths(FhirContext fhirContext) {
-        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        HashMap<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
         // BUG: resourceDirectories is being populated with all "per-convention" directories during validation. So,
         // if you have resources in the /tests directory for example, they will be picked up from there, rather than
         // from your resources directories.
@@ -730,7 +734,7 @@ public class IOUtils
         return devicePaths;
     }
     private static void setupDevicePaths(FhirContext fhirContext) {
-        HashMap<String, IAnyResource> resources = new HashMap<String, IAnyResource>();
+        HashMap<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
             {

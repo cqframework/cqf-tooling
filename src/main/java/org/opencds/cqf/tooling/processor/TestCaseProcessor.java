@@ -8,7 +8,7 @@ import java.util.Optional;
 import com.sun.istack.Nullable;
 
 import org.apache.commons.io.FilenameUtils;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
@@ -37,7 +37,7 @@ public class TestCaseProcessor
             for (String testCasePath : testCasePaths) {
                 try {
                 List<String> paths = IOUtils.getFilePaths(testCasePath, true);
-                List<IAnyResource> resources = IOUtils.readResources(paths, fhirContext);
+                List<IBaseResource> resources = IOUtils.readResources(paths, fhirContext);
                 ensureIds(testCasePath, resources);
                 Object bundle = BundleUtils.bundleArtifacts(getId(FilenameUtils.getName(testCasePath)), resources, fhirContext);
                 IOUtils.writeBundle(bundle, libraryTestCasePath, encoding, fhirContext);
@@ -51,9 +51,9 @@ public class TestCaseProcessor
         }    
     }
 
-    public static List<IAnyResource> getTestCaseResources(String path, FhirContext fhirContext)
+    public static List<IBaseResource> getTestCaseResources(String path, FhirContext fhirContext)
     {
-        List<IAnyResource> resources = new ArrayList<IAnyResource>();
+        List<IBaseResource> resources = new ArrayList<IBaseResource>();
         List<String> testCasePaths = IOUtils.getDirectoryPaths(path, false); 
         for (String testCasePath : testCasePaths) {
             List<String> paths = IOUtils.getFilePaths(testCasePath, true);
@@ -62,11 +62,11 @@ public class TestCaseProcessor
         return resources; 
     }
 
-    private static List<IAnyResource> ensureIds(String baseId, List<IAnyResource> resources) {
-        for (IAnyResource resource : resources) {
-            if (resource.getId() == null || resource.getId().equals("")) {
+    private static List<IBaseResource> ensureIds(String baseId, List<IBaseResource> resources) {
+        for (IBaseResource resource : resources) {
+            if (resource.getIdElement().getIdPart() == null || resource.getIdElement().getIdPart().equals("")) {
                 ResourceUtils.setIgId(FilenameUtils.getName(baseId), resource, false);
-                resource.setId(resource.getClass().getSimpleName() + "/" + resource.getId());
+                resource.setId(resource.getClass().getSimpleName() + "/" + resource.getIdElement().getIdPart());
             }
         }
         return resources;
@@ -77,7 +77,7 @@ public class TestCaseProcessor
     }
 
     public static Boolean bundleTestCases(String igPath, String libraryName, FhirContext fhirContext,
-            Map<String, IAnyResource> resources) {
+            Map<String, IBaseResource> resources) {
         Boolean shouldPersist = true;
         String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), libraryName);
 
@@ -91,9 +91,9 @@ public class TestCaseProcessor
         // }
 
         try {
-            List<IAnyResource> testCaseResources = TestCaseProcessor.getTestCaseResources(igTestCasePath, fhirContext);
-            for (IAnyResource resource : testCaseResources) {
-                resources.putIfAbsent(resource.getId(), resource);
+            List<IBaseResource> testCaseResources = TestCaseProcessor.getTestCaseResources(igTestCasePath, fhirContext);
+            for (IBaseResource resource : testCaseResources) {
+                resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
             }
         } catch (Exception e) {
             shouldPersist = false;
@@ -118,8 +118,8 @@ public class TestCaseProcessor
                         .filter(path -> path.equals(testContentPath))
                         .findFirst();
                     if (matchingMeasureReportPath.isPresent()) {
-                        IAnyResource measureReport = IOUtils.readResource(testContentPath, fhirContext);
-                        if (!measureReport.getId().startsWith("measurereport") || !measureReport.getId().endsWith("-expectedresults")) {
+                        IBaseResource measureReport = IOUtils.readResource(testContentPath, fhirContext);
+                        if (!measureReport.getIdElement().getIdPart().startsWith("measurereport") || !measureReport.getIdElement().getIdPart().endsWith("-expectedresults")) {
                             Object measureReportStatus = ResourceUtils.resolveProperty(measureReport, "status", fhirContext);
                             String measureReportStatusValue = ResourceUtils.resolveProperty(measureReportStatus, "value", fhirContext).toString();
                             if (measureReportStatusValue.equals("COMPLETE")) {

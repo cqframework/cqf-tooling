@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - ExecuteMeasureTestOperation",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.tooling.operation.ExecuteMeasureTestOperation",
+            "projectName": "tooling"
+        },
+        {
+            "type": "java",
             "name": "Debug (Attach)",
             "request": "attach",
             "hostName": "localhost",
@@ -36,7 +43,6 @@
                 "-op=../connectathon/fhir3/resources/library/test"
             ]
         },
-        // mvn exec:java -Dexec.args="-CqlToSTU3Library -ptcql=test/ -op=out"
         {
             "type": "java",
             "name": "APHL eICR FHIR4",
@@ -180,6 +186,6 @@
                 "-fv=fhir4",
                 "-e=json"
             ]
-        }      
+        }
     ]
 }

@@ -1,5 +1,8 @@
 package org.opencds.cqf.tooling.processor;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.r4.formats.FormatUtilities;
@@ -8,9 +11,6 @@ import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.utilities.IniFile;
 import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.npm.NpmPackageManager;
-
-import java.io.File;
-import java.io.IOException;
 
 public class BaseProcessor implements IProcessorContext, IWorkerContext.ILoggingService {
 

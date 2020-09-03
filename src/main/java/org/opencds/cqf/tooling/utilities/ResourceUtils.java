@@ -13,10 +13,10 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.ValueSetDef;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseElement;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -66,13 +66,13 @@ public class ResourceUtils
       return name.replaceAll("_", "-") + (versioned ? "-" + version.replaceAll("_", ".") : "");
     }
 
-    public static void setIgId(String baseId, IAnyResource resource, Boolean includeVersion)
+    public static void setIgId(String baseId, IBaseResource resource, Boolean includeVersion)
     {
       String version = includeVersion ? resource.getMeta().getVersionId() : "";
       setIgId(baseId, resource,  version);
     }
     
-    public static void setIgId(String baseId, IAnyResource resource, String version)
+    public static void setIgId(String baseId, IBaseResource resource, String version)
     {
       String igId = "";
       String resourceName = resource.getClass().getSimpleName().toLowerCase();
@@ -116,8 +116,8 @@ public class ResourceUtils
       return ((org.hl7.fhir.r4.model.Library)mainLibrary).getRelatedArtifact();   
     }    
 
-    public static Map<String, IAnyResource> getDepLibraryResources(String path, FhirContext fhirContext, Encoding encoding) {
-      Map<String, IAnyResource> dependencyLibraries = new HashMap<String, IAnyResource>();
+    public static Map<String, IBaseResource> getDepLibraryResources(String path, FhirContext fhirContext, Encoding encoding) {      
+      Map<String, IBaseResource> dependencyLibraries = new HashMap<String, IBaseResource>();
       switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:
             return getStu3DepLibraryResources(path, dependencyLibraries, fhirContext, encoding);
@@ -156,7 +156,7 @@ public class ResourceUtils
       return paths;
     }
 
-    private static Map<String, IAnyResource> getStu3DepLibraryResources(String path, Map<String, IAnyResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding) {
+    private static Map<String, IBaseResource> getStu3DepLibraryResources(String path, Map<String, IBaseResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding) {      
       List<String> dependencyLibraryPaths = getStu3DepLibraryPaths(path, fhirContext, encoding);
       for (String dependencyLibraryPath : dependencyLibraryPaths) {
         Object resource = IOUtils.readResource(dependencyLibraryPath, fhirContext);
@@ -185,7 +185,7 @@ public class ResourceUtils
       return paths;
     }
 
-    private static Map<String, IAnyResource> getR4DepLibraryResources(String path, Map<String, IAnyResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding) {
+    private static Map<String, IBaseResource> getR4DepLibraryResources(String path, Map<String, IBaseResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding) {      
       List<String> dependencyLibraryPaths = getR4DepLibraryPaths(path, fhirContext, encoding);
       for (String dependencyLibraryPath : dependencyLibraryPaths) {
         Object resource = IOUtils.readResource(dependencyLibraryPath, fhirContext);
@@ -197,8 +197,8 @@ public class ResourceUtils
       return dependencyLibraries;
     }
     
-    public static Map<String, IAnyResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext, boolean includeDependencies, Boolean includeVersion) throws Exception {
-      Map<String, IAnyResource> valueSetResources = new HashMap<String, IAnyResource>();
+    public static Map<String, IBaseResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext, boolean includeDependencies, Boolean includeVersion) throws Exception {
+      Map<String, IBaseResource> valueSetResources = new HashMap<String, IBaseResource>();
       List<String> valueSetDefIDs = getDepELMValueSetDefIDs(cqlContentPath);
       HashSet<String> dependencies = new HashSet<>();
         
@@ -212,9 +212,9 @@ public class ResourceUtils
       if(includeDependencies) {
         List<String> dependencyCqlPaths = IOUtils.getDependencyCqlPaths(cqlContentPath, includeVersion);
         for (String path : dependencyCqlPaths) {
-          Map<String, IAnyResource> dependencyValueSets = getDepValueSetResources(path, igPath, fhirContext, includeDependencies, includeVersion);
+          Map<String, IBaseResource> dependencyValueSets = getDepValueSetResources(path, igPath, fhirContext, includeDependencies, includeVersion);
           dependencies.addAll(dependencyValueSets.keySet());
-          for (Entry<String, IAnyResource> entry : dependencyValueSets.entrySet()) {
+          for (Entry<String, IBaseResource> entry : dependencyValueSets.entrySet()) {
             valueSetResources.putIfAbsent(entry.getKey(), entry.getValue());
           }
         }
@@ -305,12 +305,12 @@ public class ResourceUtils
       return elm; 
     }  
 
-    public static Boolean safeAddResource(String path, Map<String, IAnyResource> resources, FhirContext fhirContext) {
+    public static Boolean safeAddResource(String path, Map<String, IBaseResource> resources, FhirContext fhirContext) {
       Boolean added = true;
       try {
-          IAnyResource resource = IOUtils.readResource(path, fhirContext, true);
+          IBaseResource resource = IOUtils.readResource(path, fhirContext, true);
           if (resource != null) {
-            resources.putIfAbsent(resource.getId(), resource);
+            resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
           } else {
             added = false;
             LogUtils.putException(path, new Exception("Unable to add Resource: " + path));
@@ -323,9 +323,9 @@ public class ResourceUtils
       return added;
   }
 
-	public static Map<String, IAnyResource> getActivityDefinitionResources(String planDefinitionPath, FhirContext fhirContext, Boolean includeVersion) {
-        Map<String, IAnyResource> activityDefinitions = new HashMap<String, IAnyResource>();
-        IAnyResource planDefinition = IOUtils.readResource(planDefinitionPath, fhirContext, true);
+	public static Map<String, IBaseResource> getActivityDefinitionResources(String planDefinitionPath, FhirContext fhirContext, Boolean includeVersion) {
+        Map<String, IBaseResource> activityDefinitions = new HashMap<String, IBaseResource>();
+        IBaseResource planDefinition = IOUtils.readResource(planDefinitionPath, fhirContext, true);
         Object actionChild = resolveProperty(planDefinition, "action", fhirContext);
 
         if (actionChild != null) {
@@ -415,8 +415,8 @@ public class ResourceUtils
     }
 
     public static BaseRuntimeElementCompositeDefinition resolveRuntimeDefinition(IBase base, FhirContext fhirContext) {
-      if (base instanceof IAnyResource) {
-        return fhirContext.getResourceDefinition((IAnyResource) base);
+      if (base instanceof IBaseResource) {
+        return fhirContext.getResourceDefinition((IBaseResource) base);
       }
 
       else if (base instanceof IBaseBackboneElement || base instanceof IBaseElement) {

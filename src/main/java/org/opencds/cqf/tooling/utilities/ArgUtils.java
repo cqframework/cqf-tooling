@@ -4,7 +4,6 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
 public class ArgUtils {
-
     public static final String[] HELP_OPTIONS = {"h", "help", "?"};
 
     public static OptionSet parse(String[] args, OptionParser parser) {
