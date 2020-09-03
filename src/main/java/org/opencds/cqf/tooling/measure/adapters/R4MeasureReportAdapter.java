@@ -35,6 +35,16 @@ public class R4MeasureReportAdapter implements IMeasureReportAdapter {
         String[] measureRefParts = measureReport.getMeasure().split("/");
         String measureId = measureRefParts[measureRefParts.length - 1];
         return measureId;
+
+//        String measureId = null;
+//        measureId = measureReport.getMeasure() .getId();
+//
+//        if (measureId == null) {
+//            String[] measureRefParts = measureReport.getMeasure().getReference().split("/");
+//            measureId = measureRefParts[measureRefParts.length - 1];
+//        }
+//
+//        return measureId;
     }
 
     @Override

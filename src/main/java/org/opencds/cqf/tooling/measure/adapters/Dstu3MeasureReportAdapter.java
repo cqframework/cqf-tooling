@@ -25,13 +25,27 @@ public class Dstu3MeasureReportAdapter implements IMeasureReportAdapter {
 
     @Override
     public String getPatientId() {
-        String id = measureReport.getPatient().getId();
-        return id;
+        String patientId = null;
+        patientId = measureReport.getPatient().getId();
+
+        if (patientId == null) {
+            String[] measureRefParts = measureReport.getPatient().getReference().split("/");
+            patientId = measureRefParts[measureRefParts.length - 1];
+        }
+
+        return patientId;
     }
 
     @Override
     public String getMeasureId() {
-        String measureId = measureReport.getMeasure().getId();
+        String measureId = null;
+        measureId = measureReport.getMeasure().getId();
+
+        if (measureId == null) {
+            String[] measureRefParts = measureReport.getMeasure().getReference().split("/");
+            measureId = measureRefParts[measureRefParts.length - 1];
+        }
+
         return measureId;
     }
 
@@ -59,6 +73,8 @@ public class Dstu3MeasureReportAdapter implements IMeasureReportAdapter {
         for (MeasureReport.MeasureReportGroupComponent groupComponent : measureReport.getGroup()) {
             Group group = new Group();
             group.name = groupComponent.getId();
+            group.score = groupComponent.getMeasureScore();
+            groups.add(group);
         }
         return groups;
     }
