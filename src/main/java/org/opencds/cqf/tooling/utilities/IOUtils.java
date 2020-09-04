@@ -726,6 +726,17 @@ public class IOUtils
         }
     }
 
+    public static void ensurePath(String path) throws IOException {
+        //Creating a File object
+        File scopeDir = new File(path);
+        //Creating the directory
+        if (!scopeDir.exists()) {
+            if (!scopeDir.mkdirs()) {
+                throw new IOException("Could not create directory: " + path);
+            }
+        }
+    }
+
     private static HashSet<String> devicePaths = new HashSet<String>();
     public static HashSet<String> getDevicePaths(FhirContext fhirContext) {
         if (devicePaths.isEmpty()) {

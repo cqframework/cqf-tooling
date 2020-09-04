@@ -91,7 +91,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
                 filePath = libraryPath;
                 fileEncoding = encoding;
             }    
-            cqfmHelper.ensureToolingExtensionAndDevice(library, fhirContext);
+            cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
             IOUtils.writeResource(library, filePath, fileEncoding, fhirContext);
             String refreshedLibraryName;
             if (this.versioned && refreshedLibrary.getVersion() != null) {
@@ -151,7 +151,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
     private static void refreshLibrary(String igCanonicalBase, Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, Boolean includeVersion, CqlTranslator translator, FhirContext fhirContext) {
         Library generatedLibrary = processLibrary(igCanonicalBase, cqlContentPath, translator, includeVersion, fhirContext);
         mergeDiff(referenceLibrary, generatedLibrary, cqlContentPath, translator, fhirContext);
-        cqfmHelper.ensureToolingExtensionAndDevice(referenceLibrary, fhirContext);
+        cqfmHelper.ensureCQFToolingExtensionAndDevice(referenceLibrary, fhirContext);
         IOUtils.writeResource(referenceLibrary, outputPath, encoding, fhirContext);
     }
 
@@ -191,7 +191,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
 
         resolveDataRequirements(library, translator);
         attachContent(library, translator, IOUtils.getCqlString(cqlContentPath));
-        cqfmHelper.ensureToolingExtensionAndDevice(library, fhirContext);
+        cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
         // BaseNarrativeProvider<Narrative> narrativeProvider = new org.opencds.cqf.library.r4.NarrativeProvider();
         // INarrative narrative = narrativeProvider.getNarrative(fhirContext, library);
         // library.setText((Narrative) narrative);

@@ -5,6 +5,7 @@ import org.opencds.cqf.tooling.parameter.ScaffoldParameters;
 import org.opencds.cqf.tooling.processor.ScaffoldProcessor;
 import org.opencds.cqf.tooling.processor.argument.ScaffoldArgumentProcessor;
 
+
 public class ScaffoldOperation extends Operation {
 
     public ScaffoldOperation() {
@@ -21,6 +22,8 @@ public class ScaffoldOperation extends Operation {
             System.err.println(e.getMessage());
             System.exit(1);
         }
-        ScaffoldProcessor.scaffold(params);
+
+        ScaffoldProcessor scaffoldProcessor = new ScaffoldProcessor();
+        scaffoldProcessor.scaffold(params);
     }
 }
