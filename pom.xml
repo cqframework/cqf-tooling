@@ -18,7 +18,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <cqframework.version>1.4.9</cqframework.version>
+        <cqframework.version>1.5.0-SNAPSHOT</cqframework.version>
         <hapi.version>5.0.2</hapi.version>
         <core.version>5.0.22</core.version>
     </properties>
