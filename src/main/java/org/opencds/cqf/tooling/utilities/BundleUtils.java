@@ -9,7 +9,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.context.FhirContext;
 
 public class BundleUtils {
-    
+
     public static Object bundleArtifacts(String id, List<IBaseResource> resources, FhirContext fhirContext) {
         for (IBaseResource resource : resources) {
             if (resource.getIdElement().getIdPart() == null || resource.getIdElement().getIdPart().equals("")) {
@@ -55,14 +55,14 @@ public class BundleUtils {
         bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
         for (IBaseResource resource : resources)
         {            
-            String resourceRef = (resource.getIdElement().getResourceType() == null) ? resource.fhirType() + "/" + resource.getIdElement().getIdPart() : resource.getIdElement().getIdPart() ;
+            String resourceRef = (resource.getIdElement().getResourceType() == null) ? resource.fhirType() + "/" + resource.getIdElement().getIdPart() : resource.getIdElement().getValueAsString();
             bundle.addEntry(
             new org.hl7.fhir.r4.model.Bundle.BundleEntryComponent()
                 .setResource((org.hl7.fhir.r4.model.Resource) resource)
                 .setRequest(
                     new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent()
                         .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
-                        .setUrl(resourceRef)//shouldn't this be canonicalUrl?
+                        .setUrl(resourceRef)
                 )
             );
         }
