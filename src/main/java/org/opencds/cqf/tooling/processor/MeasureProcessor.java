@@ -79,7 +79,7 @@ public class MeasureProcessor
         List<String> measurePathLibraryNames = new ArrayList<String>();
         for (String measureSourcePath : measureSourcePaths) {
             measurePathLibraryNames
-                    .add(FilenameUtils.getBaseName(measureSourcePath).replace(MeasureProcessor.ResourcePrefix, ""));
+                .add(FilenameUtils.getBaseName(measureSourcePath).replace(MeasureProcessor.ResourcePrefix, ""));
         }
 
         List<String> bundledMeasures = new ArrayList<String>();
@@ -120,19 +120,29 @@ public class MeasureProcessor
                     .filter(path -> path.endsWith(cqlFileName))
                     .collect(Collectors.toList());
                 String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
+
                 if (includeTerminology) {
-                    shouldPersist = shouldPersist
-                        & ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
+                    boolean result = ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
+                    if (shouldPersist && !result) {
+                        LogUtils.info("Measure will not be bundled because ValueSet bundling failed.");
+                    }
+                    shouldPersist = shouldPersist & result;
                 }
 
                 if (includeDependencies) {
-                    shouldPersist = shouldPersist
-                        & LibraryProcessor.bundleLibraryDependencies(librarySourcePath, fhirContext, resources, encoding, includeVersion);
+                    boolean result = LibraryProcessor.bundleLibraryDependencies(librarySourcePath, fhirContext, resources, encoding, includeVersion);
+                    if (shouldPersist && !result) {
+                        LogUtils.info("Measure will not be bundled because Library Dependency bundling failed.");
+                    }
+                    shouldPersist = shouldPersist & result;
                 }
 
                 if (includePatientScenarios) {
-                    shouldPersist = shouldPersist
-                        & TestCaseProcessor.bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
+                    boolean result = TestCaseProcessor.bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
+                    if (shouldPersist && !result) {
+                        LogUtils.info("PlanDefinitions will not be bundled because Test Case bundling failed.");
+                    }
+                    shouldPersist = shouldPersist & result;
                 }
 
                 if (shouldPersist) {
