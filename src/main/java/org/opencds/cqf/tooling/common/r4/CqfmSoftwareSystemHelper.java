@@ -28,23 +28,6 @@ import ca.uhn.fhir.parser.XmlParser;
 
 public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 
-    private <T extends DomainResource> void validateResourceForSoftwareSystemExtension(T resource) {
-        if (resource == null) {
-            throw new IllegalArgumentException("No resource provided.");
-        }
-
-        List<String> eligibleResourceTypes = new ArrayList<String>() { {
-                add("Library");
-                add("Measure");
-        } };
-
-        String eligibleResourceTypesList = String.join(", ", eligibleResourceTypes);
-        String fhirType = resource.fhirType();
-        if (!eligibleResourceTypes.contains(fhirType)) {
-            throw new IllegalArgumentException(String.format("cqfm-softwaresystem extension is only supported for the following resources: { %s }, not %s", eligibleResourceTypesList, fhirType));
-        }
-    }
-
     public <T extends DomainResource> void ensureSoftwareSystemExtensionAndDevice(T resource, List<CqfmSoftwareSystem> softwareSystems, FhirContext fhirContext) {
         validateResourceForSoftwareSystemExtension(resource);
 
@@ -197,16 +180,16 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 //    }
 
     public <T extends DomainResource> void ensureCQFToolingExtensionAndDevice(T resource, FhirContext fhirContext) {
-        CqfmSoftwareSystem cqfToolingSoftwareSystem = new CqfmSoftwareSystem(this.getCqfToolingDeviceName(), Main.class.getPackage().getImplementationVersion());
+        CqfmSoftwareSystem cqfToolingSoftwareSystem = new CqfmSoftwareSystem(this.getCqfToolingDeviceName(), "1.3.0-SNAPSHOT");//Main.class.getPackage().getImplementationVersion());
         ensureSoftwareSystemExtensionAndDevice(resource, cqfToolingSoftwareSystem, fhirContext);
     }
 
-    private void addVersion(Device device, String version) {
-        // NOTE: The cqfm-softwaresystem extension restricts the cardinality of version to 0..1, so we overwrite any existing version entries each time
-        Device.DeviceVersionComponent versionComponent = new Device.DeviceVersionComponent(new StringType(version));
-        List<Device.DeviceVersionComponent> versionList = new ArrayList<Device.DeviceVersionComponent>();
-        versionList.add(versionComponent);
-
-        device.setVersion(versionList);
-    }
+//    private void addVersion(Device device, String version) {
+//        // NOTE: The cqfm-softwaresystem extension restricts the cardinality of version to 0..1, so we overwrite any existing version entries each time
+//        Device.DeviceVersionComponent versionComponent = new Device.DeviceVersionComponent(new StringType(version));
+//        List<Device.DeviceVersionComponent> versionList = new ArrayList<Device.DeviceVersionComponent>();
+//        versionList.add(versionComponent);
+//
+//        device.setVersion(versionList);
+//    }
 }
