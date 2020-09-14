@@ -1,5 +1,14 @@
 package org.opencds.cqf.tooling.common.r4;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.JsonParser;
+import ca.uhn.fhir.parser.XmlParser;
+import org.hl7.fhir.r4.model.*;
+import org.opencds.cqf.tooling.Main;
+import org.opencds.cqf.tooling.common.BaseCqfmSoftwareSystemHelper;
+import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
+import org.opencds.cqf.tooling.utilities.IOUtils;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -7,26 +16,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Device;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.ResourceType;
-import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.tooling.Main;
-import org.opencds.cqf.tooling.common.BaseCqfmSoftwareSystemHelper;
-import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
-import org.opencds.cqf.tooling.utilities.IOUtils;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.JsonParser;
-import ca.uhn.fhir.parser.XmlParser;
-
 public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
+
+    protected <T extends DomainResource> void validateResourceForSoftwareSystemExtension(T resource) {
+        if (resource == null) {
+            throw new IllegalArgumentException("No resource provided.");
+        }
+
+        List<String> eligibleResourceTypes = new ArrayList<String>() { {
+            add("Library");
+            add("Measure");
+        } };
+
+        String eligibleResourceTypesList = String.join(", ", eligibleResourceTypes);
+        String fhirType = "Library";//resource.get resource.fhirType();
+        if (!eligibleResourceTypes.contains(fhirType)) {
+            throw new IllegalArgumentException(String.format("cqfm-softwaresystem extension is only supported for the following resources: { %s }, not %s", eligibleResourceTypesList, fhirType));
+        }
+    }
 
     public <T extends DomainResource> void ensureSoftwareSystemExtensionAndDevice(T resource, List<CqfmSoftwareSystem> softwareSystems, FhirContext fhirContext) {
         validateResourceForSoftwareSystemExtension(resource);
@@ -68,7 +75,8 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
                 if (resourceInPath.getResourceType().toString().toLowerCase().equals("device")) {
                     Device prospectDevice = (Device)resourceInPath;
                     Device.DeviceVersionComponent proposedVersion = new Device.DeviceVersionComponent(new StringType(system.getVersion()));
-                    if (prospectDevice.getIdElement().getIdPart().equals(systemReferenceID) && prospectDevice.getVersion().contains(proposedVersion)) {
+                    if (prospectDevice.getIdElement().getIdPart().equals(systemReferenceID)
+                            && prospectDevice.getVersion().stream().anyMatch(v -> v.getValue().equals(system.getVersion()))) {
                         device = (Device) resourceInPath;
                         break;
                     }
@@ -103,14 +111,6 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
                 }
             }
 
-            /* Contained Device Resource */
-            Device softwareDevice = null;
-            for (Resource containedResource : resource.getContained()) {
-                if (containedResource.getId().equals(systemReferenceID) && containedResource.getResourceType() == ResourceType.Device) {
-                    softwareDevice = (Device)containedResource;
-                }
-            }
-
             // If Contained only contains the proposed device then set it to null, else set it to include the other
             // entries that it contained. i.e. remove any Contained entries for the proposed device/system
             if (resource.hasContained()) {
@@ -128,6 +128,15 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
             // e.g., If there is an existing device with a different version, we can't just update the version, can we?
             // Need to design what should happen and then instead of removing references we should be ensuring that the
             // device exists in the IG
+
+//            /* Contained Device Resource */
+//            Device softwareDevice = null;
+//            for (Resource containedResource : resource.getContained()) {
+//                if (containedResource.getId().equals(systemReferenceID) && containedResource.getResourceType() == ResourceType.Device) {
+//                    softwareDevice = (Device)containedResource;
+//                }
+//            }
+
 //            if (softwareDevice == null) {
 //                softwareDevice = createSoftwareSystemDevice(system);
 //                resource.addContained(softwareDevice);
@@ -180,7 +189,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 //    }
 
     public <T extends DomainResource> void ensureCQFToolingExtensionAndDevice(T resource, FhirContext fhirContext) {
-        CqfmSoftwareSystem cqfToolingSoftwareSystem = new CqfmSoftwareSystem(this.getCqfToolingDeviceName(), "1.3.0-SNAPSHOT");//Main.class.getPackage().getImplementationVersion());
+        CqfmSoftwareSystem cqfToolingSoftwareSystem = new CqfmSoftwareSystem(this.getCqfToolingDeviceName(), Main.class.getPackage().getImplementationVersion());
         ensureSoftwareSystemExtensionAndDevice(resource, cqfToolingSoftwareSystem, fhirContext);
     }
 

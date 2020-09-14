@@ -1,13 +1,6 @@
 package org.opencds.cqf.tooling.processor;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import ca.uhn.fhir.context.FhirContext;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
@@ -18,14 +11,7 @@ import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.elm.r1.ValueSetRef;
 import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.r4.formats.FormatUtilities;
-import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DataRequirement;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper;
 import org.opencds.cqf.tooling.library.GenericLibrarySourceProvider;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
@@ -34,7 +20,9 @@ import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.R4FHIRUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 public class R4LibraryProcessor extends LibraryProcessor {
     private String igCanonicalBase;

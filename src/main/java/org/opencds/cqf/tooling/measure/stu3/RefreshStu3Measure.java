@@ -1,19 +1,18 @@
 package org.opencds.cqf.tooling.measure.stu3;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.JsonParser;
+import ca.uhn.fhir.parser.XmlParser;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper;
 import org.opencds.cqf.tooling.measure.RefreshGeneratedContent;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.JsonParser;
-import ca.uhn.fhir.parser.XmlParser;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 public class RefreshStu3Measure extends RefreshGeneratedContent {
 
@@ -72,7 +71,7 @@ public class RefreshStu3Measure extends RefreshGeneratedContent {
     }
 
     public Measure refreshMeasure(Measure measure) {
-        cqfmHelper.ensureToolingExtensionAndDevice(measure, this.getContext());
+        cqfmHelper.ensureCQFToolingExtensionAndDevice(measure, this.getContext());
 //        CqfMeasure cqfMeasure = this.dataRequirementsProvider.createCqfMeasure(measure, this.libraryResourceProvider);
 //
 //        // Ensure All Related Artifacts for all referenced Libraries
