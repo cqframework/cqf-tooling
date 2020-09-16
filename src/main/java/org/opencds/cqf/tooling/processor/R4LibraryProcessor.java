@@ -32,10 +32,6 @@ public class R4LibraryProcessor extends LibraryProcessor {
     private Encoding encoding;
     private static CqfmSoftwareSystemHelper cqfmHelper;
 
-    public R4LibraryProcessor() {
-        this.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
-    }
-
     /*
         Refresh all library resources in the given libraryPath
     */
@@ -112,6 +108,8 @@ public class R4LibraryProcessor extends LibraryProcessor {
         fhirContext = params.fhirContext;
         encoding = params.encoding;
         versioned = params.versioned;
+
+        this.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
 
         return refreshLibraries(libraryPath, encoding);
 

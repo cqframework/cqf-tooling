@@ -30,10 +30,6 @@ public class STU3LibraryProcessor extends LibraryProcessor {
     private Encoding encoding;
     private static CqfmSoftwareSystemHelper cqfmHelper;
 
-    public STU3LibraryProcessor() {
-        this.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
-    }
-
     /*
     Refresh all library resources in the given libraryPath
      */
@@ -90,6 +86,8 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         fhirContext = params.fhirContext;
         encoding = params.encoding;
         versioned = params.versioned;
+
+        this.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
 
         return refreshLibraries(libraryPath);
 
