@@ -131,6 +131,12 @@ package org.opencds.cqf.tooling;
             - This tooling converts an RCKMS list of jurisdictions from an Excel file to a CodeSystem
             - mvn exec:java -Dexec.args="-JurisdictionListConverter [-pathtosource | -pts] (outputpath | -op)"
             - Example: mvn exec:java -Dexec.args="-JurisdictionsXlsxToCodeSystem -pts=C:/Users/me/aphl-ig/input/vocabulary/codesystem/sources/rckms-jurisdictions.xlsx -op=C:/Users/me/aphl-ig/input/vocabulary/codesystem"
+        
+        - Reporting Condition CQL Translator
+            - This tooling generates CQL from RCKMS jurisdiction JSON outputs.
+            - 
+            - 
+
         */
 
 public class Main {

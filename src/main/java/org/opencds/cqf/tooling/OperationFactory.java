@@ -79,6 +79,8 @@ class OperationFactory {
                 return new PostBundlesInDirOperation();
             case "JurisdictionsXlsxToCodeSystem":
                 return new RCKMSJurisdictionsGenerator();
+            case "ReportingConditionTranslator":
+                return new ReportingConditionCQLTranslator();
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operationName);
         }
