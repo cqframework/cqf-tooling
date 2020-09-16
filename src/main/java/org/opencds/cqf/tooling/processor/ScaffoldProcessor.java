@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public class ScaffoldProcessor {
+public class ScaffoldProcessor extends BaseProcessor {
     private static String LibraryPath = "/input/resources/library";
     private static String MeasurePath = "/input/resources/measure";
 
@@ -96,7 +96,7 @@ public class ScaffoldProcessor {
         org.hl7.fhir.dstu3.model.Library newLibrary = new org.hl7.fhir.dstu3.model.Library();
         newLibrary.setId(name);
         newLibrary.setName(name);
-        org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper cqfmHelper = new org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper();
+        org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper cqfmHelper = new org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper(igPath);
         cqfmHelper.ensureSoftwareSystemExtensionAndDevice(newLibrary, softwareSystems, fhirContext);
 
         IOUtils.writeResource(newLibrary, igPath + LibraryPath, outputEncoding, fhirContext);
@@ -106,7 +106,7 @@ public class ScaffoldProcessor {
         org.hl7.fhir.r4.model.Library newLibrary = new org.hl7.fhir.r4.model.Library();
         newLibrary.setId(name);
         newLibrary.setName(name);
-        org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper cqfmHelper = new org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper();
+        org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper cqfmHelper = new org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper(igPath);
         cqfmHelper.ensureSoftwareSystemExtensionAndDevice(newLibrary, softwareSystems, fhirContext);
 
         IOUtils.writeResource(newLibrary, igPath + LibraryPath, outputEncoding, fhirContext);
@@ -116,7 +116,7 @@ public class ScaffoldProcessor {
         org.hl7.fhir.dstu3.model.Measure newMeasure = new org.hl7.fhir.dstu3.model.Measure();
         newMeasure.setId(name);
         newMeasure.setName(name);
-        org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper cqfmHelper = new org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper();
+        org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper cqfmHelper = new org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper(igPath);
         cqfmHelper.ensureSoftwareSystemExtensionAndDevice(newMeasure, softwareSystems, fhirContext);
 
         IOUtils.writeResource(newMeasure, igPath + MeasurePath, outputEncoding, fhirContext);
@@ -126,7 +126,7 @@ public class ScaffoldProcessor {
         org.hl7.fhir.r4.model.Measure newMeasure = new org.hl7.fhir.r4.model.Measure();
         newMeasure.setId(name);
         newMeasure.setName(name);
-        org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper cqfmHelper = new org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper();
+        org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper cqfmHelper = new org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper(igPath);
         cqfmHelper.ensureSoftwareSystemExtensionAndDevice(newMeasure, softwareSystems, fhirContext);
 
         IOUtils.writeResource(newMeasure, igPath + MeasurePath, outputEncoding, fhirContext);

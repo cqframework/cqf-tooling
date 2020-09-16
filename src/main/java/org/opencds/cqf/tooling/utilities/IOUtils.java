@@ -761,9 +761,9 @@ public class IOUtils
             RuntimeResourceDefinition deviceDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "Device");
             String deviceClassName = deviceDefinition.getImplementingClass().getName();
             resources.entrySet().stream()
-                    .filter(entry -> entry.getValue() != null)
-                    .filter(entry ->  deviceClassName.equals(entry.getValue().getClass().getName()))
-                    .forEach(entry -> devicePaths.add(entry.getKey()));
+                .filter(entry -> entry.getValue() != null)
+                .filter(entry ->  deviceClassName.equals(entry.getValue().getClass().getName()))
+                .forEach(entry -> devicePaths.add(entry.getKey()));
         }
     }
 }

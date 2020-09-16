@@ -5,7 +5,7 @@ import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.XmlParser;
 import org.hl7.fhir.r4.model.Measure;
 import org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper;
-import org.opencds.cqf.tooling.measure.RefreshGeneratedContent;
+import org.opencds.cqf.tooling.operation.RefreshGeneratedContentOperation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import java.io.File;
@@ -14,22 +14,22 @@ import java.io.FileNotFoundException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-public class RefreshR4Measure extends RefreshGeneratedContent {
+public class RefreshR4MeasureOperation extends RefreshGeneratedContentOperation {
 
     private JsonParser jsonParser;
     private XmlParser xmlParser;
     private CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
 
-    public RefreshR4Measure() {
+    public RefreshR4MeasureOperation() {
         super("src/main/resources/org/opencds/cqf/tooling/measure/output/r4", "-RefreshR4Measure", FhirContext.forR4());
-        jsonParser = (JsonParser)this.getContext().newJsonParser();
-        xmlParser = (XmlParser)this.getContext().newXmlParser();
+        jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
+        xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
     }
 
-    public RefreshR4Measure(String pathToMeasures) {
+    public RefreshR4MeasureOperation(String pathToMeasures) {
         super(pathToMeasures, "-RefreshR4Measure", FhirContext.forR4(), null, pathToMeasures);
-        jsonParser = (JsonParser)this.getContext().newJsonParser();
-        xmlParser = (XmlParser)this.getContext().newXmlParser();
+        jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
+        xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
     }
 
     @Override
@@ -71,7 +71,7 @@ public class RefreshR4Measure extends RefreshGeneratedContent {
     }
 
     public Measure refreshMeasure(Measure measure) {
-        cqfmHelper.ensureCQFToolingExtensionAndDevice(measure, this.getContext());
+        cqfmHelper.ensureCQFToolingExtensionAndDevice(measure, this.getFhirContext());
         return measure;
     }
 }

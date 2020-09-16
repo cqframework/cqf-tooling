@@ -26,4 +26,24 @@ public class ScaffoldOperation extends Operation {
         ScaffoldProcessor scaffoldProcessor = new ScaffoldProcessor();
         scaffoldProcessor.scaffold(params);
     }
+
+    public static void main(String[] args) {
+        ScaffoldOperation op = new ScaffoldOperation();
+
+        op.execute(new String[] {
+            "-ScaffoldIG",
+            "-ip",
+            "/Users/Adam/Src/sample-ig",
+            "-iv",
+            "r4",
+            "-software",
+            "AdamsTool=1.2.4",
+            "-software",
+            "AdamsOtherTool=4.2.1",
+            "-rn",
+            "EXM_133",
+            "-rn",
+            "EXM_134"
+        });
+    }
 }

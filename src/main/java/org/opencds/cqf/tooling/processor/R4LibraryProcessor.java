@@ -30,11 +30,15 @@ public class R4LibraryProcessor extends LibraryProcessor {
     private String libraryPath;
     private FhirContext fhirContext;
     private Encoding encoding;
-    private static CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
+    private static CqfmSoftwareSystemHelper cqfmHelper;
+
+    public R4LibraryProcessor() {
+        this.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
+    }
 
     /*
-    Refresh all library resources in the given libraryPath
-     */
+        Refresh all library resources in the given libraryPath
+    */
     protected List<String> refreshLibraries(String libraryPath, Encoding encoding) {
         File file = new File(libraryPath);
         Map<String, String> fileMap = new HashMap<String, String>();

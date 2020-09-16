@@ -3,6 +3,7 @@ package org.opencds.cqf.tooling.common.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.XmlParser;
+import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.tooling.Main;
 import org.opencds.cqf.tooling.common.BaseCqfmSoftwareSystemHelper;
@@ -17,6 +18,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
+
+    public CqfmSoftwareSystemHelper() { }
+
+    public CqfmSoftwareSystemHelper(String igPath) {
+        super(igPath);
+    }
 
     protected <T extends DomainResource> void validateResourceForSoftwareSystemExtension(T resource) {
         if (resource == null) {
@@ -55,10 +62,13 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 
             // Is a device defined in devicePaths? If so, get it.
             Device device = null;
+            String deviceOutputPath = getIgPath() + devicePath;
+            IOUtils.Encoding deviceOutputEncoding = IOUtils.Encoding.JSON;
             for (String path : IOUtils.getDevicePaths(fhirContext)) {
                 DomainResource resourceInPath;
                 try {
                     if (path.endsWith("xml")) {
+                        deviceOutputEncoding = IOUtils.Encoding.XML;
                         XmlParser xmlParser = (XmlParser)fhirContext.newXmlParser();
                         resourceInPath = (DomainResource) xmlParser.parseResource(new FileReader(new File(path)));
                     }
@@ -71,17 +81,31 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
                     throw new RuntimeException("Error parsing " + e.getLocalizedMessage());
                 }
 
-                // NOTE: Takes the first device that matches on ID and Version.
+                // NOTE: Takes the first device that matches on ID.
                 if (resourceInPath.getResourceType().toString().toLowerCase().equals("device")) {
                     Device prospectDevice = (Device)resourceInPath;
-                    Device.DeviceVersionComponent proposedVersion = new Device.DeviceVersionComponent(new StringType(system.getVersion()));
-                    if (prospectDevice.getIdElement().getIdPart().equals(systemReferenceID)
-                            && prospectDevice.getVersion().stream().anyMatch(v -> v.getValue().equals(system.getVersion()))) {
-                        device = (Device) resourceInPath;
+                    if (prospectDevice.getIdElement().getIdPart().equals(systemReferenceID)) {
+                        device = (Device)resourceInPath;
+                        deviceOutputPath = path;
                         break;
                     }
                 }
             }
+
+            /* Create the device if one doesn't already exist */
+            if (device == null) {
+                device = createSoftwareSystemDevice(system);
+            }
+
+            /* Ensure that device has the current/proposed version */
+            Device.DeviceVersionComponent proposedVersion = new Device.DeviceVersionComponent(new StringType(system.getVersion()));
+            List<Device.DeviceVersionComponent> proposedVersionList = new ArrayList<Device.DeviceVersionComponent>();
+            proposedVersionList.add(proposedVersion);
+            device.setVersion(proposedVersionList);
+
+            /* Persist the new/updated Device */
+            EnsureDevicePath();
+            IOUtils.writeResource(device, deviceOutputPath, deviceOutputEncoding, fhirContext);
 
             /* Extension */
             final List<Extension> extensions = resource.getExtension();
@@ -102,7 +126,6 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 
                 resource.addExtension(softwareSystemExtension);
             }
-            // Remove Extension if device does not exist in IG.
             else if (device == null) {
                 if (resource.hasExtension(this.getCqfmSoftwareSystemExtensionUrl())) {
                     resource.setExtension(extensions.stream()
@@ -111,6 +134,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
                 }
             }
 
+            // NOTE: This seems like a cleanup from a previous implementation. Should it remain? If so, for how long?
             // If Contained only contains the proposed device then set it to null, else set it to include the other
             // entries that it contained. i.e. remove any Contained entries for the proposed device/system
             if (resource.hasContained()) {
@@ -147,38 +171,38 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
         }
     }
 
-//    private Device createSoftwareSystemDevice(CqfmSoftwareSystem system) {
-//        Device device = null;
-//
-//        if (this.getSystemIsValid(system)) {
-//            device = new Device();
-//            device.setId(system.getName());
-//
-//            /* meta.profile */
-//            Meta meta = new Meta();
-//            meta.addProfile("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/device-softwaresystem-cqfm");
-//            device.setMeta(meta);
-//
-//            device.setManufacturer(system.getName());
-//
-//            /* type */
-//            Coding typeCoding = new Coding();
-//            typeCoding.setSystem("http://hl7.org/fhir/us/cqfmeasures/CodeSystem/software-system-type");
-//            typeCoding.setCode("tooling");
-//
-//            List<Coding> typeCodingList = new ArrayList();
-//            typeCodingList.add(typeCoding);
-//
-//            CodeableConcept type = new CodeableConcept();
-//            type.setCoding(typeCodingList);
-//            device.setType(type);
-//
-//            /* version */
-//            addVersion(device, system.getVersion());
-//        }
-//
-//        return device;
-//    }
+    private Device createSoftwareSystemDevice(CqfmSoftwareSystem system) {
+        Device device = null;
+
+        if (this.getSystemIsValid(system)) {
+            device = new Device();
+            device.setId(system.getName());
+
+            /* meta.profile */
+            Meta meta = new Meta();
+            meta.addProfile("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/device-softwaresystem-cqfm");
+            device.setMeta(meta);
+
+            device.setManufacturer(system.getName());
+
+            /* type */
+            Coding typeCoding = new Coding();
+            typeCoding.setSystem("http://hl7.org/fhir/us/cqfmeasures/CodeSystem/software-system-type");
+            typeCoding.setCode("tooling");
+
+            List<Coding> typeCodingList = new ArrayList();
+            typeCodingList.add(typeCoding);
+
+            CodeableConcept type = new CodeableConcept();
+            type.setCoding(typeCodingList);
+            device.setType(type);
+
+            /* version */
+            addVersion(device, system.getVersion());
+        }
+
+        return device;
+    }
 
     /* cqf-tooling specific logic */
 //    private Device createCqfToolingDevice() {
@@ -193,12 +217,12 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
         ensureSoftwareSystemExtensionAndDevice(resource, cqfToolingSoftwareSystem, fhirContext);
     }
 
-//    private void addVersion(Device device, String version) {
-//        // NOTE: The cqfm-softwaresystem extension restricts the cardinality of version to 0..1, so we overwrite any existing version entries each time
-//        Device.DeviceVersionComponent versionComponent = new Device.DeviceVersionComponent(new StringType(version));
-//        List<Device.DeviceVersionComponent> versionList = new ArrayList<Device.DeviceVersionComponent>();
-//        versionList.add(versionComponent);
-//
-//        device.setVersion(versionList);
-//    }
+    private void addVersion(Device device, String version) {
+        // NOTE: The cqfm-softwaresystem extension restricts the cardinality of version to 0..1, so we overwrite any existing version entries each time
+        Device.DeviceVersionComponent versionComponent = new Device.DeviceVersionComponent(new StringType(version));
+        List<Device.DeviceVersionComponent> versionList = new ArrayList<Device.DeviceVersionComponent>();
+        versionList.add(versionComponent);
+
+        device.setVersion(versionList);
+    }
 }

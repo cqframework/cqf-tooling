@@ -4,8 +4,8 @@ package org.opencds.cqf.tooling;
 import org.apache.commons.lang.NotImplementedException;
 import org.opencds.cqf.tooling.acceleratorkit.Processor;
 import org.opencds.cqf.tooling.library.r4.LibraryGenerator;
-import org.opencds.cqf.tooling.measure.r4.RefreshR4Measure;
-import org.opencds.cqf.tooling.measure.stu3.RefreshStu3Measure;
+import org.opencds.cqf.tooling.measure.r4.RefreshR4MeasureOperation;
+import org.opencds.cqf.tooling.measure.stu3.RefreshStu3MeasureOperation;
 import org.opencds.cqf.tooling.modelinfo.StructureDefinitionToModelInfo;
 import org.opencds.cqf.tooling.operation.*;
 import org.opencds.cqf.tooling.qdm.QdmToQiCore;
@@ -58,9 +58,9 @@ class OperationFactory {
             case "RefreshLibrary":
                 return new RefreshLibraryOperation();
             case "RefreshStu3Measure":
-                return new RefreshStu3Measure();
+                return new RefreshStu3MeasureOperation();
             case "RefreshR4Measure":
-                return new RefreshR4Measure();
+                return new RefreshR4MeasureOperation();
             case "ScaffoldIG":
                 return new ScaffoldOperation();
 //            case "TestIG":
