@@ -132,31 +132,47 @@ public class VSACValueSetGenerator extends Operation {
                 continue;
             }
 
-            String system = SpreadsheetHelper.getCellAsString(row.getCell(systemNameCol));
-            if (system == null) {
+            String version = SpreadsheetHelper.getCellAsString(row.getCell(versionCol));
+            String code = SpreadsheetHelper.getCellAsString(row.getCell(codeCol));
+            String systemName = SpreadsheetHelper.getCellAsString(row.getCell(systemNameCol));
+            String display = SpreadsheetHelper.getCellAsString(row.getCell(descriptionCol));
+
+            if ((version == null || version.equals(""))
+                && (code == null || code.equals(""))
+                && (
+                    (systemName == null || systemName.equals("")) 
+                        && (SpreadsheetHelper.getCellAsString(row.getCell(systemOidCol)) == null || SpreadsheetHelper.getCellAsString(row.getCell(systemOidCol)).equals(""))
+                )
+            ) {
+                //Protecting against error where last line has no content except hidden characters introduced by copy/paste operations
+                continue;
+            }
+
+            String system;
+            if (systemName == null || systemName.equals("")) {
                 system = SpreadsheetHelper.getCellAsString(row.getCell(systemOidCol));
-                if (system == null) {
+                if (system == null || system.equals("")) {
                     throw new IllegalArgumentException(String.format("No system value found on row: %d", row.getRowNum()));
                 }
                 system = CodeSystemLookupDictionary.getUrlFromOid(system);
             }
             else {
-                system = CodeSystemLookupDictionary.getUrlFromName(system);
+                system = CodeSystemLookupDictionary.getUrlFromName(systemName);
             }
 
-            String version = SpreadsheetHelper.getCellAsString(row.getCell(versionCol));
-            int hash = system.hashCode() * (version != null ? version.hashCode() : 1);
-
-            if (!codesBySystem.containsKey(hash)) {
-                codesBySystem.put(hash, new org.opencds.cqf.tooling.terminology.ValueSet().setSystem(system).setVersion(version));
+            if (system == null || system.equals("")) {
+                throw new IllegalArgumentException(String.format("No system value found on row: %d", row.getRowNum()));
             }
 
-            String code = SpreadsheetHelper.getCellAsString(row.getCell(codeCol));
             if (code == null) {
                 throw new IllegalArgumentException(String.format("No code value found on row: %d", row.getRowNum()));
             }
 
-            String display = SpreadsheetHelper.getCellAsString(row.getCell(descriptionCol));
+            int hash = system.hashCode() * (version != null && !version.equals("") ? version.hashCode() : 1);
+
+            if (!codesBySystem.containsKey(hash)) {
+                codesBySystem.put(hash, new org.opencds.cqf.tooling.terminology.ValueSet().setSystem(system).setVersion(version));
+            }
 
             ValueSet.ConceptReferenceComponent concept = new ValueSet.ConceptReferenceComponent().setCode(code).setDisplay(display);
 

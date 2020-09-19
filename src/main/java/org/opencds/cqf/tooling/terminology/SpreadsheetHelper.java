@@ -27,12 +27,49 @@ public class SpreadsheetHelper {
         }
     }
 
+    private static String cleanseString(String rawValue) {
+        StringBuilder newString = new StringBuilder(rawValue.length());
+        for (int offset = 0; offset < rawValue.length();)
+        {
+            int codePoint = rawValue.codePointAt(offset);
+            offset += Character.charCount(codePoint);
+
+            // Replace invisible control characters and unused code points
+            switch (Character.getType(codePoint))
+            {
+                case Character.CONTROL:     // \p{Cc}
+                case Character.FORMAT:      // \p{Cf}
+                case Character.PRIVATE_USE: // \p{Co}
+                case Character.SURROGATE:   // \p{Cs}
+                case Character.UNASSIGNED:  // \p{Cn}
+                    newString.append('?');
+                    break;
+                default:
+                    newString.append(Character.toChars(codePoint));
+                    break;
+            }
+        }
+        return newString.toString();
+    }
+
+    public static String protectedString(String rawValue) {
+        String result = rawValue;
+        if (result == null) {
+            return result;
+        }
+        result = result.trim();
+        result.replaceAll("\\p{Cntrl}", "?");
+        result.replaceAll("\\p{C}", "?");
+        result = SpreadsheetHelper.cleanseString(result);
+        return result;
+    }
+
     public static String getCellAsString(Cell cell) {
         if (cell == null) {
             return null;
         }
         cell.setCellType(CellType.STRING);
-        return cell.getStringCellValue();
+        return SpreadsheetHelper.protectedString(cell.getStringCellValue());
     }
 
     public static String getCellAsString(Row row, int cellIndex) {
@@ -44,15 +81,6 @@ public class SpreadsheetHelper {
         }
 
         return null;
-    }
-
-    public static String getCellAsStringTrimmed(Row row, int cellIndex) {
-        String rawValue = getCellAsString(row, cellIndex);
-        String trimmedValue = null;
-        if (rawValue != null) {
-            trimmedValue = rawValue.trim();
-        }
-        return trimmedValue;
     }
 
     public static void resolveValueSet(org.hl7.fhir.dstu3.model.ValueSet vs, Map<Integer, ValueSet> codesBySystem) {
