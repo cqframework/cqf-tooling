@@ -93,13 +93,14 @@ public class SpreadsheetHelper {
         return null;
     }
 
+    //name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
     public static String getFHIRName(String value) {
         String name = value.replaceAll("[^A-Za-z0-9_]", "");
-        name = name.length() <= 256 ? name : name.substring(0, 256);
         while (name.length() > 0 && !Character.isAlphabetic(name.charAt(0))) {
             name = name.substring(1);
         }
         name = name.substring(0, 1).toUpperCase() + name.substring(1);
+        name = name.length() <= 254 ? name : name.substring(0, 254);
         return name;
     }
 
