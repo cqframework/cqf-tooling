@@ -76,9 +76,7 @@ public class SpreadsheetHelper {
         if (cell == null) {
             return null;
         }
-    
         String valueAsString = SpreadsheetHelper.getDataFormatter().formatCellValue(cell);
-
         return SpreadsheetHelper.protectedString(valueAsString);
     }
 
@@ -89,7 +87,6 @@ public class SpreadsheetHelper {
                 return getCellAsString(cell);
             }
         }
-
         return null;
     }
 
