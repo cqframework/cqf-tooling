@@ -39,6 +39,7 @@ public class VSACValueSetGenerator extends Operation {
     private int versionCol = 3; // -versioncol (-vc)
     private int systemOidCol = 4; // -systemoidcol (-soc)
     private String baseUrl; // -baseurl (-burl)
+    private boolean setName; // -setname (-name)
 
     private Map<Integer, org.opencds.cqf.tooling.terminology.ValueSet> codesBySystem = new HashMap<>();
 
@@ -71,6 +72,7 @@ public class VSACValueSetGenerator extends Operation {
                 case "versioncol": case "vc": versionCol = Integer.valueOf(value); break;
                 case "systemoidcol": case "soc": systemOidCol = Integer.valueOf(value); break;
                 case "baseurl": case "burl": baseUrl = value; break;
+                case "setname": case "name": setName = value.toLowerCase().equals("true") ? true : false; break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
@@ -85,10 +87,14 @@ public class VSACValueSetGenerator extends Operation {
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
 
         ValueSet vs = new ValueSet();
-        resolveMetaData(vs, workbook);
-        resolveCodeList(workbook);
-        resolveValueSet(vs);
-        writeValueSetToFile(vs.getTitle() != null ? vs.getTitle().replaceAll("\\s", "").concat("." + encoding) : "valueset".concat("." + encoding), vs);
+        try {
+            resolveMetaData(vs, workbook);
+            resolveCodeList(workbook);
+            resolveValueSet(vs);
+            writeValueSetToFile(vs.getTitle() != null ? vs.getTitle().replaceAll("\\s", "").concat("." + encoding) : "valueset".concat("." + encoding), vs);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(String.format("%s - ValueSet: %s", e.getMessage(), (vs.getTitle() == null || vs.getTitle().equals("") ? "undefined" : vs.getTitle())));
+        }
     }
 
     private String getSecondStringInRow(Sheet sheet, int rowIdx) {
@@ -119,7 +125,10 @@ public class VSACValueSetGenerator extends Operation {
         }
 
         vs.setId(id);
-        vs.setName(id);
+
+        if (setName) {
+            vs.setName(SpreadsheetHelper.getFHIRName(title));
+        }
     
         vs.setUrl(baseUrl + id);
         String publisher = getSecondStringInRow(metaSheet, metaStewardRow);
@@ -137,10 +146,15 @@ public class VSACValueSetGenerator extends Operation {
                 continue;
             }
 
-            String version = SpreadsheetHelper.getCellAsString(row.getCell(versionCol));
-            String code = SpreadsheetHelper.getCellAsString(row.getCell(codeCol));
+            String version = SpreadsheetHelper.getCellAsString(row.getCell(versionCol));            
             String systemName = SpreadsheetHelper.getCellAsString(row.getCell(systemNameCol));
             String display = SpreadsheetHelper.getCellAsString(row.getCell(descriptionCol));
+
+            String code = SpreadsheetHelper.getCellAsString(row.getCell(codeCol));
+
+            if (code.matches("[+-]?\\d(\\.\\d+)?[Ee][+-]?\\d+")) {
+                throw new IllegalArgumentException(String.format("Scientific Notation is not allowed for a code: %s", code));
+            }
 
             if ((version == null || version.equals(""))
                 && (code == null || code.equals(""))

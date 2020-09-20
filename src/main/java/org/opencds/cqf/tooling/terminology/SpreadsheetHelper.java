@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -64,12 +64,22 @@ public class SpreadsheetHelper {
         return result;
     }
 
+    private static DataFormatter dataFormatter;
+    public static DataFormatter getDataFormatter() {
+        if (dataFormatter == null) {
+            dataFormatter = new DataFormatter();
+        }
+        return dataFormatter;
+    }
+
     public static String getCellAsString(Cell cell) {
         if (cell == null) {
             return null;
         }
-        cell.setCellType(CellType.STRING);
-        return SpreadsheetHelper.protectedString(cell.getStringCellValue());
+    
+        String valueAsString = SpreadsheetHelper.getDataFormatter().formatCellValue(cell);
+
+        return SpreadsheetHelper.protectedString(valueAsString);
     }
 
     public static String getCellAsString(Row row, int cellIndex) {
@@ -81,6 +91,16 @@ public class SpreadsheetHelper {
         }
 
         return null;
+    }
+
+    public static String getFHIRName(String value) {
+        String name = value.replaceAll("[^A-Za-z0-9_]", "");
+        name = name.length() <= 256 ? name : name.substring(0, 256);
+        while (name.length() > 0 && !Character.isAlphabetic(name.charAt(0))) {
+            name = name.substring(1);
+        }
+        name = name.substring(0, 1).toUpperCase() + name.substring(1);
+        return name;
     }
 
     public static void resolveValueSet(org.hl7.fhir.dstu3.model.ValueSet vs, Map<Integer, ValueSet> codesBySystem) {
