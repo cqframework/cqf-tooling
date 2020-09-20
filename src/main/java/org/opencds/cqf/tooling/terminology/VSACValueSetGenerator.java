@@ -113,9 +113,14 @@ public class VSACValueSetGenerator extends Operation {
             vs.setTitle(title);
         }
         String id = getSecondStringInRow(metaSheet, metaOidRow);
-        if (id != null) {
-            vs.setId(id);
+        //id isn't required by FHIR, but like system and code, we're requiring it.
+        if (id == null || id.equals("")) {
+            throw new IllegalArgumentException(String.format("No id value found for ValueSet: %d", vs.getTitle() == null || vs.getTitle().equals("") ? "untitled" : vs.getTitle()));
         }
+
+        vs.setId(id);
+        vs.setName(id);
+    
         vs.setUrl(baseUrl + id);
         String publisher = getSecondStringInRow(metaSheet, metaStewardRow);
         if (publisher != null) {
