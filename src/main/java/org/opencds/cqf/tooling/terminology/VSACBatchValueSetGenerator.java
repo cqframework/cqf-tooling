@@ -9,6 +9,7 @@ public class VSACBatchValueSetGenerator extends Operation {
     private String pathToSpreadsheetDirectory; // -pathtospreadsheetdir (-ptsd)
     private String valueSetSource = "vsac"; //vsac or cms
     private String baseUrl; // -baseurl (-burl)
+    private boolean setName; // -setname (-name)
 
     @Override
     public void execute(String[] args) {
@@ -37,6 +38,10 @@ public class VSACBatchValueSetGenerator extends Operation {
                 case "baseurl":
                 case "burl":
                     baseUrl = value;
+                    break;
+                case "setname":
+                case "name":
+                    setName = value.toLowerCase().equals("true") ? true : false;
                     break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
@@ -73,7 +78,7 @@ public class VSACBatchValueSetGenerator extends Operation {
             }
             for (File valueSet : valueSetFiles) {
                 if (!valueSet.getPath().endsWith(".xlsx")) continue;
-                String[] argsForSpreadsheet = { "-VsacXlsxToValueSet", "-pts=" + valueSet.getAbsolutePath(), "-op=" + getOutputPath(), "-burl=" + baseUrl };
+                String[] argsForSpreadsheet = { "-VsacXlsxToValueSet", "-pts=" + valueSet.getAbsolutePath(), "-op=" + getOutputPath(), "-burl=" + baseUrl, "-name=" + (setName ? "true" : "false") };
                 generator =  new VSACValueSetGenerator();
                 generator.execute(argsForSpreadsheet);
             }
