@@ -17,7 +17,8 @@ import java.util.stream.Collectors;
 
 public class MeasureProcessor
 {      
-    public static final String ResourcePrefix = "measure-";   
+    public static final String ResourcePrefix = "measure-";
+    public static final String MeasureTestGroupName = "measure";
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
     }
@@ -130,7 +131,7 @@ public class MeasureProcessor
                 }
 
                 if (includePatientScenarios) {
-                    boolean result = TestCaseProcessor.bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
+                    boolean result = TestCaseProcessor.bundleTestCases(igPath, MeasureTestGroupName, refreshedLibraryName, fhirContext, resources);
                     if (shouldPersist && !result) {
                         LogUtils.info("PlanDefinitions will not be bundled because Test Case bundling failed.");
                     }
@@ -138,7 +139,7 @@ public class MeasureProcessor
                 }
 
                 if (shouldPersist) {
-                    String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), "measure"), refreshedLibraryName);
+                    String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), MeasureTestGroupName), refreshedLibraryName);
                     persistBundle(igPath, bundleDestPath, refreshedLibraryName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri);
                     bundleFiles(igPath, bundleDestPath, refreshedLibraryName, measureSourcePath, librarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion);
                     bundledMeasures.add(refreshedLibraryName);

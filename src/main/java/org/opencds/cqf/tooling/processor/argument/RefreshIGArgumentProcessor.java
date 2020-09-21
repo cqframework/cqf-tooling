@@ -96,8 +96,9 @@ public class RefreshIGArgumentProcessor {
         String measureToRefreshPath = (String)options.valueOf(MEASURE_TO_REFRESH_PATH[0]);
 
         ArrayList<String> paths = new ArrayList<String>();
-        assert resourcePaths != null;
-        paths.addAll(resourcePaths);
+        if (resourcePaths != null && !resourcePaths.isEmpty()) {
+            paths.addAll(resourcePaths);
+        }
     
         RefreshIGParameters ip = new RefreshIGParameters();
         ip.ini = ini;
