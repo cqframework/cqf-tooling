@@ -40,7 +40,7 @@ public class IGProcessor extends BaseProcessor {
         FhirContext fhirContext = IGProcessor.getIgFhirContext(fhirVersion);
 
         //Use case 1
-        //scafold basic templating for the type of content, Measure, PlanDefinition, or Questionnaire
+        //Scaffold basic templating for the type of content, Measure, PlanDefinition, or Questionnaire
         //Give it a name and generate all the files, cql, library, measure... should be very basic template
         //ScaffoldProcessor.scaffold(ScaffoldParameters);
 

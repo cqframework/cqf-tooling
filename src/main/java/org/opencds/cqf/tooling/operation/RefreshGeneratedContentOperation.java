@@ -1,4 +1,4 @@
-package org.opencds.cqf.tooling.measure;
+package org.opencds.cqf.tooling.operation;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
@@ -6,24 +6,25 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public abstract class RefreshGeneratedContent extends Operation {
-    private FhirContext context;
+public abstract class RefreshGeneratedContentOperation extends Operation {
+    private String igPath;
+    private FhirContext fhirContext;
     private String pathToMeasures; // -ptm
     private String pathToLibraries; // -ptl
     private String operationName;
 
     private String encoding; // -e (json|xml)
 
-    public RefreshGeneratedContent(String outputPath, String operationName, FhirContext context) {
+    public RefreshGeneratedContentOperation(String outputPath, String operationName, FhirContext fhirContext) {
         setOutputPath(outputPath);
         this.operationName = operationName;
-        this.context = context;
+        this.fhirContext = fhirContext;
     }
 
-    public RefreshGeneratedContent(String outputPath, String operationName, FhirContext context, String pathToLibraries, String pathToMeasures) {
+    public RefreshGeneratedContentOperation(String outputPath, String operationName, FhirContext fhirContext, String pathToLibraries, String pathToMeasures) {
         setOutputPath(outputPath);
         this.operationName = operationName;
-        this.context = context;
+        this.fhirContext = fhirContext;
         this.pathToLibraries = pathToLibraries;
         this.pathToMeasures = pathToMeasures;
     }
@@ -60,7 +61,7 @@ public abstract class RefreshGeneratedContent extends Operation {
     }
 
     public void output(IBaseResource resource, IOUtils.Encoding encoding) {
-        IOUtils.writeResource(resource, pathToMeasures, encoding, context);
+        IOUtils.writeResource(resource, pathToMeasures, encoding, fhirContext);
     }
 
     public abstract void refreshGeneratedContent();
@@ -69,8 +70,8 @@ public abstract class RefreshGeneratedContent extends Operation {
         return pathToMeasures;
     }
 
-    public FhirContext getContext() {
-        return context;
+    public FhirContext getFhirContext() {
+        return fhirContext;
     }
 
     public String getPathToLibraries() {

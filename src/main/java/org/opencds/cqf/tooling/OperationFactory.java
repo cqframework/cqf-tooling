@@ -4,15 +4,10 @@ package org.opencds.cqf.tooling;
 import org.apache.commons.lang.NotImplementedException;
 import org.opencds.cqf.tooling.acceleratorkit.Processor;
 import org.opencds.cqf.tooling.library.r4.LibraryGenerator;
-import org.opencds.cqf.tooling.measure.r4.RefreshR4Measure;
-import org.opencds.cqf.tooling.measure.stu3.RefreshStu3Measure;
+import org.opencds.cqf.tooling.measure.r4.RefreshR4MeasureOperation;
+import org.opencds.cqf.tooling.measure.stu3.RefreshStu3MeasureOperation;
 import org.opencds.cqf.tooling.modelinfo.StructureDefinitionToModelInfo;
-import org.opencds.cqf.tooling.operation.BundleResources;
-import org.opencds.cqf.tooling.operation.ExecuteMeasureTestOperation;
-import org.opencds.cqf.tooling.operation.IgBundler;
-import org.opencds.cqf.tooling.operation.PostBundlesInDirOperation;
-import org.opencds.cqf.tooling.operation.RefreshIGOperation;
-import org.opencds.cqf.tooling.operation.RefreshLibraryOperation;
+import org.opencds.cqf.tooling.operation.*;
 import org.opencds.cqf.tooling.qdm.QdmToQiCore;
 import org.opencds.cqf.tooling.quick.QuickPageGenerator;
 import org.opencds.cqf.tooling.terminology.CMSFlatMultiValueSetGenerator;
@@ -56,14 +51,20 @@ class OperationFactory {
 //                return new SchemaGenerator();
             case "BundleIg":
                 return new IgBundler();
+//            case "PackageIG":
+//                return new PackageOperation();
             case "RefreshIG":
                 return new RefreshIGOperation();
             case "RefreshLibrary":
                 return new RefreshLibraryOperation();
             case "RefreshStu3Measure":
-                return new RefreshStu3Measure();
+                return new RefreshStu3MeasureOperation();
             case "RefreshR4Measure":
-                return new RefreshR4Measure();
+                return new RefreshR4MeasureOperation();
+            case "ScaffoldIG":
+                return new ScaffoldOperation();
+//            case "TestIG":
+//                return new TestIGOperation();
             case "CqlToMeasure":
                 throw new NotImplementedException("CqlToMeasure");
             case "BundlesToBundle":

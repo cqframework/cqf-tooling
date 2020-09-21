@@ -1,26 +1,19 @@
 package org.opencds.cqf.tooling.processor;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.tooling.measure.RefreshGeneratedContent;
-import org.opencds.cqf.tooling.measure.r4.RefreshR4Measure;
-import org.opencds.cqf.tooling.measure.stu3.RefreshStu3Measure;
+import org.opencds.cqf.tooling.operation.RefreshGeneratedContentOperation;
+import org.opencds.cqf.tooling.measure.r4.RefreshR4MeasureOperation;
+import org.opencds.cqf.tooling.measure.stu3.RefreshStu3MeasureOperation;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
-import org.opencds.cqf.tooling.utilities.HttpClientUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MeasureProcessor
 {      
@@ -33,7 +26,7 @@ public class MeasureProcessor
         System.out.println("Refreshing measures...");
         ArrayList<String> refreshedMeasureNames = new ArrayList<String>();
         HashSet<String> measurePaths = IOUtils.getMeasurePaths(fhirContext);
-        RefreshGeneratedContent refresher = null;
+        RefreshGeneratedContentOperation refresher = null;
 
         // Filter to specific measure if specified in arguments.
         Boolean hasMeasureToRefreshpath = measureToRefreshPath != null && !measureToRefreshPath.isEmpty();
@@ -45,10 +38,10 @@ public class MeasureProcessor
             try {
                 switch (fhirContext.getVersion().getVersion()) {
                     case DSTU3:
-                        refresher = new RefreshStu3Measure(path);
+                        refresher = new RefreshStu3MeasureOperation(path);
                         break;
                     case R4:
-                        refresher = new RefreshR4Measure(path);
+                        refresher = new RefreshR4MeasureOperation(path);
                         break;
                     default:
                         throw new IllegalArgumentException(

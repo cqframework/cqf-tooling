@@ -1,12 +1,11 @@
 package org.opencds.cqf.tooling.utilities;
 
+import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class BundleUtils {
 
