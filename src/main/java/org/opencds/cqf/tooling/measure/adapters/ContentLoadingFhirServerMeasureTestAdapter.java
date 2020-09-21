@@ -34,6 +34,7 @@ public class ContentLoadingFhirServerMeasureTestAdapter extends FhirServerMeasur
 
     public ContentLoadingFhirServerMeasureTestAdapter(FhirContext fhirContext, IGenericClient fhirServer, IBaseResource testBundle, IBaseResource contentBundle) {
         super (fhirContext, fhirServer, testBundle);
+        Objects.requireNonNull(contentBundle, "contentBundle can not be null");
         this.contentBundle = contentBundle;
 
         validateContentBundle();

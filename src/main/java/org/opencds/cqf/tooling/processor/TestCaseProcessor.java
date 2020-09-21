@@ -18,11 +18,11 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class TestCaseProcessor
 {
-    public static void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext) {
+    public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext) {
         refreshTestCases(path, encoding, fhirContext, null);
     }
 
-    public static void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, @Nullable List<String> refreshedResourcesNames)
+    public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, @Nullable List<String> refreshedResourcesNames)
     {
         System.out.println("Refreshing tests");     
         List<String> libraryTestCasePaths = IOUtils.getDirectoryPaths(path, false);
