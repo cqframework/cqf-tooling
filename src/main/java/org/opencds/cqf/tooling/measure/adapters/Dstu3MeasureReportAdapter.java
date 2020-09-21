@@ -1,9 +1,6 @@
 package org.opencds.cqf.tooling.measure.adapters;
 
-
-import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MeasureReport;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

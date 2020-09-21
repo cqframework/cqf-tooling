@@ -78,7 +78,8 @@ public class RefreshIGArgumentProcessor {
         String rootDir = (String)options.valueOf(ROOT_DIR_OPTIONS[0]);
         String igPath = (String)options.valueOf(IG_PATH_OPTIONS[0]);
 
-        List<String> resourcePaths = (List<String>)options.valuesOf(RESOURCE_PATH_OPTIONS[0]);
+        List<String> resourcePaths = ArgUtils.getOptionValues(options, RESOURCE_PATH_OPTIONS[0]);
+            
         //could not easily use the built-in default here because it is based on the value of the igPath argument.
         String igEncoding = (String)options.valueOf(IG_OUTPUT_ENCODING[0]);
         Encoding outputEncodingEnum = Encoding.JSON;
