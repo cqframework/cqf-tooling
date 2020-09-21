@@ -7,6 +7,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.measure.MeasureTestProcessor;
 import org.opencds.cqf.tooling.parameter.TestIGParameters;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import java.io.File;
 import java.util.List;
@@ -32,38 +33,43 @@ public class IGTestProcessor extends BaseProcessor {
             throw new RuntimeException("The path to the test scripts must point to a directory");
         }
 
-        File[] resourceTypeTestGroups = testCasesDirectory.listFiles(file -> file.isDirectory());
-        //TODO: How can we validate the set of directories here - that they're actually FHIR resources - and message when they're not. Really it doesn't matter, it can be any grouping so long as it has a corresponding path in /bundles.
+        // refresh/generate test bundles
+        System.out.println("Refreshing test cases...");
+        TestCaseProcessor testCaseProcessor = new TestCaseProcessor();
+        testCaseProcessor.refreshTestCases(params.testCasesPath, IOUtils.Encoding.JSON, fhirContext);
 
-        for (File group : resourceTypeTestGroups) {
-            System.out.println(String.format("Processing %s test cases...", group.getName()));
-
-            // Get set of test artifacts
-            File[] testArtifactNames = group.listFiles(file -> file.isDirectory());
-
-            for (File testArtifact : testArtifactNames) {
-                System.out.println(String.format("  Processing test cases for %s: %s", group.getName(), testArtifact.getName()));
-
-                // Get content bundle
-                IBaseResource testArtifactContentBundle = GetContentBundleForTestArtifact(group.getName(), testArtifact.getName());
-
-                ITestProcessor testProcessor = getResourceTypeTestProcessor(group.getName());
-                List<IBaseResource> testCasesBundles = BundleUtils.GetBundlesInDir(testArtifact.getPath(), fhirContext, false);
-                for (IBaseResource testCaseBundle : testCasesBundles) {
-                    try {
-                        System.out.println(String.format("      Starting processing of test case '%s' for %s: %s", testCaseBundle.getIdElement(), group.getName(), testArtifact.getName()));
-                        Parameters testResults = testProcessor.executeTest(testCaseBundle, testArtifactContentBundle, params.fhirServerUri);
-                        System.out.println(String.format("      Done processing test case '%s' for %s: %s", testCaseBundle.getIdElement(), group.getName(), testArtifact.getName()));
-                    } catch (Exception ex) {
-                        System.out.println(String.format("      Error: Test case '%s' for %s: %s failed with message: %s", testCaseBundle.getIdElement(), group.getName(), testArtifact.getName(), ex.getMessage()));
-                    }
-                }
-
-                System.out.println(String.format("  Done processing all test cases for %s: %s", group.getName(), testArtifact.getName()));
-            }
-
-            System.out.println(String.format("Done processing %s test cases", group.getName()));
-        }
+//        File[] resourceTypeTestGroups = testCasesDirectory.listFiles(file -> file.isDirectory());
+//        //TODO: How can we validate the set of directories here - that they're actually FHIR resources - and message when they're not. Really it doesn't matter, it can be any grouping so long as it has a corresponding path in /bundles.
+//
+//        for (File group : resourceTypeTestGroups) {
+//            System.out.println(String.format("Processing %s test cases...", group.getName()));
+//
+//            // Get set of test artifacts
+//            File[] testArtifactNames = group.listFiles(file -> file.isDirectory());
+//
+//            for (File testArtifact : testArtifactNames) {
+//                System.out.println(String.format("  Processing test cases for %s: %s", group.getName(), testArtifact.getName()));
+//
+//                // Get content bundle
+//                IBaseResource testArtifactContentBundle = GetContentBundleForTestArtifact(group.getName(), testArtifact.getName());
+//
+//                ITestProcessor testProcessor = getResourceTypeTestProcessor(group.getName());
+//                List<IBaseResource> testCasesBundles = BundleUtils.GetBundlesInDir(testArtifact.getPath(), fhirContext, false);
+//                for (IBaseResource testCaseBundle : testCasesBundles) {
+//                    try {
+//                        System.out.println(String.format("      Starting processing of test case '%s' for %s: %s", testCaseBundle.getIdElement(), group.getName(), testArtifact.getName()));
+//                        Parameters testResults = testProcessor.executeTest(testCaseBundle, testArtifactContentBundle, params.fhirServerUri);
+//                        System.out.println(String.format("      Done processing test case '%s' for %s: %s", testCaseBundle.getIdElement(), group.getName(), testArtifact.getName()));
+//                    } catch (Exception ex) {
+//                        System.out.println(String.format("      Error: Test case '%s' for %s: %s failed with message: %s", testCaseBundle.getIdElement(), group.getName(), testArtifact.getName(), ex.getMessage()));
+//                    }
+//                }
+//
+//                System.out.println(String.format("  Done processing all test cases for %s: %s", group.getName(), testArtifact.getName()));
+//            }
+//
+//            System.out.println(String.format("Done processing %s test cases", group.getName()));
+//        }
     }
 
     private IBaseResource GetContentBundleForTestArtifact(String groupName, String testArtifactName) {

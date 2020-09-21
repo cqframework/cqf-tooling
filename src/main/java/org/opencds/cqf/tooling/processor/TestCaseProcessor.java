@@ -24,31 +24,29 @@ public class TestCaseProcessor
 
     public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, @Nullable List<String> refreshedResourcesNames)
     {
-        System.out.println("Refreshing tests");     
-        List<String> libraryTestCasePaths = IOUtils.getDirectoryPaths(path, false);
+        System.out.println("Refreshing tests");
+        List<String> resourceTypeTestGroups = IOUtils.getDirectoryPaths(path, false);
 
-        List<String> libraryTestCasePathsToBundle = new ArrayList<String>();
-        if (refreshedResourcesNames != null && !refreshedResourcesNames.isEmpty()) {
-            libraryTestCasePaths.removeIf(tcp -> !refreshedResourcesNames.contains(FilenameUtils.getName(tcp)));
-        }
-
-        for (String libraryTestCasePath : libraryTestCasePaths) {
-            List<String> testCasePaths = IOUtils.getDirectoryPaths(libraryTestCasePath, false); 
-            for (String testCasePath : testCasePaths) {
-                try {
-                List<String> paths = IOUtils.getFilePaths(testCasePath, true);
-                List<IBaseResource> resources = IOUtils.readResources(paths, fhirContext);
-                ensureIds(testCasePath, resources);
-                Object bundle = BundleUtils.bundleArtifacts(getId(FilenameUtils.getName(testCasePath)), resources, fhirContext);
-                IOUtils.writeBundle(bundle, libraryTestCasePath, encoding, fhirContext);
-                } catch (Exception e) {
-                    LogUtils.putException(testCasePath, e);
-                }
-                finally {
-                    LogUtils.warn(testCasePath);
+        for (String group : resourceTypeTestGroups) {
+            List<String> testArtifactPaths = IOUtils.getDirectoryPaths(group, false);
+            for (String testArtifactPath : testArtifactPaths) {
+                List<String> testCasePaths = IOUtils.getDirectoryPaths(testArtifactPath, false);
+                for (String testCasePath : testCasePaths) {
+                    try {
+                        List<String> paths = IOUtils.getFilePaths(testCasePath, true);
+                        List<IBaseResource> resources = IOUtils.readResources(paths, fhirContext);
+                        ensureIds(testCasePath, resources);
+                        Object bundle = BundleUtils.bundleArtifacts(getId(FilenameUtils.getName(testCasePath)), resources, fhirContext);
+                        IOUtils.writeBundle(bundle, testArtifactPath, encoding, fhirContext);
+                    } catch (Exception e) {
+                        LogUtils.putException(testCasePath, e);
+                    }
+                    finally {
+                        LogUtils.warn(testCasePath);
+                    }
                 }
             }
-        }    
+        }
     }
 
     public static List<IBaseResource> getTestCaseResources(String path, FhirContext fhirContext)
