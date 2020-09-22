@@ -18,10 +18,10 @@ import org.opencds.cqf.tooling.terminology.CMSFlatMultiValueSetGenerator;
 import org.opencds.cqf.tooling.terminology.GenericValueSetGenerator;
 import org.opencds.cqf.tooling.terminology.HEDISValueSetGenerator;
 import org.opencds.cqf.tooling.terminology.RCKMSJurisdictionsGenerator;
+import org.opencds.cqf.tooling.terminology.ReportingConditionTranslator;
 import org.opencds.cqf.tooling.terminology.VSACBatchValueSetGenerator;
 import org.opencds.cqf.tooling.terminology.VSACValueSetGenerator;
 import org.opencds.cqf.tooling.terminology.distributable.DistributableValueSetGenerator;
-
 
 class OperationFactory {
 
@@ -80,7 +80,7 @@ class OperationFactory {
             case "JurisdictionsXlsxToCodeSystem":
                 return new RCKMSJurisdictionsGenerator();
             case "ReportingConditionTranslator":
-                return new ReportingConditionCQLTranslator();
+                return new ReportingConditionTranslator();
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operationName);
         }
