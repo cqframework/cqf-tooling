@@ -218,7 +218,7 @@ public class MeasureProcessor
         }
 
          if (includePatientScenarios) {
-            TestCaseProcessor.bundleTestCaseFiles(igPath, libraryName, bundleDestFilesPath, fhirContext);
+            TestCaseProcessor.bundleTestCaseFiles(igPath, "measure", libraryName, bundleDestFilesPath, fhirContext);
         }        
     }
 }

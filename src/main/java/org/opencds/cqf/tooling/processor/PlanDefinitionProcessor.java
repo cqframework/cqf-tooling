@@ -186,7 +186,7 @@ public class PlanDefinitionProcessor {
         }
 
          if (includePatientScenarios) {
-            TestCaseProcessor.bundleTestCaseFiles(igPath, libraryName, bundleDestFilesPath, fhirContext);
+            TestCaseProcessor.bundleTestCaseFiles(igPath, "plandefinition", libraryName, bundleDestFilesPath, fhirContext);
         }        
     }
 }

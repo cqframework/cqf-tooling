@@ -101,8 +101,8 @@ public class TestCaseProcessor
     }
 
     //TODO: the bundle needs to have -expectedresults added too
-    public static void bundleTestCaseFiles(String igPath, String libraryName, String destPath, FhirContext fhirContext) {    
-        String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), libraryName);
+    public static void bundleTestCaseFiles(String igPath, String contextResourceType, String libraryName, String destPath, FhirContext fhirContext) {
+        String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), contextResourceType), libraryName);
         List<String> testCasePaths = IOUtils.getFilePaths(igTestCasePath, false);
         for (String testPath : testCasePaths) {
             String bundleTestDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testPath));
