@@ -76,7 +76,9 @@ public class R4LibraryProcessor implements LibraryProcessor{
         Library generatedLibrary = processLibrary(igCanonicalBase, cqlContentPath, translator, includeVersion, fhirContext);
         mergeDiff(referenceLibrary, generatedLibrary, cqlContentPath, translator, fhirContext);
         cqfmHelper.ensureToolingExtensionAndDevice(referenceLibrary);
-        IOUtils.writeResource(referenceLibrary, outputPath, encoding, fhirContext);
+        // Issue 96
+        // Passing the includeVersion here to handle not using the version number in the filename
+        IOUtils.writeResource(referenceLibrary, outputPath, encoding, fhirContext, includeVersion);
     }
 
     private static void mergeDiff(Library referenceLibrary, Library generatedLibrary, String cqlContentPath, CqlTranslator translator,
@@ -168,7 +170,11 @@ public class R4LibraryProcessor implements LibraryProcessor{
                     //TODO: we probably want to replace this "-library" behavior with a switch (or get rid of it altogether)
                     //HACK: this is not a safe implementation.  Someone could run without -v and everything else would still get the "library-".
                     //Doing this for the connectathon.
-                    .setResource(igCanonicalBase + "Library/" + (includeVersion ? LibraryProcessor.ResourcePrefix : "") + getResourceCanonicalReference(def, includeVersion))
+                    //.setResource(igCanonicalBase + "Library/" + (includeVersion ? LibraryProcessor.ResourcePrefix : "") + getResourceCanonicalReference(def, includeVersion))
+                    // Issue 96
+                    // When not using the -v option we want it to find the files without the version number but we want it
+                    // to generate the dependencies using the version so forcing the includeVersion to true here
+                    .setResource(igCanonicalBase + "Library/" + (includeVersion ? LibraryProcessor.ResourcePrefix : "") + getResourceCanonicalReference(def, true))
             );
         }
         else {

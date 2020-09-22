@@ -29,6 +29,7 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.processor.LibraryProcessor;
+import org.opencds.cqf.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
@@ -91,7 +92,13 @@ public class IOUtils
         return parser.setPrettyPrint(true).encodeResourceToString(resource).toString();
     }
 
+    // Creating a second copy to pass true for includeVersion when not passed in
     public static <T extends IAnyResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext) 
+    {
+    	writeResource(resource, path, encoding, fhirContext, true);
+    }
+    
+    public static <T extends IAnyResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext, Boolean includeVersion) 
     {
         // If the path is to a specific resource file, just re-use that file path/name.
         String outputPath = null;
@@ -100,7 +107,14 @@ public class IOUtils
             outputPath = path;
         }
         else {
-            outputPath = FilenameUtils.concat(path, formatFileName(resource.getIdElement().getIdPart(), encoding, fhirContext));
+        	String baseName = resource.getIdElement().getIdPart();
+        	// Issue 96
+        	// If includeVersion is false then just use name and not id for the file baseName
+        	if (!includeVersion) {
+        		// Assumes that the id will be a string with - separating the version number
+        		baseName = baseName.split("-")[0];
+        	}
+            outputPath = FilenameUtils.concat(path, formatFileName(baseName, encoding, fhirContext));
         }
 
         try (FileOutputStream writer = new FileOutputStream(outputPath))
