@@ -1,13 +1,11 @@
 package org.opencds.cqf.tooling.operation;
 
 import org.hl7.fhir.Parameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.measure.MeasureTestProcessor;
 import org.opencds.cqf.tooling.parameter.MeasureTestParameters;
 import org.opencds.cqf.tooling.processor.argument.ExecuteMeasureTestArgumentProcessor;
 import org.opencds.cqf.tooling.utilities.FhirContextCache;
-import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -23,7 +21,7 @@ public class ExecuteMeasureTestOperation extends Operation {
 
             MeasureTestProcessor processor = new MeasureTestProcessor(fhirContext);
 
-            Parameters result = processor.executeMeasureTest(params.testPath, params.contentPath, params.fhirServer);
+            Parameters result = processor.executeTest(params.testPath, params.contentPath, params.fhirServer);
 
             //TODO: Need a proper ToString() for Parameters. The following results in: "org.hl7.fhir.Parameters cannot be cast to org.hl7.fhir.instance.model.api.IBaseResource"
 //            String resource = IOUtils.encodeResourceAsString((IBaseResource)result, params.encoding, fhirContext);

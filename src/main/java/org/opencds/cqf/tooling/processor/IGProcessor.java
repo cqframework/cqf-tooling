@@ -105,7 +105,8 @@ public class IGProcessor extends BaseProcessor {
         }
 
         if (includePatientScenarios) {
-            TestCaseProcessor.refreshTestCases(FilenameUtils.concat(rootDir, IGProcessor.testCasePathElement), encoding, fhirContext, refreshedResourcesNames);
+            TestCaseProcessor testCaseProcessor = new TestCaseProcessor();
+            testCaseProcessor.refreshTestCases(FilenameUtils.concat(rootDir, IGProcessor.testCasePathElement), encoding, fhirContext, refreshedResourcesNames);
         }
     }
 

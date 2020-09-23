@@ -18,37 +18,35 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class TestCaseProcessor
 {
-    public static void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext) {
+    public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext) {
         refreshTestCases(path, encoding, fhirContext, null);
     }
 
-    public static void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, @Nullable List<String> refreshedResourcesNames)
+    public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, @Nullable List<String> refreshedResourcesNames)
     {
-        System.out.println("Refreshing tests");     
-        List<String> libraryTestCasePaths = IOUtils.getDirectoryPaths(path, false);
+        System.out.println("Refreshing tests");
+        List<String> resourceTypeTestGroups = IOUtils.getDirectoryPaths(path, false);
 
-        List<String> libraryTestCasePathsToBundle = new ArrayList<String>();
-        if (refreshedResourcesNames != null && !refreshedResourcesNames.isEmpty()) {
-            libraryTestCasePaths.removeIf(tcp -> !refreshedResourcesNames.contains(FilenameUtils.getName(tcp)));
-        }
-
-        for (String libraryTestCasePath : libraryTestCasePaths) {
-            List<String> testCasePaths = IOUtils.getDirectoryPaths(libraryTestCasePath, false); 
-            for (String testCasePath : testCasePaths) {
-                try {
-                List<String> paths = IOUtils.getFilePaths(testCasePath, true);
-                List<IBaseResource> resources = IOUtils.readResources(paths, fhirContext);
-                ensureIds(testCasePath, resources);
-                Object bundle = BundleUtils.bundleArtifacts(getId(FilenameUtils.getName(testCasePath)), resources, fhirContext);
-                IOUtils.writeBundle(bundle, libraryTestCasePath, encoding, fhirContext);
-                } catch (Exception e) {
-                    LogUtils.putException(testCasePath, e);
-                }
-                finally {
-                    LogUtils.warn(testCasePath);
+        for (String group : resourceTypeTestGroups) {
+            List<String> testArtifactPaths = IOUtils.getDirectoryPaths(group, false);
+            for (String testArtifactPath : testArtifactPaths) {
+                List<String> testCasePaths = IOUtils.getDirectoryPaths(testArtifactPath, false);
+                for (String testCasePath : testCasePaths) {
+                    try {
+                        List<String> paths = IOUtils.getFilePaths(testCasePath, true);
+                        List<IBaseResource> resources = IOUtils.readResources(paths, fhirContext);
+                        ensureIds(testCasePath, resources);
+                        Object bundle = BundleUtils.bundleArtifacts(getId(FilenameUtils.getName(testCasePath)), resources, fhirContext);
+                        IOUtils.writeBundle(bundle, testArtifactPath, encoding, fhirContext);
+                    } catch (Exception e) {
+                        LogUtils.putException(testCasePath, e);
+                    }
+                    finally {
+                        LogUtils.warn(testCasePath);
+                    }
                 }
             }
-        }    
+        }
     }
 
     public static List<IBaseResource> getTestCaseResources(String path, FhirContext fhirContext)
@@ -76,10 +74,10 @@ public class TestCaseProcessor
         return "tests-" + baseId;
     }
 
-    public static Boolean bundleTestCases(String igPath, String libraryName, FhirContext fhirContext,
+    public static Boolean bundleTestCases(String igPath, String contextResourceType, String libraryName, FhirContext fhirContext,
             Map<String, IBaseResource> resources) {
         Boolean shouldPersist = true;
-        String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), libraryName);
+        String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), contextResourceType), libraryName);
 
         // this is breaking for bundle of a bundle. Replace with individual resources
         // until we can figure it out.
@@ -103,8 +101,8 @@ public class TestCaseProcessor
     }
 
     //TODO: the bundle needs to have -expectedresults added too
-    public static void bundleTestCaseFiles(String igPath, String libraryName, String destPath, FhirContext fhirContext) {    
-        String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), libraryName);
+    public static void bundleTestCaseFiles(String igPath, String contextResourceType, String libraryName, String destPath, FhirContext fhirContext) {
+        String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), contextResourceType), libraryName);
         List<String> testCasePaths = IOUtils.getFilePaths(igTestCasePath, false);
         for (String testPath : testCasePaths) {
             String bundleTestDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testPath));

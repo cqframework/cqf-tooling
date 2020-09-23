@@ -17,7 +17,8 @@ import java.util.stream.Collectors;
 
 public class MeasureProcessor
 {      
-    public static final String ResourcePrefix = "measure-";   
+    public static final String ResourcePrefix = "measure-";
+    public static final String MeasureTestGroupName = "measure";
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
     }
@@ -64,8 +65,7 @@ public class MeasureProcessor
     public static void bundleMeasures(ArrayList<String> refreshedLibraryNames, String igPath, Boolean includeDependencies,
             Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, FhirContext fhirContext, String fhirUri,
             Encoding encoding) {
-        // The set to bundle should be the union of the successfully refreshed Measures
-        // and Libraries
+        // The set to bundle should be the union of the successfully refreshed Measures and Libraries
         // Until we have the ability to refresh Measures, the set is the union of
         // existing Measures and successfully refreshed Libraries
         HashSet<String> measureSourcePaths = IOUtils.getMeasurePaths(fhirContext);
@@ -131,7 +131,7 @@ public class MeasureProcessor
                 }
 
                 if (includePatientScenarios) {
-                    boolean result = TestCaseProcessor.bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
+                    boolean result = TestCaseProcessor.bundleTestCases(igPath, MeasureTestGroupName, refreshedLibraryName, fhirContext, resources);
                     if (shouldPersist && !result) {
                         LogUtils.info("PlanDefinitions will not be bundled because Test Case bundling failed.");
                     }
@@ -139,7 +139,7 @@ public class MeasureProcessor
                 }
 
                 if (shouldPersist) {
-                    String bundleDestPath = FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), refreshedLibraryName);
+                    String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), MeasureTestGroupName), refreshedLibraryName);
                     persistBundle(igPath, bundleDestPath, refreshedLibraryName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri);
                     bundleFiles(igPath, bundleDestPath, refreshedLibraryName, measureSourcePath, librarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion);
                     bundledMeasures.add(refreshedLibraryName);
@@ -218,7 +218,7 @@ public class MeasureProcessor
         }
 
          if (includePatientScenarios) {
-            TestCaseProcessor.bundleTestCaseFiles(igPath, libraryName, bundleDestFilesPath, fhirContext);
+            TestCaseProcessor.bundleTestCaseFiles(igPath, "measure", libraryName, bundleDestFilesPath, fhirContext);
         }        
     }
 }

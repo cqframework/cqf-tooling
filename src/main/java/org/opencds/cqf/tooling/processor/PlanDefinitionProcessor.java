@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 public class PlanDefinitionProcessor {
     public static final String ResourcePrefix = "plandefinition-";
+    public static final String PlanDefinitionTestGroupName = "plandefinition";
 
     public static void bundlePlanDefinitions(ArrayList<String> refreshedLibraryNames, String igPath, Boolean includeDependencies,
             Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean cdsHooksIg, FhirContext fhirContext, String fhirUri,
@@ -83,7 +84,7 @@ public class PlanDefinitionProcessor {
                 }
 
                 if (includePatientScenarios) {
-                    boolean result = TestCaseProcessor.bundleTestCases(igPath, refreshedLibraryName, fhirContext, resources);
+                    boolean result = TestCaseProcessor.bundleTestCases(igPath, PlanDefinitionTestGroupName, refreshedLibraryName, fhirContext, resources);
                     if (shouldPersist && !result) {
                         LogUtils.info("PlanDefinitions will not be bundled because Test Case bundling failed.");
                     }
@@ -93,7 +94,7 @@ public class PlanDefinitionProcessor {
                 List<String> activityDefinitionPaths =  CDSHooksProcessor.bundleActivityDefinitions(planDefinitionSourcePath, fhirContext, resources, encoding, includeVersion, shouldPersist);
 
                 if (shouldPersist) {
-                    String bundleDestPath = FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), refreshedLibraryName);
+                    String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), PlanDefinitionTestGroupName), refreshedLibraryName);
                     persistBundle(igPath, bundleDestPath, refreshedLibraryName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri);
                     bundleFiles(igPath, bundleDestPath, refreshedLibraryName, planDefinitionSourcePath, librarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion);
                     CDSHooksProcessor.addActivityDefinitionFilesToBundle(igPath, bundleDestPath, refreshedLibraryName, activityDefinitionPaths, fhirContext, encoding);
@@ -185,7 +186,7 @@ public class PlanDefinitionProcessor {
         }
 
          if (includePatientScenarios) {
-            TestCaseProcessor.bundleTestCaseFiles(igPath, libraryName, bundleDestFilesPath, fhirContext);
+            TestCaseProcessor.bundleTestCaseFiles(igPath, "plandefinition", libraryName, bundleDestFilesPath, fhirContext);
         }        
     }
 }

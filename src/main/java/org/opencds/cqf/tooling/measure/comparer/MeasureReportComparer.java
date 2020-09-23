@@ -7,6 +7,7 @@ import org.hl7.fhir.String;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.opencds.cqf.tooling.measure.MeasureTestProcessor;
 import org.opencds.cqf.tooling.measure.adapters.IMeasureReportAdapter;
 
 import java.util.List;
@@ -54,7 +55,7 @@ public class MeasureReportComparer {
 
         //TODO: Compare group population scores
 
-        parameter.setName(new String().withValue("Measure '" + expected.getMeasureId() + "' Test Passed"));
+        parameter.setName(new String().withValue("Measure '" + expected.getMeasureId() + "' " + MeasureTestProcessor.TestPassedKey));
         parameter.setValueBoolean(new org.hl7.fhir.Boolean().withValue(overallPassFail));
         results.getParameter().add(parameter);
 
