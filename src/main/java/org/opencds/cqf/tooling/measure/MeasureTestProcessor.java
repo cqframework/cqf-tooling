@@ -18,6 +18,9 @@ import org.opencds.cqf.tooling.processor.ITestProcessor;
 
 public class MeasureTestProcessor implements ITestProcessor {
 
+    //TODO: Should probably introduce a BaseTestProcessor and this would belong there.
+    public static final String TestPassedKey  = "Test Passed";
+
     private FhirContext fhirContext;
 
     public MeasureTestProcessor(FhirContext fhirContext)
@@ -63,7 +66,7 @@ public class MeasureTestProcessor implements ITestProcessor {
         for (ParametersParameter parameter : results.getParameter()) {
             String assertionString = "";
 
-            if (parameter.getName().getValue().indexOf("Test Passed") >= 0) {
+            if (parameter.getName().getValue().indexOf(TestPassedKey) >= 0) {
                 assertionString = ": ";
             }
             else {
