@@ -1,27 +1,40 @@
 package org.opencds.cqf.tooling.terminology;
 
 public class Condition {
-    private String displayName;
-    private String jurisdictionCode;
+    private CdsCodeDTO cdsCodeDTO;
+    private String jurisdictionIdentifier;
+    private String version;
 
-    public String getName() {
-        return displayName;
+    public CdsCodeDTO getCdsCodeDTO() {
+        return cdsCodeDTO;
     }
 
-    public String getJurisdiction() {
-        return jurisdictionCode;
+    public String getJurisdictionIdentifier() {
+        return jurisdictionIdentifier;
     }
 
-    public void setName(String displayName) {
-        this.displayName = displayName;
+    public String getVersion() {
+        return version;
     }
 
-    public void setJurisdiction(String jurisdictionCode) {
-        this.jurisdictionCode = jurisdictionCode;
+    public void setCdsCodeDTO(CdsCodeDTO cdsCodeDTO) {
+        this.cdsCodeDTO = cdsCodeDTO;
+    }
+
+    public void setJurisdictionIdentifier(String jurisdictionIdentifier) {
+        this.jurisdictionIdentifier = jurisdictionIdentifier;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     @Override
     public String toString() {
-        return getName() + ", " + getJurisdiction();
+        StringBuilder sb = new StringBuilder();
+        sb.append("cdsCodeDTO: " + getCdsCodeDTO() + "\n");
+        sb.append("responsibleAgencies: " + getJurisdictionIdentifier() + "\n");
+        sb.append("version: " + getVersion() + "\n");
+        return sb.toString();
     }
 }

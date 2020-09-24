@@ -1,42 +1,9 @@
-[
-    {
-        "assignedTo": null,
-        "cdsCodeDTO": {
-            "cdsCodeConceptRels": [],
-            "code": "15628003",
-            "codeId": "7bb5b5c5e780afbb57b3ab95a9101308",
-            "codeSystem": "2.16.840.1.113883.6.96",
-            "codeSystemId": "65810edd45ecf7b39a43f62eb2715feb",
-            "codeSystemName": "SNOMED-CT",
-            "createDatetime": 1462999057090,
-            "createId": "daryl",
-            "displayName": "Gonorrhea (disorder)",
-            "dtoState": "UNSET",
-            "lastModDatetime": 1462999057090,
-            "lastModId": "daryl",
-            "uuid": "397da2ae-245b-472d-96be-aa927b80ac59"
-        },
-        "responsibleAgencies": [
-            {
-                "conditionId": "40bbd5c453ff43bb12027f577aa9f83d",
-                "createDatetime": 1594242468421,
-                "createId": "ut.jh",
-                "displayName": "Utah Department of Health",
-                "dtoState": "UNSET",
-                "jurisdictionIdentifier": "ut",
-                "lastModDatetime": 1594242468421,
-                "lastModId": "ut.jh",
-                "relId": "abf662db53a5803141f472904db8be38",
-                "responsibleAgencyId": "254d6871de7ac235899b2bc4fa9e91de",
-                "uuid": "5b68137e-8089-48bf-8af5-925f989a3a8e"
-            }
-        ],
-        "sourceVersion": "3.0 Release 20200110",
-        "startDate": null,
-        "status": "PUBLISHED_TO_PRODUCTION",
-        "stopDate": null,
-        "submitSpecimen": true,
-        "uuid": "7e19fd2c-cb7f-4d99-babb-fd03a6d33050",
-        "version": "3.0 Release 20200110"
-    }
-]
+{
+    "cdsCodeDTO": {
+        "code": "15628003",
+        "codeSystem": "2.16.840.1.113883.6.96",
+        "displayName": "Gonorrhea (disorder)"
+    },
+    "jurisdictionIdentifier": "ut",
+    "version": "3.0 Release 20200110"
+}
