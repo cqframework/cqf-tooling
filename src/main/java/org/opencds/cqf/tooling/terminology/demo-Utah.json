@@ -1,8 +1,18 @@
 {
     "cdsCodeDTO": {
+        "cdsCodeConceptRels": [],
         "code": "15628003",
+        "codeId": "7bb5b5c5e780afbb57b3ab95a9101308",
         "codeSystem": "2.16.840.1.113883.6.96",
-        "displayName": "Gonorrhea (disorder)"
+        "codeSystemId": "65810edd45ecf7b39a43f62eb2715feb",
+        "codeSystemName": "SNOMED-CT",
+        "createDatetime": 1462999057090,
+        "createId": "daryl",
+        "displayName": "Gonorrhea (disorder)",
+        "dtoState": "UNSET",
+        "lastModDatetime": 1462999057090,
+        "lastModId": "daryl",
+        "uuid": "397da2ae-245b-472d-96be-aa927b80ac59"
     },
     "jurisdictionIdentifier": "ut",
     "version": "3.0 Release 20200110"

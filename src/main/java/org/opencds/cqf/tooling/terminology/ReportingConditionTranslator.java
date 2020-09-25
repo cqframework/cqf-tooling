@@ -55,7 +55,11 @@ public class ReportingConditionTranslator extends Operation {
     public static void main(String[] args) throws IOException {
         byte[] jsonData = Files.readAllBytes(Paths.get(pathToSource));
         ObjectMapper objectMapper = new ObjectMapper();
-        Condition condition = objectMapper.readValue(jsonData, Condition.class);
-        System.out.println("Reportable Condition: " + condition);
+        // Condition condition = objectMapper.readValue(jsonData, Condition.class);
+        JsonNode rootNode = objectMapper.readTree(jsonData);
+        // ((ObjectNode) rootNode).remove("version");
+        JsonNode code = rootNode.at("/cdsCodeDTO/code");
+        JsonNode condition = rootNode.at("/cdsCodeDTO/displayName");
+        objectMapper.writeValue(new File("updatedCondition.json"), code + " = " + condition);
     }
 }
