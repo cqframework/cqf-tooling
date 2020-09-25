@@ -41,7 +41,7 @@ public class ModelInfoBuilder {
             .withUrl(this.settings.url)
             .withPatientClassName(this.settings.patientClassName)
             .withPatientBirthDatePropertyName(this.settings.patientBirthDatePropertyName)
-            .withTargetQualifier(new QName(this.settings.targetQualifier));
+            .withTargetQualifier(this.settings.targetQualifier);
 
         return mi;
     }
