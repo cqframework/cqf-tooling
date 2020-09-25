@@ -2,12 +2,10 @@ package org.opencds.cqf.tooling.processor.argument;
 
 import static java.util.Arrays.asList;
 
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
-import org.opencds.cqf.tooling.processor.IGProcessor;
 import org.opencds.cqf.tooling.utilities.ArgUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
@@ -80,7 +78,8 @@ public class RefreshIGArgumentProcessor {
         String rootDir = (String)options.valueOf(ROOT_DIR_OPTIONS[0]);
         String igPath = (String)options.valueOf(IG_PATH_OPTIONS[0]);
 
-        List<String> resourcePaths = (List<String>)options.valuesOf(RESOURCE_PATH_OPTIONS[0]);
+        List<String> resourcePaths = ArgUtils.getOptionValues(options, RESOURCE_PATH_OPTIONS[0]);
+            
         //could not easily use the built-in default here because it is based on the value of the igPath argument.
         String igEncoding = (String)options.valueOf(IG_OUTPUT_ENCODING[0]);
         Encoding outputEncodingEnum = Encoding.JSON;
@@ -97,7 +96,9 @@ public class RefreshIGArgumentProcessor {
         String measureToRefreshPath = (String)options.valueOf(MEASURE_TO_REFRESH_PATH[0]);
 
         ArrayList<String> paths = new ArrayList<String>();
-        paths.addAll(resourcePaths);
+        if (resourcePaths != null && !resourcePaths.isEmpty()) {
+            paths.addAll(resourcePaths);
+        }
     
         RefreshIGParameters ip = new RefreshIGParameters();
         ip.ini = ini;

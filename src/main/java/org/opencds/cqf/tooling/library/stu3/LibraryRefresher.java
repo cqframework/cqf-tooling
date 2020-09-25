@@ -18,7 +18,7 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Type;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.library.BaseLibraryGenerator;
 import org.opencds.cqf.tooling.processor.LibraryProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -27,7 +27,7 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class LibraryRefresher extends BaseLibraryGenerator<Library, NarrativeProvider> {
 
-    private Map<String, IAnyResource> libraryMap = new HashMap<>();
+    private Map<String, IBaseResource> libraryMap = new HashMap<>();
 
     public LibraryRefresher() {
         setNarrativeProvider(new NarrativeProvider());

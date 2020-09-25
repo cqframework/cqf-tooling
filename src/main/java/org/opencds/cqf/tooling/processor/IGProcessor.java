@@ -1,28 +1,18 @@
 package org.opencds.cqf.tooling.processor;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
-import org.opencds.cqf.tooling.utilities.IGUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 public class IGProcessor extends BaseProcessor {
     //mega ig method
@@ -50,7 +40,7 @@ public class IGProcessor extends BaseProcessor {
         FhirContext fhirContext = IGProcessor.getIgFhirContext(fhirVersion);
 
         //Use case 1
-        //scafold basic templating for the type of content, Measure, PlanDefinition, or Questionnaire
+        //Scaffold basic templating for the type of content, Measure, PlanDefinition, or Questionnaire
         //Give it a name and generate all the files, cql, library, measure... should be very basic template
         //ScaffoldProcessor.scaffold(ScaffoldParameters);
 
@@ -115,7 +105,8 @@ public class IGProcessor extends BaseProcessor {
         }
 
         if (includePatientScenarios) {
-            TestCaseProcessor.refreshTestCases(FilenameUtils.concat(rootDir, IGProcessor.testCasePathElement), encoding, fhirContext, refreshedResourcesNames);
+            TestCaseProcessor testCaseProcessor = new TestCaseProcessor();
+            testCaseProcessor.refreshTestCases(FilenameUtils.concat(rootDir, IGProcessor.testCasePathElement), encoding, fhirContext, refreshedResourcesNames);
         }
     }
 

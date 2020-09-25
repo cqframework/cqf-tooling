@@ -467,7 +467,7 @@ public class IGProcessor {
 //        try {
 //            Map<String, IAnyResource> dependencies = ResourceUtils.getDepValueSetResources(cqlContentPath, igPath, fhirContext, includeDependencies, includeVersion);
 //            for (IAnyResource resource : dependencies.values()) {
-//                resources.putIfAbsent(resource.getId(), resource);
+//                resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
 //            }
 //        } catch (Exception e) {
 //            shouldPersist = false;
@@ -500,10 +500,10 @@ public class IGProcessor {
 //
 //            String currentResourceID = FilenameUtils.getBaseName(path);
 //            for (IAnyResource resource : dependencies.values()) {
-//                resources.putIfAbsent(resource.getId(), resource);
+//                resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
 //
 //                // NOTE: Assuming dependency library will be in directory of dependent.
-//                String dependencyPath = path.replace(currentResourceID, FilenameUtils.getBaseName(resource.getId()));
+//                String dependencyPath = path.replace(currentResourceID, FilenameUtils.getBaseName(resource.getIdElement().getIdPart()));
 //                bundleDependencies(dependencyPath, fhirContext, resources, encoding);
 //            }
 //        } catch (Exception e) {
@@ -530,7 +530,7 @@ public class IGProcessor {
 //        try {
 //            List<IAnyResource> testCaseResources = TestCaseProcessor.getTestCaseResources(igTestCasePath, fhirContext);
 //            for (IAnyResource resource : testCaseResources) {
-//                resources.putIfAbsent(resource.getId(), resource);
+//                resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
 //            }
 //        } catch (Exception e) {
 //            shouldPersist = false;

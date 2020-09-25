@@ -6,9 +6,9 @@
     "configurations": [
         {
             "type": "java",
-            "name": "CodeLens (Launch) - ReportingConditionTranslator",
+            "name": "CodeLens (Launch) - ExecuteMeasureTestOperation",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.tooling.terminology.ReportingConditionTranslator",
+            "mainClass": "org.opencds.cqf.tooling.operation.ExecuteMeasureTestOperation",
             "projectName": "tooling"
         },
         {

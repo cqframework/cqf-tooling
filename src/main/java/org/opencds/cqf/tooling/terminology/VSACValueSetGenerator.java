@@ -19,7 +19,7 @@ import ca.uhn.fhir.parser.IParser;
 
 public class VSACValueSetGenerator extends Operation {
 
-    private final String VSAC_BASE_URL = "http://cts.nlm.nih.gov/fhir/ValueSet/";
+    public static final String VSAC_BASE_URL = "http://cts.nlm.nih.gov/fhir/ValueSet/";
 
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
     private String encoding = "json"; // -encoding (-e)
@@ -38,6 +38,8 @@ public class VSACValueSetGenerator extends Operation {
     private int systemNameCol = 2; // -systemnamecol (-snc)
     private int versionCol = 3; // -versioncol (-vc)
     private int systemOidCol = 4; // -systemoidcol (-soc)
+    private String baseUrl; // -baseurl (-burl)
+    private boolean setName; // -setname (-name)
 
     private Map<Integer, org.opencds.cqf.tooling.terminology.ValueSet> codesBySystem = new HashMap<>();
 
@@ -69,6 +71,8 @@ public class VSACValueSetGenerator extends Operation {
                 case "systemnamecol": case "snc": systemNameCol = Integer.valueOf(value); break;
                 case "versioncol": case "vc": versionCol = Integer.valueOf(value); break;
                 case "systemoidcol": case "soc": systemOidCol = Integer.valueOf(value); break;
+                case "baseurl": case "burl": baseUrl = value; break;
+                case "setname": case "name": setName = value.toLowerCase().equals("true") ? true : false; break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
@@ -76,14 +80,21 @@ public class VSACValueSetGenerator extends Operation {
         if (pathToSpreadsheet == null) {
             throw new IllegalArgumentException("The path to the spreadsheet is required");
         }
+        if (baseUrl == null) {
+            baseUrl = VSAC_BASE_URL;
+        }
 
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
 
         ValueSet vs = new ValueSet();
-        resolveMetaData(vs, workbook);
-        resolveCodeList(workbook);
-        resolveValueSet(vs);
-        writeValueSetToFile(vs.getTitle() != null ? vs.getTitle().replaceAll("\\s", "").concat("." + encoding) : "valueset".concat("." + encoding), vs);
+        try {
+            resolveMetaData(vs, workbook);
+            resolveCodeList(workbook);
+            resolveValueSet(vs);
+            writeValueSetToFile(vs.getTitle() != null ? vs.getTitle().replaceAll("\\s", "").concat("." + encoding) : "valueset".concat("." + encoding), vs);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(String.format("%s - ValueSet: %s", e.getMessage(), (vs.getTitle() == null || vs.getTitle().equals("") ? "undefined" : vs.getTitle())));
+        }
     }
 
     private String getSecondStringInRow(Sheet sheet, int rowIdx) {
@@ -103,15 +114,23 @@ public class VSACValueSetGenerator extends Operation {
     public void resolveMetaData(ValueSet vs, Workbook workbook) {
         Sheet metaSheet = workbook.getSheetAt(metaSheetNum);
         String title = getSecondStringInRow(metaSheet, metaNameRow);
-        if (title != null) title = title.replace("/", "");
         if (title != null) {
+            title = title.replace("/", "");
             vs.setTitle(title);
         }
         String id = getSecondStringInRow(metaSheet, metaOidRow);
-        if (id != null) {
-            vs.setId(id);
+        //id isn't required by FHIR, but like system and code, we're requiring it.
+        if (id == null || id.equals("")) {
+            throw new IllegalArgumentException(String.format("No id value found for ValueSet: %d", vs.getTitle() == null || vs.getTitle().equals("") ? "untitled" : vs.getTitle()));
         }
-        vs.setUrl(VSAC_BASE_URL + id);
+
+        vs.setId(id);
+
+        if (setName) {
+            vs.setName(SpreadsheetHelper.getFHIRName(title));
+        }
+    
+        vs.setUrl(baseUrl + id);
         String publisher = getSecondStringInRow(metaSheet, metaStewardRow);
         if (publisher != null) {
             vs.setPublisher(publisher);
@@ -127,31 +146,52 @@ public class VSACValueSetGenerator extends Operation {
                 continue;
             }
 
-            String system = SpreadsheetHelper.getCellAsString(row.getCell(systemNameCol));
-            if (system == null) {
+            String version = SpreadsheetHelper.getCellAsString(row.getCell(versionCol));            
+            String systemName = SpreadsheetHelper.getCellAsString(row.getCell(systemNameCol));
+            String display = SpreadsheetHelper.getCellAsString(row.getCell(descriptionCol));
+
+            String code = SpreadsheetHelper.getCellAsString(row.getCell(codeCol));
+
+            if (code.matches("[+-]?\\d(\\.\\d+)?[Ee][+-]?\\d+")) {
+                throw new IllegalArgumentException(String.format("Scientific Notation is not allowed for a code: %s", code));
+            }
+
+            if ((version == null || version.equals(""))
+                && (code == null || code.equals(""))
+                && (
+                    (systemName == null || systemName.equals("")) 
+                        && (SpreadsheetHelper.getCellAsString(row.getCell(systemOidCol)) == null || SpreadsheetHelper.getCellAsString(row.getCell(systemOidCol)).equals(""))
+                )
+            ) {
+                //Protecting against error where last line has no content except hidden characters introduced by copy/paste operations
+                continue;
+            }
+
+            String system;
+            if (systemName == null || systemName.equals("")) {
                 system = SpreadsheetHelper.getCellAsString(row.getCell(systemOidCol));
-                if (system == null) {
+                if (system == null || system.equals("")) {
                     throw new IllegalArgumentException(String.format("No system value found on row: %d", row.getRowNum()));
                 }
                 system = CodeSystemLookupDictionary.getUrlFromOid(system);
             }
             else {
-                system = CodeSystemLookupDictionary.getUrlFromName(system);
+                system = CodeSystemLookupDictionary.getUrlFromName(systemName);
             }
 
-            String version = SpreadsheetHelper.getCellAsString(row.getCell(versionCol));
-            int hash = system.hashCode() * (version != null ? version.hashCode() : 1);
-
-            if (!codesBySystem.containsKey(hash)) {
-                codesBySystem.put(hash, new org.opencds.cqf.tooling.terminology.ValueSet().setSystem(system).setVersion(version));
+            if (system == null || system.equals("")) {
+                throw new IllegalArgumentException(String.format("No system value found on row: %d", row.getRowNum()));
             }
 
-            String code = SpreadsheetHelper.getCellAsString(row.getCell(codeCol));
             if (code == null) {
                 throw new IllegalArgumentException(String.format("No code value found on row: %d", row.getRowNum()));
             }
 
-            String display = SpreadsheetHelper.getCellAsString(row.getCell(descriptionCol));
+            int hash = system.hashCode() * (version != null && !version.equals("") ? version.hashCode() : 1);
+
+            if (!codesBySystem.containsKey(hash)) {
+                codesBySystem.put(hash, new org.opencds.cqf.tooling.terminology.ValueSet().setSystem(system).setVersion(version));
+            }
 
             ValueSet.ConceptReferenceComponent concept = new ValueSet.ConceptReferenceComponent().setCode(code).setDisplay(display);
 

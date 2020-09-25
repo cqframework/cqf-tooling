@@ -4,8 +4,9 @@ import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.parameter.PostBundlesInDirParameters;
+import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.HttpClientUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
@@ -53,35 +54,22 @@ public class PostBundlesInDirProcessor {
         }
 
     public static void PostBundlesInDir(PostBundlesInDirParameters params) {
-        String directoryPath = params.directoryPath;
         String fhirUri = params.fhirUri;
         FHIRVersion fhirVersion = params.fhirVersion;
         Encoding encoding = params.encoding;
         FhirContext fhirContext = getFhirContext(fhirVersion);
 
-        File dir = new File(directoryPath);
-        if (!dir.isDirectory()) {
-            throw new IllegalArgumentException("path to directory must be an existing directory.");
-        }
-
-        List<String> filePaths = IOUtils.getFilePaths(directoryPath, true).stream().filter(x -> !x.endsWith(".cql")).collect(Collectors.toList());
-        List<IAnyResource> resources = IOUtils.readResources(filePaths, fhirContext);
-
-        RuntimeResourceDefinition bundleDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "Bundle");
-        String bundleClassName = bundleDefinition.getImplementingClass().getName();
-        resources.stream()
-            .filter(entry -> entry != null)
-            .filter(entry ->  bundleClassName.equals(entry.getClass().getName()))
-            .forEach(entry -> postBundleToFhirUri(fhirUri, encoding, fhirContext, entry));        
+        List<IBaseResource> resources = BundleUtils.GetBundlesInDir(params.directoryPath, fhirContext);
+        resources.forEach(entry -> postBundleToFhirUri(fhirUri, encoding, fhirContext, entry));
     }
 
-	private static void postBundleToFhirUri(String fhirUri, Encoding encoding, FhirContext fhirContext, IAnyResource bundle) {
+	private static void postBundleToFhirUri(String fhirUri, Encoding encoding, FhirContext fhirContext, IBaseResource bundle) {
         if (fhirUri != null && !fhirUri.equals("")) {  
             try {
-                HttpClientUtils.post(fhirUri, (IAnyResource) bundle, encoding, fhirContext);
-                System.out.println("Resource successfully posted to FHIR server (" + fhirUri + "): " + ((IAnyResource)bundle).getId());
+                HttpClientUtils.post(fhirUri, (IBaseResource) bundle, encoding, fhirContext);
+                System.out.println("Resource successfully posted to FHIR server (" + fhirUri + "): " + ((IBaseResource)bundle).getIdElement().getIdPart());
             } catch (Exception e) {
-                System.out.println(((IAnyResource)bundle).getId() + e);             
+                System.out.println(((IBaseResource)bundle).getIdElement().getIdPart() + e);             
             }  
         }
     }

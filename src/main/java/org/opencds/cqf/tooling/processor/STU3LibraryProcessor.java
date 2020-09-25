@@ -1,8 +1,6 @@
 package org.opencds.cqf.tooling.processor;
 
-import java.io.File;
-import java.util.*;
-
+import ca.uhn.fhir.context.FhirContext;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
@@ -12,14 +10,7 @@ import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.elm.r1.ValueSetRef;
 import org.hl7.fhir.convertors.VersionConvertor_30_50;
-import org.hl7.fhir.dstu3.model.Attachment;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.DataRequirement;
-import org.hl7.fhir.dstu3.model.Enumerations;
-import org.hl7.fhir.dstu3.model.Library;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.*;
 import org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper;
 import org.opencds.cqf.tooling.library.GenericLibrarySourceProvider;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
@@ -28,7 +19,8 @@ import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.opencds.cqf.tooling.utilities.STU3FHIRUtils;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.File;
+import java.util.*;
 
 public class STU3LibraryProcessor extends LibraryProcessor {
     private String igCanonicalBase;
@@ -36,7 +28,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
     private String libraryPath;
     private FhirContext fhirContext;
     private Encoding encoding;
-    private static CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
+    private static CqfmSoftwareSystemHelper cqfmHelper;
 
     /*
     Refresh all library resources in the given libraryPath
@@ -65,7 +57,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
             String filePath = fileMap.get(refreshedLibrary.getId());
             org.hl7.fhir.dstu3.model.Library library = (org.hl7.fhir.dstu3.model.Library) VersionConvertor_30_50.convertResource(refreshedLibrary, false);
-            cqfmHelper.ensureToolingExtensionAndDevice(library, fhirContext);
+            cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
             IOUtils.writeResource(library, filePath, IOUtils.getEncoding(filePath), fhirContext);
             String refreshedLibraryName;
             if (this.versioned && refreshedLibrary.getVersion() != null) {
@@ -82,7 +74,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
     @Override
     public List<String> refreshLibraryContent(RefreshLibraryParameters params) {
         if (params.parentContext != null) {
-            initialize(parentContext);
+            initialize(params.parentContext);
         }
         else {
             initialize(params.ini);
@@ -94,6 +86,8 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         fhirContext = params.fhirContext;
         encoding = params.encoding;
         versioned = params.versioned;
+
+        this.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
 
         return refreshLibraries(libraryPath);
 
@@ -127,7 +121,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
     private static void refreshLibrary(String igCanonicalBase, Library referenceLibrary, String cqlContentPath, String outputPath, Encoding encoding, Boolean versioned, CqlTranslator translator, FhirContext fhirContext) {
         Library generatedLibrary = processLibrary(igCanonicalBase, cqlContentPath, translator, versioned, fhirContext);
         mergeDiff(referenceLibrary, generatedLibrary, cqlContentPath, translator, fhirContext);
-        cqfmHelper.ensureToolingExtensionAndDevice(referenceLibrary, fhirContext);
+        cqfmHelper.ensureCQFToolingExtensionAndDevice(referenceLibrary, fhirContext);
         IOUtils.writeResource(referenceLibrary, outputPath, encoding, fhirContext);
     }
 
@@ -166,7 +160,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
 
         resolveDataRequirements(library, translator);
         attachContent(library, translator, IOUtils.getCqlString(cqlContentPath));
-        cqfmHelper.ensureToolingExtensionAndDevice(library, fhirContext);
+        cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
         // BaseNarrativeProvider<Narrative> narrativeProvider = new NarrativeProvider();
         // INarrative narrative = narrativeProvider.getNarrative(fhirContext, library);
         // library.setText((Narrative) narrative);

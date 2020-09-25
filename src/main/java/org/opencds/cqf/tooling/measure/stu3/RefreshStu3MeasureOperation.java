@@ -1,36 +1,36 @@
 package org.opencds.cqf.tooling.measure.stu3;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.JsonParser;
+import ca.uhn.fhir.parser.XmlParser;
+import org.hl7.fhir.dstu3.model.Measure;
+import org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper;
+import org.opencds.cqf.tooling.operation.RefreshGeneratedContentOperation;
+import org.opencds.cqf.tooling.utilities.IOUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import org.hl7.fhir.dstu3.model.Measure;
-import org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper;
-import org.opencds.cqf.tooling.measure.RefreshGeneratedContent;
-import org.opencds.cqf.tooling.utilities.IOUtils;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.JsonParser;
-import ca.uhn.fhir.parser.XmlParser;
-
-public class RefreshStu3Measure extends RefreshGeneratedContent {
+public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperation {
 
     private JsonParser jsonParser;
     private XmlParser xmlParser;
     private CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
 
-    public RefreshStu3Measure() {
+    //NOTE: Only consumed from OperationFactory - that call should come through a proper Operation that calls a processor.
+    public RefreshStu3MeasureOperation() {
         super("src/main/resources/org/opencds/cqf/tooling/measure/output/stu3", "-RefreshStu3Measure", FhirContext.forDstu3());
-        jsonParser = (JsonParser)this.getContext().newJsonParser();
-        xmlParser = (XmlParser)this.getContext().newXmlParser();
+        jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
+        xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
     }
 
-    public RefreshStu3Measure(String pathToMeasures) {
+    public RefreshStu3MeasureOperation(String pathToMeasures) {
         super(pathToMeasures, "-RefreshStu3Measure", FhirContext.forDstu3(), null, pathToMeasures);
-        jsonParser = (JsonParser)this.getContext().newJsonParser();
-        xmlParser = (XmlParser)this.getContext().newXmlParser();
+        jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
+        xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
     }
 
     @Override
@@ -72,7 +72,7 @@ public class RefreshStu3Measure extends RefreshGeneratedContent {
     }
 
     public Measure refreshMeasure(Measure measure) {
-        cqfmHelper.ensureToolingExtensionAndDevice(measure, this.getContext());
+        cqfmHelper.ensureCQFToolingExtensionAndDevice(measure, this.getFhirContext());
 //        CqfMeasure cqfMeasure = this.dataRequirementsProvider.createCqfMeasure(measure, this.libraryResourceProvider);
 //
 //        // Ensure All Related Artifacts for all referenced Libraries

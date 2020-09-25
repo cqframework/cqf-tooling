@@ -18,7 +18,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <cqframework.version>1.4.9</cqframework.version>
+        <cqframework.version>1.5.0-SNAPSHOT</cqframework.version>
         <hapi.version>5.0.2</hapi.version>
         <core.version>5.0.22</core.version>
     </properties>
@@ -74,6 +74,88 @@
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
     </repositories>
+
+    <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>cql-formatter</artifactId>
+            <version>${cqframework.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jaxb</groupId>
+                    <artifactId>jaxb-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>quick</artifactId>
+            <version>${cqframework.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jaxb</groupId>
+                    <artifactId>jaxb-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>qdm</artifactId>
+            <version>${cqframework.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jaxb</groupId>
+                    <artifactId>jaxb-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>model</artifactId>
+            <version>${cqframework.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jaxb</groupId>
+                    <artifactId>jaxb-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>elm</artifactId>
+            <version>${cqframework.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jaxb</groupId>
+                    <artifactId>jaxb-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>cql-to-elm</artifactId>
+            <version>${cqframework.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jaxb</groupId>
+                    <artifactId>jaxb-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>cql</artifactId>
+            <version>${cqframework.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jaxb</groupId>
+                    <artifactId>jaxb-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 
     <dependencies>
@@ -189,9 +271,14 @@
 
         <!-- Excel spreadsheet parser -->
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.20</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>3.15</version>
+            <version>4.1.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>stax</groupId>
@@ -266,83 +353,35 @@
         </dependency>
 
         <!-- CQL engine dependencies -->
-        <dependency>
+                 <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>cql-formatter</artifactId>
-            <version>${cqframework.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>jaxb</groupId>
-                    <artifactId>jaxb-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>quick</artifactId>
-            <version>${cqframework.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>jaxb</groupId>
-                    <artifactId>jaxb-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>qdm</artifactId>
-            <version>${cqframework.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>jaxb</groupId>
-                    <artifactId>jaxb-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>model</artifactId>
-            <version>${cqframework.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>jaxb</groupId>
-                    <artifactId>jaxb-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>elm</artifactId>
-            <version>${cqframework.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>jaxb</groupId>
-                    <artifactId>jaxb-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>cql-to-elm</artifactId>
-            <version>${cqframework.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>jaxb</groupId>
-                    <artifactId>jaxb-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>cql</artifactId>
-            <version>${cqframework.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>jaxb</groupId>
-                    <artifactId>jaxb-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
+      
         <!-- https://mvnrepository.com/artifact/com.sun.xml.bind/jaxb-impl -->
         <dependency>
             <groupId>com.sun.xml.bind</groupId>

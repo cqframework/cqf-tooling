@@ -11,9 +11,9 @@ import org.apache.commons.io.FilenameUtils;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.r5.model.Library;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Attachment;
+import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
@@ -32,7 +32,7 @@ public class LibraryProcessor extends BaseProcessor {
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
     }
-
+    
     public static List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext) {
         System.out.println("Refreshing libraries...");
         ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
@@ -60,18 +60,18 @@ public class LibraryProcessor extends BaseProcessor {
         return libraryProcessor.refreshLibraryContent(params);
     }
 
-    public static Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IAnyResource> resources,
+    public static Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
             Encoding encoding, boolean versioned) {
         Boolean shouldPersist = true;
         try {
-            Map<String, IAnyResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding);
+            Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding);
             String currentResourceID = IOUtils.getTypeQualifiedResourceId(path, fhirContext);
-            for (IAnyResource resource : dependencies.values()) {
-                resources.putIfAbsent(resource.getId(), resource);
+            for (IBaseResource resource : dependencies.values()) {
+                resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
 
                 // NOTE: Assuming dependency library will be in directory of dependent.
                 String dependencyPath = IOUtils.getResourceFileName(IOUtils.getResourceDirectory(path), resource, encoding, fhirContext, versioned);
-                bundleLibraryDependencies(dependencyPath, fhirContext, resources, encoding, versioned);
+                 bundleLibraryDependencies(dependencyPath, fhirContext, resources, encoding, versioned);
             }
         } catch (Exception e) {
             shouldPersist = false;

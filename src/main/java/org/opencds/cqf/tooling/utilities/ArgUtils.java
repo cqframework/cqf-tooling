@@ -1,10 +1,13 @@
 package org.opencds.cqf.tooling.utilities;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
 public class ArgUtils {
-
     public static final String[] HELP_OPTIONS = {"h", "help", "?"};
 
     public static OptionSet parse(String[] args, OptionParser parser) {
@@ -31,4 +34,16 @@ public class ArgUtils {
     public static String defaultValue(OptionSet optionSet, String option, String value) {
         return optionSet.valueOf(option) == null ? value : (String)optionSet.valueOf(option); 
     }
+
+    public static List<String> getOptionValues(OptionSet options, String name) {
+        List<?> argValues = options.valuesOf(name);
+        List<String> stringArgValues = new ArrayList<>();
+        for (Object argValue : argValues) {
+          stringArgValues.add(argValue.toString());
+        }
+        if (stringArgValues.isEmpty()) {
+          return (options.has(name) ? Collections.emptyList() : null);
+        }
+        return Collections.unmodifiableList(stringArgValues);
+      }
 }
