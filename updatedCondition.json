@@ -1,1 +1,6 @@
-"\"Negative results of tests for detection of Chlamydia species nucleic acid in a clinical specimen by any organism-specific method (i.e., ‘negative’ nucleic acid test results)\" \n\n\"Patient has lab result with test name (specific for an organism or substance)\" = \"Chlamydia trachomatis Infection (Tests for Chlamydia species Nucleic Acid)\""
+{
+    "label": "Negative results of tests for detection of Chlamydia species nucleic acid in a clinical specimen by any organism-specific method (i.e., ‘negative’ nucleic acid test results)",
+    "case": "Patient has lab result with test name (specific for an organism or substance)",
+    "operator": "=",
+    "condition": "Chlamydia trachomatis Infection (Tests for Chlamydia species Nucleic Acid)"
+}

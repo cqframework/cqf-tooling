@@ -47,10 +47,8 @@ public class ReportingConditionTranslator extends Operation {
         JsonNode neg005Label = neg005.at("/label");
         JsonNode neg005Left = neg005.at("/predicates").get(0).at("/predicateParts").get(0).at("/partAlias");
         JsonNode neg005Right = neg005.at("/predicates").get(0).at("/predicateParts").get(2).at("/predicatePartConcepts").get(0).at("/openCdsConceptDTO/displayName");
-        // JsonNode condition = rootNode.at("/cdsCodeDTO/displayName");
-        objectMapper.writeValue(new File("updatedCondition.json"), 
-        neg005Label + "\n" + 
-        neg005Left + " = " + neg005Right
-        );
+        String neg005String = "{\"label\": " + neg005Label + ", \"case\": " + neg005Left + ", \"operator\": \"=\", \"condition\": " + neg005Right + "}";
+        JsonNode neg005UT = objectMapper.readTree(neg005String);
+        objectMapper.writeValue(new File("updatedCondition.json"), neg005UT);
     }
 }
