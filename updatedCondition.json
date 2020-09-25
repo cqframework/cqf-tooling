@@ -32,6 +32,39 @@
                     "jurisdiction": "ut"
                 }
             ]
+        },
+        {
+            "label": "Negative results of tests for identification of Chlamydia species in a clinical specimen by organism-specific culture method, including identification tests performed on an isolate (i.e., ‘negative’ culture results)",
+            "predicates": [
+                {
+                    "case": "Patient has lab result with test name (specific for an organism or substance)",
+                    "operator": "=",
+                    "condition": "Chlamydia trachomatis Infection (Tests for Chlamydia species by Culture and Identification Method)"
+                },
+                {
+                    "conjunction": "and"
+                },
+                {
+                    "case": "Lab result value of (ordinal)",
+                    "operator": "=",
+                    "condition": "Negative or Undetected Lab Result Value"
+                }
+            ],
+            "reporting": [
+                {
+                    "facility": [
+                        {
+                            "type": "LAB"
+                        },
+                        {
+                            "type": "Lab Reporting"
+                        }
+                    ]
+                },
+                {
+                    "jurisdiction": "ut"
+                }
+            ]
         }
     ]
 }
