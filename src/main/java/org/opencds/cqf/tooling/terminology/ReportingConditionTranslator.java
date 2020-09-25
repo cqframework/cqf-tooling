@@ -42,8 +42,15 @@ public class ReportingConditionTranslator extends Operation {
         byte[] jsonData = Files.readAllBytes(Paths.get(pathToSource));
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode = objectMapper.readTree(jsonData);
-        JsonNode code = rootNode.at("/cdsCodeDTO/codeId");
-        JsonNode condition = rootNode.at("/cdsCodeDTO/displayName");
-        objectMapper.writeValue(new File("updatedCondition.json"), code + " = " + condition);
+        JsonNode chlamydia = rootNode.get(1); 
+        JsonNode neg005 = chlamydia.at("/conditionCriteriaRels").get(20);
+        JsonNode neg005Label = neg005.at("/label");
+        JsonNode neg005Left = neg005.at("/predicates").get(0).at("/predicateParts").get(0).at("/partAlias");
+        JsonNode neg005Right = neg005.at("/predicates").get(0).at("/predicateParts").get(2).at("/predicatePartConcepts").get(0).at("/openCdsConceptDTO/displayName");
+        // JsonNode condition = rootNode.at("/cdsCodeDTO/displayName");
+        objectMapper.writeValue(new File("updatedCondition.json"), 
+        neg005Label + "\n" + 
+        neg005Left + " = " + neg005Right
+        );
     }
 }
