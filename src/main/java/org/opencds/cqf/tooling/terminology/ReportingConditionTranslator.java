@@ -47,7 +47,12 @@ public class ReportingConditionTranslator extends Operation {
         JsonNode neg005Label = neg005.at("/label");
         JsonNode neg005Left = neg005.at("/predicates").get(0).at("/predicateParts").get(0).at("/partAlias");
         JsonNode neg005Right = neg005.at("/predicates").get(0).at("/predicateParts").get(2).at("/predicatePartConcepts").get(0).at("/openCdsConceptDTO/displayName");
-        String neg005String = "{\"label\": " + neg005Label + ", \"case\": " + neg005Left + ", \"operator\": \"=\", \"condition\": " + neg005Right + "}";
+        JsonNode neg005LeftType = neg005.at("/predicates").get(1).at("/predicateParts").get(0).at("/partAlias");
+        JsonNode neg005RightResult = neg005.at("/predicates").get(1).at("/predicateParts").get(2).at("/predicatePartConcepts").get(0).at("/openCdsConceptDTO/displayName"); 
+        JsonNode lab = chlamydia.at("/logicSets").get(1).at("/name");
+        JsonNode labReporting = chlamydia.at("/logicSets").get(2).at("/name");
+        JsonNode jurisdictionCode = chlamydia.at("/responsibleAgencies").get(0).at("/jurisdictionIdentifier");
+        String neg005String = "{\"negativeCriteria\": [{\"label\": " + neg005Label + ", \"predicates\": [{\"case\": " + neg005Left + ", \"operator\": \"=\", \"condition\": " + neg005Right + "}, {\"conjunction\": \"and\"}, {\"case\": " + neg005LeftType + ", \"operator\": \"=\", \"condition\": " + neg005RightResult + "}], \"reporting\": [{\"facility\": [{\"type\": " + lab + "}, {\"type\": " + labReporting + "}]}, {\"jurisdiction\": " + jurisdictionCode + "}]}]}]}";
         JsonNode neg005UT = objectMapper.readTree(neg005String);
         objectMapper.writeValue(new File("updatedCondition.json"), neg005UT);
     }
