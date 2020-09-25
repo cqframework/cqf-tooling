@@ -5,23 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.opencds.cqf.tooling.Operation;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.io.StringWriter;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.opencds.cqf.tooling.terminology.Condition;
-import org.opencds.cqf.tooling.terminology.CdsCodeDTO;
 
 public class ReportingConditionTranslator extends Operation {
 
@@ -55,10 +41,8 @@ public class ReportingConditionTranslator extends Operation {
     public static void main(String[] args) throws IOException {
         byte[] jsonData = Files.readAllBytes(Paths.get(pathToSource));
         ObjectMapper objectMapper = new ObjectMapper();
-        // Condition condition = objectMapper.readValue(jsonData, Condition.class);
         JsonNode rootNode = objectMapper.readTree(jsonData);
-        // ((ObjectNode) rootNode).remove("version");
-        JsonNode code = rootNode.at("/cdsCodeDTO/code");
+        JsonNode code = rootNode.at("/cdsCodeDTO/codeId");
         JsonNode condition = rootNode.at("/cdsCodeDTO/displayName");
         objectMapper.writeValue(new File("updatedCondition.json"), code + " = " + condition);
     }
