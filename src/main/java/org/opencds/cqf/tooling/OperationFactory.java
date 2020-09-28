@@ -10,12 +10,7 @@ import org.opencds.cqf.tooling.modelinfo.StructureDefinitionToModelInfo;
 import org.opencds.cqf.tooling.operation.*;
 import org.opencds.cqf.tooling.qdm.QdmToQiCore;
 import org.opencds.cqf.tooling.quick.QuickPageGenerator;
-import org.opencds.cqf.tooling.terminology.CMSFlatMultiValueSetGenerator;
-import org.opencds.cqf.tooling.terminology.GenericValueSetGenerator;
-import org.opencds.cqf.tooling.terminology.HEDISValueSetGenerator;
-import org.opencds.cqf.tooling.terminology.RCKMSJurisdictionsGenerator;
-import org.opencds.cqf.tooling.terminology.VSACBatchValueSetGenerator;
-import org.opencds.cqf.tooling.terminology.VSACValueSetGenerator;
+import org.opencds.cqf.tooling.terminology.*;
 import org.opencds.cqf.tooling.terminology.distributable.DistributableValueSetGenerator;
 
 
@@ -83,6 +78,8 @@ class OperationFactory {
                 return new RCKMSJurisdictionsGenerator();
             case "ExecuteMeasureTest":
                 return new ExecuteMeasureTestOperation();
+            case "SpreadsheetToCQL":
+                return new SpreadsheetToCQLOperation();
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operationName);
         }

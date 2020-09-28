@@ -136,6 +136,10 @@ package org.opencds.cqf.tooling;
             - Executes a particular Measure Test case
             -
             - Example: mvn exec: java -Dexec.args="-ExecuteMeasureTest -test-path /home/jp/repos/connectathon/fhir401/input/tests/EXM104-9.1.000/tests-numer-EXM104-bundle.json -content-path /home/jp/repos/connectathon/fhir401/input/bundles/EXM104-9.1.000-bundle.json -fhir-server http://192.168.2.194:8082/cqf-ruler-r4/fhir"
+
+        - SpreadsheetToCQL
+            - command: mvn exec:java -Dexec.args="[-SpreadsheetToCQL] [-pathtospreadsheet | -pts] (-outputpath | -op)"
+            - This tooling converts an Excel spreadsheet (.xlsx extension) to a CQL expression with the data from the spreadsheet rows
         */
 
 public class Main {
