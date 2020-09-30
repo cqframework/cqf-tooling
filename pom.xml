@@ -165,12 +165,6 @@
             <version>1.0-2</version>
         </dependency>
 
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
-        </dependency>
-
         <!-- WikiMedia to HTML conversion library (-QdmToQiCore) -->
         <dependency>
             <groupId>info.bliki.wiki</groupId>
@@ -352,57 +346,47 @@
             </exclusions>
         </dependency>
 
-        <!-- CQL engine dependencies -->
-                 <dependency>
-            <groupId>info.cqframework</groupId>
-            <artifactId>cql-formatter</artifactId>
-        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.jvnet.jaxb2_commons/jaxb2-basics-ant -->
         <dependency>
-            <groupId>info.cqframework</groupId>
-            <artifactId>quick</artifactId>
+            <groupId>org.jvnet.jaxb2_commons</groupId>
+            <artifactId>jaxb2-basics-ant</artifactId>
+            <version>0.12.0</version>
         </dependency>
+
         <dependency>
-            <groupId>info.cqframework</groupId>
-            <artifactId>qdm</artifactId>
+            <groupId>org.jvnet.jaxb2_commons</groupId>
+            <artifactId>jaxb2-basics</artifactId>
+            <version>0.12.0</version>
         </dependency>
+
         <dependency>
-            <groupId>info.cqframework</groupId>
-            <artifactId>model</artifactId>
+            <groupId>org.jvnet.jaxb2_commons</groupId>
+            <artifactId>jaxb2-fluent-api</artifactId>
+            <version>3.0</version>
         </dependency>
+
         <dependency>
-            <groupId>info.cqframework</groupId>
-            <artifactId>elm</artifactId>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>2.3.3</version>
         </dependency>
+
         <dependency>
-            <groupId>info.cqframework</groupId>
-            <artifactId>cql-to-elm</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>info.cqframework</groupId>
-            <artifactId>cql</artifactId>
-        </dependency>
-      
-        <!-- https://mvnrepository.com/artifact/com.sun.xml.bind/jaxb-impl -->
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-xjc</artifactId>
             <version>2.4.0-b180830.0438</version>
         </dependency>
+
         <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-core</artifactId>
-            <version>2.3.0.1</version>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>org.eclipse.persistence.moxy</artifactId>
+            <version>2.7.7</version>
         </dependency>
-        <!-- Using this dependency resolves an illegal reflective access in the 2.3.1 version -->
-        <!-- <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.4.0-b180830.0359</version>
-        </dependency> -->
+
         <dependency>
-            <groupId>com.sun.activation</groupId>
-            <artifactId>javax.activation</artifactId>
-            <version>1.2.0</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.10.1</version>
         </dependency>
 
         <!-- test dependencies -->
