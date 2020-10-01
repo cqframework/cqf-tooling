@@ -116,13 +116,13 @@ public class ResourceUtils
       return ((org.hl7.fhir.r4.model.Library)mainLibrary).getRelatedArtifact();   
     }    
 
-    public static Map<String, IAnyResource> getDepLibraryResources(String path, FhirContext fhirContext, Encoding encoding) {      
+    public static Map<String, IAnyResource> getDepLibraryResources(String path, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {      
       Map<String, IAnyResource> dependencyLibraries = new HashMap<String, IAnyResource>();
       switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:
-            return getStu3DepLibraryResources(path, dependencyLibraries, fhirContext, encoding);
+            return getStu3DepLibraryResources(path, dependencyLibraries, fhirContext, encoding, includeVersion);
         case R4:
-            return getR4DepLibraryResources(path, dependencyLibraries, fhirContext, encoding);
+            return getR4DepLibraryResources(path, dependencyLibraries, fhirContext, encoding, includeVersion);
         default:
             throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
       }
@@ -131,15 +131,15 @@ public class ResourceUtils
     public static List<String> getDepLibraryPaths(String path, FhirContext fhirContext, Encoding encoding) {
       switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:
-            return getStu3DepLibraryPaths(path, fhirContext, encoding);
+            return getStu3DepLibraryPaths(path, fhirContext, encoding, true);
         case R4:
-            return getR4DepLibraryPaths(path, fhirContext, encoding);
+            return getR4DepLibraryPaths(path, fhirContext, encoding, true);
         default:
             throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
       }
     }
 
-    private static List<String> getStu3DepLibraryPaths(String path, FhirContext fhirContext, Encoding encoding) {
+    private static List<String> getStu3DepLibraryPaths(String path, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {
       List<String> paths = new ArrayList<String>();
       String directoryPath = FilenameUtils.getFullPath(path);
       List<org.hl7.fhir.dstu3.model.RelatedArtifact> relatedArtifacts = getStu3RelatedArtifacts(path, fhirContext);
@@ -147,15 +147,15 @@ public class ResourceUtils
         if (relatedArtifact.getType() == org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.DEPENDSON) {
             String dependencyLibraryName = IOUtils.formatFileName(relatedArtifact.getResource().getReference().split("Library/")[1], encoding, fhirContext);
             String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
-            IOUtils.putAllInListIfAbsent(getStu3DepLibraryPaths(dependencyLibraryPath, fhirContext, encoding), paths);
+            IOUtils.putAllInListIfAbsent(getStu3DepLibraryPaths(dependencyLibraryPath, fhirContext, encoding, includeVersion), paths);
             IOUtils.putInListIfAbsent(dependencyLibraryPath, paths);
         }
       }
       return paths;
     }
 
-    private static Map<String, IAnyResource> getStu3DepLibraryResources(String path, Map<String, IAnyResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding) {      
-      List<String> dependencyLibraryPaths = getStu3DepLibraryPaths(path, fhirContext, encoding);
+    private static Map<String, IAnyResource> getStu3DepLibraryResources(String path, Map<String, IAnyResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {      
+      List<String> dependencyLibraryPaths = getStu3DepLibraryPaths(path, fhirContext, encoding, includeVersion);
       for (String dependencyLibraryPath : dependencyLibraryPaths) {
         Object resource = IOUtils.readResource(dependencyLibraryPath, fhirContext);
         if (resource instanceof org.hl7.fhir.dstu3.model.Library) {
@@ -167,13 +167,20 @@ public class ResourceUtils
     }
 
     // if | exists there is a version
-    private static List<String> getR4DepLibraryPaths(String path, FhirContext fhirContext, Encoding encoding) {
+    private static List<String> getR4DepLibraryPaths(String path, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {
       List<String> paths = new ArrayList<String>();
       String directoryPath = FilenameUtils.getFullPath(path);
       List<org.hl7.fhir.r4.model.RelatedArtifact> relatedArtifacts = getR4RelatedArtifacts(path, fhirContext);
       for (org.hl7.fhir.r4.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
           if (relatedArtifact.getType() == org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.DEPENDSON) {
-              String dependencyLibraryName = IOUtils.formatFileName(relatedArtifact.getResource().split("Library/")[1].replaceAll("\\|", "-"), encoding, fhirContext);
+              String dependencyLibraryName;
+              // Issue 96 - Do not include version number in the filename
+              if (includeVersion) {
+            	  dependencyLibraryName = IOUtils.formatFileName(relatedArtifact.getResource().split("Library/")[1].replaceAll("\\|", "-"), encoding, fhirContext);
+              } else {
+            	  String name = relatedArtifact.getResource().split("Library/")[1];
+            	  dependencyLibraryName = IOUtils.formatFileName(name.split("\\|")[0], encoding, fhirContext);
+              }
               String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
               IOUtils.putInListIfAbsent(dependencyLibraryPath, paths);
           }
@@ -181,8 +188,8 @@ public class ResourceUtils
       return paths;
     }
 
-    private static Map<String, IAnyResource> getR4DepLibraryResources(String path, Map<String, IAnyResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding) {      
-      List<String> dependencyLibraryPaths = getR4DepLibraryPaths(path, fhirContext, encoding);
+    private static Map<String, IAnyResource> getR4DepLibraryResources(String path, Map<String, IAnyResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding, Boolean includeVersion) {      
+      List<String> dependencyLibraryPaths = getR4DepLibraryPaths(path, fhirContext, encoding, includeVersion);
       for (String dependencyLibraryPath : dependencyLibraryPaths) {
         Object resource = IOUtils.readResource(dependencyLibraryPath, fhirContext);
         if (resource instanceof org.hl7.fhir.r4.model.Library) {

@@ -18,17 +18,24 @@ public interface LibraryProcessor {
     }
 
     public static Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IAnyResource> resources,
-            Encoding encoding) {
+            Encoding encoding, Boolean includeVersion) {
         Boolean shouldPersist = true;
         try {
-            Map<String, IAnyResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding);
+            Map<String, IAnyResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding, includeVersion);
             String currentResourceID = FilenameUtils.getBaseName(path);
             for (IAnyResource resource : dependencies.values()) {
                 resources.putIfAbsent(resource.getId(), resource);
 
                 // NOTE: Assuming dependency library will be in directory of dependent.
-                String dependencyPath = path.replace(currentResourceID, resource.getId().replace("Library/", ""));
-                bundleLibraryDependencies(dependencyPath, fhirContext, resources, encoding);
+                String dependencyPath;
+                // Issue 96 - Do not include version number in filename
+                if (includeVersion) {
+                	dependencyPath = path.replace(currentResourceID, resource.getId().replace("Library/", ""));
+                } else {
+                	String resourceId = resource.getId().replace("Library/", "");
+                	dependencyPath = path.replace(currentResourceID, resourceId.split("-")[0]);
+                }
+                bundleLibraryDependencies(dependencyPath, fhirContext, resources, encoding, includeVersion);
             }
         } catch (Exception e) {
             shouldPersist = false;

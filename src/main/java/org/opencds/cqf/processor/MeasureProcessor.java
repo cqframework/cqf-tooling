@@ -123,7 +123,7 @@ public class MeasureProcessor
 
                 if (includeDependencies) {
                     shouldPersist = shouldPersist
-                        & LibraryProcessor.bundleLibraryDependencies(librarySourcePath, fhirContext, resources, encoding);
+                        & LibraryProcessor.bundleLibraryDependencies(librarySourcePath, fhirContext, resources, encoding, includeVersion);
                 }
 
                 if (includePatientScenarios) {
@@ -208,7 +208,7 @@ public class MeasureProcessor
         }
         
         if (includeDependencies) {
-            Map<String, IAnyResource> depLibraries = ResourceUtils.getDepLibraryResources(librarySourcePath, fhirContext, encoding);
+            Map<String, IAnyResource> depLibraries = ResourceUtils.getDepLibraryResources(librarySourcePath, fhirContext, encoding, includeVersion);
             if (!depLibraries.isEmpty()) {
                 String depLibrariesID = "library-deps-" + libraryName;
                 Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<IAnyResource>(depLibraries.values()), fhirContext);            
