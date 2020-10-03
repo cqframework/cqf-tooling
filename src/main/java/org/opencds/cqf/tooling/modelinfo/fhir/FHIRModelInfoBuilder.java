@@ -75,10 +75,11 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
                     "    case\n"+
                     "        when quantity is null then null\n"+
                     "        when quantity.value is null then null\n"+
-                    "        when quantity.system is null or quantity.system.value = \'http://unitsofmeasure.org\' then\n"+
-                    "            System.Quantity { value: quantity.value.value, unit: quantity.code.value }\n"+
+                    "        when quantity.system is null or quantity.system.value = \'http://unitsofmeasure.org\'\n"+
+                    "              or quantity.system.value = \'http://hl7.org/fhirpath/CodeSystem/calendar-units\' then\n"+
+                    "            System.Quantity { value: quantity.value.value, unit: Coalesce(quantity.code.value, quantity.unit.value, \'1\') }\n"+
                     "        else\n"+
-                    "            Message(null, true, \'FHIRHelpers.ToQuantity.InvalidFHIRQuantity\', \'Error\', \'Invalid FHIR Quantity code: \' & quantity.code.value)\n"+
+                    "            Message(null, true, \'FHIRHelpers.ToQuantity.InvalidFHIRQuantity\', \'Error\', \'Invalid FHIR Quantity code: \' & quantity.code.unit & \' (\' & quantity.system.value & \'|\' & quantity.code.value & \')\')\n"+
                     "    end\n"+
                     "\n"+
                     "define function ToRatio(ratio FHIR.Ratio):\n" +
