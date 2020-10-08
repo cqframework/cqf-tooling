@@ -39,6 +39,7 @@ public class TestIGOperation extends Operation {
             "-tcp",
             "/Users/Adam/Src/DBCG/connectathon/fhir401/input/tests",
             "-fs",
+            //"http://localhost:8080/cqf-ruler-r4/fhir"
             "http://192.168.2.194:8082/cqf-ruler-r4/fhir"
         });
     }

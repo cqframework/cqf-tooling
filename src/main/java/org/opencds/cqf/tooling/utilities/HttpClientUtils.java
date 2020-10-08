@@ -49,9 +49,7 @@ public class HttpClientUtils {
             while ((line = rd.readLine()) != null) {
                 responseMessage += line;
             }
-            if (responseMessage.indexOf("error") > -1) {
-                throw new IOException("Error getting resource from FHIR server (" + path + ").");
-            }
+            
             return responseMessage;
         }
     }
