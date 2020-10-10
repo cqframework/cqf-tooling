@@ -847,54 +847,56 @@ public abstract class ClassInfoBuilder {
     }
 
     protected String determineTarget(TypeSpecifier typeSpecifier) {
-        if (typeSpecifier instanceof NamedTypeSpecifier) {
-            NamedTypeSpecifier namedTypeSpecifier = (NamedTypeSpecifier)typeSpecifier;
-            String qualifiedTypeName = this.getTypeName(namedTypeSpecifier);
-            if (isPrimitiveMappedTypeName(namedTypeSpecifier.getNamespace(), namedTypeSpecifier.getName())) {
-                return "%value.value";
-            }
-            else if (isMappedTypeName(namedTypeSpecifier.getNamespace(), namedTypeSpecifier.getName())) {
-                switch (qualifiedTypeName) {
-                    case "System.Quantity": {
-                        return this.settings.helpersLibraryName + ".ToQuantity(%value)";
+        if (this.settings.useCQLPrimitives) {
+            if (typeSpecifier instanceof NamedTypeSpecifier) {
+                NamedTypeSpecifier namedTypeSpecifier = (NamedTypeSpecifier)typeSpecifier;
+                String qualifiedTypeName = this.getTypeName(namedTypeSpecifier);
+                if (isPrimitiveMappedTypeName(namedTypeSpecifier.getNamespace(), namedTypeSpecifier.getName())) {
+                    return "%value.value";
+                }
+                else if (isMappedTypeName(namedTypeSpecifier.getNamespace(), namedTypeSpecifier.getName())) {
+                    switch (qualifiedTypeName) {
+                        case "System.Quantity": {
+                            return this.settings.helpersLibraryName + ".ToQuantity(%value)";
+                        }
+                        case "System.Ratio": {
+                            return this.settings.helpersLibraryName + ".ToRatio(%value)";
+                        }
+                        case "System.Code": {
+                            return this.settings.helpersLibraryName + ".ToCode(%value)";
+                        }
+                        case "System.Concept": {
+                            return this.settings.helpersLibraryName + ".ToConcept(%value)";
+                        }
+                        case "Interval<System.Quantity>":
+                        case "Interval<System.DateTime>": {
+                            return this.settings.helpersLibraryName + ".ToInterval(%value)";
+                        }
+                        default: return null;
                     }
-                    case "System.Ratio": {
-                        return this.settings.helpersLibraryName + ".ToRatio(%value)";
+                }
+                else {
+                    if (typeTargets.containsKey(qualifiedTypeName)) {
+                        return typeTargets.get(qualifiedTypeName);
                     }
-                    case "System.Code": {
-                        return this.settings.helpersLibraryName + ".ToCode(%value)";
-                    }
-                    case "System.Concept": {
-                        return this.settings.helpersLibraryName + ".ToConcept(%value)";
-                    }
-                    case "Interval<System.Quantity>":
-                    case "Interval<System.DateTime>": {
-                        return this.settings.helpersLibraryName + ".ToInterval(%value)";
-                    }
-                    default: return null;
                 }
             }
-            else {
-                if (typeTargets.containsKey(qualifiedTypeName)) {
-                    return typeTargets.get(qualifiedTypeName);
+            else if (typeSpecifier instanceof ChoiceTypeSpecifier) {
+                ChoiceTypeSpecifier choiceTypeSpecifier = (ChoiceTypeSpecifier)typeSpecifier;
+                StringBuilder target = new StringBuilder();
+                for (TypeSpecifier choice : choiceTypeSpecifier.getChoice()) {
+                    if (target.length() > 0) {
+                        target.append(";"); // Separator for target per choice type
+                    }
+                    if (choice instanceof NamedTypeSpecifier) {
+                        NamedTypeSpecifier namedChoice = (NamedTypeSpecifier)choice;
+                        target.append(getTypeName(namedChoice));
+                        target.append(":");
+                        target.append(determineTarget(namedChoice));
+                    }
                 }
+                return target.toString();
             }
-        }
-        else if (typeSpecifier instanceof ChoiceTypeSpecifier) {
-            ChoiceTypeSpecifier choiceTypeSpecifier = (ChoiceTypeSpecifier)typeSpecifier;
-            StringBuilder target = new StringBuilder();
-            for (TypeSpecifier choice : choiceTypeSpecifier.getChoice()) {
-                if (target.length() > 0) {
-                    target.append(";"); // Separator for target per choice type
-                }
-                if (choice instanceof NamedTypeSpecifier) {
-                    NamedTypeSpecifier namedChoice = (NamedTypeSpecifier)choice;
-                    target.append(getTypeName(namedChoice));
-                    target.append(":");
-                    target.append(determineTarget(namedChoice));
-                }
-            }
-            return target.toString();
         }
 
         return null;
@@ -1019,23 +1021,24 @@ public abstract class ClassInfoBuilder {
         String path = ed.getPath();
         System.out.println(String.format("Visiting element %s, path %s", id, path));
 
-        if (ed.getSlicing() != null && !ed.getSlicing().isEmpty()) {
-            sliceInfo = new SliceInfo(ed, sliceInfo);
-            slices.setSliceInfo(sliceInfo);
-        }
-
-        if (ed.hasSliceName()) {
-            if (sliceInfo == null) {
-                System.out.println(String.format("WARNING: Slice %s is not defined as part of a valid slicing", ed.getSliceName()));
+        if (settings.createSliceElements) {
+            if (ed.getSlicing() != null && !ed.getSlicing().isEmpty()) {
+                sliceInfo = new SliceInfo(ed, sliceInfo);
+                slices.setSliceInfo(sliceInfo);
             }
-            else {
-                sliceInfo.setSliceName(ed.getSliceName());
-                System.out.println(String.format("Started slice %s of slicing root %s", sliceInfo.getSliceName(), sliceInfo.getSliceRoot().getId()));
-            }
-        }
 
-        if (sliceInfo != null && !sliceInfo.isTypeSlicing() && !sliceInfo.getSliceRoot().getId().equals(ed.getId())) {
-            sliceInfo.resolveSlicePath(ed);
+            if (ed.hasSliceName()) {
+                if (sliceInfo == null) {
+                    System.out.println(String.format("WARNING: Slice %s is not defined as part of a valid slicing", ed.getSliceName()));
+                } else {
+                    sliceInfo.setSliceName(ed.getSliceName());
+                    System.out.println(String.format("Started slice %s of slicing root %s", sliceInfo.getSliceName(), sliceInfo.getSliceRoot().getId()));
+                }
+            }
+
+            if (sliceInfo != null && !sliceInfo.isTypeSlicing() && !sliceInfo.getSliceRoot().getId().equals(ed.getId())) {
+                sliceInfo.resolveSlicePath(ed);
+            }
         }
 
         TypeSpecifier typeSpecifier = this.buildElementTypeSpecifier(modelName, pathRoot, ed);
@@ -1128,7 +1131,7 @@ public abstract class ClassInfoBuilder {
 
             if (cie != null) {
                 if (sliceInfo.isExtensionSlicing() && !sliceInfo.hasSliceMap()) {
-                    ed.getType().get(0).getProfile().get(0);
+                    //ed.getType().get(0).getProfile().get(0);
                     sliceInfo.addSliceMap(String.format("url='%s'", typeUrl(ed)));
                 }
                 String targetMap = sliceInfo.getSliceMap();

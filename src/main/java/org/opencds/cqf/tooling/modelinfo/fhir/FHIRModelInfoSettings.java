@@ -16,22 +16,24 @@ public class FHIRModelInfoSettings extends ModelInfoSettings {
                     .withFunctionName("FHIRHelpers.ToConcept"));
                 add(new ConversionInfo().withFromType("FHIR.Quantity").withToType("System.Quantity")
                     .withFunctionName("FHIRHelpers.ToQuantity"));
-                add(new ConversionInfo().withFromType("FHIR.SimpleQuantity").withToType("System.Quantity")
-                        .withFunctionName("FHIRHelpers.ToQuantity"));
-                add(new ConversionInfo().withFromType("FHIR.Age").withToType("System.Quantity")
-                        .withFunctionName("FHIRHelpers.ToQuantity"));
-                add(new ConversionInfo().withFromType("FHIR.Distance").withToType("System.Quantity")
-                        .withFunctionName("FHIRHelpers.ToQuantity"));
-                add(new ConversionInfo().withFromType("FHIR.Duration").withToType("System.Quantity")
-                        .withFunctionName("FHIRHelpers.ToQuantity"));
-                add(new ConversionInfo().withFromType("FHIR.Count").withToType("System.Quantity")
-                        .withFunctionName("FHIRHelpers.ToQuantity"));
-                add(new ConversionInfo().withFromType("FHIR.MoneyQuantity").withToType("System.Quantity")
-                        .withFunctionName("FHIRHelpers.ToQuantity"));
+                //add(new ConversionInfo().withFromType("FHIR.SimpleQuantity").withToType("System.Quantity")
+                //        .withFunctionName("FHIRHelpers.ToQuantity"));
+                //add(new ConversionInfo().withFromType("FHIR.Age").withToType("System.Quantity")
+                //        .withFunctionName("FHIRHelpers.ToQuantity"));
+                //add(new ConversionInfo().withFromType("FHIR.Distance").withToType("System.Quantity")
+                //        .withFunctionName("FHIRHelpers.ToQuantity"));
+                //add(new ConversionInfo().withFromType("FHIR.Duration").withToType("System.Quantity")
+                //        .withFunctionName("FHIRHelpers.ToQuantity"));
+                //add(new ConversionInfo().withFromType("FHIR.Count").withToType("System.Quantity")
+                //        .withFunctionName("FHIRHelpers.ToQuantity"));
+                //add(new ConversionInfo().withFromType("FHIR.MoneyQuantity").withToType("System.Quantity")
+                //        .withFunctionName("FHIRHelpers.ToQuantity"));
                 add(new ConversionInfo().withFromType("FHIR.Period").withToType("Interval<System.DateTime>")
                             .withFunctionName("FHIRHelpers.ToInterval"));
                 add(new ConversionInfo().withFromType("FHIR.Range").withToType("Interval<System.Quantity>")
                         .withFunctionName("FHIRHelpers.ToInterval"));
+                add(new ConversionInfo().withFromType("FHIR.Ratio").withToType("System.Ratio")
+                        .withFunctionName("FHIRHelpers.ToRatio"));
             }
         };
         
