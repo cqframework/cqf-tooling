@@ -87,6 +87,7 @@ public class StructureDefinitionToModelInfo extends Operation {
         if (args.length > 4) {
             modelName = args[4];
         }
+
         String modelVersion = "4.0.1";
         //String modelVersion = "3.1.0";
         //String modelVersion = "4.0.0";
