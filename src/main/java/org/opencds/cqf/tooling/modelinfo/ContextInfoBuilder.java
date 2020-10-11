@@ -39,7 +39,7 @@ public class ContextInfoBuilder {
         NamedTypeSpecifier nts = new NamedTypeSpecifier();
         nts.setNamespace(this.settings.name);
         if (ci.getName().equals("Patient")) {
-            nts.setName(this.settings.patientClassName);
+            nts.setName(this.settings.patientClassName.startsWith(this.settings.name + ".") ? "Patient" : this.settings.patientClassName);
             ci.setBirthDateElement(this.settings.patientBirthDatePropertyName);
         }
         else {

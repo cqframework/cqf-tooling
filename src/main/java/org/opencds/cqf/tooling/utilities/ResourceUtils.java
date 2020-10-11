@@ -146,7 +146,7 @@ public class ResourceUtils
       for (org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
         if (relatedArtifact.getType() == org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.DEPENDSON) {
             if (relatedArtifact.getResource().getReference().contains("Library/")) {
-                String dependencyLibraryName = IOUtils.formatFileName(relatedArtifact.getResource().getReference().split("Library/")[1], encoding, fhirContext);
+                String dependencyLibraryName = IOUtils.formatFileName(relatedArtifact.getResource().getReference().split("Library/")[1].replaceAll("\\|", "-"), encoding, fhirContext);
                 String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
                 IOUtils.putAllInListIfAbsent(getStu3DepLibraryPaths(dependencyLibraryPath, fhirContext, encoding), paths);
                 IOUtils.putInListIfAbsent(dependencyLibraryPath, paths);

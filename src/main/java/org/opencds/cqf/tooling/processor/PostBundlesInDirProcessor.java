@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.processor;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -59,8 +60,8 @@ public class PostBundlesInDirProcessor {
         Encoding encoding = params.encoding;
         FhirContext fhirContext = getFhirContext(fhirVersion);
 
-        List<IBaseResource> resources = BundleUtils.GetBundlesInDir(params.directoryPath, fhirContext);
-        resources.forEach(entry -> postBundleToFhirUri(fhirUri, encoding, fhirContext, entry));
+        List<Map.Entry<String, IBaseResource>> resources = BundleUtils.GetBundlesInDir(params.directoryPath, fhirContext);
+        resources.forEach(entry -> postBundleToFhirUri(fhirUri, encoding, fhirContext, entry.getValue()));
     }
 
 	private static void postBundleToFhirUri(String fhirUri, Encoding encoding, FhirContext fhirContext, IBaseResource bundle) {
