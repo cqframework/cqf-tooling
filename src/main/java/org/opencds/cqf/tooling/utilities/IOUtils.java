@@ -95,7 +95,13 @@ public class IOUtils
         return parser.setPrettyPrint(true).encodeResourceToString(resource).toString();
     }
 
+    // Issue 96 - adding second signature to allow for passing versioned
     public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext) 
+    {
+    	writeResource(resource, path, encoding, fhirContext, true);
+    }
+    
+    public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext, Boolean versioned) 
     {
         // If the path is to a specific resource file, just re-use that file path/name.
         String outputPath = null;
@@ -104,8 +110,15 @@ public class IOUtils
             outputPath = path;
         }
         else {
-            outputPath = FilenameUtils.concat(path, formatFileName(resource.getIdElement().getIdPart(), encoding, fhirContext));
-        }
+        	String baseName = resource.getIdElement().getIdPart();
+        	// Issue 96
+        	// If includeVersion is false then just use name and not id for the file baseName
+        	if (!versioned) {
+        		// Assumes that the id will be a string with - separating the version number
+        		baseName = baseName.split("-")[0];
+        	}
+            outputPath = FilenameUtils.concat(path, formatFileName(baseName, encoding, fhirContext));
+            }
 
         try (FileOutputStream writer = new FileOutputStream(outputPath))
         {
@@ -265,9 +278,16 @@ public class IOUtils
 
     public static String getResourceFileName(String resourcePath, IBaseResource resource, Encoding encoding, FhirContext fhirContext, boolean versioned) {
         String resourceVersion = IOUtils.getCanonicalResourceVersion(resource, fhirContext);
-        String result = Paths.get(resourcePath, resource.getIdElement().getResourceType(),
-                resource.getIdElement().getIdPart() + ((versioned && resourceVersion != null && !(resource.getIdElement().getIdPart().endsWith(resourceVersion))) ? ("-" + resourceVersion) : ""))
-                + getFileExtension(encoding);
+        String filename = resource.getIdElement().getIdPart();
+        // Issue 96
+        // Handle no version on filename but still in id
+        if (!versioned && resourceVersion != null) {
+        	int index = filename.indexOf(resourceVersion);
+        	if (index > 0) {
+        		filename = filename.substring(0, index - 1);
+        	}
+        }
+        String result = Paths.get(resourcePath, resource.getIdElement().getResourceType(), filename) + getFileExtension(encoding);
         return result;
     }
 

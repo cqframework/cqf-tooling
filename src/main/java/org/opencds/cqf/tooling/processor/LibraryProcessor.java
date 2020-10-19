@@ -64,14 +64,14 @@ public class LibraryProcessor extends BaseProcessor {
             Encoding encoding, boolean versioned) {
         Boolean shouldPersist = true;
         try {
-            Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding);
+            Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding, versioned);
             String currentResourceID = IOUtils.getTypeQualifiedResourceId(path, fhirContext);
             for (IBaseResource resource : dependencies.values()) {
                 resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
 
                 // NOTE: Assuming dependency library will be in directory of dependent.
                 String dependencyPath = IOUtils.getResourceFileName(IOUtils.getResourceDirectory(path), resource, encoding, fhirContext, versioned);
-                 bundleLibraryDependencies(dependencyPath, fhirContext, resources, encoding, versioned);
+                bundleLibraryDependencies(dependencyPath, fhirContext, resources, encoding, versioned);
             }
         } catch (Exception e) {
             shouldPersist = false;
