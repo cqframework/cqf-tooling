@@ -80,7 +80,9 @@ public class R4LibraryProcessor extends LibraryProcessor {
                 fileEncoding = encoding;
             }    
             cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
-            IOUtils.writeResource(library, filePath, fileEncoding, fhirContext);
+            // Issue 96
+            // Passing the includeVersion here to handle not using the version number in the filename
+            IOUtils.writeResource(library, filePath, fileEncoding, fhirContext, this.versioned);
             String refreshedLibraryName;
             if (this.versioned && refreshedLibrary.getVersion() != null) {
                 refreshedLibraryName = refreshedLibrary.getName() + "-" + refreshedLibrary.getVersion();
@@ -234,8 +236,12 @@ public class R4LibraryProcessor extends LibraryProcessor {
                     //TODO: we probably want to replace this "-library" behavior with a switch (or get rid of it altogether)
                     //HACK: this is not a safe implementation.  Someone could run without -v and everything else would still get the "library-".
                     //Doing this for the connectathon.
-                    .setResource(igCanonicalBase + "Library/" + (includeVersion ? LibraryProcessor.ResourcePrefix : "") + getResourceCanonicalReference(def, includeVersion))
-            );
+                    //.setResource(igCanonicalBase + "Library/" + (includeVersion ? LibraryProcessor.ResourcePrefix : "") + getResourceCanonicalReference(def, includeVersion))
+                    // Issue 96
+                    // When not using the -v option we want it to find the files without the version number but we want it
+                    // to generate the dependencies using the version so forcing the includeVersion to true here
+                    .setResource(igCanonicalBase + "Library/" + (includeVersion ? LibraryProcessor.ResourcePrefix : "") + getResourceCanonicalReference(def, true))
+                    );
         }
         else {
             if (includeVersion) {
