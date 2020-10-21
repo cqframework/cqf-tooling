@@ -34,6 +34,10 @@ class OperationFactory {
                 return new HEDISValueSetGenerator();
             case "XlsxToValueSet":
                 return new GenericValueSetGenerator();
+            case "EnsureExecutableValueSet":
+                return new EnsureExecutableValueSetOperation();
+            case "ToJsonValueSetDb":
+                return new ToJsonValueSetDbOperation();
             case "CqlToSTU3Library":
                 return new org.opencds.cqf.tooling.library.stu3.LibraryGenerator();
             case "CqlToR4Library":
