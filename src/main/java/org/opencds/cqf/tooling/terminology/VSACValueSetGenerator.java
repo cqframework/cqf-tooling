@@ -118,6 +118,7 @@ public class VSACValueSetGenerator extends Operation {
             }
             if (includeExpansion) {
                 resolveValueSetExpansion(vs);
+                vs.addExtension().setUrl("http://hl7.org/fhir/us/ecr/StructureDefinition/ersd-usageWarning").setValue(new StringType("This value set contains a point-in-time expansion enumerating the codes that meet the value set intent. As new versions of the code systems used by the value set are released, the contents of this expansion will need to be updated to incorporate newly defined codes that meet the value set intent. Before, and periodically during production use, the value set expansion contents SHOULD be updated. The value set expansion specifies the timestamp when the expansion was produced, SHOULD contain the parameters used for the expansion, and SHALL contain the codes that are obtained by evaluating the value set definition. If this is ONLY an executable value set, a distributable definition of the value set must be obtained to compute the updated expansion."));
                 if (declareCPGProfiles) {
                     vs.getMeta().addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-executablevalueset");
                     vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability").setValue(new CodeType("executable"));
