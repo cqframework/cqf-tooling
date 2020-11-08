@@ -189,6 +189,7 @@ public class VSACValueSetGenerator extends Operation {
         if (declareCPGProfiles) {
             vs.getMeta().addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-shareablevalueset");
             vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability").setValue(new CodeType("shareable"));
+            vs.setExperimental(false);
             vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel").setValue(new CodeType("narrative"));
             vs.getMeta().addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-publishablevalueset");
             vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability").setValue(new CodeType("publishable"));
