@@ -7,6 +7,7 @@ import java.io.InputStream;
 
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.r5.context.IWorkerContext;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class NpmPackageManagerTests implements IWorkerContext.ILoggingService {
@@ -23,12 +24,14 @@ public class NpmPackageManagerTests implements IWorkerContext.ILoggingService {
     /*
     NOTE: This test depends on the dev package cache for the [sample-content-ig](https://github.com/cqframework/sample-content-ig)
     Running the IG publisher on a clone of this IG locally will create and cache the package
+
+    NOTE: Temporarily @Ignore because it's causing the CI build to fail.
      */
+    @Ignore
     @Test
     public void TestSampleContentIG() throws IOException {
-        // TODO: temporarily commented because it's causing the CI build to fail.
-        // NpmPackageManager pm = NpmPackageManager.fromStream(NpmPackageManagerTests.class.getResourceAsStream("mycontentig.xml"), "4.0.1");
-        // assertTrue(pm.getNpmList().size() >= 1);
+        NpmPackageManager pm = NpmPackageManager.fromStream(NpmPackageManagerTests.class.getResourceAsStream("mycontentig.xml"), "4.0.1");
+        assertTrue(pm.getNpmList().size() >= 1);
     }
 
     /*
@@ -44,19 +47,21 @@ public class NpmPackageManagerTests implements IWorkerContext.ILoggingService {
     /*
     NOTE: This test depends on the dev package cache for the [sample-content-ig](https://github.com/cqframework/sample-content-ig)
     Running the IG publisher on a clone of this IG locally will create and cache the package
+    
+    NOTE: Temporarily @Ignore because it's causing the CI build to fail.
      */
+    @Ignore
     @Test
     public void TestLibrarySourceProvider() throws IOException {
-        // TODO: temporarily commented because it's causing the CI build to fail.
-        // NpmPackageManager pm = NpmPackageManager.fromStream(NpmPackageManagerTests.class.getResourceAsStream("mycontentig.xml"), "4.0.1");
-        // assertTrue(pm.getNpmList().size() >= 1);
+        NpmPackageManager pm = NpmPackageManager.fromStream(NpmPackageManagerTests.class.getResourceAsStream("mycontentig.xml"), "4.0.1");
+        assertTrue(pm.getNpmList().size() >= 1);
 
-        // LibraryLoader reader = new LibraryLoader("4.0.1");
-        // NpmLibrarySourceProvider sp = new NpmLibrarySourceProvider(pm.getNpmList(), reader, this);
-        // InputStream is = sp.getLibrarySource(new VersionedIdentifier().withSystem("http://somewhere.org/fhir/uv/myig").withId("example"));
-        // assertTrue(is != null);
-        // is = sp.getLibrarySource(new VersionedIdentifier().withSystem("http://somewhere.org/fhir/uv/myig").withId("example").withVersion("0.2.0"));
-        // assertTrue(is != null);
+        LibraryLoader reader = new LibraryLoader("4.0.1");
+        NpmLibrarySourceProvider sp = new NpmLibrarySourceProvider(pm.getNpmList(), reader, this);
+        InputStream is = sp.getLibrarySource(new VersionedIdentifier().withSystem("http://somewhere.org/fhir/uv/myig").withId("example"));
+        assertTrue(is != null);
+        is = sp.getLibrarySource(new VersionedIdentifier().withSystem("http://somewhere.org/fhir/uv/myig").withId("example").withVersion("0.2.0"));
+        assertTrue(is != null);
     }
 
     @Override
