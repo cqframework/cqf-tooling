@@ -167,7 +167,7 @@ public class CqlProcessor {
     }
 
     /**
-     * Do the compile. Do not return any exceptions related to content; only thros exceptions for infrastructural issues
+     * Do the compile. Do not return any exceptions related to content; only throw exceptions for infrastructural issues
      *
      * note that it's not an error if there's no .cql files - this is called without checking for their existence
      *
