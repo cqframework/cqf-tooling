@@ -1,12 +1,8 @@
 package org.opencds.cqf.tooling.measure.adapters;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.fhir.ParametersParameter;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Quantity;
 import org.junit.Test;
-import org.opencds.cqf.tooling.utilities.FhirContextCache;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -15,10 +11,6 @@ import java.util.List;
 import static org.junit.Assert.assertTrue;
 
 public class R4MeasureReportAdapterTest {
-
-    private void Setup() {
-        FhirContext fhirContext = FhirContextCache.getContext(FhirVersionEnum.R4);
-    }
 
     // R4 Tests
     private org.hl7.fhir.r4.model.MeasureReport GetR4BasicMeasureReportWithId(String id) {
@@ -35,13 +27,6 @@ public class R4MeasureReportAdapterTest {
         report.setGroup(groupList);
 
         return report;
-    }
-
-    private ParametersParameter getTestParameter(String name, Boolean passed) {
-        ParametersParameter parameter = new ParametersParameter();
-        parameter.setName(new org.hl7.fhir.String().withValue(name));
-        parameter.setValueBoolean(new org.hl7.fhir.Boolean().withValue(passed));
-        return parameter;
     }
 
     @Test
