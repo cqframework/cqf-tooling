@@ -349,7 +349,7 @@ public class GenericValueSetGenerator extends Operation {
         if (it.hasNext()) {
             Row row = it.next();
             while (row.getRowNum() < rowIdx) {
-                it.next();
+                row = it.next();
             }
             return SpreadsheetHelper.getCellAsString(row.getCell(colIdx));
         }
