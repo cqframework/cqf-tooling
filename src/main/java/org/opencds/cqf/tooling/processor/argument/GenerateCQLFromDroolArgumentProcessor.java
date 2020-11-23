@@ -2,10 +2,7 @@ package org.opencds.cqf.tooling.processor.argument;
 
 import static java.util.Arrays.asList;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.opencds.cqf.tooling.parameter.GenerateCQLDroolParameters;
+import org.opencds.cqf.tooling.parameter.GenerateCQLFromDroolParameters;
 import org.opencds.cqf.tooling.utilities.ArgUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
@@ -14,7 +11,7 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
 
-public class GenerateCQLDroolArgumentProcessor {
+public class GenerateCQLFromDroolArgumentProcessor {
 
     public static final String[] OPERATION_OPTIONS = {"GenerateCQLDrool"};
 
@@ -40,7 +37,7 @@ public class GenerateCQLDroolArgumentProcessor {
         return parser;
     }
 
-	public GenerateCQLDroolParameters parseAndConvert(String[] args) {
+	public GenerateCQLFromDroolParameters parseAndConvert(String[] args) {
 		OptionParser parser = build();
         OptionSet options = ArgUtils.parse(args, parser);
 
@@ -54,7 +51,7 @@ public class GenerateCQLDroolArgumentProcessor {
         }
         String encodingFilePath = (String)options.valueOf(ENCODING_FILE_PATH_OPTIONS[0]);
     
-        GenerateCQLDroolParameters gcdp = new GenerateCQLDroolParameters();
+        GenerateCQLFromDroolParameters gcdp = new GenerateCQLFromDroolParameters();
         gcdp.outputPath = outputPath;
         gcdp.encoding = encodingEnum;
         gcdp.encodingFilePath = encodingFilePath;
