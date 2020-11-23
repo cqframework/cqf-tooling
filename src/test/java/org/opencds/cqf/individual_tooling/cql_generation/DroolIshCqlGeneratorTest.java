@@ -11,14 +11,14 @@ public class DroolIshCqlGeneratorTest {
 
     @Test
     public void test_worked() {
-        String encodingPath = "C:\\src\\GitHub\\ChlamydiaConditionCriteriaRels.json";
-        String outputPath = "C:\\src\\GitHub\\generatedCQL.cql";
+        String encodingPath = "C:\\Users\\jreys\\Documents\\src\\CQLGenerationDocs\\ChlamydiaConditionCriteriaRels.json";
+        String outputPath = "C:\\Users\\jreys\\Documents\\src\\CQLGenerationDocs\\generatedCQL.cql";
         File file = new File(encodingPath);
         Boolean fileIsFile = file.isFile();
         if (fileIsFile) {
             URI encodingUri = file.toURI();
 
-            DroolIshCqlGenerator droolIshCqlGenerator = new DroolIshCqlGenerator(outputPath);
+            CqlGenerator droolIshCqlGenerator = new DroolIshCqlGenerator(outputPath);
 
             File outputFile = new File(outputPath);
             Boolean outputFileIsFile = outputFile.isFile();
