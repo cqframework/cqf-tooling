@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -21,9 +20,9 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.GuidanceResponse.GuidanceResponseStatus;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.junit.Test;
 import org.opencds.cqf.processing.test.library.src.GuidanceResponseComparator;
 import org.opencds.cqf.processing.test.library.src.GuidanceResponseLeanComparator;
-import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
