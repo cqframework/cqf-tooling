@@ -52,7 +52,7 @@ public class GenerateCQLDroolArgumentProcessor {
         if (encoding != null) {
             encodingEnum = Encoding.parse(encoding.toLowerCase());
         }
-        String encodingFilePath = (String)options.valueOf(ENCODING_OPTIONS[0]);
+        String encodingFilePath = (String)options.valueOf(ENCODING_FILE_PATH_OPTIONS[0]);
     
         GenerateCQLDroolParameters gcdp = new GenerateCQLDroolParameters();
         gcdp.outputPath = outputPath;

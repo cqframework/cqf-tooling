@@ -30,7 +30,15 @@ public class DroolIshCqlGenerator implements CqlGenerator {
     @Override
     public void generate(String encoding) {
         Gson gson = new Gson();
+        File file = new File(encoding);
+        List<String> contents = null;
+        try {
+            contents = Files.readLines(file, StandardCharsets.ISO_8859_1);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
         StringBuilder stringBuilder = new StringBuilder();
+        contents.forEach(x -> stringBuilder.append(x));
         JsonReader reader = new JsonReader(new StringReader(stringBuilder.toString()));
         reader.setLenient(true);
         ConditionCriteriaRel conditionCriteriaRel = gson.fromJson(reader, ConditionCriteriaRel.class);
