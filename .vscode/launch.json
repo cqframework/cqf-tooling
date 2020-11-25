@@ -79,6 +79,18 @@
         },
         {
             "type": "java",
+            "name": "DEBUG CQLGenerateFromDrool",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.tooling.Main",
+            "projectName": "tooling",
+            "args": [
+                "-GenerateCQLFromDrool",
+                "-ifp=../CQLGenerationDocs/ChlamydiaConditionCriteriaRels.json",
+                "-op=../CQLGenerationDocs/generatedCQL.cql"
+            ]
+        },
+        {
+            "type": "java",
             "name": "VSAC Spreadsheet Directory To ValueSet Resources",
             "request": "launch",
             "mainClass": "org.opencds.cqf.tooling.Main",

@@ -7,9 +7,10 @@ public class GenerateCQLFromDroolOperationTest {
     @Test
     public void test_worked() {
         String operation = "GenerateCQLFromDrool";
-        String encodingPath = "C:\\Users\\jreys\\Documents\\src\\CQLGenerationDocs\\ChlamydiaConditionCriteriaRels.json";
-        String outputPath = "C:\\Users\\jreys\\Documents\\src\\CQLGenerationDocs\\generatedCQL.cql";
-        String[] args = { "-" + operation, "-op=" + outputPath, "-efp=" + encodingPath };
+        String inputFilePath = "../CQLGenerationDocs/ChlamydiaConditionCriteriaRels.json";
+        String outputPath = "../CQLGenerationDocs/generatedCQL.cql";
+        String encoding = "json";
+        String[] args = { "-" + operation, "-ifp=" + inputFilePath, "-op=" + outputPath, "-e=" + encoding };
         Operation generateCQLFromDroolOperation = new GenerateCQLFromDroolOperation();
         generateCQLFromDroolOperation.execute(args);
     }

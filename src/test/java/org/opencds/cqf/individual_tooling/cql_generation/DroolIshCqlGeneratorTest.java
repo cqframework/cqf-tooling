@@ -11,8 +11,8 @@ public class DroolIshCqlGeneratorTest {
 
     @Test
     public void test_worked() {
-        String encodingPath = "C:\\Users\\jreys\\Documents\\src\\CQLGenerationDocs\\ChlamydiaConditionCriteriaRels.json";
-        String outputPath = "C:\\Users\\jreys\\Documents\\src\\CQLGenerationDocs\\generatedCQL.cql";
+        String encodingPath = "../CQLGenerationDocs/ChlamydiaConditionCriteriaRels.json";
+        String outputPath = "../CQLGenerationDocs/generatedCQL.cql";
         File file = new File(encodingPath);
         Boolean fileIsFile = file.isFile();
         if (fileIsFile) {

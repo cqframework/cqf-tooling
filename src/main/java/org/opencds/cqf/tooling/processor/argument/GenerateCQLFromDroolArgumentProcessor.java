@@ -13,22 +13,22 @@ import joptsimple.OptionSpecBuilder;
 
 public class GenerateCQLFromDroolArgumentProcessor {
 
-    public static final String[] OPERATION_OPTIONS = {"GenerateCQLDrool"};
+    public static final String[] OPERATION_OPTIONS = {"GenerateCQLFromDrool"};
 
     public static final String[] OUTPUT_PATH_OPTIONS = {"op", "outputPath", "outputpath", "o", "output"};
     public static final String[] ENCODING_OPTIONS = {"e", "encoding"};
-    public static final String[] ENCODING_FILE_PATH_OPTIONS = {"ep", "encodingPath", "encoding-path", "efp", "encodingFilePath", "encoding-file-path", "encoding-filePath"};
+    public static final String[] INPUT_FILE_PATH_OPTIONS = {"ip", "inputPath", "input-path", "ifp", "inputFilePath", "input-file-path", "input-filePath"};
 
     public OptionParser build() {
         OptionParser parser = new OptionParser();
 
         OptionSpecBuilder outputBuilder = parser.acceptsAll(asList(OUTPUT_PATH_OPTIONS),"Will be created if file path does not currently exist.");
         OptionSpecBuilder encodingBuilder = parser.acceptsAll(asList(ENCODING_OPTIONS), "If omitted, encoding input will be expected to be json.");
-        OptionSpecBuilder encodingFilePathBuilder = parser.acceptsAll(asList(ENCODING_FILE_PATH_OPTIONS),"Must be a path to encoded logic export required for cql generation.");
+        OptionSpecBuilder inputFilePathBuilder = parser.acceptsAll(asList(INPUT_FILE_PATH_OPTIONS),"Must be a path to encoded logic export required for cql generation.");
 
         OptionSpec<String> outputPath = outputBuilder.withRequiredArg().describedAs("path to desired cql generation output");
-        OptionSpec<String> encoding = encodingBuilder.withOptionalArg().describedAs("input encoding (as of now can only be json)"); 
-        OptionSpec<String> encodingFilePath = encodingFilePathBuilder.withRequiredArg().describedAs("input encoding file path");
+        OptionSpec<String> encoding = encodingBuilder.withOptionalArg().describedAs("input encoding (as of now can only be json)").defaultsTo("json"); 
+        OptionSpec<String> inputFilePath = inputFilePathBuilder.withRequiredArg().describedAs("input encoded file path");
 
         parser.acceptsAll(asList(OPERATION_OPTIONS),"The operation to run.");
 
@@ -44,17 +44,14 @@ public class GenerateCQLFromDroolArgumentProcessor {
         ArgUtils.ensure(OPERATION_OPTIONS[0], options);
 
         String outputPath = (String)options.valueOf(OUTPUT_PATH_OPTIONS[0]);
+        String inputFilePath = (String)options.valueOf(INPUT_FILE_PATH_OPTIONS[0]);
         String encoding = (String)options.valueOf(ENCODING_OPTIONS[0]);
-        Encoding encodingEnum = Encoding.JSON;
-        if (encoding != null) {
-            encodingEnum = Encoding.parse(encoding.toLowerCase());
-        }
-        String encodingFilePath = (String)options.valueOf(ENCODING_FILE_PATH_OPTIONS[0]);
+        Encoding encodingEnum = Encoding.parse(encoding.toLowerCase());
     
         GenerateCQLFromDroolParameters gcdp = new GenerateCQLFromDroolParameters();
         gcdp.outputPath = outputPath;
         gcdp.encoding = encodingEnum;
-        gcdp.encodingFilePath = encodingFilePath;
+        gcdp.inputFilePath = inputFilePath;
        
         return gcdp;
 	}
