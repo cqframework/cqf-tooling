@@ -37,7 +37,10 @@ public class NpmPackageManagerTests implements IWorkerContext.ILoggingService {
     /*
     NOTE: This test depends on the dev package cache for the [opioid-mme-r4](https://github.com/cqframework/opioid-mme-r4)
     Running the IG publisher on a clone of this IG locally will create and cache the package
+
+    NOTE: Also disabled due to causing the CI build to fail.
      */
+    @Ignore
     @Test
     public void TestOpioidMMEIG() throws IOException {
         NpmPackageManager pm = NpmPackageManager.fromStream(NpmPackageManagerTests.class.getResourceAsStream("opioid-mme-r4.xml"), "4.0.1");
