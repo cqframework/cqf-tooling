@@ -95,7 +95,7 @@ All changes to the master branch must be made using a pull request, and must be 
 
 Small changes must be reviewed by at least one committer that is not the author of the change. Large, significant, or breaking changes must have committer consensus before being applied.
 
-More details are available on the [Contributing](contributing).
+Additional details are available on the [Contributing](contributing.md) page.
 
 ## Communication Channels
 
@@ -107,7 +107,7 @@ Sometimes, communication occurs outside of these public channels, and that is ok
 
 ## Code of Conduct
 
-In support of a healthy and inclusive community, we use and enforce a [Code of Conduct](code_of_conduct) for all members of our community, including committers and PMC members. Our code of conduct is adapted from the Contributor Covenant.
+In support of a healthy and inclusive community, we use and enforce a [Code of Conduct](code_of_conduct.md) for all members of our community, including committers and PMC members. Our code of conduct is adapted from the Contributor Covenant.
 
 If you encounter any violation of these terms, please contact the PMC Chair or a PMC committee member. All reports will be kept in strict confidence and dealt with promptly.
 
