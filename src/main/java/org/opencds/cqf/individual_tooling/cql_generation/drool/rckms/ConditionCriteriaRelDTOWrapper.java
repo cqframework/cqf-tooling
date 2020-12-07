@@ -1,4 +1,4 @@
-package org.opencds.cqf.individual_tooling.cql_generation.drool;
+package org.opencds.cqf.individual_tooling.cql_generation.drool.rckms;
 
 import org.cdsframework.dto.ConditionCriteriaRelDTO;
 

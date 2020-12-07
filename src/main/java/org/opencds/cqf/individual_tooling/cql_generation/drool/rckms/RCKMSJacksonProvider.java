@@ -1,5 +1,5 @@
 
-package org.opencds.cqf.individual_tooling.cql_generation.drool;
+package org.opencds.cqf.individual_tooling.cql_generation.drool.rckms;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.Version;
@@ -17,31 +17,11 @@ import org.cdsframework.base.BaseDTO;
 import org.cdsframework.rs.provider.BaseDTODeserializer;
 import org.cdsframework.rs.provider.CoreJaxbAnnotationIntrospector;
 import org.cdsframework.util.ClassUtils;
-import org.cdsframework.util.LogUtils;
 
-public class JacksonProvider  {
-    
-    protected static LogUtils logger = LogUtils.getLogger(JacksonProvider.class);
-    private ObjectMapper defaultObjectMapper = null;
-
-    public JacksonProvider() {
-        this(JsonInclude.Include.NON_NULL);
-    }    
-
-    public JacksonProvider(JsonInclude.Include include) {
-        final String METHODNAME = "constructor ";
-        logger.info(METHODNAME);
-        defaultObjectMapper = createObjectMapper(include, null);
-    }
-    
-    public ObjectMapper getContext(Class<?> type) {
-        return defaultObjectMapper;
-    }
+public class RCKMSJacksonProvider  {
+    private ObjectMapper objectMapper = null;
 
     public ObjectMapper createObjectMapper(JsonInclude.Include jsonInclude, String[] ignorableFields) {
-        final String METHODNAME = "createObjectMapper ";
-        logger.info(METHODNAME, "creating objectMapper for ", JacksonProvider.class.getCanonicalName());
-
         ObjectMapper objectMapper = new ObjectMapper();
         JacksonAnnotationIntrospector primaryIntrospector = new JacksonAnnotationIntrospector();
         CoreJaxbAnnotationIntrospector secondaryIntrospector = new CoreJaxbAnnotationIntrospector();
@@ -62,7 +42,6 @@ public class JacksonProvider  {
     }
 
     public void registerDTOs(String packageName) {
-        final String METHODNAME = "registerDTOs ";
         List<Class<? extends BaseDTO>> dtoClasses = new ArrayList<Class<? extends BaseDTO>>();
         try {
             Class[] classes = ClassUtils.getClassesFromClasspath(packageName);
@@ -72,27 +51,32 @@ public class JacksonProvider  {
                 }
             }
             if (!dtoClasses.isEmpty()) {
-                registerDTOs(dtoClasses);
-                logger.info(METHODNAME, "dtoClasses=", dtoClasses );
-                logger.info(METHODNAME, "dtoClasses.size()=", dtoClasses.size() );                
+                registerDTOs(dtoClasses);       
             }
         }
         catch (IOException | ClassNotFoundException | URISyntaxException e) {
             String errorMessage = "An " + e.getClass().getSimpleName() + " has occurred; Message: " + e.getMessage();
-            logger.error(METHODNAME, errorMessage);
             throw new RuntimeException(errorMessage, e);
         }
     }
     
     public void registerDTOs(List<Class<? extends BaseDTO>> dtoClasses) {
-        if (defaultObjectMapper != null && dtoClasses != null) {
+        if (objectMapper != null && dtoClasses != null) {
             BaseDTODeserializer deserializer = new BaseDTODeserializer();
             for (Class<? extends BaseDTO> dtoClass : dtoClasses) {
                 deserializer.registerBaseDTO(dtoClass);
             }
             SimpleModule simpleModule = new SimpleModule("PolymorphicDTODeserializerModule", new Version(1, 0, 0, null));
             simpleModule.addDeserializer(BaseDTO.class, deserializer);
-            defaultObjectMapper.registerModule(simpleModule);
+            objectMapper.registerModule(simpleModule);
         }
+    }
+
+    public ObjectMapper getObjectMapper() {
+        return objectMapper;
+    }
+
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
 }

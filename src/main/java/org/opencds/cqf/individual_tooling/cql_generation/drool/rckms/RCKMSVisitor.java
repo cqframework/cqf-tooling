@@ -1,4 +1,4 @@
-package org.opencds.cqf.individual_tooling.cql_generation.drool;
+package org.opencds.cqf.individual_tooling.cql_generation.drool.rckms;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +22,14 @@ import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.DefineState
 import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.DirectReferenceCode;
 import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.Retrieve;
 import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.WhereClause;
+import org.opencds.cqf.individual_tooling.cql_generation.drool.DroolToCQLVisitor;
 
-public class HackyVisitor {
-    private Map<String, Object> printMap;
+public class RCKMSVisitor extends DroolToCQLVisitor {
+    public RCKMSVisitor(Map<String, Object> printMap) {
+        super(printMap);
+        // TODO Auto-generated constructor stub
+    }
+
     private Map<String, Pair<String, String>> cdsdmToFhirMap = Map.of(
         "EncounterEvent.encounterType" , Pair.of("Encounter", "type"),
         // "EncounterEvent.relatedClinicalStatement.problem.problemCode" , Pair.of("Encounter", "?"),
@@ -49,11 +54,8 @@ public class HackyVisitor {
         // "SubstanceDispensationEvent.relatedClinicalStatement.problem.problemCode" , Pair.of("MedicationRequest", "?")
     );
 
-    public HackyVisitor(Map<String, Object> printMap) {
-        this.printMap = printMap;
-	}
-
-	public void visit(ConditionCriteriaRelDTO conditionCriteriaRel) {
+    @Override
+    public void visit(ConditionCriteriaRelDTO conditionCriteriaRel) {
         if (!conditionCriteriaRel.getConditionCriteriaPredicateDTOs().isEmpty()) {
 			for (ConditionCriteriaPredicateDTO predicate : conditionCriteriaRel.getConditionCriteriaPredicateDTOs()) {
                 visit(predicate);
@@ -61,24 +63,86 @@ public class HackyVisitor {
         }
     }
 
+    @Override
     public DefineBlock visit(ConditionCriteriaPredicateDTO predicate) {
         DefineBlock defineBlock = new DefineBlock();
         DefineStatement defineStatement = new DefineStatement();
         List<DefineStatementBody> defineStatementBodies = new ArrayList<DefineStatementBody>();
         Retrieve retrieve = new Retrieve();
         WhereClause whereClause = new WhereClause();
+
         if (!predicate.getPredicateDTOs().isEmpty()) {
-            for (ConditionCriteriaPredicateDTO nestedPredicate : predicate.getPredicateDTOs()) {
-                DefineBlock nestedBlock = visit(nestedPredicate);
-                if (defineStatementBodies.isEmpty()) {
-                    defineStatementBodies.add(
-                        new DefineStatementBody(null, null, null, nestedBlock.getDefineStatement().getAlias()));   
-                } else {
-                    defineStatementBodies.add(
-                        new DefineStatementBody(null, null, predicate.getPredicateConjunction().name(), nestedBlock.getDefineStatement().getAlias()));   
-                }
+            aliasAndGeneratedNestedBlock(predicate, defineStatementBodies);
+        }
+        buildDefineBlock(predicate, defineBlock, defineStatement, defineStatementBodies, retrieve, whereClause);
+        return defineBlock;
+    }
+
+    @Override
+    public void visit(ConditionCriteriaPredicatePartDTO predicatePart, Retrieve retrieve, WhereClause whereClause, DefineStatementBody defineStatementBody, DefineStatement defineStatement) {
+        buildDefineBody(predicatePart, retrieve, whereClause, defineStatementBody);
+        buildDefineStatement(predicatePart, defineStatement);
+    }
+
+    @Override
+    // Operator
+    protected void visit(CriteriaResourceParamDTO criteriaResourceParamDTO, WhereClause whereClause) {
+        whereClause.setOperator(criteriaResourceParamDTO.getName());
+    }
+
+    @Override
+    // Retrieve and Left Operand (Modeling)
+    public void visit(DataInputNodeDTO dIN, Retrieve retrieve, WhereClause whereClause) {
+        Pair<String, String> fhirModeling = cdsdmToFhirMap.get(dIN.getTemplateName() + "." + dIN.getNodePath().replaceAll("/", "."));
+        if (fhirModeling != null) {
+            if (fhirModeling.getLeft() != null) { 
+                retrieve.setResourceType(fhirModeling.getLeft());
+                whereClause.setResourceType(fhirModeling.getLeft());
+            }
+            if (fhirModeling.getRight() != null) {
+                whereClause.setPath(fhirModeling.getRight());
             }
         }
+        
+        fhirModelingSet.add(Pair.of(dIN.getTemplateName(), dIN.getNodePath()));
+    }
+
+    @Override
+    // Right operand (Terminology)
+    public void visit(OpenCdsConceptDTO openCdsConceptDTO, WhereClause whereClause) {
+        if (openCdsConceptDTO.getCode() != null && openCdsConceptDTO.getDisplayName() != null) {
+            DirectReferenceCode directReferenceCode = new DirectReferenceCode(openCdsConceptDTO.getDisplayName(), openCdsConceptDTO.getCode());
+            this.printMap.put(directReferenceCode.getAlias(), directReferenceCode);
+            whereClause.setConcept(directReferenceCode.getAlias());
+        }
+    }
+
+    @Override
+    public void visit(CriteriaPredicatePartDTO  sourcePredicatePartDTO, WhereClause whereClause) {
+        if (!sourcePredicatePartDTO.getPredicatePartConceptDTOs().isEmpty()) {
+            for (CriteriaPredicatePartConceptDTO predicatePartConcepts : sourcePredicatePartDTO.getPredicatePartConceptDTOs()) {
+                visit(predicatePartConcepts, whereClause);
+            }
+        }
+    }
+
+    @Override
+    public void visit(ConditionCriteriaPredicatePartConceptDTO predicatePartConcepts, WhereClause whereClause) {
+        if (predicatePartConcepts.getOpenCdsConceptDTO() != null) {
+            visit(predicatePartConcepts.getOpenCdsConceptDTO(), whereClause);
+        }
+    }
+
+    @Override
+    public void visit(CriteriaPredicatePartConceptDTO predicatePartConcepts, WhereClause whereClause) {
+        if (predicatePartConcepts.getOpenCdsConceptDTO() != null) {
+            visit(predicatePartConcepts.getOpenCdsConceptDTO(), whereClause);
+        }
+    }
+
+    private void buildDefineBlock(ConditionCriteriaPredicateDTO predicate, DefineBlock defineBlock,
+            DefineStatement defineStatement, List<DefineStatementBody> defineStatementBodies, Retrieve retrieve,
+            WhereClause whereClause) {
         if (!predicate.getPredicatePartDTOs().isEmpty()) {
             DefineStatementBody defineStatementBody = new DefineStatementBody();
             for (ConditionCriteriaPredicatePartDTO predicatePart : predicate.getPredicatePartDTOs()) {
@@ -96,12 +160,25 @@ public class HackyVisitor {
         defineBlock.setDefineStatement(defineStatement);
         defineBlock.setDefineStatementBody(defineStatementBodies);
         if (defineBlock.getDefineStatement().getAlias() != null) {
-            printMap.put(defineBlock.getDefineStatement().getAlias(), defineBlock);
+            this.printMap.put(defineBlock.getDefineStatement().getAlias(), defineBlock);
         }
-        return defineBlock;
     }
 
-    public void visit(ConditionCriteriaPredicatePartDTO predicatePart, Retrieve retrieve, WhereClause whereClause, DefineStatementBody defineStatementBody, DefineStatement defineStatement) {
+    private void aliasAndGeneratedNestedBlock(ConditionCriteriaPredicateDTO predicate, List<DefineStatementBody> defineStatementBodies) {
+        for (ConditionCriteriaPredicateDTO nestedPredicate : predicate.getPredicateDTOs()) {
+            DefineBlock nestedBlock = visit(nestedPredicate);
+            if (defineStatementBodies.isEmpty()) {
+                defineStatementBodies.add(
+                    new DefineStatementBody(null, null, null, nestedBlock.getDefineStatement().getAlias()));   
+            } else {
+                defineStatementBodies.add(
+                    new DefineStatementBody(null, null, predicate.getPredicateConjunction().name(), nestedBlock.getDefineStatement().getAlias()));   
+            }
+        }
+    }
+    
+    private void buildDefineBody(ConditionCriteriaPredicatePartDTO predicatePart, Retrieve retrieve, WhereClause whereClause,
+            DefineStatementBody defineStatementBody) {
         if (predicatePart.getCriteriaResourceParamDTO() != null) {
             visit(predicatePart.getCriteriaResourceParamDTO(), whereClause);
         }
@@ -118,60 +195,15 @@ public class HackyVisitor {
         }
         defineStatementBody.setRetrieve(retrieve);
         defineStatementBody.setWhereClause(whereClause);
+    }
 
+    private void buildDefineStatement(ConditionCriteriaPredicatePartDTO predicatePart, DefineStatement defineStatement) {
         if (predicatePart.getPartType() != null && ( predicatePart.getPartType().equals(PredicatePartType.Text) || predicatePart.getPartType().equals(PredicatePartType.ModelElement))) {
             if (predicatePart.getPartAlias() != null) {
-                defineStatement.setAlias(predicatePart.getPartAlias());
+                defineStatement.setAlias(predicatePart.getPartAlias() + "-" + predicatePart.getPartId());
             } else if (predicatePart.getText() != null) {
-                defineStatement.setAlias(predicatePart.getText());
+                defineStatement.setAlias(predicatePart.getText() + "-" + predicatePart.getPartId());
             }
         }
-    }
-
-    private void visit(CriteriaResourceParamDTO criteriaResourceParamDTO, WhereClause whereClause) {
-        whereClause.setOperator(criteriaResourceParamDTO.getName());
-    }
-
-    public void visit(DataInputNodeDTO dIN, Retrieve retrieve, WhereClause whereClause) {
-        Pair<String, String> fhirModeling = cdsdmToFhirMap.get(dIN.getTemplateName() + "." + dIN.getNodePath().replaceAll("/", "."));
-        if (fhirModeling.getLeft() != null) { 
-            retrieve.setResourceType(fhirModeling.getLeft());
-            whereClause.setResourceType(fhirModeling.getLeft());
-        }
-        if (fhirModeling.getRight() != null) {
-            whereClause.setPath(fhirModeling.getRight());
-        }
-    }
-
-    public void visit(CriteriaPredicatePartDTO  sourcePredicatePartDTO, WhereClause whereClause) {
-        if (!sourcePredicatePartDTO.getPredicatePartConceptDTOs().isEmpty()) {
-            for (CriteriaPredicatePartConceptDTO predicatePartConcepts : sourcePredicatePartDTO.getPredicatePartConceptDTOs()) {
-                visit(predicatePartConcepts, whereClause);
-            }
-        }
-    }
-
-    public void visit(ConditionCriteriaPredicatePartConceptDTO predicatePartConcepts, WhereClause whereClause) {
-        if (predicatePartConcepts.getOpenCdsConceptDTO() != null) {
-            visit(predicatePartConcepts.getOpenCdsConceptDTO(), whereClause);
-        }
-    }
-
-    public void visit(CriteriaPredicatePartConceptDTO predicatePartConcepts, WhereClause whereClause) {
-        if (predicatePartConcepts.getOpenCdsConceptDTO() != null) {
-            visit(predicatePartConcepts.getOpenCdsConceptDTO(), whereClause);
-        }
-    }
-
-    public void visit(OpenCdsConceptDTO openCdsConceptDTO, WhereClause whereClause) {
-        if (openCdsConceptDTO.getCode() != null && openCdsConceptDTO.getDisplayName() != null) {
-            DirectReferenceCode directReferenceCode = new DirectReferenceCode(openCdsConceptDTO.getDisplayName(), openCdsConceptDTO.getCode());
-            printMap.put(directReferenceCode.getAlias(), directReferenceCode);
-            whereClause.setConcept(directReferenceCode.getAlias());
-        }
-    }
-
-    public Map<String, Object> getCqlObjects() {
-        return printMap;
     }
 }

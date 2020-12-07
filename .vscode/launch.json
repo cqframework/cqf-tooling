@@ -85,7 +85,7 @@
             "projectName": "tooling",
             "args": [
                 "-GenerateCQLFromDrool",
-                "-ifp=../CQLGenerationDocs/ChlamydiaConditionCriteriaRels.json",
+                "-ifp=../CQLGenerationDocs/default.json",
                 "-op=../CQLGenerationDocs/generatedCQL.cql"
             ]
         },

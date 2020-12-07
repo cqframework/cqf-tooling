@@ -1,4 +1,4 @@
-package org.opencds.cqf.individual_tooling.cql_generation.drool;
+package org.opencds.cqf.individual_tooling.cql_generation.drool.rckms;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -10,7 +10,7 @@ import com.fasterxml.jackson.core.JsonTokenId;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 
-class UnixTimeStampDeserializer extends DateDeserializer {
+public class UnixTimeStampDeserializer extends DateDeserializer {
 
     private static final long serialVersionUID = -2275951539867772400L;
 

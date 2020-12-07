@@ -7,7 +7,7 @@ public class GenerateCQLFromDroolOperationTest {
     @Test
     public void test_worked() {
         String operation = "GenerateCQLFromDrool";
-        String inputFilePath = "../CQLGenerationDocs/ChlamydiaConditionCriteriaRels.json";
+        String inputFilePath = "../CQLGenerationDocs/default.json";
         String outputPath = "../CQLGenerationDocs/generatedCQL.cql";
         String encoding = "json";
         String[] args = { "-" + operation, "-ifp=" + inputFilePath, "-op=" + outputPath, "-e=" + encoding };

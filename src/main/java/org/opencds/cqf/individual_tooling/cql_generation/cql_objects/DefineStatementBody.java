@@ -55,14 +55,18 @@ public class DefineStatementBody {
         if (this.conjunction == null) {
             if (this.alias != null) {
                 content = "\"" + this.getAlias() + "\"\n";
-            } else {
+            } else if (this.retrieve != null && this.whereClause != null) {
                 content = "(\n  " + this.retrieve.toString() + this.whereClause.toString() + ")\n";
+            } else {
+                content = "\nerror generating cql\n\n";
             }
         } else {
             if (this.alias != null) {
                 content = "    " + this.conjunction.toLowerCase() + "  (\n     \"" + this.getAlias() + "\"\n    )\n";
-            } else {
+            } else if (this.retrieve != null && this.whereClause != null) {
                 content = "    " + this.conjunction.toLowerCase() + "  (\n    " + this.retrieve.toString() + this.whereClause.toString() + "    )\n";
+            } else {
+                content = "\nerror generating cql\n\n";
             }
         }
         return content;
