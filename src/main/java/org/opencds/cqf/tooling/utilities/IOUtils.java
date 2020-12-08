@@ -287,7 +287,7 @@ public class IOUtils
         		filename = filename.substring(0, index - 1);
         	}
         }
-        String result = Paths.get(resourcePath, resource.getIdElement().getResourceType(), filename) + getFileExtension(encoding);
+        String result = Paths.get(resourcePath, resource.getIdElement().getResourceType().toLowerCase(), filename) + getFileExtension(encoding);
         return result;
     }
 
