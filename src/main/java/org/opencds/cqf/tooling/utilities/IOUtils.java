@@ -286,7 +286,13 @@ public class IOUtils
         	if (index > 0) {
         		filename = filename.substring(0, index - 1);
         	}
+        } else if (versioned && resourceVersion != null) {
+            int index = filename.indexOf(resourceVersion);
+            if (index < 0) {
+                filename = filename + "-" + resourceVersion;
+            }
         }
+        
         String result = Paths.get(resourcePath, resource.getIdElement().getResourceType().toLowerCase(), filename) + getFileExtension(encoding);
         return result;
     }
