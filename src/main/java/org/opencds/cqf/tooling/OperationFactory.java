@@ -70,6 +70,8 @@ class OperationFactory {
                 throw new NotImplementedException("BundlesToBundle");
             case "BundleToResources":
                 throw new NotImplementedException("BundleToResources");
+            case "ExtractMatBundle":
+            	return new ExtractMatBundleOperation();
             case "GenerateMIs":
                 return new StructureDefinitionToModelInfo();
             case "ProcessAcceleratorKit":
