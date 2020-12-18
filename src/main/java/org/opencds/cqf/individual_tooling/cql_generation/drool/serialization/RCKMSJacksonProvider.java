@@ -1,5 +1,5 @@
 
-package org.opencds.cqf.individual_tooling.cql_generation.drool.rckms;
+package org.opencds.cqf.individual_tooling.cql_generation.drool.serialization;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.Version;

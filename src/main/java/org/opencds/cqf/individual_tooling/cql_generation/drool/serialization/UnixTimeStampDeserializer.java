@@ -1,4 +1,4 @@
-package org.opencds.cqf.individual_tooling.cql_generation.drool.rckms;
+package org.opencds.cqf.individual_tooling.cql_generation.drool.serialization;
 
 import java.io.IOException;
 import java.math.BigInteger;
