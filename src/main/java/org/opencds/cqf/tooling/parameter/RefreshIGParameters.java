@@ -6,8 +6,6 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 
 public class RefreshIGParameters {
     public String ini;
-    public String rootDir;
-    public String igPath;
     public IOUtils.Encoding outputEncoding;
     public Boolean includeELM;
     public Boolean includeDependencies;
