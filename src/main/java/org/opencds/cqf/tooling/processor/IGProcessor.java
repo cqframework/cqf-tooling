@@ -20,9 +20,6 @@ public class IGProcessor extends BaseProcessor {
         if (params.ini != null) {
             initialize(params.ini);
         }
-        else {
-            initialize(params.rootDir, params.igPath);
-        }
 
         Encoding encoding = params.outputEncoding;
         Boolean includeELM = params.includeELM;
@@ -37,7 +34,7 @@ public class IGProcessor extends BaseProcessor {
 
         IOUtils.resourceDirectories.addAll(resourceDirs);
 
-        FhirContext fhirContext = IGProcessor.getIgFhirContext(fhirVersion);
+        FhirContext fhirContext = IGProcessor.getIgFhirContext(this.getFhirVersion());
 
         //Use case 1
         //Scaffold basic templating for the type of content, Measure, PlanDefinition, or Questionnaire
@@ -67,9 +64,6 @@ public class IGProcessor extends BaseProcessor {
     public void refreshIG(RefreshIGParameters params) {
         if (params.ini != null) {
             initialize(params.ini);
-        }
-        else {
-            initialize(params.rootDir, params.igPath);
         }
 
         Encoding encoding = params.outputEncoding;

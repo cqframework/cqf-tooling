@@ -271,7 +271,7 @@ public class ResourceUtils
       try {
         elm = getElmFromCql(cqlContentPath);
       } catch (Exception e) {
-        System.out.println("error proccessing cql: ");
+        System.out.println("error processing cql: ");
         System.out.println(e.getMessage());
         return includedDefs;
       }

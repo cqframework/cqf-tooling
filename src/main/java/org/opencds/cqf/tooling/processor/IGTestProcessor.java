@@ -162,7 +162,7 @@ public class IGTestProcessor extends BaseProcessor {
             initialize(params.ini);
         }
         else {
-            initialize(params.rootDir, params.igPath);
+            initialize(params.rootDir, params.igPath, fhirContext.getVersion().toString());
         }
 
         CqfmSoftwareSystem testTargetSoftwareSystem =  getCqfRulerSoftwareSystem(params.fhirServerUri);
