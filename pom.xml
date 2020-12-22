@@ -18,8 +18,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <cqframework.version>1.5.1-SNAPSHOT</cqframework.version>
-        <hapi.version>5.0.2</hapi.version>
+        <cqframework.version>1.5.1</cqframework.version>
+        <!-- TODO: Change this to a hapi-fhir released version (e.g. 5.3.0) before finalizing this work! kevin.dougan@smilecdr.com -->
+        <hapi.version>5.3.0-SNAPSHOT</hapi.version>
         <core.version>5.0.22</core.version>
     </properties>
 
