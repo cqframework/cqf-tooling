@@ -91,7 +91,9 @@ public class TestCaseProcessor
         try {
             List<IBaseResource> testCaseResources = TestCaseProcessor.getTestCaseResources(igTestCasePath, fhirContext);
             for (IBaseResource resource : testCaseResources) {
-                resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
+            	if ((!(resource instanceof org.hl7.fhir.dstu3.model.Bundle)) && (!(resource instanceof org.hl7.fhir.r4.model.Bundle))) {
+            		resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
+            	}
             }
         } catch (Exception e) {
             shouldPersist = false;
