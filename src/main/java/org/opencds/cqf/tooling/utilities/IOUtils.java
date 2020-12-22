@@ -709,7 +709,7 @@ public class IOUtils
                 try {
                     resources.put(path, IOUtils.readResource(path, fhirContext, true));
                 } catch (Exception e) {
-                    //TODO: handle exception
+                    System.out.println(String.format("Error setting PlanDefinition paths while reading resource at: '%s'. Error: %s", path, e.getMessage()));
                 }
             }
             RuntimeResourceDefinition planDefinitionDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "PlanDefinition");

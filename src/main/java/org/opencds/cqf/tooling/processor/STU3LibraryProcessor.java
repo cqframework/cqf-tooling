@@ -39,17 +39,11 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
         if (file.isDirectory()) {
             for (File libraryFile : file.listFiles()) {
-                org.hl7.fhir.dstu3.model.Resource resource = (org.hl7.fhir.dstu3.model.Resource) IOUtils.readResource(libraryFile.getAbsolutePath(), fhirContext);
-                org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) VersionConvertor_30_50.convertResource(resource, false);
-                fileMap.put(library.getId(), libraryFile.getAbsolutePath());
-                libraries.add(library);
+                loadLibrary(fileMap, libraries, libraryFile);
             }
         }
         else {
-            org.hl7.fhir.dstu3.model.Resource resource = (org.hl7.fhir.dstu3.model.Resource) IOUtils.readResource(file.getAbsolutePath(), fhirContext);
-            org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) VersionConvertor_30_50.convertResource(resource, false);
-            fileMap.put(library.getId(), file.getAbsolutePath());
-            libraries.add(library);
+            loadLibrary(fileMap, libraries, file);
         }
 
         List<String> refreshedLibraryNames = new ArrayList<String>();
@@ -69,6 +63,17 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         }
 
         return refreshedLibraryNames;
+    }
+
+    private void loadLibrary(Map<String, String> fileMap, List<org.hl7.fhir.r5.model.Library> libraries, File libraryFile) {
+        try {
+            Resource resource = (Resource) IOUtils.readResource(libraryFile.getAbsolutePath(), fhirContext);
+            org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) VersionConvertor_30_50.convertResource(resource, false);
+            fileMap.put(library.getId(), libraryFile.getAbsolutePath());
+            libraries.add(library);
+        } catch (Exception ex) {
+            logMessage(String.format("Error reading library: %s. Error: %s", libraryFile.getAbsolutePath(), ex.getMessage()));
+        }
     }
 
     @Override

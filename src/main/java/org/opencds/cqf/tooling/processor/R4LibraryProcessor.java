@@ -42,27 +42,11 @@ public class R4LibraryProcessor extends LibraryProcessor {
 
         if (file.isDirectory()) {
             for (File libraryFile : file.listFiles()) {
-                org.hl7.fhir.r4.model.Resource resource = null;
-                try {
-                    resource = FormatUtilities.loadFile(libraryFile.getAbsolutePath());
-                } catch (IOException e) {
-                    logMessage(String.format("Exceptions occurred loading resource file %s", libraryFile.getAbsolutePath()));
-                }
-                org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) VersionConvertor_40_50.convertResource(resource);
-                fileMap.put(library.getId(), libraryFile.getAbsolutePath());
-                libraries.add(library);
+                loadLibrary(fileMap, libraries, libraryFile);
             }
         }
         else {
-            org.hl7.fhir.r4.model.Resource resource = null;
-            try {
-                resource = FormatUtilities.loadFile(file.getAbsolutePath());
-            } catch (IOException e) {
-                logMessage(String.format("Exceptions occurred loading resource file %s", file.getAbsolutePath()));
-            }
-            org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) VersionConvertor_40_50.convertResource(resource);
-            fileMap.put(library.getId(), file.getAbsolutePath());
-            libraries.add(library);
+            loadLibrary(fileMap, libraries, file);
         }
 
         List<String> refreshedLibraryNames = new ArrayList<String>();
@@ -93,6 +77,17 @@ public class R4LibraryProcessor extends LibraryProcessor {
         }
 
         return refreshedLibraryNames;
+    }
+
+    private void loadLibrary(Map<String, String> fileMap, List<org.hl7.fhir.r5.model.Library> libraries, File libraryFile) {
+        try {
+            Resource resource = FormatUtilities.loadFile(libraryFile.getAbsolutePath());
+            org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) VersionConvertor_40_50.convertResource(resource);
+            fileMap.put(library.getId(), libraryFile.getAbsolutePath());
+            libraries.add(library);
+        } catch (IOException ex) {
+            logMessage(String.format("Error reading library: %s. Error: %s", libraryFile.getAbsolutePath(), ex.getMessage()));
+        }
     }
 
     @Override
