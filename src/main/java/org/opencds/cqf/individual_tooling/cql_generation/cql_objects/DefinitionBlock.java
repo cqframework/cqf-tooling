@@ -5,12 +5,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.cdsframework.enumeration.CriteriaPredicateType;
 
 public class DefinitionBlock {
 
     private String alias;
     private List<Pair<String, Expression>> expressions; // <conjunction, expression>
-    private List<Pair<String, String>> references; // <conjunction, reference>
+    private List<Pair<CriteriaPredicateType, Pair<String, String>>> references; // <conjunction, reference>
 
 
     public DefinitionBlock(String alias, List<Pair<String, Expression>> expressions) {
@@ -20,7 +21,7 @@ public class DefinitionBlock {
 
     public DefinitionBlock() {
         this.expressions = new LinkedList<Pair<String, Expression>>();
-        this.references = new LinkedList<Pair<String, String>>();
+        this.references = new LinkedList<Pair<CriteriaPredicateType, Pair<String, String>>>();
     }
 
     public String getAlias() {
@@ -35,10 +36,29 @@ public class DefinitionBlock {
         return expressions;
     }
 
-    public List<Pair<String, String>> getReferences() {
+    public List<Pair<CriteriaPredicateType, Pair<String, String>>> getReferences() {
         return references;
     }
 
+    /*
+    Pair<CriteriaPredicateType, Pair<String, String>> reference = context.referenceStack.pop();
+                Pair<String, String> aliasContext = reference.getRight();
+                if (firstExpression) {
+                    if (reference.getLeft().equals(CriteriaPredicateType.Predicate)) {
+                        definitionBlock.getReferences().add(Pair.of(null, "exists " + aliasContext.getRight()));
+                    } else {
+                        definitionBlock.getReferences().add(Pair.of(null, aliasContext.getRight()));
+                    }
+                    firstExpression = false;
+                } else {
+                    if (reference.getLeft().equals(CriteriaPredicateType.Predicate)) {
+                        definitionBlock.getReferences().add(Pair.of(aliasContext.getLeft(), "exists " + aliasContext.getRight()));
+                    } else {
+                        definitionBlock.getReferences().add(aliasContext);
+                    }
+                    definitionBlock.getReferences().add(aliasContext);
+                }
+                */
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -51,10 +71,19 @@ public class DefinitionBlock {
             }
         });
         references.forEach(reference -> { 
-            if (reference.getLeft() != null){
-                stringBuilder.append(reference.getLeft().toLowerCase() + " (\n     \""  + reference.getRight() + "\"\n )\n");
+            Pair<String, String> aliasContext = reference.getRight();
+            if (aliasContext.getLeft() != null) {
+                if (reference.getLeft().equals(CriteriaPredicateType.Predicate)) {
+                    stringBuilder.append(aliasContext.getLeft().toLowerCase() + " (\n     exists \""  + aliasContext.getRight() + "\"\n )\n");
+                } else {
+                    stringBuilder.append(aliasContext.getLeft().toLowerCase() + " (\n     \""  + aliasContext.getRight() + "\"\n )\n");
+                }
             } else {
-                stringBuilder.append(" (\n     \"" + reference.getRight() + "\"\n )\n");
+                if (reference.getLeft().equals(CriteriaPredicateType.Predicate)) {
+                    stringBuilder.append(" (\n     exists \"" + aliasContext.getRight() + "\"\n )\n");
+                } else {
+                    stringBuilder.append(" (\n     \"" + aliasContext.getRight() + "\"\n )\n");
+                }
             }
         });
         String content = stringBuilder.toString();

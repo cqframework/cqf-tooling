@@ -1,10 +1,13 @@
 package org.opencds.cqf.individual_tooling.cql_generation.drool.traversal;
 
+import java.util.List;
+
 import org.cdsframework.dto.CdsCodeDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicateDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicatePartConceptDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicatePartDTO;
 import org.cdsframework.dto.ConditionCriteriaRelDTO;
+import org.cdsframework.dto.ConditionDTO;
 import org.cdsframework.dto.CriteriaPredicatePartConceptDTO;
 import org.cdsframework.dto.CriteriaPredicatePartDTO;
 import org.cdsframework.dto.CriteriaResourceDTO;
@@ -21,10 +24,22 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
     }
 
     @Override
-    public void traverse(ConditionCriteriaRelDTO conditionCriteriaRel) {
-        if (conditionCriteriaRel.getUuid().toString().equals("9cc20b85-0e4d-43fd-a840-3c3c8720685b")) {
-            System.out.println("found you");
+    public void traverse(List<ConditionDTO> rootNode) {
+        rootNode.forEach(node -> traverse(node));
+        this.visitor.visit(rootNode);
+    }
+
+    @Override
+    protected void traverse(ConditionDTO conditionDTO) {
+        List<ConditionCriteriaRelDTO> conditionCriteriaRels = conditionDTO.getConditionCriteriaRelDTOs();
+        if (!conditionCriteriaRels.isEmpty() || conditionCriteriaRels != null) {
+            conditionCriteriaRels.forEach(rel -> traverse(rel));
         }
+        this.visitor.visit(conditionDTO);
+    }
+
+    @Override
+    protected void traverse(ConditionCriteriaRelDTO conditionCriteriaRel) {
         if (!conditionCriteriaRel.getConditionCriteriaPredicateDTOs().isEmpty()
                 && !conditionCriteriaRel.getName().toLowerCase().contains("not yet implemented")) {
             for (ConditionCriteriaPredicateDTO predicate : conditionCriteriaRel.getConditionCriteriaPredicateDTOs()) {
@@ -33,7 +48,7 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
         } else if (conditionCriteriaRel.getName().contains("Not Yet Implemented")) {
             System.out.println("Not Yet Implemented: " + conditionCriteriaRel.getUuid());
         }
-        this.visitor.visit(conditionCriteriaRel, this.context);
+        this.visitor.visit(conditionCriteriaRel);
     }
 
     @Override
@@ -48,22 +63,18 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
                 traverse(predicatePart);
             }
         }
-        this.visitor.visit(predicate, this.context);
+        this.visitor.visit(predicate);
     }
 
     @Override
-    public void traverse(ConditionCriteriaPredicatePartDTO predicatePart) {
-        // mid
-
+    protected void traverse(ConditionCriteriaPredicatePartDTO predicatePart) {
         if (predicatePart.getSourcePredicatePartDTO() != null
                 && predicatePart.getPredicatePartConceptDTOs().isEmpty()) {
             traverse(predicatePart.getSourcePredicatePartDTO());
         } else {
-            // left
             if (predicatePart.getDataInputNodeDTO() != null) {
                 traverse(predicatePart.getDataInputNodeDTO());
             }
-            // right
             if (!predicatePart.getPredicatePartConceptDTOs().isEmpty()) {
                 for (ConditionCriteriaPredicatePartConceptDTO predicatePartConcepts : predicatePart
                         .getPredicatePartConceptDTOs()) {
@@ -74,22 +85,22 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
         if (predicatePart.getCriteriaResourceParamDTO() != null) {
             traverse(predicatePart.getCriteriaResourceParamDTO());
         }
-        this.visitor.visit(predicatePart, this.context);
+        this.visitor.visit(predicatePart);
     }
 
     @Override
     protected void traverse(CriteriaResourceParamDTO criteriaResourceParamDTO) {
-        this.visitor.visit(criteriaResourceParamDTO, this.context);
+        this.visitor.visit(criteriaResourceParamDTO);
     }
 
     @Override
     protected void traverse(DataInputNodeDTO dIN) {
-        this.visitor.visit(dIN, this.context);
+        this.visitor.visit(dIN);
     }
 
     @Override
     protected void traverse(OpenCdsConceptDTO openCdsConceptDTO) {
-        this.visitor.visit(openCdsConceptDTO, this.context);
+        this.visitor.visit(openCdsConceptDTO);
     }
 
     @Override
@@ -111,12 +122,6 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
                 }
                 break;
             case Resource:
-            // for now doing nothing because sourcePredicate criteria resource objects do not contain string representation of operator.
-                // if (sourcePredicatePartDTO.getCriteriaResourceParamDTO() != null) {
-                //     traverse(sourcePredicatePartDTO.getCriteriaResourceParamDTO());
-                // } else if (sourcePredicatePartDTO.getCriteriaResourceDTO() != null) {
-                //     traverse(sourcePredicatePartDTO.getCriteriaResourceDTO());
-                // }
                 break;
             case Text:
                 break;
@@ -124,12 +129,12 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
                 break;
 
         }
-        this.visitor.visit(sourcePredicatePartDTO, this.context);
+        this.visitor.visit(sourcePredicatePartDTO);
     }
 
     @Override
     protected void traverse(CriteriaResourceDTO criteriaResourceDTO) {
-        this.visitor.visit(criteriaResourceDTO, this.context);
+        this.visitor.visit(criteriaResourceDTO);
     }
 
     @Override
@@ -139,12 +144,12 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
         } else if (conditionPredicatePartConcepts.getCdsCodeDTO() != null) {
             traverse(conditionPredicatePartConcepts.getCdsCodeDTO());
         }
-        this.visitor.visit(conditionPredicatePartConcepts, this.context);
+        this.visitor.visit(conditionPredicatePartConcepts);
     }
 
     @Override
     protected void traverse(CdsCodeDTO cdsCodeDTO) {
-        this.visitor.visit(cdsCodeDTO, this.context);
+        this.visitor.visit(cdsCodeDTO);
     }
 
     @Override
@@ -152,7 +157,6 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
         if (predicatePartConcepts.getOpenCdsConceptDTO() != null) {
             traverse(predicatePartConcepts.getOpenCdsConceptDTO());
         }
-        this.visitor.visit(predicatePartConcepts, this.context);
+        this.visitor.visit(predicatePartConcepts);
     }
-    
 }

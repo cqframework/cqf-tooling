@@ -30,7 +30,8 @@ public class DroolIshCqlGeneratorTest {
                     e.printStackTrace();
                 }
             }
-            droolIshCqlGenerator.generate(encodingUri);
+            droolIshCqlGenerator.generate(encodingUri, "generate cql");
+            droolIshCqlGenerator.generate(encodingUri, "datainput");
         } else {
             System.out.println("I am Failure.");
         }

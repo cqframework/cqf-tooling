@@ -17,6 +17,7 @@ public class GenerateCQLFromDroolArgumentProcessor {
 
     public static final String[] OUTPUT_PATH_OPTIONS = {"op", "outputPath", "outputpath", "o", "output"};
     public static final String[] ENCODING_OPTIONS = {"e", "encoding"};
+    public static final String[] COMMAND_OPTIONS = {"c", "command"};
     public static final String[] INPUT_FILE_PATH_OPTIONS = {"ip", "inputPath", "input-path", "ifp", "inputFilePath", "input-file-path", "input-filePath"};
 
     public OptionParser build() {

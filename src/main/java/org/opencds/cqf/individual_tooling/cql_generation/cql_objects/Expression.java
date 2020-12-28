@@ -83,8 +83,16 @@ public class Expression {
     public String toString() {
         if (resourceType == null) {
             return left + " " + operator + " " + right;
+        } else if (path.contains("focus") || path.contains("?")) {
+            return operator.equals("==") ?  "     " + retrieveString() + "     " +  ("//" + left + " " + "~" + " " + right) : "     " + retrieveString() + "     " +  ("//" + left + " " + operator + " " + right);
+            // exists (
+            //     Observation.interpretation Interpretation
+            //       where Interpretation ~ "Abnormal Interpretation of an Observation"
+            //   )
+        } else if (path.contains("interpretation")) {
+            return operator.equals("==") ?  "     " + retrieveString() + "     where exists (\n          " +  (resourceType + "." + path + " Interpretation \n              where Interpretation " + "~" + " " + right + "\n     )") : "     " + retrieveString() + "     exists (" +  (resourceType + path + " Interpretation \n         where Interpretation" + operator + " " + right + "\n     )");
         } else {
-            return "     " + retrieveString() + "     " + left + " " + operator + " " + right;
+            return operator.equals("==") ?  "     " + retrieveString() + "     " +  (left + " " + "~" + " " + right) : "     " + retrieveString() + "     " +  (left + " " + operator + " " + right);
         }
     }
 }
