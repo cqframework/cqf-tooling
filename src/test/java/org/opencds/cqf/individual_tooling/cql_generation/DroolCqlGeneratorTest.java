@@ -7,7 +7,7 @@ import java.net.URI;
 import org.junit.Test;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.DroolCqlGenerator;
 
-public class DroolIshCqlGeneratorTest {
+public class DroolCqlGeneratorTest {
 
     @Test
     public void test_worked() {
@@ -30,8 +30,8 @@ public class DroolIshCqlGeneratorTest {
                     e.printStackTrace();
                 }
             }
-            droolIshCqlGenerator.generate(encodingUri, "generate cql");
             droolIshCqlGenerator.generate(encodingUri, "datainput");
+            // droolIshCqlGenerator.generate(encodingUri, "generate cql");
         } else {
             System.out.println("I am Failure.");
         }
