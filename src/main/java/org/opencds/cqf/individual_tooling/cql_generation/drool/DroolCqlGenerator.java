@@ -45,11 +45,11 @@ public class DroolCqlGenerator implements CqlGenerator {
             case "datainput": {
                 visitor = new FHIRModelMappingVisitor();
             } break;
-            case "generate cql": {
-                visitor = new CqlFileVisitor("../CQLGenerationDocs/GeneratedDocs");
+            case "cql": {
+                visitor = new CqlFileVisitor(outputPath);
             } break;
             case "html": {
-                visitor = new HtmlFileVisitor("../CQLGenerationDocs/GeneratedDocs/Html");
+                visitor = new HtmlFileVisitor(outputPath);
             }
             default: throw new RuntimeException("Unkown cqlProcessingThingy: " + cqlProcessingThingy);
         } 
