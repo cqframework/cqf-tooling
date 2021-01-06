@@ -144,7 +144,7 @@ public class ExtractMatBundleOperation extends Operation {
         					newOutputDirectory + "resources/library/", resourceName);
         			
         			// Now extract the CQL from the library file
-        			String cqlFilename = newOutputDirectory + "pagecontent/cql/" + resourceName + ".cql";
+        			String cqlFilename = newOutputDirectory + "cql/" + resourceName + ".cql";
         			extractStu3CQL(theLibrary, cqlFilename);
         		}
         		else if (theResource instanceof org.hl7.fhir.dstu3.model.Measure) {
@@ -165,7 +165,7 @@ public class ExtractMatBundleOperation extends Operation {
         					newOutputDirectory + "resources/library/", resourceName);
         			
         			// Now extract the CQL from the library file
-        			String cqlFilename = newOutputDirectory + "pagecontent/cql/" + resourceName + ".cql";
+        			String cqlFilename = newOutputDirectory + "cql/" + resourceName + ".cql";
         			extractR4CQL(theLibrary, cqlFilename);
         		}
         		else if (theResource instanceof org.hl7.fhir.r4.model.Measure) {
