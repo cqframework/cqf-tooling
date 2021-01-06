@@ -14,6 +14,7 @@ import org.opencds.cqf.individual_tooling.cql_generation.IOUtil;
 import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.DefinitionBlock;
 import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.DirectReferenceCode;
 import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.Expression;
+import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.ValueSet;
 
 public class Context {
     public Set<Pair<String, String>> fhirModelingSet = new HashSet<Pair<String, String>>();
@@ -27,6 +28,11 @@ public class Context {
         StringBuilder sb = new StringBuilder();
         printMap.entrySet().stream()
             .filter(entry -> entry.getValue().getClass().equals(DirectReferenceCode.class))
+            .forEach(entry -> {
+                sb.append(entry.getValue());
+        });
+        printMap.entrySet().stream()
+            .filter(entry -> entry.getValue().getClass().equals(ValueSet.class))
             .forEach(entry -> {
                 sb.append(entry.getValue());
         });

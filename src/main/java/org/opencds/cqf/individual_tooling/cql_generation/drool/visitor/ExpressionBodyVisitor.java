@@ -18,51 +18,15 @@ import org.cdsframework.dto.DataInputNodeDTO;
 import org.cdsframework.dto.OpenCdsConceptDTO;
 import org.cdsframework.enumeration.DataModelClassType;
 import org.cdsframework.enumeration.PredicatePartType;
-import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.DirectReferenceCode;
+import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.ValueSet;
 import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.Expression;
 import org.opencds.cqf.individual_tooling.cql_generation.context.Context;
+import org.opencds.cqf.individual_tooling.cql_generation.context.FHIRContext;
 
 public class ExpressionBodyVisitor implements Visitor {
     protected Context context = new Context();
 
-    // Create a Model retriever thingy
-    private Map<String, Pair<String, String>> cdsdmToFhirMap = Map.ofEntries(
-            Map.entry("EncounterEvent.encounterType", Pair.of("Encounter", "type")),
-            Map.entry("EncounterEvent.", Pair.of("Encounter", ".reasonReference.resolve() as Observation).value")),
-            Map.entry("EncounterEvent.relatedClinicalStatement.problem.problemCode", Pair.of("Encounter", "?")),
-            Map.entry("EncounterEvent.relatedClinicalStatement.observationResult.observationValue.concept",
-                    Pair.of("Encounter", "?")),
-            Map.entry("EvaluatedPerson.demographics.gender", Pair.of("Patient", "gender")),
-            Map.entry("ObservationOrder.observationFocus", Pair.of("Observation", "focus")),
-            Map.entry("ObservationOrder.observationMethod", Pair.of("Observation", "?")),
-            Map.entry("ObservationResult.interpretation", Pair.of("Observation", "interpretation")),
-            Map.entry("ObservationResult.observationFocus", Pair.of("Observation", "focus")),
-            Map.entry("ObservationResult.observationValue.concept", Pair.of("Observation", "value as CodeableConcept")),
-            Map.entry("Problem.problemCode", Pair.of("Condition", "code")),
-            Map.entry("Problem.problemStatus", Pair.of("Condition", "clinicalStatus")),
-            Map.entry("ProcedureEvent.procedureCode", Pair.of("Procedure", "code")),
-            Map.entry("ProcedureOrder.procedureCode", Pair.of("Procedure", "code")),
-            Map.entry("ProcedureProposal.procedureCode", Pair.of("Procedure", "code")),
-            Map.entry("SubstanceAdministrationEvent.substance.substanceCode",
-                    Pair.of("MedicationRequest", "medication as CodeableConcept")), // This needs to be a little more
-                                                                                    // complicated
-            Map.entry("SubstanceAdministrationOrder.substance.substanceCode",
-                    Pair.of("MedicationRequest", "medication as CodeableConcept")), // This needs to be a little more
-                                                                                    // complicated
-            Map.entry("SubstanceAdministrationProposal.substance.substanceCode",
-                    Pair.of("MedicationRequest", "medication as CodeableConcept")), // This needs to be a little more
-                                                                                    // complicated
-            Map.entry("SubstanceDispensationEvent.substance.substanceCode",
-                    Pair.of("MedicationRequest", "medication as CodeableConcept")), // This needs to be a little more
-                                                                                    // complicated
-            Map.entry("SubstanceSubstanceAdministationEvent.relatedClinicalStatement.problem.problemCode",
-                    Pair.of("MedicationRequest", "?")),
-            Map.entry("SubstanceAdministationOrder.relatedClinicalStatement.problem.problemCode",
-                    Pair.of("MedicationRequest", "?")),
-            Map.entry("SubstanceAdministationProposal.relatedClinicalStatement.problem.problemCode",
-                    Pair.of("MedicationRequest", "?")),
-            Map.entry("SubstanceDispensationEvent.relatedClinicalStatement.problem.problemCode",
-                    Pair.of("MedicationRequest", "?")));
+    
 
     @Override
     public void visit(CriteriaPredicatePartConceptDTO predicatePartConcepts) {
@@ -99,10 +63,17 @@ public class ExpressionBodyVisitor implements Visitor {
         if (openCdsConceptDTO.getCode() != null && openCdsConceptDTO.getDisplayName() != null) {
             // Create valueSet Identifier: displayName GoballyUniqueIdentifier: displayName
             // Only if it's not 2.16.840.1.113883.3.795.5.4.12.5.1
-            DirectReferenceCode directReferenceCode = new DirectReferenceCode(openCdsConceptDTO.getDisplayName(),
-                    openCdsConceptDTO.getCode());
-            context.printMap.put(directReferenceCode.getAlias(), directReferenceCode);
-            expression.setConcept(directReferenceCode.getAlias());
+            Map<String,Pair<String, String>> valueSetMap = FHIRContext.readValueSetMapping();
+            String display = "";
+            String url = "";
+            if (valueSetMap != null && valueSetMap.size() > 0) {
+                Pair<String, String> displayUrlPair = valueSetMap.get(openCdsConceptDTO.getCode());
+                url = displayUrlPair.getRight();
+                display = displayUrlPair.getLeft();
+            }
+            ValueSet valueset = new ValueSet(display, url);
+            context.printMap.put(valueset.getAlias(), valueset);
+            expression.setConcept(valueset.getAlias());
         }
         context.expressionStack.push(expression);
     }
@@ -112,7 +83,7 @@ public class ExpressionBodyVisitor implements Visitor {
     @Override
     public void visit(DataInputNodeDTO dIN) {
         Expression expression = new Expression();
-        Pair<String, String> fhirModeling = cdsdmToFhirMap
+        Pair<String, String> fhirModeling = FHIRContext.cdsdmToFhirMap
                 .get(dIN.getTemplateName() + "." + dIN.getNodePath().replaceAll("/", "."));
         if (fhirModeling != null) {
             if (fhirModeling.getLeft() != null) {
@@ -163,10 +134,17 @@ public class ExpressionBodyVisitor implements Visitor {
         if (cdsCodeDTO.getCode() != null && cdsCodeDTO.getDisplayName() != null) {
             // Create valueSet Identifier: displayName GoballyUniqueIdentifier: displayName
             // Only if it's not 2.16.840.1.113883.3.795.5.4.12.5.1
-            DirectReferenceCode directReferenceCode = new DirectReferenceCode(cdsCodeDTO.getDisplayName(),
-                    cdsCodeDTO.getCode());
-            context.printMap.put(directReferenceCode.getAlias(), directReferenceCode);
-            expression.setConcept(directReferenceCode.getAlias());
+            Map<String,Pair<String, String>> valueSetMap = FHIRContext.readValueSetMapping();
+            String display = "";
+            String url = "";
+            if (valueSetMap != null && valueSetMap.size() > 0) {
+                Pair<String, String> displayUrlPair = valueSetMap.get(cdsCodeDTO.getCode());
+                url = displayUrlPair.getRight();
+                display = displayUrlPair.getLeft();
+            }
+            ValueSet valueset = new ValueSet(display, url);
+            context.printMap.put(valueset.getAlias(), valueset);
+            expression.setConcept(valueset.getAlias());
         }
         context.expressionStack.push(expression);
     }

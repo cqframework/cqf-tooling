@@ -1,0 +1,788 @@
+{
+  "PREG1" : {
+    "Pregnant" : "TODO"
+  },
+  "ZIK007" : {
+    "Zika Virus Disease (Test Panels for Zika virus IgM Antibody)" : "TODO"
+  },
+  "IPD005" : {
+    "Invasive Pneumococcal Disease (Tests for Streptococcus pneumoniae Nucleic Acid)" : "TODO"
+  },
+  "ZIK006" : {
+    "Zika Virus Disease (Tests for Zika virus Nucleic Acid)" : "TODO"
+  },
+  "IPD006" : {
+    "Invasive Pneumococcal Disease (Tests for Streptococcus pneumoniae Nucleic Acid in Specimen from Normally Sterile Site)" : "TODO"
+  },
+  "ZIK005" : {
+    "Zika Virus Disease (Tests for Zika virus IgM Antibody)" : "TODO"
+  },
+  "IPD007" : {
+    "Invasive Pneumococcal Disease (Tests for Streptococcus pneumoniae Antigen)" : "TODO"
+  },
+  "ZIK004" : {
+    "Zika Virus Disease (Test Panels for Zika virus Nucleic Acid)" : "TODO"
+  },
+  "IPD008" : {
+    "Invasive Pneumococcal Disease (Tests for Streptococcus pneumoniae Antigen in Specimen from Normally Sterile Site)" : "TODO"
+  },
+  "CHL010" : {
+    "Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis Nucleic Acid)" : "TODO"
+  },
+  "CHL011" : {
+    "Chlamydia species (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "SYMP113" : {
+    "Limb Weakness" : "TODO"
+  },
+  "ZIK003" : {
+    "Congenital Zika Syndromes (Disorders)" : "TODO"
+  },
+  "IPD001" : {
+    "Invasive Pneumococcal Disease (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "ZIK002" : {
+    "Zika Virus Disease (Disorders)" : "TODO"
+  },
+  "IPD002" : {
+    "Invasive Pneumococcal Disease (Disorders)" : "TODO"
+  },
+  "ZIK001" : {
+    "Zika Virus Disease  (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "IPD003" : {
+    "Invasive Pneumococcal Disease (Tests for Streptococcus pneumoniae by Culture and Identification Method)" : "TODO"
+  },
+  "IPD004" : {
+    "Invasive Pneumococcal Disease (Tests for Streptococcus pneumoniae in Specimen from Normally Sterile Site by Culture and Identification Method)" : "TODO"
+  },
+  "MERS001" : {
+    "MERS (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "BOT007" : {
+    "Botulism Antitoxin (RXNORM)" : "TODO"
+  },
+  "MERS002" : {
+    "MERS (Disorders)" : "TODO"
+  },
+  "MERS003" : {
+    "MERS (Tests for MERS_CoV Nucleic Acid)" : "TODO"
+  },
+  "CHL005" : {
+    "Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis Antigen)" : "TODO"
+  },
+  "CHL006" : {
+    "Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis by Culture and Identification Method)" : "TODO"
+  },
+  "NFO002" : {
+    "Opioid Overdose and Poisoning (Disorders)" : "TODO"
+  },
+  "CHL003" : {
+    "Chlamydia trachomatis Infection [Secondary Sites Complications] (Disorders)" : "TODO"
+  },
+  "NFO001" : {
+    "Opioid Overdose and Poisoning (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "CHL004" : {
+    "Chlamydia trachomatis Infection [Conjunctivitis] (Disorders)" : "TODO"
+  },
+  "NFO004" : {
+    "Opioid Overdose and Poisoning (Naloxone) (RxNorm)" : "TODO"
+  },
+  "CHL001" : {
+    "Chlamydia trachomatis Infection (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "NFO003" : {
+    "Opioid Overdose and Poisoning  (Tests for Opioids [Quantitative])" : "TODO"
+  },
+  "CHL002" : {
+    "Chlamydia trachomatis Infection [Cervicitis Urethritis LGV] (Disorders)" : "TODO"
+  },
+  "NFO006" : {
+    "Opioid Abuse, Dependence, and Other Use [Excluding Overdose and Poisoning] (Disorders)" : "TODO"
+  },
+  "NFO005" : {
+    "Opioid Overdose and Poisoning  (Tests for Opioids [Qualitative])" : "TODO"
+  },
+  "active" : {
+    "Active" : "TODO"
+  },
+  "PAR005" : {
+    "Carbidopa Levodopa Combination (RXNORM)" : "TODO"
+  },
+  "PAR002" : {
+    "Parkinsonism [Secondary]" : "TODO"
+  },
+  "PAR001" : {
+    "Parkinsons Disease (Disorders)" : "TODO"
+  },
+  "PAR004" : {
+    "Levodopa (RXNORM)" : "TODO"
+  },
+  "SYMP100" : {
+    "Salivary Gland Swelling [Unspecified Cause] (Disorders)" : "TODO"
+  },
+  "PAR003" : {
+    "Multiple System Atrophy" : "TODO"
+  },
+  "TRA001" : {
+    "Trachoma (Disorders)" : "TODO"
+  },
+  "CHL009" : {
+    "Chlamydia trachomatis Infection (Tests for Chlamydia species Antigen)" : "TODO"
+  },
+  "CHL007" : {
+    "Chlamydia trachomatis Infection (Tests for Chlamydia species by Culture and Identification Method)" : "TODO"
+  },
+  "CHL008" : {
+    "Chlamydia trachomatis Infection (Tests for Chlamydia species Nucleic Acid)" : "TODO"
+  },
+  "FLU008" : {
+    "Influenza (Tests for influenza A or B virus Antigen)" : "TODO"
+  },
+  "FLU007" : {
+    "Influenza (Tests for Influenza A or B Virus Nucleic Acid)" : "TODO"
+  },
+  "MUM009" : {
+    "Mumps (Test Panels for mumps virus IgM IgG Antibody)" : "TODO"
+  },
+  "PER010" : {
+    "Pertussis (Test Panels for Bordetella pertussis and Bordetella parapertussis Nucleic Acid and Culture and Identification Method)" : "TODO"
+  },
+  "MUM007" : {
+    "Mumps (Tests for mumps virus IgG Antibody)" : "TODO"
+  },
+  "PER011" : {
+    "Pertussis (Test Panels for Bordetella pertussis Antibody)" : "TODO"
+  },
+  "MUM008" : {
+    "Mumps (Test Panels for mumps virus Nucleic Acid)" : "TODO"
+  },
+  "MUM005" : {
+    "Mumps (Tests for mumps virus Antigen)" : "TODO"
+  },
+  "MUM006" : {
+    "Mumps (Tests for mumps virus IgM Antibody)" : "TODO"
+  },
+  "FLU001" : {
+    "Influenza (influenza A or B virus in Lab Results)" : "TODO"
+  },
+  "ANT008" : {
+    "Anthrax Vaccine (CVX)" : "TODO"
+  },
+  "FLU004" : {
+    "Influenza (Disorders)" : "TODO"
+  },
+  "FLU006" : {
+    "Influenza (Tests for influenza A or B virus by Culture and Identification Method)" : "TODO"
+  },
+  "COV001" : {
+    "COVID-19 (Disorders)" : "TODO"
+  },
+  "MED001" : {
+    "Azidothymidine (AZT)" : "TODO"
+  },
+  "MED002" : {
+    "Bicillin (Penicillin G Benzathine)" : "TODO"
+  },
+  "MUM003" : {
+    "Mumps (Tests for mumps virus by Culture and Identification Method)" : "TODO"
+  },
+  "MUM004" : {
+    "Mumps (Tests for mumps virus Nucleic Acid)" : "TODO"
+  },
+  "MED007" : {
+    "Rifampin" : "TODO"
+  },
+  "MUM001" : {
+    "Mumps (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "MED006" : {
+    "Dapsone" : "TODO"
+  },
+  "MUM002" : {
+    "Mumps (Disorders)" : "TODO"
+  },
+  "CHA001" : {
+    "Chancroid (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "COV003" : {
+    "COVID-19 (Tests for SARS-CoV-2 Nucleic Acid)" : "TODO"
+  },
+  "MED009" : {
+    "Tetanus (Tetanus Immune Globulin)" : "TODO"
+  },
+  "COV002" : {
+    "COVID-19 (Test Panels for SARS-CoV-2 Nucleic Acid)" : "TODO"
+  },
+  "MED008" : {
+    "Clofazimine" : "TODO"
+  },
+  "CHA003" : {
+    "Chancroid (Tests for Haemophilus ducreyi by Culture and Identification Method)" : "TODO"
+  },
+  "CHA002" : {
+    "Chancroid (Disorders)" : "TODO"
+  },
+  "COV004" : {
+    "COVID-19 (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "PER003" : {
+    "Pertussis (Disorders)" : "TODO"
+  },
+  "PER004" : {
+    "Pertussis (Tests for Bordetella pertussis by Culture and Identification Method)" : "TODO"
+  },
+  "PER001" : {
+    "Pertussis (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "PER002" : {
+    "Pertussis (Test Panels for Bordetella pertussis Toxin Antibody)" : "TODO"
+  },
+  "d" : {
+    "day(s)" : "TODO"
+  },
+  "PER009" : {
+    "Pertussis (Tests for Bordetella pertussis Antibody [Excluding Pertussis Toxin Antibody])" : "TODO"
+  },
+  "PER007" : {
+    "Pertussis (Tests for Bordetella pertussis Toxin Antibody)" : "TODO"
+  },
+  "m" : {
+    "month(s)" : "TODO"
+  },
+  "PER005" : {
+    "Pertussis (Tests for Bordetella pertussis Nucleic Acid)" : "TODO"
+  },
+  "PER006" : {
+    "Pertussis (Tests for Bordetella pertussis Antigen)" : "TODO"
+  },
+  "MED010" : {
+    "[TEST] Therapeutic Medication Response" : "TODO"
+  },
+  "y" : {
+    "year(s)" : "TODO"
+  },
+  "TUB004" : {
+    "Tuberculosis (Disorders)" : "TODO"
+  },
+  "TUB003" : {
+    "Caseating Granuloma (Finding by Microscopic Observation in Lab Results)" : "TODO"
+  },
+  "ASSERTION" : {
+    "Assertion" : "TODO"
+  },
+  "TUB001" : {
+    "Tuberculosis (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "TUB008" : {
+    "Tuberculosis (Interferon Gamma Release Assays)" : "TODO"
+  },
+  "TUB007" : {
+    "Tuberculosis (Mammalian Tuberculin Skin Test)" : "TODO"
+  },
+  "HBV010" : {
+    "Hepatitis B Immune Globulin" : "TODO"
+  },
+  "TUB006" : {
+    "Tuberculosis (Tests for Mycobacterium tuberculosis Nucleic Acid)" : "TODO"
+  },
+  "TUB005" : {
+    "Tuberculosis (Tests for Mycobacterium tuberculosis by Culture and Identification Method)" : "TODO"
+  },
+  "TUB009" : {
+    "Tuberculosis (Tests for Mycobacterium species by Culture and Identification Method)" : "TODO"
+  },
+  "LabTST023" : {
+    "Drugs [Unspecified] (Tests by Screen or Unspecified Method)" : "TODO"
+  },
+  "LabTST022" : {
+    "Organisms (Tests by Unspecified Method)" : "TODO"
+  },
+  "LabTST024" : {
+    "Organisms (Tests for Nucleic Acid in Specimen from Normally Sterile Site)" : "TODO"
+  },
+  "MEA007" : {
+    "Measles (Tests for measles virus IgM Antibody)" : "TODO"
+  },
+  "MEA006" : {
+    "Measles (Tests for measles virus Antigen)" : "TODO"
+  },
+  "MEA005" : {
+    "Measles (Tests for measles virus Nucleic Acid)" : "TODO"
+  },
+  "MEA004" : {
+    "Measles (Tests for measles virus by Culture and Identification Method)" : "TODO"
+  },
+  "MEA003" : {
+    "Measles (Koplik Spots) (Disorders)" : "TODO"
+  },
+  "MEA002" : {
+    "Measles (Disorders)" : "TODO"
+  },
+  "MEA001" : {
+    "Measles (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "GBS001" : {
+    "Guillain-Barre Syndrome (Disorders)" : "TODO"
+  },
+  "SYMP098" : {
+    "Drug Overdose and Poisoning [Suspected]" : "TODO"
+  },
+  "SYMP096" : {
+    "Glasgow Coma Scale Score < 13" : "TODO"
+  },
+  "SYMP097" : {
+    "Miosis" : "TODO"
+  },
+  "LabTST009" : {
+    "Organisms (Tests by Microscopic Observation in Specimen from Normally Sterile Site by Gram Stain)" : "TODO"
+  },
+  "LabTST008" : {
+    "Organisms (Tests by Microscopic Observation)" : "TODO"
+  },
+  "SYMP095" : {
+    "Glasgow Coma Scale Score < 12" : "TODO"
+  },
+  "SYMP092" : {
+    "Consciousness [Decreased Level]" : "TODO"
+  },
+  "SYMP093" : {
+    "Cyanosis" : "TODO"
+  },
+  "HAE001" : {
+    "Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "HAE002" : {
+    "Invasive Haemophilus Influenza Disease (Disorders)" : "TODO"
+  },
+  "HAE003" : {
+    "Invasive Haemophilus influenzae Disease (Tests for Haemophilus influenzae by Culture and Identification Method)" : "TODO"
+  },
+  "HAE004" : {
+    "Invasive Haemophilus influenzae Disease (Tests for Haemophilus influenzae in Specimen from Normally Sterile Site by Culture and Identification Method)" : "TODO"
+  },
+  "LabTST005" : {
+    "Bacteria (Tests in Specimen from Normally Sterile Site by Culture and Identification Method)" : "TODO"
+  },
+  "HAE005" : {
+    "Invasive Haemophilus influenzae Disease (Tests for Haemophilus influenzae Nucleic Acid)" : "TODO"
+  },
+  "HAE006" : {
+    "Invasive Haemophilus influenzae Disease (Tests for Haemophilus influenzae Nucleic Acid in Specimen from Normally Sterile Site)" : "TODO"
+  },
+  "LabTST006" : {
+    "Bacteria (Tests by Microscopic Observation of Genital and Urethral Specimens by Gram Stain)" : "TODO"
+  },
+  "HAE007" : {
+    "Invasive Haemophilus influenzae Disease (Tests for Haemophilus influenzae Type B Antigen in Cerebrospinal Fluid)" : "TODO"
+  },
+  "LabTST001" : {
+    "Bacteria (Tests by Culture and Identification Method)" : "TODO"
+  },
+  "LabTST002" : {
+    "Viruses (Tests by Culture and Identification Method)" : "TODO"
+  },
+  "SYMP087" : {
+    "Smoking Status [Nonsmoker]" : "TODO"
+  },
+  "SYMP088" : {
+    "Smoking Status [Unknown]" : "TODO"
+  },
+  "MAL005" : {
+    "Plasmodium species (Tests by Microscopic Observation in Blood)" : "TODO"
+  },
+  "MAL001" : {
+    "Malaria (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "SAL001" : {
+    "Salmonellosis [Salmonella serovar] (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "SAL003" : {
+    "Salmonellosis (Disorders)" : "TODO"
+  },
+  "SAL002" : {
+    "Salmonellosis [Salmonella Species and Subspecies] (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "SAL005" : {
+    "Salmonellosis (Tests for Salmonella except S. typhi and S. paratyphi by Culture and Identification Method)" : "TODO"
+  },
+  "SAL004" : {
+    "Salmonellosis (Tests for Salmonella except S. typhi and S. paratyphi Nucleic Acid)" : "TODO"
+  },
+  "SARS001" : {
+    "SARS (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "LabTST016" : {
+    "Tests by Microscopic Observation in Tissue" : "TODO"
+  },
+  "SYMP091" : {
+    "Bradypnea" : "TODO"
+  },
+  "SARS002" : {
+    "SARS (Disorders)" : "TODO"
+  },
+  "LabTST018" : {
+    "Organisms (Tests for Nucleic Acid)" : "TODO"
+  },
+  "LabTST017" : {
+    "Tests by Microscopic Observation in Blood Smear" : "TODO"
+  },
+  "SARS005" : {
+    "SARS (Tests for SARS_CoV Antibody)" : "TODO"
+  },
+  "SARS006" : {
+    "SARS (Tests for SARS_CoV by Unspecified Method)" : "TODO"
+  },
+  "SARS003" : {
+    "SARS (Tests for SARS_CoV by Culture and Identification Method)" : "TODO"
+  },
+  "LabTST014" : {
+    "Organisms (Tests by Microscopic Observation in Tissue by Acid Fast Stain)" : "TODO"
+  },
+  "SARS004" : {
+    "SARS (Tests for SARS_CoV Nucleic Acid)" : "TODO"
+  },
+  "SYMP072" : {
+    "Acute Pulmonary Edema [Unspecified Cause]" : "TODO"
+  },
+  "SYMP073" : {
+    "VHF Symptoms" : "TODO"
+  },
+  "SYMP070" : {
+    "Acute Renal Failure [Unspecified Cause]" : "TODO"
+  },
+  "SYMP071" : {
+    "Acute respiratory illness" : "TODO"
+  },
+  "HAN002" : {
+    "Hantavirus Infection and Diseases (Disorders)" : "TODO"
+  },
+  "VHF003" : {
+    "Viral Hemorrhagic Fever (Tests for Viral Hemorrhagic Fever Viruses Nucleic Acid)" : "TODO"
+  },
+  "HAN001" : {
+    "Hantavirus Infection (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "VHF002" : {
+    "Viral Hemorrhagic Fever (Disorders)" : "TODO"
+  },
+  "HAN004" : {
+    "Hantavirus Infection (Tests for Hantavirus Antigen)" : "TODO"
+  },
+  "VHF001" : {
+    "Viral Hemorrhagic Fever (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "HAN003" : {
+    "Hantavirus Infection (Tests for Hantavirus Nucleic Acid)" : "TODO"
+  },
+  "SPI003" : {
+    "S. Paratyphi Infection (Tests for S. Paratyphi Antibody)" : "TODO"
+  },
+  "SPI002" : {
+    "S. Paratyphi Infection (Disorders)" : "TODO"
+  },
+  "SPI001" : {
+    "S. Paratyphi Infection (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "ENC001" : {
+    "Discharge Disposition [Expired]" : "TODO"
+  },
+  "SYMP065" : {
+    "Loss of Consciousness" : "TODO"
+  },
+  "HCV001" : {
+    "Hepatitis C Virus Infection (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "SYMP063" : {
+    "Confusion" : "TODO"
+  },
+  "HCV002" : {
+    "Hepatitis C Virus Infection (Disorders)" : "TODO"
+  },
+  "SYMP062" : {
+    "Nausea" : "TODO"
+  },
+  "HCV003" : {
+    "Hepatitis C Virus Infection (Tests for hepatitis C virus Nucleic Acid)" : "TODO"
+  },
+  "HCV004" : {
+    "Hepatitis C Virus Infection (Tests for hepatitis C virus Antigen)" : "TODO"
+  },
+  "HCV005" : {
+    "Hepatitis C Virus Infection (Tests for hepatitis C virus Antibody)" : "TODO"
+  },
+  "VHF008" : {
+    "Thrombocytopenia (Tests for Platelets [#/volume] in Blood) " : "TODO"
+  },
+  "VHF007" : {
+    "Proteinuria (Tests for Total Protein in 24H Urine)" : "TODO"
+  },
+  "HAN005" : {
+    "Hantavirus Infection (Tests for Hantavirus IgM IgG Total Antibody)" : "TODO"
+  },
+  "VHF006" : {
+    "Viral Hemorrhagic Fever (Test Panels for Viral Hemorrhagic Fever Virus Nucleic Acid)" : "TODO"
+  },
+  "VHF005" : {
+    "Viral Hemorrhagic Fever (Tests for Viral Hemorrhagic Fever Viruses Antibody)" : "TODO"
+  },
+  "VHF004" : {
+    "Viral Hemorrhagic Fever (Tests for Viral Hemorrhagic Fever Viruses Antigen)" : "TODO"
+  },
+  "SYMP054" : {
+    "Chest Pain" : "TODO"
+  },
+  "BLL005" : {
+    "Elevated Blood Lead Level (Tests for Lead [Quantitative] in Capillary Blood" : "TODO"
+  },
+  "BLL002" : {
+    "Toxic Effects of Lead (Disorders)" : "TODO"
+  },
+  "BLL003" : {
+    "Elevated Blood Lead Level (Tests for Lead in Blood)" : "TODO"
+  },
+  "SYMP050" : {
+    "Pneumonia" : "TODO"
+  },
+  "LabRLT009" : {
+    "Acid Fast Bacilli (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "MEA012" : {
+    "Measles (Test Panels for measles virus IgM Antibody)" : "TODO"
+  },
+  "MEA011" : {
+    "Measles (Test Panels for Measles virus Nucleic Acid)" : "TODO"
+  },
+  "STI003" : {
+    "S. Typhi Infection (Tests for S. Typhi Antibody)" : "TODO"
+  },
+  "STI002" : {
+    "S. Typhi Infection (Disorders)" : "TODO"
+  },
+  "STI001" : {
+    "S. Typhi Infection (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "LabRLT001" : {
+    "Present or Positive Lab Result Value" : "TODO"
+  },
+  "SYMP058" : {
+    "Dyspnea" : "TODO"
+  },
+  "LabRLT002" : {
+    "Abnormal Interpretation of an Observation" : "TODO"
+  },
+  "STI005" : {
+    "S. Typhi Infection (Tests for S. Typhi by Culture and Identification Method)" : "TODO"
+  },
+  "LabRLT003" : {
+    "Negative or Indeterminate Lab Result Value" : "TODO"
+  },
+  "SYMP057" : {
+    "Acute Respiratory Distress Syndrome (ARDS)" : "TODO"
+  },
+  "STI004" : {
+    "S. Typhi Infection (Tests for S. Typhi Nucleic Acid)" : "TODO"
+  },
+  "BLL001" : {
+    "Elevated Blood Lead Level (Disorders)" : "TODO"
+  },
+  "SYMP041" : {
+    "Mastitis" : "TODO"
+  },
+  "SYMP042" : {
+    "Pancreatitis" : "TODO"
+  },
+  "SYMP040" : {
+    "Oophoritis" : "TODO"
+  },
+  "LabRLT011" : {
+    "Indeterminate or Equivocal Lab Result Value" : "TODO"
+  },
+  "LabRLT012" : {
+    "Negative or Undetected Lab Result Value" : "TODO"
+  },
+  "LabRLT013" : {
+    "Resistant Interpretation of an Observation " : "TODO"
+  },
+  "LabRLT014" : {
+    "Resistant Lab Result Value " : "TODO"
+  },
+  "SYMP032" : {
+    "Purpura" : "TODO"
+  },
+  "SYMP033" : {
+    "Purulent Meninges" : "TODO"
+  },
+  "SYMP030" : {
+    "Post-tussive vomiting" : "TODO"
+  },
+  "SYMP038" : {
+    "Hearing Loss" : "TODO"
+  },
+  "SYMP039" : {
+    "Orchitis" : "TODO"
+  },
+  "MEN010" : {
+    "Meningococcal Disease (Tests for Neisseria meningitidis Antigen in CSF by Latex Agglutination)" : "TODO"
+  },
+  "SYMP036" : {
+    "Aseptic meningitis" : "TODO"
+  },
+  "SYMP037" : {
+    "Encephalitis" : "TODO"
+  },
+  "SYMP034" : {
+    "Adrenal Hemorrhage" : "TODO"
+  },
+  "SYMP035" : {
+    "Parotitis [Unspecified Cause]" : "TODO"
+  },
+  "MEN007" : {
+    "Meningococcal Disease (Tests for Neisseria meningitidis Antigen in Tissue by Immunohistochemistry)" : "TODO"
+  },
+  "MEN006" : {
+    "Meningococcal Disease (Tests for Neisseria meningitidis Nucleic Acid)" : "TODO"
+  },
+  "MEN009" : {
+    "Meningococcal Disease (Tests for Neisseria meningitidis Antigen)" : "TODO"
+  },
+  "MEN008" : {
+    "Meningococcal Disease (Tests for Neisseria meningitidis Antigen in Specimen from Normally Sterile Site by Latex Agglutination)" : "TODO"
+  },
+  "GON003" : {
+    "Gonorrhea [Conjunctivitis] (Disorders)" : "TODO"
+  },
+  "SYMP029" : {
+    "Paroxysmal Cough" : "TODO"
+  },
+  "GON002" : {
+    "Gonorrhea [Secondary Sites Complications Chronic] (Disorders)" : "TODO"
+  },
+  "GON005" : {
+    "Gonorrhea (Tests for Neisseria species by Culture and Identification Method)" : "TODO"
+  },
+  "SYMP027" : {
+    "Conjunctivitis" : "TODO"
+  },
+  "GON004" : {
+    "Gonorrhea [Cervicitis Urethritis] (Disorders)" : "TODO"
+  },
+  "SYMP028" : {
+    "Inspiratory Whoop" : "TODO"
+  },
+  "SYMP025" : {
+    "Arthralgia" : "TODO"
+  },
+  "SYMP026" : {
+    "Postpartum" : "TODO"
+  },
+  "GON001" : {
+    "Gonorrhea [Neisseria gonorrhoeae] (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "SYMP024" : {
+    "Rash" : "TODO"
+  },
+  "CPCRE001" : {
+    "Tests for carbapenem susceptibility [Meropenem, imipenem, and doripenem]" : "TODO"
+  },
+  "GON007" : {
+    "Gonorrhea (Tests for Neisseria gonorrhoeae Nucleic Acid)" : "TODO"
+  },
+  "GON006" : {
+    "Gonorrhea (Tests for Neisseria gonorrhoeae by Culture and Identification Method)" : "TODO"
+  },
+  "GON008" : {
+    "Gonorrhea [Neisseria species Unspecified] (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "SYMP010" : {
+    "Vomiting" : "TODO"
+  },
+  "RUB007" : {
+    "Rubella (Tests for Rubella virus IgM Antibody)" : "TODO"
+  },
+  "SYMP011" : {
+    "Abdominal Cramps" : "TODO"
+  },
+  "SYMP019" : {
+    "Meningitis" : "TODO"
+  },
+  "RUB002" : {
+    "Rubella (Disorders)" : "TODO"
+  },
+  "RUB001" : {
+    "Rubella (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "RUB004" : {
+    "Rubella (Maternal Rubella during Pregnancy) (Disorders)" : "TODO"
+  },
+  "RUB003" : {
+    "Congenital Rubella Syndrome (Disorders)" : "TODO"
+  },
+  "SYMP015" : {
+    "Anorexia" : "TODO"
+  },
+  "SYMP012" : {
+    "Diarrhea" : "TODO"
+  },
+  "RUB006" : {
+    "Rubella (Tests for rubella virus Nucleic Acid)" : "TODO"
+  },
+  "RUB005" : {
+    "Rubella (Tests for Rubella virus by Culture and Identification Method)" : "TODO"
+  },
+  "SYP006" : {
+    "Syphilis [Congenital] (Disorders)" : "TODO"
+  },
+  "VSA007" : {
+    "Tests for Vancomycin Susceptibility [OrdQn MIC]" : "TODO"
+  },
+  "SYP003" : {
+    "Syphilis (Tests for Treponema pallidum Nucleic Acid)" : "TODO"
+  },
+  "SYP005" : {
+    "Treponema pallidum (Tests by Microscopic Observation by Immunofluorescence)" : "TODO"
+  },
+  "POL004" : {
+    "Myelitis [Non Specific]" : "TODO"
+  },
+  "SYMP007" : {
+    "Fever" : "TODO"
+  },
+  "MEN002" : {
+    "Meningococcal Disease (Disorders)" : "TODO"
+  },
+  "SYP001" : {
+    "Syphilis (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "MEN005" : {
+    "Meningococcal Disease (Tests for Neisseria meningitidis Nucleic Acid in Specimen from Normally Sterile Site)" : "TODO"
+  },
+  "MEN004" : {
+    "Meningococcal Disease (Tests for Neisseria meningitidis by Culture and Identification Method)" : "TODO"
+  },
+  "ARB001" : {
+    "Arboviral Infection (Tests for Flavivirus by Culture and Identification Method)" : "TODO"
+  },
+  "SYMP001" : {
+    "Apnea" : "TODO"
+  },
+  "MEN001" : {
+    "Meningococcal Disease (Organism or Substance in Lab Results)" : "TODO"
+  },
+  "ARB004" : {
+    "Arboviral Diseases [Reportable] (Tests for Arbovirus by Culture and Identification Method)" : "TODO"
+  },
+  "SYMP002" : {
+    "Cough" : "TODO"
+  },
+  "CMP004" : {
+    "Carbon Monoxide Poisoning (Tests for Carboxyhemoglobin in Blood [Quantitative])" : "TODO"
+  },
+  "CMP002" : {
+    "Carbon Monoxide Poisoning (Disorders)" : "TODO"
+  },
+  "CMP003" : {
+    "Carbon Monoxide Poisoning (Carbon Monoxide Exposure)" : "TODO"
+  }
+}

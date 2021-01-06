@@ -25,40 +25,31 @@ public class DefinitionBlockVisitor extends ExpressionBodyVisitor {
     @Override
     public void visit(ConditionCriteriaPredicateDTO predicate) {
         super.visit(predicate);
-        DefinitionBlock definitionBlock = null;
-        if (!this.context.definitionBlockStack.isEmpty()) {
-            definitionBlock = this.context.definitionBlockStack.pop();
-        } else {
-            definitionBlock = new DefinitionBlock();
-            definitionBlock.setAlias(predicate.getDescription() + "-" + predicate.getUuid());
-        }
+        DefinitionBlock definitionBlock = (!this.context.definitionBlockStack.isEmpty())
+            ? this.context.definitionBlockStack.pop() : new DefinitionBlock(predicate.getDescription() + "-" + predicate.getUuid());
+
         boolean firstExpression = true;
         if (this.context.expressionStack.size() > 0) {  
-            do {
-                if (firstExpression) {
-                    definitionBlock.getExpressions().add(Pair.of(null, this.context.expressionStack.pop()));
-                    firstExpression = false;
-                } else {
-                    definitionBlock.getExpressions().add(Pair.of(predicate.getPredicateConjunction().name(), this.context.expressionStack.pop()));
-                }
-            } while (this.context.expressionStack.size() > 0);
+            while (this.context.expressionStack.size() > 0) {
+                String conjunction = (firstExpression) ? null : predicate.getPredicateConjunction().name();
+                definitionBlock.getExpressions().add(Pair.of(conjunction, this.context.expressionStack.pop()));
+                firstExpression = false;
+            }
         }
         int index = 0;
         if (this.context.referenceStack.size() > 0 && predicate.getPredicateDTOs() != null 
             && !predicate.getPredicateDTOs().isEmpty() && this.context.referenceStack.size() > predicate.getPredicateDTOs().size()) {
-            do {
+            while (index < predicate.getPredicateDTOs().size()) {
+                Pair<CriteriaPredicateType, Pair<String, String>> reference = this.context.referenceStack.pop();
                 if (firstExpression) {
-                    Pair<CriteriaPredicateType, Pair<String, String>> reference = this.context.referenceStack.pop();
-                    Pair<String, String> aliasContext = reference.getRight();
-                    definitionBlock.getReferences().add(Pair.of(reference.getLeft(), Pair.of(null, aliasContext.getRight())));
+                    reference = Pair.of(reference.getLeft(), Pair.of(null, reference.getRight().getRight()));
                     firstExpression = false;
-                } else {
-                    definitionBlock.getReferences().add(this.context.referenceStack.pop());
                 }
+                definitionBlock.getReferences().add(reference);
                 index++;
-            } while (index < predicate.getPredicateDTOs().size());
+            } 
         }
         this.context.printMap.put(definitionBlock.getAlias(), definitionBlock);
         this.context.referenceStack.push(Pair.of(predicate.getPredicateType(), Pair.of(predicate.getPredicateConjunction().name(), definitionBlock.getAlias())));
-    } 
+    }
 }

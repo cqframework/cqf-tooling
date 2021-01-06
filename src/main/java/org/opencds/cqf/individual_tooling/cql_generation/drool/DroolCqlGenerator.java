@@ -5,10 +5,7 @@ import java.net.URI;
 import java.util.List;
 
 import org.cdsframework.dto.ConditionDTO;
-import org.cdsframework.dto.DataInputNodeDTO;
 import org.opencds.cqf.individual_tooling.cql_generation.CqlGenerator;
-import org.opencds.cqf.individual_tooling.cql_generation.context.Context;
-import org.opencds.cqf.individual_tooling.cql_generation.drool.serialization.ConditionCriteriaRelDTOWrapper;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.serialization.Deserializer;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.traversal.DepthFirstDroolTraverser;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.traversal.DroolTraverser;
@@ -18,7 +15,6 @@ import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.Visitor;
 
 public class DroolCqlGenerator implements CqlGenerator {
     private String outputPath;
-    private Context context = new Context();
 
     public DroolCqlGenerator(String outputPath) {
         this.outputPath = outputPath;

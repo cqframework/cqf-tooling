@@ -17,6 +17,13 @@ public class DefinitionBlock {
     public DefinitionBlock(String alias, List<Pair<String, Expression>> expressions) {
         this.alias = alias;
         this.expressions = expressions;
+        this.references = new LinkedList<Pair<CriteriaPredicateType, Pair<String, String>>>();
+    }
+
+    public DefinitionBlock(String alias) {
+        this.alias = alias;
+        this.expressions = new ArrayList<Pair<String, Expression>>();
+        this.references = new LinkedList<Pair<CriteriaPredicateType, Pair<String, String>>>();
     }
 
     public DefinitionBlock() {
@@ -39,26 +46,7 @@ public class DefinitionBlock {
     public List<Pair<CriteriaPredicateType, Pair<String, String>>> getReferences() {
         return references;
     }
-
-    /*
-    Pair<CriteriaPredicateType, Pair<String, String>> reference = context.referenceStack.pop();
-                Pair<String, String> aliasContext = reference.getRight();
-                if (firstExpression) {
-                    if (reference.getLeft().equals(CriteriaPredicateType.Predicate)) {
-                        definitionBlock.getReferences().add(Pair.of(null, "exists " + aliasContext.getRight()));
-                    } else {
-                        definitionBlock.getReferences().add(Pair.of(null, aliasContext.getRight()));
-                    }
-                    firstExpression = false;
-                } else {
-                    if (reference.getLeft().equals(CriteriaPredicateType.Predicate)) {
-                        definitionBlock.getReferences().add(Pair.of(aliasContext.getLeft(), "exists " + aliasContext.getRight()));
-                    } else {
-                        definitionBlock.getReferences().add(aliasContext);
-                    }
-                    definitionBlock.getReferences().add(aliasContext);
-                }
-                */
+    
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();

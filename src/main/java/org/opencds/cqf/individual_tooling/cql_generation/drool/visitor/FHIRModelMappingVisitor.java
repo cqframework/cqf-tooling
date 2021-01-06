@@ -15,11 +15,11 @@ import org.cdsframework.dto.CriteriaResourceDTO;
 import org.cdsframework.dto.CriteriaResourceParamDTO;
 import org.cdsframework.dto.DataInputNodeDTO;
 import org.cdsframework.dto.OpenCdsConceptDTO;
-import org.opencds.cqf.individual_tooling.cql_generation.context.Context;
+import org.opencds.cqf.individual_tooling.cql_generation.context.FHIRContext;
 
 public class FHIRModelMappingVisitor implements Visitor {
 
-    private Context context = new Context();
+    private FHIRContext context = new FHIRContext();
 
     @Override
     // Retrieve and Left Operand (Modeling)
@@ -48,7 +48,7 @@ public class FHIRModelMappingVisitor implements Visitor {
     @Override
     public void visit(OpenCdsConceptDTO openCdsConceptDTO) {
         // TODO Auto-generated method stub
-
+        context.valuesetMapping.put(openCdsConceptDTO.getCode(), Pair.of(openCdsConceptDTO.getDisplayName(), "TODO"));
     }
 
     @Override
@@ -71,13 +71,13 @@ public class FHIRModelMappingVisitor implements Visitor {
 
     @Override
     public void visit(ConditionCriteriaRelDTO conditionCriteriaRel) {
-        context.writeFHIRModelMapping();
+
     }
 
     @Override
     public void visit(CdsCodeDTO cdsCodeDTO) {
         // TODO Auto-generated method stub
-
+        context.valuesetMapping.put(cdsCodeDTO.getCode(), Pair.of(cdsCodeDTO.getDisplayName(), "TODO"));
     }
 
     @Override
@@ -95,6 +95,8 @@ public class FHIRModelMappingVisitor implements Visitor {
     @Override
     public void visit(List<ConditionDTO> rootNode) {
         // TODO Auto-generated method stub
+        context.writeFHIRModelMapping();
+        context.writeValueSetMapping();
 
     }
 }
