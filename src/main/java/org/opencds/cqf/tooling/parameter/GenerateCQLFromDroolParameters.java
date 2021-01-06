@@ -6,5 +6,5 @@ public class GenerateCQLFromDroolParameters {
     public String outputPath;
     public String inputFilePath;
     public Encoding encoding;
-    public String doCommand;
+    public String command;
 }

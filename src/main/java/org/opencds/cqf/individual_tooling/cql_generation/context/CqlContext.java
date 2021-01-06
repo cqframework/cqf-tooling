@@ -1,23 +1,17 @@
 package org.opencds.cqf.individual_tooling.cql_generation.context;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.cdsframework.enumeration.CriteriaPredicateType;
-import org.opencds.cqf.individual_tooling.cql_generation.IOUtil;
 import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.DefinitionBlock;
 import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.DirectReferenceCode;
 import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.Expression;
 import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.ValueSet;
 
-public class Context {
-    public Set<Pair<String, String>> fhirModelingSet = new HashSet<Pair<String, String>>();
+public class CqlContext {
     public Stack<Pair<CriteriaPredicateType, Pair<String, String>>> referenceStack = new Stack<Pair<CriteriaPredicateType, Pair<String, String>>>();
     public Stack<Expression> expressionStack = new Stack<Expression>();
     public Stack<DefinitionBlock> definitionBlockStack = new Stack<DefinitionBlock>();
@@ -67,22 +61,6 @@ public class Context {
         }
         sb.append(buildCql(context));
         return sb.toString();
-    }
-
-    public void writeFHIRModelMapping() {
-        String fhirModelingMapFilePath = ".\\src\\main\\java\\org\\opencds\\cqf\\individual_tooling\\cql_generation\\CQLGenerationDocs\\fhirmodelingmap.txt";
-        File fhirModelingMapFile = new File(fhirModelingMapFilePath);
-        if (fhirModelingMapFile.exists()) {
-            fhirModelingMapFile.delete();
-        }
-        try {
-            fhirModelingMapFile.createNewFile();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        fhirModelingSet.stream()
-            .forEach(element -> IOUtil.writeToFile(fhirModelingMapFile, element.getLeft() + ":     " + element.getRight() + "\n"));
     }
 
     public void clearCqlMap() {

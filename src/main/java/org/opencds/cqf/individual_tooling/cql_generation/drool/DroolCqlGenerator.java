@@ -22,27 +22,27 @@ public class DroolCqlGenerator implements CqlGenerator {
     }
 
     @Override
-    public void generate(String encoding, String doCommand) {
+    public void generate(String encoding, String command) {
         File file = new File(encoding);
-        readAndGenerateCQL(file, doCommand);
+        readAndGenerateCQL(file, command);
     }
 
     @Override
-    public void generate(URI encodingUri, String doCommand) {
+    public void generate(URI encodingUri, String command) {
         File file = new File(encodingUri.getPath());
-        readAndGenerateCQL(file, doCommand);  
+        readAndGenerateCQL(file, command);  
     }
 
-    private void readAndGenerateCQL(File file, String doCommand) {
+    private void readAndGenerateCQL(File file, String command) {
         Deserializer deserializer = new Deserializer(file);
         List<ConditionDTO> conditions = deserializer.deserialize();
-        doVisit(doCommand, conditions);
+        doVisit(command, conditions);
     }
 
-    private void doVisit(String cqlProcessingThingy, List<ConditionDTO> rootNode) {
+    private void doVisit(String command, List<ConditionDTO> rootNode) {
         Visitor visitor;
-        switch(cqlProcessingThingy) {
-            case "datainput": {
+        switch(command) {
+            case "modeling": {
                 visitor = new FHIRModelMappingVisitor();
             } break;
             case "cql": {
@@ -51,7 +51,7 @@ public class DroolCqlGenerator implements CqlGenerator {
             case "html": {
                 visitor = new HtmlFileVisitor(outputPath);
             }
-            default: throw new RuntimeException("Unkown cqlProcessingThingy: " + cqlProcessingThingy);
+            default: throw new RuntimeException("Unkown Drool Cql Generation command: " + command);
         } 
         DroolTraverser<Visitor> traverser = new DepthFirstDroolTraverser<Visitor>(visitor);
         traverser.traverse(rootNode);

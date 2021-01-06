@@ -20,6 +20,8 @@ public class FHIRContext {
 
         public Set<Pair<String, String>> fhirModelingSet = new HashSet<Pair<String, String>>();
         public Map<String, Pair<String, String>> valuesetMapping = new HashMap<String, Pair<String, String>>();
+        private static String fhirModelingMapFilePath = ".\\src\\main\\java\\org\\opencds\\cqf\\individual_tooling\\cql_generation\\CQLGenerationDocs\\fhirmodelingmap.txt";
+        private static String valueSetMappingFilePath = ".\\src\\main\\java\\org\\opencds\\cqf\\individual_tooling\\cql_generation\\CQLGenerationDocs\\valuesetMapping.json";
         // Create a Model retriever thingy
         public static final Map<String, Pair<String, String>> cdsdmToFhirMap = Map.ofEntries(
                         Map.entry("EncounterEvent.encounterType", Pair.of("Encounter", "type")),
@@ -73,7 +75,6 @@ public class FHIRContext {
         private static ObjectMapper mapper = new ObjectMapper();
 
         public void writeFHIRModelMapping() {
-                String fhirModelingMapFilePath = ".\\src\\main\\java\\org\\opencds\\cqf\\individual_tooling\\cql_generation\\CQLGenerationDocs\\fhirmodelingmap.txt";
                 File fhirModelingMapFile = new File(fhirModelingMapFilePath);
                 if (fhirModelingMapFile.exists()) {
                         fhirModelingMapFile.delete();
@@ -89,7 +90,6 @@ public class FHIRContext {
         }
 
         public void writeValueSetMapping() {
-                String valueSetMappingFilePath = ".\\src\\main\\java\\org\\opencds\\cqf\\individual_tooling\\cql_generation\\CQLGenerationDocs\\valuesetMapping.json";
                 File fhirModelingMapFile = new File(valueSetMappingFilePath);
                 if (fhirModelingMapFile.exists()) {
                         fhirModelingMapFile.delete();
@@ -112,7 +112,7 @@ public class FHIRContext {
         }
 
         public static Map<String, Pair<String, String>> readValueSetMapping() {
-                String jsonInput = IOUtil.readFile(".\\src\\main\\java\\org\\opencds\\cqf\\individual_tooling\\cql_generation\\CQLGenerationDocs\\valuesetMapping.json");
+                String jsonInput = IOUtil.readFile(valueSetMappingFilePath);
                 SimpleModule module = new SimpleModule();
                 module.addDeserializer(Pair.class, new PairJacksonProvider());
                 mapper.registerModule(module);

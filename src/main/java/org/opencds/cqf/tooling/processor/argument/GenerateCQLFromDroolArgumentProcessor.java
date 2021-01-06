@@ -26,10 +26,12 @@ public class GenerateCQLFromDroolArgumentProcessor {
         OptionSpecBuilder outputBuilder = parser.acceptsAll(asList(OUTPUT_PATH_OPTIONS),"Will be created if file path does not currently exist.");
         OptionSpecBuilder encodingBuilder = parser.acceptsAll(asList(ENCODING_OPTIONS), "If omitted, encoding input will be expected to be json.");
         OptionSpecBuilder inputFilePathBuilder = parser.acceptsAll(asList(INPUT_FILE_PATH_OPTIONS),"Must be a path to encoded logic export required for cql generation.");
+        OptionSpecBuilder commandBuilder = parser.acceptsAll(asList(COMMAND_OPTIONS),"If omitted, command will be cql");
 
         OptionSpec<String> outputPath = outputBuilder.withRequiredArg().describedAs("path to desired cql generation output");
         OptionSpec<String> encoding = encodingBuilder.withOptionalArg().describedAs("input encoding (as of now can only be json)").defaultsTo("json"); 
         OptionSpec<String> inputFilePath = inputFilePathBuilder.withRequiredArg().describedAs("input encoded file path");
+        OptionSpec<String> command = commandBuilder.withOptionalArg().describedAs("generation command to be executed (cql, modeling, html");
 
         parser.acceptsAll(asList(OPERATION_OPTIONS),"The operation to run.");
 
@@ -46,6 +48,10 @@ public class GenerateCQLFromDroolArgumentProcessor {
 
         String outputPath = (String)options.valueOf(OUTPUT_PATH_OPTIONS[0]);
         String inputFilePath = (String)options.valueOf(INPUT_FILE_PATH_OPTIONS[0]);
+        String command = (String)options.valueOf(COMMAND_OPTIONS[0]);
+        if (command == null) {
+            command = "cql";
+        }
         String encoding = (String)options.valueOf(ENCODING_OPTIONS[0]);
         Encoding encodingEnum = Encoding.parse(encoding.toLowerCase());
     
@@ -53,6 +59,7 @@ public class GenerateCQLFromDroolArgumentProcessor {
         gcdp.outputPath = outputPath;
         gcdp.encoding = encodingEnum;
         gcdp.inputFilePath = inputFilePath;
+        gcdp.command = command;
        
         return gcdp;
 	}

@@ -86,7 +86,7 @@
             "args": [
                 "-GenerateCQLFromDrool",
                 "-ifp=../CQLGenerationDocs/default.json",
-                "-op=../CQLGenerationDocs/generatedCQL.cql"
+                "-op=../CQLGenerationDocs/generatedCQL"
             ]
         },
         {

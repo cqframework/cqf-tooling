@@ -20,11 +20,11 @@ import org.cdsframework.enumeration.DataModelClassType;
 import org.cdsframework.enumeration.PredicatePartType;
 import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.ValueSet;
 import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.Expression;
-import org.opencds.cqf.individual_tooling.cql_generation.context.Context;
+import org.opencds.cqf.individual_tooling.cql_generation.context.CqlContext;
 import org.opencds.cqf.individual_tooling.cql_generation.context.FHIRContext;
 
 public class ExpressionBodyVisitor implements Visitor {
-    protected Context context = new Context();
+    protected CqlContext context = new CqlContext();
 
     
 

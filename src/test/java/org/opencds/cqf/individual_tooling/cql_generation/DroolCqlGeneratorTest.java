@@ -12,7 +12,8 @@ public class DroolCqlGeneratorTest {
     @Test
     public void test_worked() {
         String encodingPath = "../CQLGenerationDocs/NonGeneratedDocs/default.json";
-        String outputPath = "../CQLGenerationDocs/GeneratedDocs/generatedCQL.cql";
+        String outputPath = "../CQLGenerationDocs/GeneratedDocs";
+        String command = "cql";
         File file = new File(encodingPath);
         Boolean fileIsFile = file.isFile();
         if (fileIsFile) {
@@ -30,8 +31,7 @@ public class DroolCqlGeneratorTest {
                     e.printStackTrace();
                 }
             }
-            droolIshCqlGenerator.generate(encodingUri, "datainput");
-            // droolIshCqlGenerator.generate(encodingUri, "generate cql");
+            droolIshCqlGenerator.generate(encodingUri, command);
         } else {
             System.out.println("I am Failure.");
         }

@@ -10,7 +10,7 @@ public class GenerateCQLFromDroolProcessor {
 	public static void generate(GenerateCQLFromDroolParameters params) {
 		CqlGenerator generator = new DroolCqlGenerator(params.outputPath);
 		if (params.encoding.equals(IOUtils.Encoding.JSON)) {
-			generator.generate(params.inputFilePath.toString(), params.doCommand);
+			generator.generate(params.inputFilePath.toString(), params.command);
 		} else {
 			throw new IllegalArgumentException("encoding " + params.encoding.toString() + " not supported yet.");
 		}
