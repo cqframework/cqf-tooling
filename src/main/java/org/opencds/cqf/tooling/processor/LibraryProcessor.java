@@ -161,6 +161,31 @@ public class LibraryProcessor extends BaseProcessor {
         cqlProcessor = new CqlProcessor(packageManager.getNpmList(), binaryPaths, reader, this, ucumService,
                 packageId, canonicalBase);
 
+        return internalRefreshGeneratedContent(sourceLibraries);
+    }
+
+    public List<Library> refreshGeneratedContent(String cqlDirectoryPath, String fhirVersion) {
+        List<String> result = new ArrayList<String>();
+        File input = new File(cqlDirectoryPath);
+        if (input.exists() && input.isDirectory()) {
+            result.add(input.getAbsolutePath());
+        }
+        binaryPaths = result;
+
+        LibraryLoader reader = new LibraryLoader(fhirVersion);
+        try {
+            ucumService = new UcumEssenceService(UcumEssenceService.class.getResourceAsStream("/ucum-essence.xml"));
+        } catch (UcumException e) {
+            System.err.println("Could not create UCUM validation service:");
+            e.printStackTrace();
+        }
+        cqlProcessor = new CqlProcessor(null, binaryPaths, reader, this, ucumService,
+                null, null);
+        List<Library> libraries = new ArrayList<Library>();
+        return internalRefreshGeneratedContent(libraries);
+    }
+
+    private List<Library> internalRefreshGeneratedContent(List<Library> sourceLibraries) {
         cqlProcessor.execute();
 
         // For each CQL file, ensure that there is a Library resource with a matching name and version
