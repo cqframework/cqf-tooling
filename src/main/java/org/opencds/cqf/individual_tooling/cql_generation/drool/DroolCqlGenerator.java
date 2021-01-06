@@ -11,6 +11,7 @@ import org.opencds.cqf.individual_tooling.cql_generation.drool.traversal.DepthFi
 import org.opencds.cqf.individual_tooling.cql_generation.drool.traversal.DroolTraverser;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.CqlFileVisitor;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.FHIRModelMappingVisitor;
+import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.HtmlFileVisitor;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.Visitor;
 
 public class DroolCqlGenerator implements CqlGenerator {
@@ -47,6 +48,9 @@ public class DroolCqlGenerator implements CqlGenerator {
             case "generate cql": {
                 visitor = new CqlFileVisitor("../CQLGenerationDocs/GeneratedDocs");
             } break;
+            case "html": {
+                visitor = new HtmlFileVisitor("../CQLGenerationDocs/GeneratedDocs/Html");
+            }
             default: throw new RuntimeException("Unkown cqlProcessingThingy: " + cqlProcessingThingy);
         } 
         DroolTraverser<Visitor> traverser = new DepthFirstDroolTraverser<Visitor>(visitor);
