@@ -31,10 +31,12 @@ public class IOUtil {
 
     public static void writeToFile(File file, String content) {
         try {
-            if (!file.exists()) {
-                file.createNewFile();
+            if (file.exists()) {
+                file.delete();
             }
+            file.createNewFile();
             Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true), "UTF-8"));
+            writer.flush();
             writer.append(content);
             writer.close();
         } catch (UnsupportedEncodingException e1) {

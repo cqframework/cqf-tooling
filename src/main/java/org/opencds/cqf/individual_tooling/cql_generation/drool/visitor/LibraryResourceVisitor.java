@@ -11,7 +11,6 @@ public class LibraryResourceVisitor extends CqlFileVisitor {
 
     public LibraryResourceVisitor(String outputDirectoryPath) {
         super(outputDirectoryPath);
-        // TODO Auto-generated constructor stub
     }
     
     @Override
