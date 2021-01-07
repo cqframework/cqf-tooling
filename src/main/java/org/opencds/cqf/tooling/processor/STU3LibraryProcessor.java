@@ -51,6 +51,9 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
             String filePath = fileMap.get(refreshedLibrary.getId());
             org.hl7.fhir.dstu3.model.Library library = (org.hl7.fhir.dstu3.model.Library) VersionConvertor_30_50.convertResource(refreshedLibrary, false);
+
+            cleanseRelatedArtifactReferences(library);
+
             cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
             IOUtils.writeResource(library, filePath, IOUtils.getEncoding(filePath), fhirContext);
             String refreshedLibraryName;
@@ -63,6 +66,20 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         }
 
         return refreshedLibraryNames;
+    }
+
+    private void cleanseRelatedArtifactReferences(Library library) {
+        for (RelatedArtifact relatedArtifact : library.getRelatedArtifact()) {
+            if (relatedArtifact.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON) {
+                if (relatedArtifact.hasResource()) {
+                    String resourceReference = relatedArtifact.getResource().getReference();
+                    if (resourceReference.contains("|")) {
+                        String curatedResourceReference = resourceReference.substring(0, resourceReference.indexOf("|"));
+                        relatedArtifact.getResource().setReference(curatedResourceReference);
+                    }
+                }
+            }
+        }
     }
 
     private void loadLibrary(Map<String, String> fileMap, List<org.hl7.fhir.r5.model.Library> libraries, File libraryFile) {
