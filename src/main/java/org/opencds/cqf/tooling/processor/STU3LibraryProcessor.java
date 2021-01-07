@@ -70,13 +70,11 @@ public class STU3LibraryProcessor extends LibraryProcessor {
 
     private void cleanseRelatedArtifactReferences(Library library) {
         for (RelatedArtifact relatedArtifact : library.getRelatedArtifact()) {
-            if (relatedArtifact.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON) {
-                if (relatedArtifact.hasResource()) {
-                    String resourceReference = relatedArtifact.getResource().getReference();
-                    if (resourceReference.contains("|")) {
-                        String curatedResourceReference = resourceReference.substring(0, resourceReference.indexOf("|"));
-                        relatedArtifact.getResource().setReference(curatedResourceReference);
-                    }
+            if ((relatedArtifact.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON) && relatedArtifact.hasResource()) {
+                String resourceReference = relatedArtifact.getResource().getReference();
+                if (resourceReference.contains("|")) {
+                    String curatedResourceReference = resourceReference.substring(0, resourceReference.indexOf("|"));
+                    relatedArtifact.getResource().setReference(curatedResourceReference);
                 }
             }
         }
