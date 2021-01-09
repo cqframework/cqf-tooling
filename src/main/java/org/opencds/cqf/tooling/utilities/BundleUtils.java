@@ -136,4 +136,22 @@ public class BundleUtils {
             }
         }
     }
+    
+    public static void extractStu3Resources(org.hl7.fhir.dstu3.model.Bundle bundle, String encoding, String outputPath) {
+    	FhirContext context = FhirContext.forDstu3();
+    	for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+    		if (entry.getResource() != null) {
+    			ResourceUtils.outputResource(entry.getResource(), encoding, context, outputPath);
+    		}
+    	}
+    }
+    
+    public static void extractR4Resources(org.hl7.fhir.r4.model.Bundle bundle, String encoding, String outputPath) {
+    	FhirContext context = FhirContext.forR4();
+    	for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+    		if (entry.getResource() != null) {
+    			ResourceUtils.outputResource(entry.getResource(), encoding, context, outputPath);
+    		}
+    	}
+    }
 }

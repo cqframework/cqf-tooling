@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling.utilities;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -468,5 +470,33 @@ public class ResourceUtils
     public static BaseRuntimeElementDefinition getElementDefinition(FhirContext fhirContext, String ElementName) {
         BaseRuntimeElementDefinition<?> def = fhirContext.getElementDefinition(ElementName);
         return def;
+    }
+    
+    public static void outputResource(IBaseResource resource, String encoding, FhirContext context, String outputPath) {
+        try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding)) {
+            writer.write(
+                encoding.equals("json")
+                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+            );
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+    
+    public static void outputResourceByName(IBaseResource resource, String encoding, FhirContext context, String outputPath, String name) {
+        try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + name + "." + encoding)) {
+            writer.write(
+                encoding.equals("json")
+                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+            );
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }
