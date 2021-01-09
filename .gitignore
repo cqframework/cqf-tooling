@@ -131,3 +131,8 @@ hs_err_pid*
 src/main/resources/org/opencds/cqf/tooling/acceleratorkit/output/*
 FHIR-Spec/*
 .flattened-pom.xml
+
+core.*
+javacore.*
+jitdump.*
+Snap.*
