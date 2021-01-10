@@ -9,8 +9,8 @@ import org.opencds.cqf.tooling.processor.LibraryProcessor;
 public class LibraryResourceVisitor extends CqlFileVisitor {
 
 
-    public LibraryResourceVisitor(String outputDirectoryPath) {
-        super(outputDirectoryPath);
+    public LibraryResourceVisitor(String outputDirectoryPath, Enum<CQLTYPES> type) {
+        super(outputDirectoryPath, type);
     }
     
     @Override

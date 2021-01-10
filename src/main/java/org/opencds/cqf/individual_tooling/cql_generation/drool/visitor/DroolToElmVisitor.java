@@ -1,6 +1,8 @@
 package org.opencds.cqf.individual_tooling.cql_generation.drool.visitor;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.cdsframework.dto.CdsCodeDTO;
@@ -15,17 +17,17 @@ import org.cdsframework.dto.CriteriaResourceDTO;
 import org.cdsframework.dto.CriteriaResourceParamDTO;
 import org.cdsframework.dto.DataInputNodeDTO;
 import org.cdsframework.dto.OpenCdsConceptDTO;
+import org.hl7.cql_annotations.r1.Annotation;
+import org.hl7.elm.r1.AccessModifier;
+import org.hl7.elm.r1.ValueSetDef;
+import org.opencds.cqf.individual_tooling.cql_generation.context.CqlContext;
+import org.opencds.cqf.individual_tooling.cql_generation.context.ElmContext;
 import org.opencds.cqf.individual_tooling.cql_generation.context.FHIRContext;
+import org.opencds.cqf.individual_tooling.cql_generation.drool.adapter.ExpressionBodyAdapter;
 
-public class FHIRModelMappingVisitor implements Visitor {
-
-    private FHIRContext context = new FHIRContext();
-
-    @Override
-    // Retrieve and Left Operand (Modeling)
-    public void visit(DataInputNodeDTO dIN) {
-        context.fhirModelingSet.add(Pair.of(dIN.getTemplateName(), dIN.getNodePath()));
-    }
+public class DroolToElmVisitor implements Visitor {
+    private ElmContext context = new ElmContext();
+    private ExpressionBodyAdapter expressionBodyAdapter = new ExpressionBodyAdapter();
 
     @Override
     public void visit(CriteriaPredicatePartConceptDTO predicatePartConcepts) {
@@ -41,26 +43,27 @@ public class FHIRModelMappingVisitor implements Visitor {
 
     @Override
     public void visit(CriteriaPredicatePartDTO sourcePredicatePartDTO) {
-        // TODO Auto-generated method stub
-
+        expressionBodyAdapter.adapt(sourcePredicatePartDTO, context);
     }
 
     @Override
     public void visit(OpenCdsConceptDTO openCdsConceptDTO) {
-        // TODO Auto-generated method stub
-        context.valueSetMap.put(openCdsConceptDTO.getCode(), Pair.of(openCdsConceptDTO.getDisplayName(), "TODO"));
+        expressionBodyAdapter.adapt(openCdsConceptDTO, context);
+    }
+
+    @Override
+    public void visit(DataInputNodeDTO dIN) {
+        expressionBodyAdapter.adapt(dIN, context);
     }
 
     @Override
     public void visit(CriteriaResourceParamDTO criteriaResourceParamDTO) {
-        // TODO Auto-generated method stub
-
+        expressionBodyAdapter.adapt(criteriaResourceParamDTO, context);
     }
 
     @Override
     public void visit(ConditionCriteriaPredicatePartDTO predicatePart) {
-        // TODO Auto-generated method stub
-
+        expressionBodyAdapter.adapt(predicatePart, context);
     }
 
     @Override
@@ -71,13 +74,13 @@ public class FHIRModelMappingVisitor implements Visitor {
 
     @Override
     public void visit(ConditionCriteriaRelDTO conditionCriteriaRel) {
+        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void visit(CdsCodeDTO cdsCodeDTO) {
-        // TODO Auto-generated method stub
-        context.valueSetMap.put(cdsCodeDTO.getCode(), Pair.of(cdsCodeDTO.getDisplayName(), "TODO"));
+        expressionBodyAdapter.adapt(cdsCodeDTO, context);
     }
 
     @Override
@@ -95,8 +98,7 @@ public class FHIRModelMappingVisitor implements Visitor {
     @Override
     public void visit(List<ConditionDTO> rootNode) {
         // TODO Auto-generated method stub
-        context.writeFHIRModelMapping();
-        context.initializeValueSetMap();
 
     }
+    
 }

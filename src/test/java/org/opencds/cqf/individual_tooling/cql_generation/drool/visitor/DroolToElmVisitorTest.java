@@ -8,11 +8,9 @@ import org.junit.Test;
 
 import org.opencds.cqf.individual_tooling.cql_generation.drool.serialization.Deserializer;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.traversal.DroolTraverser;
-import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.CqlFileVisitor.CQLTYPES;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.traversal.DepthFirstDroolTraverser;
 
-public class LibraryResourceVisitorTest {
-
+public class DroolToElmVisitorTest {
     @Test
     public void test_worked() {
         String encodingPath = "../CQLGenerationDocs/NonGeneratedDocs/default.json";
@@ -23,11 +21,11 @@ public class LibraryResourceVisitorTest {
     private void readAndGenerateCQL(File file) {
         Deserializer deserializer = new Deserializer(file);
         List<ConditionDTO> conditions = deserializer.deserialize();
-        doVisit("../CQLGenerationDocs/GeneratedDocs", conditions);
+        doVisit(conditions);
     }
 
-    private void doVisit(String outputPath, List<ConditionDTO> rootNode) {
-        Visitor visitor = new LibraryResourceVisitor(outputPath, CQLTYPES.CONDITION); 
+    private void doVisit(List<ConditionDTO> rootNode) {
+        Visitor visitor = new DroolToElmVisitor(); 
         DroolTraverser<Visitor> traverser = new DepthFirstDroolTraverser<Visitor>(visitor);
         traverser.traverse(rootNode);
     }

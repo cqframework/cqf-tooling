@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import org.opencds.cqf.individual_tooling.cql_generation.drool.serialization.Deserializer;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.traversal.DroolTraverser;
+import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.CqlFileVisitor.CQLTYPES;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.traversal.DepthFirstDroolTraverser;
 
 public class CqlFileVisitorTest {
@@ -25,7 +26,7 @@ public class CqlFileVisitorTest {
     }
 
     private void doVisit(String outputPath, List<ConditionDTO> rootNode) {
-        Visitor visitor = new CqlFileVisitor(outputPath); 
+        Visitor visitor = new CqlFileVisitor(outputPath, CQLTYPES.CONDITIONREL); 
         DroolTraverser<Visitor> traverser = new DepthFirstDroolTraverser<Visitor>(visitor);
         traverser.traverse(rootNode);
     }

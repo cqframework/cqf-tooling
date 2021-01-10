@@ -1,7 +1,6 @@
 package org.opencds.cqf.individual_tooling.cql_generation.drool.visitor;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.cdsframework.dto.CdsCodeDTO;
@@ -25,6 +24,7 @@ import org.opencds.cqf.individual_tooling.cql_generation.context.FHIRContext;
 
 public class ExpressionBodyVisitor implements Visitor {
     protected CqlContext context = new CqlContext();
+    protected FHIRContext fhirContext = new FHIRContext();
 
     
 
@@ -39,6 +39,7 @@ public class ExpressionBodyVisitor implements Visitor {
     }
 
     @Override
+    //not tested
     public void visit(CriteriaPredicatePartDTO sourcePredicatePartDTO) {
         if (sourcePredicatePartDTO.getPartType().equals(PredicatePartType.Text)) {
             if (sourcePredicatePartDTO.getText().equals("Patient age is")) {
@@ -59,31 +60,20 @@ public class ExpressionBodyVisitor implements Visitor {
     // "ValueSet"
     @Override
     public void visit(OpenCdsConceptDTO openCdsConceptDTO) {
-        Expression expression = context.expressionStack.pop();
         if (openCdsConceptDTO.getCode() != null && openCdsConceptDTO.getDisplayName() != null) {
             // Create valueSet Identifier: displayName GoballyUniqueIdentifier: displayName
             // Only if it's not 2.16.840.1.113883.3.795.5.4.12.5.1
-            Map<String,Pair<String, String>> valueSetMap = FHIRContext.readValueSetMapping();
-            String display = "";
-            String url = "";
-            if (valueSetMap != null && valueSetMap.size() > 0) {
-                Pair<String, String> displayUrlPair = valueSetMap.get(openCdsConceptDTO.getCode());
-                url = displayUrlPair.getRight();
-                display = displayUrlPair.getLeft();
-            }
-            ValueSet valueset = new ValueSet(display, url);
-            context.printMap.put(valueset.getAlias(), valueset);
-            expression.setConcept(valueset.getAlias());
+            addValueSetToExpression(openCdsConceptDTO.getCode());
         }
-        context.expressionStack.push(expression);
     }
 
     // left operand
     // Observation.value as CodeableConcept
+    //not tested
     @Override
     public void visit(DataInputNodeDTO dIN) {
         Expression expression = new Expression();
-        Pair<String, String> fhirModeling = FHIRContext.cdsdmToFhirMap
+        Pair<String, String> fhirModeling = fhirContext.cdsdmToFhirMap
                 .get(dIN.getTemplateName() + "." + dIN.getNodePath().replaceAll("/", "."));
         if (fhirModeling != null) {
             if (fhirModeling.getLeft() != null) {
@@ -130,23 +120,11 @@ public class ExpressionBodyVisitor implements Visitor {
 
     @Override
     public void visit(CdsCodeDTO cdsCodeDTO) {
-        Expression expression = context.expressionStack.pop();
         if (cdsCodeDTO.getCode() != null && cdsCodeDTO.getDisplayName() != null) {
             // Create valueSet Identifier: displayName GoballyUniqueIdentifier: displayName
             // Only if it's not 2.16.840.1.113883.3.795.5.4.12.5.1
-            Map<String,Pair<String, String>> valueSetMap = FHIRContext.readValueSetMapping();
-            String display = "";
-            String url = "";
-            if (valueSetMap != null && valueSetMap.size() > 0) {
-                Pair<String, String> displayUrlPair = valueSetMap.get(cdsCodeDTO.getCode());
-                url = displayUrlPair.getRight();
-                display = displayUrlPair.getLeft();
-            }
-            ValueSet valueset = new ValueSet(display, url);
-            context.printMap.put(valueset.getAlias(), valueset);
-            expression.setConcept(valueset.getAlias());
+            addValueSetToExpression(cdsCodeDTO.getCode());
         }
-        context.expressionStack.push(expression);
     }
 
     @Override
@@ -165,6 +143,21 @@ public class ExpressionBodyVisitor implements Visitor {
     public void visit(List<ConditionDTO> rootNode) {
         // TODO Auto-generated method stub
 
+    }
+
+    private void addValueSetToExpression(String valueSetIdentifier) {
+        Expression expression = context.expressionStack.pop();
+        String url = "";
+        String display = "";
+        if (fhirContext.valueSetMap != null && fhirContext.valueSetMap.size() > 0) {
+            Pair<String, String> displayUrlPair = fhirContext.valueSetMap.get(valueSetIdentifier);
+            url = displayUrlPair.getRight();
+            display = displayUrlPair.getLeft();
+        }
+        ValueSet valueset = new ValueSet(display, url);
+        context.printMap.put(valueset.getAlias(), valueset);
+        expression.setConcept(valueset.getAlias());
+        context.expressionStack.push(expression);
     }
     
 }

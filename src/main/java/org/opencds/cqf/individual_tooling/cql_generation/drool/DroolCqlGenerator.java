@@ -13,6 +13,7 @@ import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.CqlFileVi
 import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.FHIRModelMappingVisitor;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.HtmlFileVisitor;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.Visitor;
+import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.CqlFileVisitor.CQLTYPES;
 
 public class DroolCqlGenerator implements CqlGenerator {
     private String outputPath;
@@ -46,7 +47,7 @@ public class DroolCqlGenerator implements CqlGenerator {
                 visitor = new FHIRModelMappingVisitor();
             } break;
             case "cql": {
-                visitor = new CqlFileVisitor(outputPath);
+                visitor = new CqlFileVisitor(outputPath, CQLTYPES.CONDITION);
             } break;
             case "html": {
                 visitor = new HtmlFileVisitor(outputPath);

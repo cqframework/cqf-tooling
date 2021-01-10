@@ -4,6 +4,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.cdsframework.dto.ConditionCriteriaPredicateDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicatePartDTO;
 import org.cdsframework.dto.ConditionCriteriaRelDTO;
+import org.cdsframework.dto.ConditionDTO;
 import org.cdsframework.enumeration.CriteriaPredicateType;
 import org.cdsframework.enumeration.PredicatePartType;
 import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.DefinitionBlock;
@@ -55,13 +56,13 @@ public class DefinitionBlockVisitor extends ExpressionBodyVisitor {
     }
 
     @Override
-    public void visit(ConditionCriteriaRelDTO conditionCriteriaRelDTO) {
+    public void visit(ConditionDTO conditionDTO) {
         DefinitionBlock definitionBlock = new DefinitionBlock("ConditionCriteriaMet");
         int index = 0;
         boolean firstExpression = true;
-        if (this.context.referenceStack.size() > 0 && conditionCriteriaRelDTO.getPredicateDTOs() != null 
-            && !conditionCriteriaRelDTO.getPredicateDTOs().isEmpty() && this.context.referenceStack.size() >= conditionCriteriaRelDTO.getPredicateDTOs().size()) {
-            while (index < conditionCriteriaRelDTO.getPredicateDTOs().size()) {
+        if (this.context.referenceStack.size() > 0 && conditionDTO.getConditionCriteriaRelDTOs() != null 
+            && !conditionDTO.getConditionCriteriaRelDTOs().isEmpty() && this.context.referenceStack.size() >= conditionDTO.getConditionCriteriaRelDTOs().size()) {
+            while (index < conditionDTO.getConditionCriteriaRelDTOs().size()) {
                 Pair<CriteriaPredicateType, Pair<String, String>> reference = this.context.referenceStack.pop();
                 if (firstExpression) {
                     reference = Pair.of(reference.getLeft(), Pair.of(null, reference.getRight().getRight()));

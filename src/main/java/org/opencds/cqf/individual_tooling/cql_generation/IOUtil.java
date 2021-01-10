@@ -16,6 +16,10 @@ public class IOUtil {
 
     public static String readFile(String path) {
         File file = new File(path);
+        return readFile(file);
+    }
+
+    public static String readFile(File file) {
         StringBuilder content = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;

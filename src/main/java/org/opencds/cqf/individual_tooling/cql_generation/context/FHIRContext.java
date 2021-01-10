@@ -19,11 +19,18 @@ import org.opencds.cqf.individual_tooling.cql_generation.drool.serialization.Pai
 public class FHIRContext {
 
         public Set<Pair<String, String>> fhirModelingSet = new HashSet<Pair<String, String>>();
-        public Map<String, Pair<String, String>> valuesetMapping = new HashMap<String, Pair<String, String>>();
-        private static String fhirModelingMapFilePath = ".\\src\\main\\java\\org\\opencds\\cqf\\individual_tooling\\cql_generation\\CQLGenerationDocs\\fhirmodelingmap.txt";
-        private static String valueSetMappingFilePath = ".\\src\\main\\java\\org\\opencds\\cqf\\individual_tooling\\cql_generation\\CQLGenerationDocs\\valuesetMapping.json";
+        public Map<String, Pair<String, String>> valueSetMap;
+        private File fhirModelingMapFile;
+        private File valueSetMappingFile;
+        
+        
+        public FHIRContext() {
+                this.fhirModelingMapFile = new File(".\\src\\main\\java\\org\\opencds\\cqf\\individual_tooling\\cql_generation\\CQLGenerationDocs\\fhirmodelingmap.txt");
+                this.valueSetMappingFile = new File(".\\src\\main\\java\\org\\opencds\\cqf\\individual_tooling\\cql_generation\\CQLGenerationDocs\\valuesetMapping.json");
+                this.valueSetMap = initializeValueSetMap();
+        }
         // Create a Model retriever thingy
-        public static final Map<String, Pair<String, String>> cdsdmToFhirMap = Map.ofEntries(
+        public final Map<String, Pair<String, String>> cdsdmToFhirMap = Map.ofEntries(
                         Map.entry("EncounterEvent.encounterType", Pair.of("Encounter", "type")),
                         Map.entry("EncounterEvent.",
                                         Pair.of("Encounter", ".reasonReference.resolve() as Observation).value")),
@@ -32,12 +39,14 @@ public class FHIRContext {
                         Map.entry("EncounterEvent.relatedClinicalStatement.observationResult.observationValue.concept",
                                         Pair.of("Encounter", "?")),
                         Map.entry("EvaluatedPerson.demographics.gender", Pair.of("Patient", "gender")),
+                        Map.entry("EvaluatedPerson.demographics.isDeceased", Pair.of("Patient", "?")),
                         Map.entry("ObservationOrder.observationFocus", Pair.of("Observation", "focus")),
                         Map.entry("ObservationOrder.observationMethod", Pair.of("Observation", "?")),
                         Map.entry("ObservationResult.interpretation", Pair.of("Observation", "interpretation")),
                         Map.entry("ObservationResult.observationFocus", Pair.of("Observation", "focus")),
                         Map.entry("ObservationResult.observationValue.concept",
                                         Pair.of("Observation", "value as CodeableConcept")),
+                        Map.entry("ObservationResult.observationValue.physicalQuantity", Pair.of("Observation", "?")),
                         Map.entry("Problem.problemCode", Pair.of("Condition", "code")),
                         Map.entry("Problem.problemStatus", Pair.of("Condition", "clinicalStatus")),
                         Map.entry("ProcedureEvent.procedureCode", Pair.of("Procedure", "code")),
@@ -45,6 +54,11 @@ public class FHIRContext {
                         Map.entry("ProcedureProposal.procedureCode", Pair.of("Procedure", "code")),
                         Map.entry("SubstanceAdministrationEvent.substance.substanceCode",
                                         Pair.of("MedicationRequest", "medication as CodeableConcept")), // This needs to
+                                                                                                        // be a little
+                                                                                                        // more
+                                                                                                        // complicated
+                        Map.entry("SubstanceAdministrationEvent.relatedClinicalStatement.problem.problemCode",
+                                        Pair.of("MedicationRequest", "?")), // This needs to
                                                                                                         // be a little
                                                                                                         // more
                                                                                                         // complicated
@@ -69,13 +83,24 @@ public class FHIRContext {
                                         Pair.of("MedicationRequest", "?")),
                         Map.entry("SubstanceAdministationProposal.relatedClinicalStatement.problem.problemCode",
                                         Pair.of("MedicationRequest", "?")),
+                        Map.entry("SubstanceAdministrationOrder.id",
+                                        Pair.of("MedicationRequest", "?")),
                         Map.entry("SubstanceDispensationEvent.relatedClinicalStatement.problem.problemCode",
                                         Pair.of("MedicationRequest", "?")));
 
-        private static ObjectMapper mapper = new ObjectMapper();
+        
+        public final Map<String, String> resourceTemplateMap = Map.ofEntries(
+                Map.entry("Encounter", "http://hl7.org/fhir/StructureDefinition/Encounter"),
+                Map.entry("Patient", "http://hl7.org/fhir/StructureDefinition/Patient"),
+                Map.entry("Observation", "http://hl7.org/fhir/StructureDefinition/Observation"),
+                Map.entry("Condition", "http://hl7.org/fhir/StructureDefinition/Condition"),
+                Map.entry("Procedure", "http://hl7.org/fhir/StructureDefinition/Procedure"),
+                Map.entry("MedicationRequest", "http://hl7.org/fhir/StructureDefinition/MedicationRequest"),
+                Map.entry("MedicationAdministration", "http://hl7.org/fhir/StructureDefinition/MedicationAdministration"));
+
+        private ObjectMapper mapper = new ObjectMapper();
 
         public void writeFHIRModelMapping() {
-                File fhirModelingMapFile = new File(fhirModelingMapFilePath);
                 if (fhirModelingMapFile.exists()) {
                         fhirModelingMapFile.delete();
                 }
@@ -89,8 +114,7 @@ public class FHIRContext {
                                 element.getLeft() + ":     " + element.getRight() + "\n"));
         }
 
-        public void writeValueSetMapping() {
-                File fhirModelingMapFile = new File(valueSetMappingFilePath);
+        private void writeValueSetMapping() {
                 if (fhirModelingMapFile.exists()) {
                         fhirModelingMapFile.delete();
                 }
@@ -102,7 +126,7 @@ public class FHIRContext {
                 }
                 String jsonResult;
                 try {
-                        jsonResult = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(valuesetMapping);
+                        jsonResult = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(valueSetMappingFile);
                         IOUtil.writeToFile(fhirModelingMapFile, jsonResult);
                 } catch (JsonProcessingException e) {
                         // TODO Auto-generated catch block
@@ -111,20 +135,20 @@ public class FHIRContext {
                 }
         }
 
-        public static Map<String, Pair<String, String>> readValueSetMapping() {
-                String jsonInput = IOUtil.readFile(valueSetMappingFilePath);
+        public Map<String, Pair<String, String>> initializeValueSetMap() {
+                if (!valueSetMappingFile.exists()) {
+                        writeValueSetMapping();
+                }
+                String jsonInput = IOUtil.readFile(valueSetMappingFile);
                 SimpleModule module = new SimpleModule();
                 module.addDeserializer(Pair.class, new PairJacksonProvider());
                 mapper.registerModule(module);
                 TypeReference<HashMap<String, Pair<String, String>>> typeRef = new TypeReference<HashMap<String, Pair<String, String>>>() {};
-                HashMap<String, Pair<String, String>> map = null;
                 try {
-                        map = mapper.readValue(jsonInput, typeRef);
+                        return mapper.readValue(jsonInput, typeRef);
                 } catch (JsonProcessingException e) {
-                        // TODO Auto-generated catch block
-                        System.out.println(e.getMessage());
                         e.printStackTrace();
+                        throw new RuntimeException(e.getMessage());
                 }
-                return map;
         }
 }
