@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.List;
 
@@ -11,6 +13,7 @@ import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
+import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -43,6 +46,8 @@ public class ExtractMatBundleOperation extends Operation {
 		        }
 			}
 		}
+
+		LogUtils.info(String.format("Extracting MAT bundle from %s", inputFile));
 
 		// Open the file to validate it
         File bundleFile = new File(inputFile);
@@ -101,7 +106,8 @@ public class ExtractMatBundleOperation extends Operation {
         
         // Now move and properly rename the files
         moveAndRenameFiles(outputDir);
-        
+
+        LogUtils.info("Extraction completed successfully");
 	}
 	
 	/**
@@ -133,7 +139,7 @@ public class ExtractMatBundleOperation extends Operation {
         	// The extractor code names them using the resource type and ID
         	// We want to name them without the resource type, use name, and if needed version
         	String resourceName;
-        	String newOutputDirectory = outputDir.substring(0, outputDir.indexOf("bundles/")) + "input/";
+        	Path newOutputDirectory = Paths.get(outputDir.substring(0, outputDir.indexOf("bundles")), "input");
         	if (version == "stu3) ") {
         		if (theResource instanceof org.hl7.fhir.dstu3.model.Library) {
         			org.hl7.fhir.dstu3.model.Library theLibrary = (org.hl7.fhir.dstu3.model.Library)theResource;
@@ -141,10 +147,10 @@ public class ExtractMatBundleOperation extends Operation {
         			
         			// Forcing the encoding to JSON here to make everything the same in input directory
         			ResourceUtils.outputResourceByName(theResource, "json", context,
-        					newOutputDirectory + "resources/library/", resourceName);
+        					Paths.get(newOutputDirectory.toString(),"resources/library").toString(), resourceName);
         			
         			// Now extract the CQL from the library file
-        			String cqlFilename = newOutputDirectory + "cql/" + resourceName + ".cql";
+        			String cqlFilename = Paths.get(newOutputDirectory.toString(), "cql", resourceName) + ".cql";
         			extractStu3CQL(theLibrary, cqlFilename);
         		}
         		else if (theResource instanceof org.hl7.fhir.dstu3.model.Measure) {
@@ -152,7 +158,7 @@ public class ExtractMatBundleOperation extends Operation {
         			
         			// Forcing the encoding to JSON here to make everything the same in input directory
         			ResourceUtils.outputResourceByName(theResource, "json", context,
-        					newOutputDirectory + "resources/measure/", resourceName);
+        					Paths.get(newOutputDirectory.toString(), "resources/measure").toString(), resourceName);
         		}
         	}
         	else if (version == "r4") {
@@ -162,10 +168,10 @@ public class ExtractMatBundleOperation extends Operation {
         			
         			// Forcing the encoding to JSON here to make everything the same in input directory
         			ResourceUtils.outputResourceByName(theResource, "json", context,
-        					newOutputDirectory + "resources/library/", resourceName);
+        					Paths.get(newOutputDirectory.toString(), "resources/library").toString(), resourceName);
         			
         			// Now extract the CQL from the library file
-        			String cqlFilename = newOutputDirectory + "cql/" + resourceName + ".cql";
+        			String cqlFilename = Paths.get(newOutputDirectory.toString(), "cql", resourceName) + ".cql";
         			extractR4CQL(theLibrary, cqlFilename);
         		}
         		else if (theResource instanceof org.hl7.fhir.r4.model.Measure) {
@@ -173,7 +179,7 @@ public class ExtractMatBundleOperation extends Operation {
         			
         			// Forcing the encoding to JSON here to make everything the same in input directory
         			ResourceUtils.outputResourceByName(theResource, "json", context,
-        					newOutputDirectory + "resources/measure/", resourceName);
+        					Paths.get(newOutputDirectory.toString(), "resources/measure").toString(), resourceName);
         		}
         	}
         }
