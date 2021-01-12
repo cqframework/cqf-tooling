@@ -12,15 +12,9 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorException;
@@ -205,7 +199,7 @@ public class IOUtils
     }
     
     //users should always check for null
-    private static Map<String, IBaseResource> cachedResources = new HashMap<String, IBaseResource>();
+    private static Map<String, IBaseResource> cachedResources = new LinkedHashMap<String, IBaseResource>();
     public static IBaseResource readResource(String path, FhirContext fhirContext, Boolean safeRead) 
     {        
         Encoding encoding = getEncoding(path);
@@ -434,7 +428,7 @@ public class IOUtils
         return dependencyCqlFiles;
     } 
   
-    private static Map<String, CqlTranslator> cachedTranslator = new HashMap<String, CqlTranslator>();
+    private static Map<String, CqlTranslator> cachedTranslator = new LinkedHashMap<String, CqlTranslator>();
     public static CqlTranslator translate(String cqlContentPath, ModelManager modelManager, LibraryManager libraryManager) {
         CqlTranslator translator = cachedTranslator.get(cqlContentPath);
         if (translator != null) {
@@ -553,7 +547,7 @@ public class IOUtils
         return libraryPath;
     }
 
-    private static HashSet<String> cqlLibraryPaths = new HashSet<String>();
+    private static HashSet<String> cqlLibraryPaths = new LinkedHashSet<String>();
     public static HashSet<String> getCqlLibraryPaths() {
         if (cqlLibraryPaths.isEmpty()) {
             setupCqlLibraryPaths();
@@ -568,7 +562,7 @@ public class IOUtils
         }
     }
 
-    private static HashSet<String> terminologyPaths = new HashSet<String>();
+    private static HashSet<String> terminologyPaths = new LinkedHashSet<String>();
     public static HashSet<String> getTerminologyPaths(FhirContext fhirContext) {
         if (terminologyPaths.isEmpty()) {
             setupTerminologyPaths(fhirContext);
@@ -576,7 +570,7 @@ public class IOUtils
         return terminologyPaths;
     }
     private static void setupTerminologyPaths(FhirContext fhirContext) {
-        HashMap<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
+        HashMap<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
             {
@@ -606,20 +600,50 @@ public class IOUtils
         }
     }
 
-    private static HashSet<String> libraryPaths = new HashSet<String>();
+    public static IBaseResource getLibraryByUrl(FhirContext fhirContext, String url) {
+        IBaseResource library = getLibraryUrlMap(fhirContext).get(url);
+        if (library == null) {
+            throw new IllegalArgumentException(String.format("Could not load library with url %s", url));
+        }
+        return library;
+    }
+
+    private static HashSet<String> libraryPaths = new LinkedHashSet<String>();
     public static HashSet<String> getLibraryPaths(FhirContext fhirContext) {
         if (libraryPaths.isEmpty()) {
             setupLibraryPaths(fhirContext);
         }
         return libraryPaths;
     }
+    private static Map<String, IBaseResource> libraryUrlMap = new LinkedHashMap<String, IBaseResource>();
+    public static Map<String, IBaseResource> getLibraryUrlMap(FhirContext fhirContext) {
+        if (libraryPathMap.isEmpty()) {
+            setupLibraryPaths(fhirContext);
+        }
+        return libraryUrlMap;
+    }
+    private static Map<String, String> libraryPathMap = new LinkedHashMap<String, String>();
+    public static Map<String, String> getLibraryPathMap(FhirContext fhirContext) {
+        if (libraryPathMap.isEmpty()) {
+            setupLibraryPaths(fhirContext);
+        }
+        return libraryPathMap;
+    }
+    private static Map<String, IBaseResource> libraries = new LinkedHashMap<String, IBaseResource>();
+    public static Map<String, IBaseResource> getLibraries(FhirContext fhirContext) {
+        if (libraries.isEmpty()) {
+            setupLibraryPaths(fhirContext);
+        }
+        return libraries;
+    }
     private static void setupLibraryPaths(FhirContext fhirContext) {
-        HashMap<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
+        Map<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
             {
                 try {
-                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                    IBaseResource resource = IOUtils.readResource(path, fhirContext, true);
+                    resources.put(path, resource);
                 } catch (Exception e) {
                     if(path.toLowerCase().contains("library")) {
                         System.out.println("Error reading in Library from path: " + path + "\n" + e);
@@ -629,27 +653,48 @@ public class IOUtils
             //TODO: move these to ResourceUtils
             RuntimeResourceDefinition libraryDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "Library");
             String libraryClassName = libraryDefinition.getImplementingClass().getName();
+            BaseRuntimeChildDefinition urlElement = libraryDefinition.getChildByNameOrThrowDataFormatException("url");
             resources.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)
                 .filter(entry ->  libraryClassName.equals(entry.getValue().getClass().getName()))
-                .forEach(entry -> libraryPaths.add(entry.getKey()));
+                .forEach(entry -> {
+                    libraryPaths.add(entry.getKey());
+                    libraries.put(entry.getValue().getIdElement().getIdPart(), entry.getValue());
+                    libraryPathMap.put(entry.getValue().getIdElement().getIdPart(), entry.getKey());
+                    libraryUrlMap.put(ResourceUtils.getUrl(entry.getValue(), fhirContext), entry.getValue());
+                });
         }
     }
 
-    private static HashSet<String> measurePaths = new HashSet<String>();
+    private static HashSet<String> measurePaths = new LinkedHashSet<String>();
     public static HashSet<String> getMeasurePaths(FhirContext fhirContext) {
         if (measurePaths.isEmpty()) {
             setupMeasurePaths(fhirContext);
         }
         return measurePaths;
     }
+    private static Map<String, String> measurePathMap = new LinkedHashMap<String, String>();
+    public static Map<String, String> getMeasurePathMap(FhirContext fhirContext) {
+        if (measurePathMap.isEmpty()) {
+            setupMeasurePaths(fhirContext);
+        }
+        return measurePathMap;
+    }
+    private static Map<String, IBaseResource> measures = new LinkedHashMap<String, IBaseResource>();
+    public static Map<String, IBaseResource> getMeasures(FhirContext fhirContext) {
+        if (measures.isEmpty()) {
+            setupMeasurePaths(fhirContext);
+        }
+        return measures;
+    }
     private static void setupMeasurePaths(FhirContext fhirContext) {
-        HashMap<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
+        Map<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
             {
                 try {
-                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                    IBaseResource resource = IOUtils.readResource(path, fhirContext, true);
+                    resources.put(path, resource);
                 } catch (Exception e) {
                     if(path.toLowerCase().contains("measure")) {
                         System.out.println("Error reading in Measure from path: " + path + "\n" + e);
@@ -662,11 +707,15 @@ public class IOUtils
             resources.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)
                 .filter(entry ->  measureClassName.equals(entry.getValue().getClass().getName()))
-                .forEach(entry -> measurePaths.add(entry.getKey()));
+                .forEach(entry -> {
+                    measurePaths.add(entry.getKey());
+                    measures.put(entry.getValue().getIdElement().getIdPart(), entry.getValue());
+                    measurePathMap.put(entry.getValue().getIdElement().getIdPart(), entry.getKey());
+                });
         }
     }
 
-    private static HashSet<String> measureReportPaths = new HashSet<String>();
+    private static HashSet<String> measureReportPaths = new LinkedHashSet<String>();
     public static HashSet<String> getMeasureReportPaths(FhirContext fhirContext) {
         if (measureReportPaths.isEmpty()) {
             setupMeasureReportPaths(fhirContext);
@@ -674,7 +723,7 @@ public class IOUtils
         return measureReportPaths;
     }
     private static void setupMeasureReportPaths(FhirContext fhirContext) {
-        HashMap<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
+        HashMap<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
             {
@@ -694,7 +743,7 @@ public class IOUtils
         }
     }
 
-	private static HashSet<String> planDefinitionPaths = new HashSet<String>();
+	private static HashSet<String> planDefinitionPaths = new LinkedHashSet<String>();
     public static HashSet<String> getPlanDefinitionPaths(FhirContext fhirContext) {
         if (planDefinitionPaths.isEmpty()) {
             setupPlanDefinitionPaths(fhirContext);
@@ -702,7 +751,7 @@ public class IOUtils
         return planDefinitionPaths;
     }
     private static void setupPlanDefinitionPaths(FhirContext fhirContext) {
-        HashMap<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
+        HashMap<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
             {
@@ -721,7 +770,7 @@ public class IOUtils
         }
     }
 
-    private static HashSet<String> activityDefinitionPaths = new HashSet<String>();
+    private static HashSet<String> activityDefinitionPaths = new LinkedHashSet<String>();
     public static HashSet<String> getActivityDefinitionPaths(FhirContext fhirContext) {
         if (activityDefinitionPaths.isEmpty()) {
             System.out.println("Reading activitydefinitions");
@@ -730,7 +779,7 @@ public class IOUtils
         return activityDefinitionPaths;
     }
     private static void setupActivityDefinitionPaths(FhirContext fhirContext) {
-        HashMap<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
+        HashMap<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
         // BUG: resourceDirectories is being populated with all "per-convention" directories during validation. So,
         // if you have resources in the /tests directory for example, they will be picked up from there, rather than
         // from your resources directories.
@@ -763,7 +812,7 @@ public class IOUtils
         }
     }
 
-    private static HashSet<String> devicePaths = new HashSet<String>();
+    private static HashSet<String> devicePaths = new LinkedHashSet<String>();
     public static HashSet<String> getDevicePaths(FhirContext fhirContext) {
         if (devicePaths.isEmpty()) {
             setupDevicePaths(fhirContext);
@@ -771,7 +820,7 @@ public class IOUtils
         return devicePaths;
     }
     private static void setupDevicePaths(FhirContext fhirContext) {
-        HashMap<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
+        HashMap<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
             {
