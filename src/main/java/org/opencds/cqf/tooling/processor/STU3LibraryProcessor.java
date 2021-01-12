@@ -69,7 +69,11 @@ public class STU3LibraryProcessor extends LibraryProcessor {
     }
 
     private void cleanseRelatedArtifactReferences(Library library) {
-        for (RelatedArtifact relatedArtifact : library.getRelatedArtifact()) {
+        List<String> unresolvableCodeSystems = Arrays.asList("http://loinc.org", "http://snomed.info/sct");
+        List<RelatedArtifact> relatedArtifacts = library.getRelatedArtifact();
+        relatedArtifacts.removeIf(ra -> ra.hasResource() && ra.getResource().hasReference() && unresolvableCodeSystems.contains(ra.getResource().getReference()));
+
+        for (RelatedArtifact relatedArtifact : relatedArtifacts) {
             if ((relatedArtifact.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON) && relatedArtifact.hasResource()) {
                 String resourceReference = relatedArtifact.getResource().getReference();
                 if (resourceReference.contains("|")) {
