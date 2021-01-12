@@ -1,11 +1,13 @@
 package org.opencds.cqf.tooling.processor;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
+import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -30,7 +32,16 @@ public class IGProcessor extends BaseProcessor {
         Boolean cdsHooksIg = params.cdsHooksIg;
         String fhirUri = params.fhirUri;
         String measureToRefreshPath = params.measureToRefreshPath;
-        ArrayList<String> resourceDirs = params.resourceDirs;
+        ArrayList<String> resourceDirs = new ArrayList<String>();
+        for (String resourceDir : params.resourceDirs) {
+            if (!Utilities.isAbsoluteFileName(resourceDir)) {
+                try {
+                    resourceDirs.add(Utilities.path(rootDir, resourceDir));
+                } catch (IOException e) {
+                    LogUtils.putException("ig", e);
+                }
+            }
+        }
 
         IOUtils.resourceDirectories.addAll(resourceDirs);
 
