@@ -4,67 +4,68 @@ public class CodeSystemLookupDictionary {
 
     /*
 
-    Using HL7's Terminology 1.0.0 Publication IG: https://terminology.hl7.org/codesystems.html
+    Using HL7's Terminology 1.0.0 Publication IG: http://terminology.hl7.org/codesystems.html
 
     CodeSystem Name                 |  OID                                  | URL
     ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        ActCode                     2.16.840.1.113883.5.4           ->      https://terminology.hl7.org/1.0.0/CodeSystem-v3-ActCode.html
-        ActMood                     2.16.840.1.113883.5.1001        ->      https://terminology.hl7.org/1.0.0/CodeSystem-v3-ActMood.html
-        ActPriority                 2.16.840.1.113883.5.7           ->      https://terminology.hl7.org/1.0.0/CodeSystem-v3-ActPriority.html
-        ActReason                   2.16.840.1.113883.5.8           ->      https://terminology.hl7.org/1.0.0/CodeSystem-v3-ActReason.html
-        ActRelationshipType         2.16.840.1.113883.5.1002        ->      https://terminology.hl7.org/1.0.0/CodeSystem-v3-ActRelationshipType.html
-        ActStatus                   2.16.840.1.113883.5.14          ->      https://terminology.hl7.org/1.0.0/CodeSystem-v3-ActStatus.html
-        AddressUse                  2.16.840.1.113883.5.1119        ->      https://terminology.hl7.org/1.0.0/CodeSystem-v3-AddressUse.html
-        AdministrativeGender        2.16.840.1.113883.5.1           ->      https://terminology.hl7.org/1.0.0/CodeSystem-v3-AdministrativeGender.html
-        AdministrativeSex           2.16.840.1.113883.18.2          ->      https://terminology.hl7.org/1.0.0/CodeSystem-v2-0001.html
-        CPT                         2.16.840.1.113883.6.12          ->      https://terminology.hl7.org/CodeSystem-v3-cpt-4.html
-        CVX                         2.16.840.1.113883.12.292        ->      https://terminology.hl7.org/CodeSystem-v2-0292.html
-        Confidentiality             2.16.840.1.113883.5.25          ->      https://terminology.hl7.org/CodeSystem-v3-Confidentiality.html
+        ActCode                     2.16.840.1.113883.5.4           ->      http://terminology.hl7.org/1.0.0/CodeSystem-v3-ActCode.html
+        ActMood                     2.16.840.1.113883.5.1001        ->      http://terminology.hl7.org/1.0.0/CodeSystem-v3-ActMood.html
+        ActPriority                 2.16.840.1.113883.5.7           ->      http://terminology.hl7.org/1.0.0/CodeSystem-v3-ActPriority.html
+        ActReason                   2.16.840.1.113883.5.8           ->      http://terminology.hl7.org/1.0.0/CodeSystem-v3-ActReason.html
+        ActRelationshipType         2.16.840.1.113883.5.1002        ->      http://terminology.hl7.org/1.0.0/CodeSystem-v3-ActRelationshipType.html
+        ActStatus                   2.16.840.1.113883.5.14          ->      http://terminology.hl7.org/1.0.0/CodeSystem-v3-ActStatus.html
+        AddressUse                  2.16.840.1.113883.5.1119        ->      http://terminology.hl7.org/1.0.0/CodeSystem-v3-AddressUse.html
+        AdministrativeGender        2.16.840.1.113883.5.1           ->      http://terminology.hl7.org/1.0.0/CodeSystem-v3-AdministrativeGender.html
+        AdministrativeSex           2.16.840.1.113883.18.2          ->      http://terminology.hl7.org/1.0.0/CodeSystem-v2-0001.html
+        CPT                         2.16.840.1.113883.6.12          ->      http://terminology.hl7.org/CodeSystem-v3-cpt-4.html
+        CVX                         2.16.840.1.113883.12.292        ->      http://terminology.hl7.org/CodeSystem-v2-0292.html
+        Confidentiality             2.16.840.1.113883.5.25          ->      http://terminology.hl7.org/CodeSystem-v3-Confidentiality.html
         DischargeDisposition        2.16.840.1.113883.12.112        ->      urn:oid:2.16.840.1.113883.12.112
-        DischargeDisposition        2.16.840.1.113883.4.642.1.1093  ->      https://terminology.hl7.org/CodeSystem-discharge-disposition.html
-        EntityNamePartQualifier     2.16.840.1.113883.5.43          ->      https://terminology.hl7.org/CodeSystem-v3-EntityNamePartQualifier.html
-        EntityNameUse               2.16.840.1.113883.5.45          ->      https://terminology.hl7.org/CodeSystem-v3-EntityNameUse.html
-        HCPCS                       2.16.840.1.113883.6.14          ->      https://terminology.hl7.org/CodeSystem-HCPCS.html
-        HCPCS Level I: CPT          2.16.840.1.113883.6.14          ->      https://terminology.hl7.org/CodeSystem-HCPCS.html
+        DischargeDisposition        2.16.840.1.113883.4.642.1.1093  ->      http://terminology.hl7.org/CodeSystem-discharge-disposition.html
+        EntityNamePartQualifier     2.16.840.1.113883.5.43          ->      http://terminology.hl7.org/CodeSystem-v3-EntityNamePartQualifier.html
+        EntityNameUse               2.16.840.1.113883.5.45          ->      http://terminology.hl7.org/CodeSystem-v3-EntityNameUse.html
+        HCPCS                       2.16.840.1.113883.6.14          ->      http://terminology.hl7.org/CodeSystem-HCPCS.html
+        HCPCS Level I: CPT          2.16.840.1.113883.6.14          ->      http://terminology.hl7.org/CodeSystem-HCPCS.html
         HCPCS Level II              2.16.840.1.113883.6.285         ->      urn:oid:2.16.840.1.113883.6.285
-        ICD10                       2.16.840.1.113883.6.3           ->      https://terminology.hl7.org/CodeSystem-icd10.html
-        ICD10PCS                    2.16.840.1.113883.6.4           ->      https://terminology.hl7.org/CodeSystem-icd10PCS.html
-        ICS10CM                     2.16.840.1.113883.6.90          ->      https://terminology.hl7.org/CodeSystem-icd10CM.html
-        ICD9                        2.16.840.1.113883.6.42          ->      https://terminology.hl7.org/CodeSystem-icd9.html
-        ICD9CM                      2.16.840.1.113883.6.2           ->      https://terminology.hl7.org/CodeSystem-icd9cm.html
+        HSLOC                       2.16.840.1.113883.6.259         ->      http://terminology.hl7.org/CodeSystem/hsloc
+        ICD10                       2.16.840.1.113883.6.3           ->      http://terminology.hl7.org/CodeSystem-icd10.html
+        ICD10PCS                    2.16.840.1.113883.6.4           ->      http://terminology.hl7.org/CodeSystem-icd10PCS.html
+        ICS10CM                     2.16.840.1.113883.6.90          ->      http://terminology.hl7.org/CodeSystem-icd10CM.html
+        ICD9                        2.16.840.1.113883.6.42          ->      http://terminology.hl7.org/CodeSystem-icd9.html
+        ICD9CM                      2.16.840.1.113883.6.2           ->      http://terminology.hl7.org/CodeSystem-icd9cm.html
         ICD9PCS                     2.16.840.1.113883.6.104         ->      urn:oid:2.16.840.1.113883.6.104
-        LOINC                       2.16.840.1.113883.6.1           ->      https://terminology.hl7.org/NamingSystem-v3-loinc.html
-        LanguageAbilityMode         2.16.840.1.113883.5.60          ->      https://terminology.hl7.org/CodeSystem-v3-LanguageAbilityMode.html
-        LanguageAbilityProficiency  2.16.840.1.113883.5.61          ->      https://terminology.hl7.org/CodeSystem-v3-LanguageAbilityProficiency.html
-        LivingArrangement           2.16.840.1.113883.5.63          ->      https://terminology.hl7.org/CodeSystem-v3-LivingArrangement.html
-        MaritalStatus               2.16.840.1.113883.5.2           ->      https://terminology.hl7.org/CodeSystem-v3-MaritalStatus.html
-        NCI                         2.16.840.1.113883.3.26.1.1      ->      https://terminology.hl7.org/CodeSystem-v3-nciThesaurus.html
-        NDFRT                       2.16.840.1.113883.3.26.1.5      ->      https://terminology.hl7.org/CodeSystem-nciVersionOfNDF-RT.html
-        NUCCPT                      2.16.840.1.113883.6.101         ->      https://terminology.hl7.org/CodeSystem-v3-nuccProviderCodes.html
-        Provider Taxonomy           2.16.840.1.113883.6.101         ->      https://terminology.hl7.org/CodeSystem-v3-nuccProviderCodes.html
-        NullFlavor                  2.16.840.1.113883.5.1008        ->      https://terminology.hl7.org/CodeSystem-v3-NullFlavor.html
-        ObservationInterpretation   2.16.840.1.113883.5.83          ->      https://terminology.hl7.org/CodeSystem-v3-ObservationInterpretation.html
-        ObservationValue            2.16.840.1.113883.5.1063        ->      https://terminology.hl7.org/CodeSystem-v3-ObservationValue.html
-        ParticipationFunction       2.16.840.1.113883.5.88          ->      https://terminology.hl7.org/CodeSystem-v3-ParticipationFunction.html
-        ParticipationMode           2.16.840.1.113883.5.1064        ->      https://terminology.hl7.org/CodeSystem-v3-ParticipationMode.html
-        ParticipationType           2.16.840.1.113883.5.90          ->      https://terminology.hl7.org/CodeSystem-v3-ParticipationType.html
-        RXNORM                      2.16.840.1.113883.6.88          ->      https://terminology.hl7.org/NamingSystem-v3-rxNorm.html
-        ReligiousAffiliation        2.16.840.1.113883.5.1076        ->      https://terminology.hl7.org/CodeSystem-v3-ReligiousAffiliation.html
-        RoleClass                   2.16.840.1.113883.5.110         ->      https://terminology.hl7.org/CodeSystem-v3-RoleClass.html
-        RoleCode                    2.16.840.1.113883.5.111         ->      https://terminology.hl7.org/CodeSystem-v3-RoleCode.html
-        RoleStatus                  2.16.840.1.113883.5.1068        ->      https://terminology.hl7.org/CodeSystem-v3-RoleStatus.html
-        SNOMEDCT                    2.16.840.1.113883.6.96          ->      https://terminology.hl7.org/NamingSystem-v3-snomed-CT.html
-        UBREV                       2.16.840.1.113883.6.21          ->      https://terminology.hl7.org/CodeSystem-nubc-UB92.html
-        UBTOB                       2.16.840.1.113883.6.21          ->      https://terminology.hl7.org/CodeSystem-nubc-UB92.html
-        POS                         2.16.840.1.113883.6.50          ->      https://terminology.hl7.org/CodeSystem-POS.html
-        CDCREC                      2.16.840.1.113883.6.238         ->      https://terminology.hl7.org/CodeSystem-PHRaceAndEthnicityCDC.html
-        CDT                         2.16.840.1.113883.6.13          ->      https://terminology.hl7.org/CodeSystem-CD2.html
-        mediaType                   2.16.840.1.113883.5.79          ->      https://terminology.hl7.org/CodeSystem-v3-mediatypes.html
+        LOINC                       2.16.840.1.113883.6.1           ->      http://terminology.hl7.org/NamingSystem-v3-loinc.html
+        LanguageAbilityMode         2.16.840.1.113883.5.60          ->      http://terminology.hl7.org/CodeSystem-v3-LanguageAbilityMode.html
+        LanguageAbilityProficiency  2.16.840.1.113883.5.61          ->      http://terminology.hl7.org/CodeSystem-v3-LanguageAbilityProficiency.html
+        LivingArrangement           2.16.840.1.113883.5.63          ->      http://terminology.hl7.org/CodeSystem-v3-LivingArrangement.html
+        MaritalStatus               2.16.840.1.113883.5.2           ->      http://terminology.hl7.org/CodeSystem-v3-MaritalStatus.html
+        NCI                         2.16.840.1.113883.3.26.1.1      ->      http://terminology.hl7.org/CodeSystem-v3-nciThesaurus.html
+        NDFRT                       2.16.840.1.113883.3.26.1.5      ->      http://terminology.hl7.org/CodeSystem-nciVersionOfNDF-RT.html
+        NUCCPT                      2.16.840.1.113883.6.101         ->      http://terminology.hl7.org/CodeSystem-v3-nuccProviderCodes.html
+        Provider Taxonomy           2.16.840.1.113883.6.101         ->      http://terminology.hl7.org/CodeSystem-v3-nuccProviderCodes.html
+        NullFlavor                  2.16.840.1.113883.5.1008        ->      http://terminology.hl7.org/CodeSystem-v3-NullFlavor.html
+        ObservationInterpretation   2.16.840.1.113883.5.83          ->      http://terminology.hl7.org/CodeSystem-v3-ObservationInterpretation.html
+        ObservationValue            2.16.840.1.113883.5.1063        ->      http://terminology.hl7.org/CodeSystem-v3-ObservationValue.html
+        ParticipationFunction       2.16.840.1.113883.5.88          ->      http://terminology.hl7.org/CodeSystem-v3-ParticipationFunction.html
+        ParticipationMode           2.16.840.1.113883.5.1064        ->      http://terminology.hl7.org/CodeSystem-v3-ParticipationMode.html
+        ParticipationType           2.16.840.1.113883.5.90          ->      http://terminology.hl7.org/CodeSystem-v3-ParticipationType.html
+        RXNORM                      2.16.840.1.113883.6.88          ->      http://terminology.hl7.org/NamingSystem-v3-rxNorm.html
+        ReligiousAffiliation        2.16.840.1.113883.5.1076        ->      http://terminology.hl7.org/CodeSystem-v3-ReligiousAffiliation.html
+        RoleClass                   2.16.840.1.113883.5.110         ->      http://terminology.hl7.org/CodeSystem-v3-RoleClass.html
+        RoleCode                    2.16.840.1.113883.5.111         ->      http://terminology.hl7.org/CodeSystem-v3-RoleCode.html
+        RoleStatus                  2.16.840.1.113883.5.1068        ->      http://terminology.hl7.org/CodeSystem-v3-RoleStatus.html
+        SNOMEDCT                    2.16.840.1.113883.6.96          ->      http://terminology.hl7.org/NamingSystem-v3-snomed-CT.html
+        UBREV                       2.16.840.1.113883.6.21          ->      http://terminology.hl7.org/CodeSystem-nubc-UB92.html
+        UBTOB                       2.16.840.1.113883.6.21          ->      http://terminology.hl7.org/CodeSystem-nubc-UB92.html
+        POS                         2.16.840.1.113883.6.50          ->      http://terminology.hl7.org/CodeSystem-POS.html
+        CDCREC                      2.16.840.1.113883.6.238         ->      http://terminology.hl7.org/CodeSystem-PHRaceAndEthnicityCDC.html
+        CDT                         2.16.840.1.113883.6.13          ->      http://terminology.hl7.org/CodeSystem-CD2.html
+        mediaType                   2.16.840.1.113883.5.79          ->      http://terminology.hl7.org/CodeSystem-v3-mediatypes.html
         SOP                         2.16.840.1.113883.3.221.5       ->      urn:oid:2.16.840.1.113883.3.221.5
         UCUM                        1.3.6.1.4.1.12009.10.3.1        ->      urn:oid:1.3.6.1.4.1.12009.10.3.1
-        UCUM                        2.16.840.1.113883.6.8           ->      https://terminology.hl7.org/NamingSystem-v3-ucum.html
-        UMLS                        2.16.840.1.113883.6.86          ->      https://terminology.hl7.org/CodeSystem-umls.html
+        UCUM                        2.16.840.1.113883.6.8           ->      http://terminology.hl7.org/NamingSystem-v3-ucum.html
+        UMLS                        2.16.840.1.113883.6.86          ->      http://terminology.hl7.org/CodeSystem-umls.html
 
     */
 
@@ -87,6 +88,7 @@ public class CodeSystemLookupDictionary {
             case "2.16.840.1.113883.5.43": return "http://terminology.hl7.org/CodeSystem/v3-EntityNamePartQualifier";
             case "2.16.840.1.113883.5.45": return "http://terminology.hl7.org/CodeSystem/v3-EntityNameUse";
             case "2.16.840.1.113883.6.14": return "http://terminology.hl7.org/CodeSystem/HCPCS";
+            case "2.16.840.1.113883.6.259": return "http://terminology.hl7.org/CodeSystem/hsloc";
             case "2.16.840.1.113883.6.285": return "urn:oid:2.16.840.1.113883.6.285";
             case "2.16.840.1.113883.6.3": return "http://terminology.hl7.org/CodeSystem/icd10";
             case "2.16.840.1.113883.6.4": return "http://www.cms.gov/Medicare/Coding/ICD10";
@@ -149,6 +151,7 @@ public class CodeSystemLookupDictionary {
             case "HCPCS": return "http://terminology.hl7.org/CodeSystem/HCPCS";
             case "HCPCS Level I: CPT": return "http://terminology.hl7.org/CodeSystem/HCPCS";
             case "HCPCS Level II": return "urn:oid:2.16.840.1.113883.6.285";
+            case "HSLOC": return "http://terminology.hl7.org/CodeSystem/hsloc";
             case "ICD10": return "http://terminology.hl7.org/CodeSystem/icd10";
             case "ICD10CM": return "http://hl7.org/fhir/sid/icd-10-cm";
             case "ICD10PCS": return "http://www.cms.gov/Medicare/Coding/ICD10";
