@@ -19,9 +19,9 @@ import org.hl7.fhir.r5.model.Constants;
 import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.VersionUtilities;
-import org.hl7.fhir.utilities.cache.FilesystemPackageCacheManager;
-import org.hl7.fhir.utilities.cache.NpmPackage;
-import org.hl7.fhir.utilities.cache.ToolsVersion;
+import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
+import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.hl7.fhir.utilities.npm.ToolsVersion;
 import org.hl7.fhir.utilities.json.JsonTrackingParser;
 
 public class NpmPackageManager implements IWorkerContext.ILoggingService {
