@@ -20,7 +20,7 @@ public class VSACBatchValueSetGenerator extends Operation {
                 throw new IllegalArgumentException("Invalid argument: " + arg);
             }
             String flag = flagAndValue[0];
-            String value = flagAndValue[1];
+            String value = flagAndValue[1].replace("\"", ""); // Strip quotes
 
             switch (flag.replace("-", "").toLowerCase()) {
                 case "outputpath":
