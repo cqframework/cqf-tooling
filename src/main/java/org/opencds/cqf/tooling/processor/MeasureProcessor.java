@@ -65,54 +65,39 @@ public class MeasureProcessor
     public static void bundleMeasures(ArrayList<String> refreshedLibraryNames, String igPath, Boolean includeDependencies,
             Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, FhirContext fhirContext, String fhirUri,
             Encoding encoding) {
-        // The set to bundle should be the union of the successfully refreshed Measures and Libraries
-        // Until we have the ability to refresh Measures, the set is the union of
-        // existing Measures and successfully refreshed Libraries
-        HashSet<String> measureSourcePaths = IOUtils.getMeasurePaths(fhirContext);
-        List<String> measurePathLibraryNames = new ArrayList<String>();
-        for (String measureSourcePath : measureSourcePaths) {
-            measurePathLibraryNames
-                .add(FilenameUtils.getBaseName(measureSourcePath).replace(MeasureProcessor.ResourcePrefix, ""));
-        }
+        Map<String, IBaseResource> measures = IOUtils.getMeasures(fhirContext);
+        //Map<String, IBaseResource> libraries = IOUtils.getLibraries(fhirContext);
 
         List<String> bundledMeasures = new ArrayList<String>();
-        for (String refreshedLibraryName : refreshedLibraryNames) {
+        for (Map.Entry<String, IBaseResource> measureEntry : measures.entrySet()) {
+            String measureSourcePath = IOUtils.getMeasurePathMap(fhirContext).get(measureEntry.getKey());
+            // Assumption - File name matches measure.name
+            String measureName = FilenameUtils.getBaseName(measureSourcePath).replace(MeasureProcessor.ResourcePrefix, "");
             try {
-                if (!measurePathLibraryNames.contains(refreshedLibraryName)) {
-                    continue;
-                }
-
                 Map<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
 
-                String refreshedLibraryFileName = IOUtils.formatFileName(refreshedLibraryName, encoding, fhirContext);
-                String librarySourcePath;
-                try {
-                    librarySourcePath = IOUtils.getLibraryPathAssociatedWithCqlFileName(refreshedLibraryFileName, fhirContext);
-                } catch (Exception e) {
-                    LogUtils.putException(refreshedLibraryName, e);
-                    continue;
-                } finally {
-                    LogUtils.warn(refreshedLibraryName);
-                }
-                
-                String measureSourcePath = "";
-                for (String path : measureSourcePaths) {
-                    if (path.endsWith(refreshedLibraryFileName))
-                    {
-                        measureSourcePath = path;
-                        break;
-                    }
-                }
-
                 Boolean shouldPersist = ResourceUtils.safeAddResource(measureSourcePath, resources, fhirContext);
-                shouldPersist = shouldPersist
-                        & ResourceUtils.safeAddResource(librarySourcePath, resources, fhirContext);
+                if (!resources.containsKey(measureEntry.getKey())) {
+                    throw new IllegalArgumentException(String.format("Could not retrieve base resource for measure %s", measureName));
+                }
+                IBaseResource measure = resources.get(measureEntry.getKey());
+                String primaryLibraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
+                IBaseResource primaryLibrary = IOUtils.getLibraryUrlMap(fhirContext).get(primaryLibraryUrl);
+                String primaryLibrarySourcePath = IOUtils.getLibraryPathMap(fhirContext).get(primaryLibrary.getIdElement().getIdPart());
+                String primaryLibraryName = ResourceUtils.getName(primaryLibrary, fhirContext);
 
-                String cqlFileName = IOUtils.formatFileName(refreshedLibraryName, Encoding.CQL, fhirContext);
+                shouldPersist = shouldPersist
+                        & ResourceUtils.safeAddResource(primaryLibrarySourcePath, resources, fhirContext);
+
+                String cqlFileName = IOUtils.formatFileName(primaryLibraryName, Encoding.CQL, fhirContext);
                 List<String> cqlLibrarySourcePaths = IOUtils.getCqlLibraryPaths().stream()
                     .filter(path -> path.endsWith(cqlFileName))
                     .collect(Collectors.toList());
                 String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
+
+                if (cqlLibrarySourcePath == null) {
+                    throw new IllegalArgumentException(String.format("Could not determine CqlLibrarySource path for library %s", primaryLibraryName));
+                }
 
                 if (includeTerminology) {
                     boolean result = ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
@@ -123,7 +108,7 @@ public class MeasureProcessor
                 }
 
                 if (includeDependencies) {
-                    boolean result = LibraryProcessor.bundleLibraryDependencies(librarySourcePath, fhirContext, resources, encoding, includeVersion);
+                    boolean result = LibraryProcessor.bundleLibraryDependencies(primaryLibrarySourcePath, fhirContext, resources, encoding, includeVersion);
                     if (shouldPersist && !result) {
                         LogUtils.info("Measure will not be bundled because Library Dependency bundling failed.");
                     }
@@ -131,7 +116,7 @@ public class MeasureProcessor
                 }
 
                 if (includePatientScenarios) {
-                    boolean result = TestCaseProcessor.bundleTestCases(igPath, MeasureTestGroupName, refreshedLibraryName, fhirContext, resources);
+                    boolean result = TestCaseProcessor.bundleTestCases(igPath, MeasureTestGroupName, primaryLibraryName, fhirContext, resources);
                     if (shouldPersist && !result) {
                         LogUtils.info("PlanDefinitions will not be bundled because Test Case bundling failed.");
                     }
@@ -139,15 +124,15 @@ public class MeasureProcessor
                 }
 
                 if (shouldPersist) {
-                    String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), MeasureTestGroupName), refreshedLibraryName);
-                    persistBundle(igPath, bundleDestPath, refreshedLibraryName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri);
-                    bundleFiles(igPath, bundleDestPath, refreshedLibraryName, measureSourcePath, librarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion);
-                    bundledMeasures.add(refreshedLibraryName);
+                    String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), MeasureTestGroupName), measureName);
+                    persistBundle(igPath, bundleDestPath, measureName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri);
+                    bundleFiles(igPath, bundleDestPath, measureName, measureSourcePath, primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion);
+                    bundledMeasures.add(measureName);
                 }
             } catch (Exception e) {
-                LogUtils.putException(refreshedLibraryName, e);
+                LogUtils.putException(measureName, e);
             } finally {
-                LogUtils.warn(refreshedLibraryName);
+                LogUtils.warn(measureName);
             }
         }
         String message = "\r\n" + bundledMeasures.size() + " Measures successfully bundled:";
@@ -155,6 +140,7 @@ public class MeasureProcessor
             message += "\r\n     " + bundledMeasure + " BUNDLED";
         }
 
+        List<String> measurePathLibraryNames = new ArrayList<>(IOUtils.getMeasurePaths(fhirContext));
         ArrayList<String> failedMeasures = new ArrayList<>(measurePathLibraryNames);
         measurePathLibraryNames.removeAll(bundledMeasures);
         measurePathLibraryNames.retainAll(refreshedLibraryNames);
