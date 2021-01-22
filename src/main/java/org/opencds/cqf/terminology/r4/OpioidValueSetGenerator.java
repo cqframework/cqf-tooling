@@ -1,12 +1,11 @@
 package org.opencds.cqf.terminology.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.Operation;
 import org.opencds.cqf.terminology.SpreadsheetHelper;
@@ -57,6 +56,11 @@ public class OpioidValueSetGenerator extends Operation {
 
         OrganizationalMeta organizationalMeta = resolveOrganizationalMeta(workbook.getSheetAt(0));
         Map<String, Integer> vsMap = resolveVsMap(workbook.getSheetAt(0));
+
+        for (Map.Entry<String, Integer> a : vsMap.entrySet())
+            System.out.println(
+                    String.format("vsMap Entry -> %s", a.toString()));
+
         List<ValueSet> valueSets = resolveValueSets(organizationalMeta, vsMap, workbook);
         output(valueSets);
     }
@@ -64,8 +68,14 @@ public class OpioidValueSetGenerator extends Operation {
     private OrganizationalMeta resolveOrganizationalMeta(Sheet sheet) {
         OrganizationalMeta organizationalMeta = new OrganizationalMeta();
         Iterator<Row> rowIterator = sheet.rowIterator();
+
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
+            if (isRowEmpty(row)) {
+                System.out.println("Debug - resolveOrganizationalMeta contained empty row!");
+                continue;
+            }
+
             switch (SpreadsheetHelper.getCellAsString(row.getCell(0))) {
                 case "Canonical URL":
                     organizationalMeta.setCanonicalUrlBase(SpreadsheetHelper.getCellAsString(row.getCell(1)));
@@ -113,6 +123,11 @@ public class OpioidValueSetGenerator extends Operation {
         Iterator<Row> rowIterator = sheet.rowIterator();
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
+            if (isRowEmpty(row)) {
+                System.out.println("Debug - resolveCpgMeta contained an empty row!");
+                continue;
+            }
+
             switch (SpreadsheetHelper.getCellAsString(row.getCell(0))) {
                 case "id":
                     meta.setId(SpreadsheetHelper.getCellAsString(row.getCell(1)).toLowerCase());
@@ -199,12 +214,25 @@ public class OpioidValueSetGenerator extends Operation {
         return vsMap;
     }
 
+    /**
+     * Iterates over vsMap.entrySet() to resolve & populate CPGMeta objects.
+     * @param meta
+     * @param vsMap
+     * @param workbook
+     * @return List of ValueSets
+     */
     private List<ValueSet> resolveValueSets(OrganizationalMeta meta, Map<String, Integer> vsMap, Workbook workbook) {
         List<ValueSet> valueSets = new ArrayList<>();
         CPGMeta cpgMeta;
         ValueSet vs;
         for (Map.Entry<String, Integer> entrySet : vsMap.entrySet()) {
-            cpgMeta = resolveCpgMeta(workbook.getSheetAt(entrySet.getValue()));
+            System.out.println(entrySet.toString());
+            if (entrySet.getValue() == -1)
+                continue;
+
+            // Reminder for future Carter: Perhaps +1 on getValue()
+            // This is future Carter. It doesn't boom anymore but unsure if this actually gets me what I want.
+            cpgMeta = resolveCpgMeta(workbook.getSheetAt(entrySet.getValue() + 1));
             vs = cpgMeta.populate(fhirContext);
             meta.populate(vs);
 
@@ -217,6 +245,7 @@ public class OpioidValueSetGenerator extends Operation {
     }
 
     private void resolveCodeList(Sheet sheet, ValueSet vs, String snomedVersion) {
+        // TODO: Make this not like the way that it is.
         Iterator<Row> rowIterator = sheet.rowIterator();
 
         Boolean active = true;
@@ -277,6 +306,9 @@ public class OpioidValueSetGenerator extends Operation {
 
     private void output(List<ValueSet> valueSets) {
         for (ValueSet valueSet : valueSets) {
+            System.out.println(
+                    String.format("outputting -> %s", valueSet.toString()));
+
             try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + valueSet.getName() + "." + encoding)) {
                 writer.write(
                         encoding.equals("json")
@@ -289,5 +321,24 @@ public class OpioidValueSetGenerator extends Operation {
                 throw new IllegalArgumentException("Error outputting ValueSet: " + valueSet.getId());
             }
         }
+    }
+
+    /**
+     * Checks if all cells in row are empty.
+     * @param row
+     * @return true if given row is empty.
+     */
+    private boolean isRowEmpty(Row row) {
+        if (row == null) return true;
+        if (row.getLastCellNum() <= 0) return true;
+
+        for (int cellIndex = row.getFirstCellNum(); cellIndex < row.getLastCellNum(); cellIndex++)
+        {
+            Cell cell = row.getCell(cellIndex);
+            if (cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK && StringUtils.isNotBlank(cell.toString()))
+                return false;
+        }
+
+        return true;
     }
 }
