@@ -65,6 +65,11 @@ public class OpioidValueSetGenerator extends Operation {
         output(valueSets);
     }
 
+    /**
+     * Iterates over each row in sheet params, builds OrganizationalMeta obj with pre-defined strs.
+     * @param sheet
+     * @return OrganizationalMeta object with properties parsed from given sheet.
+     */
     private OrganizationalMeta resolveOrganizationalMeta(Sheet sheet) {
         OrganizationalMeta organizationalMeta = new OrganizationalMeta();
         Iterator<Row> rowIterator = sheet.rowIterator();
@@ -118,6 +123,11 @@ public class OpioidValueSetGenerator extends Operation {
         return organizationalMeta;
     }
 
+    /**
+     * Iterates over each row in sheet params, builds CPGMeta obj with pre-defined strs.
+     * @param sheet
+     * @return CPGMeta object with properties parsed from given sheet.
+     */
     private CPGMeta resolveCpgMeta(Sheet sheet) {
         CPGMeta meta = new CPGMeta();
         Iterator<Row> rowIterator = sheet.rowIterator();
@@ -226,7 +236,6 @@ public class OpioidValueSetGenerator extends Operation {
         CPGMeta cpgMeta;
         ValueSet vs;
         for (Map.Entry<String, Integer> entrySet : vsMap.entrySet()) {
-            System.out.println(entrySet.toString());
             if (entrySet.getValue() == -1)
                 continue;
 
@@ -304,6 +313,10 @@ public class OpioidValueSetGenerator extends Operation {
         }
     }
 
+    /**
+     * Writes constructed ValuSets to disk in user-defined format (default being json).
+     * @param valueSets
+     */
     private void output(List<ValueSet> valueSets) {
         for (ValueSet valueSet : valueSets) {
             System.out.println(
