@@ -24,9 +24,6 @@ public class OpioidValueSetGenerator extends Operation {
 
     private final int VSLIST_IDX = 20;
 
-    private int emptyOrgRows = 0;
-    private int emptyCpgRows = 0;
-
     @Override
     public void execute(String[] args) {
         setOutputPath("src/main/resources/org/opencds/cqf/terminology/r4/output");
