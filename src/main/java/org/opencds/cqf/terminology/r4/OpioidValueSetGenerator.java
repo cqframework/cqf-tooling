@@ -209,10 +209,6 @@ public class OpioidValueSetGenerator extends Operation {
             int cellType = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getCellType();
             String sheetName = SpreadsheetHelper.getCellAsString(row.getCell(2, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
 
-            String a;
-            a = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getSheet().getSheetName();
-
-
             if (sheetName.length() <= 0)
                 continue;
             vsMap.put(
