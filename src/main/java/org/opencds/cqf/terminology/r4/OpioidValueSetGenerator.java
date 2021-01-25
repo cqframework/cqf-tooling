@@ -24,7 +24,7 @@ public class OpioidValueSetGenerator extends Operation {
     private String encoding = "json"; // -encoding (-e)
     private String outputPrefix = "valueset-"; // -outputPrefix (-opp)
 
-    private final int VSLIST_IDX = 20;
+    private final int VSLIST_IDX = 17;
 
     @Override
     public void execute(String[] args) {
