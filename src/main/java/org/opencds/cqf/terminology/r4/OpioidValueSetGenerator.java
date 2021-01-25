@@ -2,10 +2,7 @@ package org.opencds.cqf.terminology.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.Operation;
 import org.opencds.cqf.terminology.SpreadsheetHelper;
@@ -26,6 +23,9 @@ public class OpioidValueSetGenerator extends Operation {
     private String encoding = "json"; // -encoding (-e)
 
     private final int VSLIST_IDX = 20;
+
+    private int emptyOrgRows = 0;
+    private int emptyCpgRows = 0;
 
     @Override
     public void execute(String[] args) {
@@ -55,12 +55,7 @@ public class OpioidValueSetGenerator extends Operation {
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
 
         OrganizationalMeta organizationalMeta = resolveOrganizationalMeta(workbook.getSheetAt(0));
-        Map<String, Integer> vsMap = resolveVsMap(workbook.getSheetAt(0));
-
-        for (Map.Entry<String, Integer> a : vsMap.entrySet())
-            System.out.println(
-                    String.format("vsMap Entry -> %s", a.toString()));
-
+        Map<String, Integer> vsMap = resolveVsMap(workbook, workbook.getSheetAt(0));
         List<ValueSet> valueSets = resolveValueSets(organizationalMeta, vsMap, workbook);
         output(valueSets);
     }
@@ -76,12 +71,7 @@ public class OpioidValueSetGenerator extends Operation {
 
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
-            if (isRowEmpty(row)) {
-                System.out.println("Debug - resolveOrganizationalMeta contained empty row!");
-                continue;
-            }
-
-            switch (SpreadsheetHelper.getCellAsString(row.getCell(0))) {
+            switch (row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue()) {
                 case "Canonical URL":
                     organizationalMeta.setCanonicalUrlBase(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
@@ -112,7 +102,7 @@ public class OpioidValueSetGenerator extends Operation {
                 case "author.telecom.value":
                     organizationalMeta.setAuthorTelecomValue(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
-                case "Snomed Version":
+                case "SNOMED CT":
                     organizationalMeta.setSnomedVersion(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
                 default:
@@ -133,12 +123,13 @@ public class OpioidValueSetGenerator extends Operation {
         Iterator<Row> rowIterator = sheet.rowIterator();
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
-            if (isRowEmpty(row)) {
-                System.out.println("Debug - resolveCpgMeta contained an empty row!");
-                continue;
-            }
 
-            switch (SpreadsheetHelper.getCellAsString(row.getCell(0))) {
+            int cellType = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getCellType();
+            String cellString = cellType == 1
+                    ? row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue()
+                    : String.valueOf(row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getNumericCellValue());
+
+            switch (cellString) {
                 case "id":
                     meta.setId(SpreadsheetHelper.getCellAsString(row.getCell(1)).toLowerCase());
                     break;
@@ -210,7 +201,7 @@ public class OpioidValueSetGenerator extends Operation {
         return meta;
     }
 
-    private Map<String, Integer> resolveVsMap(Sheet sheet) {
+    private Map<String, Integer> resolveVsMap(Workbook workbook, Sheet sheet) {
         Map<String, Integer> vsMap = new HashMap<>();
         Iterator<Row> rowIterator = sheet.rowIterator();
         while (rowIterator.next().getRowNum() < VSLIST_IDX) {
@@ -218,7 +209,20 @@ public class OpioidValueSetGenerator extends Operation {
         }
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
-            vsMap.put(SpreadsheetHelper.getCellAsString(row.getCell(0)), SpreadsheetHelper.getCellAsInteger(row.getCell(1)) - 1);
+            int cellType = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getCellType();
+            String sheetName = SpreadsheetHelper.getCellAsString(row.getCell(2, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
+
+            String a;
+            a = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getSheet().getSheetName();
+
+
+            if (sheetName.length() <= 0)
+                continue;
+            vsMap.put(
+                    SpreadsheetHelper.getCellAsString(row.getCell(2, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK)),
+                    row.getCell(3, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getRowIndex());
+
+
         }
 
         return vsMap;
@@ -236,17 +240,12 @@ public class OpioidValueSetGenerator extends Operation {
         CPGMeta cpgMeta;
         ValueSet vs;
         for (Map.Entry<String, Integer> entrySet : vsMap.entrySet()) {
-            if (entrySet.getValue() == -1)
-                continue;
-
-            // Reminder for future Carter: Perhaps +1 on getValue()
-            // This is future Carter. It doesn't boom anymore but unsure if this actually gets me what I want.
-            cpgMeta = resolveCpgMeta(workbook.getSheetAt(entrySet.getValue() + 1));
+            cpgMeta = resolveCpgMeta(workbook.getSheet(entrySet.getKey()));
+//            if (cpgMeta.getTitle().equals("only fill this out"))
+//                continue;
             vs = cpgMeta.populate(fhirContext);
             meta.populate(vs);
-
-            resolveCodeList(workbook.getSheetAt(entrySet.getValue() + 1), vs, meta.getSnomedVersion());
-
+            resolveCodeList(workbook.getSheet(entrySet.getKey().split("-")[0] + "-cl"), vs, meta.getSnomedVersion());
             valueSets.add(vs);
         }
 
@@ -265,9 +264,11 @@ public class OpioidValueSetGenerator extends Operation {
             Row row = rowIterator.next();
 
             String code = SpreadsheetHelper.getCellAsString(row.getCell(0));
+            if (code.length() <= 0) continue;
 
-            if (code.equals("Code")) continue;
+            if (code == null || code.equals("Code")) continue;
 
+            // ???
             if (code.equals("expansion")) {
 
             }
@@ -276,6 +277,7 @@ public class OpioidValueSetGenerator extends Operation {
                 active = SpreadsheetHelper.getCellAsString(row.getCell(2)) == null ? active : Boolean.valueOf(SpreadsheetHelper.getCellAsString(row.getCell(2)));
                 system = SpreadsheetHelper.getCellAsString(row.getCell(3)) == null ? system : SpreadsheetHelper.getCellAsString(row.getCell(3));
                 if (system == null) {
+//                    system = "System was null. Debug.";
                     throw new RuntimeException("A system must be specified in the code list");
                 }
                 version = SpreadsheetHelper.getCellAsString(row.getCell(4)) == null ? version : SpreadsheetHelper.getCellAsString(row.getCell(4));
@@ -293,10 +295,10 @@ public class OpioidValueSetGenerator extends Operation {
 
                 boolean added = false;
                 for (ValueSet.ConceptSetComponent include : vs.getCompose().getInclude()) {
-                    if (include.getSystem().equals(system) && !include.hasFilter()) {
-                        include.addConcept(new ValueSet.ConceptReferenceComponent().setCode(code).setDisplay(description));
-                        added = true;
-                    }
+//                    if (include.getSystem().equals(system) && !include.hasFilter()) {
+//                        include.addConcept(new ValueSet.ConceptReferenceComponent().setCode(code).setDisplay(description));
+//                        added = true;
+//                    }
                 }
 
                 if (!added) {
@@ -318,6 +320,7 @@ public class OpioidValueSetGenerator extends Operation {
      * @param valueSets
      */
     private void output(List<ValueSet> valueSets) {
+        System.out.println(valueSets.toString());
         for (ValueSet valueSet : valueSets) {
             System.out.println(
                     String.format("outputting -> %s", valueSet.toString()));
