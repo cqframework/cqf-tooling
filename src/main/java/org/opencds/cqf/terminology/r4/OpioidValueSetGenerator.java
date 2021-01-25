@@ -3,6 +3,7 @@ package org.opencds.cqf.terminology.r4;
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.*;
+import org.hl7.elm.r1.Null;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.Operation;
 import org.opencds.cqf.terminology.SpreadsheetHelper;
@@ -21,6 +22,7 @@ public class OpioidValueSetGenerator extends Operation {
 
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
     private String encoding = "json"; // -encoding (-e)
+    private String outputPrefix = "valueset-"; // -outputPrefix (-opp)
 
     private final int VSLIST_IDX = 20;
 
@@ -39,6 +41,7 @@ public class OpioidValueSetGenerator extends Operation {
 
             switch (flag.replace("-", "").toLowerCase()) {
                 case "outputpath": case "op": setOutputPath(value); break; // -outputpath (-op)
+                case "outputprefix": case "opp": setOutputPrefix(value); break;
                 case "pathtospreadsheet": case "pts": pathToSpreadsheet = value; break;
                 case "encoding": case "e": encoding = value.toLowerCase(); break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
@@ -55,6 +58,10 @@ public class OpioidValueSetGenerator extends Operation {
         Map<String, Integer> vsMap = resolveVsMap(workbook, workbook.getSheetAt(0));
         List<ValueSet> valueSets = resolveValueSets(organizationalMeta, vsMap, workbook);
         output(valueSets);
+    }
+
+    private void setOutputPrefix(String outputPrefix) {
+        this.outputPrefix = outputPrefix;
     }
 
     /**
@@ -129,6 +136,9 @@ public class OpioidValueSetGenerator extends Operation {
             switch (cellString) {
                 case "id":
                     meta.setId(SpreadsheetHelper.getCellAsString(row.getCell(1)).toLowerCase());
+                    // In the latest workbook we were given, many valuesets had unpopulated name cells.
+                    // However each valueset had a populated id cell.
+                    meta.setName(meta.getId());
                     break;
                 case "keyword":
                     meta.setKeyword(SpreadsheetHelper.getCellAsString(row.getCell(1)));
@@ -154,9 +164,9 @@ public class OpioidValueSetGenerator extends Operation {
                 case "version":
                     meta.setVersion(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
-                case "name":
-                    meta.setName(SpreadsheetHelper.getCellAsString(row.getCell(1)));
-                    break;
+//                case "name":
+//                    meta.setName(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+//                    break;
                 case "title":
                     meta.setTitle(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
@@ -287,12 +297,13 @@ public class OpioidValueSetGenerator extends Operation {
                 }
 
                 boolean added = false;
-                for (ValueSet.ConceptSetComponent include : vs.getCompose().getInclude()) {
+// It looks like the workbook Chris was working with had a 'system' key which is not present in the workbook I am working with.
+//                for (ValueSet.ConceptSetComponent include : vs.getCompose().getInclude()) {
 //                    if (include.getSystem().equals(system) && !include.hasFilter()) {
 //                        include.addConcept(new ValueSet.ConceptReferenceComponent().setCode(code).setDisplay(description));
 //                        added = true;
 //                    }
-                }
+//                }
 
                 if (!added) {
                     vs.getCompose()
@@ -313,12 +324,11 @@ public class OpioidValueSetGenerator extends Operation {
      * @param valueSets
      */
     private void output(List<ValueSet> valueSets) {
-        System.out.println(valueSets.toString());
         for (ValueSet valueSet : valueSets) {
-            System.out.println(
-                    String.format("outputting -> %s", valueSet.toString()));
+            String prefixedOutputPath = String.format(
+                    "%s/%s%s.%s", getOutputPath(), outputPrefix, valueSet.getName(), encoding);
 
-            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + valueSet.getName() + "." + encoding)) {
+            try (FileOutputStream writer = new FileOutputStream(prefixedOutputPath)) {
                 writer.write(
                         encoding.equals("json")
                                 ? fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet).getBytes()
