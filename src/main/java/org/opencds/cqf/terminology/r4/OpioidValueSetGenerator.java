@@ -198,7 +198,8 @@ public class OpioidValueSetGenerator extends Operation {
                     meta.setPurposeExclusionCriteria(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
                 case "compose":
-                    meta.setCompose(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    if (row.getCell(1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue().length() > 1)
+                        meta.setCompose(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
                 default:
                     break;
@@ -244,8 +245,13 @@ public class OpioidValueSetGenerator extends Operation {
         ValueSet vs;
         for (Map.Entry<String, Integer> entrySet : vsMap.entrySet()) {
             cpgMeta = resolveCpgMeta(workbook.getSheet(entrySet.getKey()));
-//            if (cpgMeta.getTitle().equals("only fill this out"))
-//                continue;
+            try {
+                if (cpgMeta.getTitle().equals("only fill this out"))
+                    continue;
+            } catch (NullPointerException e) {
+                System.out.println("cpg instance had null title");
+            }
+
             vs = cpgMeta.populate(fhirContext);
             meta.populate(vs);
             resolveCodeList(workbook.getSheet(entrySet.getKey().split("-")[0] + "-cl"), vs, meta.getSnomedVersion());
@@ -280,21 +286,20 @@ public class OpioidValueSetGenerator extends Operation {
                 active = SpreadsheetHelper.getCellAsString(row.getCell(2)) == null ? active : Boolean.valueOf(SpreadsheetHelper.getCellAsString(row.getCell(2)));
                 system = SpreadsheetHelper.getCellAsString(row.getCell(3)) == null ? system : SpreadsheetHelper.getCellAsString(row.getCell(3));
                 if (system == null) {
-//                    system = "System was null. Debug.";
                     throw new RuntimeException("A system must be specified in the code list");
                 }
                 version = SpreadsheetHelper.getCellAsString(row.getCell(4)) == null ? version : SpreadsheetHelper.getCellAsString(row.getCell(4));
 
-                if (!vs.hasCompose()) {
-                    vs.setCompose(
-                            new ValueSet.ValueSetComposeComponent()
-                                    .addInclude(
-                                            new ValueSet.ConceptSetComponent()
-                                                    .setSystem(system)
-                                                    .setVersion(system.equals("http://snomed.info/sct") ? snomedVersion : version)
-                                    )
-                    );
-                }
+//                if (!vs.hasCompose()) {
+//                    vs.setCompose(
+//                            new ValueSet.ValueSetComposeComponent()
+//                                    .addInclude(
+//                                            new ValueSet.ConceptSetComponent()
+//                                                    .setSystem(system)
+//                                                    .setVersion(system.equals("http://snomed.info/sct") ? snomedVersion : version)
+//                                    )
+//                    );
+//                }
 
                 boolean added = false;
 // It looks like the workbook Chris was working with had a 'system' key which is not present in the workbook I am working with.
@@ -327,6 +332,8 @@ public class OpioidValueSetGenerator extends Operation {
         for (ValueSet valueSet : valueSets) {
             String prefixedOutputPath = String.format(
                     "%s/%s%s.%s", getOutputPath(), outputPrefix, valueSet.getName(), encoding);
+
+            valueSet.setName(valueSet.getName().replace('-', '_'));
 
             try (FileOutputStream writer = new FileOutputStream(prefixedOutputPath)) {
                 writer.write(
