@@ -10,6 +10,7 @@ import org.opencds.cqf.terminology.SpreadsheetHelper;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.*;
 
 public class OpioidValueSetGenerator extends Operation {
@@ -217,7 +218,6 @@ public class OpioidValueSetGenerator extends Operation {
         }
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
-            int cellType = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getCellType();
             String sheetName = SpreadsheetHelper.getCellAsString(row.getCell(2, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
 
             if (sheetName.length() <= 0)
@@ -225,10 +225,7 @@ public class OpioidValueSetGenerator extends Operation {
             vsMap.put(
                     SpreadsheetHelper.getCellAsString(row.getCell(2, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK)),
                     row.getCell(3, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getRowIndex());
-
-
         }
-
         return vsMap;
     }
 
@@ -243,6 +240,7 @@ public class OpioidValueSetGenerator extends Operation {
         List<ValueSet> valueSets = new ArrayList<>();
         CPGMeta cpgMeta;
         ValueSet vs;
+
         for (Map.Entry<String, Integer> entrySet : vsMap.entrySet()) {
             cpgMeta = resolveCpgMeta(workbook.getSheet(entrySet.getKey()));
             try {
@@ -269,6 +267,9 @@ public class OpioidValueSetGenerator extends Operation {
         String system = null;
         String version = null;
 
+        ValueSet.ValueSetExpansionComponent expansion = new ValueSet.ValueSetExpansionComponent();
+        expansion.setTimestamp(Date.from(Instant.now()));
+
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
 
@@ -280,16 +281,18 @@ public class OpioidValueSetGenerator extends Operation {
             // ???
             if (code.equals("expansion")) {
 
-            }
-            else {
+            } else {
                 String description = SpreadsheetHelper.getCellAsString(row.getCell(1));
                 active = SpreadsheetHelper.getCellAsString(row.getCell(2)) == null ? active : Boolean.valueOf(SpreadsheetHelper.getCellAsString(row.getCell(2)));
-                system = SpreadsheetHelper.getCellAsString(row.getCell(3)) == null ? system : SpreadsheetHelper.getCellAsString(row.getCell(3));
-                if (system == null) {
-                    throw new RuntimeException("A system must be specified in the code list");
-                }
-                version = SpreadsheetHelper.getCellAsString(row.getCell(4)) == null ? version : SpreadsheetHelper.getCellAsString(row.getCell(4));
+                system = SpreadsheetHelper.getCellAsString(row.getCell(3, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK)) == null ? system : SpreadsheetHelper.getCellAsString(row.getCell(3));
 
+                if (system == null)
+                    throw new RuntimeException("A system must be specified in the code list");
+
+                version = SpreadsheetHelper.getCellAsString(
+                        row.getCell(4)) == null
+                        ? version : SpreadsheetHelper.getCellAsString(row.getCell(4));
+//
 //                if (!vs.hasCompose()) {
 //                    vs.setCompose(
 //                            new ValueSet.ValueSetComposeComponent()
@@ -302,26 +305,26 @@ public class OpioidValueSetGenerator extends Operation {
 //                }
 
                 boolean added = false;
-// It looks like the workbook Chris was working with had a 'system' key which is not present in the workbook I am working with.
-//                for (ValueSet.ConceptSetComponent include : vs.getCompose().getInclude()) {
-//                    if (include.getSystem().equals(system) && !include.hasFilter()) {
-//                        include.addConcept(new ValueSet.ConceptReferenceComponent().setCode(code).setDisplay(description));
-//                        added = true;
-//                    }
-//                }
+                for (ValueSet.ConceptSetComponent include : vs.getCompose().getInclude()) {
+                    if (include.getSystem() != null && include.getSystem().equals(system) && !include.hasFilter()) {
+                        include.addConcept()
+                                .setCode(code)
+                                .setDisplay(description);
+                        added = true;
+                    }
+                }
 
                 if (!added) {
-                    vs.getCompose()
-                            .addInclude(
-                                    new ValueSet.ConceptSetComponent()
-                                    .setSystem(system)
-                                    .setVersion(system.equals("http://snomed.info/sct") ? snomedVersion : version)
-                                            .addConcept(new ValueSet.ConceptReferenceComponent().setCode(code).setDisplay(description))
-                            );
+                    expansion.addContains()
+                            .setCode(code)
+                            .setSystem(system)
+                            .setVersion(version)
+                            .setDisplay(description);
                 }
 
             }
         }
+        vs.setExpansion(expansion);
     }
 
     /**

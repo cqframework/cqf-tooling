@@ -98,7 +98,7 @@ public class CPGMeta {
                 ValueSet tempVs = fhirContext.newXmlParser().parseResource(ValueSet.class, "<ValueSet>" + compose + "</ValueSet>");
                 vs.setCompose(tempVs.getCompose());
             } catch (Exception e) {
-                String s = "s";
+                String s = "s"; // ?
             }
         }
 
