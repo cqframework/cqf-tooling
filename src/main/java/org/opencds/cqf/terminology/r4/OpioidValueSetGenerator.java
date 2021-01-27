@@ -21,9 +21,10 @@ public class OpioidValueSetGenerator extends Operation {
         this.fhirContext = FhirContext.forR4();
     }
 
-    private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
-    private String encoding = "json"; // -encoding (-e)
+    private String pathToSpreadsheet;          // -pathtospreadsheet (-pts)
+    private String encoding     = "json";      // -encoding (-e)
     private String outputPrefix = "valueset-"; // -outputPrefix (-opp)
+    private String conformTo    = "r4";        // -fhirv (-fhv)
 
     private final int VSLIST_IDX = 17;
 
@@ -41,10 +42,11 @@ public class OpioidValueSetGenerator extends Operation {
             String value = flagAndValue[1];
 
             switch (flag.replace("-", "").toLowerCase()) {
-                case "outputpath": case "op": setOutputPath(value); break; // -outputpath (-op)
-                case "outputprefix": case "opp": setOutputPrefix(value); break;
-                case "pathtospreadsheet": case "pts": pathToSpreadsheet = value; break;
-                case "encoding": case "e": encoding = value.toLowerCase(); break;
+                case "outputpath":        case "op": setOutputPath(value);          break; // -outputpath (-op)
+                case "outputprefix":      case "opp": outputPrefix = value;         break;
+                case "fhirv":             case "fhv": conformTo = value;            break;
+                case "pathtospreadsheet": case "pts": pathToSpreadsheet = value;    break;
+                case "encoding":          case "e": encoding = value.toLowerCase(); break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
 
