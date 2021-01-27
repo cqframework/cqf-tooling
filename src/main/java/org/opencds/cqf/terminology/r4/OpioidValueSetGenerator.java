@@ -318,13 +318,11 @@ public class OpioidValueSetGenerator extends Operation {
 //                }
 
                 // Expansion
-                if (!added) {
-                    expansion.addContains()
-                            .setCode(code)
-                            .setSystem(system)
-                            .setVersion(version)
-                            .setDisplay(description);
-                }
+                expansion.addContains()
+                        .setCode(code)
+                        .setSystem(system)
+                        .setVersion(version)
+                        .setDisplay(description);
             }
         }
         vs.setExpansion(expansion);
