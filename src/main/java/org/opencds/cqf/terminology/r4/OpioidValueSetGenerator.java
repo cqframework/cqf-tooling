@@ -220,8 +220,8 @@ public class OpioidValueSetGenerator extends Operation {
             Row row = rowIterator.next();
             String sheetName = SpreadsheetHelper.getCellAsString(row.getCell(2, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
 
-            if (sheetName.length() <= 0)
-                continue;
+            if (sheetName.length() <= 0) continue;
+
             vsMap.put(
                     SpreadsheetHelper.getCellAsString(row.getCell(2, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK)),
                     row.getCell(3, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getRowIndex());
@@ -259,8 +259,13 @@ public class OpioidValueSetGenerator extends Operation {
         return valueSets;
     }
 
+    /**
+     * Iterates over -cl sheet adding an expansion and compose when appropriate.
+     * @param sheet
+     * @param vs
+     * @param snomedVersion
+     */
     private void resolveCodeList(Sheet sheet, ValueSet vs, String snomedVersion) {
-        // TODO: Make this not like the way that it is.
         Iterator<Row> rowIterator = sheet.rowIterator();
 
         Boolean active = true;
@@ -292,28 +297,27 @@ public class OpioidValueSetGenerator extends Operation {
                 version = SpreadsheetHelper.getCellAsString(
                         row.getCell(4)) == null
                         ? version : SpreadsheetHelper.getCellAsString(row.getCell(4));
-//
-//                if (!vs.hasCompose()) {
-//                    vs.setCompose(
-//                            new ValueSet.ValueSetComposeComponent()
-//                                    .addInclude(
-//                                            new ValueSet.ConceptSetComponent()
-//                                                    .setSystem(system)
-//                                                    .setVersion(system.equals("http://snomed.info/sct") ? snomedVersion : version)
-//                                    )
-//                    );
-//                }
 
-                boolean added = false;
-                for (ValueSet.ConceptSetComponent include : vs.getCompose().getInclude()) {
-                    if (include.getSystem() != null && include.getSystem().equals(system) && !include.hasFilter()) {
-                        include.addConcept()
-                                .setCode(code)
-                                .setDisplay(description);
-                        added = true;
-                    }
+                // Compose
+                if (!vs.hasCompose()) {
+                    ValueSet.ValueSetComposeComponent vscc = new ValueSet.ValueSetComposeComponent();
+                    ValueSet.ConceptSetComponent csc = new ValueSet.ConceptSetComponent();
+
+                    vscc.addInclude(csc.setSystem(system)
+                            .setSystem(system)
+                            .setVersion(system.equals("http://snomed.info/sct") ? snomedVersion : version));
                 }
 
+//                boolean added = false;
+//                for (ValueSet.ConceptSetComponent include : vs.getCompose().getInclude()) {
+//                   if (include.getSystem() != null && include.getSystem().equals(system) && !include.hasFilter()) {
+//                       include.addConcept()
+//                               .setCode(code)
+//                               .setDisplay(description);
+//                   }
+//                }
+
+                // Expansion
                 if (!added) {
                     expansion.addContains()
                             .setCode(code)
@@ -321,7 +325,6 @@ public class OpioidValueSetGenerator extends Operation {
                             .setVersion(version)
                             .setDisplay(description);
                 }
-
             }
         }
         vs.setExpansion(expansion);
