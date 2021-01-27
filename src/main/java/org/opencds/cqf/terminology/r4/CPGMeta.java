@@ -35,11 +35,11 @@ public class CPGMeta {
     private String purposeInclusionCriteria;
     private String purposeExclusionCriteria;
 
-    private final String KEYWORD_URL = "http://hl7.org/fhir/StructureDefinition/valueset-keyWord";
-    private final String RULES_TEXT_URL = "http://hl7.org/fhir/StructureDefinition/valueset-rules-text";
-    private final String EXPRESSION_URL = "http://hl7.org/fhir/StructureDefinition/valueset-expression";
-    private final String WARNING_URL = "http://hl7.org/fhir/StructureDefinition/valueset-warning";
-    private final String CLINICAL_FOCUS_URL = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-clinical-focus";
+    private final String KEYWORD_URL            = "http://hl7.org/fhir/StructureDefinition/valueset-keyWord";
+    private final String RULES_TEXT_URL         = "http://hl7.org/fhir/StructureDefinition/valueset-rules-text";
+    private final String EXPRESSION_URL         = "http://hl7.org/fhir/StructureDefinition/valueset-expression";
+    private final String WARNING_URL            = "http://hl7.org/fhir/StructureDefinition/valueset-warning";
+    private final String CLINICAL_FOCUS_URL     = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-clinical-focus";
     private final String DATA_ELEMENT_SCOPE_URL = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-dataelement-scope";
     private final String INCLUSION_CRITERIA_URL = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-inclusion-criteria";
     private final String EXCLUSION_CRITERIA_URL = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-exclusion-criteria";
@@ -98,7 +98,7 @@ public class CPGMeta {
                 ValueSet tempVs = fhirContext.newXmlParser().parseResource(ValueSet.class, "<ValueSet>" + compose + "</ValueSet>");
                 vs.setCompose(tempVs.getCompose());
             } catch (Exception e) {
-                String s = "s"; // ?
+                e.printStackTrace();
             }
         }
 

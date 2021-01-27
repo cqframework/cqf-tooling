@@ -30,7 +30,7 @@ public class OrganizationalMeta {
         if (!valueSet.hasId()) {
             throw new RuntimeException("Metadata template must include an id");
         }
-        valueSet.setUrl(canonicalUrlBase + "/" + valueSet.getId());
+        valueSet.setUrl(canonicalUrlBase + "/ValueSet/" + valueSet.getId());
         valueSet.setCopyright(copyright);
         valueSet.addJurisdiction(
                 new CodeableConcept().addCoding(new Coding().setSystem(JURISDICTION_URL).setCode(jurisdiction))
