@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.hl7.elm.r1.Null;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.Operation;
 import org.opencds.cqf.terminology.SpreadsheetHelper;
@@ -21,10 +23,10 @@ public class OpioidValueSetGenerator extends Operation {
         this.fhirContext = FhirContext.forR4();
     }
 
-    private String pathToSpreadsheet;          // -pathtospreadsheet (-pts)
-    private String encoding     = "json";      // -encoding (-e)
-    private String outputPrefix = "valueset-"; // -outputPrefix (-opp)
-    private String conformTo    = "r4";        // -fhirv (-fhv)
+    private String pathToSpreadsheet;           // -pathtospreadsheet (-pts)
+    private String encoding      = "json";      // -encoding (-e)
+    private String outputPrefix  = "valueset-"; // -outputPrefix (-opp)
+    private String outputVersion = "r4";        // -fhirv (-fhv)
 
     private final int VSLIST_IDX = 17;
 
@@ -44,7 +46,7 @@ public class OpioidValueSetGenerator extends Operation {
             switch (flag.replace("-", "").toLowerCase()) {
                 case "outputpath":        case "op": setOutputPath(value);          break; // -outputpath (-op)
                 case "outputprefix":      case "opp": outputPrefix = value;         break;
-                case "fhirv":             case "fhv": conformTo = value;            break;
+                case "outputversion":     case "opv": setOutputVersion(value);      break;
                 case "pathtospreadsheet": case "pts": pathToSpreadsheet = value;    break;
                 case "encoding":          case "e": encoding = value.toLowerCase(); break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
@@ -63,8 +65,12 @@ public class OpioidValueSetGenerator extends Operation {
         output(valueSets);
     }
 
-    private void setOutputPrefix(String outputPrefix) {
-        this.outputPrefix = outputPrefix;
+    private void setOutputVersion(String value) {
+        if (!value.equalsIgnoreCase("r4") && !value.equalsIgnoreCase("stu3"))
+            throw new IllegalArgumentException(
+                    String.format("outputversion should be R4 or STU3. Unsupported FHIR version specified: %s", value));
+        else
+            outputVersion = value;
     }
 
     /**
@@ -116,7 +122,6 @@ public class OpioidValueSetGenerator extends Operation {
                     break;
             }
         }
-
         return organizationalMeta;
     }
 
@@ -208,7 +213,6 @@ public class OpioidValueSetGenerator extends Operation {
                     break;
             }
         }
-
         return meta;
     }
 
@@ -252,12 +256,24 @@ public class OpioidValueSetGenerator extends Operation {
                 System.out.println("cpg instance had null title");
             }
 
-            vs = cpgMeta.populate(fhirContext);
+            vs = cpgMeta.populate(fhirContext, outputVersion);
             meta.populate(vs);
             resolveCodeList(workbook.getSheet(entrySet.getKey().split("-")[0] + "-cl"), vs, meta.getSnomedVersion());
+
+
+            if (vs.hasCompose() && outputVersion.equalsIgnoreCase("r4")) {
+                vs.getMeta().addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-computablevalueset");
+                vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability").setValue(new CodeType("computable"));
+                vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel").setValue(new CodeType("structured"));
+            }
+            if (vs.hasExpansion() && outputVersion.equalsIgnoreCase("r4")) {
+                vs.getMeta().addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-executablevalueset");
+                vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability").setValue(new CodeType("executable"));
+                vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel").setValue(new CodeType("executable"));
+                vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-usageWarning").setValue(new StringType("This value set contains a point-in-time expansion enumerating the codes that meet the value set intent. As new versions of the code systems used by the value set are released, the contents of this expansion will need to be updated to incorporate newly defined codes that meet the value set intent. Before, and periodically during production use, the value set expansion contents SHOULD be updated. The value set expansion specifies the timestamp when the expansion was produced, SHOULD contain the parameters used for the expansion, and SHALL contain the codes that are obtained by evaluating the value set definition. If this is ONLY an executable value set, a distributable definition of the value set must be obtained to compute the updated expansion."));
+            }
             valueSets.add(vs);
         }
-
         return valueSets;
     }
 
@@ -310,15 +326,6 @@ public class OpioidValueSetGenerator extends Operation {
                             .setVersion(system.equals("http://snomed.info/sct") ? snomedVersion : version));
                 }
 
-//                boolean added = false;
-//                for (ValueSet.ConceptSetComponent include : vs.getCompose().getInclude()) {
-//                   if (include.getSystem() != null && include.getSystem().equals(system) && !include.hasFilter()) {
-//                       include.addConcept()
-//                               .setCode(code)
-//                               .setDisplay(description);
-//                   }
-//                }
-
                 // Expansion
                 expansion.addContains()
                         .setCode(code)
@@ -353,24 +360,5 @@ public class OpioidValueSetGenerator extends Operation {
                 throw new IllegalArgumentException("Error outputting ValueSet: " + valueSet.getId());
             }
         }
-    }
-
-    /**
-     * Checks if all cells in row are empty.
-     * @param row
-     * @return true if given row is empty.
-     */
-    private boolean isRowEmpty(Row row) {
-        if (row == null) return true;
-        if (row.getLastCellNum() <= 0) return true;
-
-        for (int cellIndex = row.getFirstCellNum(); cellIndex < row.getLastCellNum(); cellIndex++)
-        {
-            Cell cell = row.getCell(cellIndex);
-            if (cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK && StringUtils.isNotBlank(cell.toString()))
-                return false;
-        }
-
-        return true;
     }
 }

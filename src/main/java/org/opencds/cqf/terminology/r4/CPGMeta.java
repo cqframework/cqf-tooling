@@ -44,7 +44,7 @@ public class CPGMeta {
     private final String INCLUSION_CRITERIA_URL = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-inclusion-criteria";
     private final String EXCLUSION_CRITERIA_URL = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-exclusion-criteria";
 
-    public ValueSet populate(FhirContext fhirContext) {
+    public ValueSet populate(FhirContext fhirContext, String outputVersion) {
         ValueSet vs = new ValueSet();
         vs.setId(id);
         vs.setVersion(version);
@@ -78,21 +78,25 @@ public class CPGMeta {
                             )
             );
         }
-        if (warning != null) {
-            vs.addExtension(new Extension().setUrl(WARNING_URL).setValue(new StringType(warning)));
+
+        if (outputVersion.equalsIgnoreCase("stu3")) {
+            if (warning != null) {
+                vs.addExtension(new Extension().setUrl(WARNING_URL).setValue(new StringType(warning)));
+            }
+            if (purposeClinicalFocus != null) {
+                vs.addExtension(new Extension().setUrl(CLINICAL_FOCUS_URL).setValue(new StringType(purposeClinicalFocus)));
+            }
+            if (purposeDataElementScope != null) {
+                vs.addExtension(new Extension().setUrl(DATA_ELEMENT_SCOPE_URL).setValue(new StringType(purposeDataElementScope)));
+            }
+            if (purposeInclusionCriteria != null) {
+                vs.addExtension(new Extension().setUrl(INCLUSION_CRITERIA_URL).setValue(new StringType(purposeInclusionCriteria)));
+            }
+            if (purposeExclusionCriteria != null) {
+                vs.addExtension(new Extension().setUrl(EXCLUSION_CRITERIA_URL).setValue(new StringType(purposeExclusionCriteria)));
+            }
         }
-        if (purposeClinicalFocus != null) {
-            vs.addExtension(new Extension().setUrl(CLINICAL_FOCUS_URL).setValue(new StringType(purposeClinicalFocus)));
-        }
-        if (purposeDataElementScope != null) {
-            vs.addExtension(new Extension().setUrl(DATA_ELEMENT_SCOPE_URL).setValue(new StringType(purposeDataElementScope)));
-        }
-        if (purposeInclusionCriteria != null) {
-            vs.addExtension(new Extension().setUrl(INCLUSION_CRITERIA_URL).setValue(new StringType(purposeInclusionCriteria)));
-        }
-        if (purposeExclusionCriteria != null) {
-            vs.addExtension(new Extension().setUrl(EXCLUSION_CRITERIA_URL).setValue(new StringType(purposeExclusionCriteria)));
-        }
+
         if (compose != null) {
             try {
                 ValueSet tempVs = fhirContext.newXmlParser().parseResource(ValueSet.class, "<ValueSet>" + compose + "</ValueSet>");
