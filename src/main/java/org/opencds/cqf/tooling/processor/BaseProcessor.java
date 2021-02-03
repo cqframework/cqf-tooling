@@ -1,19 +1,14 @@
 package org.opencds.cqf.tooling.processor;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.elementmodel.Manager;
-import org.hl7.fhir.r5.formats.JsonParser;
 import org.hl7.fhir.r5.model.ImplementationGuide;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.convertors.VersionConvertor_30_50;
 import org.hl7.fhir.convertors.VersionConvertor_40_50;
-import org.hl7.fhir.r5.formats.FormatUtilities;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.utilities.IniFile;
 import org.hl7.fhir.utilities.TextFile;
@@ -74,7 +69,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
         }
     }
 
-    public void initialize(String rootDir, String igPath, String fhirVersion) {
+    public void initializeFromIg(String rootDir, String igPath, String fhirVersion) {
         this.rootDir = rootDir;
 
         try {
@@ -84,7 +79,16 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
             logMessage(String.format("Exceptions occurred extracting path from ig", e.getMessage()));
         }
 
-        ImplementationGuide sourceIg = loadSourceIG(igPath, fhirVersion);
+        if (fhirVersion != null) {
+            ImplementationGuide sourceIg = loadSourceIG(igPath, fhirVersion);
+        } else {
+            try {
+                ImplementationGuide sourceIg = loadSourceIG(igPath);
+            }
+            catch (Exception e) {
+                logMessage("Error Parsing File " + igPath + ": " + e.getMessage());
+            }
+        }
 
         // TODO: Perhaps we should validate the passed in fhirVersion against the fhirVersion in the IG?
 
@@ -92,7 +96,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
         packageId = sourceIg.getPackageId();
         canonicalBase = determineCanonical(sourceIg.getUrl());
         try {
-            packageManager = new NpmPackageManager(sourceIg, fhirVersion);
+            packageManager = new NpmPackageManager(sourceIg, this.fhirVersion);
         }
         catch (IOException e) {
             logMessage(String.format("Exceptions occurred loading npm package manager:", e.getMessage()));
@@ -102,7 +106,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
     /*
     Initializes from an ig.ini file in the root directory
      */
-    public void initialize(String iniFile) {
+    public void initializeFromIni(String iniFile) {
         IniFile ini = new IniFile(new File(iniFile).getAbsolutePath());
         String rootDir = Utilities.getDirectoryForFile(ini.getFileName());
         String igPath = ini.getStringProperty("IG", "ig");
@@ -111,7 +115,35 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
             logMessage("fhir-version was not specified in the ini file. Trying FHIR version 4.0.1");
             specifiedFhirVersion = "4.0.1";
         }
-        initialize(rootDir, igPath, specifiedFhirVersion);
+        try {
+            initializeFromIg(rootDir, igPath, specifiedFhirVersion);
+        }
+        catch (Exception e) {
+            logMessage(String.format("Exceptions occurred initializing refresh from ini file '%s':%s", iniFile, e.getMessage()));
+        }
+    }
+
+    private ImplementationGuide loadSourceIG(String igPath) throws Exception {
+        ImplementationGuide sourceIG = null;
+        try {
+            try {
+                sourceIg = (ImplementationGuide) org.hl7.fhir.r5.formats.FormatUtilities.loadFile(igPath);
+            } catch (Exception e) {
+                try {
+                    sourceIg = (ImplementationGuide) VersionConvertor_40_50.convertResource(org.hl7.fhir.r4.formats.FormatUtilities.loadFile(igPath));
+                } catch (Exception ex) {
+                    byte[] src = TextFile.fileToBytes(igPath);
+                    Manager.FhirFormat fmt = org.hl7.fhir.r5.formats.FormatUtilities.determineFormat(src);
+
+                    org.hl7.fhir.dstu3.formats.ParserBase parser = org.hl7.fhir.dstu3.formats.FormatUtilities.makeParser(fmt.toString());
+                    sourceIg = (ImplementationGuide) VersionConvertor_30_50.convertResource(parser.parse(src), false);
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception("Error Parsing File " + igPath + ": " + e.getMessage(), e);
+        }
+
+        return sourceIg;
     }
 
     private ImplementationGuide loadSourceIG(String igPath, String specifiedFhirVersion) {
