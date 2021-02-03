@@ -20,6 +20,8 @@ public class RefreshIGArgumentProcessor {
     public static final String[] OPERATION_OPTIONS = {"RefreshIG"};
 
     public static final String[] INI_OPTIONS = {"ini"};
+    public static final String[] ROOT_DIR_OPTIONS = {"root-dir"};
+    public static final String[] IG_PATH_OPTIONS = {"ip", "ig-path"};
     public static final String[] IG_OUTPUT_ENCODING = {"e", "encoding"};
     public static final String[] INCLUDE_ELM_OPTIONS = {"elm", "include-elm"};
     public static final String[] INCLUDE_DEPENDENCY_LIBRARY_OPTIONS = {"d", "include-dependencies"};
@@ -35,12 +37,16 @@ public class RefreshIGArgumentProcessor {
         OptionParser parser = new OptionParser();
 
         OptionSpecBuilder iniBuilder = parser.acceptsAll(asList(INI_OPTIONS), "Path to ig ini file");
+        OptionSpecBuilder rootDirBuilder = parser.acceptsAll(asList(ROOT_DIR_OPTIONS), "Root directory of the ig");
+        OptionSpecBuilder igPathBuilder = parser.acceptsAll(asList(IG_PATH_OPTIONS),"Path to the IG, relative to the root directory");
         OptionSpecBuilder resourcePathBuilder = parser.acceptsAll(asList(RESOURCE_PATH_OPTIONS),"Use multiple times to define multiple resource directories.");
         OptionSpecBuilder igOutputEncodingBuilder = parser.acceptsAll(asList(IG_OUTPUT_ENCODING), "If omitted, output will be generated using JSON encoding.");
         OptionSpecBuilder fhirUriBuilder = parser.acceptsAll(asList(FHIR_URI_OPTIONS),"If omitted the final bundle will not be loaded to a FHIR server.");
         OptionSpecBuilder measureToRefreshPathBuilder = parser.acceptsAll(asList(MEASURE_TO_REFRESH_PATH), "Path to Measure to refresh.");
 
         OptionSpec<String> ini = iniBuilder.withRequiredArg().describedAs("Path to the IG ini file");
+        OptionSpec<String> rootDir = rootDirBuilder.withOptionalArg().describedAs("Root directory of the IG");
+        OptionSpec<String> igPath = igPathBuilder.withRequiredArg().describedAs("Path to the IG, relative to the root directory");
         OptionSpec<String> resourcePath = resourcePathBuilder.withOptionalArg().describedAs("directory of resources");
         OptionSpec<String> igOutputEncoding = igOutputEncodingBuilder.withOptionalArg().describedAs("desired output encoding for resources");
         OptionSpec<String> measureToRefreshPath = measureToRefreshPathBuilder.withOptionalArg().describedAs("Path to Measure to refresh.");
@@ -68,6 +74,8 @@ public class RefreshIGArgumentProcessor {
         ArgUtils.ensure(OPERATION_OPTIONS[0], options);
 
         String ini = (String)options.valueOf(INI_OPTIONS[0]);
+        String rootDir = (String)options.valueOf(ROOT_DIR_OPTIONS[0]);
+        String igPath = (String)options.valueOf(IG_PATH_OPTIONS[0]);
 
         List<String> resourcePaths = ArgUtils.getOptionValues(options, RESOURCE_PATH_OPTIONS[0]);
             
@@ -93,6 +101,8 @@ public class RefreshIGArgumentProcessor {
     
         RefreshIGParameters ip = new RefreshIGParameters();
         ip.ini = ini;
+        ip.rootDir = rootDir;
+        ip.igPath = igPath;
         ip.outputEncoding = outputEncodingEnum;
         ip.includeELM = includeELM;
         ip.includeDependencies = includeDependencies;

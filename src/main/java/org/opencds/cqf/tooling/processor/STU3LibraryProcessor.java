@@ -101,7 +101,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
             initialize(params.parentContext);
         }
         else {
-            initialize(params.ini);
+            initializeFromIni(params.ini);
             igCanonicalBase = params.igCanonicalBase;
             cqlContentPath = params.cqlContentPath;
         }

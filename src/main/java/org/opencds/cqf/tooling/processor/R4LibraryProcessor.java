@@ -62,7 +62,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
             } else {
                 filePath = libraryPath;
                 fileEncoding = encoding;
-            }    
+            }
             cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
             // Issue 96
             // Passing the includeVersion here to handle not using the version number in the filename
@@ -96,7 +96,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
             initialize(params.parentContext);
         }
         else {
-            initialize(params.ini);
+            initializeFromIni(params.ini);
             igCanonicalBase = params.igCanonicalBase;
             cqlContentPath = params.cqlContentPath;
         }
