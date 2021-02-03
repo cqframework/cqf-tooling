@@ -9,7 +9,6 @@ import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
-import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.LogUtils;
@@ -20,7 +19,10 @@ public class IGProcessor extends BaseProcessor {
     //mega ig method
     public void publishIG(RefreshIGParameters params) {
         if (params.ini != null) {
-            initialize(params.ini);
+            initializeFromIni(params.ini);
+        }
+        else {
+            initializeFromIg(params.rootDir, params.igPath, null);
         }
 
         Encoding encoding = params.outputEncoding;
@@ -74,7 +76,15 @@ public class IGProcessor extends BaseProcessor {
     public ArrayList<String> refreshedResourcesNames = new ArrayList<String>();
     public void refreshIG(RefreshIGParameters params) {
         if (params.ini != null) {
-            initialize(params.ini);
+            initializeFromIni(params.ini);
+        }
+        else {
+            try {
+                initializeFromIg(params.rootDir, params.igPath, null);
+            }
+            catch (Exception e) {
+                logMessage(String.format("Error Refreshing for File "+ params.igPath+": "+e.getMessage(), e));
+            }
         }
 
         Encoding encoding = params.outputEncoding;
