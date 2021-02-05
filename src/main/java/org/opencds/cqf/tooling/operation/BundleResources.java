@@ -167,7 +167,7 @@ public class BundleResources extends Operation {
     
     // Output
     public void output(IBaseResource resource, FhirContext context) {
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + File.separator + getOutputPath().substring(getOutputPath().lastIndexOf(File.separator)) + "-bundle." + encoding)) {
+        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + getOutputPath().substring(getOutputPath().lastIndexOf(File.separator)) + "-bundle." + encoding)) {
             writer.write(
                 encoding.equals("json")
                     ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
