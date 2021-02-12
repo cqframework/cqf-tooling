@@ -68,9 +68,21 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         for (RelatedArtifact relatedArtifact : relatedArtifacts) {
             if ((relatedArtifact.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON) && relatedArtifact.hasResource()) {
                 String resourceReference = relatedArtifact.getResource().getReference();
+                resourceReference = resourceReference.replace("_", "-");
+                if (resourceReference.contains("Library/")) {
+                    resourceReference = resourceReference.substring(resourceReference.lastIndexOf("Library/"));
+                }
+      
                 if (resourceReference.contains("|")) {
-                    String curatedResourceReference = resourceReference.substring(0, resourceReference.indexOf("|"));
-                    relatedArtifact.getResource().setReference(curatedResourceReference);
+                    if (this.versioned) {
+                        String curatedResourceReference = resourceReference.replace("|", "-");
+                        relatedArtifact.getResource().setReference(curatedResourceReference);
+                    }
+                    else {
+                        String curatedResourceReference = resourceReference.substring(0, resourceReference.indexOf("|"));
+                        relatedArtifact.getResource().setReference(curatedResourceReference);
+                    }
+
                 }
             }
         }

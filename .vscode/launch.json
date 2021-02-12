@@ -33,6 +33,18 @@
         },
         {
             "type": "java",
+            "name": "CqlToR4LibraryOperation",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.tooling.Main",
+            "projectName": "tooling",
+            "args": [
+                "-CqlToR4Library",
+                "-ptcql=../connectathon/fhir401/input/pagecontent/cql",
+                "-op=../connectathon/fhir401/resources/library"
+            ]
+        },
+        {
+            "type": "java",
             "name": "CqlToSTU3LibraryOperation",
             "request": "launch",
             "mainClass": "org.opencds.cqf.tooling.Main",
@@ -122,12 +134,13 @@
             "projectName": "tooling",
             "args": [
                 "-RefreshIG",
-                "-ip=../connectathon/fhir3/",
-                "-iv=fhir3",
+                "-root-dir=/home/jp/repos/connectathon/fhir3",
+                "-ig-path=input/connectathon.xml",
+                "-rp=input/resources",
                 "-t",
                 "-d",
-                "-v",
-                "-p"
+                "-p",
+                "-v"
             ]
         },
         {
