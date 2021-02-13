@@ -78,7 +78,7 @@ public class PlanDefinitionProcessor {
                 if (includeDependencies) {
                     boolean result = LibraryProcessor.bundleLibraryDependencies(librarySourcePath, fhirContext, resources, encoding, includeVersion);
                     if (shouldPersist && !result) {
-                        LogUtils.info("PlanDefinitions will not be bundled because Library Dependency bundling failed.");
+                        LogUtils.info(String.format("PlanDefinitions will not be bundled because Library Dependency bundling failed. Library: '%s'", refreshedLibraryName));
                     }
                     shouldPersist = shouldPersist & result;
                 }

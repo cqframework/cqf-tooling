@@ -135,7 +135,7 @@ public class DictionaryElement {
             this.choices = new ArrayList<>();
         }
         List<DictionaryCode> codes = this.getValidChoices().stream()
-                .filter((c) -> c.getSystem() == system)
+                .filter((c) -> c.getSystem().equals(system))
                 .collect(Collectors.toList());
         return codes;
     }
