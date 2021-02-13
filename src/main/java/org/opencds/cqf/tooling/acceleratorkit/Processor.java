@@ -66,6 +66,8 @@ public class Processor extends Operation {
     private List<String> igJsonFragments = new ArrayList<String>();
     private List<String> igResourceFragments = new ArrayList<String>();
 
+    private Row currentInputOptionParent;
+
     @Override
     public void execute(String[] args) {
         setOutputPath("src/main/resources/org/opencds/cqf/tooling/acceleratorkit/output"); // default
@@ -106,6 +108,7 @@ public class Processor extends Operation {
         }
 
         scopeCanonicalBaseMap.put("core", "http://fhir.org/guides/who/core");
+        scopeCanonicalBaseMap.put("anc", "http://fhir.org/guides/who/anc-cds");
         scopeCanonicalBaseMap.put("fp", "http://fhir.org/guides/who/fp-cds");
         scopeCanonicalBaseMap.put("sti", "http://fhir.org/guides/who/sti-cds");
         scopeCanonicalBaseMap.put("cr", "http://fhir.org/guides/cqframework/cr");
@@ -117,7 +120,7 @@ public class Processor extends Operation {
         if (enableOpenMRS) {
             supportedCodeSystems.put("OpenMRS", openMRSSystem);
         }
-        supportedCodeSystems.put("ICD-10-WHO", "http://hl7.org/fhir/sid/icd-10");
+        supportedCodeSystems.put("ICD-10", "http://hl7.org/fhir/sid/icd-10");
         supportedCodeSystems.put("SNOMED-CT", "http://snomed.info/sct");
         supportedCodeSystems.put("LOINC", "http://loinc.org");
         supportedCodeSystems.put("RxNorm", "http://www.nlm.nih.gov/research/umls/rxnorm");
@@ -125,6 +128,8 @@ public class Processor extends Operation {
         // TODO: Determing and add correct URLS for these Systems
         supportedCodeSystems.put("CIEL", "http://hl7.org/fhir/sid/ciel");
         supportedCodeSystems.put("ICD-11", "http://hl7.org/fhir/sid/icd-11");
+        supportedCodeSystems.put("ICHI", "https://mitel.dimi.uniud.it/ichi/#http://id.who.int/ichi");
+        supportedCodeSystems.put("ICF", "http://hl7.org/fhir/sid/icf-nl");
 
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
 
@@ -301,8 +306,34 @@ public class Processor extends Operation {
         return scopePath + "/input/vocabulary/valueset";
     }
 
-    private List<DictionaryCode> getTerminologyCodes(String codeSystemKey, String label, Row row,
-            HashMap<String, Integer> colIds) {
+    private String getActivityID(Row row, HashMap<String, Integer> colIds) {
+        String activityID = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ActivityID"));
+        return activityID;
+    }
+
+    private String getMasterDataType(Row row, HashMap<String, Integer> colIds) {
+        String masterDataType = null;
+        String activityID = getActivityID(row, colIds);
+        if (activityID != null && !activityID.isEmpty()) {
+            String multipleChoiceType = getMultipleChoiceType(row, colIds);
+            masterDataType = multipleChoiceType != null ? multipleChoiceType.equalsIgnoreCase("Input Option") ? "Input Option" : "Data Element" : null;
+        }
+
+        return masterDataType;
+    }
+
+    private String getMultipleChoiceType(Row row, HashMap<String, Integer> colIds) {
+        String multipleChoiceType = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MultipleChoiceType"));
+        return multipleChoiceType;
+    }
+
+    private List<DictionaryCode> cleanseCodes(List<DictionaryCode> codes) {
+        // Remove "Not classifiable in" instances
+        codes.removeIf(c -> c.getCode().startsWith("Not classifiable in"));
+        return codes;
+    }
+
+    private List<DictionaryCode> getTerminologyCodes(String codeSystemKey, String label, Row row, HashMap<String, Integer> colIds) {
         List<DictionaryCode> codes = new ArrayList<>();
         String system = supportedCodeSystems.get(codeSystemKey);
         String codeListString = SpreadsheetHelper.getCellAsString(row, getColId(colIds, codeSystemKey));
@@ -317,7 +348,7 @@ public class Processor extends Operation {
             }
         }
 
-        return codes;
+        return cleanseCodes(codes);
     }
 
     private List<DictionaryCode> getFhirCodes(String label, Row row, HashMap<String, Integer> colIds) {
@@ -353,7 +384,8 @@ public class Processor extends Operation {
                     concept.setDisplay(code.getLabel());
 
                     String parentLabel = null;
-                    String parentName = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "InputOptionParent"));
+//                    String parentName = SpreadsheetHelper.getCellAsString(row, getColId(colIds,"InputOptionParent"));
+                    String parentName = SpreadsheetHelper.getCellAsString(currentInputOptionParent, getColId(colIds,"DataElementLabel")).trim();
                     if (parentName != null && !parentName.trim().isEmpty()) {
                         parentName = parentName.trim();
                         DictionaryElement currentElement = elementMap.get(parentName);
@@ -369,7 +401,7 @@ public class Processor extends Operation {
                 }
             }
         }
-        return codes;
+        return cleanseCodes(codes);
     }
 
     private List<DictionaryCode> getOpenMRSCodes(String label, Row row, HashMap<String, Integer> colIds) {
@@ -385,7 +417,7 @@ public class Processor extends Operation {
                 codes.add(getCode(system, label, display, c, parent));
             }
         }
-        return codes;
+        return cleanseCodes(codes);
     }
 
     private DictionaryCode getPrimaryCode(String label, Row row, HashMap<String, Integer> colIds) {
@@ -439,8 +471,10 @@ public class Processor extends Operation {
 
     private DictionaryFhirElementPath getFhirElementPath(Row row, HashMap<String, Integer> colIds) {
         DictionaryFhirElementPath fhirType = new DictionaryFhirElementPath();
-        String resource = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4Resource")).trim();
+        String resource = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4Resource"));
+
         if (resource != null && !resource.isEmpty()) {
+            resource = resource.trim();
             fhirType.setResource(resource);
             fhirType.setMasterDataElementPath(
                     SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MasterDataElementPath")));
@@ -474,7 +508,7 @@ public class Processor extends Operation {
         if (type != null) {
             type = type.trim();
             if (type.equals("Coding")) {
-                String choiceType = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MultipleChoiceType"));
+                String choiceType = getMultipleChoiceType(row, colIds);
                 if (choiceType != null) {
                     choiceType = choiceType.trim();
                     type = type + " - " + choiceType;
@@ -502,7 +536,7 @@ public class Processor extends Operation {
         e.setGroup(group);
         e.setLabel(label);
         e.setType(type);
-        e.setMasterDataType(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MasterDataType")));
+        e.setMasterDataType(getMasterDataType(row, colIds));
         e.setInfoIcon(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "InfoIcon")));
         e.setDue(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Due")));
         e.setRelevance(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Relevance")));
@@ -524,8 +558,9 @@ public class Processor extends Operation {
     }
 
     private void addInputOptionToParentElement(Row row, HashMap<String, Integer> colIds) {
-        String parentName = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "InputOptionParent")).trim();
-        if (parentName != null && !parentName.isEmpty()) {
+        String parentName = SpreadsheetHelper.getCellAsString(currentInputOptionParent, getColId(colIds,"DataElementLabel")).trim();
+        if (parentName != null && !parentName.isEmpty())
+        {
             DictionaryElement currentElement = elementMap.get(parentName);
             if (currentElement != null) {
                 String choices = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Name"));
@@ -583,8 +618,14 @@ public class Processor extends Operation {
                 Iterator<Cell> colIt = row.cellIterator();
                 while (colIt.hasNext()) {
                     Cell cell = colIt.next();
-                    String header = SpreadsheetHelper.getCellAsString(cell).toLowerCase();
+                    String header = SpreadsheetHelper.getCellAsString(cell)
+                            .toLowerCase()
+                            .trim()
+                            .replace("–", "-");
                     switch (header) {
+                        case "[anc] activity id":
+                            colIds.put("ActivityID", cell.getColumnIndex());
+                            break;
                         case "core, fp, sti":
                         case "scope":
                             colIds.put("Scope", cell.getColumnIndex());
@@ -592,16 +633,16 @@ public class Processor extends Operation {
                         case "in new dd":
                             colIds.put("InNewDD", cell.getColumnIndex());
                             break;
-                        case "master data type":
-                            colIds.put("MasterDataType", cell.getColumnIndex());
-                            break;
-                        case "master data element label":
-                            colIds.put("Name", cell.getColumnIndex());
-                            colIds.put("Label", cell.getColumnIndex());
-                            break;
-                        case "data element parent for input options":
-                            colIds.put("InputOptionParent", cell.getColumnIndex());
-                            break;
+//                        case "master data type":
+//                            colIds.put("MasterDataType", cell.getColumnIndex());
+//                            break;
+//                        case "master data element label":
+//                            colIds.put("Name", cell.getColumnIndex());
+//                            colIds.put("Label", cell.getColumnIndex());
+//                            break;
+//                        case "data element parent for input options":
+//                            colIds.put("InputOptionParent", cell.getColumnIndex());
+//                            break;
                         // no group column in old or new spreadsheet? Ask Bryn?
                         // case "group": colIds.put("Group", cell.getColumnIndex()); break;
                         // case "data element name": colIds.put("Name", cell.getColumnIndex()); break;
@@ -613,110 +654,65 @@ public class Processor extends Operation {
                         // relevance not used in FHIR?
                         // case "relevance": colIds.put("Relevance", cell.getColumnIndex()); break;
                         // info icon not used in FHIR?
-                        // case "info icon": colIds.put("InfoIcon", cell.getColumnIndex()); break;
-                        case "description":
-                            colIds.put("Description", cell.getColumnIndex());
-                            break;
+                        //case "info icon": colIds.put("InfoIcon", cell.getColumnIndex()); break;
+                        case "description and definition":
+                        case "description": colIds.put("Description", cell.getColumnIndex()); break;
                         case "data element label":
                             colIds.put("DataElementLabel", cell.getColumnIndex());
+                            colIds.put("Name", cell.getColumnIndex());
+                            colIds.put("Label", cell.getColumnIndex());
                             break;
-                        case "data element name":
-                            colIds.put("DataElementName", cell.getColumnIndex());
-                            break;
-                        case "notes":
-                            colIds.put("Notes", cell.getColumnIndex());
-                            break;
-                        case "data type":
-                            colIds.put("Type", cell.getColumnIndex());
-                            break;
+                        case "data element name": colIds.put("DataElementName", cell.getColumnIndex()); break;
+                        case "notes": colIds.put("Notes", cell.getColumnIndex()); break;
+                        case "data type": colIds.put("Type", cell.getColumnIndex()); break;
                         case "multiple choice":
-                            colIds.put("MultipleChoiceType", cell.getColumnIndex());
-                            break;
-                        case "input options":
-                            colIds.put("Choices", cell.getColumnIndex());
-                            break;
-                        case "calculation":
-                            colIds.put("Calculation", cell.getColumnIndex());
-                            break;
-                        case "validation required":
-                            colIds.put("Constraint", cell.getColumnIndex());
-                            break;
-                        case "required":
-                            colIds.put("Required", cell.getColumnIndex());
-                            break;
-                        case "editable":
-                            colIds.put("Editable", cell.getColumnIndex());
-                            break;
-                        case "custom profile id":
-                            colIds.put("CustomProfileId", cell.getColumnIndex());
-                            break;
-                        case "binding or custom value set name or reference":
-                            colIds.put("CustomValueSetName", cell.getColumnIndex());
-                            break;
-                        case "binding strength":
-                            colIds.put("BindingStrength", cell.getColumnIndex());
-                            break;
-                        case "ucum":
-                            colIds.put("UnitOfMeasure", cell.getColumnIndex());
-                            break;
-                        case "extension needed":
-                            colIds.put("ExtensionNeeded", cell.getColumnIndex());
-                            break;
+                        case "multiple choice type":
+                        case "multiple choice (if applicable)":
+                        case "multiple choice type ?(if applicable)":
+                            colIds.put("MultipleChoiceType", cell.getColumnIndex()); break;
+                        case "input options": colIds.put("Choices", cell.getColumnIndex()); break;
+                        case "calculation": colIds.put("Calculation", cell.getColumnIndex()); break;
+                        case "validation required": colIds.put("Constraint", cell.getColumnIndex()); break;
+                        case "required": colIds.put("Required", cell.getColumnIndex()); break;
+                        case "editable": colIds.put("Editable", cell.getColumnIndex()); break;
+                        case "custom profile id": colIds.put("CustomProfileId", cell.getColumnIndex()); break;
+                        case "binding or custom value set name or reference": colIds.put("CustomValueSetName", cell.getColumnIndex()); break;
+                        case "binding strength": colIds.put("BindingStrength", cell.getColumnIndex()); break;
+                        case "ucum": colIds.put("UnitOfMeasure", cell.getColumnIndex()); break;
+                        case "extension needed": colIds.put("ExtensionNeeded", cell.getColumnIndex()); break;
 
                         // fhir resource details
-                        case "master data element path":
-                            colIds.put("MasterDataElementPath", cell.getColumnIndex());
-                            break;
+                        case "master data element path": colIds.put("MasterDataElementPath", cell.getColumnIndex()); break;
                         case "hl7 fhir r4 - resource":
-                            colIds.put("FhirR4Resource", cell.getColumnIndex());
-                            break;
-                        case "hl7 fhir r4 - resource type":
-                            colIds.put("FhirR4ResourceType", cell.getColumnIndex());
-                            break;
-                        case "hl7 fhir r4 - base profile":
-                            colIds.put("FhirR4BaseProfile", cell.getColumnIndex());
-                            break;
-                        case "hl7 fhir r4 - version number":
-                            colIds.put("FhirR4VersionNumber", cell.getColumnIndex());
-                            break;
-                        case "hl7 fhir r4 - additional fhir mapping details":
-                            colIds.put("FhirR4AdditionalFHIRMappingDetails", cell.getColumnIndex());
-                            break;
+//                        case "hl7 fhir r4 – resource":
+                            colIds.put("FhirR4Resource", cell.getColumnIndex()); break;
+                        case "hl7 fhir r4 - resource type": colIds.put("FhirR4ResourceType", cell.getColumnIndex()); break;
+                        case "hl7 fhir r4 - base profile": colIds.put("FhirR4BaseProfile", cell.getColumnIndex()); break;
+                        case "hl7 fhir r4 - version number": colIds.put("FhirR4VersionNumber", cell.getColumnIndex()); break;
+                        case "hl7 fhir r4 - additional fhir mapping details": colIds.put("FhirR4AdditionalFHIRMappingDetails", cell.getColumnIndex()); break;
 
                         // terminology
-                        case "fhir code system":
-                            colIds.put("FhirCodeSystem", cell.getColumnIndex());
-                            break;
-                        case "hl7 fhir r4 code":
-                            colIds.put("FhirR4Code", cell.getColumnIndex());
-                            break;
+                        case "fhir code system": colIds.put("FhirCodeSystem", cell.getColumnIndex()); break;
+                        case "hl7 fhir r4 code": colIds.put("FhirR4Code", cell.getColumnIndex()); break;
                         case "icd-10-who":
-                            colIds.put("ICD-10-WHO", cell.getColumnIndex());
-                            break;
+                        case "icd-10 code":
+                        case "icd-10?code": colIds.put("ICD-10", cell.getColumnIndex()); break;
+                        case "icf?code": colIds.put("ICF", cell.getColumnIndex()); break;
+                        case "ichi?code": colIds.put("ICHI", cell.getColumnIndex()); break;
                         case "snomed-ct":
-                            colIds.put("SNOMED-CT", cell.getColumnIndex());
-                            break;
+                        case "snomed-ct code":
+                        case "snomed ct":
+                        case "snomed ct?code": colIds.put("SNOMED-CT", cell.getColumnIndex()); break;
                         case "loinc":
-                            colIds.put("LOINC", cell.getColumnIndex());
-                            break;
-                        case "rxnorm":
-                            colIds.put("RxNorm", cell.getColumnIndex());
-                            break;
+                        case "loinc code": colIds.put("LOINC", cell.getColumnIndex()); break;
+                        case "rxnorm": colIds.put("RxNorm", cell.getColumnIndex()); break;
                         case "icd-11":
-                            colIds.put("ICD-11", cell.getColumnIndex());
-                            break;
-                        case "ciel":
-                            colIds.put("CIEL", cell.getColumnIndex());
-                            break;
-                        case "openmrs entity parent":
-                            colIds.put("OpenMRSEntityParent", cell.getColumnIndex());
-                            break;
-                        case "openmrs entity":
-                            colIds.put("OpenMRSEntity", cell.getColumnIndex());
-                            break;
-                        case "openmrs entity id":
-                            colIds.put("OpenMRSEntityId", cell.getColumnIndex());
-                            break;
+                        case "icd-11 code":
+                        case "icd-11?code":colIds.put("ICD-11", cell.getColumnIndex()); break;
+                        case "ciel": colIds.put("CIEL", cell.getColumnIndex()); break;
+                        case "openmrs entity parent": colIds.put("OpenMRSEntityParent", cell.getColumnIndex()); break;
+                        case "openmrs entity": colIds.put("OpenMRSEntity", cell.getColumnIndex()); break;
+                        case "openmrs entity id": colIds.put("OpenMRSEntityId", cell.getColumnIndex()); break;
                     }
                 }
                 continue;
@@ -727,27 +723,30 @@ public class Processor extends Operation {
             boolean scopeMatchesRowScope = rowScope != null && scope.toLowerCase().equals(rowScope.toLowerCase());
 
             String inNewDD = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "InNewDD"));
-            boolean shouldInclude = inNewDD == null || (inNewDD.equals("ST") || inNewDD.equals("1"));
+            boolean shouldInclude = inNewDD == null || inNewDD.equals("ST") || inNewDD.equals("1");
 
             if (shouldInclude && (scopeIsNull || scopeMatchesRowScope)) {
-                String masterDataType = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MasterDataType"));
-                switch (masterDataType) {
-                    case "Data Element":
-                    case "Slice":
-                        DictionaryElement e = createDataElement(page, currentGroup, row, colIds);
-                        if (e != null) {
-                            elementMap.put(e.getName(), e);
-                        }
-                        break;
-                    case "Input Option":
-                        addInputOptionToParentElement(row, colIds);
-                        break;
-                    case "Calculation":
-                    case "UI Element":
-                        break;
-                    default:
-                        // Currently unsupported/undocumented
-                        break;
+                String masterDataType = getMasterDataType(row, colIds);
+                if (masterDataType != null) {
+                    switch (masterDataType) {
+                        case "Data Element":
+                        case "Slice":
+                            currentInputOptionParent = row;
+                            DictionaryElement e = createDataElement(page, currentGroup, row, colIds);
+                            if (e != null) {
+                                elementMap.put(e.getName(), e);
+                            }
+                            break;
+                        case "Input Option":
+                            addInputOptionToParentElement(row, colIds);
+                            break;
+                        case "Calculation":
+                        case "UI Element":
+                            break;
+                        default:
+                            // Currently unsupported/undocumented
+                            break;
+                    }
                 }
             }
         }
@@ -1086,6 +1085,7 @@ public class Processor extends Operation {
         sd.setName(hasCustomProfileIdRaw ? customProfileIdRaw : element.getName());
         sd.setTitle(hasCustomProfileIdRaw ? customProfileIdRaw : element.getLabel());
 
+        // TODO: This needs to be more dynamic. E.g., 'not-done' for a not done profile.
         sd.setStatus(Enumerations.PublicationStatus.DRAFT);
         sd.setExperimental(false);
         // TODO: date
@@ -1195,10 +1195,12 @@ public class Processor extends Operation {
             case "DocumentReference":
             case "Encounter":
             case "HealthcareService":
+            case "Immunization":
             case "Location":
             case "Medication":
             case "MedicationAdministration":
             case "MedicationDispense":
+            case "MedicationRequest":
             case "MedicationStatement":
             case "OccupationalData":
             case "Organization":
@@ -1214,155 +1216,155 @@ public class Processor extends Operation {
                 throw new IllegalArgumentException("Unrecognized baseType: " + resourceType.toString());
         }
 
-        // For Observations, it is a valid scenario for the Data Dictionary (DD) to not have a Data Element entry for the primary code path element - Observation.code.
-        // In this case, the tooling should ensure that this element is created. The fixed code for this element should be the code specified by the Data
-        // Element record mapped to Observation.value[x]. For all other resource types it is invalid to not have a primary code path element entry in the DD
-        if (codePath != null && !codePath.isEmpty() && element.getCode() != null) {
-            String elementId = String.format("%s.%s", resourceType, codePath);
-            String primaryCodePath = String.format("%s.%s", resourceType, codePath);
+        try {
+            // For Observations, it is a valid scenario for the Data Dictionary (DD) to not have a Data Element entry for the primary code path element - Observation.code.
+            // In this case, the tooling should ensure that this element is created. The fixed code for this element should be the code specified by the Data
+            // Element record mapped to Observation.value[x]. For all other resource types it is invalid to not have a primary code path element entry in the DD
+            if (codePath != null && !codePath.isEmpty() && element.getCode() != null) {
+                String elementId = String.format("%s.%s", resourceType, codePath);
+                String primaryCodePath = String.format("%s.%s", resourceType, codePath);
 
-            ElementDefinition existingPrimaryCodePathElement = null;
+                ElementDefinition existingPrimaryCodePathElement = null;
+                for (ElementDefinition elementDef : sd.getDifferential().getElement()) {
+                    if (elementDef.getId().equals(elementId)) {
+                        existingPrimaryCodePathElement = elementDef;
+                        break;
+                    }
+                }
+
+                Boolean isPrimaryCodePath = element.getFhirElementPath().getResourceTypeAndPath().equals(primaryCodePath);
+                Boolean isPreferredCodePath = isPrimaryCodePath || element.getFhirElementPath().getResourceTypeAndPath().equals("Observation.value[x]");
+
+                if (existingPrimaryCodePathElement == null) {
+                    ElementDefinition ed = new ElementDefinition();
+                    ed.setId(elementId);
+                    ed.setPath(elementId);
+                    ed.setMin(1);
+                    ed.setMax("1");
+                    ed.setMustSupport(true);
+                    if (isPreferredCodePath) {
+                        ed.setFixed(element.getCode().toCodeableConcept());
+                    }
+
+                    sd.getDifferential().addElement(ed);
+                } else {
+                    Type existingCode = existingPrimaryCodePathElement.getFixed();
+                    // The code in the Primary Code Path Data Element entry should always have priority over the preferred (value[x])
+                    if ((existingCode == null || isPrimaryCodePath) && (isPreferredCodePath)) {
+                        existingPrimaryCodePathElement.setFixed(element.getCode().toCodeableConcept());
+                    }
+                }
+            }
+
+            Boolean isSlice = element.getMasterDataType().toLowerCase().equals("slice");
+            String masterDataElementPath = elementPath.getMasterDataElementPath();
+            Boolean isElementOfSlice = !isSlice && masterDataElementPath != null && !masterDataElementPath.isEmpty() && masterDataElementPath.indexOf(".") > 0;
+
+            String elementId;
+            String slicePath;
+            String sliceName = null;
+            if (isSlice || isElementOfSlice) {
+                int periodIndex = masterDataElementPath.indexOf(".");
+                sliceName = periodIndex > 0 ? masterDataElementPath.substring(0, periodIndex) : masterDataElementPath;
+                slicePath = periodIndex > 0 ? masterDataElementPath.substring(periodIndex + 1) : masterDataElementPath;
+
+                String resource = elementPath.getResourceTypeAndPath();
+                int elementPathStartIndex = resource.indexOf(slicePath);
+                if (isSlice) {
+                    elementId = String.format("%s:%s", resource, sliceName);
+                } else {
+                    elementId = String.format("%s:%s.%s", resource.substring(0, elementPathStartIndex - 1), sliceName, resource.substring(elementPathStartIndex));
+                }
+            } else {
+                if (isChoiceType(elementPath)) {
+                    String elementFhirType = getFhirTypeOfTargetElement(elementPath);
+                    elementFhirType = elementFhirType.substring(0, 1).toUpperCase() + elementFhirType.substring(1);
+                    elementId = elementPath.getResourceTypeAndPath().replace("[x]", elementFhirType);
+                } else {
+                    elementId = String.format("%s.%s", resourceType, choicesPath);
+                }
+            }
+
+            ElementDefinition existingElement = null;
             for (ElementDefinition elementDef : sd.getDifferential().getElement()) {
                 if (elementDef.getId().equals(elementId)) {
-                    existingPrimaryCodePathElement = elementDef;
+                    existingElement = elementDef;
                     break;
                 }
             }
 
-            Boolean isPrimaryCodePath = element.getFhirElementPath().getResourceTypeAndPath().equals(primaryCodePath);
-            Boolean isPreferredCodePath = isPrimaryCodePath || element.getFhirElementPath().getResourceTypeAndPath().equals("Observation.value[x]");
+            // if the element doesn't exist, create it
+            if (existingElement == null) {
+                if (isSlice) {
+                    ensureSliceAndBaseElementWithSlicing(element, elementPath, sd, elementId, sliceName, null);
+                } else {
+                    String elementFhirType = getFhirTypeOfTargetElement(elementPath);
 
-            if (existingPrimaryCodePathElement == null) {
-                ElementDefinition ed = new ElementDefinition();
-                ed.setId(elementId);
-                ed.setPath(elementId);
-                ed.setMin(1);
-                ed.setMax("1");
-                ed.setMustSupport(true);
-                if (isPreferredCodePath) {
-                    ed.setFixed(element.getCode().toCodeableConcept());
-                }
+                    ElementDefinition ed = new ElementDefinition();
+                    ed.setId(elementId);
+                    ed.setPath(elementId);
+                    ed.setMin(toBoolean(element.getRequired()) ? 1 : 0);
+                    ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
+                    ed.setMustSupport(true);
 
-                sd.getDifferential().addElement(ed);
-            }
-            else {
-                Type existingCode = existingPrimaryCodePathElement.getFixed();
-                // The code in the Primary Code Path Data Element entry should always have priority over the preferred (value[x])
-                if ((existingCode == null || isPrimaryCodePath) && (isPreferredCodePath)) {
-                    existingPrimaryCodePathElement.setFixed(element.getCode().toCodeableConcept());
-                }
-            }
-        }
+                    String unitOfMeasure = element.getFhirElementPath().getUnitOfMeasure();
+                    Boolean hasUnitOfMeasure = unitOfMeasure != null && !unitOfMeasure.isEmpty();
+                    if (isChoiceType(elementPath) && hasUnitOfMeasure) {
+                        ElementDefinition unitElement = new ElementDefinition();
+                        unitElement.setId(elementId + ".unit");
+                        unitElement.setPath(elementId + ".unit");
+                        unitElement.setMin(1);
+                        unitElement.setMax("1");
+                        unitElement.setMustSupport(true);
 
-        Boolean isSlice = element.getMasterDataType().toLowerCase().equals("slice");
-        String masterDataElementPath = elementPath.getMasterDataElementPath();
-        Boolean isElementOfSlice = !isSlice &&  masterDataElementPath!= null && !masterDataElementPath.isEmpty() && masterDataElementPath.indexOf(".") > 0;
+                        //TODO: This should be a code, not fixed string
+                        ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
+                        if (elementFhirType != null && elementFhirType.length() > 0) {
+                            tr.setCode("string");
+                            unitElement.addType(tr);
+                        }
+                        unitElement.setFixed(new StringType(unitOfMeasure));
 
-        String elementId;
-        String slicePath;
-        String sliceName = null;
-        if (isSlice || isElementOfSlice) {
-            int periodIndex = masterDataElementPath.indexOf(".");
-            sliceName = periodIndex > 0 ? masterDataElementPath.substring(0, periodIndex) : masterDataElementPath;
-            slicePath = periodIndex > 0 ? masterDataElementPath.substring(periodIndex + 1) : masterDataElementPath;
+                        sd.getDifferential().addElement(unitElement);
+                    }
 
-            String resource = elementPath.getResourceTypeAndPath();
-            int elementPathStartIndex = resource.indexOf(slicePath);
-            if (isSlice) {
-                elementId = String.format("%s:%s", resource, sliceName);
-            } else {
-                elementId = String.format("%s:%s.%s", resource.substring(0, elementPathStartIndex - 1), sliceName, resource.substring(elementPathStartIndex));
-            }
-        }
-        else {
-            if (isChoiceType(elementPath)) {
-                String elementFhirType = getFhirTypeOfTargetElement(elementPath);
-                elementFhirType = elementFhirType.substring(0, 1).toUpperCase() + elementFhirType.substring(1);
-                elementId = elementPath.getResourceTypeAndPath().replace("[x]", elementFhirType);
-            }
-            else {
-                elementId = String.format("%s.%s", resourceType, choicesPath);
-            }
-        }
-
-        ElementDefinition existingElement = null;
-        for (ElementDefinition elementDef : sd.getDifferential().getElement()) {
-            if (elementDef.getId().equals(elementId)) {
-                existingElement = elementDef;
-                break;
-            }
-        }
-
-        // if the element doesn't exist, create it
-        if (existingElement == null) {
-            if (isSlice) {
-                ensureSliceAndBaseElementWithSlicing(element, elementPath, sd, elementId, sliceName, null);
-            } else {
-                String elementFhirType = getFhirTypeOfTargetElement(elementPath);
-
-                ElementDefinition ed = new ElementDefinition();
-                ed.setId(elementId);
-                ed.setPath(elementId);
-                ed.setMin(toBoolean(element.getRequired()) ? 1 : 0);
-                ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
-                ed.setMustSupport(true);
-
-                String unitOfMeasure = element.getFhirElementPath().getUnitOfMeasure();
-                Boolean hasUnitOfMeasure = unitOfMeasure != null && !unitOfMeasure.isEmpty();
-                if (isChoiceType(elementPath) && hasUnitOfMeasure) {
-                    ElementDefinition unitElement = new ElementDefinition();
-                    unitElement.setId(elementId + ".unit");
-                    unitElement.setPath(elementId + ".unit");
-                    unitElement.setMin(1);
-                    unitElement.setMax("1");
-                    unitElement.setMustSupport(true);
-
-                    //TODO: This should be a code, not fixed string
                     ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
                     if (elementFhirType != null && elementFhirType.length() > 0) {
-                        tr.setCode("string");
-                        unitElement.addType(tr);
+                        tr.setCode(elementFhirType);
+                        ed.addType(tr);
                     }
-                    unitElement.setFixed(new StringType(unitOfMeasure));
 
-                    sd.getDifferential().addElement(unitElement);
+                    ensureAndBindElementTerminology(element, sd, ed);
+                    sd.getDifferential().addElement(ed);
                 }
+            } else {
+                // If this is a choice type, append the current element's type to the type list.
+                if (isChoiceType(elementPath)) {
+                    List<ElementDefinition.TypeRefComponent> existingTypes = existingElement.getType();
 
-                ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
-                if (elementFhirType != null && elementFhirType.length() > 0) {
-                    tr.setCode(elementFhirType);
-                    ed.addType(tr);
-                }
-
-                ensureAndBindElementTerminology(element, sd, ed);
-                sd.getDifferential().addElement(ed);
-            }
-        }
-        else {
-            // If this is a choice type, append the current element's type to the type list.
-            if (isChoiceType(elementPath)) {
-                List<ElementDefinition.TypeRefComponent> existingTypes = existingElement.getType();
-
-                ElementDefinition.TypeRefComponent elementType = null;
-                String elementFhirType = getFhirTypeOfTargetElement(elementPath);
-                if (elementFhirType != null && elementFhirType.length() > 0) {
-                    for (ElementDefinition.TypeRefComponent type : existingTypes) {
-                        if (type.getCode().equals(elementFhirType)) {
-                            elementType = type;
-                            break;
+                    ElementDefinition.TypeRefComponent elementType = null;
+                    String elementFhirType = getFhirTypeOfTargetElement(elementPath);
+                    if (elementFhirType != null && elementFhirType.length() > 0) {
+                        for (ElementDefinition.TypeRefComponent type : existingTypes) {
+                            if (type.getCode().equals(elementFhirType)) {
+                                elementType = type;
+                                break;
+                            }
                         }
                     }
+
+                    if (elementType == null) {
+                        elementType = new ElementDefinition.TypeRefComponent();
+                        elementType.setCode(elementFhirType);
+                        existingElement.addType(elementType);
+                    }
+
+                    ensureAndBindElementTerminology(element, sd, existingElement);
                 }
 
-                if (elementType == null) {
-                    elementType = new ElementDefinition.TypeRefComponent();
-                    elementType.setCode(elementFhirType);
-                    existingElement.addType(elementType);
-                }
-
-                ensureAndBindElementTerminology(element, sd, existingElement);
             }
-
+        } catch (Exception e) {
+            System.out.println(String.format("Error ensuring element for '%s'. Error: %s ", element.getLabel(), e));
         }
     }
 
@@ -1575,7 +1577,9 @@ public class Processor extends Operation {
                     conceptReference.setCode(code.getCode());
                     conceptReference.setDisplay(code.getLabel());
 
-                    if (!conceptReferences.contains(conceptReference)) {
+                    // Only add the concept if it does not already exist in the ValueSet (based on both Code and Display)
+                    if (!conceptReferences.stream().filter(o -> o.getCode().equals(conceptReference.getCode())
+                            && o.getDisplay().equals(conceptReference.getDisplay())).findFirst().isPresent()) {
                         conceptSet.addConcept(conceptReference);
                     }
                 }

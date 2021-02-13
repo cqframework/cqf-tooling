@@ -8,7 +8,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
-import org.w3._1999.xhtml.P;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
