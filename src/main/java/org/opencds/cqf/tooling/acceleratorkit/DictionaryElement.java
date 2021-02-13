@@ -10,7 +10,11 @@ import java.util.stream.Collectors;
  * Represents a WHO Accelerator Kit Data Dictionary Element
  */
 public class DictionaryElement {
-    public DictionaryElement(String name) {
+    public DictionaryElement(String id, String name) {
+        if (id == null || id.equals("")) {
+            throw new IllegalArgumentException("id required");
+        }
+        this.id = id;
         if (name == null || name.equals("")) {
             throw new IllegalArgumentException("name required");
         }
@@ -33,12 +37,25 @@ public class DictionaryElement {
         this.group = group;
     }
 
+    private String activity;
+    public String getActivity() {
+        return this.activity;
+    }
+    public void setActivity(String activity) {
+        this.activity = activity;
+    }
+
     private String label;
     public String getLabel() {
         return this.label;
     }
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    private String id;
+    public String getId() {
+        return this.id;
     }
 
     private String name;

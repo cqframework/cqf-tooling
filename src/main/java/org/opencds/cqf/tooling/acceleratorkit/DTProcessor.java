@@ -152,7 +152,7 @@ public class DTProcessor extends Operation {
             throw new IllegalArgumentException("Expected business rule title of the form '<ID> <Title>'");
         }
         String decisionIdentifier = decisionTitle.substring(0, index);
-        String decisionName = decisionTitle.substring(index + 1);
+        // String decisionName = decisionTitle.substring(index + 1);
         String decisionId = decisionIdentifier.replace(".", "");
 
         planDefinition.setTitle(decisionTitle);
