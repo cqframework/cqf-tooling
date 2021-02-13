@@ -12,18 +12,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.apache.poi.ss.usermodel.*;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Element;
-import org.hl7.fhir.r4.model.ElementDefinition;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.UriType;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.*;
 import org.jetbrains.annotations.NotNull;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
@@ -53,6 +42,8 @@ public class Processor extends Operation {
 
     private Map<String, StructureDefinition> fhirModelStructureDefinitions = new HashMap<String, StructureDefinition>();
     private Map<String, DictionaryElement> elementMap = new HashMap<String, DictionaryElement>();
+    private Map<String, Integer> elementIds = new HashMap<String, Integer>();
+    private Map<String, Coding> activityMap = new HashMap<String, Coding>();
     private List<DictionaryProfileElementExtension> profileExtensions = new ArrayList<>();
     private List<StructureDefinition> extensions = new ArrayList<StructureDefinition>();
     private List<StructureDefinition> profiles = new ArrayList<StructureDefinition>();
@@ -282,6 +273,48 @@ public class Processor extends Operation {
         return scopePath + "/input/vocabulary/valueset";
     }
 
+    private Coding getActivityCoding(String activityId) {
+        if (activityId == null || activityId.isEmpty()) {
+            return null;
+        }
+
+        int i = activityId.indexOf(" ");
+        if (i <= 1) {
+            return null;
+        }
+
+        String activityCode = activityId.substring(0, i);
+        String activityDisplay = activityId.substring(i + 1);
+
+        if (activityCode.isEmpty() || activityDisplay.isEmpty()) {
+            return null;
+        }
+
+        Coding activity = activityMap.get(activityCode);
+
+        if (activity == null) {
+            activity = new Coding().setCode(activityCode).setSystem("http://fhir.org/guides/who/anc-cds/CodeSystem/activity-codes").setDisplay(activityDisplay);
+            activityMap.put(activityCode, activity);
+        }
+
+        return activity;
+    }
+
+    private String getNextElementId(String activityCode) {
+        if (activityCode == null) {
+            return null;
+        }
+
+        if (!elementIds.containsKey(activityCode)) {
+            elementIds.put(activityCode, 1);
+        }
+
+        Integer nextId = elementIds.get(activityCode);
+        elementIds.put(activityCode, nextId + 1);
+
+        return activityCode + ".DE" + nextId.toString();
+    }
+
     private String getActivityID(Row row, HashMap<String, Integer> colIds) {
         String activityID = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ActivityID"));
         return activityID;
@@ -497,11 +530,16 @@ public class Processor extends Operation {
             return null;
         }
 
-        DictionaryElement e = new DictionaryElement(name);
+        String activity = getActivityID(row, colIds);
+        Coding activityCoding = getActivityCoding(activity);
+        String id = getNextElementId(activityCoding.getCode());
+
+        DictionaryElement e = new DictionaryElement(id, name);
 
         // Populate based on the row
         e.setPage(page);
         e.setGroup(group);
+        e.setActivity(activity);
         e.setLabel(label);
         e.setType(type);
         e.setMasterDataType(getMasterDataType(row, colIds));
@@ -795,6 +833,7 @@ public class Processor extends Operation {
                 .replace("_", "-")
                 .replace("/", "-")
                 .replace(" ", "-")
+                .replace(".", "-")
                 // remove multiple ndash
                 .replace("----", "-")
                 .replace("---", "-")
@@ -1051,26 +1090,44 @@ public class Processor extends Operation {
         String customProfileIdRaw = elementPath.getCustomProfileId();
         Boolean hasCustomProfileIdRaw = customProfileIdRaw != null && !customProfileIdRaw.isEmpty();
         String resourceType = elementPath.getResourceType().trim();
+        Coding activityCoding = getActivityCoding(element.getActivity());
 
         StructureDefinition sd;
         sd = new StructureDefinition();
         sd.setId(customProfileId);
         sd.setUrl(String.format("%s/StructureDefinition/%s", canonicalBase, customProfileId));
-        // TODO: version
+        // TODO: version (I think this needs to come from the IG version, we don't need to set that here)
         sd.setName(hasCustomProfileIdRaw ? customProfileIdRaw : element.getName());
         sd.setTitle(hasCustomProfileIdRaw ? customProfileIdRaw : element.getLabel());
+
+        if (element.getId() != null) {
+            sd.addIdentifier(new Identifier().setUse(Identifier.IdentifierUse.OFFICIAL)
+                    .setSystem("http://fhir.org/guides/who/anc-cds/Identifier/data-elements")
+                    .setValue(element.getId())
+            );
+        }
 
         // TODO: This needs to be more dynamic. E.g., 'not-done' for a not done profile.
         sd.setStatus(Enumerations.PublicationStatus.DRAFT);
         sd.setExperimental(false);
-        // TODO: date
-        // TODO: publisher
-        // TODO: contact
+        // TODO: date // Should be set by publication tooling
+        // TODO: publisher // Should be set by publication tooling
+        // TODO: contact // Should be set by publication tooling
         sd.setDescription(element.getDescription());
-        // TODO: What to do with Notes?
+        // TODO: What to do with Notes? // We should add any warnings generated during this process to the notes...
         sd.setFhirVersion(Enumerations.FHIRVersion._4_0_1);
         sd.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
         sd.setAbstract(false);
+
+        if (activityCoding != null) {
+            sd.addUseContext(new UsageContext()
+                    .setCode(new Coding()
+                            .setCode("task")
+                            .setSystem("http://terminology.hl7.org/CodeSystem/usage-context-type")
+                            .setDisplay("Workflow Task")
+                    ).setValue(new CodeableConcept().addCoding(activityCoding)));
+        }
+
         // TODO: Support resources other than Observation
         sd.setType(resourceType);
 
@@ -1111,7 +1168,7 @@ public class Processor extends Operation {
         // If custom profile is specified, search for if it exists already.
         String customProfileIdRaw = element.getFhirElementPath().getCustomProfileId();
         Boolean hasCustomProfileIdRaw = customProfileIdRaw != null && !customProfileIdRaw.isEmpty();
-        String customProfileId = toId(hasCustomProfileIdRaw ? customProfileIdRaw : element.getName());
+        String customProfileId = toId(hasCustomProfileIdRaw ? customProfileIdRaw : element.getId());
         for (StructureDefinition existingSD : profiles) {
             if (existingSD.getId().equals(customProfileId)) {
                 sd = existingSD;
