@@ -120,8 +120,7 @@ package org.opencds.cqf.tooling;
             - TODO
 
         - Generate ModelInfo from StructureDefinitions
-             - command: mvn exec:java -Dexec.args="[-GenerateMIs] [path to structuredefinitions xml]  (output directory path)"
-             - TODO
+             - See documentation in StructureDefinitionToModelInfo for argument documentation and examples
 
         - Extension builder
             - TODO

@@ -24,8 +24,9 @@ public class FHIRClassInfoBuilder extends ClassInfoBuilder {
         }
 
         System.out.println("Building ComplexTypes");
-        this.buildFor("FHIR", (x -> x.getKind() == StructureDefinitionKind.COMPLEXTYPE && (x.getBaseDefinition() == null
-                || !x.getBaseDefinition().equals("http://hl7.org/fhir/StructureDefinition/Extension"))));
+        this.buildFor("FHIR", (x -> (x.getKind() == StructureDefinitionKind.COMPLEXTYPE && (x.getBaseDefinition() == null
+                || !x.getBaseDefinition().equals("http://hl7.org/fhir/StructureDefinition/Extension")))
+                && !x.getUrl().equals("http://hl7.org/fhir/StructureDefinition/elementdefinition-de")));
 
         System.out.println("Building Resources");
         this.buildFor("FHIR", (x -> x.getKind() == StructureDefinitionKind.RESOURCE

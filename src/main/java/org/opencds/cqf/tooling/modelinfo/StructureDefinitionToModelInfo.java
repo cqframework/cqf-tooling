@@ -1,5 +1,6 @@
 package org.opencds.cqf.tooling.modelinfo;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -30,10 +31,47 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 
 public class StructureDefinitionToModelInfo extends Operation {
+
+    private String inputPath;
+    private String resourcePaths;
+    private String modelName;
+    private String modelVersion;
+    private boolean useCQLPrimitives = false;
+    private boolean includeMetadata = true;
+
     /*
-        resourcePaths: Semi-colon delimited list of paths to directories containing the resource definition files
-            This directory should contain the unzipped contents of the definitions.json.zip or definitions.xml.zip files
+    // NOTE: This documentation is present in the Main.java class for the tooling as well, keep these in sync
+
+        - command: mvn exec:java -Dexec.args="
+          [-GenerateMIs]
+          [-inputPath | -ip]
+          [-resourcePaths | -rp]
+          [-modelName | -mn]
+          [-modelVersion | -mv]
+          (-useCqlPrimitives | ucp)
+          (-includeMetadata | -im)
+          (-outputpath | -op)
+        "
+
+        Examples:
+          // Build the base pure-FHIR model
+          mvn exec:java -Dexec.args"-GenerateMIs -ip=C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec -rp=4.0.1 -mn=FHIR -mv=4.0.1"
+
+          // Build the base simple-FHIR model
+          mvn exec:java -Dexec.args"-GenerateMIs -ip=C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec -rp=4.0.1 -mn=FHIR -mv=4.0.1-S"
+
+        inputPath: Path to the folder containing spec directories
+            If not specified, defaults to a peer directory named FHIR-Spec
+
+        resourcePaths: Semi-colon delimited list of paths (absolute, or relative to inputPath above) to directories containing the resource definition files
+            The directories should contain the unzipped contents of the definitions.json.zip or definitions.xml.zip files
                 (i.e. all conformance resources published as part of the specification or ig)
+
+        modelName: The name of the model being generated
+        modelVersion: The version of the model being generated
+        useCqlPrimitives: Determines whether the generated structures should use Cql primitives for "primitive types"
+        includeMetadata: Determines whether to include additional (non-structural) information such as definitions, comments, bindings, and constraints
+        outputPath: Specifies the output directory for the resulting ModelInfo
 
         Arguments for producing FHIR Model Info
             -resourcePaths="4.0.1"
@@ -63,51 +101,50 @@ public class StructureDefinitionToModelInfo extends Operation {
      */
     @Override
     public void execute(String[] args) {
-        String inputPath = Paths.get("..", "FHIR-Spec").toString();
-        if (args.length > 1) {
-            inputPath = args[1];
+        inputPath = Paths.get("..", "FHIR-Spec").toString(); // default
+        setOutputPath("output"); // default
+
+        for (String arg : args) {
+            if (arg.equals("-GenerateMIs")) continue;
+            String[] flagAndValue = arg.split("=");
+            if (flagAndValue.length < 2) {
+                throw new IllegalArgumentException("Invalid argument: " + arg);
+            }
+            String flag = flagAndValue[0];
+            String value = flagAndValue[1];
+
+            switch (flag.replace("-", "").toLowerCase()) {
+                case "inputpath": case "ip": inputPath = value; break; // -inputpath (-ip)
+                case "outputpath": case "op": setOutputPath(value); break; // -outputpath (-op)
+                case "resourcepaths": case "rp": resourcePaths = value; break; // -resourcepaths (-rp)
+                // TODO : Can we autodetect this from the structure defintions?
+                // Yes, would need to be an extension definition on the ImplementationGuide...
+                case "modelname": case "mn": modelName = value; break; // -modelname (-mn)
+                case "modelversion": case "mv": modelVersion = value; break; // -modelversion (-mv)
+                case "usecqlprimitives": case "ucp": useCQLPrimitives = value.toLowerCase().equals("true") ? true : false; break;
+                case "includemetadata": case "im": includeMetadata = value.toLowerCase().equals("true") ? true : false; break;
+                default: throw new IllegalArgumentException("Unknown flag: " + flag);
+            }
         }
 
-        if (args.length > 2) {
-            setOutputPath(args[2]);
-        }
-        else {
-            setOutputPath("../cqf-tooling/src/main/resources/org/opencds/cqf/tooling/modelinfo");
-        }
-
-        String resourcePaths = "4.0.1";
-        //String resourcePaths = "4.0.1;US-Core/3.1.0";
-        //String resourcePaths = "4.0.1;US-Core/3.1.0;QI-Core/4.0.0";
-        if (args.length > 3) {
-            resourcePaths = args[3];
-        }
-
-        // TODO : Can we autodetect this from the structure defintions?
-        // Yes, would need to be an extension definition on the ImplementationGuide...
-        String modelName = "FHIR";
-        //String modelName = "USCore";
-        //String modelName = "QICore";
-        //String modelName = "QUICK";
-        if (args.length > 4) {
-            modelName = args[4];
-        }
-
-        String modelVersion = "4.0.1";
-        //String modelVersion = "3.1.0";
-        //String modelVersion = "4.0.0";
-        //String modelVersion = "3.3.0";
-        if (args.length > 5) {
-            modelVersion = args[5];
-        }        
-
+        // TODO: Need to load from NPMPackages, not directories...
         Atlas atlas = new Atlas();
         atlas.loadPaths(inputPath, resourcePaths);
+
+        File outputPath = new File(getOutputPath());
+        if (!outputPath.exists()) {
+            if (!outputPath.mkdirs()) {
+                throw new IllegalArgumentException(String.format("Could not create output directory %s", outputPath));
+            }
+        }
 
         ModelInfoBuilder miBuilder;
         ModelInfo mi;
 
         if (modelName.equals("FHIR")) {
             ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(atlas.getStructureDefinitions());
+            ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
+            ciBuilder.settings.includeMetaData = this.includeMetadata;
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             ciBuilder.afterBuild();
 
@@ -117,6 +154,8 @@ public class StructureDefinitionToModelInfo extends Operation {
         }
         else if (modelName.equals("USCore")) {
             ClassInfoBuilder ciBuilder = new USCoreClassInfoBuilder(atlas.getStructureDefinitions());
+            ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
+            ciBuilder.settings.includeMetaData = this.includeMetadata;
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             ciBuilder.afterBuild();
 
@@ -126,6 +165,8 @@ public class StructureDefinitionToModelInfo extends Operation {
         }
         else if (modelName.equals("QICore")) {
             ClassInfoBuilder ciBuilder = new QICoreClassInfoBuilder(atlas.getStructureDefinitions());
+            ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
+            ciBuilder.settings.includeMetaData = this.includeMetadata;
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             ciBuilder.afterBuild();
 
@@ -135,6 +176,8 @@ public class StructureDefinitionToModelInfo extends Operation {
         }
         else if (modelName.equals("QUICK")) {
             ClassInfoBuilder ciBuilder = new QuickClassInfoBuilder(atlas.getStructureDefinitions());
+            ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
+            ciBuilder.settings.includeMetaData = this.includeMetadata;
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             ciBuilder.afterBuild();
 
@@ -144,6 +187,8 @@ public class StructureDefinitionToModelInfo extends Operation {
         else {
             //should blowup
             ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(atlas.getStructureDefinitions());
+            ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
+            ciBuilder.settings.includeMetaData = this.includeMetadata;
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             miBuilder = new ModelInfoBuilder(typeInfos.values());
             mi = miBuilder.build();

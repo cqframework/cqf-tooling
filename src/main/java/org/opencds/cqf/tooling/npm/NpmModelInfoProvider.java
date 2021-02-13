@@ -1,0 +1,57 @@
+package org.opencds.cqf.tooling.npm;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
+import org.cqframework.cql.cql2elm.ModelInfoProvider;
+import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.elm_modelinfo.r1.ModelInfo;
+import org.hl7.fhir.r5.context.IWorkerContext;
+import org.hl7.fhir.r5.model.Library;
+import org.hl7.fhir.utilities.npm.NpmPackage;
+
+import javax.xml.bind.JAXB;
+
+/**
+ * Provides a model info provider that can resolve CQL model info from an Npm package
+ */
+public class NpmModelInfoProvider implements ModelInfoProvider {
+
+    public NpmModelInfoProvider(List<NpmPackage> packages, ILibraryReader reader, IWorkerContext.ILoggingService logger) {
+        this.packages = packages;
+        this.reader = reader;
+        this.logger = logger;
+    }
+
+    private List<NpmPackage> packages;
+    private ILibraryReader reader;
+    private IWorkerContext.ILoggingService logger;
+
+    public ModelInfo load(VersionedIdentifier modelIdentifier) {
+        // VersionedIdentifier.id: Name of the model
+        // VersionedIdentifier.system: Namespace for the model, as a URL
+        // VersionedIdentifier.version: Version of the model
+        for (NpmPackage p : packages) {
+            try {
+                InputStream s = p.loadByCanonicalVersion(modelIdentifier.getSystem()+"/Library/"+modelIdentifier.getId()+"-ModelInfo", modelIdentifier.getVersion());
+                if (s != null) {
+                    Library l = reader.readLibrary(s);
+                    for (org.hl7.fhir.r5.model.Attachment a : l.getContent()) {
+                        if (a.getContentType() != null && a.getContentType().equals("application/xml")) {
+                            InputStream is = new ByteArrayInputStream(a.getData());
+                            return JAXB.unmarshal(is, ModelInfo.class);
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                logger.logDebugMessage(IWorkerContext.ILoggingService.LogCategory.PROGRESS, String.format("Exceptions occurred attempting to load npm library for model %s", modelIdentifier.toString()));
+            }
+        }
+
+        return null;
+    }
+}
+
