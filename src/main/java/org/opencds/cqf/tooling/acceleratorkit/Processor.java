@@ -2142,6 +2142,7 @@ public class Processor extends Operation {
                 sb.append(String.format("define \"%s\":", title));
                 sb.append(System.lineSeparator());
                 sb.append(String.format("  [%s: Cx.\"%s\"]", sd.getType(), retrieve.getTerminologyIdentifier()));
+                // TODO: Switch on sd.baseDefinition to provide filtering here (e.g. status = 'not-done')
                 sb.append(System.lineSeparator());
                 sb.append(System.lineSeparator());
             }
