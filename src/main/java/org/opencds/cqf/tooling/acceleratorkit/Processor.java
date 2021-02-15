@@ -2,14 +2,7 @@ package org.opencds.cqf.tooling.acceleratorkit;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import javax.annotation.Nonnull;
 
@@ -49,6 +42,10 @@ public class Processor extends Operation {
     private String dataElementPages; // -dataelementpages (-dep) comma-separated list of the names of pages in the
                                      // workbook to be processed
 
+    // TODO: These need to be per scope
+    private String dataElementIdentifierSystem = "http://fhir.org/guides/who/anc-cds/Identifier/data-elements";
+    private String activityCodeSystem = "http://fhir.org/guides/who/anc-cds/CodeSystem/activity-codes";
+
     // Canonical Base
     private String canonicalBase = null;
     private Map<String, String> scopeCanonicalBaseMap = new HashMap<String, String>();
@@ -57,21 +54,41 @@ public class Processor extends Operation {
     private String whoCodeSystemBase = "http://who.int/cg";
     // NOTE: for now, disable open MRS system/codes
     private boolean enableOpenMRS = false;
-    private Map<String, String> supportedCodeSystems = new HashMap<String, String>();
+    private Map<String, String> supportedCodeSystems = new LinkedHashMap<String, String>();
 
-    // private Map<String, StructureDefinition> fhirModelStructureDefinitions = new HashMap<String, StructureDefinition>();
-    private Map<String, DictionaryElement> elementMap = new HashMap<String, DictionaryElement>();
-    private Map<String, Integer> elementIds = new HashMap<String, Integer>();
-    private Map<String, Coding> activityMap = new HashMap<String, Coding>();
+    // private Map<String, StructureDefinition> fhirModelStructureDefinitions = new LinkedHashMap<String, StructureDefinition>();
+    private Map<String, DictionaryElement> elementMap = new LinkedHashMap<String, DictionaryElement>();
+    private Map<String, Integer> elementIds = new LinkedHashMap<String, Integer>();
+    private Map<String, Coding> activityMap = new LinkedHashMap<String, Coding>();
     private List<DictionaryProfileElementExtension> profileExtensions = new ArrayList<>();
     private List<StructureDefinition> extensions = new ArrayList<StructureDefinition>();
     private List<StructureDefinition> profiles = new ArrayList<StructureDefinition>();
+    private Map<String, List<StructureDefinition>> profilesByActivityId = new HashMap<String, List<StructureDefinition>>();
+    private Map<String, List<StructureDefinition>> profilesByParentProfile = new HashMap<String, List<StructureDefinition>>();
     private List<CodeSystem> codeSystems = new ArrayList<CodeSystem>();
     private List<ValueSet> valueSets = new ArrayList<ValueSet>();
+    private Map<String, Coding> concepts = new LinkedHashMap<String, Coding>();
+    private List<RetrieveInfo> retrieves = new ArrayList<RetrieveInfo>();
     private List<String> igJsonFragments = new ArrayList<String>();
     private List<String> igResourceFragments = new ArrayList<String>();
 
     private Row currentInputOptionParent;
+
+    private class RetrieveInfo {
+        public RetrieveInfo(StructureDefinition structureDefinition, String terminologyIdentifier) {
+            this.structureDefinition = structureDefinition;
+            this.terminologyIdentifier = terminologyIdentifier;
+        }
+
+        private StructureDefinition structureDefinition;
+        // public StructureDefinition getStructureDefinition() {
+        //     return structureDefinition;
+        // }
+        private String terminologyIdentifier;
+        public String getTerminologyIdentifier() {
+            return terminologyIdentifier;
+        }
+    }
 
     @Override
     public void execute(String[] args) {
@@ -198,11 +215,16 @@ public class Processor extends Operation {
         writeCodeSystems(outputPath);
         writeValueSets(outputPath);
 
-        // ig.json is deprecated and resources a located by convention. If our output
-        // isn't satisfying convention, we should
-        // modify the tooling to match the convention.
-        // writeIgJsonFragments(scopePath);
-        // writeIgResourceFragments(scopePath);
+        // write concepts CQL
+        writeConcepts(scope, outputPath);
+
+        // write DataElements CQL
+        writeDataElements(scope, outputPath);
+
+        //ig.json is deprecated and resources a located by convention. If our output isn't satisfying convention, we should
+        //modify the tooling to match the convention.
+        //writeIgJsonFragments(scopePath);
+        //writeIgResourceFragments(scopePath);
     }
 
     private void attachExtensions() {
@@ -311,6 +333,15 @@ public class Processor extends Operation {
         return scopePath + "/input/vocabulary/valueset";
     }
 
+    private String getCqlPath(String scopePath) {
+        return scopePath + "/input/cql";
+    }
+
+    private void ensureCqlPath(String scopePath) {
+        String cqlPath = getCqlPath(scopePath);
+        ensurePath(cqlPath);
+    }
+
     private Coding getActivityCoding(String activityId) {
         if (activityId == null || activityId.isEmpty()) {
             return null;
@@ -331,7 +362,7 @@ public class Processor extends Operation {
         Coding activity = activityMap.get(activityCode);
 
         if (activity == null) {
-            activity = new Coding().setCode(activityCode).setSystem("http://fhir.org/guides/who/anc-cds/CodeSystem/activity-codes").setDisplay(activityDisplay);
+            activity = new Coding().setCode(activityCode).setSystem(activityCodeSystem).setDisplay(activityDisplay);
             activityMap.put(activityCode, activity);
         }
 
@@ -1145,7 +1176,7 @@ public class Processor extends Operation {
 
         if (element.getId() != null) {
             sd.addIdentifier(new Identifier().setUse(Identifier.IdentifierUse.OFFICIAL)
-                    .setSystem("http://fhir.org/guides/who/anc-cds/Identifier/data-elements")
+                    .setSystem(dataElementIdentifierSystem)
                     .setValue(element.getId())
             );
         }
@@ -1543,6 +1574,7 @@ public class Processor extends Operation {
             String valueSetUrl = null;
             if (hasCustomValueSetName && element.getChoices().size() == 0 && customValueSetName.startsWith("http")) {
                 valueSetUrl = customValueSetName;
+                retrieves.add(new RetrieveInfo(sd, valueSetUrl));
             }
             else {
                 //TOOD: This needs some TLC, but had to decouple createCodeSystem from openMRS codes to facilitate the extended codes pattern.
@@ -1564,6 +1596,7 @@ public class Processor extends Operation {
                     codeSystem.setValueSet(valueSet.getUrl());
                 }
                 valueSetUrl = valueSet.getUrl();
+                retrieves.add(new RetrieveInfo(sd, valueSet.getTitle()));
             }
             // Bind the current element to the valueSet
             ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
@@ -1583,6 +1616,13 @@ public class Processor extends Operation {
             codes.add(coding);
 
             ed.setCode(codes);
+
+            String conceptName = code.getDisplay();
+            if (conceptName == null || conceptName.isEmpty()) {
+                conceptName = element.getLabel() + " code";
+            }
+            concepts.put(conceptName, coding);
+            retrieves.add(new RetrieveInfo(sd, conceptName));
         }
     }
 
@@ -1740,6 +1780,44 @@ public class Processor extends Operation {
         }
     }
 
+    private void indexProfileByActivity(Coding activityCoding, StructureDefinition sd) {
+        String activityId = activityCoding.getCode();
+        if (activityId != null) {
+            List<StructureDefinition> sds = profilesByActivityId.get(activityId);
+            if (sds == null) {
+                sds = new ArrayList<StructureDefinition>();
+                profilesByActivityId.put(activityId, sds);
+            }
+            if (!sds.contains(sd)) {
+                sds.add(sd);
+            }
+        }
+    }
+
+    private void indexProfileByParent(String parentUrl, StructureDefinition sd) {
+        List<StructureDefinition> sds = profilesByParentProfile.get(parentUrl);
+        if (sds == null) {
+            sds = new ArrayList<StructureDefinition>();
+            profilesByParentProfile.put(parentUrl, sds);
+        }
+        if (!sds.contains(sd)) {
+            sds.add(sd);
+        }
+    }
+
+    private void indexProfile(StructureDefinition sd) {
+        // Index the profile by Activity Id
+        Coding activityCoding = getActivityCoding(sd);
+        if (activityCoding != null) {
+            indexProfileByActivity(activityCoding, sd);
+        }
+        // Index the profile by Parent profile
+        String parentUrl = sd.getBaseDefinition();
+        if (parentUrl != null) {
+            indexProfileByParent(parentUrl, sd);
+        }
+    }
+
     public void writeProfiles(String scopePath) {
         if (profiles != null && profiles.size() > 0) {
             String profilesPath = getProfilesPath(scopePath);
@@ -1749,6 +1827,7 @@ public class Processor extends Operation {
 
             for (StructureDefinition sd : profiles) {
                 sd.getDifferential().getElement().sort(compareById);
+                indexProfile(sd);
                 writeResource(profilesPath, sd);
 
                 // Generate JSON fragment for inclusion in the IG:
@@ -1837,6 +1916,319 @@ public class Processor extends Operation {
                  */
                 igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"ValueSet/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", vs.getId()));
             }
+        }
+    }
+
+    public String getCodeSystemIdentifier(CodeSystem cs) {
+        if (cs != null) {
+            String identifier = cs.hasTitle() ? cs.getTitle() : cs.getName();
+            if (cs.hasVersion()) {
+                identifier = String.format("%s (%s)", identifier, cs.getVersion());
+            }
+
+            return identifier;
+        }
+
+        return null;
+    }
+
+    public String getCodeSystemIdentifier(String url) {
+        for (Map.Entry<String, String> e : supportedCodeSystems.entrySet()) {
+            if (e.getValue().equals(url)) {
+                return e.getKey();
+            }
+        }
+
+        return null;
+    }
+
+    public String getCodeSystemIdentifier(Coding coding) {
+        CodeSystem result = null;
+        for (CodeSystem cs : codeSystems) {
+            if (coding.getSystem().equals(cs.getUrl())) {
+                if (coding.hasVersion() && cs.hasVersion() && coding.getVersion().equals(cs.getVersion())) {
+                    result = cs;
+                    break;
+                }
+
+                if (!coding.hasVersion() && !cs.hasVersion()) {
+                    result = cs;
+                    break;
+                }
+
+                // TODO: Use a terminology service to resolve this?
+            }
+        }
+
+        if (result != null) {
+            return getCodeSystemIdentifier(result);
+        }
+
+        return getCodeSystemIdentifier(coding.getSystem());
+    }
+
+    public void writeConcepts(String scope, String scopePath) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(String.format("library %sConcepts", scope));
+        sb.append(System.lineSeparator());
+        sb.append(System.lineSeparator());
+
+        sb.append("// Code Systems");
+        sb.append(System.lineSeparator());
+        // Supported code systems
+        for (Map.Entry<String, String> entry : supportedCodeSystems.entrySet()) {
+            sb.append(String.format("codesystem \"%s\": '%s'", entry.getKey(), entry.getValue()));
+            sb.append(System.lineSeparator());
+        }
+        // For each code system, generate a codesystem CQL entry:
+        // codesystem "CodeSystem.title": 'CodeSystem.url' [version 'CodeSystem.version']
+        for (CodeSystem cs : codeSystems) {
+            String identifier = getCodeSystemIdentifier(cs);
+            sb.append(String.format("codesystem \"%s\": '%s'", identifier, cs.getUrl()));
+            if (cs.hasVersion()) {
+                sb.append(String.format(" version '%s'", cs.getVersion()));
+            }
+            sb.append(System.lineSeparator());
+        }
+
+        sb.append(System.lineSeparator());
+        sb.append("// Value Sets");
+        sb.append(System.lineSeparator());
+        // For each value set generate a valueset CQL entry:
+        // valueset "ValueSet.title": 'ValueSet.url' [version 'ValueSet.version']
+        for (ValueSet vs : valueSets) {
+            sb.append(String.format("valueset \"%s\": '%s'", vs.hasTitle() ? vs.getTitle() : vs.getName(), vs.getUrl()));
+            if (vs.hasVersion()) {
+                sb.append(String.format(" version '%s'", vs.getVersion()));
+            }
+            sb.append(System.lineSeparator());
+        }
+
+        sb.append(System.lineSeparator());
+        sb.append("// Codes");
+        sb.append(System.lineSeparator());
+        // For each concept generate a code entry:
+        // code "ConceptName": 'Coding.value' from 'getCodeSystemName(Coding.system)' display 'Coding.display'
+        for (Map.Entry<String, Coding> entry : concepts.entrySet()) {
+            sb.append(String.format("code \"%s\": '%s' from \"%s\"", entry.getKey(), entry.getValue().getCode(), getCodeSystemIdentifier(entry.getValue())));
+            if (entry.getValue().hasDisplay()) {
+                sb.append(String.format(" display '%s'", entry.getValue().getDisplay()));
+            }
+            sb.append(System.lineSeparator());
+        }
+
+        ensureCqlPath(scopePath);
+        try (FileOutputStream writer = new FileOutputStream(getCqlPath(scopePath) + "/" + scope + "Concepts.cql")) {
+            writer.write(sb.toString().getBytes());
+            writer.flush();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Error writing concepts library source");
+        }
+    }
+
+    private Identifier getDataElementIdentifier(Iterable<Identifier> identifiers) {
+        for (Identifier i : identifiers) {
+            if (i.hasSystem() && i.getSystem().equals(dataElementIdentifierSystem)) {
+                return i;
+            }
+        }
+
+        return null;
+    }
+
+    private Coding getActivityCoding(CodeableConcept concept) {
+        if (concept.hasCoding()) {
+            for (Coding c : concept.getCoding()) {
+                if (activityCodeSystem.equals(c.getSystem())) {
+                    return c;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private Coding getActivityCoding(StructureDefinition sd) {
+        if (sd.hasUseContext()) {
+            for (UsageContext uc : sd.getUseContext()) {
+                if ("http://terminology.hl7.org/CodeSystem/usage-context-type".equals(uc.getCode().getSystem())
+                        && "task".equals(uc.getCode().getCode())) {
+                    return getActivityCoding(uc.getValueCodeableConcept());
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private Comparator<String> activityIdComparator = new Comparator<String>() {
+        private int indexOfFirstDigit(String s) {
+            for (int i = 0; i < s.length(); i++) {
+                if (Character.isDigit(s.charAt(i))) {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        @Override
+        public int compare(String s1, String s2) {
+            int s1i = indexOfFirstDigit(s1);
+            int s2i = indexOfFirstDigit(s2);
+            if (s1i <= 0 || s2i <= 0) {
+                return 0;
+            }
+
+            String s1a = s1.substring(0, s1i);
+            String s2a = s2.substring(0, s2i);
+            int ac = s1a.compareTo(s2a);
+            if (ac == 0) {
+                String s1b = s1.substring(s1i);
+                String s2b = s2.substring(s2i);
+                String[] s1parts = s1b.split(".");
+                String[] s2parts = s2b.split(".");
+                for (int partIndex = 0; partIndex < s1parts.length; partIndex++) {
+                    if (partIndex >= s2parts.length) {
+                        return 1;
+                    }
+                    ac = Integer.compare(Integer.valueOf(s1parts[partIndex]), Integer.valueOf(s2parts[partIndex]));
+                    if (ac != 0) {
+                        return ac;
+                    }
+                }
+                if (s2parts.length > s1parts.length) {
+                    return -1;
+                }
+
+                return ac;
+            }
+            else {
+                return ac;
+            }
+        }
+    };
+
+    private void writeDataElement(StringBuilder sb, StructureDefinition sd) {
+        // TODO: Consider writing this to an extension on the structuredefinition instead of to the retrieveInfo like this
+        for (RetrieveInfo retrieve : retrieves) {
+            if (retrieve.structureDefinition.getId().equals(sd.getId())) {
+                String title = sd.hasTitle() ? sd.getTitle() : sd.hasName() ? sd.getName() : sd.getId();
+                sb.append("/*");
+                sb.append(System.lineSeparator());
+                sb.append("  @dataElement: ");
+                Identifier dataElementIdentifier = getDataElementIdentifier(sd.getIdentifier());
+                if (dataElementIdentifier != null) {
+                    sb.append(String.format("%s ", dataElementIdentifier.getValue()));
+                }
+                sb.append(title);
+                sb.append(System.lineSeparator());
+
+                Coding activityCoding = getActivityCoding(sd);
+                if (activityCoding != null) {
+                    sb.append(String.format("  @activity: %s %s", activityCoding.getCode(), activityCoding.getDisplay()));
+                    sb.append(System.lineSeparator());
+                }
+
+                if (sd.hasDescription()) {
+                    sb.append(String.format("  @description: %s", sd.getDescription()));
+                    sb.append(System.lineSeparator());
+                }
+                sb.append("*/");
+                sb.append(System.lineSeparator());
+                sb.append(String.format("define \"%s\":", title));
+                sb.append(System.lineSeparator());
+                sb.append(String.format("  [%s: Cx.\"%s\"]", sd.getType(), retrieve.getTerminologyIdentifier()));
+                sb.append(System.lineSeparator());
+                sb.append(System.lineSeparator());
+            }
+        }
+    }
+
+    private void writeActivityIndexHeader(StringBuilder activityIndex, String activityId) {
+        activityIndex.append(System.lineSeparator());
+        activityIndex.append(String.format("#### %s ", activityId));
+        Coding activityCoding = activityMap.get(activityId);
+        if (activityCoding != null) {
+            activityIndex.append(activityCoding.getDisplay());
+        }
+        activityIndex.append(System.lineSeparator());
+        activityIndex.append(System.lineSeparator());
+        activityIndex.append("|Data Element Id|Data Element|");
+        activityIndex.append(System.lineSeparator());
+        activityIndex.append("|---|---|");
+        activityIndex.append(System.lineSeparator());
+    }
+
+    private void writeActivityIndexEntry(StringBuilder activityIndex, StructureDefinition sd) {
+        Identifier dataElementIdentifier = getDataElementIdentifier(sd.getIdentifier());
+        String title = sd.hasTitle() ? sd.getTitle() : sd.hasName() ? sd.getName() : sd.getId();
+        activityIndex.append(String.format("|%s|[%s](StructureDefinition-%s.html)|",
+                dataElementIdentifier != null ? dataElementIdentifier.getValue() : "", title, sd.getId()));
+        activityIndex.append(System.lineSeparator());
+    }
+
+    public void writeDataElements(String scope, String scopePath) {
+        StringBuilder sb = new StringBuilder();
+        StringBuilder activityIndex = new StringBuilder();
+
+        sb.append(String.format("library %sDataElements", scope));
+        sb.append(System.lineSeparator());
+        sb.append(System.lineSeparator());
+
+        sb.append(String.format("using FHIR version '4.0.1'"));
+        sb.append(System.lineSeparator());
+        sb.append(System.lineSeparator());
+        sb.append(String.format("include FHIRHelpers version '4.0.1'"));
+        sb.append(System.lineSeparator());
+        sb.append(System.lineSeparator());
+
+        sb.append(String.format("include %sConcepts called Cx", scope));
+        sb.append(System.lineSeparator());
+        sb.append(System.lineSeparator());
+
+        // For each StructureDefinition, generate an Expression Definition:
+        /*
+        // @dataElement: StructureDefinition.identifier
+        // @activity: StructureDefinition.useContext[task]
+        // @description: StructureDefinition.description
+        define "StructureDefinition.title":
+          [StructureDefinition.resourceType: terminologyIdentifier]
+         */
+
+        List<String> activityIds = new ArrayList<String>(profilesByActivityId.keySet());
+        activityIds.sort(activityIdComparator);
+        for (String activityId : activityIds) {
+            writeActivityIndexHeader(activityIndex, activityId);
+
+            List<StructureDefinition> sds = profilesByActivityId.get(activityId);
+            sds.sort(Comparator.comparing(StructureDefinition::getId));
+            for (StructureDefinition sd : sds) {
+                writeDataElement(sb, sd);
+                writeActivityIndexEntry(activityIndex, sd);
+            }
+        }
+
+        ensureCqlPath(scopePath);
+        try (FileOutputStream writer = new FileOutputStream(getCqlPath(scopePath) + "/" + scope + "DataElements.cql")) {
+            writer.write(sb.toString().getBytes());
+            writer.flush();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Error writing concepts library source");
+        }
+
+        try (FileOutputStream writer = new FileOutputStream(getCqlPath(scopePath) + "/" + scope + "DataElementsByActivity.md")) {
+            writer.write(activityIndex.toString().getBytes());
+            writer.flush();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Error writing profile activity index");
         }
     }
 

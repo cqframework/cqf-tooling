@@ -27,10 +27,14 @@ public class DTProcessor extends Operation {
     // Canonical Base
     private String canonicalBase = null;
 
-    private String newLine = String.format("\n");
+    private String newLine = System.lineSeparator();
     private Map<String, PlanDefinition> planDefinitions = new LinkedHashMap<String, PlanDefinition>();
+    // private Map<String, List<PlanDefinition>> planDefinitionsByActivity = new LinkedHashMap<String, List<PlanDefinition>>();
     private Map<String, Library> libraries = new LinkedHashMap<String, Library>();
     private Map<String, StringBuilder> libraryCQL = new LinkedHashMap<String, StringBuilder>();
+
+    private String activityCodeSystem = "http://fhir.org/guides/who/anc-cds/CodeSystem/activity-codes";
+    private Map<String, Coding> activityMap = new LinkedHashMap<String, Coding>();
 
     @Override
     public void execute(String[] args) {
@@ -92,6 +96,7 @@ public class DTProcessor extends Operation {
         }
 
         writePlanDefinitions(outputPath);
+        writePlanDefinitionIndex(outputPath);
         writeLibraries(outputPath);
         writeLibraryCQL(outputPath);
     }
@@ -135,6 +140,33 @@ public class DTProcessor extends Operation {
                 }
             }
         }
+    }
+
+    private Coding getActivityCoding(String activityId) {
+        if (activityId == null || activityId.isEmpty()) {
+            return null;
+        }
+
+        int i = activityId.indexOf(" ");
+        if (i <= 1) {
+            return null;
+        }
+
+        String activityCode = activityId.substring(0, i);
+        String activityDisplay = activityId.substring(i + 1);
+
+        if (activityCode.isEmpty() || activityDisplay.isEmpty()) {
+            return null;
+        }
+
+        Coding activity = activityMap.get(activityCode);
+
+        if (activity == null) {
+            activity = new Coding().setCode(activityCode).setSystem(activityCodeSystem).setDisplay(activityDisplay);
+            activityMap.put(activityCode, activity);
+        }
+
+        return activity;
     }
 
     private PlanDefinition processDecisionTable(Workbook workbook, Iterator<Row> it, Iterator<Cell> cells) {
@@ -205,6 +237,16 @@ public class DTProcessor extends Operation {
         trigger.setType(TriggerDefinition.TriggerType.NAMEDEVENT);
         trigger.setName(triggerName);
         action.getTrigger().add(trigger);
+
+        Coding activityCoding = getActivityCoding(triggerName);
+        if (activityCoding != null) {
+            planDefinition.addUseContext(new UsageContext()
+                    .setCode(new Coding()
+                            .setCode("task")
+                            .setSystem("http://terminology.hl7.org/CodeSystem/usage-context-type")
+                            .setDisplay("Workflow Task")
+                    ).setValue(new CodeableConcept().addCoding(activityCoding)));
+        }
 
         if (!it.hasNext()) {
             throw new IllegalArgumentException("Expected decision table header row");
@@ -429,6 +471,7 @@ public class DTProcessor extends Operation {
         library.setUrl(canonicalBase + "/Library/" + id);
         library.setTitle(planDefinition.getTitle());
         library.setDescription(planDefinition.getDescription());
+        library.addContent((Attachment)new Attachment().setId("ig-loader-" + id + ".cql"));
 
         planDefinition.getLibrary().add((CanonicalType)new CanonicalType().setValue(library.getUrl()));
 
@@ -452,8 +495,14 @@ public class DTProcessor extends Operation {
                     String.format("Should %s", action.hasDescription()
                             ? action.getDescription().replace("\"", "\\\"") : "perform action"));
         }
-        cql.append(String.format("define \"%s\":\n", action.getConditionFirstRep().getExpression().getExpression()));
+        cql.append("/*");
+        cql.append(newLine);
         cql.append(action.getConditionFirstRep().getExpression().getDescription());
+        cql.append(newLine);
+        cql.append("*/");
+        cql.append(newLine);
+        cql.append(String.format("define \"%s\":%n", action.getConditionFirstRep().getExpression().getExpression()));
+        cql.append("  false"); // Output false, manual process to convert the pseudo-code to CQL
         cql.append(newLine);
         cql.append(newLine);
     }
@@ -466,6 +515,11 @@ public class DTProcessor extends Operation {
         cql.append(newLine);
         cql.append(newLine);
         cql.append("include FHIRHelpers version '4.0.1'");
+        cql.append(newLine);
+        cql.append(newLine);
+        cql.append("include ANCConcepts called Cx");
+        cql.append(newLine);
+        cql.append("include ANCDataElements called PatientData");
         cql.append(newLine);
         cql.append(newLine);
         cql.append("context Patient");
@@ -521,4 +575,30 @@ public class DTProcessor extends Operation {
         }
     }
 
+    private String buildPlanDefinitionIndex() {
+        StringBuilder index = new StringBuilder();
+        index.append("|Decision Table|Description|");
+        index.append(newLine);
+        index.append("|---|---|");
+        index.append(newLine);
+
+        for (PlanDefinition pd : planDefinitions.values()) {
+            index.append(String.format("|[%s](PlanDefinition-%s.html)|%s|", pd.getTitle(), pd.getId(), pd.getDescription()));
+            index.append(newLine);
+        }
+
+        return index.toString();
+    }
+
+    public void writePlanDefinitionIndex(String path) {
+        String outputFilePath = path + "/PlanDefinitionIndex.md";
+        try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
+            writer.write(buildPlanDefinitionIndex().getBytes());
+            writer.flush();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Error writing plandefinition index");
+        }
+    }
 }
