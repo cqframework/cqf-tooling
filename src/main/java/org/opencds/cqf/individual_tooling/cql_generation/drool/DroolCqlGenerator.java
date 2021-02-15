@@ -9,11 +9,10 @@ import org.opencds.cqf.individual_tooling.cql_generation.CqlGenerator;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.serialization.Deserializer;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.traversal.DepthFirstDroolTraverser;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.traversal.DroolTraverser;
-import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.CqlFileVisitor;
+import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.DroolToElmVisitor;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.FHIRModelMappingVisitor;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.HtmlFileVisitor;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.Visitor;
-import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.CqlFileVisitor.CQLTYPES;
 
 public class DroolCqlGenerator implements CqlGenerator {
     private String outputPath;
@@ -47,7 +46,7 @@ public class DroolCqlGenerator implements CqlGenerator {
                 visitor = new FHIRModelMappingVisitor();
             } break;
             case "cql": {
-                visitor = new CqlFileVisitor(outputPath, CQLTYPES.CONDITION);
+                visitor = new DroolToElmVisitor();
             } break;
             case "html": {
                 visitor = new HtmlFileVisitor(outputPath);

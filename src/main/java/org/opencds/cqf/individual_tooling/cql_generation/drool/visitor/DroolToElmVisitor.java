@@ -1,10 +1,7 @@
 package org.opencds.cqf.individual_tooling.cql_generation.drool.visitor;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.cdsframework.dto.CdsCodeDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicateDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicatePartConceptDTO;
@@ -17,12 +14,7 @@ import org.cdsframework.dto.CriteriaResourceDTO;
 import org.cdsframework.dto.CriteriaResourceParamDTO;
 import org.cdsframework.dto.DataInputNodeDTO;
 import org.cdsframework.dto.OpenCdsConceptDTO;
-import org.hl7.cql_annotations.r1.Annotation;
-import org.hl7.elm.r1.AccessModifier;
-import org.hl7.elm.r1.ValueSetDef;
-import org.opencds.cqf.individual_tooling.cql_generation.context.CqlContext;
 import org.opencds.cqf.individual_tooling.cql_generation.context.ElmContext;
-import org.opencds.cqf.individual_tooling.cql_generation.context.FHIRContext;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.adapter.DefinitionAdapter;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.adapter.DroolPredicateToElmExpressionAdapter;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.adapter.LibraryAdapter;
