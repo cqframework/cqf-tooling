@@ -211,10 +211,14 @@ public class ResourceUtils
     private static Map<String, IBaseResource> getR4DepLibraryResources(String path, Map<String, IBaseResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding, Boolean versioned) {      
       List<String> dependencyLibraryPaths = getR4DepLibraryPaths(path, fhirContext, encoding, versioned);
       for (String dependencyLibraryPath : dependencyLibraryPaths) {
-        Object resource = IOUtils.readResource(dependencyLibraryPath, fhirContext);
-        if (resource instanceof org.hl7.fhir.r4.model.Library) {
-          org.hl7.fhir.r4.model.Library library = (org.hl7.fhir.r4.model.Library)resource;
-          dependencyLibraries.putIfAbsent(library.getId(), library);
+        if (dependencyLibraryPath.contains("ModelInfo")) {
+          System.out.println("skip");
+        } else {
+          Object resource = IOUtils.readResource(dependencyLibraryPath, fhirContext);
+          if (resource instanceof org.hl7.fhir.r4.model.Library) {
+            org.hl7.fhir.r4.model.Library library = (org.hl7.fhir.r4.model.Library)resource;
+            dependencyLibraries.putIfAbsent(library.getId(), library);
+          }
         }
       }
       return dependencyLibraries;
@@ -280,7 +284,7 @@ public class ResourceUtils
       for (String valueSetUrl : valueSetDefIDs) {
           ValueSetsProcessor.getCachedValueSets(fhirContext).entrySet().stream()
           .filter(entry -> entry.getKey().equals(valueSetUrl))
-          .forEach(entry -> valueSetResources.putIfAbsent(entry.getKey(), entry.getValue()));
+          .forEach(entry -> valueSetResources.put(entry.getKey(), entry.getValue()));
       }
       dependencies.addAll(valueSetDefIDs);
 
@@ -301,7 +305,7 @@ public class ResourceUtils
         for (String valueSetUrl : dependencies) {
           message += valueSetUrl + " MISSING \r\n";
         }   
-        //System.out.println(message);
+        System.out.println(message);
         throw new Exception(message);
       }
       return valueSetResources;

@@ -99,4 +99,16 @@ public class FHIRModelMappingVisitor implements Visitor {
         context.initializeValueSetMap();
 
     }
+
+    @Override
+    public void peek(ConditionCriteriaRelDTO conditionCriteriaRel) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void peek(ConditionDTO conditionDTO) {
+        // TODO Auto-generated method stub
+
+    }
 }

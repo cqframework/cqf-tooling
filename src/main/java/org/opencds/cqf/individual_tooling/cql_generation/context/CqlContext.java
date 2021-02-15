@@ -14,6 +14,7 @@ import org.opencds.cqf.individual_tooling.cql_generation.cql_objects.ValueSet;
 public class CqlContext {
     public Stack<Pair<CriteriaPredicateType, Pair<String, String>>> referenceStack = new Stack<Pair<CriteriaPredicateType, Pair<String, String>>>();
     public Stack<Expression> expressionStack = new Stack<Expression>();
+    public Stack<String> expressionStringStack = new Stack<String>();
     public Stack<DefinitionBlock> definitionBlockStack = new Stack<DefinitionBlock>();
     public Stack<String> cqlStack = new Stack<String>();
     public Map<String, Object> printMap = new HashMap<String, Object>();

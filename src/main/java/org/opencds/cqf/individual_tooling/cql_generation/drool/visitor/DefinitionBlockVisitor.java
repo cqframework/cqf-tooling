@@ -34,7 +34,7 @@ public class DefinitionBlockVisitor extends ExpressionBodyVisitor {
         if (this.context.expressionStack.size() > 0) {  
             while (this.context.expressionStack.size() > 0) {
                 String conjunction = (firstExpression) ? null : predicate.getPredicateConjunction().name();
-                definitionBlock.getExpressions().add(Pair.of(conjunction, this.context.expressionStack.pop()));
+                //definitionBlock.getExpressions().add(Pair.of(conjunction, this.context.expressionStack.pop()));
                 firstExpression = false;
             }
         }

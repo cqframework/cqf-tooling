@@ -142,5 +142,17 @@ public class HtmlFileVisitor implements Visitor {
         }
         return libraryName;
     }
+
+    @Override
+    public void peek(ConditionCriteriaRelDTO conditionCriteriaRel) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void peek(ConditionDTO conditionDTO) {
+        // TODO Auto-generated method stub
+
+    }
     
 }

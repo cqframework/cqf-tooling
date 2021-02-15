@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import org.opencds.cqf.individual_tooling.cql_generation.drool.serialization.Deserializer;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.traversal.DroolTraverser;
+import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.DroolToElmVisitor.CQLTYPES;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.traversal.DepthFirstDroolTraverser;
 
 public class DroolToElmVisitorTest {
@@ -25,7 +26,7 @@ public class DroolToElmVisitorTest {
     }
 
     private void doVisit(List<ConditionDTO> rootNode) {
-        Visitor visitor = new DroolToElmVisitor(); 
+        DroolToElmVisitor visitor = new DroolToElmVisitor(CQLTYPES.CONDITIONREL); 
         DroolTraverser<Visitor> traverser = new DepthFirstDroolTraverser<Visitor>(visitor);
         traverser.traverse(rootNode);
     }

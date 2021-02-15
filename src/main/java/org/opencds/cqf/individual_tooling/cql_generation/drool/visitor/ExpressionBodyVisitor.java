@@ -159,5 +159,17 @@ public class ExpressionBodyVisitor implements Visitor {
         expression.setConcept(valueset.getAlias());
         context.expressionStack.push(expression);
     }
+
+    @Override
+    public void peek(ConditionCriteriaRelDTO conditionCriteriaRel) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void peek(ConditionDTO conditionDTO) {
+        // TODO Auto-generated method stub
+
+    }
     
 }

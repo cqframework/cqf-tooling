@@ -1,6 +1,7 @@
 package org.opencds.cqf.individual_tooling.cql_generation.drool.traversal;
 
 import java.util.List;
+import java.util.Stack;
 
 import org.cdsframework.dto.CdsCodeDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicateDTO;
@@ -19,6 +20,8 @@ import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.Visitor;
 
 public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
 
+    private Stack<CriteriaResourceParamDTO> criteriaResourceParamDTOExtensionStack = new Stack<CriteriaResourceParamDTO>();
+
     public DepthFirstDroolTraverser(Visitor visitor) {
         super(visitor);
     }
@@ -31,9 +34,10 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
 
     @Override
     protected void traverse(ConditionDTO conditionDTO) {
+        this.visitor.peek(conditionDTO);
         List<ConditionCriteriaRelDTO> conditionCriteriaRels = conditionDTO.getConditionCriteriaRelDTOs();
         if (!conditionCriteriaRels.isEmpty() || conditionCriteriaRels != null) {
-            conditionCriteriaRels.forEach(rel -> traverse(rel));
+            conditionCriteriaRels.forEach(rel -> { this.visitor.peek(rel); traverse(rel); });
         }
         this.visitor.visit(conditionDTO);
     }
@@ -62,6 +66,9 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
             for (ConditionCriteriaPredicatePartDTO predicatePart : predicate.getPredicatePartDTOs()) {
                 traverse(predicatePart);
             }
+            if (criteriaResourceParamDTOExtensionStack.size() > 0 || !criteriaResourceParamDTOExtensionStack.empty()) {
+                traverse(criteriaResourceParamDTOExtensionStack.pop());
+            }
         }
         this.visitor.visit(predicate);
     }
@@ -83,7 +90,8 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
             }
         }
         if (predicatePart.getCriteriaResourceParamDTO() != null) {
-            traverse(predicatePart.getCriteriaResourceParamDTO());
+            // In order to get left, right, operator instead of left, operator, right
+            criteriaResourceParamDTOExtensionStack.push(predicatePart.getCriteriaResourceParamDTO());
         }
         this.visitor.visit(predicatePart);
     }

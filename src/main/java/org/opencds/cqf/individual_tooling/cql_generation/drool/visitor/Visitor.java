@@ -42,5 +42,9 @@ public interface Visitor {
 	public void visit(ConditionDTO conditionDTO);
 
 	public void visit(List<ConditionDTO> rootNode);
+
+	public void peek(ConditionCriteriaRelDTO conditionCriteriaRel);
+
+	public void peek(ConditionDTO conditionDTO);
     
 }

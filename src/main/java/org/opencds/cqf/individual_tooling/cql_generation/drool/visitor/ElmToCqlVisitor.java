@@ -2,1009 +2,1123 @@ package org.opencds.cqf.individual_tooling.cql_generation.drool.visitor;
 
 import org.cqframework.cql.elm.visiting.ElmVisitor;
 import org.hl7.elm.r1.*;
+import org.opencds.cqf.individual_tooling.cql_generation.context.CqlContext;
 
-public class ElmToCqlVisitor<T, C> implements ElmVisitor<T, C> {
 
-    @Override
-    public T visitElement(Element elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitTypeSpecifier(TypeSpecifier elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitNamedTypeSpecifier(NamedTypeSpecifier elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitIntervalTypeSpecifier(IntervalTypeSpecifier elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitListTypeSpecifier(ListTypeSpecifier elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitTupleElementDefinition(TupleElementDefinition elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitTupleTypeSpecifier(TupleTypeSpecifier elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitExpression(Expression elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitUnaryExpression(UnaryExpression elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitBinaryExpression(BinaryExpression elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitTernaryExpression(TernaryExpression elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitNaryExpression(NaryExpression elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitExpressionDef(ExpressionDef elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitFunctionDef(FunctionDef elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitExpressionRef(ExpressionRef elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitFunctionRef(FunctionRef elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitParameterDef(ParameterDef elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitParameterRef(ParameterRef elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitOperandDef(OperandDef elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitOperandRef(OperandRef elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitIdentifierRef(IdentifierRef elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitLiteral(Literal elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitTupleElement(TupleElement elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitTuple(Tuple elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitInstanceElement(InstanceElement elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitInstance(Instance elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitInterval(Interval elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitList(List elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitAnd(And elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitOr(Or elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitXor(Xor elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitNot(Not elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitIf(If elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitCaseItem(CaseItem elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitCase(Case elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitNull(Null elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitIsNull(IsNull elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitIsTrue(IsTrue elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitIsFalse(IsFalse elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitCoalesce(Coalesce elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitIs(Is elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitAs(As elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitConvert(Convert elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitToBoolean(ToBoolean elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitToConcept(ToConcept elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitToDateTime(ToDateTime elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitToDecimal(ToDecimal elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitToInteger(ToInteger elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitToQuantity(ToQuantity elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitToString(ToString elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitToTime(ToTime elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitEqual(Equal elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitEquivalent(Equivalent elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitNotEqual(NotEqual elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitLess(Less elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitGreater(Greater elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitLessOrEqual(LessOrEqual elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitGreaterOrEqual(GreaterOrEqual elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitAdd(Add elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitSubtract(Subtract elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitMultiply(Multiply elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitDivide(Divide elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitTruncatedDivide(TruncatedDivide elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitModulo(Modulo elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitCeiling(Ceiling elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitFloor(Floor elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitTruncate(Truncate elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitAbs(Abs elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitNegate(Negate elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitRound(Round elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitLn(Ln elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitExp(Exp elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitLog(Log elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitPower(Power elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitSuccessor(Successor elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitPredecessor(Predecessor elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitMinValue(MinValue elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitMaxValue(MaxValue elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitConcatenate(Concatenate elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitCombine(Combine elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitSplit(Split elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitLength(Length elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitUpper(Upper elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitLower(Lower elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitIndexer(Indexer elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitPositionOf(PositionOf elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitSubstring(Substring elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitDurationBetween(DurationBetween elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitDifferenceBetween(DifferenceBetween elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitDateFrom(DateFrom elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitTimeFrom(TimeFrom elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitTimezoneOffsetFrom(TimezoneOffsetFrom elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitDateTimeComponentFrom(DateTimeComponentFrom elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitTimeOfDay(TimeOfDay elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitToday(Today elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitNow(Now elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitDateTime(DateTime elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitTime(Time elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitSameAs(SameAs elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitSameOrBefore(SameOrBefore elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitSameOrAfter(SameOrAfter elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitWidth(Width elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitStart(Start elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitEnd(End elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitContains(Contains elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitProperContains(ProperContains elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitIn(In elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitProperIn(ProperIn elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitIncludes(Includes elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitIncludedIn(IncludedIn elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitProperIncludes(ProperIncludes elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitProperIncludedIn(ProperIncludedIn elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitBefore(Before elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitAfter(After elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitMeets(Meets elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitMeetsBefore(MeetsBefore elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitMeetsAfter(MeetsAfter elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitOverlaps(Overlaps elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitOverlapsBefore(OverlapsBefore elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitOverlapsAfter(OverlapsAfter elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitStarts(Starts elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitEnds(Ends elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitCollapse(Collapse elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitUnion(Union elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitIntersect(Intersect elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitExcept(Except elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitExists(Exists elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitTimes(Times elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitFilter(Filter elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitFirst(First elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitLast(Last elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitIndexOf(IndexOf elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitFlatten(Flatten elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitSort(Sort elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitForEach(ForEach elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitDistinct(Distinct elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitCurrent(Current elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitSingletonFrom(SingletonFrom elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitAggregateExpression(AggregateExpression elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitCount(Count elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitSum(Sum elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitMin(Min elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitMax(Max elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitAvg(Avg elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitMedian(Median elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitMode(Mode elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitVariance(Variance elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitPopulationVariance(PopulationVariance elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitStdDev(StdDev elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitPopulationStdDev(PopulationStdDev elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitAllTrue(AllTrue elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitAnyTrue(AnyTrue elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitProperty(Property elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+// import org.hl7.elm.r1.AccessModifier;
+// import org.hl7.elm.r1.And;
+// import org.hl7.elm.r1.BinaryExpression;
+// import org.hl7.elm.r1.Expression;
+// import org.hl7.elm.r1.ExpressionDef;
+// import org.hl7.elm.r1.ExpressionRef;
+// import org.hl7.elm.r1.Or;
+// import org.hl7.elm.r1.AccessModifier;
+// import org.hl7.elm.r1.AliasedQuerySource;
+// import org.hl7.elm.r1.As;
+// import org.hl7.elm.r1.BinaryExpression;
+// import org.hl7.elm.r1.CalculateAgeAt;
+// import org.hl7.elm.r1.DateTimePrecision;
+// import org.hl7.elm.r1.Equal;
+// import org.hl7.elm.r1.Expression;
+// import org.hl7.elm.r1.ExpressionRef;
+// import org.hl7.elm.r1.FunctionRef;
+// import org.hl7.elm.r1.Greater;
+// import org.hl7.elm.r1.GreaterOrEqual;
+// import org.hl7.elm.r1.InValueSet;
+// import org.hl7.elm.r1.Less;
+// import org.hl7.elm.r1.LessOrEqual;
+// import org.hl7.elm.r1.NamedTypeSpecifier;
+// import org.hl7.elm.r1.Not;
+// import org.hl7.elm.r1.Property;
+// import org.hl7.elm.r1.Quantity;
+// import org.hl7.elm.r1.Query;
+// import org.hl7.elm.r1.Retrieve;
+// import org.hl7.elm.r1.ToQuantity;
+// import org.hl7.elm.r1.Today;
+// import org.hl7.elm.r1.ValueSetDef;
+// import org.hl7.elm.r1.ValueSetRef;
 
-    @Override
-    public T visitAliasedQuerySource(AliasedQuerySource elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitLetClause(LetClause elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitRelationshipClause(RelationshipClause elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitWith(With elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitWithout(Without elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+public class ElmToCqlVisitor implements ElmVisitor<Void, CqlContext> {
 
     @Override
-    public T visitSortByItem(SortByItem elm, C context) {
+    public Void visitElement(Element elm, CqlContext context) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public T visitByDirection(ByDirection elm, C context) {
+    public Void visitTypeSpecifier(TypeSpecifier elm, CqlContext context) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public T visitByColumn(ByColumn elm, C context) {
+    public Void visitNamedTypeSpecifier(NamedTypeSpecifier elm, CqlContext context) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public T visitByExpression(ByExpression elm, C context) {
+    public Void visitIntervalTypeSpecifier(IntervalTypeSpecifier elm, CqlContext context) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public T visitSortClause(SortClause elm, C context) {
+    public Void visitListTypeSpecifier(ListTypeSpecifier elm, CqlContext context) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public T visitReturnClause(ReturnClause elm, C context) {
+    public Void visitTupleElementDefinition(TupleElementDefinition elm, CqlContext context) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public T visitQuery(Query elm, C context) {
+    public Void visitTupleTypeSpecifier(TupleTypeSpecifier elm, CqlContext context) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    @Override
-    public T visitAliasRef(AliasRef elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public T visitQueryLetRef(QueryLetRef elm, C context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
     
+// import org.hl7.elm.r1.ExpressionDef;
+// import org.hl7.elm.r1.InValueSet;
+// import org.hl7.elm.r1.Property;
+// import org.hl7.elm.r1.Quantity;
+// import org.hl7.elm.r1.Query;
+// import org.hl7.elm.r1.Retrieve;
+// import org.hl7.elm.r1.Today;
+// import org.hl7.elm.r1.BinaryExpression;
+// import org.hl7.elm.r1.UnaryExpression;
+// import org.hl7.elm.r1.OperatorExpression;
+private StringBuilder sb = new StringBuilder();
+    @Override
+    public Void visitExpression(Expression elm, CqlContext context) {
+        sb.append("something");
+        if (elm instanceof ExpressionRef) {
+            visitExpressionRef((ExpressionRef)elm, context);
+        } else if (elm instanceof BinaryExpression) {
+            visitBinaryExpression((BinaryExpression)elm, context);
+        }
+        else if (elm instanceof UnaryExpression) {
+            visitUnaryExpression((UnaryExpression)elm, context);
+        } else if (elm instanceof Today) {
+            visitToday((Today)elm, context);
+        } else if (elm instanceof Query) {
+            visitQuery((Query)elm, context);
+        } else if (elm instanceof Property) {
+            visitProperty((Property)elm, context);
+        }
+        // else if (elm instanceof Quantity) {
+        //     visitQuantity((Quantity)elm, context);
+        // }
+        // else if (elm instanceof Retrieve) {
+        //     visitRetrieve((Retrieve)elm, context);
+        // }
+        // } else if (elm instanceof OperatorExpression) {
+        //     visitInValueSet((OperatorExpression)elm, context)
+        // }
+        return null;
+    }
+
+// import org.hl7.elm.r1.Not;
+// import org.hl7.elm.r1.As;
+// import org.hl7.elm.r1.ToQuantity;
+    @Override
+    public Void visitUnaryExpression(UnaryExpression elm, CqlContext context) {
+        if (elm instanceof Not) {
+            visitNot((Not)elm, context);
+        } else if (elm instanceof As) {
+            visitAs((As)elm, context);
+        } else if (elm instanceof ToQuantity) {
+            visitToQuantity((ToQuantity)elm, context);
+        }
+        return null;
+    }
+
+    
+// import org.hl7.elm.r1.And;
+// import org.hl7.elm.r1.Or;
+// import org.hl7.elm.r1.Equal;
+// import org.hl7.elm.r1.Greater;
+// import org.hl7.elm.r1.GreaterOrEqual;
+// import org.hl7.elm.r1.Less;
+// import org.hl7.elm.r1.LessOrEqual;
+// import org.hl7.elm.r1.CalculateAgeAt;
+    @Override
+    public Void visitBinaryExpression(BinaryExpression elm, CqlContext context) {
+        //left operator and right
+        if (elm instanceof And) {
+            visitAnd((And)elm, context);
+        } else if (elm instanceof Or) {
+            visitOr((Or)elm, context);
+        } else if (elm instanceof Equal) {
+            visitEqual((Equal)elm, context);
+        } else if (elm instanceof Greater) {
+            visitGreater((Greater)elm, context);
+        } else if (elm instanceof GreaterOrEqual) {
+            visitGreaterOrEqual((GreaterOrEqual)elm, context);
+        } else if (elm instanceof Less) {
+            visitLess((Less)elm, context);
+        } else if (elm instanceof LessOrEqual) {
+            visitLessOrEqual((LessOrEqual)elm, context);
+        }
+        // } else if (elm instanceof CalculateAgeAt) {
+        //     visitCalculateAgeAt((CalculateAgeAt)elm, context);
+        // }
+        return null;
+    }
+
+    @Override
+    public Void visitTernaryExpression(TernaryExpression elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitNaryExpression(NaryExpression elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitExpressionDef(ExpressionDef elm, CqlContext context) {
+        if (elm.getAccessLevel() != null && elm.getAccessLevel().equals(AccessModifier.PUBLIC)) {
+            visitExpression(elm.getExpression(), context);
+            context.expressionStringStack.push("define " + elm.getName() + ": \n     ");
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitFunctionDef(FunctionDef elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    
+// import org.hl7.elm.r1.FunctionRef;
+    @Override
+    public Void visitExpressionRef(ExpressionRef elm, CqlContext context) {
+        if (elm instanceof FunctionRef) {
+            visitFunctionRef((FunctionRef)elm, context);
+        } else {
+            context.expressionStringStack.push(elm.getName());
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitFunctionRef(FunctionRef elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitParameterDef(ParameterDef elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitParameterRef(ParameterRef elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitOperandDef(OperandDef elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitOperandRef(OperandRef elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitIdentifierRef(IdentifierRef elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitLiteral(Literal elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitTupleElement(TupleElement elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitTuple(Tuple elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitInstanceElement(InstanceElement elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitInstance(Instance elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitInterval(Interval elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitList(List elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitAnd(And elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitOr(Or elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitXor(Xor elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitNot(Not elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitIf(If elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitCaseItem(CaseItem elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitCase(Case elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitNull(Null elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitIsNull(IsNull elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitIsTrue(IsTrue elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitIsFalse(IsFalse elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitCoalesce(Coalesce elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitIs(Is elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitAs(As elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitConvert(Convert elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitToBoolean(ToBoolean elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitToConcept(ToConcept elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitToDateTime(ToDateTime elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitToDecimal(ToDecimal elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitToInteger(ToInteger elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitToQuantity(ToQuantity elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitToString(ToString elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitToTime(ToTime elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitEqual(Equal elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitEquivalent(Equivalent elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitNotEqual(NotEqual elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitLess(Less elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitGreater(Greater elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitLessOrEqual(LessOrEqual elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitGreaterOrEqual(GreaterOrEqual elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitAdd(Add elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitSubtract(Subtract elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitMultiply(Multiply elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitDivide(Divide elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitTruncatedDivide(TruncatedDivide elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitModulo(Modulo elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitCeiling(Ceiling elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitFloor(Floor elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitTruncate(Truncate elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitAbs(Abs elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitNegate(Negate elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitRound(Round elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitLn(Ln elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitExp(Exp elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitLog(Log elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitPower(Power elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitSuccessor(Successor elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitPredecessor(Predecessor elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitMinValue(MinValue elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitMaxValue(MaxValue elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitConcatenate(Concatenate elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitCombine(Combine elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitSplit(Split elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitLength(Length elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitUpper(Upper elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitLower(Lower elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitIndexer(Indexer elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitPositionOf(PositionOf elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitSubstring(Substring elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitDurationBetween(DurationBetween elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitDifferenceBetween(DifferenceBetween elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitDateFrom(DateFrom elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitTimeFrom(TimeFrom elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitTimezoneOffsetFrom(TimezoneOffsetFrom elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitDateTimeComponentFrom(DateTimeComponentFrom elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitTimeOfDay(TimeOfDay elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitToday(Today elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitNow(Now elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitDateTime(DateTime elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitTime(Time elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitSameAs(SameAs elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitSameOrBefore(SameOrBefore elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitSameOrAfter(SameOrAfter elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitWidth(Width elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitStart(Start elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitEnd(End elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitContains(Contains elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitProperContains(ProperContains elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitIn(In elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitProperIn(ProperIn elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitIncludes(Includes elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitIncludedIn(IncludedIn elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitProperIncludes(ProperIncludes elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitProperIncludedIn(ProperIncludedIn elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitBefore(Before elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitAfter(After elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitMeets(Meets elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitMeetsBefore(MeetsBefore elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitMeetsAfter(MeetsAfter elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitOverlaps(Overlaps elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitOverlapsBefore(OverlapsBefore elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitOverlapsAfter(OverlapsAfter elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitStarts(Starts elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitEnds(Ends elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitCollapse(Collapse elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitUnion(Union elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitIntersect(Intersect elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitExcept(Except elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitExists(Exists elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitTimes(Times elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitFilter(Filter elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitFirst(First elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitLast(Last elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitIndexOf(IndexOf elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitFlatten(Flatten elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitSort(Sort elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitForEach(ForEach elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitDistinct(Distinct elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitCurrent(Current elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitSingletonFrom(SingletonFrom elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitAggregateExpression(AggregateExpression elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitCount(Count elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitSum(Sum elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitMin(Min elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitMax(Max elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitAvg(Avg elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitMedian(Median elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitMode(Mode elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitVariance(Variance elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitPopulationVariance(PopulationVariance elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitStdDev(StdDev elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitPopulationStdDev(PopulationStdDev elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitAllTrue(AllTrue elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitAnyTrue(AnyTrue elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitProperty(Property elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitAliasedQuerySource(AliasedQuerySource elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitLetClause(LetClause elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitRelationshipClause(RelationshipClause elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitWith(With elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitWithout(Without elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitSortByItem(SortByItem elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitByDirection(ByDirection elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitByColumn(ByColumn elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitByExpression(ByExpression elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitSortClause(SortClause elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitReturnClause(ReturnClause elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitQuery(Query elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitAliasRef(AliasRef elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Void visitQueryLetRef(QueryLetRef elm, CqlContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

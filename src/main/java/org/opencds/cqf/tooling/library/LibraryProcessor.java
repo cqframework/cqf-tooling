@@ -174,6 +174,12 @@ public class LibraryProcessor extends BaseProcessor {
                     newLibrary.setVersion(fileInfo.getIdentifier().getVersion());
                     newLibrary.setUrl(String.format("%s/Library/%s", (newLibrary.getName().equals("FHIRHelpers") ? "http://hl7.org/fhir" : canonicalBase), fileInfo.getIdentifier().getId()));
                     newLibrary.setId(LibraryProcessor.getId(newLibrary.getName()) + (versioned ? "-" + newLibrary.getVersion() : ""));
+                    List<Attachment> attachments = new ArrayList<Attachment>();
+                    Attachment attachment = new Attachment();
+                    attachment.setContentType("application/elm+xml");
+                    attachment.setData(fileInfo.getElm());
+                    attachments.add(attachment);
+                    newLibrary.setContent(attachments);
                     sourceLibraries.add(newLibrary);
                 }
             }
