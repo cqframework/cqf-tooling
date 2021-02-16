@@ -1,20 +1,21 @@
 package org.opencds.cqf.tooling.measure;
 
 import java.io.File;
-import java.util.List;
 import java.util.Objects;
 
-import org.hl7.fhir.Bundle;
 import org.hl7.fhir.Parameters;
 import org.hl7.fhir.ParametersParameter;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.tooling.measure.adapters.*;
+import org.opencds.cqf.tooling.measure.adapters.ContentLoadingFhirServerMeasureTestAdapter;
+import org.opencds.cqf.tooling.measure.adapters.CqlEvaluatorMeasureTestAdapter;
+import org.opencds.cqf.tooling.measure.adapters.IMeasureReportAdapter;
+import org.opencds.cqf.tooling.measure.adapters.MeasureTestAdapter;
+import org.opencds.cqf.tooling.measure.adapters.ReadOnlyFhirServerMeasureTestAdapter;
 import org.opencds.cqf.tooling.measure.comparer.MeasureReportComparer;
+import org.opencds.cqf.tooling.processor.ITestProcessor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import org.opencds.cqf.tooling.processor.ITestProcessor;
 
 public class MeasureTestProcessor implements ITestProcessor {
 

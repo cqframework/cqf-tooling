@@ -1,23 +1,21 @@
 package org.opencds.cqf.tooling.measure.comparer;
 
-import org.hl7.fhir.OperationOutcome;
+import java.util.List;
+
 import org.hl7.fhir.Parameters;
 import org.hl7.fhir.ParametersParameter;
 import org.hl7.fhir.String;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.context.FhirContext;
 import org.opencds.cqf.tooling.measure.MeasureTestProcessor;
 import org.opencds.cqf.tooling.measure.adapters.IMeasureReportAdapter;
 
-import java.util.List;
+import ca.uhn.fhir.context.FhirContext;
 
 public class MeasureReportComparer {
 
-    private FhirContext fhirContext;
+    // private FhirContext fhirContext;
 
     public MeasureReportComparer(FhirContext fhirContext) {
-        this.fhirContext = fhirContext;
+        // this.fhirContext = fhirContext;
     }
 
     public Parameters compare(IMeasureReportAdapter actual, IMeasureReportAdapter expected) {

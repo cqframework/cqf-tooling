@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import org.hl7.elm.r1.VersionedIdentifier;
 
+@SuppressWarnings("serial")
 public class LibraryHashMap extends HashMap<VersionedIdentifier, InputStream> {
 
     @Override

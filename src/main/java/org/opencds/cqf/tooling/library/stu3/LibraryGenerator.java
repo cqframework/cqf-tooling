@@ -143,6 +143,7 @@ public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativePro
         return nameAndVersion.replaceAll("_", "-");
     }
 
+    @SuppressWarnings("unused")
     private String createFileName(String id, String encoding) {
         return id + "." + encoding;
     }

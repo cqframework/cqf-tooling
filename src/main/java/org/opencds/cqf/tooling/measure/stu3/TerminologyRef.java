@@ -7,8 +7,9 @@ import org.hl7.fhir.dstu3.model.Type;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
+@SuppressWarnings("serial")
 @DatatypeDef(name = "TerminologyRef")
-public abstract class TerminologyRef extends Type implements ca.uhn.fhir.model.api.IElement {
+public abstract class TerminologyRef extends Type {
 
 	public static enum TerminologyRefType {
 		VALUESET, CODE, CODESYSTEM

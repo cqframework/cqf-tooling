@@ -49,6 +49,8 @@ public class HtmlBuilder {
     private final String extensionIcon = "<span class=\"glyphicon glyphicon-star\"> </span>";
 
     private StringBuilder html = new StringBuilder();
+
+    @SuppressWarnings("unused")
     private String profileName;
 
     private String fileName;

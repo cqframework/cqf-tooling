@@ -24,6 +24,7 @@ public class RefreshLibraryArgumentProcessor {
     public static final String[] OUTPUT_ENCODING = {"e", "encoding"};
     public static final String[] VERSIONED_OPTIONS = {"v", "versioned"};
 
+    @SuppressWarnings("unused")
     public OptionParser build() {
         OptionParser parser = new OptionParser();
 

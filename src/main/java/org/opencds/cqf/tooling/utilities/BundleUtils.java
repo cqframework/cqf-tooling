@@ -1,16 +1,19 @@
 package org.opencds.cqf.tooling.utilities;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
-import org.w3._1999.xhtml.P;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 
 public class BundleUtils {
 
@@ -96,7 +99,7 @@ public class BundleUtils {
         List<String> filePaths = IOUtils.getFilePaths(directoryPath, recursive).stream().filter(x -> !x.endsWith(".cql")).collect(Collectors.toList());
 
         List<Map.Entry<String, IBaseResource>> bundleMap = new ArrayList<>();
-        RuntimeResourceDefinition bundleDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "Bundle");
+        RuntimeResourceDefinition bundleDefinition = ResourceUtils.getResourceDefinition(fhirContext, "Bundle");
         String bundleClassName = bundleDefinition.getImplementingClass().getName();
         for (String path : filePaths) {
             IBaseResource resource = IOUtils.readResource(path, fhirContext);

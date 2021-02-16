@@ -2,7 +2,6 @@ package org.opencds.cqf.tooling.modelinfo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +43,7 @@ public abstract class ClassInfoBuilder {
     protected abstract void innerBuild();
     protected void afterBuild() {
         //Clean up Content Reference Specifiers
-        Collection<TypeInfo> typeInfoValues = this.getTypeInfos().values();
+        // Collection<TypeInfo> typeInfoValues = this.getTypeInfos().values();
         for (TypeInfo ti : this.getTypeInfos().values()) {
             if (ti instanceof ClassInfo) {
                 ClassInfo ci = (ClassInfo)ti;
@@ -232,6 +231,7 @@ public abstract class ClassInfoBuilder {
         }
     }
 
+    @SuppressWarnings("unused")
     private String capitalizePath(String path, String modelName) {
         if (path.contains("-")) {
             return String.join("_", Arrays.asList(path.split("\\-")).stream().map(x -> this.capitalize(x))
@@ -295,6 +295,7 @@ public abstract class ClassInfoBuilder {
     }
 
     // Translates a path from the source root to the target root
+    @SuppressWarnings("unused")
     private String translate(String path, String sourceRoot, String targetRoot) {
         String result = this.normalizeValueElement(path);
         int sourceRootIndex = result.indexOf(sourceRoot);
@@ -331,11 +332,13 @@ public abstract class ClassInfoBuilder {
         return getTail(sd.getId()).equals("Element");
     }
 
+    @SuppressWarnings("unused")
     private Boolean isExtension(StructureDefinition sd) {
         return getTail(sd.getId()).equals("Extension") || (sd.getBaseDefinition() != null && getTail(sd.getBaseDefinition()).equals("Extension"));
     }
 
     // Returns true if the ElementDefinition describes an Extension
+    @SuppressWarnings("unused")
     private Boolean isExtension(ElementDefinition ed) {
         return ed.getType() != null && ed.getType().size() == 1 && ed.getType().get(0).hasCode()
                 && ed.getType().get(0).getCode() != null && ed.getType().get(0).getCode().equals("Extension");
@@ -373,6 +376,7 @@ public abstract class ClassInfoBuilder {
 
     // Returns true if the type specifier is a NamedTypeSpecifier referencing
     // FHIR.BackboneElement
+    @SuppressWarnings("unused")
     private Boolean isBackboneElement(TypeSpecifier typeSpecifier) {
         if (typeSpecifier instanceof NamedTypeSpecifier) {
             NamedTypeSpecifier nts = (NamedTypeSpecifier) typeSpecifier;
@@ -393,6 +397,7 @@ public abstract class ClassInfoBuilder {
     }
 
     // Returns the set of element definitions for the given type
+    @SuppressWarnings("unused")
     private List<ElementDefinition> getElementDefinitions(TypeSpecifier typeSpecifier) {
         if (typeSpecifier instanceof NamedTypeSpecifier) {
             NamedTypeSpecifier nts = (NamedTypeSpecifier) typeSpecifier;
@@ -405,6 +410,7 @@ public abstract class ClassInfoBuilder {
     }
 
     // Returns the element definition for the given path
+    @SuppressWarnings("unused")
     private ElementDefinition elementForPath(List<ElementDefinition> elements, String path) {
         if (elements != null) {
             for (ElementDefinition ed : elements) {
@@ -456,6 +462,7 @@ public abstract class ClassInfoBuilder {
         return null;
     }
 
+    @SuppressWarnings("unused")
     private String unQualifyId(String id)
     {
         if (id == null) {
@@ -693,6 +700,7 @@ public abstract class ClassInfoBuilder {
         return null;
     }
 
+    @SuppressWarnings("unused")
     private boolean typeSpecifiersEqual(TypeSpecifier left, TypeSpecifier right) {
         if (left instanceof NamedTypeSpecifier && right instanceof NamedTypeSpecifier) {
             return this.getTypeName((NamedTypeSpecifier)left).equals(this.getTypeName((NamedTypeSpecifier)right));
@@ -1307,6 +1315,7 @@ public abstract class ClassInfoBuilder {
         return info;
     }
 
+    @SuppressWarnings("unused")
     private StructureDefinition getBaseDefinitionStructureDef(String model, StructureDefinition sd) {
         String baseSd = (sd.getBaseDefinition() == null) ? null : getTail(sd.getBaseDefinition());
         if (baseSd != null && !baseSd.equals("ElementDefinition") && !baseSd.equals("Element")

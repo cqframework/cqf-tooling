@@ -24,6 +24,7 @@ public class ExecuteMeasureTestArgumentProcessor {
     public static final String[] FHIR_SERVER_OPTIONS = {"fhir-server", "fs"};
     public static final String[] OUTPUT_ENCODING = {"e", "encoding"};
 
+    @SuppressWarnings("unused")
     public OptionParser build() {
         OptionParser parser = new OptionParser();
 
