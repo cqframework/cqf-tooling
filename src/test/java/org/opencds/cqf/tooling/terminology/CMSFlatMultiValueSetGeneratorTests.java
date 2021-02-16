@@ -1,5 +1,6 @@
 package org.opencds.cqf.tooling.terminology;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -8,6 +9,7 @@ import java.nio.file.Paths;
 public class CMSFlatMultiValueSetGeneratorTests {
 
     @Test
+    @Ignore("Needs smaller sample spreadsheet")
     public void testValueSetGenerator() {
         VSACBatchValueSetGenerator generator = new VSACBatchValueSetGenerator();
         generator.execute(new String[] {
