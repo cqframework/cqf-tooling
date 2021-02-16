@@ -165,7 +165,31 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
                     "            codes: concept.coding C return ToCode(C),\n" +
                     "            display: concept.text.value\n" +
                     "        }\n" +
-                    "\n");
+                    "\n" +
+                    "define function resolve(reference Reference) returns Resource: external\n" +
+                    "define function references(reference Reference, resource Resource) returns Boolean: external\n" +
+                    "define function extension(element Element, url String) returns List<Element>: external\n" +
+                    "define function extension(resource Resource, url String) returns List<Element>: external\n" +
+                    "define function hasValue(element Element) returns Boolean: external\n" +
+                    "define function getValue(element Element) returns Any: external\n" +
+                    "define function ofType(identifier String) returns List<Any>: external\n" +
+                    "define function is(identifier String) returns Boolean: external\n" +
+                    "define function as(identifier String) returns Any: external\n" +
+                    "define function elementDefinition(element Element) returns ElementDefinition: external\n" +
+                    "define function slice(element Element, url String, name String) returns List<Element>: external\n" +
+                    "define function checkModifiers(resource Resource) returns Resource: external\n" +
+                    "define function checkModifiers(resource Resource, modifier String) returns Resource: external\n" +
+                    "define function checkModifiers(element Element) returns Element: external\n" +
+                    "define function checkModifiers(element Element, modifier String) returns Element: external\n" +
+                    "define function conformsTo(resource Resource, structure String) returns Boolean: external\n" +
+                    "define function memberOf(code code, valueSet String) returns Boolean: external\n" +
+                    "define function memberOf(coding Coding, valueSet String) returns Boolean: external\n" +
+                    "define function memberOf(concept CodeableConcept, valueSet String) returns Boolean: external\n" +
+                    "define function subsumes(coding Coding, subsumedCoding Coding) returns Boolean: external\n" +
+                    "define function subsumes(concept CodeableConcept, subsumedConcept CodeableConcept) returns Boolean: external\n" +
+                    "define function subsumedBy(coding Coding, subsumingCoding Coding) returns Boolean: external\n" +
+                    "define function subsumedBy(concept CodeableConcept, subsumingConcept CodeableConcept) returns Boolean: external\n" +
+                    "define function htmlChecks(element Element) returns Boolean: external\n");
             statements.stream().forEach(x -> pw.println(x));
             pw.close();
         }

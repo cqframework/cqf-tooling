@@ -737,6 +737,20 @@ public abstract class ClassInfoBuilder {
                     return this.buildTypeSpecifier(typeName);
                 }
             }
+            if (ed.getId().equals("positiveInt.value")) {
+                // Special-case code because the "value" element in the differential for positiveInt specifies a type of String
+                // Presumably this is to declare the regex enforcement of the constraint (> 0)
+                // But here, it needs to be redeclared as the appropriate type, Integer
+                typeName = getTypeName("System", "Integer");
+                return this.buildTypeSpecifier(typeName);
+            }
+            if (ed.getId().equals("unsignedInt.value")) {
+                // Special-case code because the "value" element in the differential for unsignedInt specifies a type of String
+                // Presumably this is to declare the regex enforcement of the constraint (>= 0)
+                // But here, it needs to be redeclared as the appropriate type, Integer
+                typeName = getTypeName("System", "Integer");
+                return this.buildTypeSpecifier(typeName);
+            }
             if (typeCode != null && typeCode.equals("Extension") && ed.getId().contains(":")
                     && ed.getType().get(0).hasProfile()) {
                 List<CanonicalType> extensionProfile = ed.getType().get(0).getProfile();
@@ -1318,7 +1332,7 @@ public abstract class ClassInfoBuilder {
         String path = sd.getType(); // Type is used to navigate the elements, regardless of the baseDefinition
         String id = path; // Id starts with the Type
         // TODO: Switch to differential here, but several of the primitive types declare "value" elements of type string when this happens? (positiveInt, markdown, among others)
-        List<ElementDefinition> eds = sd.getSnapshot().getElement();
+        List<ElementDefinition> eds = sd.getDifferential().getElement();
         SliceList elementSlices = null;
 
         while (index.get() < eds.size()) {

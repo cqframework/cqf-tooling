@@ -55,10 +55,10 @@ public class StructureDefinitionToModelInfo extends Operation {
 
         Examples:
           // Build the base pure-FHIR model
-          mvn exec:java -Dexec.args"-GenerateMIs -ip=C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec -rp=4.0.1 -mn=FHIR -mv=4.0.1"
+          mvn exec:java -Dexec.args"-GenerateMIs -ip=C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec -rp=4.0.1 -mn=FHIR -mv=4.0.1" -im=true
 
           // Build the base simple-FHIR model
-          mvn exec:java -Dexec.args"-GenerateMIs -ip=C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec -rp=4.0.1 -mn=FHIR -mv=4.0.1-S"
+          mvn exec:java -Dexec.args"-GenerateMIs -ip=C:\Users\Bryn\Documents\Src\HL7\FHIR-Spec -rp=4.0.1 -mn=FHIR -mv=4.0.1-S" -ucp=true
 
         inputPath: Path to the folder containing spec directories
             If not specified, defaults to a peer directory named FHIR-Spec
