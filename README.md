@@ -4,9 +4,31 @@ Tooling for CQL and IG Authors
 
 This tooling provides various useful tools for building CQFramework related content and implementation guides, including QUICK page generation, ModelInfo generation from StructureDefinitions, and ValueSet creation.
 
-Documentation is provided in the [Main](src/main/java/org/opencds/cqf/tooling/Main.java) class.
+## Usage
 
-Builds of the master branch are uploaded to the Maven repository for org.opencds.cqf
+Building this project requires Java 9+ and Maven 3.5+. The resulting jar is compatible with Java 8+.
+
+Build the project with:
+
+```bash
+mvn package
+```
+
+Run a specific operation using (example running VSAC Spreadsheet conversion):
+
+```bash
+mvn exec:java \
+-Dexec.mainClass="org.opencds.cqf.tooling.Main" \
+-Dexec.args="-VsacXlsxToValueSetBatch \
+-ptsd=src/test/resources/org/opencds/cqf/tooling/terminology \
+-op=target/test/resources/org/opencds/cqf/tooling/terminology/output \
+-setname=true \
+-vssrc=cms"
+```
+
+Documentation of the various operations is provided in the [Main](src/main/java/org/opencds/cqf/tooling/Main.java) class.
+
+Executable jars are produced by the CI system and uploaded to the Maven repository for org.opencds.cqf.
 
 ## Commit Policy
 

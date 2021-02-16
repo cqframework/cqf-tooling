@@ -4,10 +4,21 @@
 set -euxo pipefail
 bash -n "$0"
 
-if [[ "$TRAVIS_BRANCH" != "master" || ! -z "$TRAVIS_TAG" ]]
+if [[ "$TRAVIS_BRANCH" != "master" && -z "$TRAVIS_TAG" ]]
 then
-  echo "We're not on the master branch or a git tag. Skipping deploy."
+  echo "Not on the master branch or a git tag. Skipping deploy."
   exit 0
+fi
+
+if [[ ! -z "$TRAVIS_TAG" ]]
+then
+  export MAVEN_PROJECT_VERSION="$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout)"
+  echo "Maven project version is: $MAVEN_PROJECT_VERSION"
+  if [[ "$TRAVIS_TAG" != "v$MAVEN_PROJECT_VERSION" ]]
+  then
+    echo "ERROR: Maven project version and tag do not match (expected tag v$MAVEN_PROJECT_VERSION)"
+    exit 1
+  fi
 fi
 
 # Import maven settings
@@ -16,7 +27,6 @@ cp .travis.settings.xml $HOME/.m2/settings.xml
 CMD="mvn deploy -DskipTests=true -Dmaven.test.skip=true -T 4 -B -P ci"
 
 # Import signing key and publish a release on a tag
-# TODO: Make sure the tag value matches the mvn version
 if [[ ! -z "$TRAVIS_TAG" ]]
 then
     echo "Publishing Maven Central release for tag: $TRAVIS_TAG"

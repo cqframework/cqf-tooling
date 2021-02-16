@@ -21,6 +21,9 @@ deploy:
   file_glob: true
   file: "target/*.jar"
   skip_cleanup: true
+  name: CQF Tooling $TRAVIS_TAG
+  overwrite: true
+  target_commitish: $TRAVIS_COMMIT
   on:
     tags: true
 notifications:
