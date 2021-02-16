@@ -51,12 +51,12 @@
             <id>ossrh</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
-
         <repository>
             <id>ossrh</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
+
     <repositories>
         <repository>
             <id>oss-sonatype</id>
@@ -110,7 +110,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
 
     <dependencies>
         <dependency>
@@ -281,7 +280,6 @@
             <version>3.7.7</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -489,6 +487,7 @@
             </plugin>
         </plugins>
     </build>
+    
     <profiles>
         <profile>
             <id>ci</id>
