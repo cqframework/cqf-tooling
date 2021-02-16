@@ -6,9 +6,9 @@ import java.io.StringWriter;
 import java.nio.file.Paths;
 import java.util.Map;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Marshaller;
+// import javax.xml.bind.JAXBContext;
+// import javax.xml.bind.JAXBElement;
+// import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 
 import org.hl7.elm_modelinfo.r1.ClassInfo;
@@ -24,6 +24,10 @@ import org.opencds.cqf.tooling.modelinfo.quick.QuickClassInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.quick.QuickModelInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.uscore.USCoreClassInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.uscore.USCoreModelInfoBuilder;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.Marshaller;
 
 public class StructureDefinitionToModelInfo extends Operation {
     /*

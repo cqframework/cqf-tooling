@@ -5,7 +5,7 @@ import java.util.HashSet;
 
 import org.opencds.cqf.tooling.modelinfo.ClassInfoSettings;
 
-
+@SuppressWarnings("serial")
 class QuickClassInfoSettings extends ClassInfoSettings {
 
     public QuickClassInfoSettings() {

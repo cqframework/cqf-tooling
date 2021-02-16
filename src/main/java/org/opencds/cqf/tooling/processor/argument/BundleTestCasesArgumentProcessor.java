@@ -18,6 +18,7 @@ public class BundleTestCasesArgumentProcessor {
     public static final String[] PATH_OPTIONS = {"p", "path"};
     public static final String[] IG_VERSION_OPTIONS = {"iv", "ig-version"};
 
+    @SuppressWarnings("unused")
     public OptionParser build() {
         OptionParser parser = new OptionParser();
       

@@ -104,11 +104,11 @@ public class IGTestProcessor extends BaseProcessor {
         try {
             IBaseResource resource = getServerMetadata(testServerUri);
 
-            RuntimeResourceDefinition capabilityStatementDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "CapabilityStatement");
+            RuntimeResourceDefinition capabilityStatementDefinition = ResourceUtils.getResourceDefinition(fhirContext, "CapabilityStatement");
             String compatibilityStatementClassName = capabilityStatementDefinition.getImplementingClass().getName();
             if (compatibilityStatementClassName.equals(resource.getClass().getName())) {
 
-                String softwareName = null;
+                // String softwareName = null;
                 String softwareVersion = null;
 
                 if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
@@ -155,6 +155,7 @@ public class IGTestProcessor extends BaseProcessor {
         return softwareSystem;
     }
 
+    @SuppressWarnings("serial")
     public void testIg(TestIGParameters params) {
         fhirContext = params.fhirContext;
 

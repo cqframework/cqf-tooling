@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
 import org.opencds.cqf.tooling.modelinfo.ModelInfoSettings;
 
+@SuppressWarnings("serial")
 public class FHIRModelInfoSettings extends ModelInfoSettings {
 
     public FHIRModelInfoSettings(String version) {

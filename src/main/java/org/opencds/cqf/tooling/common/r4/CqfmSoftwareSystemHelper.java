@@ -24,6 +24,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
         super(rootDir);
     }
 
+    @SuppressWarnings("serial")
     protected <T extends DomainResource> void validateResourceForSoftwareSystemExtension(T resource) {
         if (resource == null) {
             throw new IllegalArgumentException("No resource provided.");
@@ -189,7 +190,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
             typeCoding.setSystem("http://hl7.org/fhir/us/cqfmeasures/CodeSystem/software-system-type");
             typeCoding.setCode("tooling");
 
-            List<Coding> typeCodingList = new ArrayList();
+            List<Coding> typeCodingList = new ArrayList<>();
             typeCodingList.add(typeCoding);
 
             CodeableConcept type = new CodeableConcept();

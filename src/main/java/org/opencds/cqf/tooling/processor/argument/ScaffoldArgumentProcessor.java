@@ -25,6 +25,7 @@ public class ScaffoldArgumentProcessor {
 	public static final String[] NAME_OF_RESOURCE_CREATE_OPTIONS = {"rn", "resource-name"};
 	public static final String[] SOFTWARE_SYSTEM_OPTIONS = {"software"};
 
+	@SuppressWarnings("unused")
 	public OptionParser build() {
 		OptionParser parser = new OptionParser();
 
@@ -47,6 +48,7 @@ public class ScaffoldArgumentProcessor {
 		return parser;
 	}
 
+	@SuppressWarnings("unchecked")
 	public ScaffoldParameters parseAndConvert(String[] args) {
 		OptionParser parser = build();
 		OptionSet options = ArgUtils.parse(args, parser);

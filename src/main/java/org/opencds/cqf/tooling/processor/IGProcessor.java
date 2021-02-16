@@ -3,7 +3,6 @@ package org.opencds.cqf.tooling.processor;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
@@ -33,7 +32,7 @@ public class IGProcessor extends BaseProcessor {
         Boolean versioned = params.versioned;
         Boolean cdsHooksIg = params.cdsHooksIg;
         String fhirUri = params.fhirUri;
-        String measureToRefreshPath = params.measureToRefreshPath;
+        // String measureToRefreshPath = params.measureToRefreshPath;
         ArrayList<String> resourceDirs = new ArrayList<String>();
         for (String resourceDir : params.resourceDirs) {
             if (!Utilities.isAbsoluteFileName(resourceDir)) {
@@ -88,12 +87,12 @@ public class IGProcessor extends BaseProcessor {
         }
 
         Encoding encoding = params.outputEncoding;
-        Boolean includeELM = params.includeELM;
-        Boolean includeDependencies = params.includeDependencies;
+        // Boolean includeELM = params.includeELM;
+        // Boolean includeDependencies = params.includeDependencies;
         Boolean includeTerminology = params.includeTerminology;
         Boolean includePatientScenarios = params.includePatientScenarios;
         Boolean versioned = params.versioned;
-        String fhirUri = params.fhirUri;
+        // String fhirUri = params.fhirUri;
         String measureToRefreshPath = params.measureToRefreshPath;
         ArrayList<String> resourceDirs = params.resourceDirs;
 
@@ -178,7 +177,7 @@ public class IGProcessor extends BaseProcessor {
         }
         checkForDirectory(igPath, IGProcessor.devicePathElement);
 
-        HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
+        // HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
     }
 
     private static void ensureDirectory(String igPath, String pathElement) {

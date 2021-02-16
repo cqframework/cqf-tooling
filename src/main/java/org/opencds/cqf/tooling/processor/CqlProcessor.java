@@ -141,6 +141,7 @@ public class CqlProcessor {
      * Libraries that don't specify a namespace will be built in this namespace
      * Libraries can specify a namespace, but must use this name to do it
      */
+    @SuppressWarnings("unused")
     private String packageId;
 
     /**
@@ -148,6 +149,7 @@ public class CqlProcessor {
      * Libraries translated in this IG will have this namespaceUri as their system
      * Library resources published in this IG will then have URLs of [canonicalBase]/Library/[libraryName]
      */
+    @SuppressWarnings("unused")
     private String canonicalBase;
 
     private NamespaceInfo namespaceInfo;

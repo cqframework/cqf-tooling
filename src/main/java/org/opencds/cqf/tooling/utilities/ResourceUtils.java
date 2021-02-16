@@ -565,7 +565,7 @@ public class ResourceUtils
         if (actionChild != null) {
           if (actionChild instanceof Iterable)
           {
-            for (Object action : (Iterable)actionChild) {
+            for (Object action : (Iterable<?>)actionChild) {
               Object definitionChild = resolveProperty(action, "definition", fhirContext);
               if (definitionChild != null) {
                 Object referenceChild = resolveProperty(definitionChild, "reference", fhirContext);
@@ -613,14 +613,11 @@ public class ResourceUtils
       }
 
       IBase base = (IBase) target;
-      BaseRuntimeElementCompositeDefinition definition;
       if (base instanceof IPrimitiveType) {
-          return path.equals("value") ? ((IPrimitiveType) target).getValue() : target;
+          return path.equals("value") ? ((IPrimitiveType<?>) target).getValue() : target;
       }
-      else {
-          definition = resolveRuntimeDefinition(base, fhirContext);
-      }
-
+          
+      BaseRuntimeElementCompositeDefinition<?> definition = resolveRuntimeDefinition(base, fhirContext);
       BaseRuntimeChildDefinition child = definition.getChildByName(path);
       if (child == null) {
           child = resolveChoiceProperty(definition, path);
@@ -648,13 +645,13 @@ public class ResourceUtils
       return child.getMax() < 1 ? values : values.get(0);
     }
 
-    public static BaseRuntimeElementCompositeDefinition resolveRuntimeDefinition(IBase base, FhirContext fhirContext) {
+    public static BaseRuntimeElementCompositeDefinition<?> resolveRuntimeDefinition(IBase base, FhirContext fhirContext) {
       if (base instanceof IBaseResource) {
         return fhirContext.getResourceDefinition((IBaseResource) base);
       }
 
       else if (base instanceof IBaseBackboneElement || base instanceof IBaseElement) {
-        return (BaseRuntimeElementCompositeDefinition) fhirContext.getElementDefinition(base.getClass());
+        return (BaseRuntimeElementCompositeDefinition<?>) fhirContext.getElementDefinition(base.getClass());
       }
 
       else if (base instanceof ICompositeType) {
@@ -665,7 +662,7 @@ public class ResourceUtils
       throw new Error(String.format("Unable to resolve the runtime definition for %s", base.getClass().getName()));
     }
 
-    public static BaseRuntimeChildDefinition resolveChoiceProperty(BaseRuntimeElementCompositeDefinition definition, String path) {
+    public static BaseRuntimeChildDefinition resolveChoiceProperty(BaseRuntimeElementCompositeDefinition<?> definition, String path) {
       for (Object child :  definition.getChildren()) {
         if (child instanceof RuntimeChildChoiceDefinition) {
           RuntimeChildChoiceDefinition choiceDefinition = (RuntimeChildChoiceDefinition) child;
@@ -685,7 +682,7 @@ public class ResourceUtils
         return def;
     }
 
-    public static BaseRuntimeElementDefinition getElementDefinition(FhirContext fhirContext, String ElementName) {
+    public static BaseRuntimeElementDefinition<?> getElementDefinition(FhirContext fhirContext, String ElementName) {
         BaseRuntimeElementDefinition<?> def = fhirContext.getElementDefinition(ElementName);
         return def;
     }

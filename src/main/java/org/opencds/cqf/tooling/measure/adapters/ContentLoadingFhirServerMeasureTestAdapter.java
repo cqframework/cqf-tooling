@@ -3,15 +3,13 @@ package org.opencds.cqf.tooling.measure.adapters;
 import java.util.List;
 import java.util.Objects;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.util.BundleUtil;
 
 public class ContentLoadingFhirServerMeasureTestAdapter extends FhirServerMeasureTestAdapter {
 

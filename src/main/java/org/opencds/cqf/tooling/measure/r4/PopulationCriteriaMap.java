@@ -8,6 +8,7 @@ import org.hl7.fhir.r4.model.Type;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
+@SuppressWarnings("serial")
 @DatatypeDef(name = "PopulationCriteriaMap")
 public class PopulationCriteriaMap extends Type {
 	protected Map<String, Pair<String, String>> map;
