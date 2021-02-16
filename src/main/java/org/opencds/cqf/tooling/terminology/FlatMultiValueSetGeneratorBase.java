@@ -1,12 +1,12 @@
 /*
-    This generator expects a source Workbook that contains all of the required data values on a single sheet.
-    The workbook can have multiple sheets, but the data must all be on the same sheet - specified by the
-    -codesheetnum (-csn) argument.
+    This generator loads value sets from a Workbook. If the data for a single sheet is needed, specify the sheet with codeSheetNum.
+    Otherwise, this processor will attempt to load data from all the sheets in the given workbook.
 */
 package org.opencds.cqf.tooling.terminology;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -34,7 +35,7 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
     private String valueSetIdentifierSystem; // -valuesetidentifiersystem (-vsis) // ValueSet.Identifier System
 
     // Code sheet defaults
-    private int codeSheetNum = 2;         // -codesheetnum (-csn)         // Codes Sheet
+    private int codeSheetNum = 2;         // -codesheetnum (-csn)         // Codes Sheet // -1 indicates load all sheets
     private int codeListRow = 1;          // -codelistrow (-clr)          // Row at which the codes start
     private int valueSetTitleCol = 0;     // -valuesettitlecol (-vstc)    // ValueSet Title
     private int valueSetOidCol = 1;       // -valuesetoidcol (-vsoc)      // ValueSet OID
@@ -44,12 +45,13 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
     private int systemNameCol = 5;        // -systemnamecol (-snc)        // Code System Name Column
     private int systemOidCol = 6;         // -systemoidcol (-soc)         // Code System OID Column
     private int versionCol = 7;           // -versioncol (-vc)            // Code System Version Column
+    private int expansionIdCol = -1;      // -expansionidcol (-eic)       // Expansion ID Column
 
     private Map<Integer, ValueSet> valueSets = new HashMap<>();
 
     public FlatMultiValueSetGeneratorBase(String outputPath, String encoding, String publisher, String publisherNamespace, String valueSetIdentifierSystem,
         int codeSheetNum, int codeListRow, int valueSetTitleCol, int valueSetOidCol, int valueSetVersionCol, int codeCol,
-        int descriptionCol, int systemNameCol, int systemOidCol, int versionCol)
+        int descriptionCol, int systemNameCol, int systemOidCol, int versionCol, int expansionIdCol)
     {
         this.outputPath = outputPath;
         this.encoding = encoding;
@@ -66,6 +68,7 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
         this.systemNameCol = systemNameCol;
         this.systemOidCol = systemOidCol;
         this.versionCol = versionCol;
+        this.expansionIdCol = expansionIdCol;
     }
 
     @Override
@@ -102,6 +105,7 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
                 case "systemnamecol": case "snc": systemNameCol = Integer.valueOf(value); break;
                 case "systemoidcol": case "soc": systemOidCol = Integer.valueOf(value); break;
                 case "versioncol": case "vc": versionCol = Integer.valueOf(value); break;
+                case "expansionidcol": case "eic": expansionIdCol = Integer.valueOf(value); break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
@@ -116,12 +120,21 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
 
     protected void processWorkbook(Workbook workbook)
     {
-        loadWorkbook(workbook);
+        if (codeSheetNum != -1) {
+            loadSheet(workbook.getSheetAt(codeSheetNum));
+        }
+        else {
+            Iterator<Sheet> it = workbook.sheetIterator();
+            while (it.hasNext()) {
+                Sheet sheet = it.next();
+                loadSheet(sheet);
+            }
+        }
         writeValueSetsToFiles(valueSets);
     }
 
-    protected void loadWorkbook(Workbook workbook) {
-        Iterator<Row> it = workbook.getSheetAt(codeSheetNum).rowIterator();
+    protected void loadSheet(Sheet sheet) {
+        Iterator<Row> it = sheet.rowIterator();
         while(it.hasNext()) {
             Row row = it.next();
             if (row.getRowNum() < codeListRow) {
@@ -146,6 +159,9 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
             // ValueSet.Url
             String valueSetUrl = publisherNamespace.concat("/ValueSet/").concat(valueSetOid);
 
+            // ValueSet.Expansion.Identifier
+            String valueSetExpansionId = expansionIdCol >= 0 ? SpreadsheetHelper.getCellAsString(row.getCell(expansionIdCol)) : null;
+
             // Code
             String code = SpreadsheetHelper.getCellAsString(row.getCell(codeCol));
             if (code == null) {
@@ -153,7 +169,7 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
             }
             // Code Description
             String display = SpreadsheetHelper.getCellAsString(row.getCell(descriptionCol));
-            ValueSet.ConceptReferenceComponent concept = new ValueSet.ConceptReferenceComponent().setCode(code).setDisplay(display);
+
             // ValueSet.Title
             String valueSetTitle = SpreadsheetHelper.getCellAsString(row.getCell(valueSetTitleCol));
             // ValueSet.Name
@@ -162,6 +178,12 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
             String system = getCodeSystemFromRow(row);
             // Code System Version
             String version = SpreadsheetHelper.getCellAsString(row.getCell(versionCol));
+
+            ValueSet.ValueSetExpansionContainsComponent component = new ValueSet.ValueSetExpansionContainsComponent();
+            component.setSystem(system);
+            component.setVersion(version);
+            component.setDisplay(display);
+            component.setCode(code);
 
             // If the ValueSet hasn't yet been visited, add it to the collection with
             // a new Include for the code system with the current Code. Otherwise, locate
@@ -175,45 +197,18 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
                 vs.setVersion(valueSetVersion);
                 vs.setName(valueSetName);
                 vs.setTitle(valueSetTitle);
+                vs.setExperimental(false);
                 vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
                 vs.setPublisher(publisher);
-                vs.setCompose(new ValueSet.ValueSetComposeComponent());
-
-                ValueSet.ConceptSetComponent component = new ValueSet.ConceptSetComponent();
-                component.setSystem(system);
-                component.setVersion(version);
-
-                ArrayList<org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent> codes = new ArrayList<>();
-                codes.add(concept);
-                component.setConcept(codes);
-                vs.getCompose().addInclude(component);
-
+                vs.setExpansion(new ValueSet.ValueSetExpansionComponent());
+                vs.getExpansion().setIdentifier(valueSetExpansionId);
+                vs.getExpansion().setTimestamp(java.util.Date.from(Instant.now()));
+                vs.getExpansion().getContains().add(component);
                 valueSets.put(valueSetHash, vs);
             }
             else {
                 ValueSet targetValueSet = valueSets.get(valueSetHash);
-                java.util.List<ValueSet.ConceptSetComponent> targetIncludeComponent = targetValueSet.getCompose().getInclude();
-
-                ValueSet.ConceptSetComponent codeSystemInclude =
-                        new ValueSet.ConceptSetComponent().setSystem(system).setVersion(version);
-
-                // Must be a better way, but without overriding ConceptSetComponent.equals(), I'm not sure what it is.
-                ValueSet.ConceptSetComponent existingCodeSystemInclude = null;
-                for (ValueSet.ConceptSetComponent systemInclude : targetIncludeComponent) {
-                    if (systemInclude.getSystem().equals(codeSystemInclude.getSystem())
-                            && systemInclude.getVersion().equals(codeSystemInclude.getVersion())) {
-                        existingCodeSystemInclude = systemInclude;
-                        break;
-                    }
-                }
-
-                if (existingCodeSystemInclude != null) {
-                    existingCodeSystemInclude.addConcept(concept);
-                }
-                else {
-                    codeSystemInclude.addConcept(concept);
-                    targetIncludeComponent.add(codeSystemInclude);
-                }
+                targetValueSet.getExpansion().getContains().add(component);
             }
         }
     }
@@ -235,12 +230,8 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
 
     protected void writeValueSetsToFiles(Map<Integer, ValueSet> valueSets)
     {
-        for (Map.Entry<Integer, ValueSet> vsEntry : valueSets.entrySet())
-        {
-            writeValueSetToFile(
-                vsEntry.getValue().getName() != null
-                    ? vsEntry.getValue().getName().replaceAll("\\s", "").replaceAll("\\/", "_").concat("." + encoding)
-                    : "valueset".concat("." + encoding), vsEntry.getValue());
+        for (Map.Entry<Integer, ValueSet> vsEntry : valueSets.entrySet()) {
+            writeValueSetToFile("valueset-" + vsEntry.getValue().getId() + "." + encoding, vsEntry.getValue());
         }
     }
 
@@ -255,7 +246,8 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
         try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + fileName)) {
             writer.write(parser.setPrettyPrint(true).encodeResourceToString(vs).getBytes());
             writer.flush();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
             throw new IllegalArgumentException("Error writing ValueSet to file: " + e.getMessage());
         }

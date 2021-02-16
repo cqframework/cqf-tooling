@@ -9,7 +9,7 @@ public class CMSFlatMultiValueSetGenerator extends FlatMultiValueSetGeneratorBas
     private static final String valueSetIdentifierSystem = "urn:ietf:rfc:3986";     // -valuesetidentifiersystem (-vsis)
 
     // Code sheet defaults
-    private static final int codeSheetNum = 0;        // -codesheetnum (-csn)         // Codes Sheet
+    private static final int codeSheetNum = -1;        // -codesheetnum (-csn)         // Codes Sheet
     private static final int codeListRow = 2;         // -codelistrow (-clr)          // Row at which the codes start
     private static final int valueSetTitleCol = 2;    // -valuesettitlecol (-vstc)    // ValueSet Title
     private static final int valueSetOidCol = 3;      // -valuesetoidcol (-vsoc)      // ValueSet OID
@@ -19,11 +19,12 @@ public class CMSFlatMultiValueSetGenerator extends FlatMultiValueSetGeneratorBas
     private static final int systemNameCol = 13;      // -systemnamecol (-snc)        // Code System Name Column
     private static final int systemOidCol = 14;       // -systemoidcol (-soc)         // Code System OID Column
     private static final int versionCol = 15;         // -versioncol (-vc)            // Code System Version Column
+    private static final int expansionIdCol = 16;     // -expansionidcol (-eic)       // Expansion Id Column
 
     public CMSFlatMultiValueSetGenerator()
     {
         super(outputPath, encoding, publisher, publisherNamespace, valueSetIdentifierSystem, codeSheetNum, codeListRow,
             valueSetTitleCol, valueSetOidCol, valueSetVersionCol, codeCol, descriptionCol, systemNameCol, systemOidCol,
-            versionCol);
+            versionCol, expansionIdCol);
     }
 }
