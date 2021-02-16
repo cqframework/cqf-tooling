@@ -28,7 +28,7 @@ public class CMSFlatMultiValueSetGeneratorTests {
             }
         }
         if (fileCount != 567) {
-            throw new IllegalArgumentException("Exected 567 value set files");
+            throw new IllegalArgumentException("Expected 567 value set files");
         }
     }
 }
