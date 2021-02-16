@@ -6,6 +6,7 @@ import java.util.HashSet;
 import org.opencds.cqf.tooling.modelinfo.ClassInfoSettings;
 
 
+@SuppressWarnings("serial")
 class QICoreClassInfoSettings extends ClassInfoSettings {
 
     public QICoreClassInfoSettings() {

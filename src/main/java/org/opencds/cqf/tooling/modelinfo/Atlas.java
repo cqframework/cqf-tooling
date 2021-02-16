@@ -131,6 +131,7 @@ public class Atlas {
 
     }
 
+    @SuppressWarnings("unused")
     private Map<String, StructureDefinition> indexResources(List<StructureDefinition> resources) {
         Map<String, StructureDefinition> resourcesById = new HashMap<String, StructureDefinition>();
         for (StructureDefinition sd : resources) {
@@ -346,7 +347,7 @@ public class Atlas {
 
         IParser parser = FhirContext.forR4().newJsonParser();
 
-        List<StructureDefinition> objects = new ArrayList<StructureDefinition>();
+        // List<StructureDefinition> objects = new ArrayList<StructureDefinition>();
 
         for (File f : files) {
 

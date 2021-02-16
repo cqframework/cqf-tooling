@@ -23,6 +23,7 @@ public class TestIGArgumentsProcessor {
     public static final String[] TEST_CASES_PATH_OPTIONS = {"tests", "testsPath", "testCasesPath", "tp", "tcp"};
     public static final String[] FHIR_URI_OPTIONS = {"fs", "fhir-uri"};
 
+    @SuppressWarnings("unused")
     public OptionParser build() {
         OptionParser parser = new OptionParser();
 

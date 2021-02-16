@@ -220,6 +220,10 @@ public class VSACValueSetGenerator extends Operation {
 
             String code = SpreadsheetHelper.getCellAsString(row.getCell(codeCol));
 
+            if (code == null) {
+                throw new IllegalArgumentException(String.format("No code value found on row: %d", row.getRowNum()));
+            }
+
             if (code.matches("[+-]?\\d(\\.\\d+)?[Ee][+-]?\\d+")) {
                 throw new IllegalArgumentException(String.format("Scientific Notation is not allowed for a code: %s", code));
             }
@@ -249,10 +253,6 @@ public class VSACValueSetGenerator extends Operation {
 
             if (system == null || system.equals("")) {
                 throw new IllegalArgumentException(String.format("No system value found on row: %d", row.getRowNum()));
-            }
-
-            if (code == null) {
-                throw new IllegalArgumentException(String.format("No code value found on row: %d", row.getRowNum()));
             }
 
             int hash = system.hashCode() * (version != null && !version.equals("") ? version.hashCode() : 1);

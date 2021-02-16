@@ -14,7 +14,6 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorException;
@@ -118,7 +117,6 @@ public class IOUtils
         {
             writer.write(parseResource(resource, encoding, fhirContext));
             writer.flush();
-            writer.close();
         }
         catch (IOException e)
         {
@@ -189,11 +187,6 @@ public class IOUtils
         return null;
     }
 
-    public static String getCanonicalResourceVersion(String path, FhirContext fhirContext) {
-        IBaseResource resource = readResource(path, fhirContext, true);
-        return getCanonicalResourceVersion(path, fhirContext);
-    }
-
     public static IBaseResource readResource(String path, FhirContext fhirContext) {
         return readResource(path, fhirContext, false);
     }
@@ -227,7 +220,7 @@ public class IOUtils
                     return null;
                 }
             }
-            resource = (IBaseResource)parser.parseResource(new FileReader(file));
+            resource = parser.parseResource(new FileReader(file));
             cachedResources.put(path, resource);
         }
         catch (Exception e)
@@ -583,7 +576,7 @@ public class IOUtils
                 }
             }
             //TODO: move these to ResourceUtils
-            RuntimeResourceDefinition valuesetDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "ValueSet");
+            RuntimeResourceDefinition valuesetDefinition = ResourceUtils.getResourceDefinition(fhirContext, "ValueSet");
             RuntimeCompositeDatatypeDefinition conceptDefinition = (RuntimeCompositeDatatypeDefinition)ResourceUtils.getElementDefinition(fhirContext, "CodeableConcept");
             RuntimeCompositeDatatypeDefinition codingDefinition = (RuntimeCompositeDatatypeDefinition)ResourceUtils.getElementDefinition(fhirContext, "Coding");
             String valuesetClassName = valuesetDefinition.getImplementingClass().getName();
@@ -651,9 +644,9 @@ public class IOUtils
                 }
             }
             //TODO: move these to ResourceUtils
-            RuntimeResourceDefinition libraryDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "Library");
+            RuntimeResourceDefinition libraryDefinition = ResourceUtils.getResourceDefinition(fhirContext, "Library");
             String libraryClassName = libraryDefinition.getImplementingClass().getName();
-            BaseRuntimeChildDefinition urlElement = libraryDefinition.getChildByNameOrThrowDataFormatException("url");
+            // BaseRuntimeChildDefinition urlElement = libraryDefinition.getChildByNameOrThrowDataFormatException("url");
             resources.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)
                 .filter(entry ->  libraryClassName.equals(entry.getValue().getClass().getName()))
@@ -702,7 +695,7 @@ public class IOUtils
                 }
             }
             //TODO: move these to ResourceUtils
-            RuntimeResourceDefinition measureDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "Measure");
+            RuntimeResourceDefinition measureDefinition = ResourceUtils.getResourceDefinition(fhirContext, "Measure");
             String measureClassName = measureDefinition.getImplementingClass().getName();
             resources.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)
@@ -734,7 +727,7 @@ public class IOUtils
                 }
             }
             //TODO: move these to ResourceUtils
-            RuntimeResourceDefinition measureReportDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "MeasureReport");
+            RuntimeResourceDefinition measureReportDefinition = ResourceUtils.getResourceDefinition(fhirContext, "MeasureReport");
             String measureReportClassName = measureReportDefinition.getImplementingClass().getName();
             resources.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)
@@ -761,7 +754,7 @@ public class IOUtils
                     System.out.println(String.format("Error setting PlanDefinition paths while reading resource at: '%s'. Error: %s", path, e.getMessage()));
                 }
             }
-            RuntimeResourceDefinition planDefinitionDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "PlanDefinition");
+            RuntimeResourceDefinition planDefinitionDefinition = ResourceUtils.getResourceDefinition(fhirContext, "PlanDefinition");
             String planDefinitionClassName = planDefinitionDefinition.getImplementingClass().getName();
             resources.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)
@@ -792,7 +785,7 @@ public class IOUtils
                     //TODO: handle exception
                 }
             }
-            RuntimeResourceDefinition activityDefinitionDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "ActivityDefinition");
+            RuntimeResourceDefinition activityDefinitionDefinition = ResourceUtils.getResourceDefinition(fhirContext, "ActivityDefinition");
             String activityDefinitionClassName = activityDefinitionDefinition.getImplementingClass().getName();
             resources.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)
@@ -833,7 +826,7 @@ public class IOUtils
                 }
             }
             //TODO: move these to ResourceUtils
-            RuntimeResourceDefinition deviceDefinition = (RuntimeResourceDefinition)ResourceUtils.getResourceDefinition(fhirContext, "Device");
+            RuntimeResourceDefinition deviceDefinition = ResourceUtils.getResourceDefinition(fhirContext, "Device");
             String deviceClassName = deviceDefinition.getImplementingClass().getName();
             resources.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)

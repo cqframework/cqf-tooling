@@ -4,6 +4,7 @@ import org.hl7.fhir.r4.model.Type;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
+@SuppressWarnings("serial")
 @DatatypeDef(name = "VersionedTerminologyRef")
 public class VersionedTerminologyRef extends TerminologyRef {
 

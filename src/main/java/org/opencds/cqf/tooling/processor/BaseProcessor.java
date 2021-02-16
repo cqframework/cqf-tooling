@@ -80,10 +80,10 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
         }
 
         if (fhirVersion != null) {
-            ImplementationGuide sourceIg = loadSourceIG(igPath, fhirVersion);
+            loadSourceIG(igPath, fhirVersion);
         } else {
             try {
-                ImplementationGuide sourceIg = loadSourceIG(igPath);
+                loadSourceIG(igPath);
             }
             catch (Exception e) {
                 logMessage("Error Parsing File " + igPath + ": " + e.getMessage());
@@ -124,7 +124,6 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
     }
 
     private ImplementationGuide loadSourceIG(String igPath) throws Exception {
-        ImplementationGuide sourceIG = null;
         try {
             try {
                 sourceIg = (ImplementationGuide) org.hl7.fhir.r5.formats.FormatUtilities.loadFile(igPath);
@@ -147,7 +146,6 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
     }
 
     private ImplementationGuide loadSourceIG(String igPath, String specifiedFhirVersion) {
-        ImplementationGuide sourceIG = null;
         try {
             if (VersionUtilities.isR3Ver(specifiedFhirVersion)) {
                 byte[] src = TextFile.fileToBytes(igPath);

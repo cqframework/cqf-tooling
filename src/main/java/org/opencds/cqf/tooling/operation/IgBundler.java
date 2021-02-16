@@ -1,3 +1,16 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
 package org.opencds.cqf.tooling.operation;
 
 import java.io.File;
@@ -211,10 +224,11 @@ public class IgBundler extends Operation
     private void addArtifactToBundle(final Path path, final Bundle bundle) {
         IBaseResource resource;
         try {
+            FileReader reader = new FileReader(new File(path.toString()));
             if (path.toString().endsWith(".xml")) {
-                resource = xmlParser.parseResource(new FileReader(new File(path.toString())));
+                resource = xmlParser.parseResource(reader);
             } else if (path.toString().endsWith(".json")) {
-                resource = jsonParser.parseResource(new FileReader(new File(path.toString())));
+                resource = jsonParser.parseResource(reader);
             } else {
                 throw new RuntimeException("Unknown file type: " + path.toString());
             }

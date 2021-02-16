@@ -22,6 +22,7 @@ public class PostBundlesInDirArgumentProcessor {
     public static final String[] ENCODING_OPTIONS = {"e", "encoding"};
     public static final String[] FHIR_URI_OPTIONS = {"fs", "fhir-uri"};
 
+    @SuppressWarnings("unused")
     public OptionParser build() {
         OptionParser parser = new OptionParser();
 

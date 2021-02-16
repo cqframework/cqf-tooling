@@ -1,7 +1,6 @@
 package org.opencds.cqf.tooling.processor;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +34,7 @@ public class LibraryProcessor extends BaseProcessor {
     
     public static List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext) {
         System.out.println("Refreshing libraries...");
-        ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
+        // ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
 
         LibraryProcessor libraryProcessor;
         switch (fhirContext.getVersion().getVersion()) {
@@ -65,7 +64,7 @@ public class LibraryProcessor extends BaseProcessor {
         Boolean shouldPersist = true;
         try {
             Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding, versioned);
-            String currentResourceID = IOUtils.getTypeQualifiedResourceId(path, fhirContext);
+            // String currentResourceID = IOUtils.getTypeQualifiedResourceId(path, fhirContext);
             for (IBaseResource resource : dependencies.values()) {
                 resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
 

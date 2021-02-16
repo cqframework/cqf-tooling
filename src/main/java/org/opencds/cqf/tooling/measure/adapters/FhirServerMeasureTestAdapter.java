@@ -40,7 +40,7 @@ public abstract class FhirServerMeasureTestAdapter extends MeasureTestAdapter {
         String periodStart = simpleFormat.format(this.getPeriodStart());
         String periodEnd = simpleFormat.format(this.getPeriodEnd());
 
-        IMeasureReportAdapter expectedAdapter = this.getExpectedMeasureReportAdapter();
+        // IMeasureReportAdapter expectedAdapter = this.getExpectedMeasureReportAdapter();
         String path = fhirServer.getServerBase() + "/Measure/" + measureId + "/$evaluate-measure?patient=" + patientId + "&periodStart=" + periodStart + "&periodEnd=" + periodEnd;
         try {
             String response = HttpClientUtils.get(path);

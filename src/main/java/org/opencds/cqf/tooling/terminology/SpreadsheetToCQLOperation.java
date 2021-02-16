@@ -1,18 +1,17 @@
 package org.opencds.cqf.tooling.terminology;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Iterator;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
 import org.opencds.cqf.tooling.Operation;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.util.Iterator;
 
 public class SpreadsheetToCQLOperation extends Operation {
 
@@ -47,7 +46,7 @@ public class SpreadsheetToCQLOperation extends Operation {
 
             switch (flag.replace("-", "").toLowerCase()) {
                 case "pathtospreadsheet": case "pts": pathToSpreadsheet = value; break; // -pathtospreadsheet (-pts)
-                case "hasheader": case "hh": hasHeader = Boolean.valueOf(value);
+                case "hasheader": case "hh": hasHeader = Boolean.valueOf(value); break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }

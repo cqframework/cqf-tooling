@@ -1,20 +1,24 @@
 package org.opencds.cqf.tooling.terminology;
 
-import ca.uhn.fhir.context.FhirContext;
-import com.google.gson.Gson;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonWriter;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import java.io.*;
+import ca.uhn.fhir.context.FhirContext;
 
 public class ToJsonValueSetDbOperation extends Operation {
     private String valueSetPath;
+
+    @SuppressWarnings("unused")
     private String encoding = IOUtils.Encoding.JSON.toString();
     private FhirContext fhirContext;
 
