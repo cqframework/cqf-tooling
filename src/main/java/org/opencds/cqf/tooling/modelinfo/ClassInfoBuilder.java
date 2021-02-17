@@ -11,14 +11,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.hl7.elm_modelinfo.r1.ChoiceTypeSpecifier;
-import org.hl7.elm_modelinfo.r1.ClassInfo;
-import org.hl7.elm_modelinfo.r1.ClassInfoElement;
-import org.hl7.elm_modelinfo.r1.IntervalTypeSpecifier;
-import org.hl7.elm_modelinfo.r1.ListTypeSpecifier;
-import org.hl7.elm_modelinfo.r1.NamedTypeSpecifier;
-import org.hl7.elm_modelinfo.r1.TypeInfo;
-import org.hl7.elm_modelinfo.r1.TypeSpecifier;
+import org.hl7.elm_modelinfo.r1.*;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.ElementDefinition;
@@ -733,6 +726,31 @@ public abstract class ClassInfoBuilder {
                     return this.buildTypeSpecifier(typeName);
                 }
             }
+            if (ed.getId().equals("Resource.id")) {
+                // This is special-case code because the FHIR 4.0.1 structure definition incorrectly reports the type of the
+                // id element of the Resource type as a System.String.
+                typeName = getTypeName(modelName, "id");
+                if (this.settings.useCQLPrimitives && this.settings.primitiveTypeMappings.containsKey(typeName)) {
+                    return this.buildTypeSpecifier(this.settings.primitiveTypeMappings.get(typeName));
+                }
+                else {
+                    return this.buildTypeSpecifier(typeName);
+                }
+            }
+            if (ed.getId().equals("positiveInt.value")) {
+                // Special-case code because the "value" element in the differential for positiveInt specifies a type of String
+                // Presumably this is to declare the regex enforcement of the constraint (> 0)
+                // But here, it needs to be redeclared as the appropriate type, Integer
+                typeName = getTypeName("System", "Integer");
+                return this.buildTypeSpecifier(typeName);
+            }
+            if (ed.getId().equals("unsignedInt.value")) {
+                // Special-case code because the "value" element in the differential for unsignedInt specifies a type of String
+                // Presumably this is to declare the regex enforcement of the constraint (>= 0)
+                // But here, it needs to be redeclared as the appropriate type, Integer
+                typeName = getTypeName("System", "Integer");
+                return this.buildTypeSpecifier(typeName);
+            }
             if (typeCode != null && typeCode.equals("Extension") && ed.getId().contains(":")
                     && ed.getType().get(0).hasProfile()) {
                 List<CanonicalType> extensionProfile = ed.getType().get(0).getProfile();
@@ -812,6 +830,8 @@ public abstract class ClassInfoBuilder {
                         ClassInfoElement cie = new ClassInfoElement();
                         cie.setName("value");
                         cie.setElementType("System.String");
+
+                        // TODO: Consider includeMetaData here
 
                         elements.add(cie);
 
@@ -910,6 +930,21 @@ public abstract class ClassInfoBuilder {
         return null;
     }
 
+    private org.hl7.elm_modelinfo.r1.BindingStrength toStrength(BindingStrength strength) {
+        switch (strength) {
+            case REQUIRED: return org.hl7.elm_modelinfo.r1.BindingStrength.REQUIRED;
+            case EXTENSIBLE: return org.hl7.elm_modelinfo.r1.BindingStrength.EXTENSIBLE;
+            case PREFERRED: return org.hl7.elm_modelinfo.r1.BindingStrength.PREFERRED;
+            case EXAMPLE: return org.hl7.elm_modelinfo.r1.BindingStrength.EXAMPLE;
+            default:
+                throw new IllegalArgumentException(String.format("Unknown binding strength %s", strength.toString()));
+        }
+    }
+
+    private String toSeverity(ElementDefinition.ConstraintSeverity severity) {
+        return severity.toString();
+    }
+
     // Builds a ClassInfoElement for the given ElementDefinition
     // This method assumes the given element is not a structure
     private ClassInfoElement buildClassInfoElement(String root, ElementDefinition ed, TypeSpecifier typeSpecifier) throws Exception {
@@ -966,6 +1001,42 @@ public abstract class ClassInfoBuilder {
         }
         else {
             cie.setElementTypeSpecifier(typeSpecifier);
+        }
+
+        if (settings.includeMetaData) {
+            cie.setLabel(ed.getLabel());
+            cie.setDescription(ed.getShort());
+            cie.setDefinition(ed.getDefinition());
+            cie.setComment(ed.getComment());
+
+            if (ed.hasBinding()) {
+                BindingInfo bi = new BindingInfo();
+                if (ed.getBinding().hasStrength()) {
+                    bi.setStrength(toStrength(ed.getBinding().getStrength()));
+                }
+                bi.setDescription(ed.getBinding().getDescription());
+                Extension bne = ed.getBinding().getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName");
+                if (bne != null) {
+                    bi.setName(bne.getValueAsPrimitive().getValueAsString());
+                }
+                cie.setBinding(bi);
+            }
+
+            for (ElementDefinition.ElementDefinitionConstraintComponent constraint : ed.getConstraint()) {
+                ConstraintInfo ci = new ConstraintInfo();
+                ci.setName(constraint.getKey());
+                ci.setSeverity(toSeverity(constraint.getSeverity()));
+                ci.setDescription(constraint.getRequirements());
+                ci.setMessage(constraint.getHuman());
+                if (constraint.hasExpression()) {
+                    ci.getExpression().add(new ExpressionInfo().withLanguage("text/fhirpath").withExpression(constraint.getExpression()));
+                }
+                cie.getConstraint().add(ci);
+            }
+
+            if (ed.hasMustSupport()) {
+                cie.setMustSupport(ed.getMustSupport());
+            }
         }
 
         System.out.println(String.format("Done building ClassInfoElement %s: %s", cie.getName(), cie.toString()));
@@ -1225,6 +1296,7 @@ public abstract class ClassInfoBuilder {
 
                 if (cie == null) {
                     cie = new ClassInfoElement().withName(stripPath(stripChoice(ed.getPath()))).withElementType(getTypeName(nts));
+                    // TODO: Consider include metadata here?
                 }
                 else {
                     cie.setElementType(getTypeName(nts));
@@ -1260,7 +1332,8 @@ public abstract class ClassInfoBuilder {
         List<ClassInfoElement> elements = new ArrayList<>();
         String path = sd.getType(); // Type is used to navigate the elements, regardless of the baseDefinition
         String id = path; // Id starts with the Type
-        List<ElementDefinition> eds = sd.getSnapshot().getElement();
+        // TODO: Switch to differential here, but several of the primitive types declare "value" elements of type string when this happens? (positiveInt, markdown, among others)
+        List<ElementDefinition> eds = sd.getDifferential().getElement();
         SliceList elementSlices = null;
 
         while (index.get() < eds.size()) {
@@ -1306,7 +1379,7 @@ public abstract class ClassInfoBuilder {
         }
         else {
             // Set base type, elements, and primary code path
-            info.withBaseType(baseTypeName)
+            info.withBaseType(baseTypeName == null ? "System.Any" : baseTypeName) // The base of all types in CQL is System.Any
                     .withElement(elements)
                     .withPrimaryCodePath(this.primaryCodePath(elements, typeName));
         }

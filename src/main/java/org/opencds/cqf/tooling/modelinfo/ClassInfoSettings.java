@@ -12,6 +12,7 @@ public class ClassInfoSettings {
     public String modelPrefix;
     public String helpersLibraryName;
     public boolean useCQLPrimitives = false;
+    public boolean includeMetaData = true;
     public boolean createSliceElements = false;
     public boolean createExtensionElements = false;
     public boolean createReferenceElements = false;
