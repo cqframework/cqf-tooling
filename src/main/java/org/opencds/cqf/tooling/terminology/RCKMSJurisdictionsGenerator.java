@@ -111,9 +111,8 @@ public class RCKMSJurisdictionsGenerator extends Operation {
             cs.addProperty(propertyState);
         CodeSystem.PropertyComponent propertyPost = new CodeSystem.PropertyComponent();     
             propertyPost.setCode("postalcode");
-            propertyPost.setUri("http://hl7.org/fhir/us/ecr/CodeSystem/ersd-jurisdiction-postalcodes");
             propertyPost.setDescription("Postal code within the public health jurisdiction.");
-            propertyPost.setType(CodeSystem.PropertyType.CODE);
+            propertyPost.setType(CodeSystem.PropertyType.STRING);
             cs.addProperty(propertyPost);
         CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent(); 
         CodeSystem.ConceptPropertyComponent conceptPropType;

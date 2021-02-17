@@ -1,14 +1,18 @@
 package org.opencds.cqf.tooling.processor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.parser.IParser;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.Parameters;
 import org.hl7.fhir.ParametersParameter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.tooling.common.BaseCqfmSoftwareSystemHelper;
+import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
 import org.opencds.cqf.tooling.measure.MeasureTestProcessor;
 import org.opencds.cqf.tooling.parameter.TestIGParameters;
-import org.opencds.cqf.tooling.utilities.BundleUtils;
-import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.*;
 
 import java.io.File;
 import java.util.*;
@@ -73,15 +77,96 @@ public class IGTestProcessor extends BaseProcessor {
 
     private FhirContext fhirContext;
 
+    private IBaseResource getServerMetadata(String testServerUri) {
+        IBaseResource result = null;
+
+        String path = testServerUri + "/metadata";
+        try {
+            String response = HttpClientUtils.get(path);
+
+            if (response != null && !response.isEmpty()) {
+                IParser parser = fhirContext.newJsonParser();
+                result = parser.parseResource(response);
+            }
+
+            return result;
+        }
+        catch (Exception ex) {
+            LogUtils.putException(String.format("Error retrieving metadata from: 's%'.", path), ex);
+            //TODO: Error/Message handling
+            return null;
+        }
+    }
+
+    private CqfmSoftwareSystem getCqfRulerSoftwareSystem(String testServerUri) {
+        CqfmSoftwareSystem softwareSystem = null;
+
+        try {
+            IBaseResource resource = getServerMetadata(testServerUri);
+
+            RuntimeResourceDefinition capabilityStatementDefinition = ResourceUtils.getResourceDefinition(fhirContext, "CapabilityStatement");
+            String compatibilityStatementClassName = capabilityStatementDefinition.getImplementingClass().getName();
+            if (compatibilityStatementClassName.equals(resource.getClass().getName())) {
+
+                // String softwareName = null;
+                String softwareVersion = null;
+
+                if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
+                    org.hl7.fhir.dstu3.model.CapabilityStatement capabilityStatement = (org.hl7.fhir.dstu3.model.CapabilityStatement)resource;
+
+                    org.hl7.fhir.dstu3.model.Extension softwareModuleExtension =
+                        capabilityStatement.getSoftware()
+                            .getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-softwareModule")
+                            .stream()
+                            .filter(extension -> !extension.getExtensionString("name").equals(BaseCqfmSoftwareSystemHelper.cqfRulerDeviceName))
+                            .collect(Collectors.toList())
+                            .get(0);
+
+                    if (softwareModuleExtension != null) {
+                        softwareVersion = softwareModuleExtension.getExtensionString("version");//.getValue().toString();
+                    }
+                } else if (fhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
+                    org.hl7.fhir.r4.model.CapabilityStatement capabilityStatement = (org.hl7.fhir.r4.model.CapabilityStatement)resource;
+
+                    org.hl7.fhir.r4.model.Extension softwareModuleExtension =
+                        capabilityStatement.getSoftware()
+                            .getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-softwareModule")
+                            .stream()
+                            .filter(extension -> !extension.getExtensionString("name").equals(BaseCqfmSoftwareSystemHelper.cqfRulerDeviceName))
+                            .collect(Collectors.toList())
+                            .get(0);
+
+                    if (softwareModuleExtension != null) {
+                        softwareVersion = softwareModuleExtension.getExtensionString("version");//.getValue().toString();
+                    }
+                }
+
+                if (softwareVersion != null && !softwareVersion.isEmpty()) {
+                    softwareSystem = new CqfmSoftwareSystem(BaseCqfmSoftwareSystemHelper.cqfRulerDeviceName, softwareVersion);
+                }
+            }
+        }
+        catch (Exception ex) {
+            LogUtils.putException(String.format("Error retrieving CapabilityStatement from: 's%'.", testServerUri), ex);
+            //TODO: Error/Message handling
+            return null;
+        }
+
+        return softwareSystem;
+    }
+
+    @SuppressWarnings("serial")
     public void testIg(TestIGParameters params) {
         fhirContext = params.fhirContext;
 
         if (params.ini != null) {
-            initialize(params.ini);
+            initializeFromIni(params.ini);
         }
         else {
-            initialize(params.rootDir, params.igPath);
+            initializeFromIg(params.rootDir, params.igPath, fhirContext.getVersion().toString());
         }
+
+        CqfmSoftwareSystem testTargetSoftwareSystem =  getCqfRulerSoftwareSystem(params.fhirServerUri);
 
         System.out.println("Running IG test cases...");
 
@@ -108,17 +193,28 @@ public class IGTestProcessor extends BaseProcessor {
 
             for (File testArtifact : testArtifactNames) {
                 System.out.println(String.format("  Processing test cases for %s: %s", group.getName(), testArtifact.getName()));
+                Boolean allTestArtifactTestsPassed = true;
 
                 // Get content bundle
-                IBaseResource testArtifactContentBundle = GetContentBundleForTestArtifact(group.getName(), testArtifact.getName());
+                Map.Entry<String, IBaseResource> testArtifactContentBundleMap = getContentBundleForTestArtifact(group.getName(), testArtifact.getName());
+
+                if ((testArtifactContentBundleMap == null) || testArtifactContentBundleMap.getValue() == null) {
+                    System.out.println(String.format("      No content bundle found for %s: %s", group.getName(), testArtifact.getName()));
+                    System.out.println(String.format("  Done processing all test cases for %s: %s", group.getName(), testArtifact.getName()));
+                    continue;
+                }
 
                 ITestProcessor testProcessor = getResourceTypeTestProcessor(group.getName());
-                List<IBaseResource> testCasesBundles = BundleUtils.GetBundlesInDir(testArtifact.getPath(), fhirContext, false);
-                for (IBaseResource testCaseBundle : testCasesBundles) {
-                    TestCaseResultSummary testCaseResult  = new TestCaseResultSummary(group.getName(), testArtifact.getName(), testCaseBundle.getIdElement().toString());
+                List<Map.Entry<String, IBaseResource>> testCasesBundles =
+                    BundleUtils.GetBundlesInDir(testArtifact.getPath(), fhirContext, false);
+
+                for (Map.Entry<String, IBaseResource> testCaseBundleMapEntry : testCasesBundles) {
+                    IBaseResource testCaseBundle = testCaseBundleMapEntry.getValue();
+                    TestCaseResultSummary testCaseResult  = new TestCaseResultSummary(group.getName(), testArtifact.getName(),
+                        testCaseBundle.getIdElement().toString());
                     try {
                         System.out.println(String.format("      Starting processing of test case '%s' for %s: %s", testCaseBundle.getIdElement(), group.getName(), testArtifact.getName()));
-                        Parameters testResults = testProcessor.executeTest(testCaseBundle, testArtifactContentBundle, params.fhirServerUri);
+                        Parameters testResults = testProcessor.executeTest(testCaseBundle, testArtifactContentBundleMap.getValue(), params.fhirServerUri);
 
                         Boolean testPassed = false;
                         for (ParametersParameter param : testResults.getParameter()) {
@@ -138,6 +234,27 @@ public class IGTestProcessor extends BaseProcessor {
                 }
 
                 System.out.println(String.format("  Done processing all test cases for %s: %s", group.getName(), testArtifact.getName()));
+
+                if (allTestArtifactTestsPassed) {
+                    List<CqfmSoftwareSystem> softwareSystems = new ArrayList<CqfmSoftwareSystem>() {
+                        {
+                            add(testTargetSoftwareSystem);
+                        }
+                    };
+
+                    if ((fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) || (fhirContext.getVersion().getVersion() == FhirVersionEnum.R4)) {
+                        if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
+                            // Stamp the testContentBundle artifacts
+                            BundleUtils.stampDstu3BundleEntriesWithSoftwareSystems((org.hl7.fhir.dstu3.model.Bundle)testArtifactContentBundleMap.getValue(), softwareSystems, fhirContext, getRootDir());
+                        } else if (fhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
+                            BundleUtils.stampR4BundleEntriesWithSoftwareSystems((org.hl7.fhir.r4.model.Bundle)testArtifactContentBundleMap.getValue(), softwareSystems, fhirContext, getRootDir());
+                        }
+
+                        String bundleFilePath = testArtifactContentBundleMap.getKey();
+                        IBaseResource bundle = testArtifactContentBundleMap.getValue();
+                        IOUtils.writeResource(bundle, bundleFilePath, IOUtils.getEncoding(bundleFilePath), fhirContext);
+                    }
+                }
             }
 
             System.out.println(String.format("Done processing %s test cases", group.getName()));
@@ -161,13 +278,13 @@ public class IGTestProcessor extends BaseProcessor {
         System.out.println(String.format("%d tests passed", passedTests.size()));
     }
 
-    private IBaseResource GetContentBundleForTestArtifact(String groupName, String testArtifactName) {
-        IBaseResource testArtifactContentBundle = null;
+    private Map.Entry<String, IBaseResource> getContentBundleForTestArtifact(String groupName, String testArtifactName) {
+        Map.Entry<String, IBaseResource> testArtifactContentBundle = null;
 
-        String contentBundlePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(getRootDir(), IGProcessor.bundlePathElement), groupName), testArtifactName);
+        String contentBundlePath = getPathForContentBundleTestArtifact(groupName, testArtifactName);
         File testArtifactContentBundleDirectory = new File(contentBundlePath);
         if (testArtifactContentBundleDirectory != null && testArtifactContentBundleDirectory.exists()) {
-            List<IBaseResource> testArtifactContentBundles = BundleUtils.GetBundlesInDir(contentBundlePath, fhirContext, false);
+            List<Map.Entry<String, IBaseResource>> testArtifactContentBundles = BundleUtils.GetBundlesInDir(contentBundlePath, fhirContext, false);
 
             // NOTE: Making the assumption that there will be a single bundle for the artifact.
             testArtifactContentBundle = testArtifactContentBundles.get(0);
@@ -176,7 +293,7 @@ public class IGTestProcessor extends BaseProcessor {
         return testArtifactContentBundle;
     }
 
-    private String GetPathForContentBundleTestArtifact(String groupName, String testArtifactName) {
+    private String getPathForContentBundleTestArtifact(String groupName, String testArtifactName) {
         String contentBundlePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(getRootDir(), IGProcessor.bundlePathElement), groupName), testArtifactName);
         return contentBundlePath;
     }

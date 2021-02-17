@@ -47,7 +47,7 @@ import org.hl7.fhir.r5.model.DataRequirement;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.ParameterDefinition;
 import org.hl7.fhir.r5.model.RelatedArtifact;
-import org.hl7.fhir.utilities.cache.NpmPackage;
+import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
@@ -141,6 +141,7 @@ public class CqlProcessor {
      * Libraries that don't specify a namespace will be built in this namespace
      * Libraries can specify a namespace, but must use this name to do it
      */
+    @SuppressWarnings("unused")
     private String packageId;
 
     /**
@@ -148,6 +149,7 @@ public class CqlProcessor {
      * Libraries translated in this IG will have this namespaceUri as their system
      * Library resources published in this IG will then have URLs of [canonicalBase]/Library/[libraryName]
      */
+    @SuppressWarnings("unused")
     private String canonicalBase;
 
     private NamespaceInfo namespaceInfo;
@@ -167,7 +169,7 @@ public class CqlProcessor {
     }
 
     /**
-     * Do the compile. Do not return any exceptions related to content; only thros exceptions for infrastructural issues
+     * Do the compile. Do not return any exceptions related to content; only throw exceptions for infrastructural issues
      *
      * note that it's not an error if there's no .cql files - this is called without checking for their existence
      *
@@ -346,37 +348,45 @@ public class CqlProcessor {
                 result.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, IssueType.EXCEPTION, file.getName(),
                         String.format("CQL Processing failed with (%d) errors.", translator.getErrors().size()), IssueSeverity.ERROR));
                 logger.logMessage(String.format("Translation failed with (%d) errors; see the error log for more information.", translator.getErrors().size()));
+
+                for (CqlTranslatorException error : translator.getErrors()) {
+                    logger.logMessage(String.format("Error: %s", error.getMessage()));
+                }
             }
             else {
-                // convert to base64 bytes
-                // NOTE: Publication tooling requires XML content
-                result.setElm(translator.toXml().getBytes());
-                result.setIdentifier(translator.toELM().getIdentifier());
-                if (options.getFormats().contains(CqlTranslator.Format.JSON)) {
-                    result.setJsonElm(translator.toJson().getBytes());
+                try {
+                    // convert to base64 bytes
+                    // NOTE: Publication tooling requires XML content
+                    result.setElm(translator.toXml().getBytes());
+                    result.setIdentifier(translator.toELM().getIdentifier());
+                    if (options.getFormats().contains(CqlTranslator.Format.JSON)) {
+                        result.setJsonElm(translator.toJson().getBytes());
+                    }
+                    if (options.getFormats().contains(CqlTranslator.Format.JXSON)) {
+                        result.setJsonElm(translator.toJxson().getBytes());
+                    }
+
+                    // TODO: Report context, requires 1.5 translator (ContextDef)
+                    // NOTE: In STU3, only Patient context is supported
+
+                    // Extract relatedArtifact data (models, libraries, code systems, and value sets)
+                    result.relatedArtifacts.addAll(extractRelatedArtifacts(translator.toELM()));
+
+                    // Extract parameter data and validate result types are supported types
+                    List<ValidationMessage> paramMessages = new ArrayList<>();
+                    result.parameters.addAll(extractParameters(translator.toELM(), paramMessages));
+                    for (ValidationMessage paramMessage : paramMessages) {
+                        result.getErrors().add(new ValidationMessage(paramMessage.getSource(), paramMessage.getType(), file.getName(),
+                                paramMessage.getMessage(), paramMessage.getLevel()));
+                    }
+
+                    // Extract dataRequirement data
+                    result.dataRequirements.addAll(extractDataRequirements(translator.toRetrieves(), translator.getTranslatedLibrary(), libraryManager));
+
+                    logger.logMessage("CQL translation completed successfully.");
+                } catch (Exception ex) {
+                    logger.logMessage(String.format("CQL Translation succeeded for file: '%s', but ELM generation failed with the following error: %s", file.getAbsolutePath(), ex.getMessage()));
                 }
-                if (options.getFormats().contains(CqlTranslator.Format.JXSON)) {
-                    result.setJsonElm(translator.toJxson().getBytes());
-                }
-
-                // TODO: Report context, requires 1.5 translator (ContextDef)
-                // NOTE: In STU3, only Patient context is supported
-
-                // Extract relatedArtifact data (models, libraries, code systems, and value sets)
-                result.relatedArtifacts.addAll(extractRelatedArtifacts(translator.toELM()));
-
-                // Extract parameter data and validate result types are supported types
-                List<ValidationMessage> paramMessages = new ArrayList<>();
-                result.parameters.addAll(extractParameters(translator.toELM(), paramMessages));
-                for (ValidationMessage paramMessage : paramMessages) {
-                    result.getErrors().add(new ValidationMessage(paramMessage.getSource(), paramMessage.getType(), file.getName(),
-                            paramMessage.getMessage(), paramMessage.getLevel()));
-                }
-
-                // Extract dataRequirement data
-                result.dataRequirements.addAll(extractDataRequirements(translator.toRetrieves(), translator.getTranslatedLibrary(), libraryManager));
-
-                logger.logMessage("CQL translation completed successfully.");
             }
         }
         catch (Exception e) {

@@ -33,6 +33,7 @@ public class RefreshIGArgumentProcessor {
     public static final String[] MEASURE_TO_REFRESH_PATH = {"mtrp", "measure-to-refresh-path"};
     public static final String[] RESOURCE_PATH_OPTIONS = {"rp", "resourcepath"};
 
+    @SuppressWarnings("unused")
     public OptionParser build() {
         OptionParser parser = new OptionParser();
 
@@ -44,7 +45,7 @@ public class RefreshIGArgumentProcessor {
         OptionSpecBuilder fhirUriBuilder = parser.acceptsAll(asList(FHIR_URI_OPTIONS),"If omitted the final bundle will not be loaded to a FHIR server.");
         OptionSpecBuilder measureToRefreshPathBuilder = parser.acceptsAll(asList(MEASURE_TO_REFRESH_PATH), "Path to Measure to refresh.");
 
-        OptionSpec<String> ini = iniBuilder.withOptionalArg().describedAs("Path to the IG ini file");
+        OptionSpec<String> ini = iniBuilder.withRequiredArg().describedAs("Path to the IG ini file");
         OptionSpec<String> rootDir = rootDirBuilder.withOptionalArg().describedAs("Root directory of the IG");
         OptionSpec<String> igPath = igPathBuilder.withRequiredArg().describedAs("Path to the IG, relative to the root directory");
         OptionSpec<String> resourcePath = resourcePathBuilder.withOptionalArg().describedAs("directory of resources");
@@ -74,7 +75,6 @@ public class RefreshIGArgumentProcessor {
         ArgUtils.ensure(OPERATION_OPTIONS[0], options);
 
         String ini = (String)options.valueOf(INI_OPTIONS[0]);
-
         String rootDir = (String)options.valueOf(ROOT_DIR_OPTIONS[0]);
         String igPath = (String)options.valueOf(IG_PATH_OPTIONS[0]);
 

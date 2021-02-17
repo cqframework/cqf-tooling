@@ -2,7 +2,6 @@ package org.opencds.cqf.tooling.measure.comparer;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.fhir.Decimal;
 import org.hl7.fhir.Parameters;
 import org.hl7.fhir.ParametersParameter;
 import org.hl7.fhir.dstu3.model.MeasureReport;
@@ -13,7 +12,6 @@ import org.opencds.cqf.tooling.measure.adapters.IMeasureReportAdapter;
 import org.opencds.cqf.tooling.measure.adapters.R4MeasureReportAdapter;
 import org.opencds.cqf.tooling.utilities.FhirContextCache;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.ArrayList;
 

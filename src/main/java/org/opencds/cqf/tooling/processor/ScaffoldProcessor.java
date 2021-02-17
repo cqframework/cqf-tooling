@@ -1,17 +1,16 @@
 package org.opencds.cqf.tooling.processor;
 
-import ca.uhn.fhir.context.FhirContext;
-import org.opencds.cqf.tooling.Operation;
-import org.opencds.cqf.tooling.common.BaseCqfmSoftwareSystemHelper;
-import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
-import org.opencds.cqf.tooling.parameter.ScaffoldParameters;
-import org.opencds.cqf.tooling.utilities.LogUtils;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
-import org.opencds.cqf.tooling.utilities.*;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+
+import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
+import org.opencds.cqf.tooling.parameter.ScaffoldParameters;
+import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.LogUtils;
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class ScaffoldProcessor extends BaseProcessor {
     private static String LibraryPath = "/input/resources/library";
@@ -38,8 +37,10 @@ public class ScaffoldProcessor extends BaseProcessor {
                 switch (resourceType.toLowerCase()) {
                     case "library":
                         createLibrary(resourceName);
+                        break;
                     case "measure":
                         createMeasure(resourceName);
+                        break;
                     default:
 
                 }

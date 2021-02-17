@@ -21,18 +21,18 @@ import org.opencds.cqf.tooling.Operation;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends BaseNarrativeProvider> extends Operation {
+public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends BaseNarrativeProvider<?>> extends Operation {
 
     private T narrativeProvider;
     private FhirContext fhirContext;
 
     private String operationName;
     private String encoding = "json";
-    private File cqlContentDir;
+    // private File cqlContentDir;
     private File[] cqlFiles;
 
     private String pathToCQLContent;
-    private String pathToCqlContentDir;
+    // private String pathToCqlContentDir;
     private ModelManager modelManager;
     private LibraryManager libraryManager;
     private LibrarySourceProvider sourceProvider;
@@ -217,6 +217,7 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
     }
 
     // TODO: This should be pulled from the ELM, not the CQL directly, why are we doing this this way?
+    @SuppressWarnings("unused")
     private ArrayList<String> getIncludedLibraries(String cql) {
         int includeDefinitionIndex = cql.indexOf("include");
         int index = 0;
@@ -236,6 +237,8 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
 
         return relatedArtifacts;
     }
+
+    @SuppressWarnings("unused")
     private String getIdFromSource(String cql) {
         if (cql.startsWith("library")) {
             return getNameFromSource(cql);
@@ -248,6 +251,7 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
         return cql.replaceFirst("library ", "").split(" version")[0].replaceAll("\"", "");
     }
 
+    @SuppressWarnings("unused")
     private String getVersionFromSource(String cql) {
         return cql.split("version")[1].split("'")[1];
     }

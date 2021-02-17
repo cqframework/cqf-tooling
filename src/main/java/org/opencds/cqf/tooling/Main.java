@@ -106,6 +106,14 @@ package org.opencds.cqf.tooling;
             - Example: mvn exec:java -Dexec.args="-BundleToResources /Users/christopherschuler/Documents/workspace/Bundles/bundle-1.json json /Users/christopherschuler/Documents/workspace/resources"
             - This tooling decomposes a Bundle entry into separate resource files
             - Accepts Bundles with .json or .xml extensions
+            
+        - MAT Bundle extraction
+        	- mvn exec:java -Dexec.args="[-ExtractMatBundle] [Bundle file path] (-v)
+        	- Example: mvn exec:java -Dexec.args="-ExtractMatBundle /Users/mholck/Development/ecqm-content-r4/bundles/mat/EXM124/EXM124.json -v=r4"
+        	- This tooling extracts out the resources and CQL from a MAT export bundle and puts them in the appropriate directories
+        	- Accepts Bundles with .json or .xml extensions
+        	- version = FHIR version { stu3, r4 }
+                Default version: r4
 
         - Generate StructureDefinitions from ModelInfo
             - command: mvn exec:java -Dexec.args="[-GenerateSDs] [path to modelinfo xml] (-outputpath | -op) (-encoding | -e)"

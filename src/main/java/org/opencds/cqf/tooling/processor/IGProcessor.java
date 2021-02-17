@@ -1,13 +1,13 @@
 package org.opencds.cqf.tooling.processor;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
+import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
-import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.LogUtils;
@@ -18,10 +18,10 @@ public class IGProcessor extends BaseProcessor {
     //mega ig method
     public void publishIG(RefreshIGParameters params) {
         if (params.ini != null) {
-            initialize(params.ini);
+            initializeFromIni(params.ini);
         }
         else {
-            initialize(params.rootDir, params.igPath);
+            initializeFromIg(params.rootDir, params.igPath, null);
         }
 
         Encoding encoding = params.outputEncoding;
@@ -32,12 +32,21 @@ public class IGProcessor extends BaseProcessor {
         Boolean versioned = params.versioned;
         Boolean cdsHooksIg = params.cdsHooksIg;
         String fhirUri = params.fhirUri;
-        String measureToRefreshPath = params.measureToRefreshPath;
-        ArrayList<String> resourceDirs = params.resourceDirs;
+        // String measureToRefreshPath = params.measureToRefreshPath;
+        ArrayList<String> resourceDirs = new ArrayList<String>();
+        for (String resourceDir : params.resourceDirs) {
+            if (!Utilities.isAbsoluteFileName(resourceDir)) {
+                try {
+                    resourceDirs.add(Utilities.path(rootDir, resourceDir));
+                } catch (IOException e) {
+                    LogUtils.putException("ig", e);
+                }
+            }
+        }
 
         IOUtils.resourceDirectories.addAll(resourceDirs);
 
-        FhirContext fhirContext = IGProcessor.getIgFhirContext(fhirVersion);
+        FhirContext fhirContext = IGProcessor.getIgFhirContext(this.getFhirVersion());
 
         //Use case 1
         //Scaffold basic templating for the type of content, Measure, PlanDefinition, or Questionnaire
@@ -66,19 +75,24 @@ public class IGProcessor extends BaseProcessor {
     public ArrayList<String> refreshedResourcesNames = new ArrayList<String>();
     public void refreshIG(RefreshIGParameters params) {
         if (params.ini != null) {
-            initialize(params.ini);
+            initializeFromIni(params.ini);
         }
         else {
-            initialize(params.rootDir, params.igPath);
+            try {
+                initializeFromIg(params.rootDir, params.igPath, null);
+            }
+            catch (Exception e) {
+                logMessage(String.format("Error Refreshing for File "+ params.igPath+": "+e.getMessage(), e));
+            }
         }
 
         Encoding encoding = params.outputEncoding;
-        Boolean includeELM = params.includeELM;
-        Boolean includeDependencies = params.includeDependencies;
+        // Boolean includeELM = params.includeELM;
+        // Boolean includeDependencies = params.includeDependencies;
         Boolean includeTerminology = params.includeTerminology;
         Boolean includePatientScenarios = params.includePatientScenarios;
         Boolean versioned = params.versioned;
-        String fhirUri = params.fhirUri;
+        // String fhirUri = params.fhirUri;
         String measureToRefreshPath = params.measureToRefreshPath;
         ArrayList<String> resourceDirs = params.resourceDirs;
 
@@ -163,7 +177,7 @@ public class IGProcessor extends BaseProcessor {
         }
         checkForDirectory(igPath, IGProcessor.devicePathElement);
 
-        HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
+        // HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
     }
 
     private static void ensureDirectory(String igPath, String pathElement) {

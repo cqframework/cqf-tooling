@@ -1,29 +1,26 @@
 package org.opencds.cqf.tooling.measure.adapters;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 
-import java.util.List;
-
 public class CqlEvaluatorMeasureTestAdapter extends MeasureTestAdapter {
 
-    private String contentPath;
-    private IBaseResource contentBundle;
+    // private String contentPath;
+    // private IBaseResource contentBundle;
 
     /// This guy will eventually run the the cql-evaluator to get the results...
     public CqlEvaluatorMeasureTestAdapter(FhirContext fhirContext, IBaseResource testBundle, IBaseResource contentBundle) {
         super(fhirContext, testBundle);
 
-        this.contentBundle = contentBundle;
+        // this.contentBundle = contentBundle;
     }
 
     public CqlEvaluatorMeasureTestAdapter(FhirContext fhirContext, String testPath, String contentPath) {
         super(fhirContext, testPath);
 
-        this.contentPath = contentPath;
+        // this.contentPath = contentPath;
     }
 
     @Override

@@ -1,6 +1,5 @@
 package org.opencds.cqf.tooling.measure.adapters;
 
-import ca.uhn.fhir.parser.IParser;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;

@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling.utilities;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,6 +34,8 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+
+import static org.opencds.cqf.tooling.utilities.CanonicalUtils.getTail;
 
 public class ResourceUtils 
 {
@@ -96,7 +100,7 @@ public class ResourceUtils
         case R4:
           return FhirContext.forR4();
         default:
-          throw new IllegalArgumentException("Unknown FHIR version: " + fhirVersion);
+          throw new IllegalArgumentException("Unsupported FHIR version: " + fhirVersion);
       }
     }
 
@@ -105,7 +109,7 @@ public class ResourceUtils
       if (!(mainLibrary instanceof org.hl7.fhir.dstu3.model.Library)) {
         throw new IllegalArgumentException("pathToLibrary must be a path to a Library type Resource");
       }
-      return ((org.hl7.fhir.dstu3.model.Library)mainLibrary).getRelatedArtifact();   
+      return ((org.hl7.fhir.dstu3.model.Library)mainLibrary).getRelatedArtifact();
     }
 
     private static List<org.hl7.fhir.r4.model.RelatedArtifact> getR4RelatedArtifacts(String pathToLibrary, FhirContext fhirContext) {
@@ -113,42 +117,49 @@ public class ResourceUtils
       if (!(mainLibrary instanceof org.hl7.fhir.r4.model.Library)) {
         throw new IllegalArgumentException("pathToLibrary must be a path to a Library type Resource");
       }
-      return ((org.hl7.fhir.r4.model.Library)mainLibrary).getRelatedArtifact();   
-    }    
+      return ((org.hl7.fhir.r4.model.Library)mainLibrary).getRelatedArtifact();
+    }
 
-    public static Map<String, IBaseResource> getDepLibraryResources(String path, FhirContext fhirContext, Encoding encoding) {      
+    public static Map<String, IBaseResource> getDepLibraryResources(String path, FhirContext fhirContext, Encoding encoding, Boolean versioned) {
       Map<String, IBaseResource> dependencyLibraries = new HashMap<String, IBaseResource>();
       switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:
-            return getStu3DepLibraryResources(path, dependencyLibraries, fhirContext, encoding);
+            return getStu3DepLibraryResources(path, dependencyLibraries, fhirContext, encoding, versioned);
         case R4:
-            return getR4DepLibraryResources(path, dependencyLibraries, fhirContext, encoding);
+            return getR4DepLibraryResources(path, dependencyLibraries, fhirContext, encoding, versioned);
         default:
-            throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+            throw new IllegalArgumentException("Unsupported fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
       }
     }
 
-    public static List<String> getDepLibraryPaths(String path, FhirContext fhirContext, Encoding encoding) {
+    public static List<String> getDepLibraryPaths(String path, FhirContext fhirContext, Encoding encoding, Boolean versioned) {
       switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:
-            return getStu3DepLibraryPaths(path, fhirContext, encoding);
+            return getStu3DepLibraryPaths(path, fhirContext, encoding, versioned);
         case R4:
-            return getR4DepLibraryPaths(path, fhirContext, encoding);
+            return getR4DepLibraryPaths(path, fhirContext, encoding,versioned);
         default:
-            throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+            throw new IllegalArgumentException("Unsupported fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
       }
     }
 
-    private static List<String> getStu3DepLibraryPaths(String path, FhirContext fhirContext, Encoding encoding) {
+    private static List<String> getStu3DepLibraryPaths(String path, FhirContext fhirContext, Encoding encoding, Boolean versioned) {
       List<String> paths = new ArrayList<String>();
       String directoryPath = FilenameUtils.getFullPath(path);
       List<org.hl7.fhir.dstu3.model.RelatedArtifact> relatedArtifacts = getStu3RelatedArtifacts(path, fhirContext);
       for (org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
         if (relatedArtifact.getType() == org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.DEPENDSON) {
             if (relatedArtifact.getResource().getReference().contains("Library/")) {
-                String dependencyLibraryName = IOUtils.formatFileName(relatedArtifact.getResource().getReference().split("Library/")[1], encoding, fhirContext);
+                String dependencyLibraryName;
+                // Issue 96 - Do not include version number in the filename
+                if (versioned) {
+              	  dependencyLibraryName = IOUtils.formatFileName(relatedArtifact.getResource().getReference().split("Library/")[1].replaceAll("\\|", "-"), encoding, fhirContext);
+                } else {
+              	  String name = relatedArtifact.getResource().getReference().split("Library/")[1];
+              	  dependencyLibraryName = IOUtils.formatFileName(name.split("\\|")[0], encoding, fhirContext);
+                }
                 String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
-                IOUtils.putAllInListIfAbsent(getStu3DepLibraryPaths(dependencyLibraryPath, fhirContext, encoding), paths);
+                IOUtils.putAllInListIfAbsent(getStu3DepLibraryPaths(dependencyLibraryPath, fhirContext, encoding, versioned), paths);
                 IOUtils.putInListIfAbsent(dependencyLibraryPath, paths);
             }
         }
@@ -156,8 +167,8 @@ public class ResourceUtils
       return paths;
     }
 
-    private static Map<String, IBaseResource> getStu3DepLibraryResources(String path, Map<String, IBaseResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding) {      
-      List<String> dependencyLibraryPaths = getStu3DepLibraryPaths(path, fhirContext, encoding);
+    private static Map<String, IBaseResource> getStu3DepLibraryResources(String path, Map<String, IBaseResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding, Boolean versioned) {
+      List<String> dependencyLibraryPaths = getStu3DepLibraryPaths(path, fhirContext, encoding, versioned);
       for (String dependencyLibraryPath : dependencyLibraryPaths) {
         Object resource = IOUtils.readResource(dependencyLibraryPath, fhirContext);
         if (resource instanceof org.hl7.fhir.dstu3.model.Library) {
@@ -169,14 +180,21 @@ public class ResourceUtils
     }
 
     // if | exists there is a version
-    private static List<String> getR4DepLibraryPaths(String path, FhirContext fhirContext, Encoding encoding) {
+    private static List<String> getR4DepLibraryPaths(String path, FhirContext fhirContext, Encoding encoding, Boolean versioned) {
       List<String> paths = new ArrayList<String>();
       String directoryPath = FilenameUtils.getFullPath(path);
       List<org.hl7.fhir.r4.model.RelatedArtifact> relatedArtifacts = getR4RelatedArtifacts(path, fhirContext);
       for (org.hl7.fhir.r4.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
           if (relatedArtifact.getType() == org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.DEPENDSON) {
               if (relatedArtifact.getResource().contains("Library/")) {
-                  String dependencyLibraryName = IOUtils.formatFileName(relatedArtifact.getResource().split("Library/")[1].replaceAll("\\|", "-"), encoding, fhirContext);
+            	  String dependencyLibraryName;
+                  // Issue 96 - Do not include version number in the filename
+                  if (versioned) {
+                	  dependencyLibraryName = IOUtils.formatFileName(relatedArtifact.getResource().split("Library/")[1].replaceAll("\\|", "-"), encoding, fhirContext);
+                  } else {
+                	  String name = relatedArtifact.getResource().split("Library/")[1];
+                	  dependencyLibraryName = IOUtils.formatFileName(name.split("\\|")[0], encoding, fhirContext);
+                  }
                   String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
                   IOUtils.putInListIfAbsent(dependencyLibraryPath, paths);
               }
@@ -185,8 +203,8 @@ public class ResourceUtils
       return paths;
     }
 
-    private static Map<String, IBaseResource> getR4DepLibraryResources(String path, Map<String, IBaseResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding) {      
-      List<String> dependencyLibraryPaths = getR4DepLibraryPaths(path, fhirContext, encoding);
+    private static Map<String, IBaseResource> getR4DepLibraryResources(String path, Map<String, IBaseResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding, Boolean versioned) {      
+      List<String> dependencyLibraryPaths = getR4DepLibraryPaths(path, fhirContext, encoding, versioned);
       for (String dependencyLibraryPath : dependencyLibraryPaths) {
         Object resource = IOUtils.readResource(dependencyLibraryPath, fhirContext);
         if (resource instanceof org.hl7.fhir.r4.model.Library) {
@@ -196,10 +214,62 @@ public class ResourceUtils
       }
       return dependencyLibraries;
     }
-    
+
+    public static List<String> getStu3TerminologyDependencies(List<org.hl7.fhir.dstu3.model.RelatedArtifact> relatedArtifacts) {
+        List<String> urls = new ArrayList<String>();
+        for (org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
+            if (relatedArtifact.hasType() && relatedArtifact.getType() == org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.DEPENDSON) {
+                if (relatedArtifact.hasResource() && relatedArtifact.getResource().hasReference()
+                        && (relatedArtifact.getResource().getReference().contains("CodeSystem/") || relatedArtifact.getResource().getReference().contains("ValueSet/"))) {
+                    urls.add(relatedArtifact.getResource().getReference());
+                }
+            }
+        }
+        return urls;
+    }
+
+    public static List<String> getR4TerminologyDependencies(List<org.hl7.fhir.r4.model.RelatedArtifact> relatedArtifacts) {
+        List<String> urls = new ArrayList<String>();
+        for (org.hl7.fhir.r4.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
+            if (relatedArtifact.hasType() && relatedArtifact.getType() == org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.DEPENDSON) {
+                if (relatedArtifact.hasResource() && (relatedArtifact.getResource().contains("CodeSystem/") || relatedArtifact.getResource().contains("ValueSet/"))) {
+                    urls.add(relatedArtifact.getResource());
+                }
+            }
+        }
+        return urls;
+    }
+
+    public static List<String> getTerminologyDependencies(IBaseResource resource, FhirContext fhirContext) throws Exception {
+        switch (fhirContext.getVersion().getVersion()) {
+            case DSTU3:
+                switch (resource.fhirType()) {
+                    case "Library": {
+                        return getStu3TerminologyDependencies(((org.hl7.fhir.dstu3.model.Library)resource).getRelatedArtifact());
+                    }
+                    case "Measure": {
+                        return getStu3TerminologyDependencies(((org.hl7.fhir.dstu3.model.Measure)resource).getRelatedArtifact());
+                    }
+                    default: throw new IllegalArgumentException(String.format("Could not retrieve relatedArtifacts from %s", resource.fhirType()));
+                }
+            case R4:
+                switch (resource.fhirType()) {
+                    case "Library": {
+                        return getR4TerminologyDependencies(((org.hl7.fhir.r4.model.Library)resource).getRelatedArtifact());
+                    }
+                    case "Measure": {
+                        return getR4TerminologyDependencies(((org.hl7.fhir.r4.model.Measure)resource).getRelatedArtifact());
+                    }
+                    default: throw new IllegalArgumentException(String.format("Could not retrieve relatedArtifacts from %s", resource.fhirType()));
+                }
+            default:
+                throw new IllegalArgumentException("Unsupported fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+        }
+    }
+
     public static Map<String, IBaseResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext, boolean includeDependencies, Boolean includeVersion) throws Exception {
       Map<String, IBaseResource> valueSetResources = new HashMap<String, IBaseResource>();
-      List<String> valueSetDefIDs = getDepELMValueSetDefIDs(cqlContentPath);
+        List<String> valueSetDefIDs = getDepELMValueSetDefIDs(cqlContentPath);
       HashSet<String> dependencies = new HashSet<>();
         
       for (String valueSetUrl : valueSetDefIDs) {
@@ -209,15 +279,15 @@ public class ResourceUtils
       }
       dependencies.addAll(valueSetDefIDs);
 
-      if(includeDependencies) {
-        List<String> dependencyCqlPaths = IOUtils.getDependencyCqlPaths(cqlContentPath, includeVersion);
-        for (String path : dependencyCqlPaths) {
-          Map<String, IBaseResource> dependencyValueSets = getDepValueSetResources(path, igPath, fhirContext, includeDependencies, includeVersion);
-          dependencies.addAll(dependencyValueSets.keySet());
-          for (Entry<String, IBaseResource> entry : dependencyValueSets.entrySet()) {
-            valueSetResources.putIfAbsent(entry.getKey(), entry.getValue());
-          }
-        }
+      if (includeDependencies) {
+         List<String> dependencyCqlPaths = IOUtils.getDependencyCqlPaths(cqlContentPath, includeVersion);
+         for (String path : dependencyCqlPaths) {
+            Map<String, IBaseResource> dependencyValueSets = getDepValueSetResources(path, igPath, fhirContext, includeDependencies, includeVersion);
+            dependencies.addAll(dependencyValueSets.keySet());
+            for (Entry<String, IBaseResource> entry : dependencyValueSets.entrySet()) {
+              valueSetResources.putIfAbsent(entry.getKey(), entry.getValue());
+            }
+         }
       }
 
       if (dependencies.size() != valueSetResources.size()) {
@@ -257,7 +327,7 @@ public class ResourceUtils
       try {
         elm = getElmFromCql(cqlContentPath);
       } catch (Exception e) {
-        System.out.println("error proccessing cql: ");
+        System.out.println("error processing cql: ");
         System.out.println(e.getMessage());
         return includedDefs;
       }
@@ -323,6 +393,170 @@ public class ResourceUtils
       return added;
   }
 
+  public static String getUrl(IBaseResource resource, FhirContext fhirContext) {
+      switch (fhirContext.getVersion().getVersion()) {
+          case DSTU3: {
+              if (resource instanceof org.hl7.fhir.dstu3.model.Measure) {
+                  return ((org.hl7.fhir.dstu3.model.Measure)resource).getUrl();
+              }
+              if (resource instanceof org.hl7.fhir.dstu3.model.Library) {
+                  return ((org.hl7.fhir.dstu3.model.Library)resource).getUrl();
+              }
+              if (resource instanceof org.hl7.fhir.dstu3.model.PlanDefinition) {
+                  return ((org.hl7.fhir.dstu3.model.PlanDefinition)resource).getUrl();
+              }
+              if (resource instanceof org.hl7.fhir.dstu3.model.CodeSystem) {
+                  return ((org.hl7.fhir.dstu3.model.CodeSystem)resource).getUrl();
+              }
+              if (resource instanceof org.hl7.fhir.dstu3.model.ValueSet) {
+                  return ((org.hl7.fhir.dstu3.model.ValueSet)resource).getUrl();
+              }
+              if (resource instanceof org.hl7.fhir.dstu3.model.ActivityDefinition) {
+                  return ((org.hl7.fhir.dstu3.model.ActivityDefinition)resource).getUrl();
+              }
+              if (resource instanceof org.hl7.fhir.dstu3.model.StructureDefinition) {
+                  return ((org.hl7.fhir.dstu3.model.StructureDefinition)resource).getUrl();
+              }
+              if (resource instanceof org.hl7.fhir.dstu3.model.GraphDefinition) {
+                  return ((org.hl7.fhir.dstu3.model.GraphDefinition)resource).getUrl();
+              }
+              throw new IllegalArgumentException(String.format("Could not retrieve url for resource type %s", resource.fhirType()));
+          }
+          case R4: {
+              if (resource instanceof org.hl7.fhir.r4.model.Measure) {
+                  return ((org.hl7.fhir.r4.model.Measure)resource).getUrl();
+              }
+              if (resource instanceof org.hl7.fhir.r4.model.Library) {
+                  return ((org.hl7.fhir.r4.model.Library)resource).getUrl();
+              }
+              if (resource instanceof org.hl7.fhir.r4.model.PlanDefinition) {
+                  return ((org.hl7.fhir.r4.model.PlanDefinition)resource).getUrl();
+              }
+              if (resource instanceof org.hl7.fhir.r4.model.CodeSystem) {
+                  return ((org.hl7.fhir.r4.model.CodeSystem)resource).getUrl();
+              }
+              if (resource instanceof org.hl7.fhir.r4.model.ValueSet) {
+                  return ((org.hl7.fhir.r4.model.ValueSet)resource).getUrl();
+              }
+              if (resource instanceof org.hl7.fhir.r4.model.ActivityDefinition) {
+                  return ((org.hl7.fhir.r4.model.ActivityDefinition)resource).getUrl();
+              }
+              if (resource instanceof org.hl7.fhir.r4.model.StructureDefinition) {
+                  return ((org.hl7.fhir.r4.model.StructureDefinition)resource).getUrl();
+              }
+              if (resource instanceof org.hl7.fhir.r4.model.GraphDefinition) {
+                  return ((org.hl7.fhir.r4.model.GraphDefinition)resource).getUrl();
+              }
+              throw new IllegalArgumentException(String.format("Could not retrieve url for resource type %s", resource.fhirType()));
+          }
+          default:
+              throw new IllegalArgumentException("Unsupported fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+      }
+  }
+
+    public static String getName(IBaseResource resource, FhirContext fhirContext) {
+        switch (fhirContext.getVersion().getVersion()) {
+            case DSTU3: {
+                if (resource instanceof org.hl7.fhir.dstu3.model.Measure) {
+                    return ((org.hl7.fhir.dstu3.model.Measure)resource).getName();
+                }
+                if (resource instanceof org.hl7.fhir.dstu3.model.Library) {
+                    return ((org.hl7.fhir.dstu3.model.Library)resource).getName();
+                }
+                if (resource instanceof org.hl7.fhir.dstu3.model.PlanDefinition) {
+                    return ((org.hl7.fhir.dstu3.model.PlanDefinition)resource).getName();
+                }
+                if (resource instanceof org.hl7.fhir.dstu3.model.CodeSystem) {
+                    return ((org.hl7.fhir.dstu3.model.CodeSystem)resource).getName();
+                }
+                if (resource instanceof org.hl7.fhir.dstu3.model.ValueSet) {
+                    return ((org.hl7.fhir.dstu3.model.ValueSet)resource).getName();
+                }
+                if (resource instanceof org.hl7.fhir.dstu3.model.ActivityDefinition) {
+                    return ((org.hl7.fhir.dstu3.model.ActivityDefinition)resource).getName();
+                }
+                if (resource instanceof org.hl7.fhir.dstu3.model.StructureDefinition) {
+                    return ((org.hl7.fhir.dstu3.model.StructureDefinition)resource).getName();
+                }
+                if (resource instanceof org.hl7.fhir.dstu3.model.GraphDefinition) {
+                    return ((org.hl7.fhir.dstu3.model.GraphDefinition)resource).getName();
+                }
+                throw new IllegalArgumentException(String.format("Could not retrieve name for resource type %s", resource.fhirType()));
+            }
+            case R4: {
+                if (resource instanceof org.hl7.fhir.r4.model.Measure) {
+                    return ((org.hl7.fhir.r4.model.Measure)resource).getName();
+                }
+                if (resource instanceof org.hl7.fhir.r4.model.Library) {
+                    return ((org.hl7.fhir.r4.model.Library)resource).getName();
+                }
+                if (resource instanceof org.hl7.fhir.r4.model.PlanDefinition) {
+                    return ((org.hl7.fhir.r4.model.PlanDefinition)resource).getName();
+                }
+                if (resource instanceof org.hl7.fhir.r4.model.CodeSystem) {
+                    return ((org.hl7.fhir.r4.model.CodeSystem)resource).getName();
+                }
+                if (resource instanceof org.hl7.fhir.r4.model.ValueSet) {
+                    return ((org.hl7.fhir.r4.model.ValueSet)resource).getName();
+                }
+                if (resource instanceof org.hl7.fhir.r4.model.ActivityDefinition) {
+                    return ((org.hl7.fhir.r4.model.ActivityDefinition)resource).getName();
+                }
+                if (resource instanceof org.hl7.fhir.r4.model.StructureDefinition) {
+                    return ((org.hl7.fhir.r4.model.StructureDefinition)resource).getName();
+                }
+                if (resource instanceof org.hl7.fhir.r4.model.GraphDefinition) {
+                    return ((org.hl7.fhir.r4.model.GraphDefinition)resource).getName();
+                }
+                throw new IllegalArgumentException(String.format("Could not retrieve name for resource type %s", resource.fhirType()));
+            }
+            default:
+                throw new IllegalArgumentException("Unsupported fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+        }
+    }
+
+    public static String getPrimaryLibraryUrl(IBaseResource resource, FhirContext fhirContext) {
+      switch (fhirContext.getVersion().getVersion()) {
+          case DSTU3: {
+              org.hl7.fhir.dstu3.model.Measure measure = (org.hl7.fhir.dstu3.model.Measure)resource;
+              if (!measure.hasLibrary() || measure.getLibrary().size() != 1) {
+                  throw new IllegalArgumentException("Measure is expected to have one and only one library");
+              }
+              return measure.getLibrary().get(0).getReference();
+          }
+          case R4: {
+              org.hl7.fhir.r4.model.Measure measure = (org.hl7.fhir.r4.model.Measure)resource;
+              if (!measure.hasLibrary() || measure.getLibrary().size() != 1) {
+                  throw new IllegalArgumentException("Measure is expected to have one and only one library");
+              }
+              return measure.getLibrary().get(0).getValue();
+          }
+          default:
+              throw new IllegalArgumentException("Unsupported fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+      }
+  }
+
+  public static String getPrimaryLibraryName(IBaseResource resource, FhirContext fhirContext) {
+        switch (fhirContext.getVersion().getVersion()) {
+            case DSTU3: {
+                org.hl7.fhir.dstu3.model.Measure measure = (org.hl7.fhir.dstu3.model.Measure)resource;
+                if (!measure.hasLibrary() || measure.getLibrary().size() != 1) {
+                    throw new IllegalArgumentException("Measure is expected to have one and only one library");
+                }
+                return getTail(measure.getLibrary().get(0).getReference());
+            }
+            case R4: {
+                org.hl7.fhir.r4.model.Measure measure = (org.hl7.fhir.r4.model.Measure)resource;
+                if (!measure.hasLibrary() || measure.getLibrary().size() != 1) {
+                    throw new IllegalArgumentException("Measure is expected to have one and only one library");
+                }
+                return getTail(measure.getLibrary().get(0).getValue());
+            }
+            default:
+                throw new IllegalArgumentException("Unsupported fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+        }
+  }
+
 	public static Map<String, IBaseResource> getActivityDefinitionResources(String planDefinitionPath, FhirContext fhirContext, Boolean includeVersion) {
         Map<String, IBaseResource> activityDefinitions = new HashMap<String, IBaseResource>();
         IBaseResource planDefinition = IOUtils.readResource(planDefinitionPath, fhirContext, true);
@@ -331,7 +565,7 @@ public class ResourceUtils
         if (actionChild != null) {
           if (actionChild instanceof Iterable)
           {
-            for (Object action : (Iterable)actionChild) {
+            for (Object action : (Iterable<?>)actionChild) {
               Object definitionChild = resolveProperty(action, "definition", fhirContext);
               if (definitionChild != null) {
                 Object referenceChild = resolveProperty(definitionChild, "reference", fhirContext);
@@ -379,14 +613,11 @@ public class ResourceUtils
       }
 
       IBase base = (IBase) target;
-      BaseRuntimeElementCompositeDefinition definition;
       if (base instanceof IPrimitiveType) {
-          return path.equals("value") ? ((IPrimitiveType) target).getValue() : target;
+          return path.equals("value") ? ((IPrimitiveType<?>) target).getValue() : target;
       }
-      else {
-          definition = resolveRuntimeDefinition(base, fhirContext);
-      }
-
+          
+      BaseRuntimeElementCompositeDefinition<?> definition = resolveRuntimeDefinition(base, fhirContext);
       BaseRuntimeChildDefinition child = definition.getChildByName(path);
       if (child == null) {
           child = resolveChoiceProperty(definition, path);
@@ -414,13 +645,13 @@ public class ResourceUtils
       return child.getMax() < 1 ? values : values.get(0);
     }
 
-    public static BaseRuntimeElementCompositeDefinition resolveRuntimeDefinition(IBase base, FhirContext fhirContext) {
+    public static BaseRuntimeElementCompositeDefinition<?> resolveRuntimeDefinition(IBase base, FhirContext fhirContext) {
       if (base instanceof IBaseResource) {
         return fhirContext.getResourceDefinition((IBaseResource) base);
       }
 
       else if (base instanceof IBaseBackboneElement || base instanceof IBaseElement) {
-        return (BaseRuntimeElementCompositeDefinition) fhirContext.getElementDefinition(base.getClass());
+        return (BaseRuntimeElementCompositeDefinition<?>) fhirContext.getElementDefinition(base.getClass());
       }
 
       else if (base instanceof ICompositeType) {
@@ -431,7 +662,7 @@ public class ResourceUtils
       throw new Error(String.format("Unable to resolve the runtime definition for %s", base.getClass().getName()));
     }
 
-    public static BaseRuntimeChildDefinition resolveChoiceProperty(BaseRuntimeElementCompositeDefinition definition, String path) {
+    public static BaseRuntimeChildDefinition resolveChoiceProperty(BaseRuntimeElementCompositeDefinition<?> definition, String path) {
       for (Object child :  definition.getChildren()) {
         if (child instanceof RuntimeChildChoiceDefinition) {
           RuntimeChildChoiceDefinition choiceDefinition = (RuntimeChildChoiceDefinition) child;
@@ -451,8 +682,36 @@ public class ResourceUtils
         return def;
     }
 
-    public static BaseRuntimeElementDefinition getElementDefinition(FhirContext fhirContext, String ElementName) {
+    public static BaseRuntimeElementDefinition<?> getElementDefinition(FhirContext fhirContext, String ElementName) {
         BaseRuntimeElementDefinition<?> def = fhirContext.getElementDefinition(ElementName);
         return def;
+    }
+    
+    public static void outputResource(IBaseResource resource, String encoding, FhirContext context, String outputPath) {
+        try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding)) {
+            writer.write(
+                encoding.equals("json")
+                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+            );
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+    
+    public static void outputResourceByName(IBaseResource resource, String encoding, FhirContext context, String outputPath, String name) {
+        try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + name + "." + encoding)) {
+            writer.write(
+                encoding.equals("json")
+                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+            );
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }

@@ -3,10 +3,7 @@ package org.opencds.cqf.tooling.common.stu3;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.XmlParser;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Main;
 import org.opencds.cqf.tooling.common.BaseCqfmSoftwareSystemHelper;
 import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
@@ -17,17 +14,17 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 
     public CqfmSoftwareSystemHelper() { }
 
-    public CqfmSoftwareSystemHelper(String igPath) {
-        super(igPath);
+    public CqfmSoftwareSystemHelper(String rootDir) {
+        super(rootDir);
     }
 
+    @SuppressWarnings("serial")
     private <T extends DomainResource> void validateResourceForSoftwareSystemExtension(T resource) {
         if (resource == null) {
             throw new IllegalArgumentException("No resource provided.");
@@ -65,7 +62,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 
             // Is a device defined in devicePaths? If so, get it.
             Device device = null;
-            String deviceOutputPath = getIgPath() + devicePath;
+            String deviceOutputPath = getRootDir() + devicePath;
             IOUtils.Encoding deviceOutputEncoding = IOUtils.Encoding.JSON;
             for (String path : IOUtils.getDevicePaths(fhirContext)) {
                 DomainResource resourceInPath;
@@ -190,7 +187,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
             typeCoding.setSystem("http://hl7.org/fhir/us/cqfmeasures/CodeSystem/software-system-type");
             typeCoding.setCode("tooling");
 
-            List<Coding> typeCodingList = new ArrayList();
+            List<Coding> typeCodingList = new ArrayList<>();
             typeCodingList.add(typeCoding);
 
             CodeableConcept type = new CodeableConcept();

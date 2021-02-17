@@ -20,7 +20,7 @@ public class FhirSchema {
             throw new IllegalArgumentException("Cannot process null schema");
         }
 
-        boolean isBackboneElement = false;
+        // boolean isBackboneElement = false;
         for (Map.Entry<String, JsonElement> entry : elements.entrySet()) {
             if (entry.getKey().equals(name)) {
                 continue;

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.sun.istack.Nullable;
+import javax.annotation.Nullable;
 
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -91,7 +91,9 @@ public class TestCaseProcessor
         try {
             List<IBaseResource> testCaseResources = TestCaseProcessor.getTestCaseResources(igTestCasePath, fhirContext);
             for (IBaseResource resource : testCaseResources) {
-                resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
+            	if ((!(resource instanceof org.hl7.fhir.dstu3.model.Bundle)) && (!(resource instanceof org.hl7.fhir.r4.model.Bundle))) {
+            		resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
+            	}
             }
         } catch (Exception e) {
             shouldPersist = false;

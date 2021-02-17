@@ -7,7 +7,7 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import ca.uhn.fhir.context.FhirContext;
 
 public abstract class RefreshGeneratedContentOperation extends Operation {
-    private String igPath;
+    // private String igPath;
     private FhirContext fhirContext;
     private String pathToMeasures; // -ptm
     private String pathToLibraries; // -ptl

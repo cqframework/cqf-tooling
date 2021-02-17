@@ -6,6 +6,7 @@ import java.util.HashSet;
 import org.opencds.cqf.tooling.modelinfo.ClassInfoSettings;
 
 
+@SuppressWarnings("serial")
 class FHIRClassInfoSettings extends ClassInfoSettings {
 
     public FHIRClassInfoSettings() {
@@ -90,10 +91,11 @@ class FHIRClassInfoSettings extends ClassInfoSettings {
             {
                 put("Account", "type");
                 put("ActivityDefinition", "topic");
-                put("AdverseEvent", "type");
+                put("AdverseEvent", "event");
                 put("AllergyIntolerance", "code");
                 put("Appointment", "serviceType");
                 put("Basic", "code");
+                put("BodyStructure", "location");
                 put("CarePlan", "category");
                 put("CareTeam", "category");
                 put("ChargeItemDefinition", "code");
@@ -105,10 +107,10 @@ class FHIRClassInfoSettings extends ClassInfoSettings {
                 put("Condition", "code");
                 put("Consent", "category");
                 put("Coverage", "type");
-                put("DetectedIssue", "category");
+                put("DetectedIssue", "code");
                 put("Device", "type");
                 put("DeviceMetric", "type");
-                put("DeviceRequest", "codeCodeableConcept");
+                put("DeviceRequest", "code");
                 put("DeviceUseStatement", "device.code");
                 put("DiagnosticReport", "code");
                 put("Encounter", "type");
@@ -120,6 +122,7 @@ class FHIRClassInfoSettings extends ClassInfoSettings {
                 put("HealthcareService", "type");
                 put("Immunization", "vaccineCode");
                 put("Library", "topic");
+                put("Location", "type");
                 put("Measure", "topic");
                 put("MeasureReport", "measure.topic");
                 put("Medication", "code");
@@ -130,10 +133,12 @@ class FHIRClassInfoSettings extends ClassInfoSettings {
                 put("MessageDefinition", "event");
                 put("Observation", "code");
                 put("OperationOutcome", "issue.code");
+                put("PractitionerRole", "code");
                 put("Procedure", "code");
                 put("ProcedureRequest", "code");
                 put("Questionnaire", "name");
                 put("ReferralRequest", "type");
+                put("RelatedPerson", "relationship");
                 put("RiskAssessment", "code");
                 put("SearchParameter", "target");
                 put("Sequence", "type");

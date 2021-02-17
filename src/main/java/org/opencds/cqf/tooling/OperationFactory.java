@@ -34,6 +34,10 @@ class OperationFactory {
                 return new HEDISValueSetGenerator();
             case "XlsxToValueSet":
                 return new GenericValueSetGenerator();
+            case "EnsureExecutableValueSet":
+                return new EnsureExecutableValueSetOperation();
+            case "ToJsonValueSetDb":
+                return new ToJsonValueSetDbOperation();
             case "CqlToSTU3Library":
                 return new org.opencds.cqf.tooling.library.stu3.LibraryGenerator();
             case "CqlToR4Library":
@@ -58,14 +62,16 @@ class OperationFactory {
                 return new RefreshR4MeasureOperation();
             case "ScaffoldIG":
                 return new ScaffoldOperation();
-//            case "TestIG":
-//                return new TestIGOperation();
+            case "TestIG":
+                return new TestIGOperation();
             case "CqlToMeasure":
                 throw new NotImplementedException("CqlToMeasure");
             case "BundlesToBundle":
                 throw new NotImplementedException("BundlesToBundle");
             case "BundleToResources":
                 throw new NotImplementedException("BundleToResources");
+            case "ExtractMatBundle":
+            	return new ExtractMatBundleOperation();
             case "GenerateMIs":
                 return new StructureDefinitionToModelInfo();
             case "ProcessAcceleratorKit":

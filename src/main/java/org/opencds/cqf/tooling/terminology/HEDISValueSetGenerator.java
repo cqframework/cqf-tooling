@@ -19,11 +19,12 @@ public class HEDISValueSetGenerator extends FlatMultiValueSetGeneratorBase {
     private static final int systemNameCol = 5;      // -systemnamecol (-snc)        // Code System Name Column
     private static final int systemOidCol = 6;       // -systemoidcol (-soc)         // Code System OID Column
     private static final int versionCol = 7;         // -versioncol (-vc)            // Code System Version Column
+    private static final int expansionId = -1;       // -expansionid (-eic)          // N/A
 
     public HEDISValueSetGenerator()
     {
         super(outputPath, encoding, publisher, publisherNamespace, valueSetIdentifierSystem, codeSheetNum, codeListRow,
             valueSetTitleCol, valueSetOidCol, valueSetVersionCol, codeCol, descriptionCol, systemNameCol, systemOidCol,
-            versionCol);
+            versionCol, expansionId);
     }
 }
