@@ -936,8 +936,9 @@ public abstract class ClassInfoBuilder {
             case EXTENSIBLE: return org.hl7.elm_modelinfo.r1.BindingStrength.EXTENSIBLE;
             case PREFERRED: return org.hl7.elm_modelinfo.r1.BindingStrength.PREFERRED;
             case EXAMPLE: return org.hl7.elm_modelinfo.r1.BindingStrength.EXAMPLE;
+            default:
+                throw new IllegalArgumentException(String.format("Unknown binding strength %s", strength.toString()));
         }
-        throw new IllegalArgumentException(String.format("Unknown binding strength %s", strength.toString()));
     }
 
     private String toSeverity(ElementDefinition.ConstraintSeverity severity) {
