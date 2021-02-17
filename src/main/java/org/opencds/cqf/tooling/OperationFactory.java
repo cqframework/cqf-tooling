@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling;
 
 //import org.opencds.cqf.tooling.jsonschema.SchemaGenerator;
 import org.apache.commons.lang.NotImplementedException;
+import org.opencds.cqf.tooling.acceleratorkit.DTProcessor;
 import org.opencds.cqf.tooling.acceleratorkit.Processor;
 import org.opencds.cqf.tooling.library.r4.LibraryGenerator;
 import org.opencds.cqf.tooling.measure.r4.RefreshR4MeasureOperation;
@@ -76,6 +77,8 @@ class OperationFactory {
                 return new StructureDefinitionToModelInfo();
             case "ProcessAcceleratorKit":
                 return new Processor();
+            case "ProcessDecisionTables":
+                return new DTProcessor();
             case "BundleResources":
                 return new BundleResources();
             case "PostBundlesInDir":

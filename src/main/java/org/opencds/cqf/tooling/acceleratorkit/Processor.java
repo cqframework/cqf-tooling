@@ -2,14 +2,7 @@ package org.opencds.cqf.tooling.acceleratorkit;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import javax.annotation.Nonnull;
 
@@ -19,15 +12,18 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.UsageContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
@@ -46,6 +42,10 @@ public class Processor extends Operation {
     private String dataElementPages; // -dataelementpages (-dep) comma-separated list of the names of pages in the
                                      // workbook to be processed
 
+    // TODO: These need to be per scope
+    private String dataElementIdentifierSystem = "http://fhir.org/guides/who/anc-cds/Identifier/data-elements";
+    private String activityCodeSystem = "http://fhir.org/guides/who/anc-cds/CodeSystem/activity-codes";
+
     // Canonical Base
     private String canonicalBase = null;
     private Map<String, String> scopeCanonicalBaseMap = new HashMap<String, String>();
@@ -54,17 +54,41 @@ public class Processor extends Operation {
     private String whoCodeSystemBase = "http://who.int/cg";
     // NOTE: for now, disable open MRS system/codes
     private boolean enableOpenMRS = false;
-    private Map<String, String> supportedCodeSystems = new HashMap<String, String>();
+    private Map<String, String> supportedCodeSystems = new LinkedHashMap<String, String>();
 
-    // private Map<String, StructureDefinition> fhirModelStructureDefinitions = new HashMap<String, StructureDefinition>();
-    private Map<String, DictionaryElement> elementMap = new HashMap<String, DictionaryElement>();
+    // private Map<String, StructureDefinition> fhirModelStructureDefinitions = new LinkedHashMap<String, StructureDefinition>();
+    private Map<String, DictionaryElement> elementMap = new LinkedHashMap<String, DictionaryElement>();
+    private Map<String, Integer> elementIds = new LinkedHashMap<String, Integer>();
+    private Map<String, Coding> activityMap = new LinkedHashMap<String, Coding>();
     private List<DictionaryProfileElementExtension> profileExtensions = new ArrayList<>();
     private List<StructureDefinition> extensions = new ArrayList<StructureDefinition>();
     private List<StructureDefinition> profiles = new ArrayList<StructureDefinition>();
+    private Map<String, List<StructureDefinition>> profilesByActivityId = new HashMap<String, List<StructureDefinition>>();
+    private Map<String, List<StructureDefinition>> profilesByParentProfile = new HashMap<String, List<StructureDefinition>>();
     private List<CodeSystem> codeSystems = new ArrayList<CodeSystem>();
     private List<ValueSet> valueSets = new ArrayList<ValueSet>();
+    private Map<String, Coding> concepts = new LinkedHashMap<String, Coding>();
+    private List<RetrieveInfo> retrieves = new ArrayList<RetrieveInfo>();
     private List<String> igJsonFragments = new ArrayList<String>();
     private List<String> igResourceFragments = new ArrayList<String>();
+
+    private Row currentInputOptionParent;
+
+    private class RetrieveInfo {
+        public RetrieveInfo(StructureDefinition structureDefinition, String terminologyIdentifier) {
+            this.structureDefinition = structureDefinition;
+            this.terminologyIdentifier = terminologyIdentifier;
+        }
+
+        private StructureDefinition structureDefinition;
+        // public StructureDefinition getStructureDefinition() {
+        //     return structureDefinition;
+        // }
+        private String terminologyIdentifier;
+        public String getTerminologyIdentifier() {
+            return terminologyIdentifier;
+        }
+    }
 
     @Override
     public void execute(String[] args) {
@@ -106,6 +130,7 @@ public class Processor extends Operation {
         }
 
         scopeCanonicalBaseMap.put("core", "http://fhir.org/guides/who/core");
+        scopeCanonicalBaseMap.put("anc", "http://fhir.org/guides/who/anc-cds");
         scopeCanonicalBaseMap.put("fp", "http://fhir.org/guides/who/fp-cds");
         scopeCanonicalBaseMap.put("sti", "http://fhir.org/guides/who/sti-cds");
         scopeCanonicalBaseMap.put("cr", "http://fhir.org/guides/cqframework/cr");
@@ -117,7 +142,7 @@ public class Processor extends Operation {
         if (enableOpenMRS) {
             supportedCodeSystems.put("OpenMRS", openMRSSystem);
         }
-        supportedCodeSystems.put("ICD-10-WHO", "http://hl7.org/fhir/sid/icd-10");
+        supportedCodeSystems.put("ICD-10", "http://hl7.org/fhir/sid/icd-10");
         supportedCodeSystems.put("SNOMED-CT", "http://snomed.info/sct");
         supportedCodeSystems.put("LOINC", "http://loinc.org");
         supportedCodeSystems.put("RxNorm", "http://www.nlm.nih.gov/research/umls/rxnorm");
@@ -125,6 +150,8 @@ public class Processor extends Operation {
         // TODO: Determing and add correct URLS for these Systems
         supportedCodeSystems.put("CIEL", "http://hl7.org/fhir/sid/ciel");
         supportedCodeSystems.put("ICD-11", "http://hl7.org/fhir/sid/icd-11");
+        supportedCodeSystems.put("ICHI", "https://mitel.dimi.uniud.it/ichi/#http://id.who.int/ichi");
+        supportedCodeSystems.put("ICF", "http://hl7.org/fhir/sid/icf-nl");
 
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
 
@@ -188,11 +215,16 @@ public class Processor extends Operation {
         writeCodeSystems(outputPath);
         writeValueSets(outputPath);
 
-        // ig.json is deprecated and resources a located by convention. If our output
-        // isn't satisfying convention, we should
-        // modify the tooling to match the convention.
-        // writeIgJsonFragments(scopePath);
-        // writeIgResourceFragments(scopePath);
+        // write concepts CQL
+        writeConcepts(scope, outputPath);
+
+        // write DataElements CQL
+        writeDataElements(scope, outputPath);
+
+        //ig.json is deprecated and resources a located by convention. If our output isn't satisfying convention, we should
+        //modify the tooling to match the convention.
+        //writeIgJsonFragments(scopePath);
+        //writeIgResourceFragments(scopePath);
     }
 
     private void attachExtensions() {
@@ -301,8 +333,85 @@ public class Processor extends Operation {
         return scopePath + "/input/vocabulary/valueset";
     }
 
-    private List<DictionaryCode> getTerminologyCodes(String codeSystemKey, String label, Row row,
-            HashMap<String, Integer> colIds) {
+    private String getCqlPath(String scopePath) {
+        return scopePath + "/input/cql";
+    }
+
+    private void ensureCqlPath(String scopePath) {
+        String cqlPath = getCqlPath(scopePath);
+        ensurePath(cqlPath);
+    }
+
+    private Coding getActivityCoding(String activityId) {
+        if (activityId == null || activityId.isEmpty()) {
+            return null;
+        }
+
+        int i = activityId.indexOf(" ");
+        if (i <= 1) {
+            return null;
+        }
+
+        String activityCode = activityId.substring(0, i);
+        String activityDisplay = activityId.substring(i + 1);
+
+        if (activityCode.isEmpty() || activityDisplay.isEmpty()) {
+            return null;
+        }
+
+        Coding activity = activityMap.get(activityCode);
+
+        if (activity == null) {
+            activity = new Coding().setCode(activityCode).setSystem(activityCodeSystem).setDisplay(activityDisplay);
+            activityMap.put(activityCode, activity);
+        }
+
+        return activity;
+    }
+
+    private String getNextElementId(String activityCode) {
+        if (activityCode == null) {
+            return null;
+        }
+
+        if (!elementIds.containsKey(activityCode)) {
+            elementIds.put(activityCode, 1);
+        }
+
+        Integer nextId = elementIds.get(activityCode);
+        elementIds.put(activityCode, nextId + 1);
+
+        return activityCode + ".DE" + nextId.toString();
+    }
+
+    private String getActivityID(Row row, HashMap<String, Integer> colIds) {
+        String activityID = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ActivityID"));
+        return activityID;
+    }
+
+    private String getMasterDataType(Row row, HashMap<String, Integer> colIds) {
+        String masterDataType = null;
+        String activityID = getActivityID(row, colIds);
+        if (activityID != null && !activityID.isEmpty()) {
+            String multipleChoiceType = getMultipleChoiceType(row, colIds);
+            masterDataType = multipleChoiceType != null ? multipleChoiceType.equalsIgnoreCase("Input Option") ? "Input Option" : "Data Element" : null;
+        }
+
+        return masterDataType;
+    }
+
+    private String getMultipleChoiceType(Row row, HashMap<String, Integer> colIds) {
+        String multipleChoiceType = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MultipleChoiceType"));
+        return multipleChoiceType;
+    }
+
+    private List<DictionaryCode> cleanseCodes(List<DictionaryCode> codes) {
+        // Remove "Not classifiable in" instances
+        codes.removeIf(c -> c.getCode().startsWith("Not classifiable in"));
+        return codes;
+    }
+
+    private List<DictionaryCode> getTerminologyCodes(String codeSystemKey, String label, Row row, HashMap<String, Integer> colIds) {
         List<DictionaryCode> codes = new ArrayList<>();
         String system = supportedCodeSystems.get(codeSystemKey);
         String codeListString = SpreadsheetHelper.getCellAsString(row, getColId(colIds, codeSystemKey));
@@ -317,7 +426,7 @@ public class Processor extends Operation {
             }
         }
 
-        return codes;
+        return cleanseCodes(codes);
     }
 
     private List<DictionaryCode> getFhirCodes(String label, Row row, HashMap<String, Integer> colIds) {
@@ -353,7 +462,8 @@ public class Processor extends Operation {
                     concept.setDisplay(code.getLabel());
 
                     String parentLabel = null;
-                    String parentName = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "InputOptionParent"));
+//                    String parentName = SpreadsheetHelper.getCellAsString(row, getColId(colIds,"InputOptionParent"));
+                    String parentName = SpreadsheetHelper.getCellAsString(currentInputOptionParent, getColId(colIds,"DataElementLabel")).trim();
                     if (parentName != null && !parentName.trim().isEmpty()) {
                         parentName = parentName.trim();
                         DictionaryElement currentElement = elementMap.get(parentName);
@@ -369,7 +479,7 @@ public class Processor extends Operation {
                 }
             }
         }
-        return codes;
+        return cleanseCodes(codes);
     }
 
     private List<DictionaryCode> getOpenMRSCodes(String label, Row row, HashMap<String, Integer> colIds) {
@@ -385,7 +495,7 @@ public class Processor extends Operation {
                 codes.add(getCode(system, label, display, c, parent));
             }
         }
-        return codes;
+        return cleanseCodes(codes);
     }
 
     private DictionaryCode getPrimaryCode(String label, Row row, HashMap<String, Integer> colIds) {
@@ -439,8 +549,10 @@ public class Processor extends Operation {
 
     private DictionaryFhirElementPath getFhirElementPath(Row row, HashMap<String, Integer> colIds) {
         DictionaryFhirElementPath fhirType = new DictionaryFhirElementPath();
-        String resource = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4Resource")).trim();
+        String resource = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4Resource"));
+
         if (resource != null && !resource.isEmpty()) {
+            resource = resource.trim();
             fhirType.setResource(resource);
             fhirType.setMasterDataElementPath(
                     SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MasterDataElementPath")));
@@ -474,7 +586,7 @@ public class Processor extends Operation {
         if (type != null) {
             type = type.trim();
             if (type.equals("Coding")) {
-                String choiceType = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MultipleChoiceType"));
+                String choiceType = getMultipleChoiceType(row, colIds);
                 if (choiceType != null) {
                     choiceType = choiceType.trim();
                     type = type + " - " + choiceType;
@@ -495,14 +607,19 @@ public class Processor extends Operation {
             return null;
         }
 
-        DictionaryElement e = new DictionaryElement(name);
+        String activity = getActivityID(row, colIds);
+        Coding activityCoding = getActivityCoding(activity);
+        String id = getNextElementId(activityCoding.getCode());
+
+        DictionaryElement e = new DictionaryElement(id, name);
 
         // Populate based on the row
         e.setPage(page);
         e.setGroup(group);
+        e.setActivity(activity);
         e.setLabel(label);
         e.setType(type);
-        e.setMasterDataType(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MasterDataType")));
+        e.setMasterDataType(getMasterDataType(row, colIds));
         e.setInfoIcon(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "InfoIcon")));
         e.setDue(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Due")));
         e.setRelevance(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Relevance")));
@@ -524,8 +641,9 @@ public class Processor extends Operation {
     }
 
     private void addInputOptionToParentElement(Row row, HashMap<String, Integer> colIds) {
-        String parentName = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "InputOptionParent")).trim();
-        if (parentName != null && !parentName.isEmpty()) {
+        String parentName = SpreadsheetHelper.getCellAsString(currentInputOptionParent, getColId(colIds,"DataElementLabel")).trim();
+        if (parentName != null && !parentName.isEmpty())
+        {
             DictionaryElement currentElement = elementMap.get(parentName);
             if (currentElement != null) {
                 String choices = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Name"));
@@ -583,8 +701,14 @@ public class Processor extends Operation {
                 Iterator<Cell> colIt = row.cellIterator();
                 while (colIt.hasNext()) {
                     Cell cell = colIt.next();
-                    String header = SpreadsheetHelper.getCellAsString(cell).toLowerCase();
+                    String header = SpreadsheetHelper.getCellAsString(cell)
+                            .toLowerCase()
+                            .trim()
+                            .replace("–", "-");
                     switch (header) {
+                        case "[anc] activity id":
+                            colIds.put("ActivityID", cell.getColumnIndex());
+                            break;
                         case "core, fp, sti":
                         case "scope":
                             colIds.put("Scope", cell.getColumnIndex());
@@ -592,16 +716,16 @@ public class Processor extends Operation {
                         case "in new dd":
                             colIds.put("InNewDD", cell.getColumnIndex());
                             break;
-                        case "master data type":
-                            colIds.put("MasterDataType", cell.getColumnIndex());
-                            break;
-                        case "master data element label":
-                            colIds.put("Name", cell.getColumnIndex());
-                            colIds.put("Label", cell.getColumnIndex());
-                            break;
-                        case "data element parent for input options":
-                            colIds.put("InputOptionParent", cell.getColumnIndex());
-                            break;
+//                        case "master data type":
+//                            colIds.put("MasterDataType", cell.getColumnIndex());
+//                            break;
+//                        case "master data element label":
+//                            colIds.put("Name", cell.getColumnIndex());
+//                            colIds.put("Label", cell.getColumnIndex());
+//                            break;
+//                        case "data element parent for input options":
+//                            colIds.put("InputOptionParent", cell.getColumnIndex());
+//                            break;
                         // no group column in old or new spreadsheet? Ask Bryn?
                         // case "group": colIds.put("Group", cell.getColumnIndex()); break;
                         // case "data element name": colIds.put("Name", cell.getColumnIndex()); break;
@@ -613,110 +737,65 @@ public class Processor extends Operation {
                         // relevance not used in FHIR?
                         // case "relevance": colIds.put("Relevance", cell.getColumnIndex()); break;
                         // info icon not used in FHIR?
-                        // case "info icon": colIds.put("InfoIcon", cell.getColumnIndex()); break;
-                        case "description":
-                            colIds.put("Description", cell.getColumnIndex());
-                            break;
+                        //case "info icon": colIds.put("InfoIcon", cell.getColumnIndex()); break;
+                        case "description and definition":
+                        case "description": colIds.put("Description", cell.getColumnIndex()); break;
                         case "data element label":
                             colIds.put("DataElementLabel", cell.getColumnIndex());
+                            colIds.put("Name", cell.getColumnIndex());
+                            colIds.put("Label", cell.getColumnIndex());
                             break;
-                        case "data element name":
-                            colIds.put("DataElementName", cell.getColumnIndex());
-                            break;
-                        case "notes":
-                            colIds.put("Notes", cell.getColumnIndex());
-                            break;
-                        case "data type":
-                            colIds.put("Type", cell.getColumnIndex());
-                            break;
+                        case "data element name": colIds.put("DataElementName", cell.getColumnIndex()); break;
+                        case "notes": colIds.put("Notes", cell.getColumnIndex()); break;
+                        case "data type": colIds.put("Type", cell.getColumnIndex()); break;
                         case "multiple choice":
-                            colIds.put("MultipleChoiceType", cell.getColumnIndex());
-                            break;
-                        case "input options":
-                            colIds.put("Choices", cell.getColumnIndex());
-                            break;
-                        case "calculation":
-                            colIds.put("Calculation", cell.getColumnIndex());
-                            break;
-                        case "validation required":
-                            colIds.put("Constraint", cell.getColumnIndex());
-                            break;
-                        case "required":
-                            colIds.put("Required", cell.getColumnIndex());
-                            break;
-                        case "editable":
-                            colIds.put("Editable", cell.getColumnIndex());
-                            break;
-                        case "custom profile id":
-                            colIds.put("CustomProfileId", cell.getColumnIndex());
-                            break;
-                        case "binding or custom value set name or reference":
-                            colIds.put("CustomValueSetName", cell.getColumnIndex());
-                            break;
-                        case "binding strength":
-                            colIds.put("BindingStrength", cell.getColumnIndex());
-                            break;
-                        case "ucum":
-                            colIds.put("UnitOfMeasure", cell.getColumnIndex());
-                            break;
-                        case "extension needed":
-                            colIds.put("ExtensionNeeded", cell.getColumnIndex());
-                            break;
+                        case "multiple choice type":
+                        case "multiple choice (if applicable)":
+                        case "multiple choice type ?(if applicable)":
+                            colIds.put("MultipleChoiceType", cell.getColumnIndex()); break;
+                        case "input options": colIds.put("Choices", cell.getColumnIndex()); break;
+                        case "calculation": colIds.put("Calculation", cell.getColumnIndex()); break;
+                        case "validation required": colIds.put("Constraint", cell.getColumnIndex()); break;
+                        case "required": colIds.put("Required", cell.getColumnIndex()); break;
+                        case "editable": colIds.put("Editable", cell.getColumnIndex()); break;
+                        case "custom profile id": colIds.put("CustomProfileId", cell.getColumnIndex()); break;
+                        case "binding or custom value set name or reference": colIds.put("CustomValueSetName", cell.getColumnIndex()); break;
+                        case "binding strength": colIds.put("BindingStrength", cell.getColumnIndex()); break;
+                        case "ucum": colIds.put("UnitOfMeasure", cell.getColumnIndex()); break;
+                        case "extension needed": colIds.put("ExtensionNeeded", cell.getColumnIndex()); break;
 
                         // fhir resource details
-                        case "master data element path":
-                            colIds.put("MasterDataElementPath", cell.getColumnIndex());
-                            break;
+                        case "master data element path": colIds.put("MasterDataElementPath", cell.getColumnIndex()); break;
                         case "hl7 fhir r4 - resource":
-                            colIds.put("FhirR4Resource", cell.getColumnIndex());
-                            break;
-                        case "hl7 fhir r4 - resource type":
-                            colIds.put("FhirR4ResourceType", cell.getColumnIndex());
-                            break;
-                        case "hl7 fhir r4 - base profile":
-                            colIds.put("FhirR4BaseProfile", cell.getColumnIndex());
-                            break;
-                        case "hl7 fhir r4 - version number":
-                            colIds.put("FhirR4VersionNumber", cell.getColumnIndex());
-                            break;
-                        case "hl7 fhir r4 - additional fhir mapping details":
-                            colIds.put("FhirR4AdditionalFHIRMappingDetails", cell.getColumnIndex());
-                            break;
+//                        case "hl7 fhir r4 – resource":
+                            colIds.put("FhirR4Resource", cell.getColumnIndex()); break;
+                        case "hl7 fhir r4 - resource type": colIds.put("FhirR4ResourceType", cell.getColumnIndex()); break;
+                        case "hl7 fhir r4 - base profile": colIds.put("FhirR4BaseProfile", cell.getColumnIndex()); break;
+                        case "hl7 fhir r4 - version number": colIds.put("FhirR4VersionNumber", cell.getColumnIndex()); break;
+                        case "hl7 fhir r4 - additional fhir mapping details": colIds.put("FhirR4AdditionalFHIRMappingDetails", cell.getColumnIndex()); break;
 
                         // terminology
-                        case "fhir code system":
-                            colIds.put("FhirCodeSystem", cell.getColumnIndex());
-                            break;
-                        case "hl7 fhir r4 code":
-                            colIds.put("FhirR4Code", cell.getColumnIndex());
-                            break;
+                        case "fhir code system": colIds.put("FhirCodeSystem", cell.getColumnIndex()); break;
+                        case "hl7 fhir r4 code": colIds.put("FhirR4Code", cell.getColumnIndex()); break;
                         case "icd-10-who":
-                            colIds.put("ICD-10-WHO", cell.getColumnIndex());
-                            break;
+                        case "icd-10 code":
+                        case "icd-10?code": colIds.put("ICD-10", cell.getColumnIndex()); break;
+                        case "icf?code": colIds.put("ICF", cell.getColumnIndex()); break;
+                        case "ichi?code": colIds.put("ICHI", cell.getColumnIndex()); break;
                         case "snomed-ct":
-                            colIds.put("SNOMED-CT", cell.getColumnIndex());
-                            break;
+                        case "snomed-ct code":
+                        case "snomed ct":
+                        case "snomed ct?code": colIds.put("SNOMED-CT", cell.getColumnIndex()); break;
                         case "loinc":
-                            colIds.put("LOINC", cell.getColumnIndex());
-                            break;
-                        case "rxnorm":
-                            colIds.put("RxNorm", cell.getColumnIndex());
-                            break;
+                        case "loinc code": colIds.put("LOINC", cell.getColumnIndex()); break;
+                        case "rxnorm": colIds.put("RxNorm", cell.getColumnIndex()); break;
                         case "icd-11":
-                            colIds.put("ICD-11", cell.getColumnIndex());
-                            break;
-                        case "ciel":
-                            colIds.put("CIEL", cell.getColumnIndex());
-                            break;
-                        case "openmrs entity parent":
-                            colIds.put("OpenMRSEntityParent", cell.getColumnIndex());
-                            break;
-                        case "openmrs entity":
-                            colIds.put("OpenMRSEntity", cell.getColumnIndex());
-                            break;
-                        case "openmrs entity id":
-                            colIds.put("OpenMRSEntityId", cell.getColumnIndex());
-                            break;
+                        case "icd-11 code":
+                        case "icd-11?code":colIds.put("ICD-11", cell.getColumnIndex()); break;
+                        case "ciel": colIds.put("CIEL", cell.getColumnIndex()); break;
+                        case "openmrs entity parent": colIds.put("OpenMRSEntityParent", cell.getColumnIndex()); break;
+                        case "openmrs entity": colIds.put("OpenMRSEntity", cell.getColumnIndex()); break;
+                        case "openmrs entity id": colIds.put("OpenMRSEntityId", cell.getColumnIndex()); break;
                     }
                 }
                 continue;
@@ -727,27 +806,30 @@ public class Processor extends Operation {
             boolean scopeMatchesRowScope = rowScope != null && scope.toLowerCase().equals(rowScope.toLowerCase());
 
             String inNewDD = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "InNewDD"));
-            boolean shouldInclude = inNewDD == null || (inNewDD.equals("ST") || inNewDD.equals("1"));
+            boolean shouldInclude = inNewDD == null || inNewDD.equals("ST") || inNewDD.equals("1");
 
             if (shouldInclude && (scopeIsNull || scopeMatchesRowScope)) {
-                String masterDataType = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MasterDataType"));
-                switch (masterDataType) {
-                    case "Data Element":
-                    case "Slice":
-                        DictionaryElement e = createDataElement(page, currentGroup, row, colIds);
-                        if (e != null) {
-                            elementMap.put(e.getName(), e);
-                        }
-                        break;
-                    case "Input Option":
-                        addInputOptionToParentElement(row, colIds);
-                        break;
-                    case "Calculation":
-                    case "UI Element":
-                        break;
-                    default:
-                        // Currently unsupported/undocumented
-                        break;
+                String masterDataType = getMasterDataType(row, colIds);
+                if (masterDataType != null) {
+                    switch (masterDataType) {
+                        case "Data Element":
+                        case "Slice":
+                            currentInputOptionParent = row;
+                            DictionaryElement e = createDataElement(page, currentGroup, row, colIds);
+                            if (e != null) {
+                                elementMap.put(e.getName(), e);
+                            }
+                            break;
+                        case "Input Option":
+                            addInputOptionToParentElement(row, colIds);
+                            break;
+                        case "Calculation":
+                        case "UI Element":
+                            break;
+                        default:
+                            // Currently unsupported/undocumented
+                            break;
+                    }
                 }
             }
         }
@@ -818,7 +900,12 @@ public class Processor extends Operation {
                 // remove these characters
                 .replace("(", "").replace(")", "").replace("[", "").replace("]", "").replace("\n", "")
                 // replace these with ndash
-                .replace(":", "-").replace(",", "-").replace("_", "-").replace("/", "-").replace(" ", "-")
+                .replace(":", "-")
+                .replace(",", "-")
+                .replace("_", "-")
+                .replace("/", "-")
+                .replace(" ", "-")
+                .replace(".", "-")
                 // remove multiple ndash
                 .replace("----", "-").replace("---", "-").replace("--", "-").replace(">", "greater-than")
                 .replace("<", "less-than");
@@ -1077,25 +1164,44 @@ public class Processor extends Operation {
         String customProfileIdRaw = elementPath.getCustomProfileId();
         Boolean hasCustomProfileIdRaw = customProfileIdRaw != null && !customProfileIdRaw.isEmpty();
         String resourceType = elementPath.getResourceType().trim();
+        Coding activityCoding = getActivityCoding(element.getActivity());
 
         StructureDefinition sd;
         sd = new StructureDefinition();
         sd.setId(customProfileId);
         sd.setUrl(String.format("%s/StructureDefinition/%s", canonicalBase, customProfileId));
-        // TODO: version
+        // TODO: version (I think this needs to come from the IG version, we don't need to set that here)
         sd.setName(hasCustomProfileIdRaw ? customProfileIdRaw : element.getName());
         sd.setTitle(hasCustomProfileIdRaw ? customProfileIdRaw : element.getLabel());
 
+        if (element.getId() != null) {
+            sd.addIdentifier(new Identifier().setUse(Identifier.IdentifierUse.OFFICIAL)
+                    .setSystem(dataElementIdentifierSystem)
+                    .setValue(element.getId())
+            );
+        }
+
+        // TODO: This needs to be more dynamic. E.g., 'not-done' for a not done profile.
         sd.setStatus(Enumerations.PublicationStatus.DRAFT);
         sd.setExperimental(false);
-        // TODO: date
-        // TODO: publisher
-        // TODO: contact
+        // TODO: date // Should be set by publication tooling
+        // TODO: publisher // Should be set by publication tooling
+        // TODO: contact // Should be set by publication tooling
         sd.setDescription(element.getDescription());
-        // TODO: What to do with Notes?
+        // TODO: What to do with Notes? // We should add any warnings generated during this process to the notes...
         sd.setFhirVersion(Enumerations.FHIRVersion._4_0_1);
         sd.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
         sd.setAbstract(false);
+
+        if (activityCoding != null) {
+            sd.addUseContext(new UsageContext()
+                    .setCode(new Coding()
+                            .setCode("task")
+                            .setSystem("http://terminology.hl7.org/CodeSystem/usage-context-type")
+                            .setDisplay("Workflow Task")
+                    ).setValue(new CodeableConcept().addCoding(activityCoding)));
+        }
+
         // TODO: Support resources other than Observation
         sd.setType(resourceType);
 
@@ -1137,7 +1243,7 @@ public class Processor extends Operation {
         // If custom profile is specified, search for if it exists already.
         String customProfileIdRaw = element.getFhirElementPath().getCustomProfileId();
         Boolean hasCustomProfileIdRaw = customProfileIdRaw != null && !customProfileIdRaw.isEmpty();
-        String customProfileId = toId(hasCustomProfileIdRaw ? customProfileIdRaw : element.getName());
+        String customProfileId = toId(hasCustomProfileIdRaw ? customProfileIdRaw : element.getId());
         for (StructureDefinition existingSD : profiles) {
             if (existingSD.getId().equals(customProfileId)) {
                 sd = existingSD;
@@ -1195,10 +1301,12 @@ public class Processor extends Operation {
             case "DocumentReference":
             case "Encounter":
             case "HealthcareService":
+            case "Immunization":
             case "Location":
             case "Medication":
             case "MedicationAdministration":
             case "MedicationDispense":
+            case "MedicationRequest":
             case "MedicationStatement":
             case "OccupationalData":
             case "Organization":
@@ -1214,155 +1322,155 @@ public class Processor extends Operation {
                 throw new IllegalArgumentException("Unrecognized baseType: " + resourceType.toString());
         }
 
-        // For Observations, it is a valid scenario for the Data Dictionary (DD) to not have a Data Element entry for the primary code path element - Observation.code.
-        // In this case, the tooling should ensure that this element is created. The fixed code for this element should be the code specified by the Data
-        // Element record mapped to Observation.value[x]. For all other resource types it is invalid to not have a primary code path element entry in the DD
-        if (codePath != null && !codePath.isEmpty() && element.getCode() != null) {
-            String elementId = String.format("%s.%s", resourceType, codePath);
-            String primaryCodePath = String.format("%s.%s", resourceType, codePath);
+        try {
+            // For Observations, it is a valid scenario for the Data Dictionary (DD) to not have a Data Element entry for the primary code path element - Observation.code.
+            // In this case, the tooling should ensure that this element is created. The fixed code for this element should be the code specified by the Data
+            // Element record mapped to Observation.value[x]. For all other resource types it is invalid to not have a primary code path element entry in the DD
+            if (codePath != null && !codePath.isEmpty() && element.getCode() != null) {
+                String elementId = String.format("%s.%s", resourceType, codePath);
+                String primaryCodePath = String.format("%s.%s", resourceType, codePath);
 
-            ElementDefinition existingPrimaryCodePathElement = null;
+                ElementDefinition existingPrimaryCodePathElement = null;
+                for (ElementDefinition elementDef : sd.getDifferential().getElement()) {
+                    if (elementDef.getId().equals(elementId)) {
+                        existingPrimaryCodePathElement = elementDef;
+                        break;
+                    }
+                }
+
+                Boolean isPrimaryCodePath = element.getFhirElementPath().getResourceTypeAndPath().equals(primaryCodePath);
+                Boolean isPreferredCodePath = isPrimaryCodePath || element.getFhirElementPath().getResourceTypeAndPath().equals("Observation.value[x]");
+
+                if (existingPrimaryCodePathElement == null) {
+                    ElementDefinition ed = new ElementDefinition();
+                    ed.setId(elementId);
+                    ed.setPath(elementId);
+                    ed.setMin(1);
+                    ed.setMax("1");
+                    ed.setMustSupport(true);
+                    if (isPreferredCodePath) {
+                        ed.setFixed(element.getCode().toCodeableConcept());
+                    }
+
+                    sd.getDifferential().addElement(ed);
+                } else {
+                    Type existingCode = existingPrimaryCodePathElement.getFixed();
+                    // The code in the Primary Code Path Data Element entry should always have priority over the preferred (value[x])
+                    if ((existingCode == null || isPrimaryCodePath) && (isPreferredCodePath)) {
+                        existingPrimaryCodePathElement.setFixed(element.getCode().toCodeableConcept());
+                    }
+                }
+            }
+
+            Boolean isSlice = element.getMasterDataType().toLowerCase().equals("slice");
+            String masterDataElementPath = elementPath.getMasterDataElementPath();
+            Boolean isElementOfSlice = !isSlice && masterDataElementPath != null && !masterDataElementPath.isEmpty() && masterDataElementPath.indexOf(".") > 0;
+
+            String elementId;
+            String slicePath;
+            String sliceName = null;
+            if (isSlice || isElementOfSlice) {
+                int periodIndex = masterDataElementPath.indexOf(".");
+                sliceName = periodIndex > 0 ? masterDataElementPath.substring(0, periodIndex) : masterDataElementPath;
+                slicePath = periodIndex > 0 ? masterDataElementPath.substring(periodIndex + 1) : masterDataElementPath;
+
+                String resource = elementPath.getResourceTypeAndPath();
+                int elementPathStartIndex = resource.indexOf(slicePath);
+                if (isSlice) {
+                    elementId = String.format("%s:%s", resource, sliceName);
+                } else {
+                    elementId = String.format("%s:%s.%s", resource.substring(0, elementPathStartIndex - 1), sliceName, resource.substring(elementPathStartIndex));
+                }
+            } else {
+                if (isChoiceType(elementPath)) {
+                    String elementFhirType = getFhirTypeOfTargetElement(elementPath);
+                    elementFhirType = elementFhirType.substring(0, 1).toUpperCase() + elementFhirType.substring(1);
+                    elementId = elementPath.getResourceTypeAndPath().replace("[x]", elementFhirType);
+                } else {
+                    elementId = String.format("%s.%s", resourceType, choicesPath);
+                }
+            }
+
+            ElementDefinition existingElement = null;
             for (ElementDefinition elementDef : sd.getDifferential().getElement()) {
                 if (elementDef.getId().equals(elementId)) {
-                    existingPrimaryCodePathElement = elementDef;
+                    existingElement = elementDef;
                     break;
                 }
             }
 
-            Boolean isPrimaryCodePath = element.getFhirElementPath().getResourceTypeAndPath().equals(primaryCodePath);
-            Boolean isPreferredCodePath = isPrimaryCodePath || element.getFhirElementPath().getResourceTypeAndPath().equals("Observation.value[x]");
+            // if the element doesn't exist, create it
+            if (existingElement == null) {
+                if (isSlice) {
+                    ensureSliceAndBaseElementWithSlicing(element, elementPath, sd, elementId, sliceName, null);
+                } else {
+                    String elementFhirType = getFhirTypeOfTargetElement(elementPath);
 
-            if (existingPrimaryCodePathElement == null) {
-                ElementDefinition ed = new ElementDefinition();
-                ed.setId(elementId);
-                ed.setPath(elementId);
-                ed.setMin(1);
-                ed.setMax("1");
-                ed.setMustSupport(true);
-                if (isPreferredCodePath) {
-                    ed.setFixed(element.getCode().toCodeableConcept());
-                }
+                    ElementDefinition ed = new ElementDefinition();
+                    ed.setId(elementId);
+                    ed.setPath(elementId);
+                    ed.setMin(toBoolean(element.getRequired()) ? 1 : 0);
+                    ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
+                    ed.setMustSupport(true);
 
-                sd.getDifferential().addElement(ed);
-            }
-            else {
-                Type existingCode = existingPrimaryCodePathElement.getFixed();
-                // The code in the Primary Code Path Data Element entry should always have priority over the preferred (value[x])
-                if ((existingCode == null || isPrimaryCodePath) && (isPreferredCodePath)) {
-                    existingPrimaryCodePathElement.setFixed(element.getCode().toCodeableConcept());
-                }
-            }
-        }
+                    String unitOfMeasure = element.getFhirElementPath().getUnitOfMeasure();
+                    Boolean hasUnitOfMeasure = unitOfMeasure != null && !unitOfMeasure.isEmpty();
+                    if (isChoiceType(elementPath) && hasUnitOfMeasure) {
+                        ElementDefinition unitElement = new ElementDefinition();
+                        unitElement.setId(elementId + ".unit");
+                        unitElement.setPath(elementId + ".unit");
+                        unitElement.setMin(1);
+                        unitElement.setMax("1");
+                        unitElement.setMustSupport(true);
 
-        Boolean isSlice = element.getMasterDataType().toLowerCase().equals("slice");
-        String masterDataElementPath = elementPath.getMasterDataElementPath();
-        Boolean isElementOfSlice = !isSlice &&  masterDataElementPath!= null && !masterDataElementPath.isEmpty() && masterDataElementPath.indexOf(".") > 0;
+                        //TODO: This should be a code, not fixed string
+                        ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
+                        if (elementFhirType != null && elementFhirType.length() > 0) {
+                            tr.setCode("string");
+                            unitElement.addType(tr);
+                        }
+                        unitElement.setFixed(new StringType(unitOfMeasure));
 
-        String elementId;
-        String slicePath;
-        String sliceName = null;
-        if (isSlice || isElementOfSlice) {
-            int periodIndex = masterDataElementPath.indexOf(".");
-            sliceName = periodIndex > 0 ? masterDataElementPath.substring(0, periodIndex) : masterDataElementPath;
-            slicePath = periodIndex > 0 ? masterDataElementPath.substring(periodIndex + 1) : masterDataElementPath;
+                        sd.getDifferential().addElement(unitElement);
+                    }
 
-            String resource = elementPath.getResourceTypeAndPath();
-            int elementPathStartIndex = resource.indexOf(slicePath);
-            if (isSlice) {
-                elementId = String.format("%s:%s", resource, sliceName);
-            } else {
-                elementId = String.format("%s:%s.%s", resource.substring(0, elementPathStartIndex - 1), sliceName, resource.substring(elementPathStartIndex));
-            }
-        }
-        else {
-            if (isChoiceType(elementPath)) {
-                String elementFhirType = getFhirTypeOfTargetElement(elementPath);
-                elementFhirType = elementFhirType.substring(0, 1).toUpperCase() + elementFhirType.substring(1);
-                elementId = elementPath.getResourceTypeAndPath().replace("[x]", elementFhirType);
-            }
-            else {
-                elementId = String.format("%s.%s", resourceType, choicesPath);
-            }
-        }
-
-        ElementDefinition existingElement = null;
-        for (ElementDefinition elementDef : sd.getDifferential().getElement()) {
-            if (elementDef.getId().equals(elementId)) {
-                existingElement = elementDef;
-                break;
-            }
-        }
-
-        // if the element doesn't exist, create it
-        if (existingElement == null) {
-            if (isSlice) {
-                ensureSliceAndBaseElementWithSlicing(element, elementPath, sd, elementId, sliceName, null);
-            } else {
-                String elementFhirType = getFhirTypeOfTargetElement(elementPath);
-
-                ElementDefinition ed = new ElementDefinition();
-                ed.setId(elementId);
-                ed.setPath(elementId);
-                ed.setMin(toBoolean(element.getRequired()) ? 1 : 0);
-                ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
-                ed.setMustSupport(true);
-
-                String unitOfMeasure = element.getFhirElementPath().getUnitOfMeasure();
-                Boolean hasUnitOfMeasure = unitOfMeasure != null && !unitOfMeasure.isEmpty();
-                if (isChoiceType(elementPath) && hasUnitOfMeasure) {
-                    ElementDefinition unitElement = new ElementDefinition();
-                    unitElement.setId(elementId + ".unit");
-                    unitElement.setPath(elementId + ".unit");
-                    unitElement.setMin(1);
-                    unitElement.setMax("1");
-                    unitElement.setMustSupport(true);
-
-                    //TODO: This should be a code, not fixed string
                     ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
                     if (elementFhirType != null && elementFhirType.length() > 0) {
-                        tr.setCode("string");
-                        unitElement.addType(tr);
+                        tr.setCode(elementFhirType);
+                        ed.addType(tr);
                     }
-                    unitElement.setFixed(new StringType(unitOfMeasure));
 
-                    sd.getDifferential().addElement(unitElement);
+                    ensureAndBindElementTerminology(element, sd, ed);
+                    sd.getDifferential().addElement(ed);
                 }
+            } else {
+                // If this is a choice type, append the current element's type to the type list.
+                if (isChoiceType(elementPath)) {
+                    List<ElementDefinition.TypeRefComponent> existingTypes = existingElement.getType();
 
-                ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
-                if (elementFhirType != null && elementFhirType.length() > 0) {
-                    tr.setCode(elementFhirType);
-                    ed.addType(tr);
-                }
-
-                ensureAndBindElementTerminology(element, sd, ed);
-                sd.getDifferential().addElement(ed);
-            }
-        }
-        else {
-            // If this is a choice type, append the current element's type to the type list.
-            if (isChoiceType(elementPath)) {
-                List<ElementDefinition.TypeRefComponent> existingTypes = existingElement.getType();
-
-                ElementDefinition.TypeRefComponent elementType = null;
-                String elementFhirType = getFhirTypeOfTargetElement(elementPath);
-                if (elementFhirType != null && elementFhirType.length() > 0) {
-                    for (ElementDefinition.TypeRefComponent type : existingTypes) {
-                        if (type.getCode().equals(elementFhirType)) {
-                            elementType = type;
-                            break;
+                    ElementDefinition.TypeRefComponent elementType = null;
+                    String elementFhirType = getFhirTypeOfTargetElement(elementPath);
+                    if (elementFhirType != null && elementFhirType.length() > 0) {
+                        for (ElementDefinition.TypeRefComponent type : existingTypes) {
+                            if (type.getCode().equals(elementFhirType)) {
+                                elementType = type;
+                                break;
+                            }
                         }
                     }
+
+                    if (elementType == null) {
+                        elementType = new ElementDefinition.TypeRefComponent();
+                        elementType.setCode(elementFhirType);
+                        existingElement.addType(elementType);
+                    }
+
+                    ensureAndBindElementTerminology(element, sd, existingElement);
                 }
 
-                if (elementType == null) {
-                    elementType = new ElementDefinition.TypeRefComponent();
-                    elementType.setCode(elementFhirType);
-                    existingElement.addType(elementType);
-                }
-
-                ensureAndBindElementTerminology(element, sd, existingElement);
             }
-
+        } catch (Exception e) {
+            System.out.println(String.format("Error ensuring element for '%s'. Error: %s ", element.getLabel(), e));
         }
     }
 
@@ -1466,6 +1574,7 @@ public class Processor extends Operation {
             String valueSetUrl = null;
             if (hasCustomValueSetName && element.getChoices().size() == 0 && customValueSetName.startsWith("http")) {
                 valueSetUrl = customValueSetName;
+                retrieves.add(new RetrieveInfo(sd, valueSetUrl));
             }
             else {
                 //TOOD: This needs some TLC, but had to decouple createCodeSystem from openMRS codes to facilitate the extended codes pattern.
@@ -1487,6 +1596,7 @@ public class Processor extends Operation {
                     codeSystem.setValueSet(valueSet.getUrl());
                 }
                 valueSetUrl = valueSet.getUrl();
+                retrieves.add(new RetrieveInfo(sd, valueSet.getTitle()));
             }
             // Bind the current element to the valueSet
             ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
@@ -1506,6 +1616,13 @@ public class Processor extends Operation {
             codes.add(coding);
 
             ed.setCode(codes);
+
+            String conceptName = code.getDisplay();
+            if (conceptName == null || conceptName.isEmpty()) {
+                conceptName = element.getLabel() + " code";
+            }
+            concepts.put(conceptName, coding);
+            retrieves.add(new RetrieveInfo(sd, conceptName));
         }
     }
 
@@ -1575,7 +1692,9 @@ public class Processor extends Operation {
                     conceptReference.setCode(code.getCode());
                     conceptReference.setDisplay(code.getLabel());
 
-                    if (!conceptReferences.contains(conceptReference)) {
+                    // Only add the concept if it does not already exist in the ValueSet (based on both Code and Display)
+                    if (!conceptReferences.stream().filter(o -> o.getCode().equals(conceptReference.getCode())
+                            && o.getDisplay().equals(conceptReference.getDisplay())).findFirst().isPresent()) {
                         conceptSet.addConcept(conceptReference);
                     }
                 }
@@ -1661,6 +1780,44 @@ public class Processor extends Operation {
         }
     }
 
+    private void indexProfileByActivity(Coding activityCoding, StructureDefinition sd) {
+        String activityId = activityCoding.getCode();
+        if (activityId != null) {
+            List<StructureDefinition> sds = profilesByActivityId.get(activityId);
+            if (sds == null) {
+                sds = new ArrayList<StructureDefinition>();
+                profilesByActivityId.put(activityId, sds);
+            }
+            if (!sds.contains(sd)) {
+                sds.add(sd);
+            }
+        }
+    }
+
+    private void indexProfileByParent(String parentUrl, StructureDefinition sd) {
+        List<StructureDefinition> sds = profilesByParentProfile.get(parentUrl);
+        if (sds == null) {
+            sds = new ArrayList<StructureDefinition>();
+            profilesByParentProfile.put(parentUrl, sds);
+        }
+        if (!sds.contains(sd)) {
+            sds.add(sd);
+        }
+    }
+
+    private void indexProfile(StructureDefinition sd) {
+        // Index the profile by Activity Id
+        Coding activityCoding = getActivityCoding(sd);
+        if (activityCoding != null) {
+            indexProfileByActivity(activityCoding, sd);
+        }
+        // Index the profile by Parent profile
+        String parentUrl = sd.getBaseDefinition();
+        if (parentUrl != null) {
+            indexProfileByParent(parentUrl, sd);
+        }
+    }
+
     public void writeProfiles(String scopePath) {
         if (profiles != null && profiles.size() > 0) {
             String profilesPath = getProfilesPath(scopePath);
@@ -1670,6 +1827,7 @@ public class Processor extends Operation {
 
             for (StructureDefinition sd : profiles) {
                 sd.getDifferential().getElement().sort(compareById);
+                indexProfile(sd);
                 writeResource(profilesPath, sd);
 
                 // Generate JSON fragment for inclusion in the IG:
@@ -1758,6 +1916,320 @@ public class Processor extends Operation {
                  */
                 igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"ValueSet/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", vs.getId()));
             }
+        }
+    }
+
+    public String getCodeSystemIdentifier(CodeSystem cs) {
+        if (cs != null) {
+            String identifier = cs.hasTitle() ? cs.getTitle() : cs.getName();
+            if (cs.hasVersion()) {
+                identifier = String.format("%s (%s)", identifier, cs.getVersion());
+            }
+
+            return identifier;
+        }
+
+        return null;
+    }
+
+    public String getCodeSystemIdentifier(String url) {
+        for (Map.Entry<String, String> e : supportedCodeSystems.entrySet()) {
+            if (e.getValue().equals(url)) {
+                return e.getKey();
+            }
+        }
+
+        return null;
+    }
+
+    public String getCodeSystemIdentifier(Coding coding) {
+        CodeSystem result = null;
+        for (CodeSystem cs : codeSystems) {
+            if (coding.getSystem().equals(cs.getUrl())) {
+                if (coding.hasVersion() && cs.hasVersion() && coding.getVersion().equals(cs.getVersion())) {
+                    result = cs;
+                    break;
+                }
+
+                if (!coding.hasVersion() && !cs.hasVersion()) {
+                    result = cs;
+                    break;
+                }
+
+                // TODO: Use a terminology service to resolve this?
+            }
+        }
+
+        if (result != null) {
+            return getCodeSystemIdentifier(result);
+        }
+
+        return getCodeSystemIdentifier(coding.getSystem());
+    }
+
+    public void writeConcepts(String scope, String scopePath) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(String.format("library %sConcepts", scope));
+        sb.append(System.lineSeparator());
+        sb.append(System.lineSeparator());
+
+        sb.append("// Code Systems");
+        sb.append(System.lineSeparator());
+        // Supported code systems
+        for (Map.Entry<String, String> entry : supportedCodeSystems.entrySet()) {
+            sb.append(String.format("codesystem \"%s\": '%s'", entry.getKey(), entry.getValue()));
+            sb.append(System.lineSeparator());
+        }
+        // For each code system, generate a codesystem CQL entry:
+        // codesystem "CodeSystem.title": 'CodeSystem.url' [version 'CodeSystem.version']
+        for (CodeSystem cs : codeSystems) {
+            String identifier = getCodeSystemIdentifier(cs);
+            sb.append(String.format("codesystem \"%s\": '%s'", identifier, cs.getUrl()));
+            if (cs.hasVersion()) {
+                sb.append(String.format(" version '%s'", cs.getVersion()));
+            }
+            sb.append(System.lineSeparator());
+        }
+
+        sb.append(System.lineSeparator());
+        sb.append("// Value Sets");
+        sb.append(System.lineSeparator());
+        // For each value set generate a valueset CQL entry:
+        // valueset "ValueSet.title": 'ValueSet.url' [version 'ValueSet.version']
+        for (ValueSet vs : valueSets) {
+            sb.append(String.format("valueset \"%s\": '%s'", vs.hasTitle() ? vs.getTitle() : vs.getName(), vs.getUrl()));
+            if (vs.hasVersion()) {
+                sb.append(String.format(" version '%s'", vs.getVersion()));
+            }
+            sb.append(System.lineSeparator());
+        }
+
+        sb.append(System.lineSeparator());
+        sb.append("// Codes");
+        sb.append(System.lineSeparator());
+        // For each concept generate a code entry:
+        // code "ConceptName": 'Coding.value' from 'getCodeSystemName(Coding.system)' display 'Coding.display'
+        for (Map.Entry<String, Coding> entry : concepts.entrySet()) {
+            sb.append(String.format("code \"%s\": '%s' from \"%s\"", entry.getKey(), entry.getValue().getCode(), getCodeSystemIdentifier(entry.getValue())));
+            if (entry.getValue().hasDisplay()) {
+                sb.append(String.format(" display '%s'", entry.getValue().getDisplay()));
+            }
+            sb.append(System.lineSeparator());
+        }
+
+        ensureCqlPath(scopePath);
+        try (FileOutputStream writer = new FileOutputStream(getCqlPath(scopePath) + "/" + scope + "Concepts.cql")) {
+            writer.write(sb.toString().getBytes());
+            writer.flush();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Error writing concepts library source");
+        }
+    }
+
+    private Identifier getDataElementIdentifier(Iterable<Identifier> identifiers) {
+        for (Identifier i : identifiers) {
+            if (i.hasSystem() && i.getSystem().equals(dataElementIdentifierSystem)) {
+                return i;
+            }
+        }
+
+        return null;
+    }
+
+    private Coding getActivityCoding(CodeableConcept concept) {
+        if (concept.hasCoding()) {
+            for (Coding c : concept.getCoding()) {
+                if (activityCodeSystem.equals(c.getSystem())) {
+                    return c;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private Coding getActivityCoding(StructureDefinition sd) {
+        if (sd.hasUseContext()) {
+            for (UsageContext uc : sd.getUseContext()) {
+                if ("http://terminology.hl7.org/CodeSystem/usage-context-type".equals(uc.getCode().getSystem())
+                        && "task".equals(uc.getCode().getCode())) {
+                    return getActivityCoding(uc.getValueCodeableConcept());
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private Comparator<String> activityIdComparator = new Comparator<String>() {
+        private int indexOfFirstDigit(String s) {
+            for (int i = 0; i < s.length(); i++) {
+                if (Character.isDigit(s.charAt(i))) {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        @Override
+        public int compare(String s1, String s2) {
+            int s1i = indexOfFirstDigit(s1);
+            int s2i = indexOfFirstDigit(s2);
+            if (s1i <= 0 || s2i <= 0) {
+                return 0;
+            }
+
+            String s1a = s1.substring(0, s1i);
+            String s2a = s2.substring(0, s2i);
+            int ac = s1a.compareTo(s2a);
+            if (ac == 0) {
+                String s1b = s1.substring(s1i);
+                String s2b = s2.substring(s2i);
+                String[] s1parts = s1b.split(".");
+                String[] s2parts = s2b.split(".");
+                for (int partIndex = 0; partIndex < s1parts.length; partIndex++) {
+                    if (partIndex >= s2parts.length) {
+                        return 1;
+                    }
+                    ac = Integer.compare(Integer.valueOf(s1parts[partIndex]), Integer.valueOf(s2parts[partIndex]));
+                    if (ac != 0) {
+                        return ac;
+                    }
+                }
+                if (s2parts.length > s1parts.length) {
+                    return -1;
+                }
+
+                return ac;
+            }
+            else {
+                return ac;
+            }
+        }
+    };
+
+    private void writeDataElement(StringBuilder sb, StructureDefinition sd) {
+        // TODO: Consider writing this to an extension on the structuredefinition instead of to the retrieveInfo like this
+        for (RetrieveInfo retrieve : retrieves) {
+            if (retrieve.structureDefinition.getId().equals(sd.getId())) {
+                String title = sd.hasTitle() ? sd.getTitle() : sd.hasName() ? sd.getName() : sd.getId();
+                sb.append("/*");
+                sb.append(System.lineSeparator());
+                sb.append("  @dataElement: ");
+                Identifier dataElementIdentifier = getDataElementIdentifier(sd.getIdentifier());
+                if (dataElementIdentifier != null) {
+                    sb.append(String.format("%s ", dataElementIdentifier.getValue()));
+                }
+                sb.append(title);
+                sb.append(System.lineSeparator());
+
+                Coding activityCoding = getActivityCoding(sd);
+                if (activityCoding != null) {
+                    sb.append(String.format("  @activity: %s %s", activityCoding.getCode(), activityCoding.getDisplay()));
+                    sb.append(System.lineSeparator());
+                }
+
+                if (sd.hasDescription()) {
+                    sb.append(String.format("  @description: %s", sd.getDescription()));
+                    sb.append(System.lineSeparator());
+                }
+                sb.append("*/");
+                sb.append(System.lineSeparator());
+                sb.append(String.format("define \"%s\":", title));
+                sb.append(System.lineSeparator());
+                sb.append(String.format("  [%s: Cx.\"%s\"]", sd.getType(), retrieve.getTerminologyIdentifier()));
+                // TODO: Switch on sd.baseDefinition to provide filtering here (e.g. status = 'not-done')
+                sb.append(System.lineSeparator());
+                sb.append(System.lineSeparator());
+            }
+        }
+    }
+
+    private void writeActivityIndexHeader(StringBuilder activityIndex, String activityId) {
+        activityIndex.append(System.lineSeparator());
+        activityIndex.append(String.format("#### %s ", activityId));
+        Coding activityCoding = activityMap.get(activityId);
+        if (activityCoding != null) {
+            activityIndex.append(activityCoding.getDisplay());
+        }
+        activityIndex.append(System.lineSeparator());
+        activityIndex.append(System.lineSeparator());
+        activityIndex.append("|Data Element Id|Data Element|");
+        activityIndex.append(System.lineSeparator());
+        activityIndex.append("|---|---|");
+        activityIndex.append(System.lineSeparator());
+    }
+
+    private void writeActivityIndexEntry(StringBuilder activityIndex, StructureDefinition sd) {
+        Identifier dataElementIdentifier = getDataElementIdentifier(sd.getIdentifier());
+        String title = sd.hasTitle() ? sd.getTitle() : sd.hasName() ? sd.getName() : sd.getId();
+        activityIndex.append(String.format("|%s|[%s](StructureDefinition-%s.html)|",
+                dataElementIdentifier != null ? dataElementIdentifier.getValue() : "", title, sd.getId()));
+        activityIndex.append(System.lineSeparator());
+    }
+
+    public void writeDataElements(String scope, String scopePath) {
+        StringBuilder sb = new StringBuilder();
+        StringBuilder activityIndex = new StringBuilder();
+
+        sb.append(String.format("library %sDataElements", scope));
+        sb.append(System.lineSeparator());
+        sb.append(System.lineSeparator());
+
+        sb.append(String.format("using FHIR version '4.0.1'"));
+        sb.append(System.lineSeparator());
+        sb.append(System.lineSeparator());
+        sb.append(String.format("include FHIRHelpers version '4.0.1'"));
+        sb.append(System.lineSeparator());
+        sb.append(System.lineSeparator());
+
+        sb.append(String.format("include %sConcepts called Cx", scope));
+        sb.append(System.lineSeparator());
+        sb.append(System.lineSeparator());
+
+        // For each StructureDefinition, generate an Expression Definition:
+        /*
+        // @dataElement: StructureDefinition.identifier
+        // @activity: StructureDefinition.useContext[task]
+        // @description: StructureDefinition.description
+        define "StructureDefinition.title":
+          [StructureDefinition.resourceType: terminologyIdentifier]
+         */
+
+        List<String> activityIds = new ArrayList<String>(profilesByActivityId.keySet());
+        activityIds.sort(activityIdComparator);
+        for (String activityId : activityIds) {
+            writeActivityIndexHeader(activityIndex, activityId);
+
+            List<StructureDefinition> sds = profilesByActivityId.get(activityId);
+            sds.sort(Comparator.comparing(StructureDefinition::getId));
+            for (StructureDefinition sd : sds) {
+                writeDataElement(sb, sd);
+                writeActivityIndexEntry(activityIndex, sd);
+            }
+        }
+
+        ensureCqlPath(scopePath);
+        try (FileOutputStream writer = new FileOutputStream(getCqlPath(scopePath) + "/" + scope + "DataElements.cql")) {
+            writer.write(sb.toString().getBytes());
+            writer.flush();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Error writing concepts library source");
+        }
+
+        try (FileOutputStream writer = new FileOutputStream(getCqlPath(scopePath) + "/" + scope + "DataElementsByActivity.md")) {
+            writer.write(activityIndex.toString().getBytes());
+            writer.flush();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Error writing profile activity index");
         }
     }
 

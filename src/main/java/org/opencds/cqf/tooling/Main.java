@@ -134,6 +134,11 @@ package org.opencds.cqf.tooling;
             - mvn exec:java -Dexec.args="-ProcessAcceleratorKit [-pathtospreadsheet | -pts] [-dataelementpages | -dep] (-outputpath | -op) (-encoding | -e)"
             - Example: mvn exec:java -Dexec.args="-ProcessAcceleratorKit -pts=ANC-Primary-Data-Dictionary.xlsx -dep=""ANC Reg,Quick Check,Profile,S&F,PE,Tests,C&T"""
 
+        - Decision Table Processor
+            - This tooling converts a WHO accelerator kit decision table to a set of PlanDefinition resources
+            - mvn exec:java -Dexec.args="-ProcessDecisionTable [-pathtospreadsheet | -pts] [-decisiontablepages | -dtp] (-outputpath | -op) (-encoding | -e)"
+            - Example: mvn exec:java -Dexec.args="-ProcessDecisionTable -pts=ANC-Decision-Logic.xlsx -dtp=""ANC.DT.01 Danger signs,ANC.DT.02 Check symptoms"""
+
         - Jurisdiction List Converter
             - This tooling converts an RCKMS list of jurisdictions from an Excel file to a CodeSystem
             - mvn exec:java -Dexec.args="-JurisdictionListConverter [-pathtosource | -pts] (outputpath | -op)"
