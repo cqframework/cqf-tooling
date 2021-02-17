@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.processor;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FilenameUtils;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.operation.RefreshGeneratedContentOperation;
 import org.opencds.cqf.tooling.measure.r4.RefreshR4MeasureOperation;
@@ -52,6 +53,7 @@ public class MeasureProcessor
                 refresher.refreshGeneratedContent();
                 refreshedMeasureNames.add(FilenameUtils.getBaseName(path).replace(MeasureProcessor.ResourcePrefix, ""));
             } catch (Exception e) {
+                e.printStackTrace();
                 LogUtils.putException(path, e);
             }
             finally {
@@ -82,9 +84,19 @@ public class MeasureProcessor
                 }
                 IBaseResource measure = resources.get(measureEntry.getKey());
                 String primaryLibraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
-                IBaseResource primaryLibrary = IOUtils.getLibraryUrlMap(fhirContext).get(primaryLibraryUrl);
+                IBaseResource primaryLibrary;
+                if (primaryLibraryUrl.startsWith("http")) {
+                    primaryLibrary = IOUtils.getLibraryUrlMap(fhirContext).get(primaryLibraryUrl);
+                }
+                else {
+                    primaryLibrary = IOUtils.getLibraries(fhirContext).get(primaryLibraryUrl);
+                }
                 String primaryLibrarySourcePath = IOUtils.getLibraryPathMap(fhirContext).get(primaryLibrary.getIdElement().getIdPart());
                 String primaryLibraryName = ResourceUtils.getName(primaryLibrary, fhirContext);
+                if (includeVersion) {
+                    primaryLibraryName = primaryLibraryName + "-" + 
+                        fhirContext.newFhirPath().evaluateFirst(primaryLibrary, "version", IBase.class).get().toString();
+                }
 
                 shouldPersist = shouldPersist
                         & ResourceUtils.safeAddResource(primaryLibrarySourcePath, resources, fhirContext);
@@ -190,6 +202,7 @@ public class MeasureProcessor
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  
                 }  
             }  catch (Exception e) {
+                e.printStackTrace();
                 LogUtils.putException(libraryName, e.getMessage());
             }       
         }

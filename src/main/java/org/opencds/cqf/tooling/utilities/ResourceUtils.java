@@ -1,7 +1,9 @@
 package org.opencds.cqf.tooling.utilities;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,6 +13,10 @@ import java.util.Map.Entry;
 
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
+import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
+import org.cqframework.cql.cql2elm.FhirLibrarySourceProvider;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.hl7.elm.r1.IncludeDef;
@@ -22,7 +28,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.opencds.cqf.tooling.library.GenericLibrarySourceProvider;
 import org.opencds.cqf.tooling.processor.ValueSetsProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
@@ -357,19 +362,59 @@ public class ResourceUtils
       return valueSetDefs;
     }
 
+    private static CqlTranslatorOptions getTranslatorOptions(String folder) {
+      String optionsFileName = folder + File.separator + "cql-options.json";
+      CqlTranslatorOptions options = null;
+      File file = new File(optionsFileName);
+      if (file.exists()) {
+          options = CqlTranslatorOptionsMapper.fromFile(file.getAbsolutePath());
+      }
+      else {
+          options = CqlTranslatorOptions.defaultOptions();
+          if (!options.getFormats().contains(CqlTranslator.Format.XML)) {
+              options.getFormats().add(CqlTranslator.Format.XML);
+          }
+      }
+
+      return options;
+  }
+
     private static Map<String, org.hl7.elm.r1.Library> cachedElm = new HashMap<String, org.hl7.elm.r1.Library>();
     public static org.hl7.elm.r1.Library getElmFromCql(String cqlContentPath) {
       org.hl7.elm.r1.Library elm = cachedElm.get(cqlContentPath);
       if (elm != null) {
         return elm;
       }
-      String cqlDirPath = IOUtils.getParentDirectoryPath(cqlContentPath);
-      ModelManager modelManager = new ModelManager();
-      GenericLibrarySourceProvider sourceProvider = new GenericLibrarySourceProvider(cqlDirPath);
-      LibraryManager libraryManager = new LibraryManager(modelManager);
-      libraryManager.getLibrarySourceLoader().registerProvider(sourceProvider);
 
-      CqlTranslator translator = IOUtils.translate(cqlContentPath, modelManager, libraryManager);      
+      String folder = IOUtils.getParentDirectoryPath(cqlContentPath);
+
+      CqlTranslatorOptions options = getTranslatorOptions(folder);
+
+      // Setup
+      // Construct DefaultLibrarySourceProvider
+      // Construct FhirLibrarySourceProvider
+      ModelManager modelManager = new ModelManager();
+      LibraryManager libraryManager = new LibraryManager(modelManager);
+      // if (packages != null) {
+      //     libraryManager.getLibrarySourceLoader().registerProvider(new NpmLibrarySourceProvider(packages, reader, logger));
+      // }
+      libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
+      libraryManager.getLibrarySourceLoader().registerProvider(new DefaultLibrarySourceProvider(Paths.get(folder)));
+
+      // loadNamespaces(libraryManager);
+
+      // foreach *.cql file
+      // for (File file : new File(folder).listFiles(getCqlFilenameFilter())) {
+      //     translateFile(modelManager, libraryManager, file, options);
+      // }
+
+  
+      // ModelManager modelManager = new ModelManager();
+      // GenericLibrarySourceProvider sourceProvider = new GenericLibrarySourceProvider(folder);
+      // LibraryManager libraryManager = new LibraryManager(modelManager);
+      // libraryManager.getLibrarySourceLoader().registerProvider(sourceProvider);
+
+      CqlTranslator translator = IOUtils.translate(cqlContentPath, modelManager, libraryManager, options);      
       elm = translator.toELM(); 
       cachedElm.put(cqlContentPath, elm);
       return elm; 
@@ -522,7 +567,9 @@ public class ResourceUtils
               if (!measure.hasLibrary() || measure.getLibrary().size() != 1) {
                   throw new IllegalArgumentException("Measure is expected to have one and only one library");
               }
-              return measure.getLibrary().get(0).getReference();
+              String reference = measure.getLibrary().get(0).getReference();
+              String parts[] = reference.split("/");
+              return parts[parts.length - 1];
           }
           case R4: {
               org.hl7.fhir.r4.model.Measure measure = (org.hl7.fhir.r4.model.Measure)resource;

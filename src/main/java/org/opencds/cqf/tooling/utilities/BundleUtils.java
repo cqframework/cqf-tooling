@@ -81,6 +81,7 @@ public class BundleUtils {
             try {
                 HttpClientUtils.post(fhirUri, bundle, encoding, fhirContext);
             } catch (IOException e) {
+                e.printStackTrace();
                 LogUtils.putException(bundle.getIdElement().getIdPart(), "Error posting to FHIR Server: " + fhirUri + ".  Bundle not posted.");
             }
         }

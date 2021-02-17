@@ -16,6 +16,7 @@ import java.util.*;
 
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.CqlTranslatorException;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
@@ -210,10 +211,10 @@ public class IOUtils
             IParser parser = getParser(encoding, fhirContext);
             File file = new File(path);
 
-            if (!file.exists()) {
-                String[] paths = file.getParent().split("\\\\");
-                file = new File(Paths.get(file.getParent(), paths[paths.length - 1] + "-" + file.getName()).toString());
-            }
+            // if (!file.exists()) {
+            //     String[] paths = file.getParent().split("\\\\");
+            //     file = new File(Paths.get(file.getParent(), paths[paths.length - 1] + "-" + file.getName()).toString());
+            // }
 
             if (safeRead) {
                 if (!file.exists()) {
@@ -422,7 +423,7 @@ public class IOUtils
     } 
   
     private static Map<String, CqlTranslator> cachedTranslator = new LinkedHashMap<String, CqlTranslator>();
-    public static CqlTranslator translate(String cqlContentPath, ModelManager modelManager, LibraryManager libraryManager) {
+    public static CqlTranslator translate(String cqlContentPath, ModelManager modelManager, LibraryManager libraryManager, CqlTranslatorOptions options) {
         CqlTranslator translator = cachedTranslator.get(cqlContentPath);
         if (translator != null) {
             return translator;
@@ -433,17 +434,16 @@ public class IOUtils
             throw new IllegalArgumentException("cqlContentPath must be a path to a .cql file");
           }
           
-            ArrayList<CqlTranslator.Options> options = new ArrayList<>();
-            options.add(CqlTranslator.Options.EnableDateRangeOptimization);
+            // ArrayList<CqlTranslator.Options> options = new ArrayList<>();
+            // options.add(CqlTranslator.Options.EnableDateRangeOptimization);
   
             translator =
                     CqlTranslator.fromFile(
                             cqlFile,
                             modelManager,
                             libraryManager,
-                            options.toArray(new CqlTranslator.Options[0])
-                    );
-  
+                            null, options);
+
             if (translator.getErrors().size() > 0) {
                 //System.err.println("Translation failed due to errors:");
                 ArrayList<String> errors = new ArrayList<>();
@@ -498,7 +498,10 @@ public class IOUtils
                 igVersionToken = "";
         }
         String result = baseName + getFileExtension(encoding); 
-        result = result.replace("-" + igVersionToken, "_" + igVersionToken);
+        if (encoding == Encoding.CQL) {
+            result = result.replace("-" + igVersionToken, "_" + igVersionToken);
+        }
+
         return result;
     }    
 
