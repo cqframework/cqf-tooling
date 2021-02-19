@@ -1,6 +1,6 @@
 # cqf-tooling
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.opencds.cqf/tooling/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.opencds.cqf/tooling) [![Build Status](https://www.travis-ci.com/cqframework/cqf-tooling.svg?branch=master)](https://www.travis-ci.com/cqframework/cqf-tooling)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.opencds.cqf/tooling/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.opencds.cqf/tooling) [![Build Status](https://www.travis-ci.com/cqframework/cqf-tooling.svg?branch=master)](https://www.travis-ci.com/cqframework/cqf-tooling) [![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.fhir.org/#narrow/stream/179220-cql)
 
 Tooling for CQL and IG Authors
 
@@ -28,9 +28,11 @@ mvn exec:java \
 -vssrc=cms"
 ```
 
-Documentation of the various operations is provided in the [Main](src/main/java/org/opencds/cqf/tooling/Main.java) class.
+Executable jars are produced by the CI system on Maven Central: [Download executable jar](https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=org.opencds.cqf&a=tooling&c=jar-with-dependencies&v=LATEST)
 
-Executable jars are produced by the CI system and uploaded to the Maven repository for org.opencds.cqf.
+This can be run with `java -jar tooling-1.3.0-jar-with-dependencies.jar -VsacXlsxToValueSetBatch`
+
+Documentation of the various operations is provided in the [Main](src/main/java/org/opencds/cqf/tooling/Main.java) class.
 
 ## Commit Policy
 
@@ -39,6 +41,22 @@ All new development takes place on `<feature>` branches off `master`. Once featu
 Changes to the `master` branch must be done through an approved PR. Delete branches after merging to keep the repository clean.
 
 Merges to `master` trigger a deployment to the Maven Snapshots repositories. Once ready for a release, the `master` branch is updated with the correct version number and is tagged. Tags trigger a full release to Maven Central and a corresponding release to Github. Releases SHALL NOT have a SNAPSHOT version, nor any SNAPSHOT dependencies.
+
+## Getting Help
+
+Bugs and feature requests can be filed with [Github Issues](https://github.com/cqframework/cqf-tooling/issues).
+
+The implementers are active on the official FHIR [Zulip chat for CQL](https://chat.fhir.org/#narrow/stream/179220-cql).
+
+Inquires for commercial support can be directed to [info@alphora.com](info@alphora.com).
+
+## Related Projects
+
+[Clinical Quality Language](https://github.com/cqframework/clinical_quality_language) - Tooling in support of the CQL specification, including the CQL verifier/translator used in this project.
+
+[CQL Support for Atom](https://atom.io/packages/language-cql) - Open source CQL IDE with syntax highlighting, linting, and local CQL evaluation.
+
+[CQF Ruler](https://github.com/DBCG/cqf-ruler) - Integrates this project into the HAPI FHIR server, exposing some functionality as services.
 
 ## License
 
