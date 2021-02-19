@@ -37,7 +37,6 @@ package org.opencds.cqf;
 
         - XLSX Opioid ValueSet terminology generator
             - command: mvn exec:java -Dexec.args="[-OpioidXlsxToValueSet] [-pathtospreadsheet=<path> | -pts] (-outputpath | -op) (-encoding | -e) (-outputprefix | -opp) (-outputversion | -opv)"
-            - Example: mvn exec:java -Dexec.args="-OpioidXlsxToValueSet -pts=C:\Users\Carter\Desktop\Opioid.xlsx -opv=stu3"
             - This tooling converts the CDC Opioid XLSX spreadsheet to valuesets.
             - Outputversion, if not specified, defaults to R4.
 
