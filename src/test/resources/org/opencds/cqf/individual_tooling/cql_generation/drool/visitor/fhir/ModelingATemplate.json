@@ -1,0 +1,27 @@
+{
+    "resourceType": "Condition",
+    "id": "modelingA-some-patient",
+    "clinicalStatus": {
+        "coding": [{
+            "code": "active"
+        }]
+    },
+    "verificationStatus":{
+        "coding": [{
+            "code": "confirmed"
+        }]
+    },
+    "category": {
+        "coding": [{
+            "code": "encounter-diagnosis"
+        }]
+    },
+    "code": {
+        "coding": [{
+            "code": "some-code"
+        }]
+    },
+    "subject": {
+        "reference": "Patient/some-patient"
+    }
+}

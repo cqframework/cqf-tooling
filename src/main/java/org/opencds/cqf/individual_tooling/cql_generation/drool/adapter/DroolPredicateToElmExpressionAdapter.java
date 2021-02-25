@@ -1,9 +1,13 @@
 package org.opencds.cqf.individual_tooling.cql_generation.drool.adapter;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import com.google.common.base.Strings;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cdsframework.dto.CdsCodeDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicateDTO;
@@ -16,224 +20,321 @@ import org.cdsframework.enumeration.CriteriaPredicateType;
 import org.cdsframework.enumeration.CriteriaResourceType;
 import org.cdsframework.enumeration.DataModelClassType;
 import org.cdsframework.enumeration.PredicatePartType;
-import org.hl7.cql.model.DataType;
-import org.hl7.elm.r1.AccessModifier;
-import org.hl7.elm.r1.Count;
-import org.hl7.elm.r1.Distinct;
+import org.cqframework.cql.cql2elm.LibraryBuilder;
+import org.hl7.elm.r1.CodeRef;
+import org.hl7.elm.r1.CodeSystemRef;
 import org.hl7.elm.r1.Expression;
 import org.hl7.elm.r1.Literal;
-import org.hl7.elm.r1.Property;
 import org.hl7.elm.r1.Quantity;
-import org.hl7.elm.r1.ValueSetDef;
-import org.hl7.elm.r1.ValueSetRef;
 import org.opencds.cqf.individual_tooling.cql_generation.context.ElmContext;
-import org.opencds.cqf.individual_tooling.cql_generation.context.FHIRContext;
+import org.opencds.cqf.individual_tooling.cql_generation.builder.ModelElmBuilder;
 
+/**
+ * Provides adapter functionality from any node in a ConditionCriteriaPredicateDTO object graph to the respective elm Expression representation.
+ * This is meant to build a single expression at a time. The order should not necessarily matter although there are some cases
+ * where, for example, a function declaration must start, gather operands, and end.
+ * @author  Joshua Reynolds
+ * @since   2021-02-24 
+ */
 public class DroolPredicateToElmExpressionAdapter {
-    private FHIRContext fhirContext = new FHIRContext();
-    // Literal, Quantity, Expression, or vmrModeling
+    /**
+     * the {@link ModelElmBuilder ModelElmBuilder } is needed to determine the respective mapping 
+     * from the VMR Model to a Model used in Cql i.e. FHIR
+     */
+    private ModelElmBuilder modelBuilder;
+    /**
+     * left represents the left operand of a predicate
+     * Literal, Quantity, Expression, or vmrModeling
+    */
     private Object left;
+    /**
+     * right represents the right operand of a predicate
+     */
     private Expression right;
+    /**
+     * operator represents the operator of a predicate
+     */
     private String operator;
+    /**
+     * holds context of whether or not the current state is processing a function
+     */
     private boolean startedFunction = false;
 
-    public void adapt(OpenCdsConceptDTO openCdsConceptDTO, ElmContext context) {
-        // TODO: Support List of ValueSets for counting each
-        if (openCdsConceptDTO.getCode() != null) {
-            // Create valueSet Identifier: displayName GoballyUniqueIdentifier: displayName
-            // Only if it's not 2.16.840.1.113883.3.795.5.4.12.5.1
-            if (openCdsConceptDTO.getCode().equals("y") || openCdsConceptDTO.getCode().equals("m") || openCdsConceptDTO.getCode().equals("d")) {
-                right = inferUnitAndQuantity(context, openCdsConceptDTO.getCode());
-            } else {
-                String url = "";
-                String name = "";
-                if (fhirContext.valueSetMap != null && fhirContext.valueSetMap.size() > 0) {
-                    Pair<String, String> displayUrlPair = fhirContext.valueSetMap.get(openCdsConceptDTO.getCode());
-                    // url = displayUrlPair.getRight();
-                    url = openCdsConceptDTO.getCode();
-                    name = displayUrlPair.getLeft();
-                }
-                ValueSetRef valueSetRef = adaptValueSet(context, url, name);
-                right = valueSetRef;
-            }
-        }
-    }
+    //TODO: only used for debugging... maybe only engage when debugging and add to log?
+    private boolean hitLeft = false;
+    private boolean hitRight = false;
+    public static Set<String> valueSetIds = new HashSet<String>();
 
-    public void adapt(CdsCodeDTO cdsCodeDTO, ElmContext context) {
-        // TODO: Support List of ValueSets for counting each
-        if (cdsCodeDTO.getCode() != null) {
-            if (cdsCodeDTO.getCode().equals("y") || cdsCodeDTO.getCode().equals("m") || cdsCodeDTO.getCode().equals("d")) {
-                right = inferUnitAndQuantity(context, cdsCodeDTO.getCode());
-            } else {
-                String url = "";
-                String name = "";
-                if (fhirContext.valueSetMap != null && fhirContext.valueSetMap.size() > 0) {
-                    Pair<String, String> displayUrlPair = fhirContext.valueSetMap.get(cdsCodeDTO.getCode());
-                    // url = displayUrlPair.getRight();
-                    url = cdsCodeDTO.getCode();
-                    name = displayUrlPair.getLeft();
-                }
-                ValueSetRef valueSetRef = adaptValueSet(context, url, name);
-                right = valueSetRef;
-            }
-        }
+    /**
+     * Provides adapter functionality from any node in a ConditionCriteriaPredicateDTO object graph to the respective elm representation.
+     * @param modelBuilder modelBuilder
+     */
+    public DroolPredicateToElmExpressionAdapter(ModelElmBuilder modelBuilder) {
+        this.modelBuilder = modelBuilder;
     }
+    
+    /**
+     * Interrogates the {@link DataInputNodeDTO dataInputNode } for a TemplateName and NodePath in order to determine output Model Mapping
+     * @param dIN dataInputNode
+     * @param context elmContext
+     */
+    public void adapt(DataInputNodeDTO dIN, ElmContext context) {
+        left = Pair.of(dIN.getTemplateName(), dIN.getNodePath());
+        if (left != null) {
+            hitLeft = true;
+        }
+	}
 
+    /**
+     * Interrogates the {@link ConditionCriteriaPredicatePartDTO predicatePart } in order to determine if a Quantity or Function must be resolved in Elm
+     * @param predicatePart predicatePart
+     * @param context elmContext
+     */
     public void adapt(ConditionCriteriaPredicatePartDTO predicatePart, ElmContext context) {
-        if (predicatePart.getDataInputClassType() != null
-                && (predicatePart.getDataInputClassType().equals(DataModelClassType.String)
-                        || predicatePart.getDataInputClassType().equals(DataModelClassType.Quantity)
-                        || predicatePart.getDataInputClassType().equals(DataModelClassType.Numeric))
-                && predicatePart.getPartType().equals(PredicatePartType.DataInput)) {
-            if (predicatePart.getDataInputNumeric() != null) {
-                if (predicatePart.getText() != null && predicatePart.getText().equals("mg/24 hours ")) {
-                    adaptQuantityOperand("mg/(24.h)", predicatePart.getDataInputNumeric(), context);
-                } else{
-                    adaptQuantityOperand(predicatePart.getText(), predicatePart.getDataInputNumeric(), context);
+        if (predicatePart.getDataInputClassType() != null && predicatePart.getPartType().equals(PredicatePartType.DataInput)) {
+            switch (predicatePart.getDataInputClassType()) {
+                case Numeric: resolveQuantity(predicatePart.getText(), predicatePart.getDataInputNumeric(), context.libraryBuilder);
+                    break;
+                case Quantity: resolveQuantity(predicatePart.getText(), predicatePart.getDataInputNumeric(), context.libraryBuilder);
+                    break;
+                case String: {
+                    if (predicatePart.getText() != null && predicatePart.getText().equals("Null")) {
+                        right = context.libraryBuilder.buildNull(context.libraryBuilder.resolveTypeName("System", "String"));
+                        hitRight = true;
+                    } else {
+                        resolveQuantity(predicatePart.getText(), predicatePart.getDataInputNumeric(), context.libraryBuilder);
+                    }
                 }
-            } else {
-                adaptQuantityOperand(predicatePart.getText(), null, context);
+                    break;
+                default:
+                    break;
             }
-        }
-        if (predicatePart.getResourceType() != null && predicatePart.getResourceType().equals(CriteriaResourceType.Function)) {
-            if (!startedFunction) {
-                if (predicatePart.getCriteriaResourceDTO() != null && predicatePart.getCriteriaResourceDTO().getName().equals("CountUnique")) {
-                    startedFunction = true;
-                } else {
-                    throw new RuntimeException("Unknown Function: " + predicatePart.getCriteriaResourceDTO().getName());
-                }
-            } else {
-                left = fhirContext.buildCountQuery(context, left, right, operator);
-                startedFunction = false;
+        } else {
+            if (predicatePart.getResourceType() != null && predicatePart.getCriteriaResourceDTO() != null && predicatePart.getResourceType().equals(CriteriaResourceType.Function)) {
+                resolveFunction(predicatePart.getCriteriaResourceDTO().getName(), context.libraryBuilder);
             }
         }
     }
 
+    /**
+     * Interrogates the {@link CriteriaPredicatePartDTO sourcePredicatePartDTO } in order to determine if a Boolean literal
+     * or a Patient Age Function should be resolved in Elm
+     * @param sourcePredicatePartDTO sourcePredicatePartDTO
+     * @param context elmContext
+     */
+	public void adapt(CriteriaPredicatePartDTO sourcePredicatePartDTO, ElmContext context) {
+        switch(sourcePredicatePartDTO.getPartType()) {
+            case DataInput: {
+                if (sourcePredicatePartDTO.getDataInputClassType().equals(DataModelClassType.Boolean)) {
+                    right = context.libraryBuilder.createLiteral(sourcePredicatePartDTO.isDataInputBoolean());
+                    if (right != null) {
+                        hitRight = true;
+                    }
+                }
+            } break;
+            case Text: {
+                if (sourcePredicatePartDTO.getText().equals("Patient age is")) {
+                    left = modelBuilder.resolveModeling(context.libraryBuilder, Pair.of("Patient", "Age"), right, operator);
+                if (left != null) {
+                    hitLeft = true;
+                }
+                }
+            } break;
+            default:
+                break;
+        }
+    }
+
+    private void resolveFunction(String criteriaResourceName, LibraryBuilder libraryBuilder) {
+        if (!startedFunction) {
+            if (!Strings.isNullOrEmpty(criteriaResourceName) && criteriaResourceName.toLowerCase().equals("countunique")) {
+                startedFunction = true;
+            } else {
+                throw new RuntimeException("Unknown Function: " + criteriaResourceName);
+            }
+        } else {
+            Expression modeling = modelBuilder.resolveModeling(libraryBuilder, (Pair<String, String>)left, right, operator);
+            left = modelBuilder.buildCountQuery(libraryBuilder, modeling, right, operator);
+            if (left != null) {
+                hitLeft = true;
+            }
+            startedFunction = false;
+        }
+    }
+
+    private void resolveQuantity(String text, BigDecimal dataInputNumericValue, LibraryBuilder libraryBuilder) {
+        if (dataInputNumericValue != null) {
+            if (!Strings.isNullOrEmpty(text)) {
+                List<String> unitParts = List.of(text.split(" "));
+                if (unitParts.contains("mg/24") && unitParts.contains("hours")) {
+                    adaptQuantityOperand("mg/(24.h)", dataInputNumericValue, libraryBuilder);
+                    return;
+                }
+            }
+            if (StringUtils.isNumeric(text)) {
+                adaptQuantityOperand(null, dataInputNumericValue, libraryBuilder);
+            } else {
+                adaptQuantityOperand(text, dataInputNumericValue, libraryBuilder);
+            }
+        } else {
+            adaptQuantityOperand(text, null, libraryBuilder);
+        }
+    }
+
+    /**
+     * Interrogates the {@link CriteriaResourceParamDTO criteriaResourceParamDTO } for the operator name
+     * @param criteriaResourceParamDTO criteriaResourceParamDTO
+     * @param context elmContext
+     */
     public void adapt(CriteriaResourceParamDTO criteriaResourceParamDTO, ElmContext context) {
         if (criteriaResourceParamDTO.getName() != null) {
             operator = criteriaResourceParamDTO.getName();
         }
     }
 
-    public void adapt(DataInputNodeDTO dIN, ElmContext context) {
-        // could look at predicateCount to figure out if this truly represents left
-        left = Pair.of(dIN.getTemplateName(), dIN.getNodePath());
-	}
+    /**
+     * Interrogates the {@link OpenCdsConceptDTO openCdsConceptDTO } for the code and displayName in order to determine Terminology
+     * @param openCdsConceptDTO openCdsConceptDTO
+     * @param context elmContext
+     */
+    public void adapt(OpenCdsConceptDTO openCdsConceptDTO, ElmContext context) {
+        valueSetIds.add(openCdsConceptDTO.getCode());
+        resoveValueSet(openCdsConceptDTO.getCode(), openCdsConceptDTO.getDisplayName(), context.libraryBuilder);
+    }
 
-	public void adapt(CriteriaPredicatePartDTO sourcePredicatePartDTO, ElmContext context) {
-        if (sourcePredicatePartDTO.getPartType().equals(PredicatePartType.Text)) {
-            if (sourcePredicatePartDTO.getText().equals("Patient age is")) {
-                DataType dataType = context.libraryBuilder.resolveTypeName(context.getModelIdentifier() + "." + "Patient");
-                DataType birthDateType = context.libraryBuilder.resolvePath(dataType, "birthDate");
-                Property birthDateProperty = context.of.createProperty().withPath("birthDate").withSource(context.of.createExpressionRef().withName("Patient"));
-                birthDateProperty.setResultType(birthDateType);
-                Expression today = context.of.createToday();
-                today.setResultType(context.libraryBuilder.resolveTypeName("System", "Date"));
-                Expression operand = context.libraryBuilder.resolveFunction("System", "CalculateAgeAt", List.of(birthDateProperty, today));
-                left = operand;
-            }
-        } else if (sourcePredicatePartDTO.getPartType().equals(PredicatePartType.DataInput)) {
-            if (sourcePredicatePartDTO.getDataInputClassType().equals(DataModelClassType.Boolean)) {
-                // TODO: need a way to retrieve dataInputBoolean value
-                right = context.libraryBuilder.createLiteral(true);
+    /**
+     * Interrogates the {@link CdsCodeDTO cdsCodeDTO } for the code and displayName in order to determine Terminology
+     * @param cdsCodeDTO
+     * @param context
+     */
+    public void adapt(CdsCodeDTO cdsCodeDTO, ElmContext context) {
+        valueSetIds.add(cdsCodeDTO.getCode());
+        resoveValueSet(cdsCodeDTO.getCode(), cdsCodeDTO.getDisplayName(), context.libraryBuilder);
+    }
+
+    private void resoveValueSet(String code, String display, LibraryBuilder libraryBuilder) {
+        if (code != null) {
+            if (code.matches("(?i)y|m|d")) {
+                right = inferUnitAndQuantity(libraryBuilder, code);
+                if (right != null) {
+                    hitLeft = true;
+                }
+            } else {
+                String url = "https://hln.com/fhir/ValueSet/" + code;
+                if (display.equals("Active")) {
+                    right = resolveActiveConditionCode(libraryBuilder);
+                    if (right != null) {
+                        hitRight = true;
+                    }
+                } else {
+                    right = modelBuilder.adaptValueSet(libraryBuilder, url, display);
+                    if (right != null) {
+                        hitRight = true;
+                    }
+                }
             }
         }
     }
-    
+
+    private CodeRef resolveActiveConditionCode(LibraryBuilder libraryBuilder) {
+        String systemUrl = "http://terminology.hl7.org/CodeSystem/condition-clinical";
+        String systemName = "Condition Clinical Status Codes";
+
+        String finalId = "active";
+        String finalName = "Active";
+        String finalDisplay = "Active";
+
+        CodeSystemRef csRef = modelBuilder.buildCodeSystem(libraryBuilder, systemUrl, systemName);
+        return modelBuilder.buildCode(libraryBuilder, finalId, finalName, finalDisplay, csRef);
+    }
+
+    /**
+     * If there are any {@link ConditionCriteriaPredicatePartDTO predicateParts}, push a predicate expression to the expression stack.
+     * @param predicate
+     * @param context
+     */
 	public void adapt(ConditionCriteriaPredicateDTO predicate, ElmContext context) {
-        if (predicate.getPredicatePartDTOs().size() > 0 && ! predicate.getPredicateType().equals(CriteriaPredicateType.PredicateGroup)) {
-            context.expressionStack.push(fhirContext.buildPredicate(context, left, right, operator));
+        if (predicate.getPredicatePartDTOs().size() > 0 && !predicate.getPredicateType().equals(CriteriaPredicateType.PredicateGroup)) {
+            if (!hitRight || !hitLeft) {
+                System.out.println("Not enough information to generate drool from " + predicate.getUuid());
+            }
+            context.expressionStack.push(modelBuilder.buildPredicate(context.libraryBuilder, left, right, operator));
             if (left instanceof Quantity) {
                 left = null;
             }
-            // TODO: need to clearState() each time somehow;
+            clearState();
         }
     }
 
-    private ValueSetRef adaptValueSet(ElmContext context, String url, String name) {
-        ValueSetDef vs = context.libraryBuilder.resolveValueSetRef(name);
-        if (vs == null) {
-            vs = context.of.createValueSetDef()
-                .withAccessLevel(AccessModifier.PUBLIC)
-                .withName(name)
-                .withId(url);
-            vs.setResultType(context.libraryBuilder.resolveTypeName("System", "ValueSet"));
-            context.libraryBuilder.addValueSet(vs);
-        }
-        ValueSetRef valueSetRef = context.of.createValueSetRef().withName(name);
-        valueSetRef.setResultType(context.libraryBuilder.resolveTypeName("System", "ValueSet"));
-        return valueSetRef;
+    private void clearState() {
+        hitLeft = false;
+        hitRight = false;
+        left = null;
+        right = null;
+        operator = null;
+        startedFunction = false;
     }
 
-    private void adaptQuantityOperand(String text, BigDecimal bigDecimal, ElmContext context) {
-        if (text == null || text.equals("") || text.toLowerCase().equals("null")) {
+    private void adaptQuantityOperand(String text, BigDecimal bigDecimal, LibraryBuilder libraryBuilder) {
+        if (Strings.isNullOrEmpty(text) || text.toLowerCase().equals("null")) {
             System.out.println("No Unit Provided");
         }
-        if (bigDecimal == null && (text == null || text.equals("") || text.toLowerCase().equals("null"))) {
+        if (bigDecimal == null && (Strings.isNullOrEmpty(text) || text.toLowerCase().equals("null"))) {
             System.out.println("Data Input was Null");
             return;
         }
         if (bigDecimal != null) {
             if (left == null) {
-                if (text != null) {
-                    left = context.libraryBuilder.createQuantity(bigDecimal, text);
+                if (!Strings.isNullOrEmpty(text)) {
+                    left = libraryBuilder.createQuantity(bigDecimal, text);
                 } else {
-                    left = context.libraryBuilder.createLiteral(bigDecimal.doubleValue());
+                    left = libraryBuilder.createLiteral(bigDecimal.doubleValue());
+                }
+                if (left != null) {
+                    hitLeft = true;
                 }
             }
             else {
-                if (text != null) {
-                    right = context.libraryBuilder.createQuantity(bigDecimal, text);
+                if (!Strings.isNullOrEmpty(text)) {
+                    right = libraryBuilder.createQuantity(bigDecimal, text);
                 } else {
-                    right = context.libraryBuilder.createLiteral(bigDecimal.doubleValue());
+                    right = libraryBuilder.createLiteral(bigDecimal.doubleValue());
+                }
+                if (right != null) {
+                    hitRight = true;
                 }
             }
         } else {
             if (left == null) {
-                left = context.libraryBuilder.createNumberLiteral(text);
+                left = libraryBuilder.createNumberLiteral(text);
             } else {
-                right = context.libraryBuilder.createNumberLiteral(text);
+                right = libraryBuilder.createNumberLiteral(text);
+            }
+            if (left != null) {
+                hitLeft = true;
+            }
+            if (right != null) {
+                hitRight = true;
             }
         }
     }
 
-    private Quantity inferUnitAndQuantity(ElmContext context, String code) {
+    private Quantity inferUnitAndQuantity(LibraryBuilder libraryBuilder, String code) {
         // TODO: what if unit is for left Quantity?
+        String unit;
         switch (code) {
-            case "y": {
-                if (right != null && right instanceof Quantity) {
-                    return context.libraryBuilder.createQuantity(((Quantity) right).getValue(), "years");
-                } else if (right != null && right instanceof Literal) {
-                    Literal literal = (Literal) right;
-                    return context.libraryBuilder.createQuantity(parseDecimal(context, literal.getValue()), "years");
-                }
-            }
-            case "m": {
-                if (right != null && right instanceof Quantity) {
-                    return context.libraryBuilder.createQuantity(((Quantity) right).getValue(), "months");
-                } else if (right != null && right instanceof Literal) {
-                    Literal literal = (Literal) right;
-                    return context.libraryBuilder.createQuantity(parseDecimal(context, literal.getValue()), "months");
-                }
-            }
-            case "d": {
-                if (right != null && right instanceof Quantity) {
-                    return context.libraryBuilder.createQuantity(((Quantity) right).getValue(), "days");
-                } else if (right != null && right instanceof Literal) {
-                    Literal literal = (Literal) right;
-                    return context.libraryBuilder.createQuantity(parseDecimal(context, literal.getValue()), "days");
-                }
-            }
+            case "y": unit = "years"; break;
+            case "m": unit = "months"; break;
+            case "d": unit = "days"; break;
             default: throw new RuntimeException("Unkown unit type: " + code);
         }
-    }
-
-    private BigDecimal parseDecimal(ElmContext context, String value) {
-        try {
-            BigDecimal result = (BigDecimal)context.getDecimalFormat().parse(value);
-            return result;
-        } catch (ParseException e) {
-            throw new IllegalArgumentException(String.format("Could not parse number literal: %s", value, e));
+        if (right != null && right instanceof Quantity) {
+            return libraryBuilder.createQuantity(((Quantity) right).getValue(), unit);
+        } else if (right != null && right instanceof Literal) {
+            Literal literal = (Literal) right;
+            return libraryBuilder.createQuantity(modelBuilder.parseDecimal(literal.getValue()), unit);
+        } else {
+            throw new RuntimeException("Unable to infer Quantity from " + right.getClass().getName());
         }
     }
 }

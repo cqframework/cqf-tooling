@@ -5,6 +5,11 @@ import org.opencds.cqf.tooling.parameter.GenerateCQLFromDroolParameters;
 import org.opencds.cqf.tooling.processor.GenerateCQLFromDroolProcessor;
 import org.opencds.cqf.tooling.processor.argument.GenerateCQLFromDroolArgumentProcessor;
 
+/**
+ * Generate Cql (Elm Libraries as of now) from a Data Input Source File
+ * @author  Joshua Reynolds
+ * @since   2021-02-24 
+ */
 public class GenerateCQLFromDroolOperation extends Operation {
 
     public GenerateCQLFromDroolOperation() {

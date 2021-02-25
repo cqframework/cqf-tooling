@@ -3,6 +3,8 @@ package org.opencds.cqf.individual_tooling.cql_generation.drool.traversal;
 import java.util.List;
 import java.util.Stack;
 
+import com.google.common.base.Strings;
+
 import org.cdsframework.dto.CdsCodeDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicateDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicatePartConceptDTO;
@@ -15,13 +17,14 @@ import org.cdsframework.dto.CriteriaResourceDTO;
 import org.cdsframework.dto.CriteriaResourceParamDTO;
 import org.cdsframework.dto.DataInputNodeDTO;
 import org.cdsframework.dto.OpenCdsConceptDTO;
+import org.cdsframework.enumeration.CriteriaResourceType;
 import org.cdsframework.enumeration.DataModelClassType;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.Visitor;
 
 public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
 
     private Stack<CriteriaResourceParamDTO> criteriaResourceParamDTOExtensionStack = new Stack<CriteriaResourceParamDTO>();
-
+    private Boolean unableToDetermineModeling = false;
     public DepthFirstDroolTraverser(Visitor visitor) {
         super(visitor);
     }
@@ -37,20 +40,27 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
         this.visitor.peek(conditionDTO);
         List<ConditionCriteriaRelDTO> conditionCriteriaRels = conditionDTO.getConditionCriteriaRelDTOs();
         if (!conditionCriteriaRels.isEmpty() || conditionCriteriaRels != null) {
-            conditionCriteriaRels.forEach(rel -> { this.visitor.peek(rel); traverse(rel); });
+
+            conditionCriteriaRels.stream()
+            .filter(rel -> 
+            rel.getConditionCriteriaPredicateDTOs().isEmpty()
+             || rel.getName().toLowerCase().contains("not yet implemented"))
+            .forEach(rel -> System.out.println("Not Yet Implemented: " + rel.getUuid()));
+            
+            conditionCriteriaRels.stream()
+            .filter(rel -> 
+            !rel.getConditionCriteriaPredicateDTOs().isEmpty()
+             && !rel.getName().toLowerCase().contains("not yet implemented"))
+            .forEach(rel -> { this.visitor.peek(rel); traverse(rel); });
         }
         this.visitor.visit(conditionDTO);
     }
 
     @Override
     protected void traverse(ConditionCriteriaRelDTO conditionCriteriaRel) {
-        if (!conditionCriteriaRel.getConditionCriteriaPredicateDTOs().isEmpty()
-                && !conditionCriteriaRel.getName().toLowerCase().contains("not yet implemented")) {
-            for (ConditionCriteriaPredicateDTO predicate : conditionCriteriaRel.getConditionCriteriaPredicateDTOs()) {
-                traverse(predicate);
-            }
-        } else if (conditionCriteriaRel.getName().contains("Not Yet Implemented")) {
-            System.out.println("Not Yet Implemented: " + conditionCriteriaRel.getUuid());
+        for (ConditionCriteriaPredicateDTO predicate : conditionCriteriaRel.getConditionCriteriaPredicateDTOs()) {
+            unableToDetermineModeling = false;
+            traverse(predicate);
         }
         this.visitor.visit(conditionCriteriaRel);
     }
@@ -59,18 +69,25 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
     protected void traverse(ConditionCriteriaPredicateDTO predicate) {
         if (!predicate.getPredicateDTOs().isEmpty()) {
             for (ConditionCriteriaPredicateDTO nestedPredicate : predicate.getPredicateDTOs()) {
+                unableToDetermineModeling = false;
                 traverse(nestedPredicate);
             }
         }
         if (!predicate.getPredicatePartDTOs().isEmpty()) {
             for (ConditionCriteriaPredicatePartDTO predicatePart : predicate.getPredicatePartDTOs()) {
-                traverse(predicatePart);
+                if (!unableToDetermineModeling) {
+                    traverse(predicatePart);
+                } else return;
             }
-            if (criteriaResourceParamDTOExtensionStack.size() > 0 || !criteriaResourceParamDTOExtensionStack.empty()) {
-                traverse(criteriaResourceParamDTOExtensionStack.pop());
-            }
+            if (!unableToDetermineModeling) {
+                if (criteriaResourceParamDTOExtensionStack.size() > 0 || !criteriaResourceParamDTOExtensionStack.empty()) {
+                    traverse(criteriaResourceParamDTOExtensionStack.pop());
+                }
+            } else return;
         }
-        this.visitor.visit(predicate);
+        if (!unableToDetermineModeling) {
+            this.visitor.visit(predicate);
+        } else return;
     }
 
     @Override
@@ -78,6 +95,9 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
         if (predicatePart.getSourcePredicatePartDTO() != null
                 && predicatePart.getPredicatePartConceptDTOs().isEmpty()) {
             traverse(predicatePart.getSourcePredicatePartDTO());
+            if (unableToDetermineModeling) {
+                return;
+            }
         } else {
             if (predicatePart.getDataInputNodeDTO() != null) {
                 traverse(predicatePart.getDataInputNodeDTO());
@@ -92,6 +112,11 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
         if (predicatePart.getCriteriaResourceParamDTO() != null) {
             // In order to get left, right, operator instead of left, operator, right
             criteriaResourceParamDTOExtensionStack.push(predicatePart.getCriteriaResourceParamDTO());
+        }
+        if (unknownOperatorModeling(predicatePart)) {
+            System.out.println("Unable to determine operator from " + predicatePart.getCriteriaResourceDTO().getUuid());
+            unableToDetermineModeling = true;
+            return;
         }
         this.visitor.visit(predicatePart);
     }
@@ -121,7 +146,15 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
                         traverse(predicatePartConcepts);
                     }
                 } else if (sourcePredicatePartDTO.getDataInputClassType().equals(DataModelClassType.String)) {
+                    if (sourcePredicatePartDTO.getPartAlias() != null && sourcePredicatePartDTO.getPartAlias().equals("an order and only an order")) {
+                        System.out.println("Unable to determine modeling from " + sourcePredicatePartDTO.getUuid());
+                        unableToDetermineModeling = true;
+                    }
                     break;
+                } else if (unknownConceptModeling(sourcePredicatePartDTO)){
+                    System.out.println("Unable to determine modeling from " + sourcePredicatePartDTO.getUuid());
+                    unableToDetermineModeling = true;
+                    return;
                 }
                 break;
             case ModelElement:
@@ -166,5 +199,23 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
             traverse(predicatePartConcepts.getOpenCdsConceptDTO());
         }
         this.visitor.visit(predicatePartConcepts);
+    }
+    
+    private boolean unknownConceptModeling(CriteriaPredicatePartDTO sourcePredicatePartDTO) {
+        return sourcePredicatePartDTO.getPredicatePartRelDTOs() != null && !sourcePredicatePartDTO.getPredicatePartRelDTOs().isEmpty()
+                    && sourcePredicatePartDTO.getPredicatePartRelDTOs().size() == 1 && sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getOpenCdsConceptDTO() == null
+                    && sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getCdsCodeDTO() == null && sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getValueSetDTO() == null
+                    && sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getCdsListDTO() != null
+                    && (sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getCdsListDTO().getName().equals("Reportable Condition Lab Test Concepts")
+                    || sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getCdsListDTO().getName().equals("Reportable Condition Lab Result Concepts")
+                    || sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getCdsListDTO().getName().equals("Reportable Condition Lab Results Interpretation Concepts")
+                    || sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getCdsListDTO().getName().equals("Reportable Condition Substance Administration"));
+    }
+
+    private boolean unknownOperatorModeling(ConditionCriteriaPredicatePartDTO predicatePart) {
+        return predicatePart.getCriteriaResourceParamDTO() == null && predicatePart.getCriteriaResourceDTO() != null
+            && ((predicatePart.getCriteriaResourceDTO().getResourceType() != null 
+                && !predicatePart.getCriteriaResourceDTO().getResourceType().equals(CriteriaResourceType.Function))
+                || predicatePart.getCriteriaResourceDTO().getResourceType() == null);
     }
 }

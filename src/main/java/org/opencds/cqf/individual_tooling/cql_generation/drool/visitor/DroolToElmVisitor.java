@@ -15,27 +15,51 @@ import org.cdsframework.dto.CriteriaResourceParamDTO;
 import org.cdsframework.dto.DataInputNodeDTO;
 import org.cdsframework.dto.OpenCdsConceptDTO;
 import org.opencds.cqf.individual_tooling.cql_generation.context.ElmContext;
+import org.opencds.cqf.individual_tooling.cql_generation.builder.ModelElmBuilder;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.adapter.DefinitionAdapter;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.adapter.DroolPredicateToElmExpressionAdapter;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.adapter.LibraryAdapter;
 
+/**
+ * Implements the {@link Visitor Visitor} Interface and uses the DefinitionAdapter 
+ * DroolPredicateToElmExpressionAdapter and LibraryAdapter to build out Elm Libraries and write them to
+ * a given output directory.  The ganularity of the libraries can be toggled by CONDITION or CONDITIONREL
+ * using the {@link CQLTYPES CQLTYPES} enumeration.
+ * @author  Joshua Reynolds
+ * @since   2021-02-24 
+ */
 public class DroolToElmVisitor implements Visitor {
     public enum CQLTYPES {
         CONDITION,
         CONDITIONREL
     }
     private Enum<CQLTYPES> type = null;
-    private ElmContext context = new ElmContext();
-    private DroolPredicateToElmExpressionAdapter expressionBodyAdapter = new DroolPredicateToElmExpressionAdapter();
+    private ModelElmBuilder modelBuilder;
+    private ElmContext context;
+    private String outputPath;
+    private DroolPredicateToElmExpressionAdapter expressionBodyAdapter;
     private DefinitionAdapter definitionAdapter = new DefinitionAdapter();
     private LibraryAdapter libraryAdapter = new LibraryAdapter();
 
-    public DroolToElmVisitor() {
-
+    /**
+     * Default to CONDITION granularity.
+     * @param modelBuilder modelBuilder
+     * @param outputPath outputPath
+     */
+    public DroolToElmVisitor(ModelElmBuilder modelBuilder, String outputPath) {
+        this.outputPath = outputPath;
+        this.type = CQLTYPES.CONDITION;
+        this.modelBuilder = modelBuilder;
+        context = new ElmContext(modelBuilder);
+        expressionBodyAdapter = new DroolPredicateToElmExpressionAdapter(modelBuilder);
     }
 
-    public DroolToElmVisitor(Enum<CQLTYPES> type) {
+    public DroolToElmVisitor(Enum<CQLTYPES> type, ModelElmBuilder modelBuilder, String outputPath) {
+        this.outputPath = outputPath;
         this.type = type;
+        this.modelBuilder = modelBuilder;
+        context = new ElmContext(modelBuilder);
+        expressionBodyAdapter = new DroolPredicateToElmExpressionAdapter(modelBuilder);
     }
 
 
@@ -86,8 +110,8 @@ public class DroolToElmVisitor implements Visitor {
     @Override
     public void visit(ConditionCriteriaRelDTO conditionCriteriaRel) {
         if (this.type != null && this.type.equals(CQLTYPES.CONDITIONREL)) {
-            definitionAdapter.adapt(conditionCriteriaRel, context);
-            libraryAdapter.buildLibrary(context);
+            definitionAdapter.conditionCriteriaMetExpression(context);
+            context.buildLibrary();
         }
     }
 
@@ -112,8 +136,8 @@ public class DroolToElmVisitor implements Visitor {
     @Override
     public void visit(ConditionDTO conditionDTO) {
         if (this.type != null && this.type.equals(CQLTYPES.CONDITION)) {
-            definitionAdapter.adapt(conditionDTO, context);
-            libraryAdapter.buildLibrary(context);
+            definitionAdapter.conditionCriteriaMetExpression(context);
+            context.buildLibrary();
         }
     }
 
@@ -128,7 +152,9 @@ public class DroolToElmVisitor implements Visitor {
     @Override
     public void visit(List<ConditionDTO> rootNode) {
         libraryAdapter.adapt(rootNode, context);
-        context.writeElm("../CQLGenerationDocs/GeneratedDocs/elm");
+        context.writeElm(outputPath);
+        //TODO: remove after resolving missing valuesets
+        context.writeValueSets(expressionBodyAdapter.valueSetIds);
     }
 
     public ElmContext getContext() {

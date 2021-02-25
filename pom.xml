@@ -8,7 +8,14 @@
     <version>${revision}</version>
 
     <properties>
-        <revision>1.3.1-SNAPSHOT</revision>
+        <version.major>1</version.major>
+        <version.minor>3</version.minor>
+        <version.patch>1</version.patch>
+        <cql-engine.version>1.5.1</cql-engine.version>
+        <cql-evaluator.version>1.1.0</cql-evaluator.version>
+
+        <!-- NOTE: Building under the release profile automatically drops the -SNAPSHOT extension -->
+        <revision>${version.major}.${version.minor}.${version.patch}-SNAPSHOT</revision>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -83,44 +90,145 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>cql-formatter</artifactId>
-                <version>${cqframework.version}</version>
+                <groupId>org.opencds.cqf.cql</groupId>
+                <artifactId>evaluator.builder</artifactId>
+                <version>${cql-evaluator.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>quick</artifactId>
-                <version>${cqframework.version}</version>
+                <groupId>org.opencds.cqf.cql</groupId>
+                <artifactId>engine</artifactId>
+                <version>1.5.1</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                </exclusions>
+                <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>qdm</artifactId>
-                <version>${cqframework.version}</version>
+                <groupId>org.opencds.cqf.cql</groupId>
+                <artifactId>engine.fhir</artifactId>
+                <version>1.5.1</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                </exclusions>
+                <scope>test</scope>
             </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>model</artifactId>
-                <version>${cqframework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>elm</artifactId>
-                <version>${cqframework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>cql-to-elm</artifactId>
-                <version>${cqframework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>cql</artifactId>
-                <version>${cqframework.version}</version>
-            </dependency>
+          <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>cql-formatter</artifactId>
+            <version>${cqframework.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jaxb</groupId>
+                    <artifactId>jaxb-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>quick</artifactId>
+            <version>${cqframework.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jaxb</groupId>
+                    <artifactId>jaxb-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>qdm</artifactId>
+            <version>${cqframework.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jaxb</groupId>
+                    <artifactId>jaxb-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>model</artifactId>
+            <version>${cqframework.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jaxb</groupId>
+                    <artifactId>jaxb-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>elm</artifactId>
+            <version>${cqframework.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jaxb</groupId>
+                    <artifactId>jaxb-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>cql-to-elm</artifactId>
+            <version>${cqframework.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jaxb</groupId>
+                    <artifactId>jaxb-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>cql</artifactId>
+            <version>${cqframework.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jaxb</groupId>
+                    <artifactId>jaxb-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.builder</artifactId>
+            <version>${cql-evaluator.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>engine</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>engine.fhir</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>javax.xml.stream</groupId>
             <artifactId>stax-api</artifactId>
@@ -158,7 +266,7 @@
         <!-- FHIR Core Dependencies -->
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>org.hl7.fhir.r5</artifactId>
+            <artifactId>org.hl7.fhir.r4</artifactId>
             <version>${core.version}</version>
         </dependency>
         <dependency>

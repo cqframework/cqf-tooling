@@ -57,6 +57,10 @@ public class IOUtil {
 
     public static void writeToFile(String filePath, String content) {
         File file = new File(filePath);
+        File parent = file.getParentFile();
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
         writeToFile(file, content);
     }
 }

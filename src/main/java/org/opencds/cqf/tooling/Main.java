@@ -163,6 +163,10 @@ package org.opencds.cqf.tooling;
         - SpreadsheetToCQL
             - command: mvn exec:java -Dexec.args="[-SpreadsheetToCQL] [-pathtospreadsheet | -pts] (-outputpath | -op)"
             - This tooling converts an Excel spreadsheet (.xlsx extension) to a CQL expression with the data from the spreadsheet rows
+
+        - GenerateCQLFromDroolOperation
+            - command: mvn exec: java -Dexec.args="-GenerateCQLFromDrool -ifp=../CQLGenerationDocs/NonGeneratedDocs/default.json -op=../CQLGenerationDocs/GeneratedDocs/elm"
+            - this tooling generates cql elm libraries given a Data Input Source File
         */
 
 public class Main {
