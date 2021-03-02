@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CodeCollection {
+    public CodeCollection() {
+        this.codes = new ArrayList<DictionaryCode>();
+    }
+
     public CodeCollection(List<DictionaryCode> codes) {
         this.codes = codes;
     }

@@ -15,6 +15,10 @@ public class MultipleChoiceElementChoices {
 
     private CodeCollection codes;
     public CodeCollection getCodes() {
+        if (this.codes == null) {
+            this.codes = new CodeCollection();
+        }
+
         return this.codes;
     }
 }

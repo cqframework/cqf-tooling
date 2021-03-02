@@ -634,9 +634,6 @@ public class Processor extends Operation {
                 if (dataElementCodes != null && !dataElementCodes.isEmpty()) {
                     parentElement.getChoices().getCodes().getCodes().addAll(dataElementCodes);
                 }
-
-                //TODO: Ensure the element for the parentChoicesFhirElementPath is added to the parentElement
-
             }
         }
     }
@@ -773,7 +770,9 @@ public class Processor extends Operation {
                         case "snomed ct":
                         case "snomed ct?code": colIds.put("SNOMED-CT", cell.getColumnIndex()); break;
                         case "loinc":
-                        case "loinc code": colIds.put("LOINC", cell.getColumnIndex()); break;
+                        case "loinc code":
+                        case "loinc version 2.68?code":
+                            colIds.put("LOINC", cell.getColumnIndex()); break;
                         case "rxnorm": colIds.put("RxNorm", cell.getColumnIndex()); break;
                         case "icd-11":
                         case "icd-11 code":
@@ -1396,6 +1395,16 @@ public class Processor extends Operation {
                     ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
                     ed.setMustSupport(true);
 
+                    ElementDefinition.TypeRefComponent edtr = new ElementDefinition.TypeRefComponent();
+                    if (elementFhirType != null && elementFhirType.length() > 0) {
+                        edtr.setCode(elementFhirType);
+                        ed.addType(edtr);
+                    }
+
+                    ensureAndBindElementTerminology(element, sd, ed);
+                    sd.getDifferential().addElement(ed);
+
+                    // UnitOfMeasure-specific block
                     String unitOfMeasure = element.getUnitOfMeasure();
                     Boolean hasUnitOfMeasure = unitOfMeasure != null && !unitOfMeasure.isEmpty();
                     if (isChoiceType(elementPath) && hasUnitOfMeasure) {
@@ -1407,24 +1416,15 @@ public class Processor extends Operation {
                         unitElement.setMustSupport(true);
 
                         //TODO: This should be a code, not fixed string
-                        ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
+                        ElementDefinition.TypeRefComponent uitr = new ElementDefinition.TypeRefComponent();
                         if (elementFhirType != null && elementFhirType.length() > 0) {
-                            tr.setCode("string");
-                            unitElement.addType(tr);
+                            uitr.setCode("string");
+                            unitElement.addType(uitr);
                         }
                         unitElement.setFixed(new StringType(unitOfMeasure));
 
                         sd.getDifferential().addElement(unitElement);
                     }
-
-                    ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
-                    if (elementFhirType != null && elementFhirType.length() > 0) {
-                        tr.setCode(elementFhirType);
-                        ed.addType(tr);
-                    }
-
-                    ensureAndBindElementTerminology(element, sd, ed);
-                    sd.getDifferential().addElement(ed);
                 }
             } else {
                 // If this is a choice type, append the current element's type to the type list.
@@ -1450,10 +1450,52 @@ public class Processor extends Operation {
 
                     ensureAndBindElementTerminology(element, sd, existingElement);
                 }
-
             }
+
+            ensureChoicesDataElement(element, sd);
+
         } catch (Exception e) {
             System.out.println(String.format("Error ensuring element for '%s'. Error: %s ", element.getLabel(), e));
+        }
+    }
+
+    private void ensureChoicesDataElement(DictionaryElement dictionaryElement, StructureDefinition sd) {
+        // Ensure Element for Choices path
+        String choicesElementPath = dictionaryElement.getChoices().getFhirElementPath().getResourceTypeAndPath();
+        ElementDefinition existingChoicesElement = null;
+        for (ElementDefinition elementDef : sd.getDifferential().getElement()) {
+            if (elementDef.getId().equals(choicesElementPath)) {
+                existingChoicesElement = elementDef;
+                break;
+            }
+        }
+
+        if (existingChoicesElement != null) {
+            ElementDefinition.ElementDefinitionBindingComponent existingBinding = existingChoicesElement.getBinding();
+            if (existingBinding == null) {
+                //TODO: Create the binding to the ensurevalueset
+            }
+        } else {
+            ElementDefinition ed = new ElementDefinition();
+            ed.setId(choicesElementPath);
+            ed.setPath(choicesElementPath);
+            ed.setMin(1);
+            ed.setMax(isMultipleChoiceElement(dictionaryElement) ? "*" : "1");
+            ed.setMustSupport(true);
+
+            String elementFhirType = getFhirTypeOfTargetElement(dictionaryElement.getFhirElementPath());
+            ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
+            if (elementFhirType != null && elementFhirType.length() > 0) {
+                tr.setCode(elementFhirType);
+                ed.addType(tr);
+            }
+
+            String valueSetName = dictionaryElement.getCustomValueSetName();
+            if (valueSetName == null || valueSetName.isEmpty()) {
+                valueSetName = dictionaryElement.getName() + "-values";
+            }
+            ensureAndBindElementTerminology(valueSetName, dictionaryElement.getLabel(), sd, ed, dictionaryElement.getChoices().getCodes(), dictionaryElement.getBindingStrength());
+            sd.getDifferential().addElement(ed);
         }
     }
 
@@ -1547,31 +1589,52 @@ public class Processor extends Operation {
         }
     }
 
-    private void ensureAndBindElementTerminology(DictionaryElement element, StructureDefinition sd, ElementDefinition ed) {
-        // Description: Needs to ensure and bind two things: The primaryCodes, the choicesCodes
+    private void ensureAndBindElementTerminology(String valueSetName, String valueSetLabel, StructureDefinition sd,
+                                                 ElementDefinition ed, CodeCollection codes,
+                                                 Enumerations.BindingStrength bindingStrength) {
+        if (codes != null) {
+            String primaryValueSetId = toId(valueSetName);
 
+            ValueSet primaryValueSet = ensureValueSetWithCodes(primaryValueSetId, valueSetLabel, codes);
+
+            retrieves.add(new RetrieveInfo(sd, primaryValueSet.getTitle()));
+
+            // Bind the current element to the valueSet
+            ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
+            binding.setStrength(bindingStrength);
+            binding.setValueSet(primaryValueSet.getUrl());
+            ed.setBinding(binding);
+        }
+    }
+
+    private void ensureAndBindElementTerminology(DictionaryElement element, StructureDefinition sd, ElementDefinition ed) {
         // Create a ValueSet with the primary codes for the data element and bind that to the element definition (i.e., ed)
         // if the element is not a multiple choice element or an extension and has as code,
         // bind it as the fixed value for the element.
         //if (element.getChoices().getCodes().size() == 0 && element.getPrimaryCodes() != null && !requiresExtension(element)) {
         //TODO: Restore the extension exclusion in the condition below? Removed to allow for reuse of this method in createExtensionStructureDefinition
         if (element.getPrimaryCodes() != null) {// && !requiresExtension(element)) {
-            String primaryValueSetName = element.getCustomValueSetName();
-            if (primaryValueSetName == null || primaryValueSetName.isEmpty()) {
-                primaryValueSetName = element.getName();
+            String valueSetName = element.getCustomValueSetName();
+            if (valueSetName == null || valueSetName.isEmpty()) {
+                valueSetName = element.getName();
             }
-            String primaryValueSetId = toId(primaryValueSetName);
 
             CodeCollection codes = element.getPrimaryCodes();
-            ValueSet primaryValueSet = ensureValueSetWithCodes(primaryValueSetId, element.getLabel(), element.getPrimaryCodes());
 
-            retrieves.add(new RetrieveInfo(sd, primaryValueSet.getTitle()));
-
-            // Bind the current element to the valueSet
-            ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
-            binding.setStrength(element.getBindingStrength());
-            binding.setValueSet(primaryValueSet.getUrl());
-            ed.setBinding(binding);
+            if (codes != null) {
+                ensureAndBindElementTerminology(valueSetName, element.getLabel(), sd, ed, codes, element.getBindingStrength());
+//                String primaryValueSetId = toId(valueSetName);
+//
+//                ValueSet primaryValueSet = ensureValueSetWithCodes(primaryValueSetId, element.getLabel(), codes);
+//
+//                retrieves.add(new RetrieveInfo(sd, primaryValueSet.getTitle()));
+//
+//                // Bind the current element to the valueSet
+//                ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
+//                binding.setStrength(element.getBindingStrength());
+//                binding.setValueSet(primaryValueSet.getUrl());
+//                ed.setBinding(binding);
+            }
         }
 
 //        // binding and CodeSystem/ValueSet for MultipleChoice elements
@@ -1643,7 +1706,7 @@ public class Processor extends Operation {
             valueSet.setId(valueSetId);
             valueSet.setUrl(String.format("%s/ValueSet/%s", canonicalBase, valueSetId));
             valueSet.setName(valueSetId);
-            valueSet.setTitle(String.format("%s values", valueSetLabel));
+            valueSet.setTitle(String.format("%s", valueSetLabel));
             valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
             valueSet.setExperimental(false);
             valueSet.setDescription(String.format("Codes representing possible values for the %s element", valueSetLabel));
