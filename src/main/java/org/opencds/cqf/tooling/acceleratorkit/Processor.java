@@ -72,7 +72,7 @@ public class Processor extends Operation {
     private List<String> igJsonFragments = new ArrayList<String>();
     private List<String> igResourceFragments = new ArrayList<String>();
 
-    private Row currentInputOptionParent;
+    private Row currentInputOptionParentRow;
 
     private class RetrieveInfo {
         public RetrieveInfo(StructureDefinition structureDefinition, String terminologyIdentifier) {
@@ -129,29 +129,12 @@ public class Processor extends Operation {
             }
         }
 
-        scopeCanonicalBaseMap.put("core", "http://fhir.org/guides/who/core");
-        scopeCanonicalBaseMap.put("anc", "http://fhir.org/guides/who/anc-cds");
-        scopeCanonicalBaseMap.put("fp", "http://fhir.org/guides/who/fp-cds");
-        scopeCanonicalBaseMap.put("sti", "http://fhir.org/guides/who/sti-cds");
-        scopeCanonicalBaseMap.put("cr", "http://fhir.org/guides/cqframework/cr");
-
         if (pathToSpreadsheet == null) {
             throw new IllegalArgumentException("The path to the spreadsheet is required");
         }
 
-        if (enableOpenMRS) {
-            supportedCodeSystems.put("OpenMRS", openMRSSystem);
-        }
-        supportedCodeSystems.put("ICD-10", "http://hl7.org/fhir/sid/icd-10");
-        supportedCodeSystems.put("SNOMED-CT", "http://snomed.info/sct");
-        supportedCodeSystems.put("LOINC", "http://loinc.org");
-        supportedCodeSystems.put("RxNorm", "http://www.nlm.nih.gov/research/umls/rxnorm");
-
-        // TODO: Determing and add correct URLS for these Systems
-        supportedCodeSystems.put("CIEL", "http://hl7.org/fhir/sid/ciel");
-        supportedCodeSystems.put("ICD-11", "http://hl7.org/fhir/sid/icd-11");
-        supportedCodeSystems.put("ICHI", "https://mitel.dimi.uniud.it/ichi/#http://id.who.int/ichi");
-        supportedCodeSystems.put("ICF", "http://hl7.org/fhir/sid/icf-nl");
+        registerScopes();
+        registerCodeSystems();
 
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
 
@@ -164,6 +147,30 @@ public class Processor extends Operation {
                 processScope(workbook, scope);
             }
         }
+    }
+
+    private void registerCodeSystems() {
+        if (enableOpenMRS) {
+            supportedCodeSystems.put("OpenMRS", openMRSSystem);
+        }
+        supportedCodeSystems.put("ICD-10", "http://hl7.org/fhir/sid/icd-10");
+        supportedCodeSystems.put("SNOMED-CT", "http://snomed.info/sct");
+        supportedCodeSystems.put("LOINC", "http://loinc.org");
+        supportedCodeSystems.put("RxNorm", "http://www.nlm.nih.gov/research/umls/rxnorm");
+
+        // TODO: Determine and add correct URLS for these Systems
+        supportedCodeSystems.put("CIEL", "http://hl7.org/fhir/sid/ciel");
+        supportedCodeSystems.put("ICD-11", "http://hl7.org/fhir/sid/icd-11");
+        supportedCodeSystems.put("ICHI", "https://mitel.dimi.uniud.it/ichi/#http://id.who.int/ichi");
+        supportedCodeSystems.put("ICF", "http://hl7.org/fhir/sid/icf-nl");
+    }
+
+    private void registerScopes() {
+        scopeCanonicalBaseMap.put("core", "http://fhir.org/guides/who/core");
+        scopeCanonicalBaseMap.put("anc", "http://fhir.org/guides/who/anc-cds");
+        scopeCanonicalBaseMap.put("fp", "http://fhir.org/guides/who/fp-cds");
+        scopeCanonicalBaseMap.put("sti", "http://fhir.org/guides/who/sti-cds");
+        scopeCanonicalBaseMap.put("cr", "http://fhir.org/guides/cqframework/cr");
     }
 
     // private void loadFHIRModel() {
@@ -462,8 +469,7 @@ public class Processor extends Operation {
                     concept.setDisplay(code.getLabel());
 
                     String parentLabel = null;
-//                    String parentName = SpreadsheetHelper.getCellAsString(row, getColId(colIds,"InputOptionParent"));
-                    String parentName = SpreadsheetHelper.getCellAsString(currentInputOptionParent, getColId(colIds,"DataElementLabel")).trim();
+                    String parentName = SpreadsheetHelper.getCellAsString(currentInputOptionParentRow, getColId(colIds,"DataElementLabel")).trim();
                     if (parentName != null && !parentName.trim().isEmpty()) {
                         parentName = parentName.trim();
                         DictionaryElement currentElement = elementMap.get(parentName);
@@ -498,43 +504,12 @@ public class Processor extends Operation {
         return cleanseCodes(codes);
     }
 
-    private DictionaryCode getPrimaryCode(String label, Row row, HashMap<String, Integer> colIds) {
-        List<DictionaryCode> codes = new ArrayList<>();
-        DictionaryCode primaryCode = null;
-        if (enableOpenMRS) {
-            List<DictionaryCode> openMRSCodes = getOpenMRSCodes(label, row, colIds);
-            if (openMRSCodes != null && !openMRSCodes.isEmpty()) {
-                primaryCode = openMRSCodes.get(0);
-                codes.addAll(openMRSCodes);
-            }
-        }
+    private List<DictionaryCode> getPrimaryCodes(String label, Row row, HashMap<String, Integer> colIds) {
+        List<DictionaryCode> codes;
 
-        List<DictionaryCode> fhirCodes = getFhirCodes(label, row, colIds);
-        if (fhirCodes != null && !fhirCodes.isEmpty()) {
-            if (primaryCode == null) {
-                primaryCode = fhirCodes.get(0);
-            }
-            codes.addAll(fhirCodes);
-        }
+        codes = getDataElementCodes(row, colIds, label);
 
-        for (String codeSystemKey : supportedCodeSystems.keySet()) {
-            List<DictionaryCode> terminologyCodes = getTerminologyCodes(codeSystemKey, label, row, colIds);
-            if (terminologyCodes != null && !terminologyCodes.isEmpty()) {
-                if (primaryCode == null) {
-                    primaryCode = terminologyCodes.get(0);
-                }
-                codes.addAll(terminologyCodes);
-            }
-        }
-
-        // If more than one code is specified for the element, raise a warning.
-        if (codes != null && codes.size() > 1) {
-            System.out.println(
-                    String.format("Element %s - \"%s\" has multiple codes. %s was selected as the Primary code",
-                            row.getCell(0).toString().replace(".0", ""), label, primaryCode.getCode()));
-        }
-
-        return primaryCode;
+        return codes;
     }
 
     private DictionaryCode getCode(String system, String label, String display, String codeValue, String parent) {
@@ -554,19 +529,7 @@ public class Processor extends Operation {
         if (resource != null && !resource.isEmpty()) {
             resource = resource.trim();
             fhirType.setResource(resource);
-            fhirType.setMasterDataElementPath(
-                    SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MasterDataElementPath")));
             fhirType.setFhirElementType(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4ResourceType")));
-            fhirType.setBaseProfile(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4BaseProfile")));
-            fhirType.setVersion(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4VersionNumber")));
-            fhirType.setCustomProfileId(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomProfileId")));
-            fhirType.setCustomValueSetName(
-                    SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomValueSetName")));
-            fhirType.setBindingStrength(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "BindingStrength")));
-            fhirType.setUnitOfMeasure(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "UnitOfMeasure")));
-            fhirType.setExtensionNeeded(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ExtensionNeeded")));
-            fhirType.setAdditionalFHIRMappingDetails(
-                    SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4AdditionalFHIRMappingDetails")));
         }
         return fhirType;
     }
@@ -580,8 +543,7 @@ public class Processor extends Operation {
     }
 
     private DictionaryElement createDataElement(String page, String group, Row row, HashMap<String, Integer> colIds) {
-        // String label = SpreadsheetHelper.getCellAsString(row, getColId(colIds,
-        // "Label"));
+        // String label = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Label"));
         String type = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Type"));
         if (type != null) {
             type = type.trim();
@@ -634,50 +596,76 @@ public class Processor extends Operation {
         e.setRequired(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Required")));
         e.setEditable(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Editable")));
         e.setScope(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Scope")));
-        e.setCode(getPrimaryCode(name, row, colIds));
+        //TODO: Get all codes specified on the element, create a valueset and bind to it. Required
+        e.setPrimaryCodes(getPrimaryCodes(name, row, colIds));
+
         e.setFhirElementPath(getFhirElementPath(row, colIds));
+        e.setMasterDataElementPath(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MasterDataElementPath")));
+        e.setBaseProfile(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4BaseProfile")));
+        e.setCustomProfileId(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomProfileId")));
+        e.setVersion(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4VersionNumber")));
+        e.setCustomValueSetName( SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomValueSetName")));
+        e.setBindingStrength(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "BindingStrength")));
+        e.setUnitOfMeasure(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "UnitOfMeasure")));
+        e.setExtensionNeeded(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ExtensionNeeded")));
+
+        e.setAdditionalFHIRMappingDetails(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4AdditionalFHIRMappingDetails")));
 
         return e;
     }
 
     private void addInputOptionToParentElement(Row row, HashMap<String, Integer> colIds) {
-        String parentName = SpreadsheetHelper.getCellAsString(currentInputOptionParent, getColId(colIds,"DataElementLabel")).trim();
+        String parentName =
+                SpreadsheetHelper.getCellAsString(currentInputOptionParentRow, getColId(colIds,"DataElementLabel")).trim();
+
         if (parentName != null && !parentName.isEmpty())
         {
-            DictionaryElement currentElement = elementMap.get(parentName);
-            if (currentElement != null) {
-                String choices = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Name"));
-                if (choices != null && !choices.isEmpty()) {
-                    choices = choices.trim();
-
-                    List<DictionaryCode> codes;
-                    if (enableOpenMRS) {
-                        // Open MRS choices
-                        codes = getOpenMRSCodes(choices, row, colIds);
-                        if (codes != null && !codes.isEmpty()) {
-                            currentElement.getChoices().addAll(codes);
-                        }
-                    }
-
-                    // FHIR choices
-                    String fhirCodeSystem = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
-                    if (fhirCodeSystem != null && !fhirCodeSystem.isEmpty()) {
-                        codes = getFhirCodes(choices, row, colIds);
-                        if (codes != null && !codes.isEmpty()) {
-                            currentElement.getChoices().addAll(codes);
-                        }
-                    }
-
-                    // Other Terminology choices
-                    for (String codeSystemKey : supportedCodeSystems.keySet()) {
-                        codes = getTerminologyCodes(codeSystemKey, choices, row, colIds);
-                        if (codes != null && !codes.isEmpty()) {
-                            currentElement.getChoices().addAll(codes);
-                        }
-                    }
+            DictionaryElement parentElement = elementMap.get(parentName);
+            if (parentElement != null) {
+                // The choices FHIR Element Path is set by the first "Input Option" row in the group and will NOT be
+                // overridden, if set, by subsequent input option rows.
+                DictionaryFhirElementPath parentChoicesFhirElementPath = parentElement.getChoices().getFhirElementPath();
+                if (parentChoicesFhirElementPath == null) {
+                    parentChoicesFhirElementPath = getFhirElementPath(row, colIds);
+                    parentElement.getChoices().setFhirElementPath(parentChoicesFhirElementPath);
                 }
+
+                List<DictionaryCode> dataElementCodes = getDataElementCodes(row, colIds, parentName);
+                if (dataElementCodes != null && !dataElementCodes.isEmpty()) {
+                    parentElement.getChoices().getCodes().getCodes().addAll(dataElementCodes);
+                }
+
+                //TODO: Ensure the element for the parentChoicesFhirElementPath is added to the parentElement
+
             }
         }
+    }
+
+    private List<DictionaryCode> getDataElementCodes(Row row, HashMap<String, Integer> colIds, String dataElementLabel) {
+        List<DictionaryCode> codes = new ArrayList<>();
+
+        if (enableOpenMRS) {
+            // Open MRS choices
+            List<DictionaryCode> mrsCodes = getOpenMRSCodes(dataElementLabel, row, colIds);
+            codes.addAll(mrsCodes);
+        }
+
+        // FHIR choices
+        String fhirCodeSystem = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
+        if (fhirCodeSystem != null && !fhirCodeSystem.isEmpty()) {
+            List<DictionaryCode> fhirCodes = getFhirCodes(dataElementLabel, row, colIds);
+            codes.addAll(fhirCodes);
+        }
+
+        // Other Terminology choices
+        for (String codeSystemKey : supportedCodeSystems.keySet()) {
+            List<DictionaryCode> codeSystemCodes = getTerminologyCodes(codeSystemKey, dataElementLabel, row, colIds);
+            if (codes != codeSystemCodes && !codeSystemCodes.isEmpty()) {
+                codes.addAll(codeSystemCodes);
+            }
+        }
+
+        return codes;
     }
 
     private void processDataElementPage(Workbook workbook, String page, String scope) {
@@ -766,9 +754,7 @@ public class Processor extends Operation {
 
                         // fhir resource details
                         case "master data element path": colIds.put("MasterDataElementPath", cell.getColumnIndex()); break;
-                        case "hl7 fhir r4 - resource":
-//                        case "hl7 fhir r4 – resource":
-                            colIds.put("FhirR4Resource", cell.getColumnIndex()); break;
+                        case "hl7 fhir r4 - resource": colIds.put("FhirR4Resource", cell.getColumnIndex()); break;
                         case "hl7 fhir r4 - resource type": colIds.put("FhirR4ResourceType", cell.getColumnIndex()); break;
                         case "hl7 fhir r4 - base profile": colIds.put("FhirR4BaseProfile", cell.getColumnIndex()); break;
                         case "hl7 fhir r4 - version number": colIds.put("FhirR4VersionNumber", cell.getColumnIndex()); break;
@@ -814,7 +800,7 @@ public class Processor extends Operation {
                     switch (masterDataType) {
                         case "Data Element":
                         case "Slice":
-                            currentInputOptionParent = row;
+                            currentInputOptionParentRow = row;
                             DictionaryElement e = createDataElement(page, currentGroup, row, colIds);
                             if (e != null) {
                                 elementMap.put(e.getName(), e);
@@ -838,13 +824,13 @@ public class Processor extends Operation {
     private void processElementMap() {
         for (DictionaryElement element : elementMap.values()) {
             if (requiresProfile(element)) {
-                // StructureDefinition profile = ensureProfile(element);
+                 ensureProfile(element);
             }
         }
     }
 
     private boolean requiresExtension(DictionaryElement element) {
-        String baseProfile = element.getFhirElementPath().getBaseProfile();
+        String baseProfile = element.getBaseProfile();
         if (baseProfile != null && baseProfile.toLowerCase().trim().equals("extension needed")) {
             return true;
         } else {
@@ -854,10 +840,9 @@ public class Processor extends Operation {
 
     private boolean requiresProfile(DictionaryElement element) {
         if (element == null || element.getMasterDataType() == null || element.getFhirElementPath() == null
-        // || (element.getFhirElementPath().getBaseProfile() != null
-        // &&
-        // element.getFhirElementPath().getBaseProfile().toLowerCase().trim().equals("extension
-        // needed"))
+         || (element.getBaseProfile() != null
+             &&
+             element.getBaseProfile().toLowerCase().trim().equals("extension needed"))
         ) {
             return false;
         }
@@ -1069,9 +1054,11 @@ public class Processor extends Operation {
         rootElement.setMin(toBoolean(element.getRequired()) ? 1 : 0);
         rootElement.setMax(isMultipleChoiceElement(element) ? "*" : "1");
 
-        if (element.getCode() != null) {
-            rootElement.setFixed(element.getCode().toCodeableConcept());
-        }
+//        // TODO: bind to generated valueset
+//        if (element.getPrimaryCodes() != null) {
+//            rootElement.setFixed(element.getPrimaryCodes().toCodeableConcept());
+//        }
+        ensureAndBindElementTerminology(element, sd, rootElement);
 
         sd.getDifferential().addElement(rootElement);
 
@@ -1161,7 +1148,7 @@ public class Processor extends Operation {
     @Nonnull
     private StructureDefinition createProfileStructureDefinition(DictionaryElement element, String customProfileId) {
         DictionaryFhirElementPath elementPath = element.getFhirElementPath();
-        String customProfileIdRaw = elementPath.getCustomProfileId();
+        String customProfileIdRaw = element.getCustomProfileId();
         Boolean hasCustomProfileIdRaw = customProfileIdRaw != null && !customProfileIdRaw.isEmpty();
         String resourceType = elementPath.getResourceType().trim();
         Coding activityCoding = getActivityCoding(element.getActivity());
@@ -1206,7 +1193,7 @@ public class Processor extends Operation {
         sd.setType(resourceType);
 
         String baseResource = "http://hl7.org/fhir/StructureDefinition/" + resourceType;
-        String baseProfileValue = elementPath.getBaseProfile();
+        String baseProfileValue = element.getBaseProfile();
         if (baseProfileValue == null || baseProfileValue.isEmpty() || baseProfileValue.toLowerCase().equals("extension needed") || baseProfileValue.toLowerCase().equals("fhir")) {
             sd.setBaseDefinition(baseResource);
         }
@@ -1234,31 +1221,29 @@ public class Processor extends Operation {
 
         return sd;
     }
-    
-    @SuppressWarnings("unused")
-    private StructureDefinition ensureProfile(DictionaryElement element) {
+
+    private void ensureProfile(DictionaryElement element) {
         StructureDefinition sd = null;
-        List<ElementDefinition> elementDefinitions = new ArrayList<>();
+//        List<ElementDefinition> elementDefinitions = new ArrayList<>();
 
         // If custom profile is specified, search for if it exists already.
-        String customProfileIdRaw = element.getFhirElementPath().getCustomProfileId();
-        Boolean hasCustomProfileIdRaw = customProfileIdRaw != null && !customProfileIdRaw.isEmpty();
-        String customProfileId = toId(hasCustomProfileIdRaw ? customProfileIdRaw : element.getId());
-        for (StructureDefinition existingSD : profiles) {
-            if (existingSD.getId().equals(customProfileId)) {
-                sd = existingSD;
+        String customProfileIdRaw = element.getCustomProfileId();
+        String profileId = toId(customProfileIdRaw != null && !customProfileIdRaw.isEmpty() ? customProfileIdRaw : element.getId());
+        for (StructureDefinition profile : profiles) {
+            if (profile.getId().equals(profileId)) {
+                sd = profile;
             }
         }
 
         // If the profile doesn't exist, create it with the root element.
         if (sd == null) {
-            sd = createProfileStructureDefinition(element, customProfileId);
+            sd = createProfileStructureDefinition(element, profileId);
         }
 
         if (requiresExtension(element)) {
             StructureDefinition extension = ensureExtension(element);
             DictionaryProfileElementExtension profileElementExtensionEntry = new DictionaryProfileElementExtension();
-            profileElementExtensionEntry.setProfileId(customProfileId);
+            profileElementExtensionEntry.setProfileId(profileId);
             profileElementExtensionEntry.setResourcePath(element.getFhirElementPath().getResourceTypeAndPath());
             profileElementExtensionEntry.setElement(element);
             profileElementExtensionEntry.setExtension(extension);
@@ -1272,8 +1257,6 @@ public class Processor extends Operation {
         if (!profiles.contains(sd)) {
             profiles.add(sd);
         }
-
-        return sd;
     }
 
     private void ensureElement(DictionaryElement element, StructureDefinition sd) {
@@ -1293,8 +1276,6 @@ public class Processor extends Operation {
             case "CarePlan":
             case "Communication":
             case "Condition":
-                choicesPath = elementPath.getResourcePath();
-                break;
             case "Consent":
             case "Coverage":
             case "DeviceUseStatement":
@@ -1326,7 +1307,7 @@ public class Processor extends Operation {
             // For Observations, it is a valid scenario for the Data Dictionary (DD) to not have a Data Element entry for the primary code path element - Observation.code.
             // In this case, the tooling should ensure that this element is created. The fixed code for this element should be the code specified by the Data
             // Element record mapped to Observation.value[x]. For all other resource types it is invalid to not have a primary code path element entry in the DD
-            if (codePath != null && !codePath.isEmpty() && element.getCode() != null) {
+            if (codePath != null && !codePath.isEmpty() && element.getPrimaryCodes() != null) {
                 String elementId = String.format("%s.%s", resourceType, codePath);
                 String primaryCodePath = String.format("%s.%s", resourceType, codePath);
 
@@ -1349,7 +1330,8 @@ public class Processor extends Operation {
                     ed.setMax("1");
                     ed.setMustSupport(true);
                     if (isPreferredCodePath) {
-                        ed.setFixed(element.getCode().toCodeableConcept());
+                        //TODO: Bind to valueset rather than fixed code
+                        ed.setFixed(element.getPrimaryCodes().getCodes().get(0).toCodeableConcept());
                     }
 
                     sd.getDifferential().addElement(ed);
@@ -1357,13 +1339,14 @@ public class Processor extends Operation {
                     Type existingCode = existingPrimaryCodePathElement.getFixed();
                     // The code in the Primary Code Path Data Element entry should always have priority over the preferred (value[x])
                     if ((existingCode == null || isPrimaryCodePath) && (isPreferredCodePath)) {
-                        existingPrimaryCodePathElement.setFixed(element.getCode().toCodeableConcept());
+                        //TODO: Bind to valueset rather than fixed code
+                        existingPrimaryCodePathElement.setFixed(element.getPrimaryCodes().getCodes().get(0).toCodeableConcept());
                     }
                 }
             }
 
             Boolean isSlice = element.getMasterDataType().toLowerCase().equals("slice");
-            String masterDataElementPath = elementPath.getMasterDataElementPath();
+            String masterDataElementPath = element.getMasterDataElementPath();
             Boolean isElementOfSlice = !isSlice && masterDataElementPath != null && !masterDataElementPath.isEmpty() && masterDataElementPath.indexOf(".") > 0;
 
             String elementId;
@@ -1413,7 +1396,7 @@ public class Processor extends Operation {
                     ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
                     ed.setMustSupport(true);
 
-                    String unitOfMeasure = element.getFhirElementPath().getUnitOfMeasure();
+                    String unitOfMeasure = element.getUnitOfMeasure();
                     Boolean hasUnitOfMeasure = unitOfMeasure != null && !unitOfMeasure.isEmpty();
                     if (isChoiceType(elementPath) && hasUnitOfMeasure) {
                         ElementDefinition unitElement = new ElementDefinition();
@@ -1488,7 +1471,7 @@ public class Processor extends Operation {
 
         if (existingBaseDefinition != null) {
             ElementDefinition.DiscriminatorType discriminatorType = ElementDefinition.DiscriminatorType.VALUE;
-            String discriminatorPath = elementPath.getAdditionalFHIRMappingDetails().split("=")[0].trim();
+            String discriminatorPath = dictionaryElement.getAdditionalFHIRMappingDetails().split("=")[0].trim();
             String resourceTypePath = elementPath.getResourceTypeAndPath();
             discriminatorPath = discriminatorPath.replaceAll(resourceTypePath + ".", "");
 
@@ -1511,7 +1494,7 @@ public class Processor extends Operation {
             }
 
             ElementDefinition.DiscriminatorType discriminatorType = ElementDefinition.DiscriminatorType.VALUE;
-            String discriminatorPath = elementPath.getAdditionalFHIRMappingDetails().split("=")[0].trim();
+            String discriminatorPath = dictionaryElement.getAdditionalFHIRMappingDetails().split("=")[0].trim();
             String resourceTypePath = elementPath.getResourceTypeAndPath();
             discriminatorPath = discriminatorPath.replaceAll(resourceTypePath + ".", "");
 
@@ -1523,7 +1506,7 @@ public class Processor extends Operation {
         // Add the actual slice
 
         /* Add the actual Slice (e.g., telecom:Telephone1) */
-        String discriminatorValue = elementPath.getAdditionalFHIRMappingDetails().split("=")[1].trim();
+        String discriminatorValue = dictionaryElement.getAdditionalFHIRMappingDetails().split("=")[1].trim();
         ElementDefinition sliceElement = new ElementDefinition();
         sliceElement.setId(elementId);
         sliceElement.setSliceName(sliceName);
@@ -1565,76 +1548,87 @@ public class Processor extends Operation {
     }
 
     private void ensureAndBindElementTerminology(DictionaryElement element, StructureDefinition sd, ElementDefinition ed) {
-        // binding and CodeSystem/ValueSet for MultipleChoice elements
-        String customValueSetName = element.getFhirElementPath().getCustomValueSetName();
-        Boolean hasCustomValueSetName = customValueSetName != null && !customValueSetName.isEmpty();
+        // Description: Needs to ensure and bind two things: The primaryCodes, the choicesCodes
 
-        //TODO: hasCustomValueSetName might be sufficient here?
-        if (element.getChoices().size() > 0 || hasCustomValueSetName) {
-            String valueSetUrl = null;
-            if (hasCustomValueSetName && element.getChoices().size() == 0 && customValueSetName.startsWith("http")) {
-                valueSetUrl = customValueSetName;
-                retrieves.add(new RetrieveInfo(sd, valueSetUrl));
+        // Create a ValueSet with the primary codes for the data element and bind that to the element definition (i.e., ed)
+        // if the element is not a multiple choice element or an extension and has as code,
+        // bind it as the fixed value for the element.
+        //if (element.getChoices().getCodes().size() == 0 && element.getPrimaryCodes() != null && !requiresExtension(element)) {
+        //TODO: Restore the extension exclusion in the condition below? Removed to allow for reuse of this method in createExtensionStructureDefinition
+        if (element.getPrimaryCodes() != null) {// && !requiresExtension(element)) {
+            String primaryValueSetName = element.getCustomValueSetName();
+            if (primaryValueSetName == null || primaryValueSetName.isEmpty()) {
+                primaryValueSetName = element.getName();
             }
-            else {
-                //TOOD: This needs some TLC, but had to decouple createCodeSystem from openMRS codes to facilitate the extended codes pattern.
-                CodeSystem codeSystem = null;
-                if (enableOpenMRS && element.getChoicesForSystem(openMRSSystem).size() > 0) {
-                    codeSystem = createCodeSystem(element.getName(), canonicalBase, null, null);
-                    // collect all the OpenMRS choices to add to the codeSystem
-                    for (DictionaryCode code : element.getChoicesForSystem(openMRSSystem)) {
-                        CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent();
-                        concept.setCode(code.getCode());
-                        concept.setDisplay(code.getLabel());
-                        codeSystem.addConcept(concept);
-                    }
-                }
+            String primaryValueSetId = toId(primaryValueSetName);
 
-                ValueSet valueSet = ensureValueSet(element);
+            CodeCollection codes = element.getPrimaryCodes();
+            ValueSet primaryValueSet = ensureValueSetWithCodes(primaryValueSetId, element.getLabel(), element.getPrimaryCodes());
 
-                if (codeSystem != null && element.getChoicesForSystem(openMRSSystem).size() == element.getChoices().size()) {
-                    codeSystem.setValueSet(valueSet.getUrl());
-                }
-                valueSetUrl = valueSet.getUrl();
-                retrieves.add(new RetrieveInfo(sd, valueSet.getTitle()));
-            }
+            retrieves.add(new RetrieveInfo(sd, primaryValueSet.getTitle()));
+
             // Bind the current element to the valueSet
             ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
-            binding.setStrength(element.getFhirElementPath().getBindingStrength());
-            binding.setValueSet(valueSetUrl);
+            binding.setStrength(element.getBindingStrength());
+            binding.setValueSet(primaryValueSet.getUrl());
             ed.setBinding(binding);
         }
-        // if the element is not a multiple choice element or an extension and has as code, bind it as the fixed value for the element.
-        if (element.getChoices().size() == 0 && element.getCode() != null && !requiresExtension(element)) {
-            DictionaryCode code = element.getCode();
-            List<Coding> codes = new ArrayList<>();
-            Coding coding = new Coding();
-            coding.setCode(code.getCode());
-            coding.setSystem(code.getSystem());
-            coding.setDisplay(code.getDisplay());
 
-            codes.add(coding);
-
-            ed.setCode(codes);
-
-            String conceptName = code.getDisplay();
-            if (conceptName == null || conceptName.isEmpty()) {
-                conceptName = element.getLabel() + " code";
-            }
-            concepts.put(conceptName, coding);
-            retrieves.add(new RetrieveInfo(sd, conceptName));
-        }
+//        // binding and CodeSystem/ValueSet for MultipleChoice elements
+//        String customValueSetName = element.getCustomValueSetName();
+//        Boolean hasCustomValueSetName = customValueSetName != null && !customValueSetName.isEmpty();
+//
+//        // TODO: hasCustomValueSetName might be sufficient here?
+//        // TODO: Need to ensureElement for the element.getChoices().getFhirElementPath()
+//        if (element.getChoices().getCodes().size() > 0 || hasCustomValueSetName) {
+//            String valueSetUrl = null;
+//            if (hasCustomValueSetName && element.getChoices().getCodes().size() == 0
+//                    && customValueSetName.startsWith("http")) {
+//                valueSetUrl = customValueSetName;
+//                retrieves.add(new RetrieveInfo(sd, valueSetUrl));
+//            }
+//            else {
+//                // TOOD: This needs some TLC, but had to decouple createCodeSystem from openMRS codes to
+//                // facilitate the extended codes pattern.
+//                CodeSystem codeSystem = null;
+//                if (enableOpenMRS && element.getChoices().getCodes().getCodesForSystem(openMRSSystem).size() > 0) {
+//                    codeSystem = createCodeSystem(element.getName(), canonicalBase, null, null);
+//                    // collect all the OpenMRS choices to add to the codeSystem
+//                    for (DictionaryCode code : element.getChoices().getCodes().getCodesForSystem(openMRSSystem)) {
+//                        CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent();
+//                        concept.setCode(code.getCode());
+//                        concept.setDisplay(code.getLabel());
+//                        codeSystem.addConcept(concept);
+//                    }
+//                }
+//
+//                // Ensure the ValueSet
+//                String primaryValueSetName = element.getCustomValueSetName();
+//                if (primaryValueSetName == null || primaryValueSetName.isEmpty()) {
+//                    primaryValueSetName = toId(element.getName());
+//                }
+//
+//                //TODO: use "-values" for the choices VS
+//                String primaryValueSetId = toId(primaryValueSetName) + "-values";
+//                ValueSet valueSet = ensureValueSetWithCodes(primaryValueSetId, element.getLabel(), element);
+//
+//                if (codeSystem != null && element.getChoices().getCodes().getCodesForSystem(openMRSSystem).size() == element.getChoices().getCodes().size()) {
+//                    codeSystem.setValueSet(valueSet.getUrl());
+//                }
+//                valueSetUrl = valueSet.getUrl();
+//                retrieves.add(new RetrieveInfo(sd, valueSet.getTitle()));
+//            }
+//            // Bind the current element to the valueSet
+//            ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
+//            binding.setStrength(element.getBindingStrength());
+//            binding.setValueSet(valueSetUrl);
+//            ed.setBinding(binding);
+//        }
     }
 
     @Nonnull
-    private ValueSet ensureValueSet(DictionaryElement element) {
+    private ValueSet ensureValueSetWithCodes(String valueSetId, String valueSetLabel, CodeCollection codes) {
         // Ensure the ValueSet
-        String valueSetName = element.getFhirElementPath().getCustomValueSetName();
-        if (valueSetName == null || valueSetName.isEmpty()) {
-            valueSetName = toId(element.getName());
-        }
-
-        String valueSetId = toId(valueSetName) + "-values";
         ValueSet valueSet = null;
         Boolean valueSetExisted = false;
         for (ValueSet vs : valueSets) {
@@ -1647,16 +1641,12 @@ public class Processor extends Operation {
         if (valueSet == null) {
             valueSet = new ValueSet();
             valueSet.setId(valueSetId);
-            valueSet.setUrl(String.format("%s/ValueSet/%s", canonicalBase, valueSet.getId()));
-            // TODO: version
+            valueSet.setUrl(String.format("%s/ValueSet/%s", canonicalBase, valueSetId));
             valueSet.setName(valueSetId);
-            valueSet.setTitle(String.format("%s values", element.getLabel()));
+            valueSet.setTitle(String.format("%s values", valueSetLabel));
             valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
             valueSet.setExperimental(false);
-            // TODO: date
-            // TODO: publisher
-            // TODO: contact
-            valueSet.setDescription(String.format("Codes representing possible values for the %s element", element.getLabel()));
+            valueSet.setDescription(String.format("Codes representing possible values for the %s element", valueSetLabel));
             valueSet.setImmutable(true);
         }
 
@@ -1668,8 +1658,8 @@ public class Processor extends Operation {
         }
 
         // Group by Supported Terminology System
-        for (String codeSystemUrl : element.getCodeSystemUrls()) {
-            List<DictionaryCode> systemCodes = element.getChoicesForSystem(codeSystemUrl);
+        for (String codeSystemUrl : codes.getCodeSystemUrls()) {
+            List<DictionaryCode> systemCodes = codes.getCodesForSystem(codeSystemUrl);
 
             if (systemCodes.size() > 0) {
                 List<ValueSet.ConceptSetComponent> conceptSets = compose.getInclude();
@@ -1693,8 +1683,8 @@ public class Processor extends Operation {
                     conceptReference.setDisplay(code.getLabel());
 
                     // Only add the concept if it does not already exist in the ValueSet (based on both Code and Display)
-                    if (!conceptReferences.stream().filter(o -> o.getCode().equals(conceptReference.getCode())
-                            && o.getDisplay().equals(conceptReference.getDisplay())).findFirst().isPresent()) {
+                    if (conceptReferences.stream().noneMatch(o -> o.getCode().equals(conceptReference.getCode())
+                            && o.getDisplay().equals(conceptReference.getDisplay()))) {
                         conceptSet.addConcept(conceptReference);
                     }
                 }
