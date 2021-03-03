@@ -2,6 +2,7 @@ package org.opencds.cqf.individual_tooling.cql_generation.drool.visitor;
 
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.cdsframework.dto.CdsCodeDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicateDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicatePartConceptDTO;
@@ -14,16 +15,21 @@ import org.cdsframework.dto.CriteriaResourceDTO;
 import org.cdsframework.dto.CriteriaResourceParamDTO;
 import org.cdsframework.dto.DataInputNodeDTO;
 import org.cdsframework.dto.OpenCdsConceptDTO;
+import org.cdsframework.enumeration.CriteriaPredicateType;
+import org.hl7.elm.r1.ContextDef;
+import org.hl7.elm.r1.Expression;
+import org.hl7.elm.r1.ExpressionRef;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.individual_tooling.cql_generation.context.ElmContext;
-import org.opencds.cqf.individual_tooling.cql_generation.builder.ModelElmBuilder;
+import org.opencds.cqf.individual_tooling.cql_generation.builder.VmrToModelElmBuilder;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.adapter.DefinitionAdapter;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.adapter.DroolPredicateToElmExpressionAdapter;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.adapter.LibraryAdapter;
 
 /**
  * Implements the {@link Visitor Visitor} Interface and uses the DefinitionAdapter 
- * DroolPredicateToElmExpressionAdapter and LibraryAdapter to build out Elm Libraries and write them to
- * a given output directory.  The ganularity of the libraries can be toggled by CONDITION or CONDITIONREL
+ * DroolPredicateToElmExpressionAdapter and LibraryAdapter to build up the {@link ElmContext ElmContext}.  
+ * The ganularity of the libraries can be toggled by CONDITION or CONDITIONREL
  * using the {@link CQLTYPES CQLTYPES} enumeration.
  * @author  Joshua Reynolds
  * @since   2021-02-24 
@@ -34,9 +40,8 @@ public class DroolToElmVisitor implements Visitor {
         CONDITIONREL
     }
     private Enum<CQLTYPES> type = null;
-    private ModelElmBuilder modelBuilder;
+    private VmrToModelElmBuilder modelBuilder;
     private ElmContext context;
-    private String outputPath;
     private DroolPredicateToElmExpressionAdapter expressionBodyAdapter;
     private DefinitionAdapter definitionAdapter = new DefinitionAdapter();
     private LibraryAdapter libraryAdapter = new LibraryAdapter();
@@ -44,18 +49,15 @@ public class DroolToElmVisitor implements Visitor {
     /**
      * Default to CONDITION granularity.
      * @param modelBuilder modelBuilder
-     * @param outputPath outputPath
      */
-    public DroolToElmVisitor(ModelElmBuilder modelBuilder, String outputPath) {
-        this.outputPath = outputPath;
+    public DroolToElmVisitor(VmrToModelElmBuilder modelBuilder) {
         this.type = CQLTYPES.CONDITION;
         this.modelBuilder = modelBuilder;
         context = new ElmContext(modelBuilder);
         expressionBodyAdapter = new DroolPredicateToElmExpressionAdapter(modelBuilder);
     }
 
-    public DroolToElmVisitor(Enum<CQLTYPES> type, ModelElmBuilder modelBuilder, String outputPath) {
-        this.outputPath = outputPath;
+    public DroolToElmVisitor(Enum<CQLTYPES> type, VmrToModelElmBuilder modelBuilder) {
         this.type = type;
         this.modelBuilder = modelBuilder;
         context = new ElmContext(modelBuilder);
@@ -77,40 +79,66 @@ public class DroolToElmVisitor implements Visitor {
 
     @Override
     public void visit(CriteriaPredicatePartDTO sourcePredicatePartDTO) {
-        expressionBodyAdapter.adapt(sourcePredicatePartDTO, context);
+        if (sourcePredicatePartDTO.getPartType() != null) {
+            expressionBodyAdapter.adapt(sourcePredicatePartDTO, context.libraryBuilder);
+        }
     }
 
     @Override
     public void visit(OpenCdsConceptDTO openCdsConceptDTO) {
-        expressionBodyAdapter.adapt(openCdsConceptDTO, context);
+        expressionBodyAdapter.adapt(openCdsConceptDTO, context.libraryBuilder);
     }
 
     @Override
     public void visit(DataInputNodeDTO dIN) {
-        expressionBodyAdapter.adapt(dIN, context);
+        expressionBodyAdapter.adapt(dIN);
     }
 
     @Override
     public void visit(CriteriaResourceParamDTO criteriaResourceParamDTO) {
-        expressionBodyAdapter.adapt(criteriaResourceParamDTO, context);
+        if (criteriaResourceParamDTO.getName() != null) {
+            expressionBodyAdapter.adapt(criteriaResourceParamDTO);
+        }
     }
 
     @Override
     public void visit(ConditionCriteriaPredicatePartDTO predicatePart) {
-        expressionBodyAdapter.adapt(predicatePart, context);
-        definitionAdapter.adapt(predicatePart, context);
+        expressionBodyAdapter.adapt(predicatePart, context.libraryBuilder);
+        definitionAdapter.adapt(predicatePart, context.libraryBuilder);
     }
 
     @Override
     public void visit(ConditionCriteriaPredicateDTO predicate) {
-        expressionBodyAdapter.adapt(predicate, context);
-        definitionAdapter.adapt(predicate, context);
+        if (predicate.getPredicatePartDTOs().size() > 0 && !predicate.getPredicateType().equals(CriteriaPredicateType.PredicateGroup)) {
+            Expression predicateExpression = expressionBodyAdapter.adapt(predicate, context.libraryBuilder);
+            if (predicateExpression == null) {
+                System.out.println("Not enough information to generate elm from " + predicate.getUuid());
+            } else {
+                context.expressionStack.push(predicateExpression);
+            }
+        }
+        expressionBodyAdapter.clearState();
+        Pair<String, ExpressionRef> expressionReferenceConjunctionPair = 
+        definitionAdapter.adapt(predicate, context.libraryBuilder, modelBuilder, context.expressionStack, context.referenceStack);
+        if (expressionReferenceConjunctionPair != null){
+            context.referenceStack.push(expressionReferenceConjunctionPair);
+        } else {
+            System.out.println("Not enough information to generate elm from " + predicate.getUuid());
+        }
     }
 
     @Override
     public void visit(ConditionCriteriaRelDTO conditionCriteriaRel) {
         if (this.type != null && this.type.equals(CQLTYPES.CONDITIONREL)) {
-            definitionAdapter.conditionCriteriaMetExpression(context);
+            if (context.referenceStack.size() > 0) {
+                Pair<String, ExpressionRef> expressionReferenceConjunctionPair = 
+                    definitionAdapter.conditionCriteriaMetExpression(context.libraryBuilder, modelBuilder, context.expressionStack, context.referenceStack);
+                if (expressionReferenceConjunctionPair != null) {
+                    context.referenceStack.push(expressionReferenceConjunctionPair);
+                }
+            } else {
+                System.out.println("No remaining Expression Reference to build CriteriaMetExpression" + conditionCriteriaRel.getUuid());
+            }
             context.buildLibrary();
         }
     }
@@ -118,13 +146,14 @@ public class DroolToElmVisitor implements Visitor {
     @Override
     public void peek(ConditionCriteriaRelDTO conditionCriteriaRel) {
         if (this.type != null && this.type.equals(CQLTYPES.CONDITIONREL)) {
-            libraryAdapter.adapt(conditionCriteriaRel, context);
+            Pair<VersionedIdentifier, ContextDef> libraryInfo = libraryAdapter.adapt(conditionCriteriaRel, modelBuilder, context.libraries.size() + 1);
+            context.newLibraryBuilder(libraryInfo);
         }
     }
 
     @Override
     public void visit(CdsCodeDTO cdsCodeDTO) {
-        expressionBodyAdapter.adapt(cdsCodeDTO, context);
+        expressionBodyAdapter.adapt(cdsCodeDTO, context.libraryBuilder);
     }
 
     @Override
@@ -136,7 +165,15 @@ public class DroolToElmVisitor implements Visitor {
     @Override
     public void visit(ConditionDTO conditionDTO) {
         if (this.type != null && this.type.equals(CQLTYPES.CONDITION)) {
-            definitionAdapter.conditionCriteriaMetExpression(context);
+            if (context.referenceStack.size() > 0) {
+                Pair<String, ExpressionRef> expressionReferenceConjunctionPair = 
+                    definitionAdapter.conditionCriteriaMetExpression(context.libraryBuilder, modelBuilder, context.expressionStack, context.referenceStack);
+                if (expressionReferenceConjunctionPair != null) {
+                    context.referenceStack.push(expressionReferenceConjunctionPair);
+                }
+            } else {
+                System.out.println("No remaining Expression Reference to build CriteriaMetExpression" + conditionDTO.getUuid());
+            }
             context.buildLibrary();
         }
     }
@@ -144,20 +181,14 @@ public class DroolToElmVisitor implements Visitor {
     @Override
     public void peek(ConditionDTO conditionDTO) {
         if (this.type != null && this.type.equals(CQLTYPES.CONDITION)) {
-            libraryAdapter.adapt(conditionDTO, context);
+            Pair<VersionedIdentifier, ContextDef> libraryInfo = libraryAdapter.adapt(conditionDTO, modelBuilder, context.libraries.size() + 1);
+            context.newLibraryBuilder(libraryInfo);
         }
 
     }
 
     @Override
-    public void visit(List<ConditionDTO> rootNode) {
-        libraryAdapter.adapt(rootNode, context);
-        context.writeElm(outputPath);
-        //TODO: remove after resolving missing valuesets
-        context.writeValueSets(expressionBodyAdapter.valueSetIds);
-    }
-
-    public ElmContext getContext() {
+    public ElmContext visit(List<ConditionDTO> rootNode) {
         return context;
     }
 }

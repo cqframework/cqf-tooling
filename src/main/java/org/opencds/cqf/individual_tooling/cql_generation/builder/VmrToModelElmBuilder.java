@@ -47,7 +47,6 @@ import org.hl7.elm.r1.InCodeSystem;
 import org.hl7.elm.r1.InValueSet;
 import org.hl7.elm.r1.LetClause;
 import org.hl7.elm.r1.Not;
-import org.hl7.elm.r1.Null;
 import org.hl7.elm.r1.Property;
 import org.hl7.elm.r1.Query;
 import org.hl7.elm.r1.RelationshipClause;
@@ -64,7 +63,7 @@ import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.elm.r1.Or;
 
 // Some of these methods should probably live in LibraryBuilder... possible all
-public abstract class ModelElmBuilder {
+public abstract class VmrToModelElmBuilder {
     public final ObjectFactory of = new ObjectFactory();
     public final org.hl7.cql_annotations.r1.ObjectFactory af = new org.hl7.cql_annotations.r1.ObjectFactory();
     protected String modelIdentifier;
@@ -74,7 +73,7 @@ public abstract class ModelElmBuilder {
     protected IncludeDef includeHelper;
     protected DecimalFormat decimalFormat;
 
-    public ModelElmBuilder(String modelIdentifier, String modelVersion, String modelUri, LibrarySourceProvider lsp, DecimalFormat decimalFormat) {
+    public VmrToModelElmBuilder(String modelIdentifier, String modelVersion, String modelUri, LibrarySourceProvider lsp, DecimalFormat decimalFormat) {
         this.modelIdentifier = modelIdentifier;
         this.modelVersion = modelVersion;
         this.modelUri = modelUri;
@@ -89,23 +88,23 @@ public abstract class ModelElmBuilder {
     public abstract Expression resolveModeling(LibraryBuilder libraryBuilder, Pair<String, String> left, Expression right, String operator);
 
     // This may be more appropriate to live in DroolPredicateToElmExpressionAdapter
-	public Expression buildPredicate(LibraryBuilder libraryBuilder, Object left, Expression right, String operator) {
+	public Expression resolvePredicate(LibraryBuilder libraryBuilder, Object left, Expression right, String operator) {
         if (left instanceof Pair) {
             Pair pair = (Pair) left;
             if (pair.getLeft() instanceof String && pair.getRight() instanceof String) {
                 left = resolveModeling(libraryBuilder, (Pair<String, String>)left, right, operator);
-                return inferOperator(libraryBuilder, operator, (Expression)left, right);
+                return resolveOperator(libraryBuilder, operator, (Expression)left, right);
             } else {
                 throw new RuntimeException("Unknown modeling pair: " + left + " , " + right);
             }
         } else if (left instanceof Expression) {
-            return inferOperator(libraryBuilder, operator, (Expression)left, right);
+            return resolveOperator(libraryBuilder, operator, (Expression)left, right);
         } else {
             throw new RuntimeException("Unknown left operand type: " + left);
         }
 	}
 
-    private Expression inferOperator(LibraryBuilder libraryBuilder, String operator, Expression left, Expression right) {
+    private Expression resolveOperator(LibraryBuilder libraryBuilder, String operator, Expression left, Expression right) {
         Expression operatorExpression = null;
             switch (operator) {
                 case ">=":  {
@@ -116,15 +115,15 @@ public abstract class ModelElmBuilder {
                         sources.add(source);
                         AliasRef aliasRef = of.createAliasRef().withName(source.getAlias());
                         aliasRef.setResultType(((ListType) left.getResultType()).getElementType());
-                        Expression where = adaptInequalityExpression(libraryBuilder, operator, aliasRef, right);
+                        Expression where = resolveInequality(libraryBuilder, operator, aliasRef, right);
                         elements.add(where);
-                        Query query = visitQuery(libraryBuilder, sources, elements);
+                        Query query = resolveQuery(libraryBuilder, sources, elements);
                         Exists exists = of.createExists().withOperand(query);
                         exists.setResultType(libraryBuilder.resolveTypeName("System", "Boolean"));
                         operatorExpression = exists;
                     }
                     else {
-                        operatorExpression = adaptInequalityExpression(libraryBuilder, operator, left, right);
+                        operatorExpression = resolveInequality(libraryBuilder, operator, left, right);
                     }
                     break;
                 }
@@ -138,13 +137,13 @@ public abstract class ModelElmBuilder {
                             AliasRef aliasRef = of.createAliasRef().withName(source.getAlias());
                             aliasRef.setResultType(((ListType) left.getResultType()).getElementType());
                             elements.add(resolveWhere(libraryBuilder, left, right, elements, aliasRef));
-                             Query query = visitQuery(libraryBuilder, sources, elements);
+                             Query query = resolveQuery(libraryBuilder, sources, elements);
                             Exists exists = of.createExists().withOperand(query);
                             exists.setResultType(libraryBuilder.resolveTypeName("System", "Boolean"));
                             operatorExpression = exists;
                         }
                         else {
-                            operatorExpression = adaptMembershipExpression(libraryBuilder, "in", left, right);
+                            operatorExpression = resolveMembership(libraryBuilder, "in", left, right);
                         }
                     } else {
                         if (left.getResultType() instanceof ListType) {
@@ -154,15 +153,15 @@ public abstract class ModelElmBuilder {
                             sources.add(source);
                             AliasRef aliasRef = of.createAliasRef().withName(source.getAlias());
                             aliasRef.setResultType(((ListType) left.getResultType()).getElementType());
-                            Expression where = adaptEqualityExpression(libraryBuilder, operator, aliasRef, right);
+                            Expression where = resolveEquality(libraryBuilder, operator, aliasRef, right);
                             elements.add(where);
-                            Query query = visitQuery(libraryBuilder, sources, elements);
+                            Query query = resolveQuery(libraryBuilder, sources, elements);
                             Exists exists = of.createExists().withOperand(query);
                             exists.setResultType(libraryBuilder.resolveTypeName("System", "Boolean"));
                             operatorExpression = exists;
                         }
                         else {
-                            operatorExpression = adaptEqualityExpression(libraryBuilder, operator, left, right);
+                            operatorExpression = resolveEquality(libraryBuilder, operator, left, right);
                         }
                     }
                     break;
@@ -175,15 +174,15 @@ public abstract class ModelElmBuilder {
                         sources.add(source);
                         AliasRef aliasRef = of.createAliasRef().withName(source.getAlias());
                         aliasRef.setResultType(((ListType) left.getResultType()).getElementType());
-                        Expression where = adaptInequalityExpression(libraryBuilder, operator, aliasRef, right);
+                        Expression where = resolveInequality(libraryBuilder, operator, aliasRef, right);
                         elements.add(where);
-                        Query query = visitQuery(libraryBuilder, sources, elements);
+                        Query query = resolveQuery(libraryBuilder, sources, elements);
                         Exists exists = of.createExists().withOperand(query);
                         exists.setResultType(libraryBuilder.resolveTypeName("System", "Boolean"));
                         operatorExpression = exists;
                     }
                     else {
-                        operatorExpression = adaptInequalityExpression(libraryBuilder, operator, left, right);
+                        operatorExpression = resolveInequality(libraryBuilder, operator, left, right);
                     }
                     break;
                 }
@@ -195,15 +194,15 @@ public abstract class ModelElmBuilder {
                         sources.add(source);
                         AliasRef aliasRef = of.createAliasRef().withName(source.getAlias());
                         aliasRef.setResultType(((ListType) left.getResultType()).getElementType());
-                        Expression where = adaptInequalityExpression(libraryBuilder, operator, aliasRef, right);
+                        Expression where = resolveInequality(libraryBuilder, operator, aliasRef, right);
                         elements.add(where);
-                        Query query = visitQuery(libraryBuilder, sources, elements);
+                        Query query = resolveQuery(libraryBuilder, sources, elements);
                         Exists exists = of.createExists().withOperand(query);
                         exists.setResultType(libraryBuilder.resolveTypeName("System", "Boolean"));
                         operatorExpression = exists;
                     }
                     else {
-                        operatorExpression = adaptInequalityExpression(libraryBuilder, operator, left, right);
+                        operatorExpression = resolveInequality(libraryBuilder, operator, left, right);
                     }
                     break;
                 }
@@ -215,41 +214,38 @@ public abstract class ModelElmBuilder {
                         sources.add(source);
                         AliasRef aliasRef = of.createAliasRef().withName(source.getAlias());
                         aliasRef.setResultType(((ListType) left.getResultType()).getElementType());
-                        Expression where = adaptInequalityExpression(libraryBuilder, operator, aliasRef, right);
+                        Expression where = resolveInequality(libraryBuilder, operator, aliasRef, right);
                         elements.add(where);
-                        Query query = visitQuery(libraryBuilder, sources, elements);
+                        Query query = resolveQuery(libraryBuilder, sources, elements);
                         Exists exists = of.createExists().withOperand(query);
                         exists.setResultType(libraryBuilder.resolveTypeName("System", "Boolean"));
                         operatorExpression = exists;
                     }
                     else {
-                        operatorExpression = adaptInequalityExpression(libraryBuilder, operator, left, right);
+                        operatorExpression = resolveInequality(libraryBuilder, operator, left, right);
                     }
                     break;
                 }
                 case "!=": {
                     if (right instanceof ValueSetRef || right instanceof CodeRef) {
-                        operatorExpression = adaptNotExpression(libraryBuilder, adaptMembershipExpression(libraryBuilder, "in", left, right));
+                        operatorExpression = resolveNot(libraryBuilder, resolveMembership(libraryBuilder, "in", left, right));
                     }
                     else if (left.getResultType() instanceof ListType) {
-                        if (right instanceof Null) {
-                            System.out.println("");
-                        }
                         List<Element> elements = new ArrayList<Element>();
                         List<AliasedQuerySource> sources = new ArrayList<AliasedQuerySource>();
                         AliasedQuerySource source = of.createAliasedQuerySource().withAlias(left.getClass().getName().substring(left.getClass().getName().length() - 6, left.getClass().getName().length())).withExpression(left);
                         sources.add(source);
                         AliasRef aliasRef = of.createAliasRef().withName(source.getAlias());
                         aliasRef.setResultType(((ListType) left.getResultType()).getElementType());
-                        Expression where = adaptEqualityExpression(libraryBuilder, operator, aliasRef, right);
+                        Expression where = resolveEquality(libraryBuilder, operator, aliasRef, right);
                         elements.add(where);
-                        Query query = visitQuery(libraryBuilder, sources, elements);
+                        Query query = resolveQuery(libraryBuilder, sources, elements);
                         Exists exists = of.createExists().withOperand(query);
                         exists.setResultType(libraryBuilder.resolveTypeName("System", "Boolean"));
                         operatorExpression = exists;
                     }
                     else {
-                        operatorExpression = adaptEqualityExpression(libraryBuilder, operator, left, right);
+                        operatorExpression = resolveEquality(libraryBuilder, operator, left, right);
                     }
                     break;
                 }
@@ -262,13 +258,13 @@ public abstract class ModelElmBuilder {
                         AliasRef aliasRef = of.createAliasRef().withName(source.getAlias());
                         aliasRef.setResultType(((ListType) left.getResultType()).getElementType());
                         elements.add(resolveWhere(libraryBuilder, left, right, elements, aliasRef));
-                        Query query = visitQuery(libraryBuilder, sources, elements);
+                        Query query = resolveQuery(libraryBuilder, sources, elements);
                         Exists exists = of.createExists().withOperand(query);
                         exists.setResultType(libraryBuilder.resolveTypeName("System", "Boolean"));
                         operatorExpression = exists;
                     }
                     else {
-                        operatorExpression = adaptMembershipExpression(libraryBuilder, "in", left, right);
+                        operatorExpression = resolveMembership(libraryBuilder, "in", left, right);
                     }
                     break;
                 }
@@ -278,7 +274,7 @@ public abstract class ModelElmBuilder {
                 return operatorExpression;
     }
     
-    public Expression buildCountQuery(LibraryBuilder libraryBuilder, Expression expression, Expression right, String operator) {
+    public Expression resolveCountQuery(LibraryBuilder libraryBuilder, Expression expression, Expression right, String operator) {
         List<Element> elements = new ArrayList<Element>();
         List<AliasedQuerySource> sources = new ArrayList<AliasedQuerySource>();
         AliasedQuerySource source = of.createAliasedQuerySource().withAlias("Alias").withExpression(expression);
@@ -292,10 +288,10 @@ public abstract class ModelElmBuilder {
         }
         //TODO: need to determine operator
         if (operator != null && operator.equals("==")) {
-            Expression where = adaptMembershipExpression(libraryBuilder, "in", aliasRef, right);
+            Expression where = resolveMembership(libraryBuilder, "in", aliasRef, right);
             elements.add(where);
         }
-        Query query = visitQuery(libraryBuilder, sources, elements);
+        Query query = resolveQuery(libraryBuilder, sources, elements);
         Expression distinct = libraryBuilder.resolveFunction("System", "Distinct", List.of(query));
         Expression count = libraryBuilder.resolveFunction("System", "Count", List.of(distinct));
         return count;
@@ -304,27 +300,27 @@ public abstract class ModelElmBuilder {
     private Expression resolveWhere(LibraryBuilder libraryBuilder, Expression left, Expression right, List<Element> elements,
             AliasRef aliasRef) {
         if (right instanceof CodeRef) {
-            return adaptEqualityExpression(libraryBuilder, "~", aliasRef, right);
+            return resolveEquality(libraryBuilder, "~", aliasRef, right);
         } else if (right instanceof ValueSetRef) {
-            return adaptMembershipExpression(libraryBuilder, "in", aliasRef, right);
+            return resolveMembership(libraryBuilder, "in", aliasRef, right);
         } else {
             throw new RuntimeException("Unable to build predicate expression for: " + left.getResultType() + " and " + right.getResultType());
         }
     }
     
-    public Not adaptNotExpression(LibraryBuilder libraryBuilder, Expression operand) {
+    public Not resolveNot(LibraryBuilder libraryBuilder, Expression operand) {
         Not result = of.createNot().withOperand(operand);
         libraryBuilder.resolveUnaryCall("System", "Not", result);
         return result;
     }
 
-    public Exists adaptExistenceExpression(LibraryBuilder libraryBuilder, Expression operand) {
+    public Exists resolveExistence(LibraryBuilder libraryBuilder, Expression operand) {
         Exists result = of.createExists().withOperand(operand);
         libraryBuilder.resolveUnaryCall("System", "Exists", result);
         return result;
     }
 
-    public Expression adaptMembershipExpression(LibraryBuilder libraryBuilder, String operator, Expression left, Expression right) {
+    public Expression resolveMembership(LibraryBuilder libraryBuilder, String operator, Expression left, Expression right) {
         switch (operator) {
             case "in":
                 return libraryBuilder.resolveIn(left, right);
@@ -345,7 +341,7 @@ public abstract class ModelElmBuilder {
         throw new IllegalArgumentException(String.format("Unknown operator: %s", operator));
     }
 
-    public And adaptAndExpression(LibraryBuilder libraryBuilder, Expression left, Expression right) {
+    public And resolveAnd(LibraryBuilder libraryBuilder, Expression left, Expression right) {
         And and = of.createAnd().withOperand(left,right);
         libraryBuilder.resolveBinaryCall("System", "And", and);
         return and;
@@ -363,7 +359,7 @@ public abstract class ModelElmBuilder {
         }
     }
 
-    public Expression adaptEqualityExpression(LibraryBuilder libraryBuilder, String operator, Expression left, Expression right) {
+    public Expression resolveEquality(LibraryBuilder libraryBuilder, String operator, Expression left, Expression right) {
         if (operator.equals("~") || operator.equals("!~")) {
             BinaryExpression equivalent = of.createEquivalent().withOperand(left, right);
             libraryBuilder.resolveBinaryCall("System", "Equivalent", equivalent);
@@ -387,7 +383,7 @@ public abstract class ModelElmBuilder {
         }
     }
 
-    public BinaryExpression adaptInequalityExpression(LibraryBuilder libraryBuilder, String operator, Expression left, Expression right) {
+    public BinaryExpression resolveInequality(LibraryBuilder libraryBuilder, String operator, Expression left, Expression right) {
         BinaryExpression exp;
         String operatorName;
         switch (operator) {
@@ -415,7 +411,7 @@ public abstract class ModelElmBuilder {
         return exp;
     }
 
-    public Retrieve buildRetrieve(LibraryBuilder libraryBuilder, String resource, Expression terminology, String codeComparator, String codeProperty) {
+    public Retrieve resolveRetrieve(LibraryBuilder libraryBuilder, String resource, Expression terminology, String codeComparator, String codeProperty) {
         // libraryBuilder.checkLiteralContext();
         //As of now there is only the Fhir Model
         String label = modelIdentifier + "." + resource;
@@ -602,7 +598,7 @@ public abstract class ModelElmBuilder {
         return retrieve;
     }
 
-    public Query visitQuery(LibraryBuilder libraryBuilder, List<AliasedQuerySource> sources, List<Element> elements) {
+    public Query resolveQuery(LibraryBuilder libraryBuilder, List<AliasedQuerySource> sources, List<Element> elements) {
         QueryContext queryContext = new QueryContext();
         libraryBuilder.pushQueryContext(queryContext);
         try {
@@ -739,18 +735,18 @@ public abstract class ModelElmBuilder {
         }
     }
 
-    public Object visitAliasedQuerySource(Expression querySource, String alias) {
+    public Object resolveAliasedQuerySource(Expression querySource, String alias) {
         AliasedQuerySource source = of.createAliasedQuerySource().withExpression(querySource).withAlias(alias);
         source.setResultType(source.getExpression().getResultType());
         return source;
     }
 
-    public Object visitWhereClause(Expression expression, LibraryBuilder libraryBuilder) {
+    public Object resolveWhereClause(Expression expression, LibraryBuilder libraryBuilder) {
         DataTypes.verifyType(expression.getResultType(), libraryBuilder.resolveTypeName("System", "Boolean"));
         return expression;
     }
 
-    public CodeSystemRef buildCodeSystem(LibraryBuilder libraryBuilder, String systemUrl, String systemName) {
+    public CodeSystemRef resolveCodeSystem(LibraryBuilder libraryBuilder, String systemUrl, String systemName) {
         CodeSystemDef cs = libraryBuilder.resolveCodeSystemRef(systemName);
         if (cs == null) {
             cs = of.createCodeSystemDef().withAccessLevel(AccessModifier.PUBLIC)
@@ -766,7 +762,7 @@ public abstract class ModelElmBuilder {
         return csRef;
     }
     
-    public CodeRef buildCode(LibraryBuilder libraryBuilder, String codeId, String codeName, String codeDisplay,
+    public CodeRef resolveCode(LibraryBuilder libraryBuilder, String codeId, String codeName, String codeDisplay,
             CodeSystemRef csRef) {
         CodeDef code = libraryBuilder.resolveCodeRef(codeName);
         if (code == null) {
@@ -782,7 +778,7 @@ public abstract class ModelElmBuilder {
         return codeRef;
     }
 
-    public Expression adaptValueSet(LibraryBuilder libraryBuilder, String url, String name) {
+    public Expression resolveValueSet(LibraryBuilder libraryBuilder, String url, String name) {
         ValueSetDef vs = libraryBuilder.resolveValueSetRef(name);
         if (vs == null) {
             vs = of.createValueSetDef()

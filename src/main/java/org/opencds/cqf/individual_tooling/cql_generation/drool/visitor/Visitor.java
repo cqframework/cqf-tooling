@@ -14,6 +14,7 @@ import org.cdsframework.dto.CriteriaResourceDTO;
 import org.cdsframework.dto.CriteriaResourceParamDTO;
 import org.cdsframework.dto.DataInputNodeDTO;
 import org.cdsframework.dto.OpenCdsConceptDTO;
+import org.opencds.cqf.individual_tooling.cql_generation.context.ElmContext;
 
 public interface Visitor {
 
@@ -41,7 +42,7 @@ public interface Visitor {
 
 	public void visit(ConditionDTO conditionDTO);
 
-	public void visit(List<ConditionDTO> rootNode);
+	public ElmContext visit(List<ConditionDTO> rootNode);
 
 	public void peek(ConditionCriteriaRelDTO conditionCriteriaRel);
 

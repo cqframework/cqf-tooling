@@ -3,6 +3,7 @@ package org.opencds.cqf.individual_tooling.cql_generation.drool.adapter;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Strings;
@@ -16,7 +17,6 @@ import org.cdsframework.dto.CriteriaPredicatePartDTO;
 import org.cdsframework.dto.CriteriaResourceParamDTO;
 import org.cdsframework.dto.DataInputNodeDTO;
 import org.cdsframework.dto.OpenCdsConceptDTO;
-import org.cdsframework.enumeration.CriteriaPredicateType;
 import org.cdsframework.enumeration.CriteriaResourceType;
 import org.cdsframework.enumeration.DataModelClassType;
 import org.cdsframework.enumeration.PredicatePartType;
@@ -26,26 +26,32 @@ import org.hl7.elm.r1.CodeSystemRef;
 import org.hl7.elm.r1.Expression;
 import org.hl7.elm.r1.Literal;
 import org.hl7.elm.r1.Quantity;
-import org.opencds.cqf.individual_tooling.cql_generation.context.ElmContext;
-import org.opencds.cqf.individual_tooling.cql_generation.builder.ModelElmBuilder;
+import org.opencds.cqf.individual_tooling.cql_generation.builder.VmrToModelElmBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 /**
- * Provides adapter functionality from any node in a ConditionCriteriaPredicateDTO object graph to the respective elm Expression representation.
- * This is meant to build a single expression at a time. The order should not necessarily matter although there are some cases
- * where, for example, a function declaration must start, gather operands, and end.
- * @author  Joshua Reynolds
- * @since   2021-02-24 
+ * Provides adapter functionality from any node in a
+ * ConditionCriteriaPredicateDTO object graph to the respective Elm
+ * representation. This is meant to build a single expression at a time. The
+ * order should not necessarily matter although there are some cases where, for
+ * example, a function declaration must start, gather operands, and end.
+ * 
+ * @author Joshua Reynolds
+ * @since 2021-02-24
  */
 public class DroolPredicateToElmExpressionAdapter {
     /**
-     * the {@link ModelElmBuilder ModelElmBuilder } is needed to determine the respective mapping 
+     * the {@link VmrToModelElmBuilder ModelElmBuilder } is needed to determine the respective mapping 
      * from the VMR Model to a Model used in Cql i.e. FHIR
      */
-    private ModelElmBuilder modelBuilder;
+    private VmrToModelElmBuilder modelBuilder;
     /**
-     * left represents the left operand of a predicate
-     * Literal, Quantity, Expression, or vmrModeling
-    */
+     * left represents the left operand of a predicate Literal, Quantity,
+     * Expression, or vmrModeling
+     */
     private Object left;
     /**
      * right represents the right operand of a predicate
@@ -60,49 +66,55 @@ public class DroolPredicateToElmExpressionAdapter {
      */
     private boolean startedFunction = false;
 
-    //TODO: only used for debugging... maybe only engage when debugging and add to log?
-    private boolean hitLeft = false;
-    private boolean hitRight = false;
     public static Set<String> valueSetIds = new HashSet<String>();
+    private Logger logger;
+    private Map<String, Marker> markers = Map.of(
+        "Left_Operand", MarkerFactory.getMarker("Left_Operand"),
+        "Right_Operand", MarkerFactory.getMarker("Right_Operand"),
+        "Expression", MarkerFactory.getMarker("Expression"),
+        "Modeling", MarkerFactory.getMarker("Modeling"),
+        "Function", MarkerFactory.getMarker("Function"),
+        "Operator", MarkerFactory.getMarker("Operator")
+    );
 
     /**
      * Provides adapter functionality from any node in a ConditionCriteriaPredicateDTO object graph to the respective elm representation.
      * @param modelBuilder modelBuilder
      */
-    public DroolPredicateToElmExpressionAdapter(ModelElmBuilder modelBuilder) {
+    public DroolPredicateToElmExpressionAdapter(VmrToModelElmBuilder modelBuilder) {
+        logger = LoggerFactory.getLogger(this.getClass());
         this.modelBuilder = modelBuilder;
+        
     }
     
     /**
      * Interrogates the {@link DataInputNodeDTO dataInputNode } for a TemplateName and NodePath in order to determine output Model Mapping
      * @param dIN dataInputNode
-     * @param context elmContext
      */
-    public void adapt(DataInputNodeDTO dIN, ElmContext context) {
+    public void adapt(DataInputNodeDTO dIN) {
+        logger.debug("Creating left side of operator...");
         left = Pair.of(dIN.getTemplateName(), dIN.getNodePath());
-        if (left != null) {
-            hitLeft = true;
-        }
+        logger.debug("left result: {}", left);
 	}
 
     /**
      * Interrogates the {@link ConditionCriteriaPredicatePartDTO predicatePart } in order to determine if a Quantity or Function must be resolved in Elm
      * @param predicatePart predicatePart
-     * @param context elmContext
+     * @param libraryBuilder libraryBuilder
      */
-    public void adapt(ConditionCriteriaPredicatePartDTO predicatePart, ElmContext context) {
-        if (predicatePart.getDataInputClassType() != null && predicatePart.getPartType().equals(PredicatePartType.DataInput)) {
+    public void adapt(ConditionCriteriaPredicatePartDTO predicatePart, LibraryBuilder libraryBuilder) {
+        if (predicatePart.getDataInputClassType() != null && predicatePart.getPartType()!= null
+            && predicatePart.getPartType().equals(PredicatePartType.DataInput)) {
             switch (predicatePart.getDataInputClassType()) {
-                case Numeric: resolveQuantity(predicatePart.getText(), predicatePart.getDataInputNumeric(), context.libraryBuilder);
+                case Numeric: logger.debug("Resolving Numeric Quantity..."); resolveQuantity(predicatePart.getText(), predicatePart.getDataInputNumeric(), libraryBuilder);
                     break;
-                case Quantity: resolveQuantity(predicatePart.getText(), predicatePart.getDataInputNumeric(), context.libraryBuilder);
+                case Quantity: logger.debug("Resolving Quantity..."); resolveQuantity(predicatePart.getText(), predicatePart.getDataInputNumeric(), libraryBuilder);
                     break;
                 case String: {
                     if (predicatePart.getText() != null && predicatePart.getText().equals("Null")) {
-                        right = context.libraryBuilder.buildNull(context.libraryBuilder.resolveTypeName("System", "String"));
-                        hitRight = true;
+                        logger.debug("Resolving Null String"); right = libraryBuilder.buildNull(libraryBuilder.resolveTypeName("System", "String"));
                     } else {
-                        resolveQuantity(predicatePart.getText(), predicatePart.getDataInputNumeric(), context.libraryBuilder);
+                        logger.debug("Resolving Number String Quantity..."); resolveQuantity(predicatePart.getText(), predicatePart.getDataInputNumeric(), libraryBuilder);
                     }
                 }
                     break;
@@ -111,7 +123,8 @@ public class DroolPredicateToElmExpressionAdapter {
             }
         } else {
             if (predicatePart.getResourceType() != null && predicatePart.getCriteriaResourceDTO() != null && predicatePart.getResourceType().equals(CriteriaResourceType.Function)) {
-                resolveFunction(predicatePart.getCriteriaResourceDTO().getName(), context.libraryBuilder);
+                logger.debug("Resolving Function...");
+                resolveFunction(predicatePart.getCriteriaResourceDTO().getName(), libraryBuilder);
             }
         }
     }
@@ -120,24 +133,26 @@ public class DroolPredicateToElmExpressionAdapter {
      * Interrogates the {@link CriteriaPredicatePartDTO sourcePredicatePartDTO } in order to determine if a Boolean literal
      * or a Patient Age Function should be resolved in Elm
      * @param sourcePredicatePartDTO sourcePredicatePartDTO
-     * @param context elmContext
+     * @param libraryBuilder
      */
-	public void adapt(CriteriaPredicatePartDTO sourcePredicatePartDTO, ElmContext context) {
+	public void adapt(CriteriaPredicatePartDTO sourcePredicatePartDTO, LibraryBuilder libraryBuilder) {
         switch(sourcePredicatePartDTO.getPartType()) {
             case DataInput: {
                 if (sourcePredicatePartDTO.getDataInputClassType().equals(DataModelClassType.Boolean)) {
-                    right = context.libraryBuilder.createLiteral(sourcePredicatePartDTO.isDataInputBoolean());
-                    if (right != null) {
-                        hitRight = true;
-                    }
+                    Marker expressionMarker = markers.get("Expression");
+                    expressionMarker.add(markers.get("Right_Operand"));
+                    logger.debug(expressionMarker, "Setting right operand to Boolean Literal.");
+                    right = libraryBuilder.createLiteral(sourcePredicatePartDTO.isDataInputBoolean());
+                    logger.debug(expressionMarker, "right result: {}", right);
                 }
             } break;
             case Text: {
                 if (sourcePredicatePartDTO.getText().equals("Patient age is")) {
-                    left = modelBuilder.resolveModeling(context.libraryBuilder, Pair.of("Patient", "Age"), right, operator);
-                if (left != null) {
-                    hitLeft = true;
-                }
+                    Marker expressionMarker = markers.get("Expression");
+                    expressionMarker.add(markers.get("Left_Operand"));
+                    logger.debug(expressionMarker, "Setting left operand to Calculated Patient Age.");
+                    left = modelBuilder.resolveModeling(libraryBuilder, Pair.of("Patient", "Age"), right, operator);
+                    logger.debug(expressionMarker, "left result: {}", left);
                 }
             } break;
             default:
@@ -148,17 +163,24 @@ public class DroolPredicateToElmExpressionAdapter {
     private void resolveFunction(String criteriaResourceName, LibraryBuilder libraryBuilder) {
         if (!startedFunction) {
             if (!Strings.isNullOrEmpty(criteriaResourceName) && criteriaResourceName.toLowerCase().equals("countunique")) {
+                logger.debug(markers.get("Function"), "Starting function: {}", criteriaResourceName);
                 startedFunction = true;
             } else {
                 throw new RuntimeException("Unknown Function: " + criteriaResourceName);
             }
         } else {
+            Marker expressionModelingMarker = markers.get("Expression");
+            expressionModelingMarker.add(markers.get("Modeling"));
+            logger.debug(expressionModelingMarker, "Resolving Modeling for left operand.");
             Expression modeling = modelBuilder.resolveModeling(libraryBuilder, (Pair<String, String>)left, right, operator);
-            left = modelBuilder.buildCountQuery(libraryBuilder, modeling, right, operator);
-            if (left != null) {
-                hitLeft = true;
-            }
+            logger.debug(expressionModelingMarker, "modeling result: {}", modeling);
+            Marker expressionMarker = markers.get("Expression");
+            expressionMarker.add(markers.get("Left_Operand"));
+            logger.debug(expressionMarker, "Setting left operand to Count Query.");
+            left = modelBuilder.resolveCountQuery(libraryBuilder, modeling, right, operator);
+            logger.debug(expressionMarker, "left result: {}", left);
             startedFunction = false;
+            logger.debug(markers.get("Function"), "Ending function: {}", criteriaResourceName);
         }
     }
 
@@ -167,6 +189,7 @@ public class DroolPredicateToElmExpressionAdapter {
             if (!Strings.isNullOrEmpty(text)) {
                 List<String> unitParts = List.of(text.split(" "));
                 if (unitParts.contains("mg/24") && unitParts.contains("hours")) {
+                    logger.info("Found units: {}, adapting to mg/(24.h)", unitParts);
                     adaptQuantityOperand("mg/(24.h)", dataInputNumericValue, libraryBuilder);
                     return;
                 }
@@ -184,54 +207,60 @@ public class DroolPredicateToElmExpressionAdapter {
     /**
      * Interrogates the {@link CriteriaResourceParamDTO criteriaResourceParamDTO } for the operator name
      * @param criteriaResourceParamDTO criteriaResourceParamDTO
-     * @param context elmContext
      */
-    public void adapt(CriteriaResourceParamDTO criteriaResourceParamDTO, ElmContext context) {
-        if (criteriaResourceParamDTO.getName() != null) {
-            operator = criteriaResourceParamDTO.getName();
-        }
+    public void adapt(CriteriaResourceParamDTO criteriaResourceParamDTO) {
+        logger.debug(markers.get("Operator"), "Creating operator...");
+        operator = criteriaResourceParamDTO.getName();
+        logger.debug(markers.get("Operator"), "operator result: {}", operator);
     }
 
     /**
      * Interrogates the {@link OpenCdsConceptDTO openCdsConceptDTO } for the code and displayName in order to determine Terminology
      * @param openCdsConceptDTO openCdsConceptDTO
-     * @param context elmContext
+     * @param libraryBuilder libraryBuilder
      */
-    public void adapt(OpenCdsConceptDTO openCdsConceptDTO, ElmContext context) {
+    public void adapt(OpenCdsConceptDTO openCdsConceptDTO, LibraryBuilder libraryBuilder) {
+        logger.debug("Resolving VMR concept: {}", openCdsConceptDTO.getCode());
         valueSetIds.add(openCdsConceptDTO.getCode());
-        resoveValueSet(openCdsConceptDTO.getCode(), openCdsConceptDTO.getDisplayName(), context.libraryBuilder);
+        if (openCdsConceptDTO.getCode() != null) {
+            resoveValueSet(openCdsConceptDTO.getCode(), openCdsConceptDTO.getDisplayName(), libraryBuilder);
+        } else {   
+            logger.warn("Vmr Concept code was not found: {}", openCdsConceptDTO.getCode());
+        }
     }
 
     /**
      * Interrogates the {@link CdsCodeDTO cdsCodeDTO } for the code and displayName in order to determine Terminology
      * @param cdsCodeDTO
-     * @param context
+     * @param libraryBuilder libraryBuilder
      */
-    public void adapt(CdsCodeDTO cdsCodeDTO, ElmContext context) {
+    public void adapt(CdsCodeDTO cdsCodeDTO, LibraryBuilder libraryBuilder) {
+        logger.debug("Resolving VMR concept: {}", cdsCodeDTO.getCode());
         valueSetIds.add(cdsCodeDTO.getCode());
-        resoveValueSet(cdsCodeDTO.getCode(), cdsCodeDTO.getDisplayName(), context.libraryBuilder);
+        if (cdsCodeDTO.getCode() != null) {
+            resoveValueSet(cdsCodeDTO.getCode(), cdsCodeDTO.getDisplayName(), libraryBuilder);
+        } else {   
+            logger.warn("Vmr Concept code was not found: {}", cdsCodeDTO.getCode());
+        }
     }
 
     private void resoveValueSet(String code, String display, LibraryBuilder libraryBuilder) {
-        if (code != null) {
-            if (code.matches("(?i)y|m|d")) {
-                right = inferUnitAndQuantity(libraryBuilder, code);
-                if (right != null) {
-                    hitLeft = true;
-                }
+        Marker expressionMarker = markers.get("Expression");
+        expressionMarker.add(markers.get("Right_Operand"));
+        if (code.matches("(?i)y|m|d")) {
+            logger.debug("Resolving Quantity Unit: {}", code);
+            right = inferUnitAndQuantity(libraryBuilder, code);
+            logger.debug(expressionMarker, "right result: {}", right);
+        } else {
+            String url = "https://hln.com/fhir/ValueSet/" + code;
+            if (display.equals("Active")) {
+                logger.debug("Resolving Active Code...");
+                right = resolveActiveConditionCode(libraryBuilder);
+                logger.debug(expressionMarker, "right result: {}", right);
             } else {
-                String url = "https://hln.com/fhir/ValueSet/" + code;
-                if (display.equals("Active")) {
-                    right = resolveActiveConditionCode(libraryBuilder);
-                    if (right != null) {
-                        hitRight = true;
-                    }
-                } else {
-                    right = modelBuilder.adaptValueSet(libraryBuilder, url, display);
-                    if (right != null) {
-                        hitRight = true;
-                    }
-                }
+                logger.debug("Resolving ValueSet: {}", code);
+                right = modelBuilder.resolveValueSet(libraryBuilder, url, display);
+                logger.debug(expressionMarker, "right result: {}", right);
             }
         }
     }
@@ -244,31 +273,20 @@ public class DroolPredicateToElmExpressionAdapter {
         String finalName = "Active";
         String finalDisplay = "Active";
 
-        CodeSystemRef csRef = modelBuilder.buildCodeSystem(libraryBuilder, systemUrl, systemName);
-        return modelBuilder.buildCode(libraryBuilder, finalId, finalName, finalDisplay, csRef);
+        CodeSystemRef csRef = modelBuilder.resolveCodeSystem(libraryBuilder, systemUrl, systemName);
+        return modelBuilder.resolveCode(libraryBuilder, finalId, finalName, finalDisplay, csRef);
     }
 
     /**
-     * If there are any {@link ConditionCriteriaPredicatePartDTO predicateParts}, push a predicate expression to the expression stack.
-     * @param predicate
-     * @param context
+     * build Predicate from current state (left, right, operator)
+     * @param predicate predicate
+     * @param libraryBuilder libraryBuilder
      */
-	public void adapt(ConditionCriteriaPredicateDTO predicate, ElmContext context) {
-        if (predicate.getPredicatePartDTOs().size() > 0 && !predicate.getPredicateType().equals(CriteriaPredicateType.PredicateGroup)) {
-            if (!hitRight || !hitLeft) {
-                System.out.println("Not enough information to generate drool from " + predicate.getUuid());
-            }
-            context.expressionStack.push(modelBuilder.buildPredicate(context.libraryBuilder, left, right, operator));
-            if (left instanceof Quantity) {
-                left = null;
-            }
-            clearState();
-        }
+	public Expression adapt(ConditionCriteriaPredicateDTO predicate, LibraryBuilder libraryBuilder) {
+        return modelBuilder.resolvePredicate(libraryBuilder, left, right, operator);
     }
 
-    private void clearState() {
-        hitLeft = false;
-        hitRight = false;
+    public void clearState() {
         left = null;
         right = null;
         operator = null;
@@ -277,44 +295,53 @@ public class DroolPredicateToElmExpressionAdapter {
 
     private void adaptQuantityOperand(String text, BigDecimal bigDecimal, LibraryBuilder libraryBuilder) {
         if (Strings.isNullOrEmpty(text) || text.toLowerCase().equals("null")) {
+            logger.warn("No unit found");
             System.out.println("No Unit Provided");
         }
         if (bigDecimal == null && (Strings.isNullOrEmpty(text) || text.toLowerCase().equals("null"))) {
-            System.out.println("Data Input was Null");
+            logger.warn("Data Input was null");
             return;
         }
         if (bigDecimal != null) {
             if (left == null) {
+                Marker expressionMarker = markers.get("Expression");
+                expressionMarker.add(markers.get("Left_Operand"));
                 if (!Strings.isNullOrEmpty(text)) {
+                    logger.debug(expressionMarker, "Creating left side of operator...");
                     left = libraryBuilder.createQuantity(bigDecimal, text);
+                    logger.debug(expressionMarker, "left result: {}", left);
                 } else {
+                    logger.debug(expressionMarker, "Creating left side of operator...");
                     left = libraryBuilder.createLiteral(bigDecimal.doubleValue());
-                }
-                if (left != null) {
-                    hitLeft = true;
+                    logger.debug(expressionMarker, "left result: {}", left);
                 }
             }
             else {
+                Marker expressionMarker = markers.get("Expression");
+                expressionMarker.add(markers.get("Right_Operand"));
                 if (!Strings.isNullOrEmpty(text)) {
+                    logger.debug(expressionMarker, "Creating right side of operator...");
                     right = libraryBuilder.createQuantity(bigDecimal, text);
+                    logger.debug(expressionMarker, "right result: {}", right);
                 } else {
+                    logger.debug(expressionMarker, "Creating right side of operator...");
                     right = libraryBuilder.createLiteral(bigDecimal.doubleValue());
-                }
-                if (right != null) {
-                    hitRight = true;
+                    logger.debug(expressionMarker, "right result: {}", right);
                 }
             }
         } else {
             if (left == null) {
+                Marker expressionMarker = markers.get("Expression");
+                expressionMarker.add(markers.get("Left_Operand"));
+                logger.debug(expressionMarker, "Creating left side of operator...");
                 left = libraryBuilder.createNumberLiteral(text);
+                logger.debug(expressionMarker, "left result: {}", left);
             } else {
+                Marker expressionMarker = markers.get("Expression");
+                expressionMarker.add(markers.get("Right_Operand"));
+                logger.debug(expressionMarker, "Creating right side of operator...");
                 right = libraryBuilder.createNumberLiteral(text);
-            }
-            if (left != null) {
-                hitLeft = true;
-            }
-            if (right != null) {
-                hitRight = true;
+                logger.debug(expressionMarker, "right result: {}", right);
             }
         }
     }

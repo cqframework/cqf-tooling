@@ -1,7 +1,6 @@
 package org.opencds.cqf.individual_tooling.cql_generation;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 
 import org.junit.Test;
@@ -12,28 +11,16 @@ public class DroolCqlGeneratorTest {
 
     @Test
     public void test_worked() {
-        String encodingPath = "../CQLGenerationDocs/NonGeneratedDocs/default.json";
+        String dataInputPath = "../CQLGenerationDocs/NonGeneratedDocs/default.json";
         String outputPath = "../CQLGenerationDocs/GeneratedDocs/elm";
         CQLTYPES cqlType = CQLTYPES.CONDITION;
         String fhirVersion = "4.0.0";
-        File file = new File(encodingPath);
-        Boolean fileIsFile = file.isFile();
-        if (fileIsFile) {
+        File file = new File(dataInputPath);
+        if (file.isFile()) {
             URI encodingUri = file.toURI();
-
-            CqlGenerator droolIshCqlGenerator = new DroolCqlGenerator(outputPath, cqlType);
-
-            File outputFile = new File(outputPath);
-            Boolean outputFileIsFile = outputFile.isFile();
-            if (!outputFileIsFile) {
-                try {
-                    outputFile.createNewFile();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-            droolIshCqlGenerator.generate(encodingUri, fhirVersion);
+            URI outputUri = new File(outputPath).toURI();
+            CqlGenerator droolIshCqlGenerator = new DroolCqlGenerator(cqlType);
+            droolIshCqlGenerator.generateAndWriteToFile(encodingUri, outputUri, fhirVersion);
         } else {
             System.out.println("I am Failure.");
         }

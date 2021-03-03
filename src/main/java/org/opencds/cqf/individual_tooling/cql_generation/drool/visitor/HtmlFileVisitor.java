@@ -18,6 +18,7 @@ import org.cdsframework.dto.CriteriaResourceParamDTO;
 import org.cdsframework.dto.DataInputNodeDTO;
 import org.cdsframework.dto.OpenCdsConceptDTO;
 import org.opencds.cqf.individual_tooling.cql_generation.IOUtil;
+import org.opencds.cqf.individual_tooling.cql_generation.context.ElmContext;
 
 public class HtmlFileVisitor implements Visitor {
     private String outputDirectoryPath;
@@ -106,20 +107,22 @@ public class HtmlFileVisitor implements Visitor {
     }
 
     @Override
-    public void visit(List<ConditionDTO> rootNode) {
+    public ElmContext visit(List<ConditionDTO> rootNode) {
         htmlStrings.entrySet().stream().forEach(entry -> {
             // Dont like this concat
             String filePath = outputDirectoryPath.concat("/" + entry.getKey() + ".html");
             File file = new File(filePath);
-            String content = "<html><head><title>" + entry.getKey() + "</title></head><body><p>" + entry.getValue() + "</p></body></html>";
+            String content = "<html><head><title>" + entry.getKey() + "</title></head><body><p>" + entry.getValue()
+                    + "</p></body></html>";
             IOUtil.writeToFile(file, content);
         });
+        return null;
     }
 
     private String inferLibraryName(ConditionCriteriaRelDTO conditionCriteriaRel) {
         String libraryName = buildName(conditionCriteriaRel);
         if (conditionCriteriaRel.getCriteriaDTO() != null) {
-            libraryName = libraryName.concat( "_" + conditionCriteriaRel.getUuid().toString().substring(0, 5));
+            libraryName = libraryName.concat("_" + conditionCriteriaRel.getUuid().toString().substring(0, 5));
         }
         return libraryName;
     }

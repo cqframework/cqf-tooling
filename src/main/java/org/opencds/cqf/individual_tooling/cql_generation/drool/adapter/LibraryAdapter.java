@@ -1,118 +1,99 @@
 package org.opencds.cqf.individual_tooling.cql_generation.drool.adapter;
 
-import java.io.StringWriter;
-import java.util.List;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.cdsframework.dto.ConditionCriteriaRelDTO;
 import org.cdsframework.dto.ConditionDTO;
 import org.hl7.elm.r1.ContextDef;
-import org.hl7.elm.r1.Library;
-import org.hl7.elm.r1.ObjectFactory;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.opencds.cqf.individual_tooling.cql_generation.context.ElmContext;
-import org.hl7.cql_annotations.r1.Annotation;
+import org.opencds.cqf.individual_tooling.cql_generation.builder.VmrToModelElmBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 /**
- * Provides adapter functionality for creating Elm Libraries from List<{@link ConditionDTO ConditionDTO}> object graph
- * @author  Joshua Reynolds
- * @since   2021-02-24 
+ * Provides adapter functionality for creating Elm Libraries
+ * @author Joshua Reynolds
+ * @since 2021-02-24
  */
 public class LibraryAdapter {
 
-    /**
-     * converts every Elm Library Object in the context to the String representation and adds it to the elmLibraryMap
-     * @param rootNode rootNode
-     * @param context elmContext
-     */
-    public void adapt(List<ConditionDTO> rootNode, ElmContext context) {
-        context.libraries.entrySet().stream().forEach(entry -> {
-            System.out.println(entry.getKey());
-            try {
-                String elm = convertToXml(entry.getValue().getLibrary());
-                context.elmLibraryMap.put(entry.getKey(), Pair.of(elm, entry.getValue().getLibrary()));
-            } catch (JAXBException e) {
-                e.printStackTrace();
-            }
-        });
+    private Logger logger;
+    private Map<String, Marker> markers = Map.of(
+        "Library", MarkerFactory.getMarker("Library")
+    );
+
+    public LibraryAdapter() {
+        logger = LoggerFactory.getLogger(this.getClass());
     }
 
     /**
      * Interrogates the {@link ConditionDTO Condition} in order to infer the Library name and a possible header
-     * @param conditionDTO
-     * @param context
+     * @param conditionDTO conditionDTO
+     * @param modelBuilder modelBuilder
+     * @param libraryIndex library index to include in the name
+     * @return Pair<VersionedIdentifier, ContextDef>
      */
-    public void adapt(ConditionDTO conditionDTO, ElmContext context) {
+    public Pair<VersionedIdentifier, ContextDef> adapt(ConditionDTO conditionDTO, VmrToModelElmBuilder modelBuilder, Integer libraryIndex) {
         String libraryName = null;
         String header = null;
         if (conditionDTO.getCdsCodeDTO() != null) {
-            libraryName = inferLibraryName(conditionDTO.getCdsCodeDTO().getDisplayName(), context);
+            logger.debug(markers.get("Library"), "Resolve Library name...");
+            libraryName = inferLibraryName(conditionDTO.getCdsCodeDTO().getDisplayName(), libraryIndex);
             header = conditionDTO.getCdsCodeDTO().getDisplayName();
         } else {
+            logger.error(markers.get("Library"), "conditionCriteriaRel.getCriteriaDTO() was null.");
             throw new RuntimeException("Unable to infer library name for condition " + conditionDTO.getUuid().toString());
         }
-        resolveContext(libraryName, header, context);
+        logger.debug("Resolving context for library " + libraryName);
+        return resolveContext(libraryName, header, modelBuilder);
     }
 
     /**
      * Interrogates the {@link ConditionCriteriaRelDTO conditionCriteriaRel} in order to infer the Library name and a possible header
-     * @param conditionCriteriaRel
-     * @param context
+     * @param conditionCriteriaRel conditionCriteriaRel
+     * @param modelBuilder modelBuilder
+     * @param libraryIndex library index to include in the name
+     * @return Pair<VersionedIdentifier, ContextDef>
      */
-    public void adapt(ConditionCriteriaRelDTO conditionCriteriaRel, ElmContext context) {
-        String libraryName = inferLibraryName(conditionCriteriaRel.getLabel(), context);
+    public Pair<VersionedIdentifier, ContextDef> adapt(ConditionCriteriaRelDTO conditionCriteriaRel, VmrToModelElmBuilder modelBuilder, Integer libraryIndex) {
+        String libraryName = inferLibraryName(conditionCriteriaRel.getLabel(), libraryIndex);
         String header = conditionCriteriaRel.getLabel();
         if (conditionCriteriaRel.getCriteriaDTO() != null) {
+            logger.debug(markers.get("Library"), "Resolve Library name...");
             libraryName = libraryName.concat( "_" + conditionCriteriaRel.getUuid().toString().substring(0, 5));
             header = header.concat(" " + conditionCriteriaRel.getCriteriaDTO().getCriteriaType().toString());
+        } else {
+            logger.error(markers.get("Library"), "conditionCriteriaRel.getCriteriaDTO() was null.");
+            throw new RuntimeException("Unable to infer library name for condition " + conditionCriteriaRel.getUuid().toString());
         }
-        resolveContext(libraryName, header, context);
+        logger.debug("Resolving context for library " + libraryName);
+        return resolveContext(libraryName, header, modelBuilder);
     }
 
-    private String inferLibraryName(String libraryName, ElmContext context) {
+    private String inferLibraryName(String libraryName, Integer libraryIndex) {
         try {
-            if (libraryName.replaceAll(" ", "").length() < 50 && !libraryName.contains("=")) {
+            if (libraryName.replaceAll(" ", "").length() < 40 && !libraryName.contains("=")) {
                 libraryName = libraryName.replaceAll(" ", "_").replaceAll("<", "")
                         .replaceAll(">=", "").replaceAll(",", "").replaceAll(":", "").replaceAll("#", "")
                         .replaceAll("TEST", "").replaceAll("TEST2", "").replaceAll("TEST3", "")
                         .replaceAll("TESTExample-Daryl", "").replaceAll("[()]", "");
             } else {
-                libraryName = "GeneratedCql" + ElmContext.elmLibraryIndex;
+                logger.info("Descriptive name was too long, generating library name for " + libraryName);
+                libraryName = "GeneratedCql" + libraryIndex;
             }
         } catch (Exception e) {
-            libraryName = "ErrorWhileGenerated" + ElmContext.elmLibraryIndex;
+            logger.error(markers.get("Library"), "Could not infer library name for " + libraryName);
+            libraryName = "ErrorWhileGenerated" + libraryIndex;
         }
         return libraryName;
     }
 
-    private void resolveContext(String libraryName, String header, ElmContext context) {
+    private Pair<VersionedIdentifier, ContextDef> resolveContext(String libraryName, String header, VmrToModelElmBuilder modelBuilder) {
         VersionedIdentifier versionedIdentifier = new VersionedIdentifier().withId(libraryName).withVersion("1.0.0");
-        ContextDef contextDef = context.modelBuilder.of.createContextDef().withName("Patient");
-        context.newLibraryBuilder(versionedIdentifier, contextDef);
-    }
-
-    // pulled from translator
-    private String convertToXml(Library library) throws JAXBException {
-        Marshaller marshaller = getJaxbContext().createMarshaller();
-        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-
-        StringWriter writer = new StringWriter();
-        marshaller.marshal(new ObjectFactory().createLibrary(library), writer);
-        return writer.getBuffer().toString().replace("<xml version=\"1.0\"", "<xml version=\"1.1\"").replace("\f", "&#xc;");
-    }
-
-    private static JAXBContext getJaxbContext() {
-        JAXBContext jaxbContext;
-        try {
-            jaxbContext = JAXBContext.newInstance(Library.class, Annotation.class);
-        } catch (JAXBException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error creating JAXBContext - " + e.getMessage());
-        }
-        return jaxbContext;
+        ContextDef contextDef = modelBuilder.of.createContextDef().withName("Patient");
+        return Pair.of(versionedIdentifier, contextDef);
     }
 }

@@ -40,7 +40,8 @@ import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.individual_tooling.cql_generation.IOUtil;
-import org.opencds.cqf.individual_tooling.cql_generation.builder.FhirModelElmBuilder;
+import org.opencds.cqf.individual_tooling.cql_generation.builder.VmrToFhirElmBuilder;
+import org.opencds.cqf.individual_tooling.cql_generation.context.ElmContext;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.serialization.Deserializer;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.traversal.DroolTraverser;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.DroolToElmVisitor.CQLTYPES;
@@ -133,7 +134,7 @@ public class DroolToElmVisitorTest {
         // String expressionListFilePath =
         // "../CQLGenerationDocs/GeneratedDocs/elm/expressions/Abdominal_Cramps_314_Expression.txt";
         // runAllExpressionsFromFile(xmlFileName, expressionListFilePath);
-        setup("Patient_is_deceased_84755.xml");
+        // setup("Patient_is_deceased_84755.xml");
         generateElmForDebug();
 
         // results.forEach(object -> Assert.assertTrue(((List<?>) object).size() == 2));
@@ -177,11 +178,11 @@ public class DroolToElmVisitorTest {
     }
 
     private void doVisit(List<ConditionDTO> rootNode) {
-        String outputPath = "../CQLGenerationDocs/GeneratedDocs/elm";
         DroolToElmVisitor visitor = new DroolToElmVisitor(CQLTYPES.CONDITION,
-                new FhirModelElmBuilder("4.0.0", new DecimalFormat("#.#")), outputPath);
+                new VmrToFhirElmBuilder("4.0.0", new DecimalFormat("#.#")));
         DroolTraverser<Visitor> traverser = new DepthFirstDroolTraverser<Visitor>(visitor);
-        traverser.traverse(rootNode);
+        ElmContext context = traverser.traverse(rootNode);
+        System.out.println("");
     }
 
     private Library library;

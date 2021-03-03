@@ -14,6 +14,7 @@ import org.cdsframework.dto.CriteriaResourceDTO;
 import org.cdsframework.dto.CriteriaResourceParamDTO;
 import org.cdsframework.dto.DataInputNodeDTO;
 import org.cdsframework.dto.OpenCdsConceptDTO;
+import org.opencds.cqf.individual_tooling.cql_generation.context.ElmContext;
 
 public abstract class DroolTraverser<T> {
     protected T visitor;
@@ -22,7 +23,7 @@ public abstract class DroolTraverser<T> {
         this.visitor = visitor;
     }
 
-    public abstract void traverse(List<ConditionDTO> rootNode);
+    public abstract ElmContext traverse(List<ConditionDTO> rootNode);
 
     protected abstract void traverse(ConditionDTO conditionDTO);
 

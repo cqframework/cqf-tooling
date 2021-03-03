@@ -1,29 +1,43 @@
 package org.opencds.cqf.individual_tooling.cql_generation.drool.adapter;
 
 import java.util.Map;
+import java.util.Stack;
 
 import com.google.common.base.Strings;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.cdsframework.dto.ConditionCriteriaPredicateDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicatePartDTO;
+import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.hl7.elm.r1.AccessModifier;
 import org.hl7.elm.r1.And;
 import org.hl7.elm.r1.BinaryExpression;
-import org.hl7.elm.r1.Element;
 import org.hl7.elm.r1.Expression;
 import org.hl7.elm.r1.ExpressionDef;
 import org.hl7.elm.r1.ExpressionRef;
 import org.hl7.elm.r1.Or;
-import org.opencds.cqf.individual_tooling.cql_generation.context.ElmContext;
+import org.opencds.cqf.individual_tooling.cql_generation.builder.VmrToModelElmBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 /**
- * Provides adapter functionality for building an Expression Definition and Reference Graph
- * using the ElmContext to flush out a stack of Expressions
- * @author  Joshua Reynolds
- * @since   2021-02-24 
+ * Provides adapter functionality for building an Expression Definition and
+ * Reference Graph
+ * 
+ * @author Joshua Reynolds
+ * @since 2021-02-24
  */
 public class DefinitionAdapter {
+    private Logger logger;
+    private Map<String, Marker> markers = Map.of(
+        "ExpressionDef", MarkerFactory.getMarker("ExpressionDef")
+    );
+
+    public DefinitionAdapter() {
+        logger = LoggerFactory.getLogger(this.getClass());
+    }
     private String identifier;
     private String expressionContext = "Patient";
 
@@ -32,21 +46,23 @@ public class DefinitionAdapter {
      * infers the ExpressionDefinition identifier from either the partAlias, text, or nodeLabel
      * and initializes context in the LibraryBuilder
      * @param predicatePart predicatePart
-     * @param context elmContext
+     * @param libraryBuilder libraryBuilder
      */
-    public void adapt(ConditionCriteriaPredicatePartDTO predicatePart, ElmContext context) {
+    public void adapt(ConditionCriteriaPredicatePartDTO predicatePart, LibraryBuilder libraryBuilder) {
         switch (predicatePart.getPartType()) {
             case DataInput:
                 break;
-            case ModelElement: 
-                inferIdentifier(predicatePart); 
-                initializeContext(context);
+            case ModelElement:
+                inferIdentifier(predicatePart);
+                logger.debug(markers.get("ExpressionDef"), "Initializing Context for Expression {}", identifier);
+                initializeContext(libraryBuilder);
                 break;
             case Resource:
                 break;
             case Text: 
-                inferIdentifier(predicatePart); 
-                initializeContext(context);
+                inferIdentifier(predicatePart);
+                logger.debug(markers.get("ExpressionDef"), "Initializing Context for Expression {}", identifier);
+                initializeContext(libraryBuilder);
                 break;
             default:
                 break;
@@ -55,35 +71,44 @@ public class DefinitionAdapter {
 
     /**
      * If there is no identifier, interrogate {@link ConditionCriteriaPredicateDTO predicate} 
-     * for description as identifier and initializes context
+     * for description and initializes context
      * includes all Expressions in the expression stack and includes a number of Expression
      * References in the reference stack equal to the number of Predicate entries in the predicateDTOs
-     * finalizes context
+     * finalizes context to flush out a stack of Expressions
      * @param predicate predicate
-     * @param context elmContext
+     * @param libraryBuilder libraryBuilder
+     * @param modelBuilder modelBuilder
+     * @param expressionStack expressionStack
+     * @param referenceStack referenceStack (Conjunction, ExpressionRef)
+     * @return Pair<String, ExpressionRef>
      */
-    public void adapt(ConditionCriteriaPredicateDTO predicate, ElmContext context) {
+    public Pair<String, ExpressionRef> adapt(ConditionCriteriaPredicateDTO predicate, LibraryBuilder libraryBuilder, VmrToModelElmBuilder modelBuilder, Stack<Expression> expressionStack, Stack<Pair<String, ExpressionRef>> referenceStack) {
         if (Strings.isNullOrEmpty(identifier)) {
             identifier = predicate.getDescription() + "-" + predicate.getUuid();
-            initializeContext(context);
+            logger.debug(markers.get("ExpressionDef"), "Initializing Context for Expression {}", identifier);
+            initializeContext(libraryBuilder);
         }
-        ExpressionDef expressionDef = includeDefinitions(predicate.getPredicateConjunction().name(), context);
-        expressionDef = includeReferences(predicate.getPredicateDTOs().size(), context, expressionDef);
+        logger.debug(markers.get("ExpressionDef"), "Including Expressions in ExpressionDefinition {}", identifier);
+        ExpressionDef expressionDef = includeDefinitions(predicate.getPredicateConjunction().name(), libraryBuilder, modelBuilder, expressionStack);
+        logger.debug(markers.get("ExpressionDef"), "Including References for Expression {}", identifier);
+        expressionDef = includeReferences(predicate.getPredicateDTOs().size(), libraryBuilder, modelBuilder, referenceStack, expressionDef);
         if (expressionDef != null) {
-            finalizeContext(predicate.getPredicateConjunction().name(), context, expressionDef.getName());
+            logger.debug(markers.get("ExpressionDef"), "Finalizing Context for Expression {}", identifier);
+            return finalizeContext(predicate.getPredicateConjunction().name(), libraryBuilder, modelBuilder, expressionDef.getName());
         }
+        else return null;
     }
 
-    public void conditionCriteriaMetExpression(ElmContext context) {
-        if (context.referenceStack.size() > 0) {
-            identifier = "ConditionCriteriaMet";
-            initializeContext(context);
-            ExpressionDef expressionDef = includeDefinitions(null, context);
-            expressionDef = includeReferences(context.referenceStack.size(), context, expressionDef);
-            finalizeContext(null, context, expressionDef.getName());
-        } else {
-            System.out.println("No Reference in Library");
-        }
+    public Pair<String, ExpressionRef> conditionCriteriaMetExpression(LibraryBuilder libraryBuilder, VmrToModelElmBuilder modelBuilder, Stack<Expression> expressionStack, Stack<Pair<String, ExpressionRef>> referenceStack) {
+        identifier = "ConditionCriteriaMet";
+        logger.debug(markers.get("ExpressionDef"), "Initializing Context for Expression {}", identifier);
+        initializeContext(libraryBuilder);
+        logger.debug(markers.get("ExpressionDef"), "Including Expressions in ExpressionDefinition {}", identifier);
+        ExpressionDef expressionDef = includeDefinitions(null, libraryBuilder, modelBuilder, expressionStack);
+        logger.debug(markers.get("ExpressionDef"), "Including References for Expression {}", identifier);
+        expressionDef = includeReferences(referenceStack.size(), libraryBuilder, modelBuilder, referenceStack, expressionDef);
+        logger.debug(markers.get("ExpressionDef"), "Finalizing Context for Expression {}", identifier);
+        return finalizeContext(null, libraryBuilder, modelBuilder, expressionDef.getName());
     }
 
     private void inferIdentifier(ConditionCriteriaPredicatePartDTO predicatePart) {
@@ -94,56 +119,64 @@ public class DefinitionAdapter {
         if (alias != null && id != null) {
             identifier = alias + "-" + id;
         } else {
+            logger.error(markers.get("ExpressionDefinition"), "predicatePart.getPartAlias(), predicatePart.getText(), and predicatePart.getNodeLabel() were null.");
             throw new RuntimeException("No Inferred Alias found for " + predicatePart.getUuid());
         }
     }
 
-    private void initializeContext(ElmContext context) {
-        ExpressionDef def = context.libraryBuilder.resolveExpressionRef(identifier);
-        if (def == null || isImplicitContextExpressionDef(context, def)) {
-            if (def != null && isImplicitContextExpressionDef(context, def)) {
-                context.libraryBuilder.removeExpression(def);
-                removeImplicitContextExpressionDef(context, def);
-                def = null;
-            }
-            context.libraryBuilder.pushExpressionContext(expressionContext);
-            context.libraryBuilder.currentExpressionContext();
+    private void initializeContext(LibraryBuilder libraryBuilder) {
+        ExpressionDef def = libraryBuilder.resolveExpressionRef(identifier);
+        if (def == null) {
+            libraryBuilder.pushExpressionContext(expressionContext);
+            libraryBuilder.currentExpressionContext();
             try {
-                context.libraryBuilder.pushExpressionDefinition(identifier);
-                context.libraryBuilder.resolveExpressionRef(identifier);
+                libraryBuilder.pushExpressionDefinition(identifier);
+                libraryBuilder.resolveExpressionRef(identifier);
             } finally {
-                context.libraryBuilder.popExpressionContext();
+                libraryBuilder.popExpressionContext();
             }
         }
     }
 
-    private ExpressionDef includeReferences(Integer actualListSize, ElmContext context,
+    private ExpressionDef includeReferences(Integer actualListSize, LibraryBuilder libraryBuilder, VmrToModelElmBuilder modelBuilder, Stack<Pair<String, ExpressionRef>> referenceStack,
             ExpressionDef expressionDef) {
-        if (!context.referenceStack.isEmpty() && actualListSize != null
-                && context.referenceStack.size() >= actualListSize.intValue()) {
-            int index = 0;
-            while (index < actualListSize.intValue()) {
-                Pair<String, ExpressionRef> reference = context.referenceStack.pop();
-                if (expressionDef == null) {
-                    expressionDef = adaptExpressionDef(context, reference.getRight());
-                } else {
-                    buildBinaryFromConjunction(reference.getLeft(), context, expressionDef, reference.getRight());
+        if (!referenceStack.isEmpty() && actualListSize != null) {
+            if (referenceStack.size() >= actualListSize.intValue()) {
+                int index = 0;
+                while (index < actualListSize.intValue()) {
+                    Pair<String, ExpressionRef> reference = referenceStack.pop();
+                    if (expressionDef == null) {
+                        expressionDef = adaptExpressionDef(libraryBuilder, modelBuilder, reference.getRight());
+                    } else {
+                        buildBinaryFromConjunction(reference.getLeft(), libraryBuilder, expressionDef, reference.getRight());
+                    }
+                    index++;
                 }
-                index++;
+            } else if (referenceStack.size() <= actualListSize.intValue()) {
+                logger.warn(markers.get("ExpressionDef"), "missing Expression Reference, expected " + actualListSize + " but found " + referenceStack.size() + ".");
+                for (Pair<String, ExpressionRef> reference : referenceStack) {
+                    if (expressionDef == null) {
+                        expressionDef = adaptExpressionDef(libraryBuilder, modelBuilder, reference.getRight());
+                    } else {
+                        buildBinaryFromConjunction(reference.getLeft(), libraryBuilder, expressionDef, reference.getRight());
+                    }
+                }
+                logger.debug("Clearing Reference stack.");
+                referenceStack.clear();
             }
         }
         return expressionDef;
     }
 
-    private ExpressionDef includeDefinitions(String conjunction, ElmContext context) {
+    private ExpressionDef includeDefinitions(String conjunction, LibraryBuilder libraryBuilder, VmrToModelElmBuilder modelBuilder, Stack<Expression> expressionStack) {
         ExpressionDef expressionDef = null;
-        if (!context.expressionStack.isEmpty()) {
-            while (!context.expressionStack.isEmpty()) {
-                Expression expression = context.expressionStack.pop();
+        if (!expressionStack.isEmpty()) {
+            while (!expressionStack.isEmpty()) {
+                Expression expression = expressionStack.pop();
                 if (expressionDef == null) {
-                    expressionDef = adaptExpressionDef(context, expression);
+                    expressionDef = adaptExpressionDef(libraryBuilder, modelBuilder, expression);
                 } else {
-                    buildBinaryFromConjunction(conjunction, context, expressionDef,
+                    buildBinaryFromConjunction(conjunction, libraryBuilder, expressionDef,
                             expression);
                 }
             }
@@ -151,10 +184,10 @@ public class DefinitionAdapter {
         return expressionDef;
     }
     
-    private ExpressionDef adaptExpressionDef(ElmContext context, Expression expression) {
-        ExpressionDef def = context.libraryBuilder.resolveExpressionRef(identifier);
+    private ExpressionDef adaptExpressionDef(LibraryBuilder libraryBuilder, VmrToModelElmBuilder modelBuilder, Expression expression) {
+        ExpressionDef def = libraryBuilder.resolveExpressionRef(identifier);
         if (def == null) {
-            def = context.modelBuilder.of.createExpressionDef()
+            def = modelBuilder.of.createExpressionDef()
                     .withAccessLevel(AccessModifier.PUBLIC)
                     .withName(this.identifier)
                     .withContext(this.expressionContext)
@@ -162,7 +195,7 @@ public class DefinitionAdapter {
             if (def.getExpression() != null) {
                 def.setResultType(def.getExpression().getResultType());
             }
-            context.libraryBuilder.addExpression(def);
+            libraryBuilder.addExpression(def);
         } else {
             def.setExpression(expression);
             if (def.getExpression() != null) {
@@ -172,16 +205,17 @@ public class DefinitionAdapter {
         return def;
     }
 
-    private void finalizeContext(String conjunction, ElmContext context, String expressionName) {
-        context.libraryBuilder.popExpressionDefinition();
-        ExpressionRef expressionRef = context.modelBuilder.of.createExpressionRef().withName(expressionName);
-        if (conjunction != null) {
-            context.referenceStack.push(Pair.of(conjunction, expressionRef));
-        }
+    private Pair<String, ExpressionRef> finalizeContext(String conjunction, LibraryBuilder libraryBuilder, VmrToModelElmBuilder modelBuilder, String expressionName) {
+        libraryBuilder.popExpressionDefinition();
+        ExpressionRef expressionRef = modelBuilder.of.createExpressionRef().withName(expressionName);
         identifier = null;
+        if (conjunction != null) {
+            return Pair.of(conjunction, expressionRef);
+        }
+        return null;
     }
 
-    private void buildBinaryFromConjunction(String conjunction, ElmContext context,
+    private void buildBinaryFromConjunction(String conjunction, LibraryBuilder libraryBuilder,
             ExpressionDef expressionDef, Expression expression) {
         BinaryExpression binary; 
         switch (conjunction.toLowerCase()) {
@@ -196,24 +230,5 @@ public class DefinitionAdapter {
             default: throw new RuntimeException("Unkown conjunction " + conjunction);
         }
         expressionDef.setExpression(binary);
-    }
-
-    private boolean isImplicitContextExpressionDef(ElmContext context, ExpressionDef def) {
-        for (Element e : context.contextDefinitions.values()) {
-            if (def == e) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private void removeImplicitContextExpressionDef(ElmContext context, ExpressionDef def) {
-        for (Map.Entry<String, Element> e : context.contextDefinitions.entrySet()) {
-            if (def == e.getValue()) {
-                context.contextDefinitions.remove(e.getKey());
-                break;
-            }
-        }
     }
 }

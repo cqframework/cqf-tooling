@@ -3,8 +3,6 @@ package org.opencds.cqf.individual_tooling.cql_generation.drool.traversal;
 import java.util.List;
 import java.util.Stack;
 
-import com.google.common.base.Strings;
-
 import org.cdsframework.dto.CdsCodeDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicateDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicatePartConceptDTO;
@@ -19,6 +17,7 @@ import org.cdsframework.dto.DataInputNodeDTO;
 import org.cdsframework.dto.OpenCdsConceptDTO;
 import org.cdsframework.enumeration.CriteriaResourceType;
 import org.cdsframework.enumeration.DataModelClassType;
+import org.opencds.cqf.individual_tooling.cql_generation.context.ElmContext;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.Visitor;
 
 public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
@@ -30,9 +29,9 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
     }
 
     @Override
-    public void traverse(List<ConditionDTO> rootNode) {
+    public ElmContext traverse(List<ConditionDTO> rootNode) {
         rootNode.forEach(node -> traverse(node));
-        this.visitor.visit(rootNode);
+        return this.visitor.visit(rootNode);
     }
 
     @Override
