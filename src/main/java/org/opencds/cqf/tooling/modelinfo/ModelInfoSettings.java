@@ -1,6 +1,8 @@
 package org.opencds.cqf.tooling.modelinfo;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
 
@@ -12,6 +14,7 @@ public class ModelInfoSettings {
     public String patientClassName;
     public String patientBirthDatePropertyName;
     public String targetQualifier;
+    //public Map<String, String> primarySearchPath = new HashMap<String, String>();
 
     public Collection<ConversionInfo> conversionInfos;
 
