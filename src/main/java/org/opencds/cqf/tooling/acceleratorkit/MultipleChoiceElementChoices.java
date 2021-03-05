@@ -13,6 +13,12 @@ public class MultipleChoiceElementChoices {
         this.fhirElementPath = fhirElementPath;
     }
 
+    private String customValueSetName;
+    public String getCustomValueSetName() { return this.customValueSetName; }
+    public void setCustomValueSetName(String customValueSetName) {
+        this.customValueSetName = customValueSetName;
+    }
+
     private CodeCollection codes;
     public CodeCollection getCodes() {
         if (this.codes == null) {

@@ -604,7 +604,7 @@ public class Processor extends Operation {
         e.setBaseProfile(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4BaseProfile")));
         e.setCustomProfileId(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomProfileId")));
         e.setVersion(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4VersionNumber")));
-        e.setCustomValueSetName( SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomValueSetName")));
+        e.setCustomValueSetName(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomValueSetName")));
         e.setBindingStrength(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "BindingStrength")));
         e.setUnitOfMeasure(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "UnitOfMeasure")));
         e.setExtensionNeeded(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ExtensionNeeded")));
@@ -628,6 +628,12 @@ public class Processor extends Operation {
                 if (parentChoicesFhirElementPath == null) {
                     parentChoicesFhirElementPath = getFhirElementPath(row, colIds);
                     parentElement.getChoices().setFhirElementPath(parentChoicesFhirElementPath);
+                }
+
+                String parentChoicesCustomValueSetName = parentElement.getChoices().getCustomValueSetName();
+                if (parentChoicesCustomValueSetName == null) {
+                    parentChoicesCustomValueSetName = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomValueSetName"));
+                    parentElement.getChoices().setCustomValueSetName(parentChoicesCustomValueSetName);
                 }
 
                 List<DictionaryCode> dataElementCodes = getDataElementCodes(row, colIds, parentName);
@@ -1461,41 +1467,43 @@ public class Processor extends Operation {
 
     private void ensureChoicesDataElement(DictionaryElement dictionaryElement, StructureDefinition sd) {
         // Ensure Element for Choices path
-        String choicesElementPath = dictionaryElement.getChoices().getFhirElementPath().getResourceTypeAndPath();
-        ElementDefinition existingChoicesElement = null;
-        for (ElementDefinition elementDef : sd.getDifferential().getElement()) {
-            if (elementDef.getId().equals(choicesElementPath)) {
-                existingChoicesElement = elementDef;
-                break;
-            }
-        }
-
-        if (existingChoicesElement != null) {
-            ElementDefinition.ElementDefinitionBindingComponent existingBinding = existingChoicesElement.getBinding();
-            if (existingBinding == null) {
-                //TODO: Create the binding to the ensurevalueset
-            }
-        } else {
-            ElementDefinition ed = new ElementDefinition();
-            ed.setId(choicesElementPath);
-            ed.setPath(choicesElementPath);
-            ed.setMin(1);
-            ed.setMax(isMultipleChoiceElement(dictionaryElement) ? "*" : "1");
-            ed.setMustSupport(true);
-
-            String elementFhirType = getFhirTypeOfTargetElement(dictionaryElement.getFhirElementPath());
-            ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
-            if (elementFhirType != null && elementFhirType.length() > 0) {
-                tr.setCode(elementFhirType);
-                ed.addType(tr);
+        if (dictionaryElement.getChoices() != null && dictionaryElement.getChoices().getFhirElementPath() != null) {
+            String choicesElementPath = dictionaryElement.getChoices().getFhirElementPath().getResourceTypeAndPath();
+            ElementDefinition existingChoicesElement = null;
+            for (ElementDefinition elementDef : sd.getDifferential().getElement()) {
+                if (elementDef.getId().equals(choicesElementPath)) {
+                    existingChoicesElement = elementDef;
+                    break;
+                }
             }
 
-            String valueSetName = dictionaryElement.getCustomValueSetName();
-            if (valueSetName == null || valueSetName.isEmpty()) {
-                valueSetName = dictionaryElement.getName() + "-values";
+            if (existingChoicesElement != null) {
+                ElementDefinition.ElementDefinitionBindingComponent existingBinding = existingChoicesElement.getBinding();
+                if (existingBinding == null) {
+                    //TODO: Create the binding to the ensurevalueset
+                }
+            } else {
+                ElementDefinition ed = new ElementDefinition();
+                ed.setId(choicesElementPath);
+                ed.setPath(choicesElementPath);
+                ed.setMin(1);
+                ed.setMax(isMultipleChoiceElement(dictionaryElement) ? "*" : "1");
+                ed.setMustSupport(true);
+
+                String elementFhirType = getFhirTypeOfTargetElement(dictionaryElement.getFhirElementPath());
+                ElementDefinition.TypeRefComponent tr = new ElementDefinition.TypeRefComponent();
+                if (elementFhirType != null && elementFhirType.length() > 0) {
+                    tr.setCode(elementFhirType);
+                    ed.addType(tr);
+                }
+
+                String valueSetName = dictionaryElement.getChoices().getCustomValueSetName();
+                if (valueSetName == null || valueSetName.isEmpty()) {
+                    valueSetName = dictionaryElement.getName() + "-choices";
+                }
+                ensureAndBindElementTerminology(valueSetName, dictionaryElement.getLabel() + " choices", sd, ed, dictionaryElement.getChoices().getCodes(), dictionaryElement.getBindingStrength());
+                sd.getDifferential().addElement(ed);
             }
-            ensureAndBindElementTerminology(valueSetName, dictionaryElement.getLabel(), sd, ed, dictionaryElement.getChoices().getCodes(), dictionaryElement.getBindingStrength());
-            sd.getDifferential().addElement(ed);
         }
     }
 
@@ -2186,16 +2194,33 @@ public class Processor extends Operation {
                     sb.append(System.lineSeparator());
                 }
 
+                String choicesSuffix = "";
                 if (sd.hasDescription()) {
-                    sb.append(String.format("  @description: %s", sd.getDescription()));
+                    String choicesPrefix = "";
+                    if (retrieve.getTerminologyIdentifier() != null
+                            && retrieve.getTerminologyIdentifier().contains("choices")) {
+                        choicesPrefix = "Choices for ";
+                        choicesSuffix = " choices";
+                    }
+                    sb.append(String.format("  @description: %s%s", choicesPrefix, sd.getDescription()));
                     sb.append(System.lineSeparator());
                 }
                 sb.append("*/");
                 sb.append(System.lineSeparator());
-                sb.append(String.format("define \"%s\":", title));
+                sb.append(String.format("define \"%s%s\":", title, choicesSuffix));
                 sb.append(System.lineSeparator());
                 sb.append(String.format("  [%s: Cx.\"%s\"]", sd.getType(), retrieve.getTerminologyIdentifier()));
                 // TODO: Switch on sd.baseDefinition to provide filtering here (e.g. status = 'not-done')
+
+                switch (sd.getBaseDefinition()) {
+                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-procedure-not-done":
+                        sb.append(" R");
+                        sb.append(System.lineSeparator());
+                        sb.append("    where R.status.value = 'not-done'");
+                        break;
+                    default:
+                        break;
+                }
                 sb.append(System.lineSeparator());
                 sb.append(System.lineSeparator());
             }
