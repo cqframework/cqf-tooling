@@ -1059,10 +1059,6 @@ public class Processor extends Operation {
         rootElement.setMin(toBoolean(element.getRequired()) ? 1 : 0);
         rootElement.setMax(isMultipleChoiceElement(element) ? "*" : "1");
 
-//        // TODO: bind to generated valueset
-//        if (element.getPrimaryCodes() != null) {
-//            rootElement.setFixed(element.getPrimaryCodes().toCodeableConcept());
-//        }
         ensureAndBindElementTerminology(element, sd, rootElement);
 
         sd.getDifferential().addElement(rootElement);
@@ -1194,7 +1190,6 @@ public class Processor extends Operation {
                     ).setValue(new CodeableConcept().addCoding(activityCoding)));
         }
 
-        // TODO: Support resources other than Observation
         sd.setType(resourceType);
 
         String baseResource = "http://hl7.org/fhir/StructureDefinition/" + resourceType;
@@ -1617,8 +1612,7 @@ public class Processor extends Operation {
 
     private void ensureAndBindElementTerminology(DictionaryElement element, StructureDefinition sd, ElementDefinition ed) {
         // Create a ValueSet with the primary codes for the data element and bind that to the element definition (i.e., ed)
-        // if the element is not a multiple choice element or an extension and has as code,
-        // bind it as the fixed value for the element.
+        // if the element is not a multiple choice element or an extension and has as code, bind it as the fixed value for the element.
         //if (element.getChoices().getCodes().size() == 0 && element.getPrimaryCodes() != null && !requiresExtension(element)) {
         //TODO: Restore the extension exclusion in the condition below? Removed to allow for reuse of this method in createExtensionStructureDefinition
         if (element.getPrimaryCodes() != null) {// && !requiresExtension(element)) {
@@ -1628,73 +1622,10 @@ public class Processor extends Operation {
             }
 
             CodeCollection codes = element.getPrimaryCodes();
-
             if (codes != null) {
                 ensureAndBindElementTerminology(valueSetName, element.getLabel(), sd, ed, codes, element.getBindingStrength());
-//                String primaryValueSetId = toId(valueSetName);
-//
-//                ValueSet primaryValueSet = ensureValueSetWithCodes(primaryValueSetId, element.getLabel(), codes);
-//
-//                retrieves.add(new RetrieveInfo(sd, primaryValueSet.getTitle()));
-//
-//                // Bind the current element to the valueSet
-//                ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
-//                binding.setStrength(element.getBindingStrength());
-//                binding.setValueSet(primaryValueSet.getUrl());
-//                ed.setBinding(binding);
             }
         }
-
-//        // binding and CodeSystem/ValueSet for MultipleChoice elements
-//        String customValueSetName = element.getCustomValueSetName();
-//        Boolean hasCustomValueSetName = customValueSetName != null && !customValueSetName.isEmpty();
-//
-//        // TODO: hasCustomValueSetName might be sufficient here?
-//        // TODO: Need to ensureElement for the element.getChoices().getFhirElementPath()
-//        if (element.getChoices().getCodes().size() > 0 || hasCustomValueSetName) {
-//            String valueSetUrl = null;
-//            if (hasCustomValueSetName && element.getChoices().getCodes().size() == 0
-//                    && customValueSetName.startsWith("http")) {
-//                valueSetUrl = customValueSetName;
-//                retrieves.add(new RetrieveInfo(sd, valueSetUrl));
-//            }
-//            else {
-//                // TOOD: This needs some TLC, but had to decouple createCodeSystem from openMRS codes to
-//                // facilitate the extended codes pattern.
-//                CodeSystem codeSystem = null;
-//                if (enableOpenMRS && element.getChoices().getCodes().getCodesForSystem(openMRSSystem).size() > 0) {
-//                    codeSystem = createCodeSystem(element.getName(), canonicalBase, null, null);
-//                    // collect all the OpenMRS choices to add to the codeSystem
-//                    for (DictionaryCode code : element.getChoices().getCodes().getCodesForSystem(openMRSSystem)) {
-//                        CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent();
-//                        concept.setCode(code.getCode());
-//                        concept.setDisplay(code.getLabel());
-//                        codeSystem.addConcept(concept);
-//                    }
-//                }
-//
-//                // Ensure the ValueSet
-//                String primaryValueSetName = element.getCustomValueSetName();
-//                if (primaryValueSetName == null || primaryValueSetName.isEmpty()) {
-//                    primaryValueSetName = toId(element.getName());
-//                }
-//
-//                //TODO: use "-values" for the choices VS
-//                String primaryValueSetId = toId(primaryValueSetName) + "-values";
-//                ValueSet valueSet = ensureValueSetWithCodes(primaryValueSetId, element.getLabel(), element);
-//
-//                if (codeSystem != null && element.getChoices().getCodes().getCodesForSystem(openMRSSystem).size() == element.getChoices().getCodes().size()) {
-//                    codeSystem.setValueSet(valueSet.getUrl());
-//                }
-//                valueSetUrl = valueSet.getUrl();
-//                retrieves.add(new RetrieveInfo(sd, valueSet.getTitle()));
-//            }
-//            // Bind the current element to the valueSet
-//            ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
-//            binding.setStrength(element.getBindingStrength());
-//            binding.setValueSet(valueSetUrl);
-//            ed.setBinding(binding);
-//        }
     }
 
     @Nonnull
