@@ -2150,8 +2150,8 @@ public class Processor extends Operation {
             if (ac == 0) {
                 String s1b = s1.substring(s1i);
                 String s2b = s2.substring(s2i);
-                String[] s1parts = s1b.split(".");
-                String[] s2parts = s2b.split(".");
+                String[] s1parts = s1b.split("\\.");
+                String[] s2parts = s2b.split("\\.");
                 for (int partIndex = 0; partIndex < s1parts.length; partIndex++) {
                     if (partIndex >= s2parts.length) {
                         return 1;
@@ -2213,7 +2213,7 @@ public class Processor extends Operation {
                 // TODO: Switch on sd.baseDefinition to provide filtering here (e.g. status = 'not-done')
 
                 switch (sd.getBaseDefinition()) {
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-procedure-not-done":
+                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-procedurenotdone":
                         sb.append(" R");
                         sb.append(System.lineSeparator());
                         sb.append("    where R.status.value = 'not-done'");
