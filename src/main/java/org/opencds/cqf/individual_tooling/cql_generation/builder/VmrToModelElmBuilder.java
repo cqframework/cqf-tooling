@@ -19,6 +19,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.cqframework.cql.cql2elm.CqlSemanticException;
 import org.cqframework.cql.cql2elm.CqlTranslatorException;
@@ -60,6 +61,10 @@ import org.hl7.elm.r1.Tuple;
 import org.hl7.elm.r1.TupleElement;
 import org.hl7.elm.r1.Xor;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 import org.hl7.elm.r1.Or;
 
 // Some of these methods should probably live in LibraryBuilder... possible all
@@ -72,6 +77,11 @@ public abstract class VmrToModelElmBuilder {
     protected LibrarySourceProvider lsp;
     protected IncludeDef includeHelper;
     protected DecimalFormat decimalFormat;
+    protected Logger logger;
+    protected Map<String, Marker> markers = Map.of(
+        "Modeling", MarkerFactory.getMarker("Modeling")
+    );
+
 
     public VmrToModelElmBuilder(String modelIdentifier, String modelVersion, String modelUri, LibrarySourceProvider lsp, DecimalFormat decimalFormat) {
         this.modelIdentifier = modelIdentifier;
@@ -80,6 +90,7 @@ public abstract class VmrToModelElmBuilder {
         this.lsp = lsp;
         this.decimalFormat = decimalFormat;
         this.decimalFormat.setParseBigDecimal(true);
+        logger = LoggerFactory.getLogger(this.getClass());                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
     }
 
     // These two methods are only appropriate for building predicates...  need to abstract this a bit in the future.
@@ -92,19 +103,23 @@ public abstract class VmrToModelElmBuilder {
         if (left instanceof Pair) {
             Pair pair = (Pair) left;
             if (pair.getLeft() instanceof String && pair.getRight() instanceof String) {
+                logger.debug(markers.get("Modeling"), "Resolving Modeling for left");
                 left = resolveModeling(libraryBuilder, (Pair<String, String>)left, right, operator);
                 return resolveOperator(libraryBuilder, operator, (Expression)left, right);
             } else {
-                throw new RuntimeException("Unknown modeling pair: " + left + " , " + right);
+                logger.debug(markers.get("Modeling"), "Unknown Vmr Modeling for left, {}", pair);
+                throw new RuntimeException("Unknown modeling pair: " + pair.getLeft() + " , " + pair.getRight());
             }
         } else if (left instanceof Expression) {
             return resolveOperator(libraryBuilder, operator, (Expression)left, right);
         } else {
+            logger.debug("Unkown type left, {}", left);
             throw new RuntimeException("Unknown left operand type: " + left);
         }
 	}
 
     private Expression resolveOperator(LibraryBuilder libraryBuilder, String operator, Expression left, Expression right) {
+        logger.debug("resolving operator");
         Expression operatorExpression = null;
             switch (operator) {
                 case ">=":  {
@@ -269,12 +284,14 @@ public abstract class VmrToModelElmBuilder {
                     break;
                 }
                 default:
+                logger.debug("Unkown Operator: " + operator);
                     throw new IllegalArgumentException("Unknown operator: " + operator);
             }
                 return operatorExpression;
     }
     
     public Expression resolveCountQuery(LibraryBuilder libraryBuilder, Expression expression, Expression right, String operator) {
+        logger.debug(markers.get("Modeling"), "Resolving Count Query");
         List<Element> elements = new ArrayList<Element>();
         List<AliasedQuerySource> sources = new ArrayList<AliasedQuerySource>();
         AliasedQuerySource source = of.createAliasedQuerySource().withAlias("Alias").withExpression(expression);
@@ -299,6 +316,7 @@ public abstract class VmrToModelElmBuilder {
 
     private Expression resolveWhere(LibraryBuilder libraryBuilder, Expression left, Expression right, List<Element> elements,
             AliasRef aliasRef) {
+        logger.debug(markers.get("Modeling"), "Resolving Where");
         if (right instanceof CodeRef) {
             return resolveEquality(libraryBuilder, "~", aliasRef, right);
         } else if (right instanceof ValueSetRef) {
@@ -309,12 +327,14 @@ public abstract class VmrToModelElmBuilder {
     }
     
     public Not resolveNot(LibraryBuilder libraryBuilder, Expression operand) {
+        logger.debug(markers.get("Modeling"), "Resolving Not");
         Not result = of.createNot().withOperand(operand);
         libraryBuilder.resolveUnaryCall("System", "Not", result);
         return result;
     }
 
     public Exists resolveExistence(LibraryBuilder libraryBuilder, Expression operand) {
+        logger.debug(markers.get("Modeling"), "Resolving Exists");
         Exists result = of.createExists().withOperand(operand);
         libraryBuilder.resolveUnaryCall("System", "Exists", result);
         return result;
@@ -323,9 +343,11 @@ public abstract class VmrToModelElmBuilder {
     public Expression resolveMembership(LibraryBuilder libraryBuilder, String operator, Expression left, Expression right) {
         switch (operator) {
             case "in":
+                logger.debug(markers.get("Modeling"), "Resolving In");
                 return libraryBuilder.resolveIn(left, right);
             case "contains":
                 if (left instanceof ValueSetRef) {
+                    logger.debug(markers.get("Modeling"), "Resolving InValueSet");
                     InValueSet in = of.createInValueSet()
                             .withCode(right)
                             .withValueset((ValueSetRef) left);
@@ -334,6 +356,7 @@ public abstract class VmrToModelElmBuilder {
                 }
 
                 Contains contains = of.createContains().withOperand(left, right);
+                logger.debug(markers.get("Modeling"), "Resolving Contains");
                 libraryBuilder.resolveBinaryCall("System", "Contains", contains);
                 return contains;
         }
@@ -342,6 +365,7 @@ public abstract class VmrToModelElmBuilder {
     }
 
     public And resolveAnd(LibraryBuilder libraryBuilder, Expression left, Expression right) {
+        logger.debug(markers.get("Modeling"), "Resolving And");
         And and = of.createAnd().withOperand(left,right);
         libraryBuilder.resolveBinaryCall("System", "And", and);
         return and;
@@ -349,10 +373,12 @@ public abstract class VmrToModelElmBuilder {
 
     public Expression adaptOrExpression(LibraryBuilder libraryBuilder, String text, Expression left, Expression right) {
         if (text.equals("xor")) {
+            logger.debug(markers.get("Modeling"), "Resolving Xor");
             Xor xor = of.createXor().withOperand(left, right);
             libraryBuilder.resolveBinaryCall("System", "Xor", xor);
             return xor;
         } else {
+            logger.debug(markers.get("Modeling"), "Resolving Or");
             Or or = of.createOr().withOperand(left, right);
             libraryBuilder.resolveBinaryCall("System", "Or", or);
             return or;
@@ -362,8 +388,10 @@ public abstract class VmrToModelElmBuilder {
     public Expression resolveEquality(LibraryBuilder libraryBuilder, String operator, Expression left, Expression right) {
         if (operator.equals("~") || operator.equals("!~")) {
             BinaryExpression equivalent = of.createEquivalent().withOperand(left, right);
+            logger.debug(markers.get("Modeling"), "Resolving Equivalent");
             libraryBuilder.resolveBinaryCall("System", "Equivalent", equivalent);
             if (!"~".equals(operator)) {
+                logger.debug(markers.get("Modeling"), "Resolving Not");
                 Not not = of.createNot().withOperand(equivalent);
                 libraryBuilder.resolveUnaryCall("System", "Not", not);
                 return not;
@@ -371,10 +399,12 @@ public abstract class VmrToModelElmBuilder {
             return equivalent;
         }
         else {
+            logger.debug(markers.get("Modeling"), "Resolving Equal");
             BinaryExpression equal = of.createEqual().withOperand(left, right);
             libraryBuilder.resolveBinaryCall("System", "Equal", equal);
             
             if (!"=".equals(operator)) {
+                logger.debug(markers.get("Modeling"), "Resolving Not");
                 Not not = of.createNot().withOperand(equal);
                 libraryBuilder.resolveUnaryCall("System", "Not", not);
                 return not;
@@ -388,22 +418,27 @@ public abstract class VmrToModelElmBuilder {
         String operatorName;
         switch (operator) {
             case "<=":
+                logger.debug(markers.get("Modeling"), "Resolving LessOrEqual");
                 operatorName = "LessOrEqual";
                 exp = of.createLessOrEqual();
                 break;
             case "<":
+                logger.debug(markers.get("Modeling"), "Resolving Less");
                 operatorName = "Less";
                 exp = of.createLess();
                 break;
             case ">":
+                logger.debug(markers.get("Modeling"), "Resolving Greater");
                 operatorName = "Greater";
                 exp = of.createGreater();
                 break;
             case ">=":
+                logger.debug(markers.get("Modeling"), "Resolving GreaterOrEqual");
                 operatorName = "GreaterOrEqual";
                 exp = of.createGreaterOrEqual();
                 break;
             default:
+                logger.debug(markers.get("Modeling"), "Unknown operator: ", operator);
                 throw new IllegalArgumentException(String.format("Unknown operator: %s", operator));
         }
         exp.withOperand(left, right);
@@ -414,6 +449,7 @@ public abstract class VmrToModelElmBuilder {
     public Retrieve resolveRetrieve(LibraryBuilder libraryBuilder, String resource, Expression terminology, String codeComparator, String codeProperty) {
         // libraryBuilder.checkLiteralContext();
         //As of now there is only the Fhir Model
+        logger.debug(markers.get("Modeling"), "Resolving Retrieve");
         String label = modelIdentifier + "." + resource;
         DataType dataType = libraryBuilder.resolveTypeName(modelIdentifier, label);
         libraryBuilder.resolveLabel(modelIdentifier, resource);
@@ -565,7 +601,7 @@ public abstract class VmrToModelElmBuilder {
                         }
                         else {
                             // Otherwise, access the codes property of the resulting Concept
-                            Expression codesAccessor = libraryBuilder.buildProperty(toList.getOperand(), "codes", toList.getOperand().getResultType());
+                            Expression codesAccessor = libraryBuilder.buildProperty(toList.getOperand(), "codes", false, toList.getOperand().getResultType());
                             retrieve.setCodes(codesAccessor);
                         }
                     }
@@ -599,6 +635,7 @@ public abstract class VmrToModelElmBuilder {
     }
 
     public Query resolveQuery(LibraryBuilder libraryBuilder, List<AliasedQuerySource> sources, List<Element> elements) {
+        logger.debug(markers.get("Modeling"), "Resolving Query");
         QueryContext queryContext = new QueryContext();
         libraryBuilder.pushQueryContext(queryContext);
         try {
@@ -736,19 +773,23 @@ public abstract class VmrToModelElmBuilder {
     }
 
     public Object resolveAliasedQuerySource(Expression querySource, String alias) {
+        logger.debug(markers.get("Modeling"), "Resolving Aliased Query Source");
         AliasedQuerySource source = of.createAliasedQuerySource().withExpression(querySource).withAlias(alias);
         source.setResultType(source.getExpression().getResultType());
         return source;
     }
 
     public Object resolveWhereClause(Expression expression, LibraryBuilder libraryBuilder) {
+        logger.debug(markers.get("Modeling"), "Resolving Where Clause");
         DataTypes.verifyType(expression.getResultType(), libraryBuilder.resolveTypeName("System", "Boolean"));
         return expression;
     }
 
     public CodeSystemRef resolveCodeSystem(LibraryBuilder libraryBuilder, String systemUrl, String systemName) {
+        logger.debug(markers.get("Modeling"), "Resolving CodeSystem");
         CodeSystemDef cs = libraryBuilder.resolveCodeSystemRef(systemName);
         if (cs == null) {
+            logger.debug(markers.get("Modeling"), "Creating new CodeSystem Definition");
             cs = of.createCodeSystemDef().withAccessLevel(AccessModifier.PUBLIC)
                 .withId(systemUrl).withName(systemName);
 
@@ -764,8 +805,10 @@ public abstract class VmrToModelElmBuilder {
     
     public CodeRef resolveCode(LibraryBuilder libraryBuilder, String codeId, String codeName, String codeDisplay,
             CodeSystemRef csRef) {
+        logger.debug(markers.get("Modeling"), "Resolving Code");
         CodeDef code = libraryBuilder.resolveCodeRef(codeName);
         if (code == null) {
+            logger.debug(markers.get("Modeling"), "Creating new Code Definition");
             code = of.createCodeDef().withAccessLevel(AccessModifier.PUBLIC)
                 .withCodeSystem(csRef).withDisplay(codeDisplay).withId(codeId)
                 .withName(codeName);
@@ -779,8 +822,10 @@ public abstract class VmrToModelElmBuilder {
     }
 
     public Expression resolveValueSet(LibraryBuilder libraryBuilder, String url, String name) {
+        logger.debug(markers.get("Modeling"), "Resolving ValueSet");
         ValueSetDef vs = libraryBuilder.resolveValueSetRef(name);
         if (vs == null) {
+            logger.debug(markers.get("Modeling"), "Creating new ValueSet Definition");
             vs = of.createValueSetDef()
                 .withAccessLevel(AccessModifier.PUBLIC)
                 .withName(name)

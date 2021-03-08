@@ -21,6 +21,7 @@ import org.opencds.cqf.individual_tooling.cql_generation.drool.serialization.Ser
 import org.opencds.cqf.individual_tooling.cql_generation.drool.traversal.DepthFirstDroolTraverser;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.traversal.DroolTraverser;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.DroolToElmVisitor;
+import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.ElmToCqlVisitor;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.HtmlFileVisitor;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.Visitor;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.DroolToElmVisitor.CQLTYPES;
@@ -92,7 +93,13 @@ public class DroolCqlGenerator implements CqlGenerator {
         Visitor visitor = new DroolToElmVisitor(type, modelBuilder);
         // visitor = new HtmlFileVisitor(outputPath);
         DroolTraverser<Visitor> traverser = new DepthFirstDroolTraverser<Visitor>(visitor);
-        return traverser.traverse(rootNode);
+        ElmContext context = traverser.traverse(rootNode);
+        context.libraries.values().forEach(library -> {
+            ElmToCqlVisitor elmVisitor = new ElmToCqlVisitor();
+            elmVisitor.visitLibrary(library, context);
+            context.cqlStrings.push(elmVisitor.getOutput());
+        });
+        return context;
     }
 
     private VmrToModelElmBuilder resolveModel(String fhirVersion) {

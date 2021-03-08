@@ -128,6 +128,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
      * [Condition: category ~ "Encounter diagnosis"] C return C.code
     */
     private Expression buildModelingA(LibraryBuilder libraryBuilder) {
+        this.logger.debug(this.markers.get("Modeling"), "Building Modeling A: [Condition: category ~ \"Encounter diagnosis\"] C return C.code");
         String resource = "Condition";
         String retrieveDataPath = "category";
         String retrieveAlias = "C";
@@ -151,6 +152,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
      * [Observation] O where O.status in { 'final', 'amended' } return O.value as FHIR.CodeableConcept // TODO: Contextualize to the encounter?
     */
     private Expression buildModelingB(LibraryBuilder libraryBuilder) {
+        this.logger.debug(this.markers.get("Modeling"), "Building Modeling B: [Observation] O where O.status in { 'final', 'amended' } return O.value as FHIR.CodeableConcept");
         String resource = "Observation";
         String dataPath = "value";
         String retrieveAlias = "O";
@@ -200,6 +202,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
      * @return Expression
      */
     private Expression buildModelingC(LibraryBuilder libraryBuilder) {
+        this.logger.debug(this.markers.get("Modeling"), "Building Modeling C: [MedicationAdministration] M return M.reasonCode\nunion (\n[MedicationAdministration] M\nlet reasonConditions: [Condition: id in (M.reasonReference R return GetTail(R.reference))]\nreturn reasonConditions.code )");
         String resource = "MedicationAdministration";
         String dataPath = "reasonCode";
         String retrieveAlias = "M";
@@ -229,6 +232,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
      * @return Expression
      */
     private Expression buildModelingD(LibraryBuilder libraryBuilder) {
+        this.logger.debug(this.markers.get("Modeling"), "Building Modeling D: [MedicationAdministration] M return M.medication.code as FHIR.CodeableConcept\nunion (\n[MedicationAdministration] M\nlet medicationResource: First([Medication: id in GetTail(M.medication.reference)])\nreturn medicationResource.code  )");
         String resource = "MedicationAdministration";
         String dataPath = "medication";
         String retrieveAlias = "M";
@@ -251,6 +255,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
      * @return Expression
     */
     private Expression buildModelingE(LibraryBuilder libraryBuilder) {
+        this.logger.debug(this.markers.get("Modeling"), "Building Modeling E: [Condition: category ~ \"Problem\"] C return C.code");
         String resource = "Condition";
         String retrieveDataPath = "category";
         String retrieveAlias = "C";
@@ -276,6 +281,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
      * @return Expression
     */
     private Expression buildModelingF(LibraryBuilder libraryBuilder) {
+        this.logger.debug(this.markers.get("Modeling"), "Building Modeling F: [Condition: category ~ \"Problem\"] C return C.clinicalStatus");
         String resource = "Condition";
         String retrieveDataPath = "category";
         String retrieveAlias = "C";
@@ -301,6 +307,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
      * @return Expression
     */
     private Expression buildModelingG(LibraryBuilder libraryBuilder) {
+        this.logger.debug(this.markers.get("Modeling"), "Building Modeling G: flatten ([Observation] O return O.interpretation)");
         String resource = "Observation";
         String dataPath = "interpretation";
         String retrieveAlias = "O";
@@ -321,6 +328,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
      * @return Expression
     */
     private Expression buildModelingH(LibraryBuilder libraryBuilder) {
+        this.logger.debug(this.markers.get("Modeling"), "Building Modeling H: [Observation] O return O.code");
         String resource = "Observation";
         String dataPath = "code";
         String retrieveAlias = "O";
@@ -338,6 +346,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
      * @return Expression
     */
     private Expression buildModelingI(LibraryBuilder libraryBuilder) {
+        this.logger.debug(this.markers.get("Modeling"), "Building Modeling I: [Observation] O where O.status in { 'final', 'amended' } return O.value as FHIR.CodeableConcept");
         String resource = "Observation";
         String dataPath = "value";
         String retrieveAlias = "O";
@@ -380,6 +389,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
      * @return Expression
     */
     private Expression buildModelingJ(LibraryBuilder libraryBuilder) {
+        this.logger.debug(this.markers.get("Modeling"), "Building Modeling J: [Observation] O where O.status in { 'final', 'amended' } return O.value as FHIR.Quantity");
         String resource = "Observation";
         String dataPath = "value";
         String retrieveAlias = "O";
@@ -422,6 +432,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
      * @return Expression
     */
     private Expression buildModelingK(LibraryBuilder libraryBuilder) {
+        this.logger.debug(this.markers.get("Modeling"), "Building Modeling K: [ServiceRequest] SR return SR.code");
         String resource = "ServiceRequest";
         String dataPath = "code";
         String retrieveAlias = "SR";
@@ -445,6 +456,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
      * @return Expression
     */
     private Expression buildModelingL(LibraryBuilder libraryBuilder) {
+        this.logger.debug(this.markers.get("Modeling"), "Building Modeling L: [MedicationRequest] M return M.medication as FHIR.CodeableConcept\nunion (\n[MedicationAdministration] M\nlet medicationResource: First([Medication: id in GetTail(M.medication.reference)])\nreturn medicationResource.code  )");
         String medicationRequest = "MedicationRequest";
         String medicationAdministration = "MedicationAdministration";
         String dataPath = "medication";
@@ -464,6 +476,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
 
     // ????
     private Expression buildModelingM(LibraryBuilder libraryBuilder) {
+        this.logger.debug(this.markers.get("Modeling"), "Building Modeling M: TODO: Must Resolve");
         Expression unknownModeling = of.createList().withElement(libraryBuilder.createLiteral("TODO: Determine Modeling"));
         unknownModeling.setResultType(new ListType(libraryBuilder.resolveTypeName("System" + "." + "String")));
         return unknownModeling;
@@ -475,6 +488,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
      * @return Expression
     */
     private Expression buildModelingN(LibraryBuilder libraryBuilder) {
+        this.logger.debug(this.markers.get("Modeling"), "Building Modeling N: [Patient] P return P.deceased as FHIR.boolean");
         String resource = "Patient";
         String dataPath = "deceased";
         String retrieveAlias = "P";
@@ -492,7 +506,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
             org.hl7.elm.r1.List codeRefs, String filterPath) {
         DataType dataType = libraryBuilder.resolveTypeName(modelIdentifier + "." + resource);
         DataType codeType = libraryBuilder.resolvePath(dataType, filterPath);
-        Expression property = libraryBuilder.buildProperty(source.getAlias(), resource + "." + filterPath, codeType);
+        Expression property = libraryBuilder.buildProperty(source.getAlias(), resource + "." + filterPath, false, codeType);
 
         Expression left = property;
 
@@ -502,7 +516,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
         List<AliasedQuerySource> sources = new ArrayList<AliasedQuerySource>();
         sources.add(thisSource);
         DataType codeStringType = libraryBuilder.resolvePath(libraryBuilder.resolveTypeName("System", "Code"), "code");
-        Expression codeStringProperty = libraryBuilder.buildProperty(thisSource.getAlias(), "code", codeStringType);
+        Expression codeStringProperty = libraryBuilder.buildProperty(thisSource.getAlias(), "code", false, codeStringType);
         IsNull isNull = of.createIsNull().withOperand(codeStringProperty);
         isNull.setResultType(libraryBuilder.resolveTypeName("System", "Boolean"));
         Not not = of.createNot().withOperand(isNull);
@@ -539,7 +553,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
         // build ReturnClause
         // set the queryResultType to ReturnClause resultType
         // add the Return to Query
-        Expression property = libraryBuilder.buildProperty(source.getAlias(), dataPath, codeType);
+        Expression property = libraryBuilder.buildProperty(source.getAlias(), dataPath, false, codeType);
         ReturnClause returnClause = of.createReturnClause().withExpression(property);
         returnClause.setResultType(new ListType(property.getResultType()));
         elements.add(returnClause);
@@ -557,7 +571,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
         // build ReturnClause
         // set the queryResultType to ReturnClause resultType
         // add the Return to Query
-        Expression property = libraryBuilder.buildProperty(source.getAlias(), dataPath, codeType);
+        Expression property = libraryBuilder.buildProperty(source.getAlias(), dataPath, false, codeType);
 
         As as = null;
         if (typeSpecifier != null) {
@@ -586,7 +600,8 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
         sources.add(source);
 
         DataType medicationType = libraryBuilder.resolvePath(source.getResultType(), "medication");
-        Expression medicationProperty = libraryBuilder.buildProperty(source.getAlias(), "medication", medicationType);
+        Expression medicationProperty = libraryBuilder.buildProperty(source.getAlias(), "medication", false,
+                medicationType);
         DataType referenceType = libraryBuilder.resolvePath(medicationProperty.getResultType(), "reference");
         TypeSpecifier typeSpecifier = libraryBuilder.dataTypeToTypeSpecifier(libraryBuilder.resolveTypeName("FHIR", "Reference"));
         As as = null;
@@ -599,7 +614,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
             );
             as.setResultType(typeSpecifier.getResultType());
         }
-        Expression referenceProperty = libraryBuilder.buildProperty(as, "reference", referenceType);
+        Expression referenceProperty = libraryBuilder.buildProperty(as, "reference", false, referenceType);
         Expression separator = libraryBuilder.createLiteral("/");
         Expression split = libraryBuilder.resolveFunction("System", "Split", List.of(referenceProperty, separator));
         Expression last = libraryBuilder.resolveFunction("System", "Last", List.of(split));
@@ -613,7 +628,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
         elements.add(let);
 
         DataType codeType = libraryBuilder.resolvePath(let.getResultType(), "code");
-        Expression property = libraryBuilder.buildProperty(let.getIdentifier(), "code", codeType);
+        Expression property = libraryBuilder.buildProperty(let.getIdentifier(), "code", false, codeType);
         ReturnClause returnClause = of.createReturnClause().withExpression(property);
         returnClause.setResultType(new ListType(property.getResultType()));
         elements.add(returnClause);
@@ -632,11 +647,11 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
 
         List<Element> letQueryElements = new ArrayList<Element>();
         DataType reasonReferenceType = libraryBuilder.resolvePath(source.getResultType(), "reasonReference");
-        Expression reasonReferenceProperty = libraryBuilder.buildProperty(source.getAlias(), "reasonReference", reasonReferenceType);
+        Expression reasonReferenceProperty = libraryBuilder.buildProperty(source.getAlias(), "reasonReference", false, reasonReferenceType);
         AliasedQuerySource reasonReferenceSource = of.createAliasedQuerySource().withAlias("R").withExpression(reasonReferenceProperty);
         reasonReferenceSource.setResultType(((ListType)reasonReferenceProperty.getResultType()).getElementType());
         DataType referenceType = libraryBuilder.resolvePath(((ListType)reasonReferenceProperty.getResultType()).getElementType(), "reference");
-        Expression referenceProperty = libraryBuilder.buildProperty(reasonReferenceSource.getAlias(), "reference", referenceType);
+        Expression referenceProperty = libraryBuilder.buildProperty(reasonReferenceSource.getAlias(), "reference", false, referenceType);
         Expression separator = libraryBuilder.createLiteral("/");
         Expression split = libraryBuilder.resolveFunction("System", "Split", List.of(referenceProperty, separator));
         Expression last = libraryBuilder.resolveFunction("System", "Last", List.of(split));
@@ -655,7 +670,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
         elements.add(let);
 
         DataType codeType = libraryBuilder.resolvePath(((ListType)let.getResultType()).getElementType(), "code");
-        Expression property = libraryBuilder.buildProperty(let.getIdentifier(), "code", codeType);
+        Expression property = libraryBuilder.buildProperty(let.getIdentifier(), "code", false, codeType);
         ReturnClause returnClause = of.createReturnClause().withExpression(property);
         returnClause.setResultType(new ListType(property.getResultType()));
         elements.add(returnClause);
@@ -669,6 +684,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
      * @return Expression
     */
     public Expression resolvePatientAge(LibraryBuilder libraryBuilder) {
+        logger.debug(markers.get("Modeling"), "Resolving Patient Age: CalculateAgeAt(Patient.birthDate, Today())");
         DataType dataType = libraryBuilder.resolveTypeName(modelIdentifier + "." + "Patient");
         DataType birthDateType = libraryBuilder.resolvePath(dataType, "birthDate");
         Property birthDateProperty = of.createProperty().withPath("birthDate").withSource(of.createExpressionRef().withName("Patient"));

@@ -110,10 +110,11 @@ public class DroolToElmVisitorTest {
 
     @Test
     public void test_ModelingN() {
-        String xmlFileName = "Patient_is_deceased_84755.xml";
-        String expressionListFilePath = "../CQLGenerationDocs/GeneratedDocs/elm/expressions/Patient_is_deceased__Expression.txt";
-        runAllExpressionsFromFile(xmlFileName, expressionListFilePath);
-        // generateElmForDebug();
+        // String xmlFileName = "Patient_is_deceased_84755.xml";
+        // String expressionListFilePath = "../CQLGenerationDocs/GeneratedDocs/elm/expressions/Patient_is_deceased__Expression.txt";
+        // runAllExpressionsFromFile(xmlFileName, expressionListFilePath);
+        generateElmForDebug();
+        System.out.println("test");
 
         // results.forEach(object -> Assert.assertTrue(((List<?>) object).size() == 2));
     }
@@ -123,7 +124,7 @@ public class DroolToElmVisitorTest {
         String xmlFileName = "GeneratedCql136_89fdc.xml";
         String expressionListFilePath = "../CQLGenerationDocs/GeneratedDocs/elm/expressions/GeneratedCql136_89fd_Expression.txt";
         runAllExpressionsFromFile(xmlFileName, expressionListFilePath);
-        // generateElmForDebug();
+        generateElmForDebug();
 
         // results.forEach(object -> Assert.assertTrue(((List<?>) object).size() == 2));
     }

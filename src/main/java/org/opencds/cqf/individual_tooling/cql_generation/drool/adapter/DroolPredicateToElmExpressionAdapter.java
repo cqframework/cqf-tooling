@@ -80,7 +80,7 @@ public class DroolPredicateToElmExpressionAdapter {
     /**
      * Provides adapter functionality from any node in a ConditionCriteriaPredicateDTO object graph to the respective elm representation.
      * @param modelBuilder modelBuilder
-     */
+    */
     public DroolPredicateToElmExpressionAdapter(VmrToModelElmBuilder modelBuilder) {
         logger = LoggerFactory.getLogger(this.getClass());
         this.modelBuilder = modelBuilder;
@@ -90,7 +90,7 @@ public class DroolPredicateToElmExpressionAdapter {
     /**
      * Interrogates the {@link DataInputNodeDTO dataInputNode } for a TemplateName and NodePath in order to determine output Model Mapping
      * @param dIN dataInputNode
-     */
+    */
     public void adapt(DataInputNodeDTO dIN) {
         logger.debug("Creating left side of operator...");
         left = Pair.of(dIN.getTemplateName(), dIN.getNodePath());
@@ -101,7 +101,7 @@ public class DroolPredicateToElmExpressionAdapter {
      * Interrogates the {@link ConditionCriteriaPredicatePartDTO predicatePart } in order to determine if a Quantity or Function must be resolved in Elm
      * @param predicatePart predicatePart
      * @param libraryBuilder libraryBuilder
-     */
+    */
     public void adapt(ConditionCriteriaPredicatePartDTO predicatePart, LibraryBuilder libraryBuilder) {
         if (predicatePart.getDataInputClassType() != null && predicatePart.getPartType()!= null
             && predicatePart.getPartType().equals(PredicatePartType.DataInput)) {
@@ -134,7 +134,7 @@ public class DroolPredicateToElmExpressionAdapter {
      * or a Patient Age Function should be resolved in Elm
      * @param sourcePredicatePartDTO sourcePredicatePartDTO
      * @param libraryBuilder
-     */
+    */
 	public void adapt(CriteriaPredicatePartDTO sourcePredicatePartDTO, LibraryBuilder libraryBuilder) {
         switch(sourcePredicatePartDTO.getPartType()) {
             case DataInput: {

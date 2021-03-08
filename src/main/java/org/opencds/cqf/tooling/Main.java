@@ -165,13 +165,14 @@ package org.opencds.cqf.tooling;
             - This tooling converts an Excel spreadsheet (.xlsx extension) to a CQL expression with the data from the spreadsheet rows
 
         - GenerateCQLFromDroolOperation
-            - command: mvn exec: java -Dexec.args="-GenerateCQLFromDrool -ifp=../CQLGenerationDocs/NonGeneratedDocs/default.json -op=../CQLGenerationDocs/GeneratedDocs/elm"
+            - command: mvn exec: java -Dexec.args="-GenerateCQLFromDrool -ifp=../CQLGenerationDocs/NonGeneratedDocs/default.json -op=../CQLGenerationDocs/GeneratedDocs/elm -fv=4.0.0 -t=CONDITION"
             - this tooling generates cql elm libraries given a Data Input Source File
         */
 
 public class Main {
 
     public static void main(String[] args) {
+        System.console().readLine();
         if (args.length == 0) {
             System.out.println("cqf-tooling version: " + Main.class.getPackage().getImplementationVersion());
             System.out.println("Requests must include which operation to run as a command line argument. See docs for examples on how to use this project.");

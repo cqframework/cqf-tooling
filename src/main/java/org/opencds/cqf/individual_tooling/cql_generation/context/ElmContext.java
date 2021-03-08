@@ -31,6 +31,8 @@ import org.opencds.cqf.individual_tooling.cql_generation.builder.VmrToModelElmBu
  * @since   2021-02-24 
  */
 public class ElmContext {
+    public StringBuilder sb = new StringBuilder();
+    public Stack<String> cqlStrings = new Stack<String>();
     public LibraryBuilder libraryBuilder;
     private String currentContext = "Patient"; // default context to patient
     public VmrToModelElmBuilder modelBuilder;
