@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.UsageContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.operation.ScaffoldOperation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -185,7 +186,7 @@ public class Processor extends Operation {
 
     private void processScope(Workbook workbook, String scope) {
         // reset variables
-        elementMap = new HashMap<>();
+        elementMap = new LinkedHashMap<>();
         profileExtensions = new ArrayList<>();
         extensions = new ArrayList<>();
         profiles = new ArrayList<>();
@@ -774,7 +775,8 @@ public class Processor extends Operation {
                         case "snomed-ct":
                         case "snomed-ct code":
                         case "snomed ct":
-                        case "snomed ct?code": colIds.put("SNOMED-CT", cell.getColumnIndex()); break;
+                        case "snomed ct?code":
+                        case "snomed ct international version?code": colIds.put("SNOMED-CT", cell.getColumnIndex()); break;
                         case "loinc":
                         case "loinc code":
                         case "loinc version 2.68?code":
@@ -1059,7 +1061,7 @@ public class Processor extends Operation {
         rootElement.setMin(toBoolean(element.getRequired()) ? 1 : 0);
         rootElement.setMax(isMultipleChoiceElement(element) ? "*" : "1");
 
-        ensureAndBindElementTerminology(element, sd, rootElement);
+        ensureAndBindElementToPrimaryCodes(element, sd, rootElement, false);
 
         sd.getDifferential().addElement(rootElement);
 
@@ -1093,7 +1095,7 @@ public class Processor extends Operation {
             valueElement.setType(valueTypeList);
         }
 
-        ensureAndBindElementTerminology(element, sd, valueElement);
+        ensureAndBindElementToPrimaryCodes(element, sd, valueElement, false);
 
         valueElement.setShort(element.getLabel());
         valueElement.setDefinition(element.getDescription());
@@ -1331,7 +1333,8 @@ public class Processor extends Operation {
                     ed.setMustSupport(true);
                     if (isPreferredCodePath) {
                         //TODO: Bind to valueset rather than fixed code
-                        ed.setFixed(element.getPrimaryCodes().getCodes().get(0).toCodeableConcept());
+//                        ed.setFixed(element.getPrimaryCodes().getCodes().get(0).toCodeableConcept());
+                        ensureAndBindElementToPrimaryCodes(element, sd, ed, true);
                     }
 
                     sd.getDifferential().addElement(ed);
@@ -1402,7 +1405,7 @@ public class Processor extends Operation {
                         ed.addType(edtr);
                     }
 
-                    ensureAndBindElementTerminology(element, sd, ed);
+                    ensureAndBindElementToPrimaryCodes(element, sd, ed, true);
                     sd.getDifferential().addElement(ed);
 
                     // UnitOfMeasure-specific block
@@ -1449,7 +1452,7 @@ public class Processor extends Operation {
                         existingElement.addType(elementType);
                     }
 
-                    ensureAndBindElementTerminology(element, sd, existingElement);
+                    ensureAndBindElementToPrimaryCodes(element, sd, existingElement, true);
                 }
             }
 
@@ -1493,10 +1496,15 @@ public class Processor extends Operation {
                 }
 
                 String valueSetName = dictionaryElement.getChoices().getCustomValueSetName();
+                String valueSetLabel = dictionaryElement.getLabel();
                 if (valueSetName == null || valueSetName.isEmpty()) {
                     valueSetName = dictionaryElement.getName() + "-choices";
+                } else {
+                    valueSetLabel = valueSetName;
                 }
-                ensureAndBindElementTerminology(valueSetName, dictionaryElement.getLabel() + " choices", sd, ed, dictionaryElement.getChoices().getCodes(), dictionaryElement.getBindingStrength());
+
+                ensureAndBindElementTerminology(valueSetName, valueSetLabel, sd, ed,
+                        dictionaryElement.getChoices().getCodes(), dictionaryElement.getBindingStrength(), false);
                 sd.getDifferential().addElement(ed);
             }
         }
@@ -1594,13 +1602,15 @@ public class Processor extends Operation {
 
     private void ensureAndBindElementTerminology(String valueSetName, String valueSetLabel, StructureDefinition sd,
                                                  ElementDefinition ed, CodeCollection codes,
-                                                 Enumerations.BindingStrength bindingStrength) {
+                                                 Enumerations.BindingStrength bindingStrength, Boolean isPrimaryDataElement) {
         if (codes != null) {
             String primaryValueSetId = toId(valueSetName);
 
             ValueSet primaryValueSet = ensureValueSetWithCodes(primaryValueSetId, valueSetLabel, codes);
 
-            retrieves.add(new RetrieveInfo(sd, primaryValueSet.getTitle()));
+            if (isPrimaryDataElement) {
+                retrieves.add(new RetrieveInfo(sd, primaryValueSet.getTitle()));
+            }
 
             // Bind the current element to the valueSet
             ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
@@ -1610,20 +1620,23 @@ public class Processor extends Operation {
         }
     }
 
-    private void ensureAndBindElementTerminology(DictionaryElement element, StructureDefinition sd, ElementDefinition ed) {
+    private void ensureAndBindElementToPrimaryCodes(DictionaryElement element, StructureDefinition sd, ElementDefinition ed, Boolean isPrimaryDataElement) {
         // Create a ValueSet with the primary codes for the data element and bind that to the element definition (i.e., ed)
         // if the element is not a multiple choice element or an extension and has as code, bind it as the fixed value for the element.
         //if (element.getChoices().getCodes().size() == 0 && element.getPrimaryCodes() != null && !requiresExtension(element)) {
         //TODO: Restore the extension exclusion in the condition below? Removed to allow for reuse of this method in createExtensionStructureDefinition
         if (element.getPrimaryCodes() != null) {// && !requiresExtension(element)) {
             String valueSetName = element.getCustomValueSetName();
+            String valueSetLabel = element.getLabel();
             if (valueSetName == null || valueSetName.isEmpty()) {
                 valueSetName = element.getName();
+                valueSetLabel = element.getName();
             }
 
             CodeCollection codes = element.getPrimaryCodes();
-            if (codes != null) {
-                ensureAndBindElementTerminology(valueSetName, element.getLabel(), sd, ed, codes, element.getBindingStrength());
+            if (codes != null && codes.size() > 0) {
+                ensureAndBindElementTerminology(valueSetName, valueSetLabel, sd, ed, codes,
+                        element.getBindingStrength(), isPrimaryDataElement);
             }
         }
     }
@@ -2125,20 +2138,13 @@ public class Processor extends Operation {
                     sb.append(System.lineSeparator());
                 }
 
-                String choicesSuffix = "";
                 if (sd.hasDescription()) {
-                    String choicesPrefix = "";
-                    if (retrieve.getTerminologyIdentifier() != null
-                            && retrieve.getTerminologyIdentifier().contains("choices")) {
-                        choicesPrefix = "Choices for ";
-                        choicesSuffix = " choices";
-                    }
-                    sb.append(String.format("  @description: %s%s", choicesPrefix, sd.getDescription()));
+                    sb.append(String.format("  @description: %s", sd.getDescription()));
                     sb.append(System.lineSeparator());
                 }
                 sb.append("*/");
                 sb.append(System.lineSeparator());
-                sb.append(String.format("define \"%s%s\":", title, choicesSuffix));
+                sb.append(String.format("define \"%s\":", title));
                 sb.append(System.lineSeparator());
                 sb.append(String.format("  [%s: Cx.\"%s\"]", sd.getType(), retrieve.getTerminologyIdentifier()));
                 // TODO: Switch on sd.baseDefinition to provide filtering here (e.g. status = 'not-done')
