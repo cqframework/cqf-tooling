@@ -52,7 +52,7 @@ public class CodeCollection {
     }
 
     public int size() {
-        return codes.size();
+        return getCodes().size();
     }
 
     public List<Coding> toCodings() {

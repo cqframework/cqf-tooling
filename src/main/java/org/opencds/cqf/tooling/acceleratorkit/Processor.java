@@ -49,7 +49,7 @@ public class Processor extends Operation {
 
     // Canonical Base
     private String canonicalBase = null;
-    private Map<String, String> scopeCanonicalBaseMap = new HashMap<String, String>();
+    private Map<String, String> scopeCanonicalBaseMap = new LinkedHashMap<String, String>();
 
     private String openMRSSystem = "http://openmrs.org/concepts";
     private String whoCodeSystemBase = "http://who.int/cg";
@@ -64,8 +64,8 @@ public class Processor extends Operation {
     private List<DictionaryProfileElementExtension> profileExtensions = new ArrayList<>();
     private List<StructureDefinition> extensions = new ArrayList<StructureDefinition>();
     private List<StructureDefinition> profiles = new ArrayList<StructureDefinition>();
-    private Map<String, List<StructureDefinition>> profilesByActivityId = new HashMap<String, List<StructureDefinition>>();
-    private Map<String, List<StructureDefinition>> profilesByParentProfile = new HashMap<String, List<StructureDefinition>>();
+    private Map<String, List<StructureDefinition>> profilesByActivityId = new LinkedHashMap<String, List<StructureDefinition>>();
+    private Map<String, List<StructureDefinition>> profilesByParentProfile = new LinkedHashMap<String, List<StructureDefinition>>();
     private List<CodeSystem> codeSystems = new ArrayList<CodeSystem>();
     private List<ValueSet> valueSets = new ArrayList<ValueSet>();
     private Map<String, Coding> concepts = new LinkedHashMap<String, Coding>();
@@ -507,9 +507,7 @@ public class Processor extends Operation {
 
     private List<DictionaryCode> getPrimaryCodes(String label, Row row, HashMap<String, Integer> colIds) {
         List<DictionaryCode> codes;
-
         codes = getDataElementCodes(row, colIds, label);
-
         return codes;
     }
 
@@ -679,7 +677,7 @@ public class Processor extends Operation {
         }
 
         Iterator<Row> it = sheet.rowIterator();
-        HashMap<String, Integer> colIds = new HashMap<String, Integer>();
+        HashMap<String, Integer> colIds = new LinkedHashMap<String, Integer>();
         String currentGroup = null;
         while (it.hasNext()) {
             Row row = it.next();
@@ -1061,7 +1059,7 @@ public class Processor extends Operation {
         rootElement.setMin(toBoolean(element.getRequired()) ? 1 : 0);
         rootElement.setMax(isMultipleChoiceElement(element) ? "*" : "1");
 
-        ensureAndBindElementToPrimaryCodes(element, sd, rootElement, false);
+        ensureElementAndBindTerminology(element, sd, rootElement, null, null, false);
 
         sd.getDifferential().addElement(rootElement);
 
@@ -1095,7 +1093,7 @@ public class Processor extends Operation {
             valueElement.setType(valueTypeList);
         }
 
-        ensureAndBindElementToPrimaryCodes(element, sd, valueElement, false);
+        ensureElementAndBindTerminology(element, sd, valueElement, null, null,false);
 
         valueElement.setShort(element.getLabel());
         valueElement.setDefinition(element.getDescription());
@@ -1334,7 +1332,7 @@ public class Processor extends Operation {
                     if (isPreferredCodePath) {
                         //TODO: Bind to valueset rather than fixed code
 //                        ed.setFixed(element.getPrimaryCodes().getCodes().get(0).toCodeableConcept());
-                        ensureAndBindElementToPrimaryCodes(element, sd, ed, true);
+                        ensureElementAndBindTerminology(element, sd, ed, null, null, true);
                     }
 
                     sd.getDifferential().addElement(ed);
@@ -1405,7 +1403,7 @@ public class Processor extends Operation {
                         ed.addType(edtr);
                     }
 
-                    ensureAndBindElementToPrimaryCodes(element, sd, ed, true);
+                    ensureElementAndBindTerminology(element, sd, ed, null, null, true);
                     sd.getDifferential().addElement(ed);
 
                     // UnitOfMeasure-specific block
@@ -1452,7 +1450,7 @@ public class Processor extends Operation {
                         existingElement.addType(elementType);
                     }
 
-                    ensureAndBindElementToPrimaryCodes(element, sd, existingElement, true);
+                    ensureElementAndBindTerminology(element, sd, existingElement, null, null, true);
                 }
             }
 
@@ -1495,16 +1493,9 @@ public class Processor extends Operation {
                     ed.addType(tr);
                 }
 
-                String valueSetName = dictionaryElement.getChoices().getCustomValueSetName();
-                String valueSetLabel = dictionaryElement.getLabel();
-                if (valueSetName == null || valueSetName.isEmpty()) {
-                    valueSetName = dictionaryElement.getName() + "-choices";
-                } else {
-                    valueSetLabel = valueSetName;
-                }
-
-                ensureAndBindElementTerminology(valueSetName, valueSetLabel, sd, ed,
-                        dictionaryElement.getChoices().getCodes(), dictionaryElement.getBindingStrength(), false);
+                CodeCollection codes = dictionaryElement.getChoices().getCodes();
+                String customChoicesValueSetName = dictionaryElement.getChoices().getCustomValueSetName();
+                ensureElementAndBindTerminology(dictionaryElement, sd, ed, codes, customChoicesValueSetName, false);
                 sd.getDifferential().addElement(ed);
             }
         }
@@ -1600,44 +1591,54 @@ public class Processor extends Operation {
         }
     }
 
-    private void ensureAndBindElementTerminology(String valueSetName, String valueSetLabel, StructureDefinition sd,
-                                                 ElementDefinition ed, CodeCollection codes,
-                                                 Enumerations.BindingStrength bindingStrength, Boolean isPrimaryDataElement) {
-        if (codes != null) {
-            String primaryValueSetId = toId(valueSetName);
+    private void ensureElementAndBindTerminology(DictionaryElement dictionaryElement, StructureDefinition targetStructureDefinition,
+                                                 ElementDefinition targetElement, CodeCollection codes, String customValueSetName, Boolean isPrimaryDataElement) {
+        String valueSetLabel = dictionaryElement.getLabel();
+        String valueSetName = null;
 
-            ValueSet primaryValueSet = ensureValueSetWithCodes(primaryValueSetId, valueSetLabel, codes);
-
-            if (isPrimaryDataElement) {
-                retrieves.add(new RetrieveInfo(sd, primaryValueSet.getTitle()));
-            }
-
-            // Bind the current element to the valueSet
-            ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
-            binding.setStrength(bindingStrength);
-            binding.setValueSet(primaryValueSet.getUrl());
-            ed.setBinding(binding);
+        if (customValueSetName != null && !customValueSetName.isEmpty()) {
+            valueSetName = customValueSetName;
+            valueSetLabel = customValueSetName;
         }
-    }
 
-    private void ensureAndBindElementToPrimaryCodes(DictionaryElement element, StructureDefinition sd, ElementDefinition ed, Boolean isPrimaryDataElement) {
-        // Create a ValueSet with the primary codes for the data element and bind that to the element definition (i.e., ed)
-        // if the element is not a multiple choice element or an extension and has as code, bind it as the fixed value for the element.
-        //if (element.getChoices().getCodes().size() == 0 && element.getPrimaryCodes() != null && !requiresExtension(element)) {
-        //TODO: Restore the extension exclusion in the condition below? Removed to allow for reuse of this method in createExtensionStructureDefinition
-        if (element.getPrimaryCodes() != null) {// && !requiresExtension(element)) {
-            String valueSetName = element.getCustomValueSetName();
-            String valueSetLabel = element.getLabel();
-            if (valueSetName == null || valueSetName.isEmpty()) {
-                valueSetName = element.getName();
-                valueSetLabel = element.getName();
+        if (valueSetName == null || valueSetName.isEmpty()) {
+            valueSetName = dictionaryElement.getCustomValueSetName();
+            valueSetLabel = dictionaryElement.getCustomValueSetName();
+        }
+
+        if (valueSetName == null || valueSetName.isEmpty()) {
+            valueSetName = dictionaryElement.getName();
+            valueSetLabel = dictionaryElement.getName();
+        }
+
+        CodeCollection codesToBind = codes;
+        if (codesToBind == null || codesToBind.size() == 0) {
+            codesToBind = dictionaryElement.getPrimaryCodes();
+        }
+
+        String valueSetId = toId(valueSetName);
+        ValueSet valueSet = null;
+        if (codesToBind != null) {
+            valueSet = ensureValueSetWithCodes(valueSetId, valueSetLabel, codesToBind);
+        }
+
+        Enumerations.BindingStrength bindingStrength = dictionaryElement.getBindingStrength();
+
+        // Bind the current element to the valueSet
+        ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
+        binding.setStrength(bindingStrength);
+        binding.setValueSet(String.format("%s/ValueSet/%s", canonicalBase, valueSetId));
+        targetElement.setBinding(binding);
+
+        if (isPrimaryDataElement) {
+            valueSetLabel = valueSetId;
+            for (ValueSet vs : valueSets) {
+                if (vs.getId().equals(valueSetId)) {
+                    valueSetLabel = vs.getTitle();
+                }
             }
 
-            CodeCollection codes = element.getPrimaryCodes();
-            if (codes != null && codes.size() > 0) {
-                ensureAndBindElementTerminology(valueSetName, valueSetLabel, sd, ed, codes,
-                        element.getBindingStrength(), isPrimaryDataElement);
-            }
+            retrieves.add(new RetrieveInfo(targetStructureDefinition, valueSetLabel));
         }
     }
 
