@@ -402,7 +402,7 @@ public class Processor extends Operation {
         String activityID = getActivityID(row, colIds);
         if (activityID != null && !activityID.isEmpty()) {
             String multipleChoiceType = getMultipleChoiceType(row, colIds);
-            masterDataType = multipleChoiceType != null ? multipleChoiceType.equalsIgnoreCase("Input Option") ? "Input Option" : "Data Element" : null;
+            masterDataType = multipleChoiceType != null && multipleChoiceType.equalsIgnoreCase("Input Option") ? "Input Option" : "Data Element";
         }
 
         return masterDataType;
@@ -2166,9 +2166,31 @@ public class Processor extends Operation {
 
                 switch (sd.getBaseDefinition()) {
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-procedurenotdone":
-                        sb.append(" R");
+                        sb.append(" P");
                         sb.append(System.lineSeparator());
-                        sb.append("    where R.status.value = 'not-done'");
+                        sb.append("    where P.status.value = 'not-done'");
+                        break;
+                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-medicationnotrequested":
+                        sb.append(" MR");
+                        sb.append(System.lineSeparator());
+                        sb.append("    where MR.status = 'completed'");
+                        sb.append(System.lineSeparator());
+                        sb.append("      and MR.doNotPerform");
+                        break;
+                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-observationnotdone":
+                        sb.append(" O");
+                        sb.append(System.lineSeparator());
+                        sb.append("    //where Not Implemented");
+                        break;
+                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-servicenotrequested":
+                        sb.append(" O");
+                        sb.append(System.lineSeparator());
+                        sb.append("    //where Not Implemented");
+                        break;
+                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-immunizationnotdone":
+                        sb.append(" O");
+                        sb.append(System.lineSeparator());
+                        sb.append("    //where Not Implemented");
                         break;
                     default:
                         break;
