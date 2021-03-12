@@ -26,7 +26,6 @@ import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.UsageContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
-import org.opencds.cqf.tooling.operation.ScaffoldOperation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -208,7 +207,7 @@ public class Processor extends Operation {
 
         // process workbook
         for (String page : dataElementPages.split(",")) {
-            processDataElementPage(workbook, page, scope);
+            processDataElementPage(workbook, page.trim(), scope);
         }
 
         // process element map
@@ -1059,7 +1058,7 @@ public class Processor extends Operation {
         rootElement.setMin(toBoolean(element.getRequired()) ? 1 : 0);
         rootElement.setMax(isMultipleChoiceElement(element) ? "*" : "1");
 
-        ensureElementAndBindTerminology(element, sd, rootElement, null, null, false);
+        ensureTerminologyAndBindToElement(element, sd, rootElement, null, null, false);
 
         sd.getDifferential().addElement(rootElement);
 
@@ -1093,7 +1092,7 @@ public class Processor extends Operation {
             valueElement.setType(valueTypeList);
         }
 
-        ensureElementAndBindTerminology(element, sd, valueElement, null, null,false);
+        ensureTerminologyAndBindToElement(element, sd, valueElement, null, null,false);
 
         valueElement.setShort(element.getLabel());
         valueElement.setDefinition(element.getDescription());
@@ -1267,11 +1266,11 @@ public class Processor extends Operation {
         String resourceType = elementPath.getResourceType().trim();
 
         switch (resourceType) {
-            case "AllergyIntolerance":
             case "Observation":
                 codePath = "code";
                 choicesPath = elementPath.getResourcePath();
                 break;
+            case "AllergyIntolerance":
             case "Appointment":
             case "CarePlan":
             case "Communication":
@@ -1307,6 +1306,7 @@ public class Processor extends Operation {
             // For Observations, it is a valid scenario for the Data Dictionary (DD) to not have a Data Element entry for the primary code path element - Observation.code.
             // In this case, the tooling should ensure that this element is created. The fixed code for this element should be the code specified by the Data
             // Element record mapped to Observation.value[x]. For all other resource types it is invalid to not have a primary code path element entry in the DD
+            Boolean primaryCodePathElementAdded = false;
             if (codePath != null && !codePath.isEmpty() && element.getPrimaryCodes() != null) {
                 String elementId = String.format("%s.%s", resourceType, codePath);
                 String primaryCodePath = String.format("%s.%s", resourceType, codePath);
@@ -1330,7 +1330,8 @@ public class Processor extends Operation {
                     ed.setMax("1");
                     ed.setMustSupport(true);
                     if (isPreferredCodePath) {
-                        ensureElementAndBindTerminology(element, sd, ed, null, null, true);
+                        ensureTerminologyAndBindToElement(element, sd, ed, null, null, true);
+                        primaryCodePathElementAdded = true;
                     }
 
                     sd.getDifferential().addElement(ed);
@@ -1417,7 +1418,11 @@ public class Processor extends Operation {
                         ed.addType(edtr);
                     }
 
-                    ensureElementAndBindTerminology(element, sd, ed, null, null, true);
+                    // If this is an Observation and we've already created the primary code path element, do not bind the
+                    // targeted/mapped element (e.g., value[x]) to the primary codes valueset - that was done above
+                    if (!primaryCodePathElementAdded) {
+                        ensureTerminologyAndBindToElement(element, sd, ed, null, null, true);
+                    }
                     sd.getDifferential().addElement(ed);
 
                     // UnitOfMeasure-specific block
@@ -1464,7 +1469,11 @@ public class Processor extends Operation {
                         existingElement.addType(elementType);
                     }
 
-                    ensureElementAndBindTerminology(element, sd, existingElement, null, null, true);
+                    // If this is an Observation and we've already created the primary code path element, do not bind the
+                    // targeted/mapped element (e.g., value[x]) to the primary codes valueset - that was done above
+                    if (!primaryCodePathElementAdded) {
+                        ensureTerminologyAndBindToElement(element, sd, existingElement, null, null, true);
+                    }
                 }
             }
 
@@ -1509,7 +1518,7 @@ public class Processor extends Operation {
 
                 CodeCollection codes = dictionaryElement.getChoices().getCodes();
                 String customChoicesValueSetName = dictionaryElement.getChoices().getCustomValueSetName();
-                ensureElementAndBindTerminology(dictionaryElement, sd, ed, codes, customChoicesValueSetName, false);
+                ensureTerminologyAndBindToElement(dictionaryElement, sd, ed, codes, customChoicesValueSetName, false);
                 sd.getDifferential().addElement(ed);
             }
         }
@@ -1605,8 +1614,9 @@ public class Processor extends Operation {
         }
     }
 
-    private void ensureElementAndBindTerminology(DictionaryElement dictionaryElement, StructureDefinition targetStructureDefinition,
-                                                 ElementDefinition targetElement, CodeCollection codes, String customValueSetName, Boolean isPrimaryDataElement) {
+    private void ensureTerminologyAndBindToElement(DictionaryElement dictionaryElement, StructureDefinition targetStructureDefinition,
+                                                   ElementDefinition targetElement, CodeCollection codes, String customValueSetName,
+                                                   Boolean isPrimaryDataElement) {
         String valueSetLabel = dictionaryElement.getLabel();
         String valueSetName = null;
 
