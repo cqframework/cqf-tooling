@@ -1330,8 +1330,6 @@ public class Processor extends Operation {
                     ed.setMax("1");
                     ed.setMustSupport(true);
                     if (isPreferredCodePath) {
-                        //TODO: Bind to valueset rather than fixed code
-//                        ed.setFixed(element.getPrimaryCodes().getCodes().get(0).toCodeableConcept());
                         ensureElementAndBindTerminology(element, sd, ed, null, null, true);
                     }
 
@@ -1389,6 +1387,22 @@ public class Processor extends Operation {
                     ensureSliceAndBaseElementWithSlicing(element, elementPath, sd, elementId, sliceName, null);
                 } else {
                     String elementFhirType = getFhirTypeOfTargetElement(elementPath);
+
+                    // Split the elementPath on . then ensure and element for all between 1st and last.
+                    String[] pathParts = elementPath.getResourcePath().split("\\.");
+                    if (pathParts.length > 1) {
+                        List<String> pathPartsCumulative = new ArrayList<>();
+                        pathPartsCumulative.add(elementPath.getResourceType());
+                        for (int i = 0; i < pathParts.length - 1; i++) {
+                            pathPartsCumulative.add(pathParts[i]);
+                            String path = String.join(".", String.join(".", pathPartsCumulative));
+                            String id = path;
+                            ElementDefinition pathElement = new ElementDefinition();
+                            pathElement.setId(id);
+                            pathElement.setPath(path);
+                            sd.getDifferential().addElement(pathElement);
+                        }
+                    }
 
                     ElementDefinition ed = new ElementDefinition();
                     ed.setId(elementId);
