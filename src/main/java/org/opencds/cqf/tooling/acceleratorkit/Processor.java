@@ -234,6 +234,17 @@ public class Processor extends Operation {
         //writeIgResourceFragments(scopePath);
     }
 
+    private ElementDefinition getDifferentialElement(StructureDefinition sd, String elementId) {
+        ElementDefinition element = null;
+        for (ElementDefinition ed : sd.getDifferential().getElement()) {
+            if (ed.getId().equals(elementId)) {
+                element = ed;
+                break;
+            }
+        }
+        return element;
+    }
+
     private void attachExtensions() {
         // Add extensions to the appropriate profiles
         for (DictionaryProfileElementExtension profileElementExtension : profileExtensions) {
@@ -244,15 +255,7 @@ public class Processor extends Operation {
                     String extensionName = getExtensionName(profileElementExtension.getResourcePath(),
                             profile.getName());
 
-                    List<ElementDefinition> extensionDifferential = extensionDefinition.getDifferential().getElement();
-
-                    ElementDefinition extensionBaseElement = null;
-                    for (ElementDefinition ed : extensionDifferential) {
-                        if (ed.getId().equals("Extension.extension")) {
-                            extensionBaseElement = ed;
-                            break;
-                        }
-                    }
+                    ElementDefinition extensionBaseElement = getDifferentialElement(extensionDefinition, "Extension.extension");
 
                     String resourcePath = profileElementExtension.getResourcePath();
                     String pathToElementBeingExtended = resourcePath.substring(0,
@@ -768,7 +771,8 @@ public class Processor extends Operation {
                         case "icd-10 code":
                         case "icd-10?code": colIds.put("ICD-10", cell.getColumnIndex()); break;
                         case "icf?code": colIds.put("ICF", cell.getColumnIndex()); break;
-                        case "ichi?code": colIds.put("ICHI", cell.getColumnIndex()); break;
+                        case "ichi?code":
+                        case "ichi (beta 3)?code": colIds.put("ICHI", cell.getColumnIndex()); break;
                         case "snomed-ct":
                         case "snomed-ct code":
                         case "snomed ct":
@@ -1311,13 +1315,7 @@ public class Processor extends Operation {
                 String elementId = String.format("%s.%s", resourceType, codePath);
                 String primaryCodePath = String.format("%s.%s", resourceType, codePath);
 
-                ElementDefinition existingPrimaryCodePathElement = null;
-                for (ElementDefinition elementDef : sd.getDifferential().getElement()) {
-                    if (elementDef.getId().equals(elementId)) {
-                        existingPrimaryCodePathElement = elementDef;
-                        break;
-                    }
-                }
+                ElementDefinition existingPrimaryCodePathElement = getDifferentialElement(sd, elementId);
 
                 Boolean isPrimaryCodePath = element.getFhirElementPath().getResourceTypeAndPath().equals(primaryCodePath);
                 Boolean isPreferredCodePath = isPrimaryCodePath || element.getFhirElementPath().getResourceTypeAndPath().equals("Observation.value[x]");
@@ -1374,13 +1372,7 @@ public class Processor extends Operation {
                 }
             }
 
-            ElementDefinition existingElement = null;
-            for (ElementDefinition elementDef : sd.getDifferential().getElement()) {
-                if (elementDef.getId().equals(elementId)) {
-                    existingElement = elementDef;
-                    break;
-                }
-            }
+            ElementDefinition existingElement = getDifferentialElement(sd, elementId);
 
             // if the element doesn't exist, create it
             if (existingElement == null) {
@@ -1488,13 +1480,7 @@ public class Processor extends Operation {
         // Ensure Element for Choices path
         if (dictionaryElement.getChoices() != null && dictionaryElement.getChoices().getFhirElementPath() != null) {
             String choicesElementPath = dictionaryElement.getChoices().getFhirElementPath().getResourceTypeAndPath();
-            ElementDefinition existingChoicesElement = null;
-            for (ElementDefinition elementDef : sd.getDifferential().getElement()) {
-                if (elementDef.getId().equals(choicesElementPath)) {
-                    existingChoicesElement = elementDef;
-                    break;
-                }
-            }
+            ElementDefinition existingChoicesElement = getDifferentialElement(sd, choicesElementPath);
 
             if (existingChoicesElement != null) {
                 ElementDefinition.ElementDefinitionBindingComponent existingBinding = existingChoicesElement.getBinding();
@@ -1529,19 +1515,14 @@ public class Processor extends Operation {
 
         // Ensure the base definition exists
         String baseElementId = elementId.replace(":" + sliceName, "");
-        ElementDefinition existingBaseDefinition = null;
-        for (ElementDefinition ed : sd.getDifferential().getElement()) {
-            if (ed.getId().equals(baseElementId)) {
-                existingBaseDefinition = ed;
-            }
-        }
+        ElementDefinition existingBaseDefinition = getDifferentialElement(sd, baseElementId);
+
+        ElementDefinition.DiscriminatorType discriminatorType = ElementDefinition.DiscriminatorType.VALUE;
+        String discriminatorPath = dictionaryElement.getAdditionalFHIRMappingDetails().split("=")[0].trim();
+        String resourceTypePath = elementPath.getResourceTypeAndPath();
+        discriminatorPath = discriminatorPath.replaceAll(resourceTypePath + ".", "");
 
         if (existingBaseDefinition != null) {
-            ElementDefinition.DiscriminatorType discriminatorType = ElementDefinition.DiscriminatorType.VALUE;
-            String discriminatorPath = dictionaryElement.getAdditionalFHIRMappingDetails().split("=")[0].trim();
-            String resourceTypePath = elementPath.getResourceTypeAndPath();
-            discriminatorPath = discriminatorPath.replaceAll(resourceTypePath + ".", "");
-
             ensureElementHasSlicingWithDiscriminator(existingBaseDefinition, discriminatorType, discriminatorPath);
         }
         else {
@@ -1560,17 +1541,10 @@ public class Processor extends Operation {
                 ed.addType(tr);
             }
 
-            ElementDefinition.DiscriminatorType discriminatorType = ElementDefinition.DiscriminatorType.VALUE;
-            String discriminatorPath = dictionaryElement.getAdditionalFHIRMappingDetails().split("=")[0].trim();
-            String resourceTypePath = elementPath.getResourceTypeAndPath();
-            discriminatorPath = discriminatorPath.replaceAll(resourceTypePath + ".", "");
-
             ensureElementHasSlicingWithDiscriminator(ed, discriminatorType, discriminatorPath);
 
             sd.getDifferential().addElement(ed);
         }
-
-        // Add the actual slice
 
         /* Add the actual Slice (e.g., telecom:Telephone1) */
         String discriminatorValue = dictionaryElement.getAdditionalFHIRMappingDetails().split("=")[1].trim();
