@@ -1503,7 +1503,11 @@ public class Processor extends Operation {
                 }
 
                 CodeCollection codes = dictionaryElement.getChoices().getCodes();
+
                 String customChoicesValueSetName = dictionaryElement.getChoices().getCustomValueSetName();
+                if (customChoicesValueSetName == null || customChoicesValueSetName.isEmpty()) {
+                    customChoicesValueSetName = dictionaryElement.getName() + "-choices";
+                }
                 ensureTerminologyAndBindToElement(dictionaryElement, sd, ed, codes, customChoicesValueSetName, false);
                 sd.getDifferential().addElement(ed);
             }
