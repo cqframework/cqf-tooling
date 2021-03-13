@@ -2158,6 +2158,13 @@ public class Processor extends Operation {
                         sb.append(System.lineSeparator());
                         sb.append("    where P.status.value = 'not-done'");
                         break;
+                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-medicationrequest":
+                        sb.append(" MR");
+                        sb.append(System.lineSeparator());
+                        sb.append("    where MR.status = 'completed'");
+                        sb.append(System.lineSeparator());
+                        sb.append("      and Coalesce(MR.doNotPerform, false) is false");
+                        break;
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-medicationnotrequested":
                         sb.append(" MR");
                         sb.append(System.lineSeparator());
