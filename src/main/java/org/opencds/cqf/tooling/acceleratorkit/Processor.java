@@ -2153,10 +2153,15 @@ public class Processor extends Operation {
                 // TODO: Switch on sd.baseDefinition to provide filtering here (e.g. status = 'not-done')
 
                 switch (sd.getBaseDefinition()) {
+                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-procedure":
+                        sb.append(" P");
+                        sb.append(System.lineSeparator());
+                        sb.append("    where P.status in { 'preparation', 'in-progress', 'completed' }");
+                        break;
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-procedurenotdone":
                         sb.append(" P");
                         sb.append(System.lineSeparator());
-                        sb.append("    where P.status.value = 'not-done'");
+                        sb.append("    where P.status = 'not-done'");
                         break;
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-medicationrequest":
                         sb.append(" MR");
