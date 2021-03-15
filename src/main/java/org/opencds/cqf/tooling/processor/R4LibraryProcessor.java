@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.processor;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.r4.formats.FormatUtilities;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -24,15 +26,30 @@ public class R4LibraryProcessor extends LibraryProcessor {
     private Encoding encoding;
     private static CqfmSoftwareSystemHelper cqfmHelper;
 
+    private String getLibraryPath(String libraryPath) {
+        File f = new File(libraryPath);
+        if (!f.exists() && f.getParentFile().isDirectory() && f.getParentFile().exists()) {
+            return f.getParentFile().toString();
+        }
+        return libraryPath;
+    }
+
     /*
         Refresh all library resources in the given libraryPath
+        If the path is not specified, or is not a known directory, process
+        all known library resources
     */
     protected List<String> refreshLibraries(String libraryPath, Encoding encoding) {
-        File file = new File(libraryPath);
+        File file = libraryPath != null ? new File(libraryPath) : null;
         Map<String, String> fileMap = new HashMap<String, String>();
         List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
 
-        if (file.isDirectory()) {
+        if (file == null || !file.exists()) {
+            for (String path : IOUtils.getLibraryPaths(this.fhirContext)) {
+                loadLibrary(fileMap, libraries, new File(path));
+            }
+        }
+        else if (file.isDirectory()) {
             for (File libraryFile : file.listFiles()) {
                 loadLibrary(fileMap, libraries, libraryFile);
             }
@@ -52,7 +69,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
                 filePath = fileMap.get(refreshedLibrary.getId());
                 fileEncoding = IOUtils.getEncoding(filePath);
             } else {
-                filePath = libraryPath;
+                filePath = getLibraryPath(libraryPath);
                 fileEncoding = encoding;
             }
             cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
