@@ -905,7 +905,8 @@ public class Processor extends Operation {
     }
 
     private boolean toBoolean(String value) {
-        return "Yes".equals(value);
+        return
+            "Yes".equals(value) || "R".equals(value);
     }
 
     private String cleanseFhirType(String type) {
@@ -1008,6 +1009,17 @@ public class Processor extends Operation {
 
     private boolean isChoiceType(DictionaryFhirElementPath elementPath) {
         return elementPath.getResourcePath().indexOf("[x]") >= 0;
+    }
+
+    private boolean isBindableType(DictionaryElement element) {
+        String type = element.getType().toLowerCase();
+        String mappedType = element.getFhirElementPath().getFhirElementType();
+
+        boolean isBindable =
+            type.contains("codings")
+                || mappedType.equalsIgnoreCase("CodeableConcept");
+
+        return isBindable;
     }
 
     private StructureDefinition createExtensionStructureDefinition(DictionaryElement element, String extensionId) {
@@ -1624,13 +1636,15 @@ public class Processor extends Operation {
             valueSet = ensureValueSetWithCodes(valueSetId, valueSetLabel, codesToBind);
         }
 
-        Enumerations.BindingStrength bindingStrength = dictionaryElement.getBindingStrength();
-
-        // Bind the current element to the valueSet
-        ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
-        binding.setStrength(bindingStrength);
-        binding.setValueSet(String.format("%s/ValueSet/%s", canonicalBase, valueSetId));
-        targetElement.setBinding(binding);
+        // Can only bind bindable types (i.e., CodeableConcept)
+        if (isBindableType(dictionaryElement)) {
+            Enumerations.BindingStrength bindingStrength = dictionaryElement.getBindingStrength();
+            // Bind the current element to the valueSet
+            ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
+            binding.setStrength(bindingStrength);
+            binding.setValueSet(String.format("%s/ValueSet/%s", canonicalBase, valueSetId));
+            targetElement.setBinding(binding);
+        }
 
         if (isPrimaryDataElement) {
             valueSetLabel = valueSetId;
@@ -2183,12 +2197,12 @@ public class Processor extends Operation {
                         sb.append("    //where Not Implemented");
                         break;
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-servicenotrequested":
-                        sb.append(" O");
+                        sb.append(" SR");
                         sb.append(System.lineSeparator());
                         sb.append("    //where Not Implemented");
                         break;
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-immunizationnotdone":
-                        sb.append(" O");
+                        sb.append(" I");
                         sb.append(System.lineSeparator());
                         sb.append("    //where Not Implemented");
                         break;
