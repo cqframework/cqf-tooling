@@ -1012,12 +1012,18 @@ public class Processor extends Operation {
     }
 
     private boolean isBindableType(DictionaryElement element) {
-        String type = element.getType().toLowerCase();
-        String mappedType = element.getFhirElementPath().getFhirElementType();
+        String type = null;
+        if (element.getType() != null) {
+            type = element.getType().toLowerCase();
+        }
+        String mappedType = null;
+        if (element.getFhirElementPath() != null) {
+            mappedType = element.getFhirElementPath().getFhirElementType();
+        }
 
         boolean isBindable =
-            type.contains("codings")
-                || mappedType.equalsIgnoreCase("CodeableConcept");
+            (type != null && type.contains("codings"))
+            || (mappedType != null && mappedType.equalsIgnoreCase("CodeableConcept"));
 
         return isBindable;
     }
