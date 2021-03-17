@@ -838,20 +838,15 @@ public class Processor extends Operation {
     }
 
     private boolean requiresExtension(DictionaryElement element) {
-        String baseProfile = element.getBaseProfile();
-        if (baseProfile != null && baseProfile.toLowerCase().trim().equals("extension needed")) {
-            return true;
-        } else {
-            return false;
-        }
+        String extensionNeededValue = element.getExtensionNeeded();
+        boolean isExtensionNeeded = toBoolean(extensionNeededValue);
+        return isExtensionNeeded;
     }
 
     private boolean requiresProfile(DictionaryElement element) {
-        if (element == null || element.getMasterDataType() == null || element.getFhirElementPath() == null
-         || (element.getBaseProfile() != null
-             &&
-             element.getBaseProfile().toLowerCase().trim().equals("extension needed"))
-        ) {
+        if (element == null
+                || element.getMasterDataType() == null
+                || element.getFhirElementPath() == null) {
             return false;
         }
 
@@ -906,7 +901,8 @@ public class Processor extends Operation {
 
     private boolean toBoolean(String value) {
         return
-            "Yes".equals(value) || "R".equals(value);
+            value != null && !value.isEmpty()
+                && ("Yes".equalsIgnoreCase(value) || "R".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
     }
 
     private String cleanseFhirType(String type) {
@@ -1215,7 +1211,7 @@ public class Processor extends Operation {
 
         String baseResource = "http://hl7.org/fhir/StructureDefinition/" + resourceType;
         String baseProfileValue = element.getBaseProfile();
-        if (baseProfileValue == null || baseProfileValue.isEmpty() || baseProfileValue.toLowerCase().equals("extension needed") || baseProfileValue.toLowerCase().equals("fhir")) {
+        if (baseProfileValue == null || baseProfileValue.isEmpty() || requiresExtension(element) || baseProfileValue.toLowerCase().equals("fhir")) {
             sd.setBaseDefinition(baseResource);
         }
         else {
@@ -1643,7 +1639,7 @@ public class Processor extends Operation {
             if (codesToBind != null) {
                 valueSet = ensureValueSetWithCodes(valueSetId, valueSetLabel, codesToBind);
             }
-            
+
             Enumerations.BindingStrength bindingStrength = dictionaryElement.getBindingStrength();
             // Bind the current element to the valueSet
             ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
