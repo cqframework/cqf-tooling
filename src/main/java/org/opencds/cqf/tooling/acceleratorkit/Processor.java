@@ -1613,54 +1613,54 @@ public class Processor extends Operation {
     private void ensureTerminologyAndBindToElement(DictionaryElement dictionaryElement, StructureDefinition targetStructureDefinition,
                                                    ElementDefinition targetElement, CodeCollection codes, String customValueSetName,
                                                    Boolean isPrimaryDataElement) {
-        String valueSetLabel = dictionaryElement.getLabel();
-        String valueSetName = null;
-
-        if (customValueSetName != null && !customValueSetName.isEmpty()) {
-            valueSetName = customValueSetName;
-            valueSetLabel = customValueSetName;
-        }
-
-        if (valueSetName == null || valueSetName.isEmpty()) {
-            valueSetName = dictionaryElement.getCustomValueSetName();
-            valueSetLabel = dictionaryElement.getCustomValueSetName();
-        }
-
-        if (valueSetName == null || valueSetName.isEmpty()) {
-            valueSetName = dictionaryElement.getName();
-            valueSetLabel = dictionaryElement.getName();
-        }
-
-        CodeCollection codesToBind = codes;
-        if (codesToBind == null || codesToBind.size() == 0) {
-            codesToBind = dictionaryElement.getPrimaryCodes();
-        }
-
-        String valueSetId = toId(valueSetName);
-        ValueSet valueSet = null;
-        if (codesToBind != null) {
-            valueSet = ensureValueSetWithCodes(valueSetId, valueSetLabel, codesToBind);
-        }
-
         // Can only bind bindable types (i.e., CodeableConcept)
         if (isBindableType(dictionaryElement)) {
+            String valueSetLabel = dictionaryElement.getLabel();
+            String valueSetName = null;
+
+            if (customValueSetName != null && !customValueSetName.isEmpty()) {
+                valueSetName = customValueSetName;
+                valueSetLabel = customValueSetName;
+            }
+
+            if (valueSetName == null || valueSetName.isEmpty()) {
+                valueSetName = dictionaryElement.getCustomValueSetName();
+                valueSetLabel = dictionaryElement.getCustomValueSetName();
+            }
+
+            if (valueSetName == null || valueSetName.isEmpty()) {
+                valueSetName = dictionaryElement.getName();
+                valueSetLabel = dictionaryElement.getName();
+            }
+
+            CodeCollection codesToBind = codes;
+            if (codesToBind == null || codesToBind.size() == 0) {
+                codesToBind = dictionaryElement.getPrimaryCodes();
+            }
+
+            String valueSetId = toId(valueSetName);
+            ValueSet valueSet = null;
+            if (codesToBind != null) {
+                valueSet = ensureValueSetWithCodes(valueSetId, valueSetLabel, codesToBind);
+            }
+            
             Enumerations.BindingStrength bindingStrength = dictionaryElement.getBindingStrength();
             // Bind the current element to the valueSet
             ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
             binding.setStrength(bindingStrength);
             binding.setValueSet(String.format("%s/ValueSet/%s", canonicalBase, valueSetId));
             targetElement.setBinding(binding);
-        }
 
-        if (isPrimaryDataElement) {
-            valueSetLabel = valueSetId;
-            for (ValueSet vs : valueSets) {
-                if (vs.getId().equals(valueSetId)) {
-                    valueSetLabel = vs.getTitle();
+            if (isPrimaryDataElement) {
+                valueSetLabel = valueSetId;
+                for (ValueSet vs : valueSets) {
+                    if (vs.getId().equals(valueSetId)) {
+                        valueSetLabel = vs.getTitle();
+                    }
                 }
-            }
 
-            retrieves.add(new RetrieveInfo(targetStructureDefinition, valueSetLabel));
+                retrieves.add(new RetrieveInfo(targetStructureDefinition, valueSetLabel));
+            }
         }
     }
 
