@@ -1,0 +1,18 @@
+{
+  "resourceType": "Bundle",
+  "id": "bundle-1",
+  "type": "collection",
+  "entry": [ {
+    "fullUrl": "observation-1",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "observation-1"
+    }
+  }, {
+    "fullUrl": "condition-1",
+    "resource": {
+      "resourceType": "Condition",
+      "id": "condition-1"
+    }
+  } ]
+}

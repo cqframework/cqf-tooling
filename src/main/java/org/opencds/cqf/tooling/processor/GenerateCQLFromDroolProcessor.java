@@ -1,8 +1,5 @@
 package org.opencds.cqf.tooling.processor;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.opencds.cqf.individual_tooling.cql_generation.CqlGenerator;
 import org.opencds.cqf.individual_tooling.cql_generation.drool.DroolCqlGenerator;
 import org.opencds.cqf.tooling.parameter.GenerateCQLFromDroolParameters;

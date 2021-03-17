@@ -60,6 +60,16 @@
 
     <repositories>
         <repository>
+            <id>support.hln.com-release</id>
+            <name>support.hln.com-release</name>
+            <url>https://support.hln.com/artifactory/libs-release-local/</url>
+        </repository>
+        <repository>
+            <id>support.hln.com-snapshot</id>
+            <name>support.hln.com-snapshot</name>
+            <url>https://support.hln.com/artifactory/libs-snapshot-local/</url>
+        </repository>
+        <repository>
             <id>oss-sonatype</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
             <snapshots>
@@ -83,7 +93,7 @@
             <dependency>
                 <groupId>org.opencds.cqf.cql</groupId>
                 <artifactId>engine</artifactId>
-                <version>1.5.1</version>
+                <version>1.5.2-SNAPSHOT</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
@@ -95,7 +105,7 @@
             <dependency>
                 <groupId>org.opencds.cqf.cql</groupId>
                 <artifactId>engine.fhir</artifactId>
-                <version>1.5.1</version>
+                <version>1.5.2-SNAPSHOT</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
@@ -231,7 +241,7 @@
         <dependency>
             <groupId>info.bliki.wiki</groupId>
             <artifactId>bliki-core</artifactId>
-            <version>3.1.0</version>
+            <version>3.1.1-SNAPSHOT</version>
         </dependency>
 
         <!-- HTML Parser/Manipulator (-QiCoreQUICK) -->
@@ -345,17 +355,17 @@
         <dependency>
             <groupId>org.thymeleaf</groupId>
             <artifactId>thymeleaf</artifactId>
-            <version>3.0.12.RELEASE</version>
+            <version>3.0.13-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.12.3</version>
+            <version>2.12.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
-            <version>3.0.1</version>
+            <version>3.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -364,17 +374,31 @@
             <version>2.4.0-b180830.0359</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/javax.activation/activation -->
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime -->
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>2.3.0-b170127.1453</version>
+        </dependency>
+
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.12.3</version>
+            <version>2.12.3-SNAPSHOT</version>
         </dependency>
 
         <!-- test dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <version>4.13.3-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -398,6 +422,52 @@
                     <groupId>org.jvnet.jaxb2.maven2</groupId>
                     <artifactId>maven-jaxb2-plugin</artifactId>
                     <version>0.14.0</version>
+                    <executions>
+                        <execution>
+                            <id>generate</id>
+                            <goals>
+                                <goal>generate</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <schemaDirectory>${project.basedir}/src/main/resources/org/opencds/cqf/tooling/vmr</schemaDirectory>
+                        <schemaIncludes>
+                            <include>vmr.xsd</include>
+                        </schemaIncludes>
+                        <episode>false</episode>
+                        <!-- <args>
+                            <arg>-Xfluent-api</arg>
+                            <arg>-Xequals</arg>
+                            <arg>-XhashCode</arg>
+                            <arg>-XtoString</arg>
+                            <arg>-npa</arg>
+                            <arg>-XautoInheritance</arg>
+                            <arg>-XautoInheritance-xmlTypesExtend=org.opencds.cqf.cql.engine.elm.execution.Executable</arg>
+                            <arg>-Xannotate</arg>
+                        </args> -->
+                        <!-- <plugins>
+                            <plugin>
+                                <groupId>org.jvnet.jaxb2_commons</groupId>
+                                <artifactId>jaxb2-fluent-api</artifactId>
+                                <version>3.0</version>
+                            </plugin>
+                            <plugin>
+                                <groupId>org.jvnet.jaxb2_commons</groupId>
+                                <artifactId>jaxb2-basics</artifactId>
+                                <version>0.12.0</version>
+                            </plugin>
+                            <plugin>
+                                <groupId>org.jvnet.jaxb2_commons</groupId>
+                                <artifactId>jaxb2-basics-annotate</artifactId>
+                                <version>1.1.0</version>
+                            </plugin>
+                        </plugins> -->
+                        <generatePackage>org.opencds.cqf.tooling.vmr</generatePackage>
+                        <readOnly>false</readOnly>
+                        <markGenerated>false</markGenerated>
+                        <disableXmlSecurity>true</disableXmlSecurity>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -583,16 +653,16 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
             </plugin> -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb2-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

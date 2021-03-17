@@ -10,7 +10,7 @@ import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.DroolToEl
 public class DroolCqlGeneratorTest {
 
     @Test
-    public void test_worked() {
+    public void   test_worked() {
         String dataInputPath = "../CQLGenerationDocs/NonGeneratedDocs/default.json";
         String outputPath = "../CQLGenerationDocs/GeneratedDocs/elm";
         CQLTYPES cqlType = CQLTYPES.CONDITION;

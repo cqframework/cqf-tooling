@@ -11,6 +11,7 @@ import javax.xml.bind.JAXBException;
 
 import org.cdsframework.dto.ConditionDTO;
 import org.hl7.elm.r1.Library;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.individual_tooling.cql_generation.CqlGenerator;
 import org.opencds.cqf.individual_tooling.cql_generation.IOUtil;
 import org.opencds.cqf.individual_tooling.cql_generation.builder.VmrToFhirElmBuilder;
@@ -36,6 +37,7 @@ import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.DroolToEl
  */
 public class DroolCqlGenerator implements CqlGenerator {
     private CQLTYPES type;
+    private File cqlOutput;
 
     public DroolCqlGenerator(CQLTYPES type) {
         this.type = type;
@@ -53,6 +55,8 @@ public class DroolCqlGenerator implements CqlGenerator {
                 e.printStackTrace();
             }
         }
+        this.cqlOutput = new File(output.getAbsolutePath() + "/cql");
+        cqlOutput.mkdir();
         VmrToModelElmBuilder modelBuilder = resolveModel(fhirVersion);
         ElmContext context = readAndGenerateCQL(input, modelBuilder);
         writeElm(context, modelBuilder, output);
@@ -70,6 +74,8 @@ public class DroolCqlGenerator implements CqlGenerator {
     public void generateAndWriteToFile(URI inputURI, URI outputURI, String fhirVersion) {
         File file = new File(inputURI.getPath());
         File output = new File(outputURI.getPath());
+        this.cqlOutput = new File(output.getAbsolutePath() + "/cql");
+        cqlOutput.mkdir();
         VmrToModelElmBuilder modelBuilder = resolveModel(fhirVersion);
         ElmContext context = readAndGenerateCQL(file, modelBuilder);
         writeElm(context, modelBuilder, output);  
@@ -98,12 +104,27 @@ public class DroolCqlGenerator implements CqlGenerator {
             ElmToCqlVisitor elmVisitor = new ElmToCqlVisitor();
             elmVisitor.visitLibrary(library, context);
             context.cqlStrings.push(elmVisitor.getOutput());
+            writeCql(context, cqlOutput);
         });
         return context;
     }
 
     private VmrToModelElmBuilder resolveModel(String fhirVersion) {
         return new VmrToFhirElmBuilder(fhirVersion, new DecimalFormat("#.#"));
+    }
+
+    private void writeCql(ElmContext context, File outpuDirectory) {
+        context.cqlStrings.forEach(cql -> {
+            if (outpuDirectory.isDirectory()) {
+                VersionedIdentifier vi = new VersionedIdentifier();
+                vi.setId(getIdFromSource(cql));
+                vi.setVersion(getVersionFromSource(cql));
+                File outputFile = new File(outpuDirectory.getAbsolutePath() + "/" + vi.getId() + "-" + vi.getVersion() + ".cql");
+                IOUtil.writeToFile(outputFile, cql);
+            } else {
+                System.out.println("Output directory is not a directory: " + outpuDirectory.getAbsolutePath());
+            }
+        });
     }
 
     private void writeElm(ElmContext context, VmrToModelElmBuilder modelBuilder, File outpuDirectory) {
@@ -122,5 +143,20 @@ public class DroolCqlGenerator implements CqlGenerator {
                 e.printStackTrace();
             }
         });
+    }
+
+    private String getIdFromSource(String cql) {
+        if (cql.startsWith("library")) {
+            return getNameFromSource(cql);
+        }
+
+        throw new RuntimeException("This tool requires cql libraries to include a named/versioned identifier");
+    }
+
+    private String getNameFromSource(String cql) {
+        return cql.replaceFirst("library ", "").split(" version")[0].replaceAll("\"", "");
+    }
+    private String getVersionFromSource(String cql) {
+        return cql.split("version")[1].split("'")[1];
     }
 }

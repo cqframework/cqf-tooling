@@ -539,9 +539,8 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
             String codeDisplay, List<Element> elements) {
         CodeSystemRef csRef = resolveCodeSystem(libraryBuilder, systemUrl, systemName);
         CodeRef codeRef = resolveCode(libraryBuilder, codeId, codeName, codeDisplay, csRef);
-        Expression codeList = libraryBuilder.resolveToList(codeRef);
         // Retrieve retrieve = buildRetrieve(libraryBuilder, resource + "." + retrieveDataPath, codeRef, codeComparator);
-        Retrieve retrieve = resolveRetrieve(libraryBuilder, resource, codeList, codeComparator, retrieveDataPath);
+        Retrieve retrieve = resolveRetrieve(libraryBuilder, resource, codeRef, codeComparator, retrieveDataPath);
 
         AliasedQuerySource source = of.createAliasedQuerySource().withAlias(retrieveAlias).withExpression(retrieve);
         source.setResultType(source.getExpression().getResultType());

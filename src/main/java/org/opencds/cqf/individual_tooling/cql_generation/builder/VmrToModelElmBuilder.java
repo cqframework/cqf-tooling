@@ -164,7 +164,7 @@ public abstract class VmrToModelElmBuilder {
                         if (left.getResultType() instanceof ListType) {
                             List<Element> elements = new ArrayList<Element>();
                             List<AliasedQuerySource> sources = new ArrayList<AliasedQuerySource>();
-                            AliasedQuerySource source = of.createAliasedQuerySource().withAlias(left.getClass().getName().substring(left.getClass().getName().length() - 6, left.getClass().getName().length())).withExpression(left);
+                            AliasedQuerySource source = of.createAliasedQuerySource().withAlias("Alias").withExpression(left);
                             sources.add(source);
                             AliasRef aliasRef = of.createAliasRef().withName(source.getAlias());
                             aliasRef.setResultType(((ListType) left.getResultType()).getElementType());
@@ -225,7 +225,7 @@ public abstract class VmrToModelElmBuilder {
                     if (left.getResultType() instanceof ListType) {
                         List<Element> elements = new ArrayList<Element>();
                         List<AliasedQuerySource> sources = new ArrayList<AliasedQuerySource>();
-                        AliasedQuerySource source = of.createAliasedQuerySource().withAlias(left.getClass().getName().substring(0, 6)).withExpression(left);
+                        AliasedQuerySource source = of.createAliasedQuerySource().withAlias("Alias").withExpression(left);
                         sources.add(source);
                         AliasRef aliasRef = of.createAliasRef().withName(source.getAlias());
                         aliasRef.setResultType(((ListType) left.getResultType()).getElementType());
@@ -248,7 +248,7 @@ public abstract class VmrToModelElmBuilder {
                     else if (left.getResultType() instanceof ListType) {
                         List<Element> elements = new ArrayList<Element>();
                         List<AliasedQuerySource> sources = new ArrayList<AliasedQuerySource>();
-                        AliasedQuerySource source = of.createAliasedQuerySource().withAlias(left.getClass().getName().substring(left.getClass().getName().length() - 6, left.getClass().getName().length())).withExpression(left);
+                        AliasedQuerySource source = of.createAliasedQuerySource().withAlias("Alias").withExpression(left);
                         sources.add(source);
                         AliasRef aliasRef = of.createAliasRef().withName(source.getAlias());
                         aliasRef.setResultType(((ListType) left.getResultType()).getElementType());

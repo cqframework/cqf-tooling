@@ -15,9 +15,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
+
+import com.google.common.base.Strings;
 
 public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
     private boolean useSpaces = true;
@@ -317,38 +321,118 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         addToSection("library");
         String id = library.getIdentifier().getId();
         String version = library.getIdentifier().getVersion();
-        output.append("library " + id + "\'" + version + "\'");
+        output.append(currentSection + " " + id + " version " + "\'" + version + "\'");
         super.visitLibrary(library, context);
+        if(library.getUsings() != null && library.getUsings().getDef() != null && !library.getUsings().getDef().isEmpty()) {
+            library.getUsings().getDef().stream().forEach(using -> visitUsingDef(using, context));
+        }
+        if (library.getIncludes() != null && library.getIncludes().getDef() != null && !library.getIncludes().getDef().isEmpty()) {
+            library.getIncludes().getDef().stream().forEach(include -> visitIncludeDef(include, context));
+        }
+        if (library.getCodeSystems() != null && library.getCodeSystems().getDef() != null && !library.getCodeSystems().getDef().isEmpty()) {
+            library.getCodeSystems().getDef().stream().forEach(codeSystem -> visitCodeSystemDef(codeSystem, context));
+        }
+        if (library.getValueSets() != null && library.getValueSets().getDef() != null && !library.getValueSets().getDef().isEmpty()) {
+            library.getValueSets().getDef().stream().forEach(valueset -> visitValueSetDef(valueset, context));
+        }
+        if (library.getCodes() != null && library.getCodes().getDef() != null && !library.getCodes().getDef().isEmpty()) {
+            library.getCodes().getDef().stream().forEach(code -> visitCodeDef(code, context));
+        }
+        if (library.getConcepts() != null && library.getConcepts().getDef() != null && !library.getConcepts().getDef().isEmpty()) {
+            library.getConcepts().getDef().stream().forEach(concept -> visitConceptDef(concept, context));
+        }
+        if (library.getParameters() != null && library.getParameters().getDef() != null && !library.getParameters().getDef().isEmpty()) {
+            library.getParameters().getDef().stream().forEach(param -> visitParameterDef(param, context));
+        }
+        if (library.getContexts() != null && library.getContexts().getDef() != null && !library.getContexts().getDef().isEmpty()) {
+            library.getContexts().getDef().stream().forEach(contextDef -> visitContextDef(contextDef, context));
+        }
+        if (library.getStatements() != null && library.getStatements().getDef() != null && !library.getStatements().getDef().isEmpty()) {
+            visitStatement(library.getStatements(), context);
+        }
         // newLine();
         return null;
     }
 
     @Override
     public Void visitUsingDef(UsingDef using, ElmContext context) {
-        newConstruct("using");
+        if (!using.getLocalIdentifier().equals("System")) {
+            newConstruct("using");
+            output.append(String.format("%s %s version \'%s\'", currentSection, using.getLocalIdentifier(), using.getVersion()));
+        }
         return super.visitUsingDef(using, context);
     }
 
     @Override
     public Void visitIncludeDef(IncludeDef include, ElmContext context) {
         newConstruct("include");
+        output.append(String.format("%s %s", currentSection, include.getPath()));
+        if (!Strings.isNullOrEmpty(include.getVersion())) {
+            output.append(String.format(" version \'%s\'", include.getVersion()));
+        }
+        if (!Strings.isNullOrEmpty(include.getLocalIdentifier())) {
+            output.append(String.format(" called %s", include.getLocalIdentifier()));
+        }
         return super.visitIncludeDef(include, context);
     }
 
     @Override
     public Void visitCodeSystemDef(CodeSystemDef codeSystem, ElmContext context) {
         newConstruct("codesystem");
+        if (codeSystem.getAccessLevel() != null) {
+            visitAccessModifier(codeSystem.getAccessLevel(), context);
+        }
+        output.append(String.format("%s \"%s\" : \'%s\'", currentSection, codeSystem.getName(), codeSystem.getId()));
+        if (!Strings.isNullOrEmpty(codeSystem.getVersion())) {
+            output.append(String.format("version %s", codeSystem.getVersion()));
+        }
         return super.visitCodeSystemDef(codeSystem, context);
     }
 
     @Override
     public Void visitValueSetDef(ValueSetDef valueset, ElmContext context) {
         newConstruct("valueset");
+        if (valueset.getAccessLevel() != null) {
+            visitAccessModifier(valueset.getAccessLevel(), context);
+        }
+        output.append(String.format("%s \"%s\" : \'%s\'", currentSection, valueset.getName(), valueset.getId()));
+        if (!Strings.isNullOrEmpty(valueset.getVersion())) {
+            output.append(String.format(" version %s", valueset.getVersion()));
+        }
+        if (valueset.getCodeSystem() != null && !valueset.getCodeSystem().isEmpty()) {
+            output.append("codesystems { ");
+            int index = 0;
+            for (CodeSystemRef codeSystem : valueset.getCodeSystem()) {
+                if (index != 0) {
+                    output.append(", ");
+                }
+                visitCodeSystemRef(codeSystem, context);
+            }
+            output.append(" }");
+        }
         return super.visitValueSetDef(valueset, context);
+    }
+
+    @Override
+    public Void visitCodeSystemRef(CodeSystemRef codeSystem, ElmContext context) {
+        output.append(" ");
+        if (!Strings.isNullOrEmpty(codeSystem.getLibraryName())) {
+            output.append(String.format("\"%s\".", codeSystem.getLibraryName()));
+        }
+        output.append(String.format("\"%s\"",codeSystem.getName()));
+        return null;
     }
 
     public Void visitCodeDef(CodeDef code, ElmContext context) {
         newConstruct("code");
+        if (code.getAccessLevel() != null) {
+            visitAccessModifier(code.getAccessLevel(), context);
+        }
+        output.append(String.format("%s \"%s\" : \'%s\' from", currentSection, code.getName(), code.getId()));
+        visitCodeSystemRef(code.getCodeSystem(), context);
+        if (!Strings.isNullOrEmpty(code.getDisplay())) {
+            output.append(String.format(" display \'%s\'", code.getDisplay()));
+        }
         return null;
     }
 
@@ -369,6 +453,11 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
     }
 
     public Void visitAccessModifier(AccessModifier access, ElmContext context) {
+        if (access.equals(AccessModifier.PRIVATE)) {
+            output.append("private ");
+        } else {
+            // default to nothing for now.
+        }
         return null;
     }
 
@@ -384,6 +473,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
 
     @Override
     public Void visitNamedTypeSpecifier(NamedTypeSpecifier namedTypeSpecifier, ElmContext context) {
+        output.append(" " + namedTypeSpecifier.getResultType().toLabel());
         return super.visitNamedTypeSpecifier(namedTypeSpecifier, context);
     }
 
@@ -426,15 +516,23 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
             //     break;
             // }
 
-            ExpressionDef c = statements.getDef().get(i);
-            enterClause();
-            try {
-                Object childResult = visitExpressionDef(c, context);
+            Element c = statements.getDef().get(i);
+            if (c instanceof ExpressionDef) {
+                enterClause();
+                try {
+                    Object childResult = visitExpressionDef((ExpressionDef)c, context);
+                    result = childResult;
+                    // result = aggregateResult(result, childResult);
+                }
+                finally {
+                    exitClause();
+                }
+            } else if (c instanceof ContextDef) {
+                Object childResult = visitContextDef((ContextDef)c, context);
                 result = childResult;
-                // result = aggregateResult(result, childResult);
-            }
-            finally {
-                exitClause();
+            } else if (c instanceof FunctionDef) {
+                Object childResult = visitFunctionDef((FunctionDef)c, context);
+                result = childResult;
             }
         }
 
@@ -443,11 +541,24 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
 
     public Void visitExpressionDef(ExpressionDef expressionDef, ElmContext context) {
         newConstruct("statement");
+        output.append("define");
+        if (expressionDef.getAccessLevel() != null) {
+            visitAccessModifier(expressionDef.getAccessLevel(), context);
+        }
+        if (expressionDef.getName().equals("Patient has a discharge disposition of-6ff8beb15ce0add65b41d080669c199b")){
+            System.out.println("Units:-81c2ddf471455503cd0e601e");
+        }
+        output.append(String.format(" \"%s\":", expressionDef.getName()));
+        if (expressionDef.getExpression() != null) {
+            visitExpression(expressionDef.getExpression(), context);
+        }
         return null;
     }
 
     public Void visitContextDef(ContextDef contextDef, ElmContext context) {
-        newConstruct("statement");
+        newConstruct("context");
+        output.append(String.format("%s %s", currentSection, contextDef.getName()));
+        //System.out.println(output.toString());
         return null;
     }
 
@@ -455,6 +566,9 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
     public Void visitFunctionDef(FunctionDef function, ElmContext context) {
         newConstruct("statement");
 
+        if (function.getAccessLevel() != null) {
+            visitAccessModifier(function.getAccessLevel(), context);
+        }
         Object result = "TODO"; // defaultResult();
         int n = function.getOperand().size();
         boolean clauseEntered = false;
@@ -472,6 +586,12 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
                 exitClause();
             }
         }
+        if (function.getExpression() != null) {
+            visitExpression(function.getExpression(), context);
+        }
+        else if (function.getResultTypeSpecifier() != null) {
+            visitTypeSpecifier(function.getResultTypeSpecifier(), context);
+        }
 
         return null;
     }
@@ -483,49 +603,85 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
 
     @Override
     public Void visitAliasedQuerySource(AliasedQuerySource source, ElmContext context) {
+        try {
+            output.append("(");
+            if (!(source.getExpression() instanceof Retrieve)) {
+                enterClause();
+            }
+            visitExpression(source.getExpression(), context);
+        } finally {
+            if (!(source.getExpression() instanceof Retrieve)) {
+                exitClause();
+                newLine();
+            }
+            output.append(") ");
+        }
+        output.append(" " + source.getAlias());
         return super.visitAliasedQuerySource(source, context);
     }
 
     @Override
     public Void visitAliasRef(AliasRef alias, ElmContext context) {
+        output.append(" " + alias.getName());
         return super.visitAliasRef(alias, context);
     }
 
-    private Void visitWithOrWithoutClause(RelationshipClause withOrWithout, ElmContext context) {
+    @Override
+    public Void visitRelationshipClause(RelationshipClause relationship, ElmContext context) {
         Object result = "TODO";// defaultResult();
         boolean clauseEntered = false;     
         try {
-            Expression suchThat = withOrWithout.getSuchThat();
             enterClause();
-            // need to resolve some kind of space   
-            visitExpression(suchThat, context);
+            if (relationship instanceof With) {
+                visitWith((With) relationship, context);
+            } else if (relationship instanceof Without) {
+                visitWithout((Without) relationship, context);
+            }
             clauseEntered = true;
-            Object childResult = visitExpression(withOrWithout.getExpression(), context);
-            result = childResult; // aggregateResult(result, childResult);
         }
         finally {
             if (clauseEntered) {
                 exitClause();
             }
         }
-
         return null;
     }
 
     @Override
     public Void visitWith(With with, ElmContext context) {
-        return visitWithOrWithoutClause(with, context);
+        output.append(String.format("with"));
+        return null;
     }
 
     @Override
     public Void visitWithout(Without without, ElmContext context) {
-        return visitWithOrWithoutClause(without, context);
+        output.append(String.format("without"));
+        return null;
     }
 
     @Override
     public Void visitRetrieve(Retrieve retrieve, ElmContext context) {
         enterRetrieve();
         try {
+            output.append(String.format("[%s", retrieve.getDataType().getLocalPart()));
+            if (retrieve.getCodes() != null) {
+                if (!Strings.isNullOrEmpty(retrieve.getCodeComparator())) {
+                    if (!Strings.isNullOrEmpty(retrieve.getCodeProperty())) {
+                        output.append(String.format(": %s %s", retrieve.getCodeProperty(), retrieve.getCodeComparator()));
+                    }
+                } else {
+                    output.append(" :");
+                }
+                output.append(" ");
+                //TODO: ToList should exist in UnaryExpression super Visitor
+                if (retrieve.getCodes() instanceof ToList) {
+                    //System.out.println(output.toString());
+                    visitToList((ToList)retrieve.getCodes(), context);
+                } else {
+                    visitExpression(retrieve.getCodes(), context);
+                }
+            }
+            output.append("]");
             return super.visitRetrieve(retrieve, context);
         }
         finally {
@@ -535,11 +691,75 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
 
     @Override
     public Void visitQuery(Query query, ElmContext context) {
+        boolean internalValidation = false;
+        if (query.getSource() != null && !query.getSource().isEmpty()) {
+            for(AliasedQuerySource source : query.getSource()) {
+                if (source.getAlias().equals("$this")) {
+                    internalValidation = true;
+                    visitExpression(source.getExpression(), context);
+                } else {
+                    visitAliasedQuerySource(source, context);
+                }
+            }
+        }
+        if (internalValidation) {
+            visitExpression(query.getReturn().getExpression(), context);
+        } else {
+            if (query.getLet() != null && !query.getLet().isEmpty()) {
+                enterClause();
+                output.append(String.format("let"));
+                query.getLet().stream().forEach(let -> visitLetClause(let, context));
+                exitClause();
+            }
+            //System.out.println(output.toString());
+            if (query.getRelationship() != null && !query.getRelationship().isEmpty()) {
+                query.getRelationship().stream().forEach(relationship -> visitRelationshipClause(relationship, context));
+            }
+            if (query.getWhere() != null) {
+                visitWhereClause(query.getWhere(), context);
+            }
+            if (query.getReturn() != null) {
+                visitReturnClause(query.getReturn(), context);
+            }
+            if (query.getSort() != null) {
+                visitSortClause(query.getSort(), context);
+            }
+        }
         return super.visitQuery(query, context);
+    }
+
+    public Void visitToList(ToList toList, ElmContext context) {
+        output.append("{ ");
+        //TODO: ToList should exist in UnaryExpression super Visitor
+        if (toList.getOperand() instanceof ToList) {
+            visitToList((ToList)toList.getOperand(), context);
+        } else {
+            if (toList.getOperand() instanceof CodeRef) {
+                visitCodeRef((CodeRef)toList.getOperand(), context);
+            } else {
+                visitExpression(toList.getOperand(), context);
+            }
+        }
+        output.append(" }");
+        return null;
     }
 
     @Override
     public Void visitUnion(Union union, ElmContext context) {
+        int operandCount = 0;
+        for (Expression expression : union.getOperand()) {
+            if (operandCount > 0) {
+                newLine();
+                output.append("union ");
+            }
+            output.append("( ");
+            enterClause();
+            visitExpression(expression, context);
+            exitClause();
+            newLine();
+            output.append(") ");
+            operandCount++;
+        }
         return null;
     }
 
@@ -555,30 +775,11 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
 
     @Override
     public Void visitLetClause(LetClause let, ElmContext context) {
-        enterClause();
-        try {
-            // Object result = defaultResult();
-            // int n = ctx.getChildCount();
-            // for (int i = 0; i < n; i++) {
-            //     // if (!shouldVisitNextChild(ctx, result)) {
-            //     //     break;
-            //     // }
-
-            //     ParseTree c = ctx.getChild(i);
-
-            //     if (i > 1 && !c.getText().equals(",")) {
-            //         newLine();
-            //     }
-
-            //     Object childResult = c.accept(this);
-            //     result = aggregateResult(result, childResult);
-            // }
-            // return result;
-            return null;
-        }
-        finally {
-            exitClause();
-        }
+        output.append(String.format(" %s: ", let.getIdentifier()));
+        // System.out.println(output.toString());
+        visitExpression(let.getExpression(), context);
+        newLine();
+        return null;
     }
 
     // @Override
@@ -587,8 +788,10 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
     // }
 
     public Void visitWhereClause(Expression where, ElmContext context) {
-        enterClause();
         try {
+            enterClause();
+            output.append("where");
+            visitExpression(where, context);
             return null;
         }
         finally {
@@ -599,6 +802,8 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
     @Override
     public Void visitReturnClause(ReturnClause returnClause, ElmContext context) {
         enterClause();
+        output.append("return");
+        visitExpression(returnClause.getExpression(), context);
         try {
             return super.visitReturnClause(returnClause, context);
         }
@@ -633,53 +838,82 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
     }
 
     @Override
+    public Void visitNull(Null nullElement, ElmContext context) {
+        output.append("null");
+        return super.visitNull(nullElement, context);
+    }
+
+    @Override
     public Void visitNot(Not not, ElmContext context) {
+        output.append(" not ");
+        if (not.getOperand() instanceof AnyInValueSet) {
+            visitAnyInValueSet((AnyInValueSet) not.getOperand(), context);
+        } else {
+            visitExpression(not.getOperand(), context);
+        }
         return super.visitNot(not, context);
     }
 
-    public Void visitBoolean(Literal booleanLiteral, ElmContext context) {
-        return null;
+    @Override
+    public Void visitEqual(Equal equal, ElmContext context) {
+        output.append(" Equal(");
+        visitExpression(equal.getOperand().get(0), context);
+        output.append(", ");
+        visitExpression(equal.getOperand().get(1), context);
+        output.append(")");
+        //System.out.println(output.toString());
+        return super.visitEqual(equal, context);
     }
 
     @Override
     public Void visitOr(Or or, ElmContext context) {
-        return visitBinaryExpression(or, context);
+        visitExpression(or.getOperand().get(0), context);
+        output.append(" or (");
+        enterClause();
+        visitExpression(or.getOperand().get(1), context);
+        exitClause();
+        newLine();
+        output.append(")");
+        return super.visitOr(or, context);
     }
 
     @Override
     public Void visitBinaryExpression(BinaryExpression binary, ElmContext context) {
-        // Object result = defaultResult();
-        // int n = ctx.getChildCount();
-        // boolean clauseEntered = false;
         try {
-            // for (int i = 0; i < n; i++) {
-            //     if (!shouldVisitNextChild(ctx, result)) {
-            //         break;
-            //     }
-
-            //     ParseTree c = ctx.getChild(i);
-
-            //     if (i == 1) {
-            //         enterClause();
-            //         clauseEntered = true;
-            //     }
-
-            //     Object childResult = c.accept(this);
-            //     result = aggregateResult(result, childResult);
-            // }
-            // return result;
-            return null;
+            enterClause();
+            return super.visitBinaryExpression(binary, context);
         }
         finally {
-            //if (clauseEntered) {
-                exitClause();
-            //}
+            exitClause();
         }
     }
 
     @Override
+    public Void visitEquivalent(Equivalent equivalent, ElmContext context) {
+        visitExpression(equivalent.getOperand().get(0), context);
+        output.append(" ~ ");
+        visitExpression(equivalent.getOperand().get(1), context);
+        return super.visitEquivalent(equivalent, context);
+    }
+
+    @Override
+    public Void visitIn(In in, ElmContext context) {
+        visitExpression(in.getOperand().get(0), context);
+        output.append(" in ");
+        visitExpression(in.getOperand().get(1), context);
+        return super.visitIn(in, context);
+    }
+
+    @Override
     public Void visitAnd(And and, ElmContext context) {
-        return visitBinaryExpression(and, context);
+        visitExpression(and.getOperand().get(0), context);
+        output.append(" and (");
+        enterClause();
+        visitExpression(and.getOperand().get(1), context);
+        exitClause();
+        newLine();
+        output.append(")");
+        return super.visitAnd(and, context);
     }
 
     @Override
@@ -689,6 +923,15 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
 
     @Override
     public Void visitExists(Exists exists, ElmContext context) {
+        enterClause();
+        output.append("exists (");
+        enterClause();
+        visitExpression(exists.getOperand(), context);
+        exitClause();
+        newLine();
+        output.append(")");
+        exitClause();
+        //System.out.println(output.toString());
         return super.visitExists(exists, context);
     }
 
@@ -703,6 +946,13 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
     @Override
     public Void visitDateTimeComponentFrom(DateTimeComponentFrom dateTime, ElmContext context) {
         return super.visitDateTimeComponentFrom(dateTime, context);
+    }
+
+    @Override
+    public Void visitToday(Today today, ElmContext context) {
+        output.append(" Today()");
+        //System.out.println(output.toString());
+        return super.visitToday(today, context);
     }
 
     @Override
@@ -731,11 +981,68 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
 
     @Override
     public Void visitFlatten(Flatten flatten, ElmContext context) {
+        output.append("flatten (");
+        enterClause();
+        visitExpression(flatten.getOperand(), context);
+        exitClause();
+        newLine();
+        output.append(")");
         return null;
     }
 
     @Override
     public Void visitDistinct(Distinct distinct, ElmContext context) {
+        // could be a keyword in returnClause but adding parentheses to be safe
+        output.append("distinct (");
+        enterClause();
+        visitExpression(distinct.getOperand(), context);
+        exitClause();
+        newLine();
+        output.append(")");
+        //System.out.println(output.toString());
+        return super.visitDistinct(distinct, context);
+    }
+
+    @Override
+    public Void visitFirst(First first, ElmContext context) {
+        output.append(" First (");
+        enterClause();
+        visitExpression(first.getSource(), context);
+        exitClause();
+        newLine();
+        output.append(")");
+        return super.visitFirst(first, context);
+    }
+
+    @Override
+    public Void visitLast(Last last, ElmContext context) {
+        output.append(" Last (");
+        enterClause();
+        visitExpression(last.getSource(), context);
+        exitClause();
+        newLine();
+        output.append(")");
+        return super.visitLast(last, context);
+    }
+
+    @Override
+    public Void visitSplit(Split split, ElmContext context) {
+        output.append("Split (");
+        visitExpression(split.getStringToSplit(), context);
+        output.append(", ");
+        visitExpression(split.getSeparator(), context);
+        output.append(")");
+        //System.out.println(output.toString());
+        return super.visitSplit(split, context);
+    }
+
+    public Void visitAnyInValueSet(AnyInValueSet anyInValueSet, ElmContext context) {
+        output.append("AnyInValueSet(");
+        visitExpression(anyInValueSet.getCodes(), context);
+        output.append(", ");
+        visitExpression(anyInValueSet.getValueset(), context);
+        output.append(")");
+        //System.out.println(output.toString());
         return null;
     }
 
@@ -756,6 +1063,11 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
 
     @Override
     public Void visitAggregateExpression(AggregateExpression expression, ElmContext context) {
+        if (expression instanceof Count) {
+            output.append("Count(");
+            visitExpression(expression.getSource(), context);
+            output.append(")");
+        }
         return super.visitAggregateExpression(expression, context);
     }
 
@@ -791,17 +1103,54 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
 
     @Override
     public Void visitLess(Less less, ElmContext context) {
-        return null;
+        int operandCount = 0;
+        for (Expression expression : less.getOperand()) {
+            if (operandCount > 0) {
+                output.append(" < ");
+            }
+            visitExpression(expression, context);
+            operandCount++;
+        }
+        return super.visitLess(less, context);
+    }
+
+    @Override
+    public Void visitLessOrEqual(LessOrEqual lessOrElement, ElmContext context) {
+        int operandCount = 0;
+        for (Expression expression : lessOrElement.getOperand()) {
+            if (operandCount > 0) {
+                output.append(" <= ");
+            }
+            visitExpression(expression, context);
+            operandCount++;
+        }
+        return super.visitLessOrEqual(lessOrElement, context);
     }
 
     @Override
     public Void visitGreater(Greater greater, ElmContext context) {
-        return null;
+        int operandCount = 0;
+        for (Expression expression : greater.getOperand()) {
+            if (operandCount > 0) {
+                output.append(" > ");
+            }
+            visitExpression(expression, context);
+            operandCount++;
+        }
+        return super.visitGreater(greater, context);
     }
 
     @Override
     public Void visitGreaterOrEqual(GreaterOrEqual greaterOrElement, ElmContext context) {
-        return null;
+        int operandCount = 0;
+        for (Expression expression : greaterOrElement.getOperand()) {
+            if (operandCount > 0) {
+                output.append(" >= ");
+            }
+            visitExpression(expression, context);
+            operandCount++;
+        }
+        return super.visitGreaterOrEqual(greaterOrElement, context);
     }
 
     @Override
@@ -850,6 +1199,11 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
 
     @Override
     public Void visitLiteral(Literal literal, ElmContext context) {
+        if (literal.getResultType().toLabel().equals("System.String")) {
+            output.append(String.format("\'%s\'", literal.getValue()));
+        } else {
+            output.append(literal.getValue());
+        }
         return super.visitLiteral(literal, context);
     }
 
@@ -860,29 +1214,37 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
 
     @Override
     public Void visitFunctionRef(FunctionRef function, ElmContext context) {
-        // Object result = defaultResult();
-        // int n = ctx.getChildCount();
-        // for (int i = 0; i < n; i++) {
-        //     if (!shouldVisitNextChild(ctx, result)) {
-        //         break;
-        //     }
-
-        //     ParseTree c = ctx.getChild(i);
-
-        //     if (c == ctx.paramList()) {
-        //         enterGroup();
-        //     }
-        //     try {
-        //         Object childResult = c.accept(this);
-        //         result = aggregateResult(result, childResult);
-        //     }
-        //     finally {
-        //         if (c == ctx.paramList()) {
-        //             exitGroup();
-        //         }
-        //     }
-        // }
+        if (function.getLibraryName() != null && function.getLibraryName().equals("FHIRHelpers")) {
+            function.getOperand().stream().forEach(operand -> visitExpression(operand, context));
+        } else if (function.getLibraryName() != null) {
+            if (function.getLibraryName().equals("System")) {
+                //log system function
+                output.append(String.format(" %s(", function.getName()));
+                commaDeliminatedOperandVisitation(function, context);
+                output.append(")");
+            } else {
+                output.append(String.format(" %s.%s", function.getLibraryName(), function.getName()));
+                output.append("(");
+                commaDeliminatedOperandVisitation(function, context);
+                output.append(")");
+            }
+        } else {
+            output.append(String.format(" %s(", function.getName()));
+            commaDeliminatedOperandVisitation(function, context);
+            output.append(")");
+        }
         return null; //result;
+    }
+
+    private void commaDeliminatedOperandVisitation(FunctionRef function, ElmContext context) {
+        int operandCount = 0;
+        for (Expression operand : function.getOperand()) {
+            if (operandCount > 0) {
+                output.append(", ");
+            }
+            visitExpression(operand, context);
+            operandCount++;
+        }
     }
 
     public Object visitParamList(cqlParser.ParamListContext ctx) {
@@ -891,7 +1253,139 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
 
     @Override
     public Void visitQuantity(Quantity quantity, ElmContext context) {
+        if (quantity.getValue() != null) {
+            output.append(quantity.getValue());
+        }
+        if (quantity.getUnit() != null) {
+            output.append(" \'" + quantity.getUnit() + "\'");
+        }
+        //System.out.println(output.toString());
         return super.visitQuantity(quantity, context);
+    }
+
+    @Override
+    public Void visitProperty(Property property, ElmContext context) {
+        if (property.getSource() != null) {
+            if (property.getSource() instanceof As) {
+                output.append("(");
+                visitExpression(property.getSource(), context);
+                output.append(")");
+            } else {
+                visitExpression(property.getSource(), context);
+            }
+        } else if (!Strings.isNullOrEmpty(property.getScope())) {
+            if (property.getScope().equals("$this")) {
+                // log internalValidation
+            } else {
+                output.append(" " + property.getScope());
+            }
+        }
+        String removeResourceType = Arrays.stream(property.getPath().split("\\."))
+            .filter(split -> !(split.equals("Observation") || split.equals("Condition") || split.equals("System")))
+            .collect(Collectors.joining("."));
+        output.append(String.format(".%s", removeResourceType));
+        return super.visitProperty(property, context);
+    }
+
+    @Override 
+    public Void visitInValueSet(InValueSet inValueSet, ElmContext context) {
+        visitExpression(inValueSet.getCode(), context);
+        output.append(" in");
+        visitExpression(inValueSet.getValueset(), context);
+        return super.visitInValueSet(inValueSet, context);
+    }
+
+    @Override
+    public Void visitExpressionRef(ExpressionRef expressionRef, ElmContext context) {
+        if (expressionRef instanceof FunctionRef) {
+            visitFunctionRef((FunctionRef) expressionRef, context);
+        } else {
+            if (expressionRef.getLibraryName() != null) {
+                output.append(String.format(" \"%s\".\"%s\"", expressionRef.getLibraryName(), expressionRef.getName()));
+            } else {
+                output.append(String.format(" \"%s\"", expressionRef.getName()));
+            }
+        }
+        return super.visitExpressionRef(expressionRef, context);
+    }
+
+    @Override
+    public Void visitValueSetRef(ValueSetRef valueSetRef, ElmContext context) {
+        if (valueSetRef.getLibraryName() != null) {
+            output.append(String.format(" \"%s\".\"%s\"", valueSetRef.getLibraryName(), valueSetRef.getName()));
+        } else {
+            output.append(" \"" + valueSetRef.getName() + "\"");
+        }
+        return super.visitValueSetRef(valueSetRef, context);
+    }
+
+    public Void visitCodeRef(CodeRef codeRef, ElmContext context) {
+        if (codeRef.getLibraryName() != null) {
+            output.append(String.format("\"%s\".\"%s\"", codeRef.getLibraryName(), codeRef.getName()));
+        } else {
+            output.append("\"" + codeRef.getName() + "\"");
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitToConcept(ToConcept toConcept, ElmContext context) {
+        output.append("ToConcept(");
+        if (toConcept.getOperand() instanceof CodeRef) {
+            visitCodeRef((CodeRef)toConcept.getOperand(), context);
+        } else {
+            visitExpression(toConcept.getOperand(), context);
+        }
+        output.append(")");
+        return super.visitToConcept(toConcept, context);
+    }
+
+    @Override
+    public Void visitToQuantity(ToQuantity toQuantity, ElmContext context) {
+        output.append("ToQuantity(");
+        visitExpression(toQuantity.getOperand(), context);
+        output.append(")");
+        return super.visitToQuantity(toQuantity, context);
+    }
+
+    @Override
+    public Void visitToDecimal(ToDecimal toDecimal, ElmContext context) {
+        output.append("ToDecimal(");
+        visitExpression(toDecimal.getOperand(), context);
+        output.append(")");
+        return super.visitToDecimal(toDecimal, context);
+    }
+
+    @Override
+    public Void visitElement(Element elm, ElmContext context) {
+        if (elm instanceof CodeRef) return visitCodeRef((CodeRef) elm, context);
+        else return super.visitElement(elm, context);
+    }
+
+    @Override
+    public Void visitList(org.hl7.elm.r1.List list, ElmContext context) {
+        output.append("{ ");
+        if (list.getTypeSpecifier() != null) {
+            visitElement(list.getTypeSpecifier(), context);
+        }
+        int elementPosition = 0;
+        for (Expression element : list.getElement()) {
+            if (elementPosition > 0) {
+                output.append(", ");
+            }
+            visitElement(element, context);
+            elementPosition++;
+        }
+        output.append(" }");
+        return null;
+    }
+
+    @Override
+    public Void visitAs(As as, ElmContext context) {
+        visitExpression(as.getOperand(), context);
+        output.append(" as");
+        visitTypeSpecifier(as.getAsTypeSpecifier(), context);
+        return super.visitAs(as, context);
     }
 
     private static class SyntaxErrorListener extends BaseErrorListener {
