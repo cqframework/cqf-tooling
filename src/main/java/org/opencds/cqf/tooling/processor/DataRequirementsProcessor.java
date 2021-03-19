@@ -16,36 +16,47 @@ public class DataRequirementsProcessor{
     ElmRequirementsContext elmRequirementsContext;
 
     public Library gatherDataRequirements(org.hl7.elm.r1.Library elmLibraryToProcess, Set<String> expressions){
-        elmRequirementsVisitor = new ElmRequirementsVisitor();
-        elmRequirementsContext = new ElmRequirementsContext();
         if(null != elmLibraryToProcess) {
-            if(expressions == null || expressions.isEmpty()){
-                extractRefsFromElmLibrary(elmLibraryToProcess);
-            }else{
-                expressions.forEach(expression->{
-                    extractExpressionFromElmLibrary(elmLibraryToProcess, expression);
-                });
+            elmRequirementsVisitor = new ElmRequirementsVisitor();
+            elmRequirementsContext = new ElmRequirementsContext();
+            if (null != elmLibraryToProcess) {
+                if (expressions == null || expressions.isEmpty()) {
+                    extractReqsFromElmLibrary(elmLibraryToProcess);
+                } else {
+                    expressions.forEach(expression -> {
+                        extractReqsForExpression(elmLibraryToProcess, expression);
+                    });
+                }
+                Library moduleLibrary = createLibrary();
+                return moduleLibrary;
             }
-            Library moduleLibrary = createLibrary();
-            return moduleLibrary;
         }
         return null;
     }
 
-    public void extractRefsFromElmLibrary(org.hl7.elm.r1.Library elmLibrary){
-        org.hl7.elm.r1.Library.Statements statements = elmLibrary.getStatements();
-//        statements
-    }
-
-    public void extractExpressionFromElmLibrary(org.hl7.elm.r1.Library library, String expression){
+    public void extractReqsForExpression(org.hl7.elm.r1.Library library, String expression){
         ExpressionDef exDef = getExpressionDef(library.getStatements().getDef(), expression);
         if(null != exDef){
-            elmRequirementsVisitor.visitExpressionDef(exDef, elmRequirementsContext);
-//            Expression exFromDef = exDef.getExpression();
-            System.out.println();
+            extractRequirementsFromExpressionDef(exDef);
         }
     }
 
+    public void extractReqsFromElmLibrary(org.hl7.elm.r1.Library elmLibrary){
+        org.hl7.elm.r1.Library.Statements statements = elmLibrary.getStatements();
+        if(null != elmLibrary.getStatements()
+                && null != elmLibrary.getStatements().getDef()
+                && ! elmLibrary.getStatements().getDef().isEmpty()) {
+            elmLibrary.getStatements().getDef().forEach(def -> {
+                extractRequirementsFromExpressionDef(def);
+            });
+        }
+    }
+
+    public void extractRequirementsFromExpressionDef(ExpressionDef expDef) {
+        if(null != expDef){
+            elmRequirementsVisitor.visitExpressionDef(expDef, elmRequirementsContext);
+        }
+    }
 
     public List<RelatedArtifact> createArtifactsFromContext(){
         List<RelatedArtifact> relatedArtifacts= new ArrayList<>();
@@ -61,25 +72,28 @@ public class DataRequirementsProcessor{
 
     private List<RelatedArtifact> getLibraryRefsFromContext(Set<String> libraryRefs) {
         List<RelatedArtifact> libraryArtifacts= new ArrayList<>();
-        libraryRefs.forEach(libraryRef -> {
-            RelatedArtifact libraryArtifact = new RelatedArtifact();
-            libraryArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
-            libraryArtifact.setResource(libraryRef);
-            libraryArtifacts.add(libraryArtifact);
-        });
+        if(null != libraryRefs && !libraryRefs.isEmpty()) {
+            libraryRefs.forEach(libraryRef -> {
+                RelatedArtifact libraryArtifact = new RelatedArtifact();
+                libraryArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
+                libraryArtifact.setResource(libraryRef);
+                libraryArtifacts.add(libraryArtifact);
+            });
+        }
 
         return libraryArtifacts;
     }
 
-    private Collection<? extends RelatedArtifact> getRefsFromContext(Set<? extends Expression> refs) {
+    private List<? extends RelatedArtifact> getRefsFromContext(Set<? extends Expression> refs) {
         List<RelatedArtifact> refArtifacts= new ArrayList<>();
-        refs.forEach(ref -> {
-            RelatedArtifact refArtifact = new RelatedArtifact();
-            refArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
-//            refArtifact.setResource(codeRef.);
-            refArtifacts.add(refArtifact);
-        });
-
+        if(null != refs && !refs.isEmpty()) {
+            refs.forEach(ref -> {
+                RelatedArtifact refArtifact = new RelatedArtifact();
+                refArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
+                //            refArtifact.setResource(codeRef.);
+                refArtifacts.add(refArtifact);
+            });
+        }
         return refArtifacts;
     }
 
