@@ -13,51 +13,6 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
     }
 
     @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj);
-    }
-
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        return super.clone();
-    }
-
-    @Override
-    public String toString() {
-        return super.toString();
-    }
-
-    @Override
-    public ElmRequirements visitExpression(Expression elm, ElmRequirementsContext context) {
-        return super.visitExpression(elm, context);
-    }
-
-    @Override
-    public ElmRequirements visitUnaryExpression(UnaryExpression elm, ElmRequirementsContext context) {
-        return super.visitUnaryExpression(elm, context);
-    }
-
-    @Override
-    public ElmRequirements visitBinaryExpression(BinaryExpression elm, ElmRequirementsContext context) {
-        return super.visitBinaryExpression(elm, context);
-    }
-
-    @Override
-    public ElmRequirements visitTernaryExpression(TernaryExpression elm, ElmRequirementsContext context) {
-        return super.visitTernaryExpression(elm, context);
-    }
-
-    @Override
-    public ElmRequirements visitNaryExpression(NaryExpression elm, ElmRequirementsContext context) {
-        return super.visitNaryExpression(elm, context);
-    }
-
-    @Override
     public ElmRequirements visitExpressionDef(ExpressionDef elm, ElmRequirementsContext context) {
         context.getElmRequirements().reportExpressionDef(elm);
         return super.visitExpressionDef(elm, context);
@@ -91,6 +46,97 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
     public ElmRequirements visitParameterRef(ParameterRef elm, ElmRequirementsContext context) {
         context.getElmRequirements().reportParameterRef(elm);
         return super.visitParameterRef(elm, context);
+    }
+
+    @Override
+    public ElmRequirements visitRetrieve(Retrieve elm, ElmRequirementsContext context) {
+        context.getElmRequirements().reportRetrieve(elm);
+        return super.visitRetrieve(elm, context);
+    }
+
+    @Override
+    public ElmRequirements visitCodeSystemDef(CodeSystemDef elm, ElmRequirementsContext context) {
+        context.getElmRequirements().reportCodeSystemDef(elm);
+        return super.visitCodeSystemDef(elm, context);
+    }
+
+    @Override
+    public ElmRequirements visitValueSetDef(ValueSetDef elm, ElmRequirementsContext context) {
+        context.getElmRequirements().reportValueSetDef(elm);
+        return super.visitValueSetDef(elm, context);
+    }
+
+    @Override
+    public ElmRequirements visitCodeSystemRef(CodeSystemRef elm, ElmRequirementsContext context){
+        context.getElmRequirements().reportCodeSystemRef(elm);
+        return super.visitCodeSystemRef(elm, context);
+    }
+
+    @Override
+    public ElmRequirements visitValueSetRef(ValueSetRef elm, ElmRequirementsContext context) {
+        context.getElmRequirements().reportValueSetRef(elm);
+        return context.getElmRequirements();
+    }
+
+    @Override
+    public ElmRequirements visitLibrary(Library elm, ElmRequirementsContext context) {
+        context.getElmRequirements().reportLibraryRef(elm);
+        return super.visitLibrary(elm, context);
+    }
+
+    @Override
+    public ElmRequirements visitIncludeDef(IncludeDef elm, ElmRequirementsContext context) {
+        context.getElmRequirements().reportLibraryRef(elm);
+        return super.visitIncludeDef(elm, context);
+    }
+
+    @Override
+    public ElmRequirements visitCodeRef(CodeRef elm, ElmRequirementsContext context){
+        context.getElmRequirements().reportCodeRef(elm);
+        return super.visitCodeRef(elm, context);
+    }
+
+    @Override
+    public ElmRequirements visitCodeDef(CodeDef elm, ElmRequirementsContext context){
+        context.getElmRequirements().reportCodeDef(elm);
+        return super.visitCodeDef(elm, context);
+    }
+
+    @Override
+    public ElmRequirements visitConceptRef(ConceptRef elm, ElmRequirementsContext context) {
+        context.getElmRequirements().reportConceptRef(elm);
+        return super.visitConceptRef(elm, context);
+    }
+
+    @Override
+    public ElmRequirements visitConceptDef(ConceptDef elm, ElmRequirementsContext context) {
+        context.getElmRequirements().reportConceptDef(elm);
+        return super.visitConceptDef(elm, context);
+    }
+
+    @Override
+    public ElmRequirements visitExpression(Expression elm, ElmRequirementsContext context) {
+        return super.visitExpression(elm, context);
+    }
+
+    @Override
+    public ElmRequirements visitUnaryExpression(UnaryExpression elm, ElmRequirementsContext context) {
+        return super.visitUnaryExpression(elm, context);
+    }
+
+    @Override
+    public ElmRequirements visitBinaryExpression(BinaryExpression elm, ElmRequirementsContext context) {
+        return super.visitBinaryExpression(elm, context);
+    }
+
+    @Override
+    public ElmRequirements visitTernaryExpression(TernaryExpression elm, ElmRequirementsContext context) {
+        return super.visitTernaryExpression(elm, context);
+    }
+
+    @Override
+    public ElmRequirements visitNaryExpression(NaryExpression elm, ElmRequirementsContext context) {
+        return super.visitNaryExpression(elm, context);
     }
 
     @Override
@@ -839,36 +885,6 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
     }
 
     @Override
-    public ElmRequirements visitRetrieve(Retrieve elm, ElmRequirementsContext context) {
-        context.getElmRequirements().reportRetrieve(elm);
-        return super.visitRetrieve(elm, context);
-    }
-
-    @Override
-    public ElmRequirements visitCodeSystemDef(CodeSystemDef elm, ElmRequirementsContext context) {
-        context.getElmRequirements().reportCodeSystemDef(elm);
-        return super.visitCodeSystemDef(elm, context);
-    }
-
-    @Override
-    public ElmRequirements visitValueSetDef(ValueSetDef elm, ElmRequirementsContext context) {
-        context.getElmRequirements().reportValueSetDef(elm);
-        return super.visitValueSetDef(elm, context);
-    }
-
-    @Override
-    public ElmRequirements visitCodeSystemRef(CodeSystemRef elm, ElmRequirementsContext context){
-        context.getElmRequirements().reportCodeSystemRef(elm);
-        return super.visitCodeSystemRef(elm, context);
-    }
-
-    @Override
-    public ElmRequirements visitValueSetRef(ValueSetRef elm, ElmRequirementsContext context) {
-        context.getElmRequirements().reportValueSetRef(elm);
-        return context.getElmRequirements();
-    }
-
-    @Override
     public ElmRequirements visitCode(Code elm, ElmRequirementsContext context) {
         return super.visitCode(elm, context);
     }
@@ -939,43 +955,7 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
     }
 
     @Override
-    public ElmRequirements visitLibrary(Library elm, ElmRequirementsContext context) {
-        context.getElmRequirements().reportLibraryRef(elm);
-        return super.visitLibrary(elm, context);
-    }
-
-    @Override
     public ElmRequirements visitUsingDef(UsingDef elm, ElmRequirementsContext context) {
         return super.visitUsingDef(elm, context);
     }
-
-    @Override
-    public ElmRequirements visitIncludeDef(IncludeDef elm, ElmRequirementsContext context) {
-        return super.visitIncludeDef(elm, context);
-    }
-
-    @Override
-    public ElmRequirements visitCodeRef(CodeRef elm, ElmRequirementsContext context){
-        context.getElmRequirements().reportCodeRef(elm);
-        return super.visitCodeRef(elm, context);
-    }
-
-    @Override
-    public ElmRequirements visitCodeDef(CodeDef elm, ElmRequirementsContext context){
-        context.getElmRequirements().reportCodeDef(elm);
-        return super.visitCodeDef(elm, context);
-    }
-
-    @Override
-    public ElmRequirements visitConceptRef(ConceptRef elm, ElmRequirementsContext context) {
-        context.getElmRequirements().reportConceptRef(elm);
-        return super.visitConceptRef(elm, context);
-    }
-
-    @Override
-    public ElmRequirements visitConceptDef(ConceptDef elm, ElmRequirementsContext context) {
-        context.getElmRequirements().reportConceptDef(elm);
-        return super.visitConceptDef(elm, context);
-    }
-
 }

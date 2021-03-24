@@ -76,10 +76,35 @@ public class DataRequirementsProcessor{
         relatedArtifacts.addAll(getValueSetRefsFromContext());
 //        relatedArtifacts.addAll(getRefsFromContext(elmRequirementsContext.getElmRequirements().getExpressionRefs()));
 //        relatedArtifacts.addAll(getFunctionRefsFromContext(elmRequirementsContext.getElmRequirements().getFunctionRefs()));
-//        relatedArtifacts.addAll(getLibraryRefsFromContext(elmRequirementsContext.getElmRequirements().getLibraryRefs()));
-//        relatedArtifacts.addAll(getRefsFromContext(elmRequirementsContext.getElmRequirements().getRetrieves()));
+        relatedArtifacts.addAll(getLibraryRefsFromContext(elmRequirementsContext.getElmRequirements().getLibraryRefs()));
+        relatedArtifacts.addAll(getRetrievesFromContext());
 
         return relatedArtifacts;
+    }
+
+    private Collection<? extends RelatedArtifact> getRetrievesFromContext() {
+        List<RelatedArtifact> refArtifacts= new ArrayList<>();
+        List<Retrieve> retrieves = elmRequirementsContext.getElmRequirements().getRetrieves();
+        if(null != retrieves && !retrieves.isEmpty()){
+            retrieves.forEach(retrieve -> {
+                RelatedArtifact refArtifact = new RelatedArtifact();
+                refArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
+                refArtifact.setDisplay("Retrieve");
+                refArtifact.setResource(retrieve.getTemplateId());
+                boolean artifactAddedAlready = false;
+                for(RelatedArtifact refAdded : refArtifacts){
+                    if(refAdded.getResource().equalsIgnoreCase(retrieve.getTemplateId())){
+                        artifactAddedAlready = true;
+                        break;
+                    }
+                }
+                if(!artifactAddedAlready){
+                    refArtifacts.add(refArtifact);
+                }
+
+            });
+        }
+        return refArtifacts;
     }
 
     private Collection<? extends RelatedArtifact> getValueSetRefsFromContext() {
