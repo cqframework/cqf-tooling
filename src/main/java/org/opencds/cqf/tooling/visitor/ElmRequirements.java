@@ -94,8 +94,12 @@ public class ElmRequirements {
     }
 
     public List<ValueSetDef> getValueSetDefs() {return valueSetDefs;}
-
-    
+    public List<CodeDef> getCodeDefs(){return codeDefs;}
+    public List<CodeSystemDef> getCodeSystemDefs(){return codeSystemDefs;}
+    public List<ConceptDef> getConceptDefs(){return conceptDefs;}
+    public List<ParameterDef>  getParameterDefs(){return parameterDefs;}
+    public List<ExpressionDef> getExpressionDefs(){return expressionDefs;}
+    public List<FunctionDef> getFunctionDefs(){return functionDefs;}
 
     public List<CodeRef> getCodeRefs() {return codeRefs;}
     public void setCodeRefs(List<CodeRef> codeRefs) {this.codeRefs = codeRefs;}

@@ -87,33 +87,36 @@ public class DataRequirementsProcessor{
         List<ValueSetRef> valueSetRefs = new ArrayList<>(elmRequirementsContext.getElmRequirements().getValueSetRefs());
         List<ValueSetDef> valueSetDefs = new ArrayList<>(elmRequirementsContext.getElmRequirements().getValueSetDefs());
         if(null != valueSetRefs && !valueSetRefs.isEmpty()
-            && null != valueSetDefs && !valueSetDefs.isEmpty()) {
-            valueSetRefs.forEach(ref -> {
-                String libraryName = (ref).getLibraryName();
-                String functionName = (ref).getName();
-                String referenceToFunction;
-                if(null != libraryName && !libraryName.isEmpty()){
-                    referenceToFunction = libraryName + "." + functionName;
-                }else{
-                    referenceToFunction = processingLibraryName + "." + functionName;
-                }
-                RelatedArtifact refArtifact = new RelatedArtifact();
-                refArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
-                refArtifact.setDisplay("ValueSetRef");
-                refArtifact.setResource(referenceToFunction);
-                boolean artifactAddedAlready = false;
-                for(RelatedArtifact refAdded : refArtifacts){
-                    if(refAdded.getResource().equalsIgnoreCase(referenceToFunction)){
-                        artifactAddedAlready = true;
-                        break;
+                && null != valueSetDefs && !valueSetDefs.isEmpty()) {
+            valueSetRefs.forEach(valueSetRef -> {
+                ValueSetDef valueSetDef = findValueSetDef(valueSetRef.getName(), valueSetDefs);
+                if(null != valueSetDef && null != valueSetDef.getId() && !valueSetDef.getId().isEmpty()){
+                    RelatedArtifact refArtifact = new RelatedArtifact();
+                    refArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
+                    refArtifact.setDisplay(valueSetDef.getName());
+                    refArtifact.setResource(valueSetDef.getId());
+                    boolean artifactAddedAlready = false;
+                    for(RelatedArtifact refAdded : refArtifacts){
+                        if(refAdded.getResource().equalsIgnoreCase(valueSetDef.getId())){
+                            artifactAddedAlready = true;
+                            break;
+                        }
                     }
-                }
-                if(!artifactAddedAlready){
-                    refArtifacts.add(refArtifact);
+                    if(!artifactAddedAlready){
+                        refArtifacts.add(refArtifact);
+                    }
                 }
             });
         }
         return refArtifacts;
+    }
+
+    private ValueSetDef findValueSetDef(String name, List<ValueSetDef> valueSetDefs) {
+        return valueSetDefs.stream().filter(valueSetDef -> valueSetDef
+                .getName()
+                .equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
     }
 
     private List<RelatedArtifact> getFunctionRefsFromContext(List<FunctionRef> refs) {
