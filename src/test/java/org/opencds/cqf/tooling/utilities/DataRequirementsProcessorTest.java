@@ -52,7 +52,7 @@ public class DataRequirementsProcessorTest {
         try {
             Set<String> expressions = new HashSet<>();
             // TODO - add expressions to expressions
-            expressions.add("Active Ambulatory Benzodiazepine Rx");
+            expressions.add("Conditions Indicating End of Life or With Limited Life Expectancy");//Active Ambulatory Opioid Rx");
             CqlTranslator translator = createTranslator("OpioidCDSCommon.cql", cqlTranslatorOptions);
             Library elmLibrary = translator.toELM();
             DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
