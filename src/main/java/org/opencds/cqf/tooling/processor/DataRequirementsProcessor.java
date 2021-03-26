@@ -99,7 +99,7 @@ public class DataRequirementsProcessor{
             refArtifact.setResource(referenceToExpression);
             boolean artifactAddedAlready = false;
             for(RelatedArtifact refAdded : refArtifacts){
-                if(refAdded.getResource().equalsIgnoreCase(expressionRef.getName())){
+                if(refAdded.getResource().equalsIgnoreCase(referenceToExpression)){
                     artifactAddedAlready = true;
                     break;
                 }
