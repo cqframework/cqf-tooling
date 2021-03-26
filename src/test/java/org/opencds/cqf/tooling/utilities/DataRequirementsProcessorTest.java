@@ -30,6 +30,27 @@ public class DataRequirementsProcessorTest {
         CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
         cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
         try {
+            /*
+                OpioidCDSCommon.cql
+                cernerTestCases.cql
+                AdultOutpatientEncountersFHIR4.xml
+                AdvancedIllnessandFrailtyExclusionECQMFHIR4.xml
+                BCSComponent.xml
+                CCSComponent.xml
+                FHIRHelpers.xml
+                HBPComponent.xml
+                HospiceFHIR4.xml
+                MATGlobalCommonFunctionsFHIR4.xml
+                PVSComponent.xml
+                SupplementalDataElementsFHIR4.xml
+                TSCComponent.xml
+                BCSComponent-v0-0-001-FHIR-4-0-1.xml
+                CCSComponent-v0-0-001-FHIR-4-0-1.xml
+                HBPComponent-v0-0-001-FHIR-4-0-1.xml
+                PVSComponent-v0-0-001-FHIR-4-0-1.xml
+                TSCComponent-v0-0-001-FHIR-4-0-1.xml
+                PreventiveCareandWellness-v0-0-001-FHIR-4-0-1.xml
+             */
             CqlTranslator translator = createTranslator("OpioidCDSCommon.cql", cqlTranslatorOptions);
             Library elmLibrary = translator.toELM();
             DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();

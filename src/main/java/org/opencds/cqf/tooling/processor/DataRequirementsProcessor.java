@@ -67,44 +67,130 @@ public class DataRequirementsProcessor{
 
     public List<RelatedArtifact> createArtifactsFromContext(){
 
-        // visit cqlprocessor result.parameters.addAll(extractParameters(translator.toELM(), paramMessages));   ETC
         List<RelatedArtifact> relatedArtifacts= new ArrayList<>();
 //        relatedArtifacts.addAll(getRefsFromContext(elmRequirementsContext.getElmRequirements().getCodeRefs()));
-//        relatedArtifacts.addAll(getRefsFromContext(elmRequirementsContext.getElmRequirements().getCodeSystemRefs()));
+        relatedArtifacts.addAll(getCodeSystemRefsFromContext());
 //        relatedArtifacts.addAll(getRefsFromContext(elmRequirementsContext.getElmRequirements().getConceptRefs()));
-//        relatedArtifacts.addAll(getRefsFromContext(elmRequirementsContext.getElmRequirements().getParameterRefs()));
+        relatedArtifacts.addAll(getParameterRefsFromContext());
         relatedArtifacts.addAll(getValueSetRefsFromContext());
-//        relatedArtifacts.addAll(getRefsFromContext(elmRequirementsContext.getElmRequirements().getExpressionRefs()));
+        relatedArtifacts.addAll(getExpressionRefsFromContext());
 //        relatedArtifacts.addAll(getFunctionRefsFromContext(elmRequirementsContext.getElmRequirements().getFunctionRefs()));
         relatedArtifacts.addAll(getLibraryRefsFromContext(elmRequirementsContext.getElmRequirements().getLibraryRefs()));
-        relatedArtifacts.addAll(getRetrievesFromContext());
+
 
         return relatedArtifacts;
     }
 
-    private Collection<? extends RelatedArtifact> getRetrievesFromContext() {
+    private Collection<? extends RelatedArtifact> getExpressionRefsFromContext() {
         List<RelatedArtifact> refArtifacts= new ArrayList<>();
-        List<Retrieve> retrieves = elmRequirementsContext.getElmRequirements().getRetrieves();
-        if(null != retrieves && !retrieves.isEmpty()){
-            retrieves.forEach(retrieve -> {
-                RelatedArtifact refArtifact = new RelatedArtifact();
-                refArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
-                refArtifact.setDisplay("Retrieve");
-                refArtifact.setResource(retrieve.getTemplateId());
-                boolean artifactAddedAlready = false;
-                for(RelatedArtifact refAdded : refArtifacts){
-                    if(refAdded.getResource().equalsIgnoreCase(retrieve.getTemplateId())){
-                        artifactAddedAlready = true;
-                        break;
+        List<ExpressionRef> expressionRefs = new ArrayList<>(elmRequirementsContext.getElmRequirements().getExpressionRefs());
+        expressionRefs.forEach(expressionRef -> {
+            RelatedArtifact refArtifact = new RelatedArtifact();
+            refArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
+            refArtifact.setDisplay("ExpressionRef");
+            String libraryName = (expressionRef).getLibraryName();
+            String expressionName = (expressionRef).getName();
+            String referenceToExpression;
+            if(null != libraryName && !libraryName.isEmpty()){
+                referenceToExpression = libraryName + "." + expressionName;
+            }else{
+                referenceToExpression = processingLibraryName + "." + expressionName;
+            }
+            refArtifact.setResource(referenceToExpression);
+            boolean artifactAddedAlready = false;
+            for(RelatedArtifact refAdded : refArtifacts){
+                if(refAdded.getResource().equalsIgnoreCase(expressionRef.getName())){
+                    artifactAddedAlready = true;
+                    break;
+                }
+            }
+            if(!artifactAddedAlready){
+                refArtifacts.add(refArtifact);
+            }
+        });
+        return refArtifacts;
+    }
+
+    private Collection<? extends RelatedArtifact> getParameterRefsFromContext() {
+        List<RelatedArtifact> refArtifacts= new ArrayList<>();
+        List<ParameterRef> parameterRefs = new ArrayList<>(elmRequirementsContext.getElmRequirements().getParameterRefs());
+        parameterRefs.forEach(parameterRef -> {
+            RelatedArtifact refArtifact = new RelatedArtifact();
+            refArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
+            refArtifact.setDisplay("ParameterRef");
+            refArtifact.setResource(parameterRef.getName());
+            boolean artifactAddedAlready = false;
+            for(RelatedArtifact refAdded : refArtifacts){
+                if(refAdded.getResource().equalsIgnoreCase(parameterRef.getName())){
+                    artifactAddedAlready = true;
+                    break;
+                }
+            }
+            if(!artifactAddedAlready){
+                refArtifacts.add(refArtifact);
+            }
+        });
+        return refArtifacts;
+    }
+
+    private CodeSystemDef findCodeSystemDef(String name, List<CodeSystemDef> codeSystemDefs) {
+        return codeSystemDefs.stream().filter(codeSystemDef -> codeSystemDef
+                .getName()
+                .equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private List<RelatedArtifact> getCodeSystemRefsFromContext() {
+        List<RelatedArtifact> refArtifacts= new ArrayList<>();
+        List<CodeSystemRef> codeSystemRefs = new ArrayList<>(elmRequirementsContext.getElmRequirements().getCodeSystemRefs());
+        List<CodeSystemDef> codeSystemDefs = new ArrayList<>(elmRequirementsContext.getElmRequirements().getCodeSystemDefs());
+        if(null != codeSystemRefs && !codeSystemRefs.isEmpty()
+                && null != codeSystemDefs && !codeSystemDefs.isEmpty()) {
+            codeSystemRefs.forEach(codeSystemRef -> {
+                CodeSystemDef codeSystemDef = findCodeSystemDef(codeSystemRef.getName(), codeSystemDefs);
+                if(null != codeSystemDef && null != codeSystemDef.getId() && !codeSystemDef.getId().isEmpty()){
+                    RelatedArtifact refArtifact = new RelatedArtifact();
+                    refArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
+                    refArtifact.setDisplay(codeSystemDef.getName());
+                    refArtifact.setResource(codeSystemDef.getId());
+                    boolean artifactAddedAlready = false;
+                    for(RelatedArtifact refAdded : refArtifacts){
+                        if(refAdded.getResource().equalsIgnoreCase(codeSystemDef.getId())){
+                            artifactAddedAlready = true;
+                            break;
+                        }
+                    }
+                    if(!artifactAddedAlready){
+                        refArtifacts.add(refArtifact);
                     }
                 }
-                if(!artifactAddedAlready){
-                    refArtifacts.add(refArtifact);
-                }
-
             });
         }
         return refArtifacts;
+    }
+
+    private List<DataRequirement> getRetrievesFromContext() {
+        List<DataRequirement> dataRequirementList = new ArrayList<>();
+
+        List<Retrieve> retrieves = elmRequirementsContext.getElmRequirements().getRetrieves();
+        if(null != retrieves && !retrieves.isEmpty()){
+            retrieves.forEach(retrieve -> {
+                DataRequirement dataRequirement = new DataRequirement();
+                dataRequirement.setType(Enumerations.FHIRAllTypes.valueOf(retrieve.getDataType().getLocalPart().toUpperCase()));
+                boolean retrieveAddedAlready = false;
+                for(DataRequirement dataRequirementAdded : dataRequirementList){
+                    if(dataRequirementAdded.getType() == dataRequirement.getType()){
+                        retrieveAddedAlready = true;
+                        break;
+                    }
+                }
+                if(!retrieveAddedAlready){
+                    dataRequirementList.add(dataRequirement);
+                }
+            });
+        }
+        return dataRequirementList;
     }
 
     private Collection<? extends RelatedArtifact> getValueSetRefsFromContext() {
@@ -223,8 +309,11 @@ public class DataRequirementsProcessor{
         returnLibrary.setType(libraryType);
         returnLibrary.setDate(new Date());
         returnLibrary.setStatus(Enumerations.PublicationStatus.ACTIVE);
-//        returnLibrary.addRelatedArtifact()
         returnLibrary.setRelatedArtifact(createArtifactsFromContext());
+        List<DataRequirement> dataRequirements = getRetrievesFromContext();
+        dataRequirements.forEach(dataRequirement -> {
+            returnLibrary.addDataRequirement(dataRequirement);
+        });
 
         return returnLibrary;
     }
