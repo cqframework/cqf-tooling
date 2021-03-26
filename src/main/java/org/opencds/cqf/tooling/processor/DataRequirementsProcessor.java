@@ -66,15 +66,33 @@ public class DataRequirementsProcessor{
 
     public List<RelatedArtifact> createArtifactsFromContext(){
         List<RelatedArtifact> relatedArtifacts= new ArrayList<>();
+        relatedArtifacts.addAll(getCodeDefsFromContext());
 //        relatedArtifacts.addAll(getRefsFromContext(elmRequirementsContext.getElmRequirements().getCodeRefs()));
         relatedArtifacts.addAll(getCodeSystemRefsFromContext());
+// Need an example:
 //        relatedArtifacts.addAll(getRefsFromContext(elmRequirementsContext.getElmRequirements().getConceptRefs()));
         relatedArtifacts.addAll(getParameterRefsFromContext());
         relatedArtifacts.addAll(getValueSetRefsFromContext());
         relatedArtifacts.addAll(getExpressionRefsFromContext());
 //        relatedArtifacts.addAll(getFunctionRefsFromContext(elmRequirementsContext.getElmRequirements().getFunctionRefs()));
+//      No reason to do this (??) FunctionRefs are handled in ExpressionRefs
         relatedArtifacts.addAll(getLibraryRefsFromContext(elmRequirementsContext.getElmRequirements().getLibraryRefs()));
         return relatedArtifacts;
+    }
+
+    private Collection<? extends RelatedArtifact> getCodeDefsFromContext() {
+        List<RelatedArtifact> refArtifacts= new ArrayList<>();
+        List<CodeDef> codeDefs = new ArrayList<>(elmRequirementsContext.getElmRequirements().getCodeDefs());
+        codeDefs.forEach(codeDef -> {
+            RelatedArtifact refArtifact = new RelatedArtifact();
+            refArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
+            refArtifact.setDisplay("CodeDef");
+            refArtifact.setResource(codeDef.getCodeSystem().getName() + "." + codeDef.getName());
+            if(!checkIfArtifactAdded(refArtifacts, refArtifact.getResource())){
+                refArtifacts.add(refArtifact);
+            }
+        });
+        return refArtifacts;
     }
 
     private Collection<? extends RelatedArtifact> getExpressionRefsFromContext() {
@@ -84,12 +102,13 @@ public class DataRequirementsProcessor{
             RelatedArtifact refArtifact = new RelatedArtifact();
             refArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
             refArtifact.setDisplay("ExpressionRef");
+            if(expressionRef instanceof FunctionRef){
+                refArtifact.setDisplay("FunctionRef");
+            }
             String libraryName = (expressionRef).getLibraryName();
             String expressionName = (expressionRef).getName();
-            String referenceToExpression;
-            if(null != libraryName && !libraryName.isEmpty()){
-                referenceToExpression = libraryName + "." + expressionName;
-            }else{
+            String referenceToExpression = libraryName + "." + expressionName;;
+            if(null == libraryName || libraryName.isEmpty()){
                 referenceToExpression = processingLibraryName + "." + expressionName;
             }
             refArtifact.setResource(referenceToExpression);
