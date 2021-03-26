@@ -10,7 +10,6 @@ import org.opencds.cqf.tooling.visitor.ElmRequirementsVisitor;
 import java.util.*;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DataRequirementsProcessor{
     ElmRequirementsVisitor elmRequirementsVisitor;
@@ -66,7 +65,6 @@ public class DataRequirementsProcessor{
     }
 
     public List<RelatedArtifact> createArtifactsFromContext(){
-
         List<RelatedArtifact> relatedArtifacts= new ArrayList<>();
 //        relatedArtifacts.addAll(getRefsFromContext(elmRequirementsContext.getElmRequirements().getCodeRefs()));
         relatedArtifacts.addAll(getCodeSystemRefsFromContext());
@@ -76,8 +74,6 @@ public class DataRequirementsProcessor{
         relatedArtifacts.addAll(getExpressionRefsFromContext());
 //        relatedArtifacts.addAll(getFunctionRefsFromContext(elmRequirementsContext.getElmRequirements().getFunctionRefs()));
         relatedArtifacts.addAll(getLibraryRefsFromContext(elmRequirementsContext.getElmRequirements().getLibraryRefs()));
-
-
         return relatedArtifacts;
     }
 
@@ -97,14 +93,7 @@ public class DataRequirementsProcessor{
                 referenceToExpression = processingLibraryName + "." + expressionName;
             }
             refArtifact.setResource(referenceToExpression);
-            boolean artifactAddedAlready = false;
-            for(RelatedArtifact refAdded : refArtifacts){
-                if(refAdded.getResource().equalsIgnoreCase(referenceToExpression)){
-                    artifactAddedAlready = true;
-                    break;
-                }
-            }
-            if(!artifactAddedAlready){
+            if(!checkIfArtifactAdded(refArtifacts, referenceToExpression)){
                 refArtifacts.add(refArtifact);
             }
         });
@@ -119,18 +108,22 @@ public class DataRequirementsProcessor{
             refArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
             refArtifact.setDisplay("ParameterRef");
             refArtifact.setResource(parameterRef.getName());
-            boolean artifactAddedAlready = false;
-            for(RelatedArtifact refAdded : refArtifacts){
-                if(refAdded.getResource().equalsIgnoreCase(parameterRef.getName())){
-                    artifactAddedAlready = true;
-                    break;
-                }
-            }
-            if(!artifactAddedAlready){
+            if(!checkIfArtifactAdded(refArtifacts, parameterRef.getName())){
                 refArtifacts.add(refArtifact);
             }
         });
         return refArtifacts;
+    }
+
+    private boolean checkIfArtifactAdded(List<RelatedArtifact> refArtifacts, String toCompare){
+        boolean wasAdded = false;
+        for(RelatedArtifact refAdded : refArtifacts){
+            if(refAdded.getResource().equalsIgnoreCase(toCompare)){
+                wasAdded = true;
+                break;
+            }
+        }
+        return wasAdded;
     }
 
     private CodeSystemDef findCodeSystemDef(String name, List<CodeSystemDef> codeSystemDefs) {
@@ -154,14 +147,7 @@ public class DataRequirementsProcessor{
                     refArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
                     refArtifact.setDisplay(codeSystemDef.getName());
                     refArtifact.setResource(codeSystemDef.getId());
-                    boolean artifactAddedAlready = false;
-                    for(RelatedArtifact refAdded : refArtifacts){
-                        if(refAdded.getResource().equalsIgnoreCase(codeSystemDef.getId())){
-                            artifactAddedAlready = true;
-                            break;
-                        }
-                    }
-                    if(!artifactAddedAlready){
+                    if(!checkIfArtifactAdded(refArtifacts, codeSystemDef.getId())){
                         refArtifacts.add(refArtifact);
                     }
                 }
@@ -206,14 +192,7 @@ public class DataRequirementsProcessor{
                     refArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
                     refArtifact.setDisplay(valueSetDef.getName());
                     refArtifact.setResource(valueSetDef.getId());
-                    boolean artifactAddedAlready = false;
-                    for(RelatedArtifact refAdded : refArtifacts){
-                        if(refAdded.getResource().equalsIgnoreCase(valueSetDef.getId())){
-                            artifactAddedAlready = true;
-                            break;
-                        }
-                    }
-                    if(!artifactAddedAlready){
+                    if(!checkIfArtifactAdded(refArtifacts, valueSetDef.getId())){
                         refArtifacts.add(refArtifact);
                     }
                 }
@@ -246,22 +225,13 @@ public class DataRequirementsProcessor{
                 refArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
                 refArtifact.setDisplay("FunctionRef");
                 refArtifact.setResource(referenceToFunction);
-                boolean artifactAddedAlready = false;
-                for(RelatedArtifact refAdded : refArtifacts){
-                    if(refAdded.getResource().equalsIgnoreCase(referenceToFunction)){
-                        artifactAddedAlready = true;
-                        break;
-                    }
-                }
-                if(!artifactAddedAlready){
+                if(!checkIfArtifactAdded(refArtifacts, referenceToFunction)){
                     refArtifacts.add(refArtifact);
                 }
             });
         }
         return refArtifacts;
     }
-
-
 
     private List<RelatedArtifact> getLibraryRefsFromContext(List<String> libraryRefs) {
         List<RelatedArtifact> libraryArtifacts= new ArrayList<>();
@@ -275,19 +245,6 @@ public class DataRequirementsProcessor{
         }
 
         return libraryArtifacts;
-    }
-
-    private List<? extends RelatedArtifact> getRefsFromContext(List<? extends Expression> refs) {
-        List<RelatedArtifact> refArtifacts= new ArrayList<>();
-        if(null != refs && !refs.isEmpty()) {
-            refs.forEach(ref -> {
-                RelatedArtifact refArtifact = new RelatedArtifact();
-                refArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
-                //            refArtifact.setResource(codeRef.);
-                refArtifacts.add(refArtifact);
-            });
-        }
-        return refArtifacts;
     }
 
     private ExpressionDef getExpressionDef(List<ExpressionDef> defList, String expName){

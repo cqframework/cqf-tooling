@@ -68,11 +68,20 @@ public class ElmRequirements {
     }
 
     public void reportLibraryRef(Element library){
+        StringBuilder libraryIdentifier = new StringBuilder();
+        libraryIdentifier.append("Library/");
         if(library instanceof Library) {
-            libraryRefs.add("Library/" + ((Library)library).getIdentifier().getId() + "|" + ((Library)library).getIdentifier().getVersion());
+            libraryIdentifier.append(((Library)library).getIdentifier().getId());
+            if(null != ((Library)library).getIdentifier().getVersion()){
+                libraryIdentifier.append("|" + ((Library)library).getIdentifier().getVersion());
+            }
         }else if(library instanceof IncludeDef) {
-            libraryRefs.add("Library/" + ((IncludeDef) library).getPath() + "|" + ((IncludeDef)library).getVersion());
+            libraryIdentifier.append(((IncludeDef) library).getPath());
+            if(null != ((IncludeDef)library).getVersion()){
+                libraryIdentifier.append("|" + ((IncludeDef)library).getVersion());
+            }
         }
+        libraryRefs.add(libraryIdentifier.toString());
     }
 
     public void reportRetrieve(Retrieve retrieve){retrieves.add(retrieve);}
