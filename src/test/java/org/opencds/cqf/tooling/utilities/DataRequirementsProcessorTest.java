@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.utilities;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.cqframework.cql.cql2elm.*;
+import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
@@ -13,6 +14,8 @@ import org.opencds.cqf.tooling.processor.DataRequirementsProcessor;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -51,10 +54,45 @@ public class DataRequirementsProcessorTest {
                 TSCComponent-v0-0-001-FHIR-4-0-1.xml
                 PreventiveCareandWellness-v0-0-001-FHIR-4-0-1.xml
              */
-            CqlTranslator translator = createTranslator("OpioidCDSCommon.cql", cqlTranslatorOptions);
+            CqlTranslator translator = createTranslator("OpioidCDS/cql/OpioidCDSCommon.cql", cqlTranslatorOptions);
             Library elmLibrary = translator.toELM();
+            assertTrue(translator.getErrors().isEmpty());
+            cacheLibrary(translator.getTranslatedLibrary());
+
             DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
-            org.hl7.fhir.r5.model.Library moduleDefinitionLibrary = dqReqTrans.gatherDataRequirements(elmLibrary, null);
+            org.hl7.fhir.r5.model.Library moduleDefinitionLibrary = dqReqTrans.gatherDataRequirements(libraryManager, translator.getTranslatedLibrary(), cqlTranslatorOptions, null);
+            assertTrue(moduleDefinitionLibrary.getType().getCode("http://terminology.hl7.org/CodeSystem/library-type").equalsIgnoreCase("module-definition"));
+
+            FhirContext context =  FhirContext.forR5();
+            IParser parser = context.newJsonParser();
+            String moduleDefString = parser.setPrettyPrint(true).encodeResourceToString(moduleDefinitionLibrary);
+            System.out.println(moduleDefString);
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
+    private void cacheLibrary(TranslatedLibrary library) {
+        // Add the translated library to the library manager (NOTE: This should be a "cacheLibrary" call on the LibraryManager, available in 1.5.3+)
+        // Without this, the data requirements processor will try to load the current library, resulting in a re-translation
+        String libraryPath = NamespaceManager.getPath(library.getIdentifier().getSystem(), library.getIdentifier().getId());
+        libraryManager.getTranslatedLibraries().put(libraryPath, library);
+    }
+
+    @Test
+    public void TestDataRequirementsProcessorWithExpressions() {
+        CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
+        cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
+        try {
+            Set<String> expressions = new HashSet<>();
+            // TODO - add expressions to expressions
+            expressions.add("Conditions Indicating End of Life or With Limited Life Expectancy");//Active Ambulatory Opioid Rx");
+            CqlTranslator translator = createTranslator("OpioidCDS/cql/OpioidCDSCommon.cql", cqlTranslatorOptions);
+            Library elmLibrary = translator.toELM();
+            assertTrue(translator.getErrors().isEmpty());
+            cacheLibrary(translator.getTranslatedLibrary());
+            DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
+            org.hl7.fhir.r5.model.Library moduleDefinitionLibrary = dqReqTrans.gatherDataRequirements(libraryManager, translator.getTranslatedLibrary(), cqlTranslatorOptions, expressions);
             assertTrue(moduleDefinitionLibrary.getType().getCode("http://terminology.hl7.org/CodeSystem/library-type").equalsIgnoreCase("module-definition"));
 
             FhirContext context =  FhirContext.forR5();
@@ -67,17 +105,16 @@ public class DataRequirementsProcessorTest {
     }
 
     @Test
-    public void TestDataRequirementsProcessorWithExpressions() {
+    public void TestLibraryDataRequirements() {
         CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
         cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
         try {
-            Set<String> expressions = new HashSet<>();
-            // TODO - add expressions to expressions
-            expressions.add("Conditions Indicating End of Life or With Limited Life Expectancy");//Active Ambulatory Opioid Rx");
-            CqlTranslator translator = createTranslator("OpioidCDSCommon.cql", cqlTranslatorOptions);
+            CqlTranslator translator = createTranslator("CompositeMeasures/cql/BCSComponent.cql", cqlTranslatorOptions);
             Library elmLibrary = translator.toELM();
+            assertTrue(translator.getErrors().isEmpty());
+            cacheLibrary(translator.getTranslatedLibrary());
             DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
-            org.hl7.fhir.r5.model.Library moduleDefinitionLibrary = dqReqTrans.gatherDataRequirements(elmLibrary, expressions);
+            org.hl7.fhir.r5.model.Library moduleDefinitionLibrary = dqReqTrans.gatherDataRequirements(libraryManager, translator.getTranslatedLibrary(), cqlTranslatorOptions, null);
             assertTrue(moduleDefinitionLibrary.getType().getCode("http://terminology.hl7.org/CodeSystem/library-type").equalsIgnoreCase("module-definition"));
 
             FhirContext context =  FhirContext.forR5();
@@ -89,10 +126,10 @@ public class DataRequirementsProcessorTest {
         }
     }
 
-    private static void setup() {
+    private static void setup(String relativePath) {
         modelManager = new ModelManager();
         libraryManager = new LibraryManager(modelManager);
-        libraryManager.getLibrarySourceLoader().registerProvider(new TestLibrarySourceProvider());
+        libraryManager.getLibrarySourceLoader().registerProvider(new DefaultLibrarySourceProvider(Paths.get(relativePath)));
         libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
         try {
             ucumService = new UcumEssenceService(UcumEssenceService.class.getResourceAsStream("/ucum-essence.xml"));
@@ -114,7 +151,7 @@ public class DataRequirementsProcessorTest {
 
     private static ModelManager getModelManager() {
         if (modelManager == null) {
-            setup();
+            setup(null);
         }
 
         return modelManager;
@@ -122,7 +159,7 @@ public class DataRequirementsProcessorTest {
 
     private static LibraryManager getLibraryManager() {
         if (libraryManager == null) {
-            setup();
+            setup(null);
         }
 
         return libraryManager;
@@ -130,7 +167,7 @@ public class DataRequirementsProcessorTest {
 
     private static UcumService getUcumService() {
         if (ucumService == null) {
-            setup();
+            setup(null);
         }
 
         return ucumService;
@@ -149,14 +186,11 @@ public class DataRequirementsProcessorTest {
     }
 
     public static CqlTranslator createTranslator(NamespaceInfo namespaceInfo, String testFileName, CqlTranslatorOptions options) throws IOException {
-        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        File translationTestFile = new File(classLoader.getResource(testFileName).getFile());
-        if(null != translationTestFile){
-            ModelManager modelManager = new ModelManager();
-            LibraryManager libraryManager = new LibraryManager(modelManager);
-            libraryManager.getLibrarySourceLoader().registerProvider(new TestLibrarySourceProvider());
-            libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
-            CqlTranslator translator = CqlTranslator.fromFile(namespaceInfo, translationTestFile, modelManager, libraryManager, getUcumService(), options);
+        File translationTestFile = new File(DataRequirementsProcessorTest.class.getResource(testFileName).getFile());
+        if(null != translationTestFile) {
+            reset();
+            setup(translationTestFile.getParent());
+            CqlTranslator translator = CqlTranslator.fromFile(namespaceInfo, translationTestFile, getModelManager(), getLibraryManager(), getUcumService(), options);
             return translator;
 
         }

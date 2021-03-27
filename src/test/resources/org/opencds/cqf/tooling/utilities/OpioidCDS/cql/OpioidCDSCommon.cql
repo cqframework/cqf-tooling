@@ -27,7 +27,6 @@ valueset "CDC malignant cancer conditions": 'http://fhir.org/guides/cdc/opioid-c
 valueset "Oncology specialty designations (NUCC)": 'http://fhir.org/guides/cdc/opioid-cds/ValueSet/oncology-specialty-designations'
 valueset "Opioid misuse disorders": 'http://fhir.org/guides/cdc/opioid-cds/ValueSet/opioid-misuse-disorders'
 valueset "Substance misuse behavioral counseling": 'http://fhir.org/guides/cdc/opioid-cds/ValueSet/substance-misuse-behavioral-counseling'
-
 valueset "Conditions documenting substance misuse": 'http://fhir.org/guides/cdc/opioid-cds/ValueSet/conditions-documenting-substance-misuse'
 // Harvested from VSAC - OID: 2.16.840.1.113883.3.464.1003.101.12.1001
 // Reviewed with Terminology, 2020-02-05 - Value set name in VSAC is "Office Visit", need to verify suitability
@@ -71,7 +70,8 @@ define "Active Ambulatory Opioid Rx":
       where date from MR.authoredOn 2 years or less on or before Today()
         and MR.medication is Reference or MR.medication in "Opioid analgesics with ambulatory misuse potential"
   ) Rx
-    let Med: if Rx.medication is Reference then [Medication: id in (Last(Split((Rx.medication as FHIR.Reference).reference, '/')))] else null
+  // NOTE: changed to singleton
+    let Med: if Rx.medication is Reference then singleton from ([Medication: id in (Last(Split((Rx.medication as FHIR.Reference).reference, '/')))]) else null
     where not(Rx.medication is Reference) or Med.code in "Opioid analgesics with ambulatory misuse potential"
       return
         MedicationRequest {
@@ -79,7 +79,7 @@ define "Active Ambulatory Opioid Rx":
           status: Rx.status,
           intent: Rx.intent,
           category: Rx.category,
-          medication: if Rx.medication is Reference then First(Med.code) else Rx.medication as CodeableConcept,
+          medication: if Rx.medication is Reference then Med.code else Rx.medication as CodeableConcept,
           subject: Rx.subject,
           recorder: Rx.recorder,
           dosageInstruction: Rx.dosageInstruction,
@@ -93,7 +93,7 @@ define "Active Ambulatory Benzodiazepine Rx":
     where date from MR.authoredOn 2 years or less on or before Today()
       and MR.medication is Reference or MR.medication in "Benzodiazepine medications"
 ) Rx
-  let Med: if Rx.medication is Reference then [Medication: id in (Last(Split((Rx.medication as FHIR.Reference).reference, '/')))] else null
+  let Med: if Rx.medication is Reference then singleton from ([Medication: id in (Last(Split((Rx.medication as FHIR.Reference).reference, '/')))]) else null
   where not(Rx.medication is Reference) or Med.code in "Benzodiazepine medications"
     return
       MedicationRequest {
@@ -101,7 +101,7 @@ define "Active Ambulatory Benzodiazepine Rx":
         status: Rx.status,
         intent: Rx.intent,
         category: Rx.category,
-        medication: if Rx.medication is Reference then First(Med.code) else Rx.medication as CodeableConcept,
+        medication: if Rx.medication is Reference then Med.code else Rx.medication as CodeableConcept,
         subject: Rx.subject,
         recorder: Rx.recorder,
         dosageInstruction: Rx.dosageInstruction,
@@ -115,7 +115,7 @@ define "Active Ambulatory Naloxone Rx":
     where date from MR.authoredOn 2 years or less on or before Today()
       and MR.medication is Reference or MR.medication in "Naloxone medications"
 ) Rx
-  let Med: if Rx.medication is Reference then [Medication: id in (Last(Split((Rx.medication as FHIR.Reference).reference, '/')))] else null
+  let Med: if Rx.medication is Reference then singleton from ([Medication: id in (Last(Split((Rx.medication as FHIR.Reference).reference, '/')))]) else null
   where not(Rx.medication is Reference) or Med.code in "Naloxone medications"
     return
       MedicationRequest {
@@ -123,7 +123,7 @@ define "Active Ambulatory Naloxone Rx":
         status: Rx.status,
         intent: Rx.intent,
         category: Rx.category,
-        medication: if Rx.medication is Reference then First(Med.code) else Rx.medication as CodeableConcept,
+        medication: if Rx.medication is Reference then Med.code else Rx.medication as CodeableConcept,
         subject: Rx.subject,
         recorder: Rx.recorder,
         dosageInstruction: Rx.dosageInstruction,
