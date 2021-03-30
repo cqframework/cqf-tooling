@@ -505,8 +505,8 @@ public class CqlProcessor {
         if (uri != null) {
             // The translator has no way to correctly infer the namespace of the FHIRHelpers library, since it will happily provide that source to any namespace that wants it
             // So override the declaration here so that it points back to the FHIRHelpers library in the base specification
-            if (name.equals("FHIRHelpers") && !uri.equals("http://hl7.org/fhir")) {
-                uri = "http://hl7.org/fhir";
+            if (name.equals("FHIRHelpers") && !(uri.equals("http://hl7.org/fhir") || uri.equals("http://fhir.org/guides/cqf/common"))) {
+                uri = "http://fhir.org/guides/cqf/common";
             }
             return String.format("%s/Library/%s%s", uri, name, version != null ? ("|" + version) : "");
         }
