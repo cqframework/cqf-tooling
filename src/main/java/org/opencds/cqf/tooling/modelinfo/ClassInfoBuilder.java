@@ -1457,7 +1457,7 @@ public abstract class ClassInfoBuilder {
         }
         else if (typeSpecifier instanceof ListTypeSpecifier) {
             ListTypeSpecifier lts = (ListTypeSpecifier) typeSpecifier;
-            if (lts.getElementType().startsWith("#")) {
+            if (lts.getElementType() != null && lts.getElementType().startsWith("#")) {
                 return true;
             }
             else if (lts.getElementTypeSpecifier() != null) {
@@ -1477,7 +1477,7 @@ public abstract class ClassInfoBuilder {
         }
         else if (typeSpecifier instanceof ListTypeSpecifier) {
             ListTypeSpecifier lts = (ListTypeSpecifier) typeSpecifier;
-            if (lts.getElementType().startsWith("#")) {
+            if (lts.getElementType() != null && lts.getElementType().startsWith("#")) {
                 return lts.getElementType();
             }
             else if (lts.getElementTypeSpecifier() != null) {

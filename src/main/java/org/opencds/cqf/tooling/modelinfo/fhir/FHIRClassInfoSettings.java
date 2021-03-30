@@ -135,13 +135,11 @@ class FHIRClassInfoSettings extends ClassInfoSettings {
                 put("OperationOutcome", "issue.code");
                 put("PractitionerRole", "code");
                 put("Procedure", "code");
-                put("ProcedureRequest", "code");
                 put("Questionnaire", "name");
-                put("ReferralRequest", "type");
                 put("RelatedPerson", "relationship");
                 put("RiskAssessment", "code");
                 put("SearchParameter", "target");
-                put("Sequence", "type");
+                put("ServiceRequest", "code");
                 put("Specimen", "type");
                 put("Substance", "code");
                 put("SupplyDelivery", "type");
