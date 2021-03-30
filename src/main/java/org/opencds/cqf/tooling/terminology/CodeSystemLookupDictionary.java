@@ -27,7 +27,7 @@ public class CodeSystemLookupDictionary {
         EntityNameUse               2.16.840.1.113883.5.45          ->      http://terminology.hl7.org/CodeSystem-v3-EntityNameUse.html
         HCPCS                       2.16.840.1.113883.6.14          ->      http://terminology.hl7.org/CodeSystem-HCPCS.html
         HCPCS Level I: CPT          2.16.840.1.113883.6.14          ->      http://terminology.hl7.org/CodeSystem-HCPCS.html
-        HCPCS Level II              2.16.840.1.113883.6.285         ->      urn:oid:2.16.840.1.113883.6.285
+        HCPCS Level II              2.16.840.1.113883.6.285         ->      https://terminology.hl7.org/CodeSystem-hcpcs-Level-II.html
         HSLOC                       2.16.840.1.113883.6.259         ->      http://terminology.hl7.org/CodeSystem/hsloc
         ICD10                       2.16.840.1.113883.6.3           ->      http://terminology.hl7.org/CodeSystem-icd10.html
         ICD10PCS                    2.16.840.1.113883.6.4           ->      http://terminology.hl7.org/CodeSystem-icd10PCS.html
@@ -89,7 +89,7 @@ public class CodeSystemLookupDictionary {
             case "2.16.840.1.113883.5.45": return "http://terminology.hl7.org/CodeSystem/v3-EntityNameUse";
             case "2.16.840.1.113883.6.14": return "http://terminology.hl7.org/CodeSystem/HCPCS";
             case "2.16.840.1.113883.6.259": return "http://terminology.hl7.org/CodeSystem/hsloc";
-            case "2.16.840.1.113883.6.285": return "urn:oid:2.16.840.1.113883.6.285";
+            case "2.16.840.1.113883.6.285": return "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets";
             case "2.16.840.1.113883.6.3": return "http://terminology.hl7.org/CodeSystem/icd10";
             case "2.16.840.1.113883.6.4": return "http://www.cms.gov/Medicare/Coding/ICD10";
             case "2.16.840.1.113883.6.90": return "http://hl7.org/fhir/sid/icd-10-cm";
@@ -150,7 +150,7 @@ public class CodeSystemLookupDictionary {
             case "EntityNameUse": return "http://terminology.hl7.org/CodeSystem/v3-EntityNameUse";
             case "HCPCS": return "http://terminology.hl7.org/CodeSystem/HCPCS";
             case "HCPCS Level I: CPT": return "http://terminology.hl7.org/CodeSystem/HCPCS";
-            case "HCPCS Level II": return "urn:oid:2.16.840.1.113883.6.285";
+            case "HCPCS Level II": return "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets";
             case "HSLOC": return "http://terminology.hl7.org/CodeSystem/hsloc";
             case "ICD10": return "http://terminology.hl7.org/CodeSystem/icd10";
             case "ICD10CM": return "http://hl7.org/fhir/sid/icd-10-cm";

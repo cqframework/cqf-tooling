@@ -1,6 +1,7 @@
 package org.opencds.cqf.tooling.modelinfo.fhir;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
 import org.opencds.cqf.tooling.modelinfo.ModelInfoSettings;
@@ -37,6 +38,72 @@ public class FHIRModelInfoSettings extends ModelInfoSettings {
                         .withFunctionName("FHIRHelpers.ToRatio"));
             }
         };
-        
+/*
+        this.primarySearchPath = new HashMap<String, String>() {
+            {
+                put("Account", "type");
+                put("ActivityDefinition", "context");
+                put("AdverseEvent", "event");
+                put("AllergyIntolerance", "code");
+                put("Appointment", "service-type");
+                put("Basic", "code");
+                put("BodyStructure", "location");
+                put("CarePlan", "category");
+                put("CareTeam", "category");
+                put("ChargeItemDefinition", "context");
+                put("Claim", "use");
+                put("ClinicalImpression", "status"); // TODO: Should request a search parameter on clinical impression by code
+                put("CodeSystem", "context");
+                put("Communication", "category");
+                put("CommunicationRequest", "category");
+                put("CompartmentDefinition", "context");
+                put("Composition", "type");
+                put("Condition", "code");
+                put("Consent", "category");
+                put("Coverage", "type");
+                put("DetectedIssue", "code");
+                put("Device", "type");
+                put("DeviceMetric", "type");
+                put("DeviceRequest", "code");
+                put("DeviceUseStatement", "device");
+                put("DiagnosticReport", "code");
+                put("Encounter", "type");
+                put("EpisodeOfCare", "type");
+                put("ExplanationOfBenefit", "status"); // TODO: Should request a search parameter on explanation of benefit by type
+                put("Flag", "identifier"); // TODO: Should request a search parameter on Flag by code
+                put("Goal", "category");
+                put("GuidanceResponse", "identifier"); // TODO: Should request a search parameter on GuidanceResponse by module
+                put("HealthcareService", "service-type");
+                put("Immunization", "vaccine-code");
+                put("Library", "context");
+                put("Location", "type");
+                put("Measure", "context");
+                put("MeasureReport", "measure");
+                put("Medication", "code");
+                put("MedicationAdministration", "medication");
+                put("MedicationDispense", "medication");
+                put("MedicationRequest", "medication");
+                put("MedicationStatement", "medication");
+                put("MessageDefinition", "context");
+                put("Observation", "code");
+                //put("OperationOutcome", "issue.code");
+                put("PlanDefinition", "context");
+                put("PractitionerRole", "role");
+                put("Procedure", "code");
+                put("Questionnaire", "context");
+                put("RelatedPerson", "relationship");
+                put("RiskAssessment", "method"); // TODO: Request a search parameter by code
+                put("SearchParameter", "context");
+                put("ServiceRequest", "code");
+                put("Specimen", "type");
+                put("StructureDefinition", "context");
+                put("Substance", "code");
+                put("SupplyDelivery", "status"); // TODO: Request a searchparameter by type
+                put("SupplyRequest", "category");
+                put("Task", "code");
+                put("ValueSet", "context");
+            }
+        };
+*/
     }
 }

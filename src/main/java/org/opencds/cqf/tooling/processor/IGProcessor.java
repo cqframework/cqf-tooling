@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
+import org.opencds.cqf.tooling.utilities.IGUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.LogUtils;
@@ -95,7 +96,13 @@ public class IGProcessor extends BaseProcessor {
         // String fhirUri = params.fhirUri;
         String measureToRefreshPath = params.measureToRefreshPath;
         ArrayList<String> resourceDirs = params.resourceDirs;
-
+        if (resourceDirs.size() == 0) {
+            try {
+                resourceDirs = IGUtils.extractResourcePaths(this.rootDir, this.sourceIg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         IOUtils.resourceDirectories.addAll(resourceDirs);
 
         FhirContext fhirContext = IGProcessor.getIgFhirContext(fhirVersion);
