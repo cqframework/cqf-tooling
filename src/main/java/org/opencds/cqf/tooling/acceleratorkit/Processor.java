@@ -45,13 +45,18 @@ public class Processor extends Operation {
     // TODO: These need to be per scope
     private String dataElementIdentifierSystem = "http://fhir.org/guides/who/anc-cds/Identifier/data-elements";
     private String activityCodeSystem = "http://fhir.org/guides/who/anc-cds/CodeSystem/activity-codes";
+    private String whoCodeSystemBase;
 
     // Canonical Base
     private String canonicalBase = null;
+    public void setCanonicalBase(String value) {
+        canonicalBase = value;
+        whoCodeSystemBase = canonicalBase;// + "/CodeSystem/anc-custom-codes"; //http://fhir.org/guides/who/anc-cds/CodeSystem/anc-custom-codes
+    }
     private Map<String, String> scopeCanonicalBaseMap = new LinkedHashMap<String, String>();
 
     private String openMRSSystem = "http://openmrs.org/concepts";
-    private String whoCodeSystemBase = "http://who.int/cg";
+
     // NOTE: for now, disable open MRS system/codes
     private boolean enableOpenMRS = false;
     private Map<String, String> supportedCodeSystems = new LinkedHashMap<String, String>();
@@ -202,7 +207,7 @@ public class Processor extends Operation {
         ensurePath(outputPath);
 
         if (scope != null && scope.length() > 0) {
-            canonicalBase = scopeCanonicalBaseMap.get(scope.toLowerCase());
+            setCanonicalBase(scopeCanonicalBaseMap.get(scope.toLowerCase()));
         }
 
         // process workbook
@@ -767,6 +772,8 @@ public class Processor extends Operation {
                         // terminology
                         case "fhir code system": colIds.put("FhirCodeSystem", cell.getColumnIndex()); break;
                         case "hl7 fhir r4 code": colIds.put("FhirR4Code", cell.getColumnIndex()); break;
+                        case "hl7 fhir r4 code display": colIds.put("FhirR4CodeDisplay", cell.getColumnIndex()); break;
+                        case "hl7 fhir r4 code definition": colIds.put("FhirR4CodeDefinition", cell.getColumnIndex()); break;
                         case "icd-10-who":
                         case "icd-10 code":
                         case "icd-10?code": colIds.put("ICD-10", cell.getColumnIndex()); break;
@@ -1284,11 +1291,11 @@ public class Processor extends Operation {
         String resourceType = elementPath.getResourceType().trim();
 
         switch (resourceType) {
+            case "AllergyIntolerance":
             case "Observation":
                 codePath = "code";
                 choicesPath = elementPath.getResourcePath();
                 break;
-            case "AllergyIntolerance":
             case "Appointment":
             case "CarePlan":
             case "Communication":
@@ -1321,11 +1328,18 @@ public class Processor extends Operation {
         }
 
         try {
+            // if (codePath != null && choicesPath.equals(codePath)) {
+            //     Consolidate getPrimaryCodes() and choicesCodes somehow and bind that VS to the choicesPath
+
             // For Observations, it is a valid scenario for the Data Dictionary (DD) to not have a Data Element entry for the primary code path element - Observation.code.
             // In this case, the tooling should ensure that this element is created. The fixed code for this element should be the code specified by the Data
-            // Element record mapped to Observation.value[x]. For all other resource types it is invalid to not have a primary code path element entry in the DD
+            // Element record mapped to Observation.value[x]. For all other resource types it is invalid to not have a primary code path element entry in the DD.
             Boolean primaryCodePathElementAdded = false;
-            if (codePath != null && !codePath.isEmpty() && element.getPrimaryCodes() != null) {
+            if (codePath != null
+                    && !codePath.isEmpty()
+                    && element.getPrimaryCodes() != null) {
+//                    && element.getPrimaryCodes().getCodes().size() > 0
+//                    && !choicesPath.equalsIgnoreCase(codePath)) {
                 String elementId = String.format("%s.%s", resourceType, codePath);
                 String primaryCodePath = String.format("%s.%s", resourceType, codePath);
 
@@ -1377,13 +1391,13 @@ public class Processor extends Operation {
                     elementId = String.format("%s:%s.%s", resource.substring(0, elementPathStartIndex - 1), sliceName, resource.substring(elementPathStartIndex));
                 }
             } else {
-                if (isChoiceType(elementPath)) {
-                    String elementFhirType = getFhirTypeOfTargetElement(elementPath);
-                    elementFhirType = elementFhirType.substring(0, 1).toUpperCase() + elementFhirType.substring(1);
-                    elementId = elementPath.getResourceTypeAndPath().replace("[x]", elementFhirType);
-                } else {
+//                if (isChoiceType(elementPath)) {
+//                    String elementFhirType = getFhirTypeOfTargetElement(elementPath);
+//                    elementFhirType = elementFhirType.substring(0, 1).toUpperCase() + elementFhirType.substring(1);
+//                    elementId = elementPath.getResourceTypeAndPath().replace("[x]", elementFhirType);
+//                } else {
                     elementId = String.format("%s.%s", resourceType, choicesPath);
-                }
+//                }
             }
 
             ElementDefinition existingElement = getDifferentialElement(sd, elementId);
@@ -1426,7 +1440,7 @@ public class Processor extends Operation {
 
                     // If this is an Observation and we've already created the primary code path element, do not bind the
                     // targeted/mapped element (e.g., value[x]) to the primary codes valueset - that was done above
-                    if (!primaryCodePathElementAdded) {
+                    if (!primaryCodePathElementAdded) {// && codePath != null) {
                         ensureTerminologyAndBindToElement(element, sd, ed, null, null, true);
                     }
                     sd.getDifferential().addElement(ed);
@@ -1477,7 +1491,7 @@ public class Processor extends Operation {
 
                     // If this is an Observation and we've already created the primary code path element, do not bind the
                     // targeted/mapped element (e.g., value[x]) to the primary codes valueset - that was done above
-                    if (!primaryCodePathElementAdded) {
+                    if (!primaryCodePathElementAdded) {// && codePath != null) {
                         ensureTerminologyAndBindToElement(element, sd, existingElement, null, null, true);
                     }
                 }
@@ -1496,10 +1510,21 @@ public class Processor extends Operation {
             String choicesElementPath = dictionaryElement.getChoices().getFhirElementPath().getResourceTypeAndPath();
             ElementDefinition existingChoicesElement = getDifferentialElement(sd, choicesElementPath);
 
+            CodeCollection codes = dictionaryElement.getChoices().getCodes();
+            String customChoicesValueSetName = dictionaryElement.getChoices().getCustomValueSetName();
+            if (customChoicesValueSetName == null || customChoicesValueSetName.isEmpty()) {
+                customChoicesValueSetName = dictionaryElement.getName() + "-choices";
+            }
+
+            if (dictionaryElement.getFhirElementPath().getResourceTypeAndPath().equalsIgnoreCase(choicesElementPath)) {
+                List<DictionaryCode> primaryCodes = dictionaryElement.getPrimaryCodes().getCodes();
+                codes.getCodes().addAll(primaryCodes);
+            }
+
             if (existingChoicesElement != null) {
                 ElementDefinition.ElementDefinitionBindingComponent existingBinding = existingChoicesElement.getBinding();
-                if (existingBinding == null) {
-                    //TODO: Create the binding to the ensurevalueset
+                if (existingBinding == null || existingBinding.getId() == null) {
+                    ensureTerminologyAndBindToElement(dictionaryElement, sd, existingChoicesElement, codes, customChoicesValueSetName, false);
                 }
             } else {
                 ElementDefinition ed = new ElementDefinition();
@@ -1516,12 +1541,6 @@ public class Processor extends Operation {
                     ed.addType(tr);
                 }
 
-                CodeCollection codes = dictionaryElement.getChoices().getCodes();
-
-                String customChoicesValueSetName = dictionaryElement.getChoices().getCustomValueSetName();
-                if (customChoicesValueSetName == null || customChoicesValueSetName.isEmpty()) {
-                    customChoicesValueSetName = dictionaryElement.getName() + "-choices";
-                }
                 ensureTerminologyAndBindToElement(dictionaryElement, sd, ed, codes, customChoicesValueSetName, false);
                 sd.getDifferential().addElement(ed);
             }
@@ -1609,8 +1628,10 @@ public class Processor extends Operation {
     private void ensureTerminologyAndBindToElement(DictionaryElement dictionaryElement, StructureDefinition targetStructureDefinition,
                                                    ElementDefinition targetElement, CodeCollection codes, String customValueSetName,
                                                    Boolean isPrimaryDataElement) {
-        // Can only bind bindable types (i.e., CodeableConcept)
-        if (isBindableType(dictionaryElement)) {
+        // Can only bind bindable types (e.g., CodeableConcept).
+        // Observation.code is special case - if mapping is Observation.value[x] with a non-bindable type, we'll still need
+        // to allow for binding of Observation.code (the primary code path)
+        if (isBindableType(dictionaryElement) || targetElement.getPath().equals("Observation.code")) {
             String valueSetLabel = dictionaryElement.getLabel();
             String valueSetName = null;
 
@@ -1640,22 +1661,24 @@ public class Processor extends Operation {
                 valueSet = ensureValueSetWithCodes(valueSetId, valueSetLabel, codesToBind);
             }
 
-            Enumerations.BindingStrength bindingStrength = dictionaryElement.getBindingStrength();
-            // Bind the current element to the valueSet
-            ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
-            binding.setStrength(bindingStrength);
-            binding.setValueSet(String.format("%s/ValueSet/%s", canonicalBase, valueSetId));
-            targetElement.setBinding(binding);
+            if (valueSet != null) {
+                Enumerations.BindingStrength bindingStrength = dictionaryElement.getBindingStrength();
+                // Bind the current element to the valueSet
+                ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
+                binding.setStrength(bindingStrength);
+                binding.setValueSet(valueSet.getUrl());
+                targetElement.setBinding(binding);
 
-            if (isPrimaryDataElement) {
-                valueSetLabel = valueSetId;
-                for (ValueSet vs : valueSets) {
-                    if (vs.getId().equals(valueSetId)) {
-                        valueSetLabel = vs.getTitle();
+                if (isPrimaryDataElement) {
+                    valueSetLabel = valueSetId;
+                    for (ValueSet vs : valueSets) {
+                        if (vs.getId().equals(valueSetId)) {
+                            valueSetLabel = vs.getTitle();
+                        }
                     }
-                }
 
-                retrieves.add(new RetrieveInfo(targetStructureDefinition, valueSetLabel));
+                    retrieves.add(new RetrieveInfo(targetStructureDefinition, valueSetLabel));
+                }
             }
         }
     }
