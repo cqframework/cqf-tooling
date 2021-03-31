@@ -13,8 +13,7 @@ import org.junit.Test;
 import org.opencds.cqf.tooling.measure.ECQMCreator;
 import org.opencds.cqf.tooling.processor.DataRequirementsProcessor;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,6 +27,36 @@ public class ECQMCreatorTest {
 
     @Test
     public void TestECQMCreator() {
+        // TODO - translate measure into ELM measure then call creator with that measure
+        CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
+        cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
+        cqlTranslatorOptions.getOptions().add(CqlTranslator.Options.EnableAnnotations);
+        String libraryPath = "CompositeMeasures/cql/EXM124-9.0.000.cql";//library-EXM124-9.0.000.json";
+        try {
+            CqlTranslator translator = createTranslator(libraryPath, cqlTranslatorOptions);
+            org.hl7.elm.r1.Library elmLibrary = translator.toELM();
+            cacheLibrary(translator.getTranslatedLibrary());
+            FhirContext context =  FhirContext.forR5();
+            IParser parser = context.newJsonParser();
+            InputStream inputStream = this.getClass().getResourceAsStream("/ecqm/resources/measure-EXM124-9.0.000.json");
+            Measure measureToConvert = parser.parseResource(Measure.class, inputStream);
+            ECQMCreator eCQMCreator = new ECQMCreator();
+            Measure returnMeasure = eCQMCreator.create_eCQMFromMeasure(measureToConvert, libraryManager, translator.getTranslatedLibrary());
+            assertTrue(null != returnMeasure);
+            System.out.println(parser.setPrettyPrint(true).encodeResourceToString(returnMeasure));
+            System.out.println();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+
+
+
+
+/*
+        System.out.println(parser.setPrettyPrint(true).encodeResourceToString(measureToConvert));
+        System.out.println();
+
+
         Set<String> expressions = new HashSet<>();
         expressions.add("Conditions Indicating End of Life or With Limited Life Expectancy");
         expressions.add("Active Ambulatory Opioid Rx");
@@ -37,40 +66,13 @@ public class ECQMCreatorTest {
         org.hl7.fhir.r5.model.Library modDefLibrary =  getModuleDefinitionLibrary(expressions);
         assertTrue(null != modDefLibrary);
 
-        ECQMCreator eCQMCreator = new ECQMCreator();
-        Measure newMeasure = eCQMCreator.create_eCQM(modDefLibrary);
-        FhirContext context =  FhirContext.forR5();
-        IParser parser = context.newJsonParser();
+        Measure newMeasure = eCQMCreator.create_eCQMFromLibrary(modDefLibrary);
         String measureString = parser.setPrettyPrint(true).encodeResourceToString(newMeasure);
         System.out.println(measureString);
+*/
     }
 
-    private org.hl7.fhir.r5.model.Library getModuleDefinitionLibrary(Set<String> expressions){
-        CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
-        cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
-        try {
-            CqlTranslator translator = createTranslator("OpioidCDS/cql/OpioidCDSCommon.cql", cqlTranslatorOptions);
-            Library elmLibrary = translator.toELM();
-            assertTrue(translator.getErrors().isEmpty());
-            cacheLibrary(translator.getTranslatedLibrary());
-            DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
-            org.hl7.fhir.r5.model.Library moduleDefinitionLibrary = dqReqTrans.gatherDataRequirements(libraryManager, translator.getTranslatedLibrary(), cqlTranslatorOptions, expressions);
-            assertTrue(moduleDefinitionLibrary.getType().getCode("http://terminology.hl7.org/CodeSystem/library-type").equalsIgnoreCase("module-definition"));
-
-            FhirContext context =  FhirContext.forR5();
-            IParser parser = context.newJsonParser();
-            String moduleDefString = parser.setPrettyPrint(true).encodeResourceToString(moduleDefinitionLibrary);
-            System.out.println(moduleDefString);
-
-            return  moduleDefinitionLibrary;
-
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
-        return null;
-    }
-
-    private void cacheLibrary(TranslatedLibrary library) {
+    private static void cacheLibrary(TranslatedLibrary library) {
         // Add the translated library to the library manager (NOTE: This should be a "cacheLibrary" call on the LibraryManager, available in 1.5.3+)
         // Without this, the data requirements processor will try to load the current library, resulting in a re-translation
         String libraryPath = NamespaceManager.getPath(library.getIdentifier().getSystem(), library.getIdentifier().getId());
@@ -132,8 +134,8 @@ public class ECQMCreatorTest {
         return createTranslator(namespaceInfo, testFileName, new CqlTranslatorOptions(options));
     }
 
-    public static CqlTranslator createTranslator(NamespaceInfo namespaceInfo, String testFileName, CqlTranslatorOptions options) throws IOException {
-        File translationTestFile = new File(DataRequirementsProcessorTest.class.getResource(testFileName).getFile());
+    public static CqlTranslator createTranslator(NamespaceInfo namespaceInfo, String libraryName, CqlTranslatorOptions options) throws IOException {
+        File translationTestFile = new File(ECQMUtils.class.getResource(libraryName).getFile());
         if(null != translationTestFile) {
             reset();
             setup(translationTestFile.getParent());

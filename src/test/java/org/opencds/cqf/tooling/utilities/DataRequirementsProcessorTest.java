@@ -32,6 +32,7 @@ public class DataRequirementsProcessorTest {
     public void TestDataRequirementsProcessor() {
         CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
         cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
+        cqlTranslatorOptions.getOptions().add(CqlTranslator.Options.EnableAnnotations);
         try {
             /*
                 OpioidCDSCommon.cql
@@ -54,7 +55,7 @@ public class DataRequirementsProcessorTest {
                 TSCComponent-v0-0-001-FHIR-4-0-1.xml
                 PreventiveCareandWellness-v0-0-001-FHIR-4-0-1.xml
              */
-            CqlTranslator translator = createTranslator("OpioidCDS/cql/OpioidCDSCommon.cql", cqlTranslatorOptions);
+            CqlTranslator translator = createTranslator("CompositeMeasures/cql/EXM124-9.0.000.cql", cqlTranslatorOptions);//"OpioidCDS/cql/OpioidCDSCommon.cql", cqlTranslatorOptions);
             Library elmLibrary = translator.toELM();
             assertTrue(translator.getErrors().isEmpty());
             cacheLibrary(translator.getTranslatedLibrary());
@@ -109,6 +110,7 @@ public class DataRequirementsProcessorTest {
         CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
         cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
         try {
+//            CqlTranslator translator = createTranslator("/ecqm/resources/library-EXM506-2.2.000.json", cqlTranslatorOptions);
             CqlTranslator translator = createTranslator("CompositeMeasures/cql/BCSComponent.cql", cqlTranslatorOptions);
             Library elmLibrary = translator.toELM();
             assertTrue(translator.getErrors().isEmpty());
