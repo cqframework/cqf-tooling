@@ -60,7 +60,7 @@ public class ECQMCreator {
 
     private void setType(Measure measureToUse) {
         List<CodeableConcept> measureType = measureToUse.getType();
-        if(null == measureType || !measureType.isEmpty()) {
+        if(null == measureType || measureType.isEmpty()) {
             List<CodeableConcept> typeList = new ArrayList<>();
             CodeableConcept cc = new CodeableConcept();
             cc.addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/measure-type")
@@ -72,7 +72,7 @@ public class ECQMCreator {
 
     private void setLibrary(Measure measureToUse, TranslatedLibrary translatedLibrary){
         // TODO - Is this the TranslatedLibrary?
-        if(measureToUse.getLibrary().isEmpty()){
+        if(null == measureToUse.getLibrary() || measureToUse.getLibrary().isEmpty()){
             List<CanonicalType> libraryList = new ArrayList<>();
             String libraryName = translatedLibrary.getIdentifier().getId() + "-" + translatedLibrary.getIdentifier().getVersion();
             libraryList.add(new CanonicalType(libraryName));
@@ -126,15 +126,19 @@ public class ECQMCreator {
     }
 
     private void setScoringAndUnit(Measure measureToUse) {
-        CodeableConcept scoring = new CodeableConcept();
-        Coding newCoding = new Coding();
-        newCoding.setCode("ratio");
-        newCoding.setDisplay("Where does this come from?? proportion | ratio | continuous-variable | cohort");
-        newCoding.setSystem("http://hl7.org/fhir/ValueSet/measure-scoring");
-        scoring.addCoding(newCoding);
-        measureToUse.setScoring(scoring);
+        CodeableConcept measureScoring = measureToUse.getScoring();
+        if(null == measureScoring || measureScoring.isEmpty()) {
+            CodeableConcept scoring = new CodeableConcept();
+            Coding newCoding = new Coding();
+            newCoding.setCode("ratio");
+            newCoding.setDisplay("Where does this come from?? proportion | ratio | continuous-variable | cohort");
+            newCoding.setSystem("http://hl7.org/fhir/ValueSet/measure-scoring");
+            scoring.addCoding(newCoding);
+            measureToUse.setScoring(scoring);
+        }
         Extension scoringUnitExtension = new Extension();
         scoringUnitExtension.setUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-scoringUnit");
+        scoringUnitExtension.setValue(new CodeType("scoring unit"));
         scoringUnitExtension.setId("Where does this come from? Units for scoring value");
         measureToUse.addExtension(scoringUnitExtension);
     }
