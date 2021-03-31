@@ -59,12 +59,15 @@ public class ECQMCreator {
     }
 
     private void setType(Measure measureToUse) {
-        List<CodeableConcept> typeList = new ArrayList<>();
-        CodeableConcept cc = new CodeableConcept();
-        cc.addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/measure-type")
-                .setCode("process"));//?? outcome??
-        typeList.add(cc);
-        measureToUse.setType(typeList);
+        List<CodeableConcept> measureType = measureToUse.getType();
+        if(null == measureType || !measureType.isEmpty()) {
+            List<CodeableConcept> typeList = new ArrayList<>();
+            CodeableConcept cc = new CodeableConcept();
+            cc.addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/measure-type")
+                    .setCode("process"));
+            typeList.add(cc);
+            measureToUse.setType(typeList);
+        }
     }
 
     private void setLibrary(Measure measureToUse, TranslatedLibrary translatedLibrary){
