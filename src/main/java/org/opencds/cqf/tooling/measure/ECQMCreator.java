@@ -34,28 +34,15 @@ public class ECQMCreator {
         setMeta(measureToUse);
         setLibrary(measureToUse, translatedLibrary);
         setType(measureToUse);
-        setImprovementNotation(measureToUse);
 
         // Computable measure http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-measure-cqfm
-        setPopulationBasis(measureToUse);
         setParameters(measureToUse);
         setDataRequirements(measureToUse);
         setDirectReferenceCode(measureToUse);
         setLogicDefinition(measureToUse);
         measureToUse.setRelatedArtifact(this.moduleDefinitionLibrary.getRelatedArtifact());
-        setScoringAndUnit(measureToUse);
 
         return measureToUse;
-    }
-
-    private void setImprovementNotation(Measure measureToUse) {
-        List<CodeableConcept> notationList = new ArrayList<>();
-        CodeableConcept cc = new CodeableConcept();
-        cc.addCoding(new Coding().setSystem("http://hl7.org/fhir/ValueSet/measure-improvement-notation")
-                .setCode("increase")
-                .setDisplay("Where does this come from?"));
-        notationList.add(cc);
-        measureToUse.setImprovementNotation(cc);
     }
 
     private void setType(Measure measureToUse) {
@@ -109,38 +96,6 @@ public class ECQMCreator {
             measureToUse.addExtension(parameterExtension);
             
         });
-    }
-
-    private void setPopulationBasis(Measure measureToUse) {
-        String url = "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
-        for(Extension extension : measureToUse.getExtension()){
-            if(extension.getUrl().equalsIgnoreCase(url)){
-                return;
-            }
-        }
-        Extension parameterExtension = new Extension();
-        parameterExtension.setUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis");
-        // TODO - this measure it is boolean and already exists. What about other measures??
-        parameterExtension.setValue(new CodeType("boolean"));
-        measureToUse.addExtension(parameterExtension);
-    }
-
-    private void setScoringAndUnit(Measure measureToUse) {
-        CodeableConcept measureScoring = measureToUse.getScoring();
-        if(null == measureScoring || measureScoring.isEmpty()) {
-            CodeableConcept scoring = new CodeableConcept();
-            Coding newCoding = new Coding();
-            newCoding.setCode("ratio");
-            newCoding.setDisplay("Where does this come from?? proportion | ratio | continuous-variable | cohort");
-            newCoding.setSystem("http://hl7.org/fhir/ValueSet/measure-scoring");
-            scoring.addCoding(newCoding);
-            measureToUse.setScoring(scoring);
-        }
-        Extension scoringUnitExtension = new Extension();
-        scoringUnitExtension.setUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-scoringUnit");
-        scoringUnitExtension.setValue(new CodeType("scoring unit"));
-        scoringUnitExtension.setId("Where does this come from? Units for scoring value");
-        measureToUse.addExtension(scoringUnitExtension);
     }
 
     private void setMeta(Measure measureToUse){
