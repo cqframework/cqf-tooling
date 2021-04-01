@@ -92,6 +92,8 @@ public class SearchInfoBuilder {
             case QUANTITY: si.setType("System.Quantity"); break;
             case URI: si.setType("System.String"); break;
             case SPECIAL: si.setType("System.Any"); break;
+        default:
+            break;
         }
 
         ci.getSearch().add(si);
@@ -134,10 +136,10 @@ public class SearchInfoBuilder {
  */
 
     protected void innerBuild() {
-        for (SearchParameter sp : atlas.getSearchParameters().values()) {
-            Iterable<SearchInfo> sis = buildSearchInfo(sp);
-            // NOTE: There is nothing to add here, search infos are added to the classinfos they are part of
-        }
+        // for (SearchParameter sp : atlas.getSearchParameters().values()) {
+        //     Iterable<SearchInfo> sis = buildSearchInfo(sp);
+        //     // NOTE: There is nothing to add here, search infos are added to the classinfos they are part of
+        // }
 /*
         for (TypeInfo ti : typeInfos.values()) {
             if (ti instanceof ClassInfo) {
