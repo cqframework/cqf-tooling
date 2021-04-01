@@ -14,7 +14,7 @@ public abstract class Operation {
         File outputFile = new File(this.outputPath);
         outputFile.mkdirs();
         if (!outputFile.isDirectory()) {
-            throw new IllegalArgumentException(String.format("Specified output path is not a directory: %s", outputFile));
+            throw new IllegalArgumentException(String.format("Specified output path is not a directory: %s", outputPath));
         }
     }
 

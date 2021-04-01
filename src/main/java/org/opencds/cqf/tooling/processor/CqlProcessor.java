@@ -261,7 +261,7 @@ public class CqlProcessor {
         ModelManager modelManager = new ModelManager();
         LibraryManager libraryManager = new LibraryManager(modelManager);
         if (packages != null) {
-            modelManager.getModelInfoLoader().registerModelInfoProvider(new NpmModelInfoProvider(packages, reader, logger));
+            modelManager.getModelInfoLoader().registerModelInfoProvider(new NpmModelInfoProvider(packages, reader, logger), true);
             libraryManager.getLibrarySourceLoader().registerProvider(new NpmLibrarySourceProvider(packages, reader, logger));
         }
         libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
@@ -471,9 +471,22 @@ public class CqlProcessor {
                 .setResource(getModelInfoReferenceUrl(usingDef.getUri(), usingDef.getLocalIdentifier(), usingDef.getVersion()));
     }
 
+    /*
+    Override the referencing URL for the FHIR-ModelInfo library
+    This is required because models do not have a "namespace" in the same way that libraries do,
+    so there is no way for the UsingDefinition to have a Uri that is different than the expected URI that the
+    providers understand. I.e. model names and model URIs are one-to-one.
+     */
+    private String mapModelInfoUri(String uri, String name) {
+        if (name.equals("FHIR") && uri.equals("http://hl7.org/fhir")) {
+            return "http://fhir.org/guides/cqf/common";
+        }
+        return uri;
+    }
+
     private String getModelInfoReferenceUrl(String uri, String name, String version) {
         if (uri != null) {
-            return String.format("%s/Library/%s-ModelInfo%s", uri, name, version != null ? ("|" + version) : "");
+            return String.format("%s/Library/%s-ModelInfo%s", mapModelInfoUri(uri, name), name, version != null ? ("|" + version) : "");
         }
 
         return String.format("Library/%-ModelInfo%s", name, version != null ? ("|" + version) : "");
@@ -492,8 +505,8 @@ public class CqlProcessor {
         if (uri != null) {
             // The translator has no way to correctly infer the namespace of the FHIRHelpers library, since it will happily provide that source to any namespace that wants it
             // So override the declaration here so that it points back to the FHIRHelpers library in the base specification
-            if (name.equals("FHIRHelpers") && !uri.equals("http://hl7.org/fhir")) {
-                uri = "http://hl7.org/fhir";
+            if (name.equals("FHIRHelpers") && !(uri.equals("http://hl7.org/fhir") || uri.equals("http://fhir.org/guides/cqf/common"))) {
+                uri = "http://fhir.org/guides/cqf/common";
             }
             return String.format("%s/Library/%s%s", uri, name, version != null ? ("|" + version) : "");
         }

@@ -35,11 +35,23 @@ public class NpmModelInfoProvider implements ModelInfoProvider {
         // VersionedIdentifier.version: Version of the model
         for (NpmPackage p : packages) {
             try {
-                InputStream s = p.loadByCanonicalVersion(modelIdentifier.getSystem()+"/Library/"+modelIdentifier.getId()+"-ModelInfo", modelIdentifier.getVersion());
+                VersionedIdentifier identifier = new VersionedIdentifier()
+                        .withId(modelIdentifier.getId())
+                        .withVersion(modelIdentifier.getVersion())
+                        .withSystem(modelIdentifier.getSystem());
+
+                if (identifier.getSystem() == null) {
+                    identifier.setSystem(p.canonical());
+                }
+
+                InputStream s = p.loadByCanonicalVersion(identifier.getSystem()+"/Library/"+identifier.getId()+"-ModelInfo", identifier.getVersion());
                 if (s != null) {
                     Library l = reader.readLibrary(s);
                     for (org.hl7.fhir.r5.model.Attachment a : l.getContent()) {
                         if (a.getContentType() != null && a.getContentType().equals("application/xml")) {
+                            if (modelIdentifier.getSystem() == null) {
+                                modelIdentifier.setSystem(identifier.getSystem());
+                            }
                             InputStream is = new ByteArrayInputStream(a.getData());
                             return JAXB.unmarshal(is, ModelInfo.class);
                         }

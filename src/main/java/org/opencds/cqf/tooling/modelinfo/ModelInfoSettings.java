@@ -12,6 +12,7 @@ public class ModelInfoSettings {
     public String patientClassName;
     public String patientBirthDatePropertyName;
     public String targetQualifier;
+    //public Map<String, String> primarySearchPath = new HashMap<String, String>();
 
     public Collection<ConversionInfo> conversionInfos;
 
