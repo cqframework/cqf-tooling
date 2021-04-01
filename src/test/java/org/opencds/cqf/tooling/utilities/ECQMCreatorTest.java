@@ -72,6 +72,34 @@ public class ECQMCreatorTest {
 */
     }
 
+    @Test
+    public void TestECQMCreatorDataRequirements() {
+        // TODO - translate measure into ELM measure then call creator with that measure
+        CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
+        cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
+        cqlTranslatorOptions.getOptions().add(CqlTranslator.Options.EnableAnnotations);
+        String libraryPath = "CompositeMeasures/cql/BCSComponent.cql"; //EXM124-9.0.000.cql";//library-EXM124-9.0.000.json";
+        try {
+            CqlTranslator translator = createTranslator(libraryPath, cqlTranslatorOptions);
+            org.hl7.elm.r1.Library elmLibrary = translator.toELM();
+            cacheLibrary(translator.getTranslatedLibrary());
+            FhirContext context = FhirContext.forR5();
+            IParser parser = context.newJsonParser();
+            IParser xmlParser = context.newXmlParser();
+            InputStream inputStream = this.getClass().getResourceAsStream("CompositeMeasures/resources/BCSComponent-v0-0-001-FHIR-4-0-1.xml");  //"/ecqm/resources/measure-EXM124-9.0.000.json");
+            Measure measureToConvert = xmlParser.parseResource(Measure.class, inputStream);
+
+//            Measure measureToConvert = parser.parseResource(Measure.class, inputStream);
+            ECQMCreator eCQMCreator = new ECQMCreator();
+            Measure returnMeasure = eCQMCreator.create_eCQMFromMeasure(measureToConvert, libraryManager, translator.getTranslatedLibrary());
+            assertTrue(null != returnMeasure);
+            System.out.println(parser.setPrettyPrint(true).encodeResourceToString(returnMeasure));
+            System.out.println();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
     private static void cacheLibrary(TranslatedLibrary library) {
         // Add the translated library to the library manager (NOTE: This should be a "cacheLibrary" call on the LibraryManager, available in 1.5.3+)
         // Without this, the data requirements processor will try to load the current library, resulting in a re-translation

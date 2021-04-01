@@ -284,11 +284,11 @@
           <th scope="row"><b>Direct Reference Codes: </b></th>
           <td style="padding-left: 4px;">
                 <table class="grid-dict">
-                    <tr><th><b>code</b></th><th><b>display</b></th><th><b>system</b></th></tr>
+                    <tr><th><b>display</b></th><th><b>code</b></th><th><b>system</b></th></tr>
                     {% for extension in Measure.extension.where(url = 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode') %}
                         <tr>
-                            <td>{{extension.valueCoding.code}}</td>
                             <td>{{extension.valueCoding.display}}</td>
+                            <td>{{extension.valueCoding.code}}</td>
                             <td>{{extension.valueCoding.version}}</td>
                         </tr>
                     {% endfor %}
@@ -297,21 +297,20 @@
         </tr>
         {% endif %}
         {% if Measure.supplementalData.exists() %}
-        <tr>
-          <th scope="row"><b>Supplemental Data: </b></th>
-          <td style="padding-left: 4px;">
-                <table class="grid-dict">
-                    <tr><th><b>code</b></th><th><b>system</b></th><th><b>expression</b></th></tr>
-                    {% for supplementalData in Measure.supplementalData %}
-                      <tr>
-                        <td>{{supplementalData.code.text}}</td>
-                        <td>{{(supplementalData.usage.first() as CodeableConcept).coding.first().system}}</td>
-                        <td>{{supplementalData.criteria.expresssion}}</td>
-                      </tr>
-                    {% endfor %}
-                </table>
-          </td>
-        </tr>
+            <tr>
+                <th scope="row"><b>Supplemental Data: </b></th>
+                <td style="padding-left: 4px;">
+                    <table class="grid-dict">
+                        <tr><th><b>expression</b></th><th><b>system</b></th></tr>
+                        {% for supplementalData in Measure.supplementalData %}
+                        <tr>
+                            <td>{{supplementalData.criteria.expression}}</td>
+                            <td>{{(supplementalData.usage.first() as CodeableConcept).coding.first().system}}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </td>
+            </tr>
         {% endif %}
         {% if Measure.useContext.exists() %}
         <tr>
