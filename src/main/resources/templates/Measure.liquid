@@ -236,17 +236,93 @@
           </td>
         </tr>
         {% endif %}
+        {% if Measure.extension.where(url = 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter').exists() %}
+        <tr>
+            <th scope="row"><b>Parameters: </b></th>
+            <td style="padding-left: 4px;">
+                <table class="grid-dict">
+                    <tr><th><b>name</b></th><th><b>use</b></th><th><b>min</b></th><th><b>max</b></th><th><b>type</b></th></tr>
+                    {% for extension in Measure.extension.where(url = 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter') %}
+                    <tr>
+                        <td>{{extension.valueParameterDefinition.name}}</td>
+                        <td>{{extension.valueParameterDefinition.use}}</td>
+                        <td>{{extension.valueParameterDefinition.min}}</td>
+                        <td>{{extension.valueParameterDefinition.max}}</td>
+                        <td>{{extension.valueParameterDefinition.type}}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </td>
+        </tr>
+        {% endif %}
+        {% if Measure.extension.where(url = 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement').exists() %}
+        <tr>
+          <th scope="row"><b>Data Requirements: </b></th>
+          <td style="padding-left: 4px;">
+                <table class="grid-dict">
+                    <tr><th><b>type</b></th><th><b>path</b></th><th><b>valueSet or system</b></th><th><b>code</b></th></tr>
+                    {% for extension in Measure.extension.where(url = 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement') %}
+                        <tr>
+                            <td>{{extension.valueDataRequirement.type}}</td>
+                            <td>{{extension.valueDataRequirement.codeFilter.first().path}}</td>
+                            {% if extension.valueDataRequirement.codeFilter.first().valueSet.exists() %}
+                                <td>{{extension.valueDataRequirement.codeFilter.first().valueSet}}</td>
+                                <td></td>
+                            {% endif%}
+                            {% if extension.valueDataRequirement.codeFilter.first().code.exists() %}
+                                <td>{{extension.valueDataRequirement.codeFilter.first().code.first().version}}</td>
+                                <td>{{extension.valueDataRequirement.codeFilter.first().code.first().code}}</td>
+                            {% endif%}
+                        </tr>
+                    {% endfor %}
+                </table>
+          </td>
+        </tr>
+        {% endif %}
+        {% if Measure.extension.where(url = 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode').exists() %}
+        <tr>
+          <th scope="row"><b>Direct Reference Codes: </b></th>
+          <td style="padding-left: 4px;">
+                <table class="grid-dict">
+                    <tr><th><b>code</b></th><th><b>display</b></th><th><b>system</b></th></tr>
+                    {% for extension in Measure.extension.where(url = 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode') %}
+                        <tr>
+                            <td>{{extension.valueCoding.code}}</td>
+                            <td>{{extension.valueCoding.display}}</td>
+                            <td>{{extension.valueCoding.version}}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+          </td>
+        </tr>
+        {% endif %}
+        {% if Measure.supplementalData.exists() %}
+        <tr>
+          <th scope="row"><b>Supplemental Data: </b></th>
+          <td style="padding-left: 4px;">
+                <table class="grid-dict">
+                    <tr><th><b>code</b></th><th><b>system</b></th><th><b>expression</b></th></tr>
+                    {% for supplementalData in Measure.supplementalData %}
+                      <tr>
+                        <td>{{supplementalData.code.text}}</td>
+                        <td>{{(supplementalData.usage.first() as CodeableConcept).coding.first().system}}</td>
+                        <td>{{supplementalData.criteria.expresssion}}</td>
+                      </tr>
+                    {% endfor %}
+                </table>
+          </td>
+        </tr>
+        {% endif %}
         {% if Measure.useContext.exists() %}
         <tr>
             <th scope="row"><b>Use Context: </b></th>
             <td style="padding-left: 4px;">
                 <table class="grid-dict">
-                    <tr><th><b>code</b></th><th><b>value</b></th><th><b>display</b></th></tr>
+                    <tr><th><b>code</b></th><th><b>value</b></th></tr>
                     {% for useContext in Measure.useContext %}
                       <tr>
                         <td>{{useContext.code.code}}</td>
-                        <td>{{(useContext.value as CodeableConcept).coding.first().code}}</td>
-                        <td>{{(useContext.value as CodeableConcept).coding.first().display}}</td>
+                        <td>{{(useContext.valueCodeableConcept).text}}</td>
                       </tr>
                     {% endfor %}
                 </table>

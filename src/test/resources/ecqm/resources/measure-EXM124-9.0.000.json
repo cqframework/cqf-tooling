@@ -32,7 +32,7 @@
       "value": "http://www.ncqa.org/"
     } ]
   } ],
-  "description": "Percentage of women 21-64 years of age who were screened for cervical cancer using either of the following criteria: <br> *  Women age 21-64 who had cervical cytology performed every 3 years <br.*  Women age 30-64 who had cervical cytology/human papillomavirus (HPV) co-testing performed every 5 years ",
+  "description": "Percentage of women 21-64 years of age who were screened for cervical cancer using either of the following criteria: <br/>*  Women age 21-64 who had cervical cytology performed every 3 years <br/>*  Women age 30-64 who had cervical cytology/human papillomavirus (HPV) co-testing performed every 5 years ",
   "useContext": [ {
     "code": {
       "code": "program"

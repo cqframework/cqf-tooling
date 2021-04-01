@@ -89,12 +89,15 @@ public class ECQMCreator {
     }
 
     private void setParameters(Measure measureToUse) {
+        Set<String> parameterName = new HashSet<>();
         moduleDefinitionLibrary.getParameter().forEach(parameter->{
-            Extension parameterExtension = new Extension();
-            parameterExtension.setUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter");
-            parameterExtension.setValue(parameter);
-            measureToUse.addExtension(parameterExtension);
-            
+            if(!parameterName.contains(parameter.getName())) {
+                Extension parameterExtension = new Extension();
+                parameterExtension.setUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter");
+                parameterExtension.setValue(parameter);
+                measureToUse.addExtension(parameterExtension);
+                parameterName.add(parameter.getName());
+            }
         });
     }
 
