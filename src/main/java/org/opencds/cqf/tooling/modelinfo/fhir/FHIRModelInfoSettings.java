@@ -1,7 +1,6 @@
 package org.opencds.cqf.tooling.modelinfo.fhir;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
 import org.opencds.cqf.tooling.modelinfo.ModelInfoSettings;

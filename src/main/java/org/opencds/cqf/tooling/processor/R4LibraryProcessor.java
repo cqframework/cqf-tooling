@@ -2,7 +2,6 @@ package org.opencds.cqf.tooling.processor;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +11,6 @@ import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.r4.formats.FormatUtilities;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
