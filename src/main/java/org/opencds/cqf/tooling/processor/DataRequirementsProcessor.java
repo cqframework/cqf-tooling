@@ -8,6 +8,7 @@ import org.hl7.cql.model.IntervalType;
 import org.hl7.cql.model.ListType;
 import org.hl7.cql.model.NamedType;
 import org.hl7.elm.r1.*;
+import org.hl7.elm.r1.Element;
 import org.hl7.elm.r1.Expression;
 import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.model.Library;
@@ -16,6 +17,8 @@ import org.opencds.cqf.tooling.visitor.ElmRequirement;
 import org.opencds.cqf.tooling.visitor.ElmRequirementsContext;
 import org.opencds.cqf.tooling.visitor.ElmRequirementsVisitor;
 
+import javax.xml.bind.JAXBElement;
+import java.io.Serializable;
 import java.util.*;
 import java.util.Date;
 import java.util.List;
@@ -28,7 +31,7 @@ public class DataRequirementsProcessor {
         return this.validationMessages;
     }
 
-    public Library gatherDataRequirements(LibraryManager libraryManager, TranslatedLibrary translatedLibrary, CqlTranslatorOptions options, Set<String> expressions) {
+    public Library gatherDataRequirements(LibraryManager libraryManager, TranslatedLibrary translatedLibrary, CqlTranslatorOptions options, Set<String> expressions, boolean includeLogicDefinitions) {
         if (libraryManager == null) {
             throw new IllegalArgumentException("libraryManager required");
         }
@@ -55,10 +58,10 @@ public class DataRequirementsProcessor {
             }
         }
 
-        return createLibrary(context);
+        return createLibrary(context, includeLogicDefinitions);
     }
 
-    private Library createLibrary(ElmRequirementsContext context) {
+    private Library createLibrary(ElmRequirementsContext context, boolean includeLogicDefinitions) {
         Library returnLibrary = new Library();
         returnLibrary.setStatus(Enumerations.PublicationStatus.ACTIVE);
         CodeableConcept libraryType = new CodeableConcept();
@@ -72,6 +75,9 @@ public class DataRequirementsProcessor {
         returnLibrary.getRelatedArtifact().addAll(extractRelatedArtifacts(context));
         returnLibrary.getDataRequirement().addAll(extractDataRequirements(context));
         returnLibrary.getParameter().addAll(extractParameters(context));
+        if (includeLogicDefinitions) {
+            returnLibrary.getExtension().addAll(extractLogicDefinitions(context));
+        }
         return returnLibrary;
 
     }
@@ -144,6 +150,80 @@ public class DataRequirementsProcessor {
         }
 
         return result;
+    }
+
+    private org.hl7.cql_annotations.r1.Annotation getAnnotation(Element e) {
+        for (Object o : e.getAnnotation()) {
+            if (o instanceof org.hl7.cql_annotations.r1.Annotation) {
+                return (org.hl7.cql_annotations.r1.Annotation)o;
+            }
+        }
+
+        return null;
+    }
+
+    private String toNarrativeText(org.hl7.cql_annotations.r1.Annotation a) {
+        StringBuilder sb = new StringBuilder();
+        if (a.getS() != null) {
+            addNarrativeText(sb, a.getS());
+        }
+        return sb.toString();
+    }
+
+    private void addNarrativeText(StringBuilder sb, org.hl7.cql_annotations.r1.Narrative n) {
+        for (Serializable s : n.getContent()) {
+            if (s instanceof org.hl7.cql_annotations.r1.Narrative) {
+                addNarrativeText(sb, (org.hl7.cql_annotations.r1.Narrative)s);
+            }
+            else if (s instanceof String) {
+                sb.append((String)s);
+            }
+            // TODO: THIS IS WRONG... SHOULDN'T NEED TO KNOW ABOUT JAXB TO ACCOMPLISH THIS
+            else if (s instanceof JAXBElement<?>) {
+                JAXBElement<?> j = (JAXBElement<?>)s;
+                if (j.getValue() instanceof org.hl7.cql_annotations.r1.Narrative) {
+                    addNarrativeText(sb, (org.hl7.cql_annotations.r1.Narrative)j.getValue());
+                }
+            }
+        }
+    }
+
+    private List<Extension> extractLogicDefinitions(ElmRequirementsContext context) {
+        List<Extension> result = new ArrayList<Extension>();
+
+        int sequence = 0;
+        for (ElmRequirement req : context.getRequirements().getExpressionDefs()) {
+            ExpressionDef def = (ExpressionDef)req.getElement();
+            org.hl7.cql_annotations.r1.Annotation a = getAnnotation(def);
+            if (a != null) {
+                result.add(toLogicDefinition(req, def, toNarrativeText(a), sequence++));
+            }
+        }
+
+        return result;
+    }
+
+    private StringType toString(String value) {
+        StringType result = new StringType();
+        result.setValue(value);
+        return result;
+    }
+
+    private IntegerType toInteger(int value) {
+        IntegerType result = new IntegerType();
+        result.setValue(value);
+        return result;
+    }
+
+    private Extension toLogicDefinition(ElmRequirement req, ExpressionDef def, String text, int sequence) {
+        Extension e = new Extension();
+        e.setUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition");
+        // TODO: Include the libraryUrl
+        e.addExtension(new Extension().setUrl("libraryName").setValue(toString(req.getLibraryIdentifier().getId())));
+        e.addExtension(new Extension().setUrl("name").setValue(toString(def.getName())));
+        e.addExtension(new Extension().setUrl("statement").setValue(toString(text)));
+        e.addExtension(new Extension().setUrl("sequence").setValue(toInteger(sequence)));
+        return e;
     }
 
     private List<DataRequirement> extractDataRequirements(ElmRequirementsContext context) {

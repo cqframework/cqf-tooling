@@ -112,10 +112,11 @@ define "Tobacco Cessation Pharmacotherapy Ordered":
       where CessationPharmacotherapyOrdered.authoredOn during "Measurement Period"
         and CessationPharmacotherapyOrdered.status = 'active'
 
-define "Active Pharmacotherapy for Tobacco Cessation":
-  ["MedicationStatement": "Tobacco Use Cessation Pharmacotherapy"] TakingCessationPharmacotherapy
-      where Global."Normalize Interval" ( TakingCessationPharmacotherapy.effective ) overlaps after "Measurement Period"
-        and TakingCessationPharmacotherapy.status in { 'active', 'completed' }
+// MedicationStatement is not available in R5, known publication issue
+//define "Active Pharmacotherapy for Tobacco Cessation":
+//  ["MedicationStatement": "Tobacco Use Cessation Pharmacotherapy"] TakingCessationPharmacotherapy
+//      where Global."Normalize Interval" ( TakingCessationPharmacotherapy.effective ) overlaps after "Measurement Period"
+//        and TakingCessationPharmacotherapy.status in { 'active', 'completed' }
 
 define "Tobacco Cessation Counseling Given":
   ["Encounter": "Tobacco Use Cessation Counseling"] TobaccoCessationCounseling
@@ -125,7 +126,7 @@ define "Tobacco Cessation Counseling Given":
 define "Numerator 2":
   exists "Tobacco Cessation Counseling Given"
       or exists "Tobacco Cessation Pharmacotherapy Ordered"
-      or exists "Active Pharmacotherapy for Tobacco Cessation"
+      //or exists "Active Pharmacotherapy for Tobacco Cessation"
 
 define "Has Limited Life Expectancy":
   exists ( ["Condition"] LimitedLifeExpectancy
@@ -190,7 +191,7 @@ define "Numerator 3":
       or ( "Most Recent Tobacco Use Screening Indicates Tobacco User" is not null
           and ( exists "Tobacco Cessation Counseling Given"
               or exists "Tobacco Cessation Pharmacotherapy Ordered"
-              or exists "Active Pharmacotherapy for Tobacco Cessation"
+              //or exists "Active Pharmacotherapy for Tobacco Cessation"
           )
       )
 

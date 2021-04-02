@@ -11,14 +11,11 @@ import java.util.Set;
 
 public class ECQMUtils {
 
-    public static Library getModuleDefinitionLibrary(Measure measureToUse, LibraryManager libraryManager, TranslatedLibrary translatedLibrary){
-        CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
-        cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
-        cqlTranslatorOptions.getOptions().add(CqlTranslator.Options.EnableAnnotations);
+    public static Library getModuleDefinitionLibrary(Measure measureToUse, LibraryManager libraryManager, TranslatedLibrary translatedLibrary, CqlTranslatorOptions options){
 
         Set<String> expressionList = getExpressions(measureToUse);
         DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
-        return dqReqTrans.gatherDataRequirements(libraryManager, translatedLibrary, cqlTranslatorOptions, expressionList);
+        return dqReqTrans.gatherDataRequirements(libraryManager, translatedLibrary, options, expressionList, true);
     }
 
     private static Set<String> getExpressions(Measure measureToUse) {

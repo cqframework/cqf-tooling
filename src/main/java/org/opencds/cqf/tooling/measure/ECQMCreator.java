@@ -1,6 +1,7 @@
 package org.opencds.cqf.tooling.measure;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
 import org.fhir.ucum.Canonical;
@@ -15,7 +16,7 @@ import java.util.*;
 public class ECQMCreator {
     Library moduleDefinitionLibrary;
 
-    public Measure create_eCQMFromMeasure(Measure measureToUse, LibraryManager libraryManager, TranslatedLibrary translatedLibrary) {
+    public Measure create_eCQMFromMeasure(Measure measureToUse, LibraryManager libraryManager, TranslatedLibrary translatedLibrary, CqlTranslatorOptions options) {
         // TODO - load library from listing in measure
 //        FhirContext fhirContext = FhirContext.forR5();
 //        String primaryLibraryUrl = ResourceUtils.getPrimaryLibraryUrl(measureToUse, fhirContext);
@@ -28,14 +29,21 @@ public class ECQMCreator {
 //            primaryLibrary = IOUtils.getLibraries(fhirContext).get(primaryLibraryUrl);
         // this returns null 3.31.2021
 //        }
-        moduleDefinitionLibrary = ECQMUtils.getModuleDefinitionLibrary(measureToUse, libraryManager, translatedLibrary);//expressionList, libraryPath);
+        moduleDefinitionLibrary = ECQMUtils.getModuleDefinitionLibrary(measureToUse, libraryManager, translatedLibrary, options);//expressionList, libraryPath);
         measureToUse.setDate(new Date());
         // http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/measure-cqfm
         setMeta(measureToUse);
-        setLibrary(measureToUse, translatedLibrary);
-        setType(measureToUse);
+        // Don't need to do this... it is required information to perform this processing in the first place, should just be left alone
+        //setLibrary(measureToUse, translatedLibrary);
+        // Don't need to do this... type isn't a computable attribute, it's just metadata and will come from the source measure
+        //setType(measureToUse);
 
         // Computable measure http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-measure-cqfm
+        clearMeasureExtensions(measureToUse, "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter");
+        clearMeasureExtensions(measureToUse, "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement");
+        clearMeasureExtensions(measureToUse, "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode");
+        clearMeasureExtensions(measureToUse, "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition");
+        clearRelatedArtifacts(measureToUse);
         setParameters(measureToUse);
         setDataRequirements(measureToUse);
         setDirectReferenceCode(measureToUse);
@@ -43,6 +51,15 @@ public class ECQMCreator {
         measureToUse.setRelatedArtifact(this.moduleDefinitionLibrary.getRelatedArtifact());
 
         return measureToUse;
+    }
+
+    private void clearMeasureExtensions(Measure measure, String extensionUrl) {
+        List<Extension> extensionsToRemove = measure.getExtensionsByUrl(extensionUrl);
+        measure.getExtension().removeAll(extensionsToRemove);
+    }
+
+    private void clearRelatedArtifacts(Measure measure) {
+        measure.getRelatedArtifact().removeIf(r -> r.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON);
     }
 
     private void setType(Measure measureToUse) {
@@ -68,7 +85,11 @@ public class ECQMCreator {
     }
 
     private void setLogicDefinition(Measure measureToUse) {
-        // TODO - Add "logic-definition" chunks based on the ExpressionDefs in the gathered requirements. // from Bryn Skype chat 3/29/21 9:39 AM
+        moduleDefinitionLibrary.getExtension().forEach(extension -> {
+            if (extension.getUrl().equalsIgnoreCase("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition")) {
+                measureToUse.addExtension(extension);
+            }
+        });
     }
 
     private void setDirectReferenceCode(Measure measureToUse) {
@@ -102,8 +123,17 @@ public class ECQMCreator {
     }
 
     private void setMeta(Measure measureToUse){
-        Meta newMeta = new Meta();
-        newMeta.addProfile("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-measure-cqfm");
-        measureToUse.setMeta(newMeta);
+        if (measureToUse.getMeta() == null) {
+            measureToUse.setMeta(new Meta());
+        }
+        boolean hasProfileMarker = false;
+        for (CanonicalType canonical : measureToUse.getMeta().getProfile()) {
+            if ("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-measure-cqfm".equals(canonical.getValue())) {
+                hasProfileMarker = true;
+            }
+        }
+        if (!hasProfileMarker) {
+            measureToUse.getMeta().addProfile("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-measure-cqfm");
+        }
     }
 }

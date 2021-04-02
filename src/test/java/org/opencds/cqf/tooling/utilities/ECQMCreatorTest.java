@@ -25,25 +25,86 @@ public class ECQMCreatorTest {
     private static LibraryManager libraryManager;
     private static UcumService ucumService;
 
-    @Test
-    public void TestECQMCreator() {
-        // TODO - translate measure into ELM measure then call creator with that measure
+    private String refreshMeasure(String primaryLibraryPath, String measurePath) throws IOException {
         CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
         cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
         cqlTranslatorOptions.getOptions().add(CqlTranslator.Options.EnableAnnotations);
-        String libraryPath = "CompositeMeasures/cql/EXM124-9.0.000.cql";//library-EXM124-9.0.000.json";
+        CqlTranslator translator = createTranslator(primaryLibraryPath, cqlTranslatorOptions);
+        org.hl7.elm.r1.Library elmLibrary = translator.toELM();
+        cacheLibrary(translator.getTranslatedLibrary());
+        FhirContext context =  FhirContext.forR5();
+        IParser parser = measurePath.endsWith(".json") ? context.newJsonParser() : context.newXmlParser();
+        InputStream inputStream = this.getClass().getResourceAsStream(measurePath);
+        Measure measureToConvert = parser.parseResource(Measure.class, inputStream);
+        ECQMCreator eCQMCreator = new ECQMCreator();
+        Measure returnMeasure = eCQMCreator.create_eCQMFromMeasure(measureToConvert, libraryManager, translator.getTranslatedLibrary(), cqlTranslatorOptions);
+        assertTrue(null != returnMeasure);
+        String measureResourceContent = parser.setPrettyPrint(true).encodeResourceToString(returnMeasure);
+        return measureResourceContent;
+    }
+
+    @Test
+    public void TestBCSComponent() {
         try {
-            CqlTranslator translator = createTranslator(libraryPath, cqlTranslatorOptions);
-            org.hl7.elm.r1.Library elmLibrary = translator.toELM();
-            cacheLibrary(translator.getTranslatedLibrary());
-            FhirContext context =  FhirContext.forR5();
-            IParser parser = context.newJsonParser();
-            InputStream inputStream = this.getClass().getResourceAsStream("/ecqm/resources/measure-EXM124-9.0.000.json");
-            Measure measureToConvert = parser.parseResource(Measure.class, inputStream);
-            ECQMCreator eCQMCreator = new ECQMCreator();
-            Measure returnMeasure = eCQMCreator.create_eCQMFromMeasure(measureToConvert, libraryManager, translator.getTranslatedLibrary());
-            assertTrue(null != returnMeasure);
-            System.out.println(parser.setPrettyPrint(true).encodeResourceToString(returnMeasure));
+            String measureResourceContent = refreshMeasure("CompositeMeasures/cql/BCSComponent.cql", "CompositeMeasures/resources/BCSComponent-v0-0-001-FHIR-4-0-1.xml");
+            System.out.println(measureResourceContent);
+            System.out.println();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
+    @Test
+    public void TestCCSComponent() {
+        try {
+            String measureResourceContent = refreshMeasure("CompositeMeasures/cql/CCSComponent.cql", "CompositeMeasures/resources/CCSComponent-v0-0-001-FHIR-4-0-1.xml");
+            System.out.println(measureResourceContent);
+            System.out.println();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
+    @Test
+    public void TestHBPComponent() {
+        try {
+            String measureResourceContent = refreshMeasure("CompositeMeasures/cql/HBPComponent.cql", "CompositeMeasures/resources/HBPComponent-v0-0-001-FHIR-4-0-1.xml");
+            System.out.println(measureResourceContent);
+            System.out.println();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
+    @Test
+    public void TestPVSComponent() {
+        try {
+            String measureResourceContent = refreshMeasure("CompositeMeasures/cql/PVSComponent.cql", "CompositeMeasures/resources/PVSComponent-v0-0-001-FHIR-4-0-1.xml");
+            System.out.println(measureResourceContent);
+            System.out.println();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
+    @Test
+    public void TestTSCComponent() {
+        try {
+            String measureResourceContent = refreshMeasure("CompositeMeasures/cql/TSCComponent.cql", "CompositeMeasures/resources/TSCComponent-v0-0-001-FHIR-4-0-1.xml");
+            System.out.println(measureResourceContent);
+            System.out.println();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
+    @Test
+    public void TestECQMCreator() {
+
+        // TODO - translate measure into ELM measure then call creator with that measure
+        try {
+            String measureResourceContent = refreshMeasure("CompositeMeasures/cql/EXM124-9.0.000.cql", "/ecqm/resources/measure-EXM124-9.0.000.json");
+            System.out.println(measureResourceContent);
             System.out.println();
         } catch (IOException ioException) {
             ioException.printStackTrace();
@@ -91,7 +152,7 @@ public class ECQMCreatorTest {
 
 //            Measure measureToConvert = parser.parseResource(Measure.class, inputStream);
             ECQMCreator eCQMCreator = new ECQMCreator();
-            Measure returnMeasure = eCQMCreator.create_eCQMFromMeasure(measureToConvert, libraryManager, translator.getTranslatedLibrary());
+            Measure returnMeasure = eCQMCreator.create_eCQMFromMeasure(measureToConvert, libraryManager, translator.getTranslatedLibrary(), cqlTranslatorOptions);
             assertTrue(null != returnMeasure);
             System.out.println(parser.setPrettyPrint(true).encodeResourceToString(returnMeasure));
             System.out.println();
