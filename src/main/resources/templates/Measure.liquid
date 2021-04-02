@@ -533,5 +533,32 @@
         </tr>
         {% endif %}
         {% endfor %}
+        {% if Measure.extension.where(url = 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition').exists() %}
+        <tr>
+          <th scope="row"><b>Logic Definitions: </b></th>
+          <td style="padding-left: 4px;">
+            {% for extension in Measure.extension.where(url = 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition') %}
+                <table class="grid-dict">
+                    <tr><th><b>Library Name</b></th><th><b>Name</b></th><th><b>sequence</b></th></tr>
+                    <tr>
+                        {% for lNameExtension in extension.extension.where(url = 'libraryName') %}
+                            <td>{{lNameExtension.value}}</td>
+                        {% endfor %}
+                        {% for nameExtension in extension.extension.where(url = 'name') %}
+                            <td>{{nameExtension.value}}</td>
+                        {% endfor %}
+                        {% for sequenceExtension in extension.extension.where(url = 'sequence') %}
+                            <td>{{sequenceExtension.value}}</td>
+                        {% endfor %}
+                    </tr>
+                </table>
+                {% for statementExtension in extension.extension.where(url = 'statement') %}
+                    {{statementExtension.value}}
+                {% endfor %}
+                <br/><br/>
+            {% endfor %}
+          </td>
+        </tr>
+        {% endif %}
     </table>
 </div>
