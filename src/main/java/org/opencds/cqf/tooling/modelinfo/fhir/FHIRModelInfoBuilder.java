@@ -14,15 +14,18 @@ import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.opencds.cqf.tooling.modelinfo.Atlas;
 import org.opencds.cqf.tooling.modelinfo.ContextInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.ModelInfoBuilder;
+import org.opencds.cqf.tooling.modelinfo.SearchInfoBuilder;
 
 public class FHIRModelInfoBuilder extends ModelInfoBuilder {
     private String fhirHelpersPath;
+    private SearchInfoBuilder searchInfoBuilder;
     private ContextInfoBuilder contextInfoBuilder;
 
     public FHIRModelInfoBuilder(String version, Map<String, TypeInfo> typeInfos, Atlas atlas, String fhirHelpersPath) {
         super(typeInfos.values());
         this.fhirHelpersPath = fhirHelpersPath;
         this.settings = new FHIRModelInfoSettings(version);
+        this.searchInfoBuilder = new SearchInfoBuilder(settings, atlas, typeInfos);
         this.contextInfoBuilder = new ContextInfoBuilder(settings, atlas, typeInfos);
     }
 
@@ -57,7 +60,16 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
         // TODO: File naming?
         try {
             PrintWriter pw = new PrintWriter(this.fhirHelpersPath);
-            pw.println(String.format("library FHIRHelpers version '%s'\n", this.settings.version) +
+            pw.println(
+                    "/*\n" +
+                    "@author: Bryn Rhodes\n" +
+                    "@description: This library defines functions to convert between FHIR \n" +
+                    " data types and CQL system-defined types, as well as functions to support\n" +
+                    " FHIRPath implementation. For more information, the FHIRHelpers wiki page:\n" +
+                    " https://github.com/cqframework/clinical_quality_language/wiki/FHIRHelpers\n" +
+                    "@allowFluent: true\n" +
+                    "*/\n" +
+                    String.format("library FHIRHelpers version '%s'\n", this.settings.version) +
                     "\n" +
                     String.format("using FHIR version '%s'\n", this.settings.version) +
                     "\n" +
@@ -166,8 +178,15 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
                     "            display: concept.text.value\n" +
                     "        }\n" +
                     "\n" +
+                    "define function reference(reference String):\n" +
+                    "    if reference is null then\n" +
+                    "        null\n" +
+                    "    else\n" +
+                    "        Reference { reference: string { value: reference } }\n" +
+                    "\n" +
+                    "define function resolve(reference String) returns Resource: external\n" +
                     "define function resolve(reference Reference) returns Resource: external\n" +
-                    "define function references(reference Reference, resource Resource) returns Boolean: external\n" +
+                    "define function reference(resource Resource) returns Reference: external\n" +
                     "define function extension(element Element, url String) returns List<Element>: external\n" +
                     "define function extension(resource Resource, url String) returns List<Element>: external\n" +
                     "define function hasValue(element Element) returns Boolean: external\n" +
@@ -200,6 +219,8 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
 
     @Override
     protected ModelInfo afterBuild(ModelInfo mi) {
+        // Build search infos (attaches SearchInfo to the existing TypeInfos)
+        this.searchInfoBuilder.build();
         mi.withContextInfo(this.contextInfoBuilder.build().values());
         // Apply fixups
         return mi;

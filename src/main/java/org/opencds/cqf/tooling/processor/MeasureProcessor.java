@@ -91,6 +91,10 @@ public class MeasureProcessor
                 else {
                     primaryLibrary = IOUtils.getLibraries(fhirContext).get(primaryLibraryUrl);
                 }
+                
+                if (primaryLibrary == null)
+                	throw new IllegalArgumentException(String.format("Could not resolve library url %s", primaryLibraryUrl));
+                
                 String primaryLibrarySourcePath = IOUtils.getLibraryPathMap(fhirContext).get(primaryLibrary.getIdElement().getIdPart());
                 String primaryLibraryName = ResourceUtils.getName(primaryLibrary, fhirContext);
                 if (includeVersion) {
