@@ -3,6 +3,8 @@ package org.opencds.cqf.tooling.measure.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.XmlParser;
+
+import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.r4.model.Measure;
 import org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper;
 import org.opencds.cqf.tooling.operation.RefreshGeneratedContentOperation;
@@ -27,7 +29,7 @@ public class RefreshR4MeasureOperation extends RefreshGeneratedContentOperation 
     }
 
     public RefreshR4MeasureOperation(String pathToMeasures) {
-        super(pathToMeasures, "-RefreshR4Measure", FhirContext.forR4(), null, pathToMeasures);
+        super(FilenameUtils.getPath(pathToMeasures), "-RefreshR4Measure", FhirContext.forR4(), null, pathToMeasures);
         jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
         xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
     }

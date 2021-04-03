@@ -2,7 +2,6 @@ package org.opencds.cqf.tooling.processor;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +11,6 @@ import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.r4.formats.FormatUtilities;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -75,14 +73,19 @@ public class R4LibraryProcessor extends LibraryProcessor {
             cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
             // Issue 96
             // Passing the includeVersion here to handle not using the version number in the filename
-            IOUtils.writeResource(library, filePath, fileEncoding, fhirContext, this.versioned);
-            String refreshedLibraryName;
-            if (this.versioned && refreshedLibrary.getVersion() != null) {
-                refreshedLibraryName = refreshedLibrary.getName() + "-" + refreshedLibrary.getVersion();
-            } else {
-                refreshedLibraryName = refreshedLibrary.getName();
+            if (new File(filePath).exists()) {
+                // TODO: This prevents mangled names from being output
+                // It would be nice for the tooling to generate library shells, we have enough information to,
+                // but the tooling gets confused about the ID and the filename and what gets written is garbage
+                IOUtils.writeResource(library, filePath, fileEncoding, fhirContext, this.versioned);
+                String refreshedLibraryName;
+                if (this.versioned && refreshedLibrary.getVersion() != null) {
+                    refreshedLibraryName = refreshedLibrary.getName() + "-" + refreshedLibrary.getVersion();
+                } else {
+                    refreshedLibraryName = refreshedLibrary.getName();
+                }
+                refreshedLibraryNames.add(refreshedLibraryName);
             }
-            refreshedLibraryNames.add(refreshedLibraryName);
         }
 
         return refreshedLibraryNames;
