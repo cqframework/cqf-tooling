@@ -2,9 +2,9 @@ package org.opencds.cqf.tooling.operation;
 
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
-import org.opencds.cqf.tooling.processor.LibraryProcessor;
-import org.opencds.cqf.tooling.processor.R4LibraryProcessor;
-import org.opencds.cqf.tooling.processor.STU3LibraryProcessor;
+import org.opencds.cqf.tooling.library.LibraryProcessor;
+import org.opencds.cqf.tooling.library.r4.R4LibraryProcessor;
+import org.opencds.cqf.tooling.library.stu3.STU3LibraryProcessor;
 import org.opencds.cqf.tooling.processor.argument.RefreshLibraryArgumentProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;

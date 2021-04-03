@@ -7,16 +7,12 @@ import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
-import org.hl7.elm.r1.Library;
 import org.hl7.fhir.r5.model.Measure;
 import org.junit.Test;
-import org.opencds.cqf.tooling.measure.ECQMCreator;
-import org.opencds.cqf.tooling.processor.DataRequirementsProcessor;
+import org.opencds.cqf.tooling.measure.MeasureRefreshProcessor;
 
 import java.io.*;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Set;
 
 import static org.junit.Assert.assertTrue;
 
@@ -36,8 +32,8 @@ public class ECQMCreatorTest {
         IParser parser = measurePath.endsWith(".json") ? context.newJsonParser() : context.newXmlParser();
         InputStream inputStream = this.getClass().getResourceAsStream(measurePath);
         Measure measureToConvert = parser.parseResource(Measure.class, inputStream);
-        ECQMCreator eCQMCreator = new ECQMCreator();
-        Measure returnMeasure = eCQMCreator.create_eCQMFromMeasure(measureToConvert, libraryManager, translator.getTranslatedLibrary(), cqlTranslatorOptions);
+        MeasureRefreshProcessor refreshProcessor = new MeasureRefreshProcessor();
+        Measure returnMeasure = refreshProcessor.refreshMeasure(measureToConvert, libraryManager, translator.getTranslatedLibrary(), cqlTranslatorOptions);
         assertTrue(null != returnMeasure);
         String measureResourceContent = parser.setPrettyPrint(true).encodeResourceToString(returnMeasure);
         return measureResourceContent;
@@ -151,8 +147,8 @@ public class ECQMCreatorTest {
             Measure measureToConvert = xmlParser.parseResource(Measure.class, inputStream);
 
 //            Measure measureToConvert = parser.parseResource(Measure.class, inputStream);
-            ECQMCreator eCQMCreator = new ECQMCreator();
-            Measure returnMeasure = eCQMCreator.create_eCQMFromMeasure(measureToConvert, libraryManager, translator.getTranslatedLibrary(), cqlTranslatorOptions);
+            MeasureRefreshProcessor refreshProcessor = new MeasureRefreshProcessor();
+            Measure returnMeasure = refreshProcessor.refreshMeasure(measureToConvert, libraryManager, translator.getTranslatedLibrary(), cqlTranslatorOptions);
             assertTrue(null != returnMeasure);
             System.out.println(parser.setPrettyPrint(true).encodeResourceToString(returnMeasure));
             System.out.println();
@@ -224,7 +220,7 @@ public class ECQMCreatorTest {
     }
 
     public static CqlTranslator createTranslator(NamespaceInfo namespaceInfo, String libraryName, CqlTranslatorOptions options) throws IOException {
-        File translationTestFile = new File(ECQMUtils.class.getResource(libraryName).getFile());
+        File translationTestFile = new File(ECQMCreatorTest.class.getResource(libraryName).getFile());
         if(null != translationTestFile) {
             reset();
             setup(translationTestFile.getParent());

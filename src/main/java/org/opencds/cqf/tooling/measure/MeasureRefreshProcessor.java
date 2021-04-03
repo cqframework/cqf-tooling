@@ -1,38 +1,22 @@
 package org.opencds.cqf.tooling.measure;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
-import org.fhir.ucum.Canonical;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.*;
-import org.opencds.cqf.tooling.utilities.ECQMUtils;
-import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
+import org.opencds.cqf.tooling.processor.DataRequirementsProcessor;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-public class ECQMCreator {
-    Library moduleDefinitionLibrary;
-
-    public Measure create_eCQMFromMeasure(Measure measureToUse, LibraryManager libraryManager, TranslatedLibrary translatedLibrary, CqlTranslatorOptions options) {
-        // TODO - load library from listing in measure
-//        FhirContext fhirContext = FhirContext.forR5();
-//        String primaryLibraryUrl = ResourceUtils.getPrimaryLibraryUrl(measureToUse, fhirContext);
-//          // required edit to ResourceUtils to add R5
-//        IBaseResource primaryLibrary;
-//        if (primaryLibraryUrl.startsWith("http")) {
-//            primaryLibrary = IOUtils.getLibraryUrlMap(fhirContext).get(primaryLibraryUrl);
-//        }
-//        else {
-//            primaryLibrary = IOUtils.getLibraries(fhirContext).get(primaryLibraryUrl);
-        // this returns null 3.31.2021
-//        }
-        moduleDefinitionLibrary = ECQMUtils.getModuleDefinitionLibrary(measureToUse, libraryManager, translatedLibrary, options);//expressionList, libraryPath);
+public class MeasureRefreshProcessor {
+    public Measure refreshMeasure(Measure measureToUse, LibraryManager libraryManager, TranslatedLibrary translatedLibrary, CqlTranslatorOptions options) {
+        Library moduleDefinitionLibrary = getModuleDefinitionLibrary(measureToUse, libraryManager, translatedLibrary, options);
         measureToUse.setDate(new Date());
         // http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/measure-cqfm
-        setMeta(measureToUse);
+        setMeta(measureToUse, moduleDefinitionLibrary);
         // Don't need to do this... it is required information to perform this processing in the first place, should just be left alone
         //setLibrary(measureToUse, translatedLibrary);
         // Don't need to do this... type isn't a computable attribute, it's just metadata and will come from the source measure
@@ -44,13 +28,35 @@ public class ECQMCreator {
         clearMeasureExtensions(measureToUse, "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode");
         clearMeasureExtensions(measureToUse, "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition");
         clearRelatedArtifacts(measureToUse);
-        setParameters(measureToUse);
-        setDataRequirements(measureToUse);
-        setDirectReferenceCode(measureToUse);
-        setLogicDefinition(measureToUse);
-        measureToUse.setRelatedArtifact(this.moduleDefinitionLibrary.getRelatedArtifact());
+        setParameters(measureToUse, moduleDefinitionLibrary);
+        setDataRequirements(measureToUse, moduleDefinitionLibrary);
+        setDirectReferenceCode(measureToUse, moduleDefinitionLibrary);
+        setLogicDefinition(measureToUse, moduleDefinitionLibrary);
+        measureToUse.setRelatedArtifact(moduleDefinitionLibrary.getRelatedArtifact());
 
         return measureToUse;
+    }
+
+    private Library getModuleDefinitionLibrary(Measure measureToUse, LibraryManager libraryManager, TranslatedLibrary translatedLibrary, CqlTranslatorOptions options){
+        Set<String> expressionList = getExpressions(measureToUse);
+        DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
+        return dqReqTrans.gatherDataRequirements(libraryManager, translatedLibrary, options, expressionList, true);
+    }
+
+    private Set<String> getExpressions(Measure measureToUse) {
+        Set<String> expressionSet = new HashSet<>();
+        measureToUse.getSupplementalData().forEach(supData->{
+            expressionSet.add(supData.getCriteria().getExpression());
+        });
+        measureToUse.getGroup().forEach(groupMember->{
+            groupMember.getPopulation().forEach(population->{
+                expressionSet.add(population.getCriteria().getExpression());
+            });
+            groupMember.getStratifier().forEach(stratifier->{
+                expressionSet.add(stratifier.getCriteria().getExpression());
+            });
+        });
+        return expressionSet;
     }
 
     private void clearMeasureExtensions(Measure measure, String extensionUrl) {
@@ -62,29 +68,7 @@ public class ECQMCreator {
         measure.getRelatedArtifact().removeIf(r -> r.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON);
     }
 
-    private void setType(Measure measureToUse) {
-        List<CodeableConcept> measureType = measureToUse.getType();
-        if(null == measureType || measureType.isEmpty()) {
-            List<CodeableConcept> typeList = new ArrayList<>();
-            CodeableConcept cc = new CodeableConcept();
-            cc.addCoding(new Coding().setSystem("http://terminology.hl7.org/CodeSystem/measure-type")
-                    .setCode("process"));
-            typeList.add(cc);
-            measureToUse.setType(typeList);
-        }
-    }
-
-    private void setLibrary(Measure measureToUse, TranslatedLibrary translatedLibrary){
-        // TODO - Is this the TranslatedLibrary?
-        if(null == measureToUse.getLibrary() || measureToUse.getLibrary().isEmpty()){
-            List<CanonicalType> libraryList = new ArrayList<>();
-            String libraryName = translatedLibrary.getIdentifier().getId() + "-" + translatedLibrary.getIdentifier().getVersion();
-            libraryList.add(new CanonicalType(libraryName));
-            measureToUse.setLibrary(libraryList);   // "Logic used by the measure" -- see setLogicDefinition in next section - what is the difference? Is this just a ref to a library and the other is ?????
-        }
-    }
-
-    private void setLogicDefinition(Measure measureToUse) {
+    private void setLogicDefinition(Measure measureToUse, Library moduleDefinitionLibrary) {
         moduleDefinitionLibrary.getExtension().forEach(extension -> {
             if (extension.getUrl().equalsIgnoreCase("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition")) {
                 measureToUse.addExtension(extension);
@@ -92,7 +76,7 @@ public class ECQMCreator {
         });
     }
 
-    private void setDirectReferenceCode(Measure measureToUse) {
+    private void setDirectReferenceCode(Measure measureToUse, Library moduleDefinitionLibrary) {
         moduleDefinitionLibrary.getExtension().forEach(extension -> {
             if(extension.getUrl().equalsIgnoreCase("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode")) {
                 measureToUse.addExtension(extension);
@@ -100,7 +84,7 @@ public class ECQMCreator {
         });
     }
 
-    private void setDataRequirements(Measure measureToUse) {
+    private void setDataRequirements(Measure measureToUse, Library moduleDefinitionLibrary) {
         moduleDefinitionLibrary.getDataRequirement().forEach(dataRequirement -> {
             Extension dataReqExtension = new Extension();
             dataReqExtension.setUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement");
@@ -109,7 +93,7 @@ public class ECQMCreator {
         });
     }
 
-    private void setParameters(Measure measureToUse) {
+    private void setParameters(Measure measureToUse, Library moduleDefinitionLibrary) {
         Set<String> parameterName = new HashSet<>();
         moduleDefinitionLibrary.getParameter().forEach(parameter->{
             if(!parameterName.contains(parameter.getName())) {
@@ -122,7 +106,7 @@ public class ECQMCreator {
         });
     }
 
-    private void setMeta(Measure measureToUse){
+    private void setMeta(Measure measureToUse, Library moduleDefinitionLibrary){
         if (measureToUse.getMeta() == null) {
             measureToUse.setMeta(new Meta());
         }

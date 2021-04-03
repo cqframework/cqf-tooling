@@ -228,6 +228,30 @@ public class CqlProcessor {
         return result;
     }
 
+    private void checkCachedManager() {
+        if (cachedOptions == null) {
+            if (hasMultipleBinaryPaths) {
+                throw new RuntimeException("CqlProcessor has been used with multiple Cql paths, ambiguous options and manager");
+            }
+            else {
+                throw new RuntimeException("CqlProcessor has not been executed, no cached options or manager");
+            }
+        }
+    }
+
+    private boolean hasMultipleBinaryPaths = false;
+    private CqlTranslatorOptions cachedOptions;
+    public CqlTranslatorOptions getCqlTranslatorOptions() {
+        checkCachedManager();
+        return cachedOptions;
+    }
+
+    private LibraryManager cachedLibraryManager;
+    public LibraryManager getLibraryManager() {
+        checkCachedManager();
+        return cachedLibraryManager;
+    }
+
     /**
      * Reads configuration file named cql-options.json from the given folder if present. Otherwise returns default options.
      * @param folder
@@ -271,8 +295,26 @@ public class CqlProcessor {
         loadNamespaces(libraryManager);
 
         // foreach *.cql file
+        boolean hadCqlFiles = false;
         for (File file : new File(folder).listFiles(getCqlFilenameFilter())) {
+            hadCqlFiles = true;
             translateFile(modelManager, libraryManager, file, options);
+        }
+
+        if (hadCqlFiles) {
+            if (cachedOptions == null) {
+                if (!hasMultipleBinaryPaths) {
+                    cachedOptions = options;
+                    cachedLibraryManager = libraryManager;
+                }
+            }
+            else {
+                if (!hasMultipleBinaryPaths) {
+                    hasMultipleBinaryPaths = true;
+                    cachedOptions = null;
+                    cachedLibraryManager = null;
+                }
+            }
         }
     }
 
@@ -291,7 +333,7 @@ public class CqlProcessor {
         }
     }
 
-    private ValidationMessage.IssueType severityToIssueType(CqlTranslatorException.ErrorSeverity severity) {
+    public static ValidationMessage.IssueType severityToIssueType(CqlTranslatorException.ErrorSeverity severity) {
         switch (severity) {
             case Info: return ValidationMessage.IssueType.INFORMATIONAL;
             case Warning:
@@ -300,7 +342,7 @@ public class CqlProcessor {
         }
     }
 
-    private ValidationMessage.IssueSeverity severityToIssueSeverity(CqlTranslatorException.ErrorSeverity severity) {
+    public static ValidationMessage.IssueSeverity severityToIssueSeverity(CqlTranslatorException.ErrorSeverity severity) {
         switch (severity) {
             case Info: return ValidationMessage.IssueSeverity.INFORMATION;
             case Warning: return ValidationMessage.IssueSeverity.WARNING;
@@ -309,7 +351,7 @@ public class CqlProcessor {
         }
     }
 
-    private ValidationMessage exceptionToValidationMessage(File file, CqlTranslatorException exception) {
+    public static ValidationMessage exceptionToValidationMessage(File file, CqlTranslatorException exception) {
         TrackBack tb = exception.getLocator();
         if (tb != null) {
             return new ValidationMessage(ValidationMessage.Source.Publisher, severityToIssueType(exception.getSeverity()),

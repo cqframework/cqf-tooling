@@ -561,25 +561,31 @@ public class ResourceUtils
     }
 
     public static String getPrimaryLibraryUrl(IBaseResource resource, FhirContext fhirContext) {
-      switch (fhirContext.getVersion().getVersion()) {
-          case DSTU3: {
-              org.hl7.fhir.dstu3.model.Measure measure = (org.hl7.fhir.dstu3.model.Measure)resource;
-              if (!measure.hasLibrary() || measure.getLibrary().size() != 1) {
-                  throw new IllegalArgumentException("Measure is expected to have one and only one library");
-              }
-              String reference = measure.getLibrary().get(0).getReference();
-              String parts[] = reference.split("/");
-              return parts[parts.length - 1];
-          }
-          case R4: {
-              org.hl7.fhir.r4.model.Measure measure = (org.hl7.fhir.r4.model.Measure)resource;
-              if (!measure.hasLibrary() || measure.getLibrary().size() != 1) {
-                  throw new IllegalArgumentException("Measure is expected to have one and only one library");
-              }
-              return measure.getLibrary().get(0).getValue();
-          }
-          default:
-              throw new IllegalArgumentException("Unsupported fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+        if (resource instanceof org.hl7.fhir.r5.model.Measure) {
+            org.hl7.fhir.r5.model.Measure measure = (org.hl7.fhir.r5.model.Measure)resource;
+            if (!measure.hasLibrary() || measure.getLibrary().size() != 1) {
+                throw new IllegalArgumentException("Measure is expected to have one and only one library");
+            }
+            return measure.getLibrary().get(0).getValue();
+        }
+        else if (resource instanceof org.hl7.fhir.r4.model.Measure) {
+            org.hl7.fhir.r4.model.Measure measure = (org.hl7.fhir.r4.model.Measure)resource;
+            if (!measure.hasLibrary() || measure.getLibrary().size() != 1) {
+                throw new IllegalArgumentException("Measure is expected to have one and only one library");
+            }
+            return measure.getLibrary().get(0).getValue();
+        }
+        else if (resource instanceof org.hl7.fhir.dstu3.model.Measure) {
+            org.hl7.fhir.dstu3.model.Measure measure = (org.hl7.fhir.dstu3.model.Measure)resource;
+            if (!measure.hasLibrary() || measure.getLibrary().size() != 1) {
+                throw new IllegalArgumentException("Measure is expected to have one and only one library");
+            }
+            String reference = measure.getLibrary().get(0).getReference();
+            String parts[] = reference.split("/");
+            return parts[parts.length - 1];
+        }
+        else {
+           throw new IllegalArgumentException("Unsupported fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
       }
   }
 
