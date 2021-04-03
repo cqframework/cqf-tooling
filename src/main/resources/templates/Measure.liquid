@@ -553,7 +553,7 @@
                     </tr>
                 </table>
                 {% for statementExtension in extension.extension.where(url = 'statement') %}
-                    {{statementExtension.value}}
+                    <pre><code>{{statementExtension.value}}</code></pre>
                 {% endfor %}
                 <br/><br/>
             {% endfor %}
