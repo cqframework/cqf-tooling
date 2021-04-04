@@ -18,7 +18,8 @@ public class BundleResources extends Operation {
 
     private String encoding; // -encoding (-e)
     private String pathToDirectory; // -pathtodir (-ptd)
-    private String version; // -version (-v) Can be dstu2, stu3, or r4
+    private String version; // -version (-v) Can be dstu2, stu3, or
+    private String bundleId; // -bundleid (-bid)
 
     private IBaseResource theResource;
     private List<IBaseResource> theResources = new ArrayList<>();
@@ -52,6 +53,10 @@ public class BundleResources extends Operation {
                     break;
                 case "version": case "v":
                     version = value;
+                    break;
+                case "bundleid":
+                case "bid":
+                    bundleId = value;
                     break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
@@ -94,6 +99,9 @@ public class BundleResources extends Operation {
 
         if (context.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
             org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
+            if (bundleId != null && !bundleId.isEmpty()) {
+                bundle.setId(bundleId);
+            }
             bundle.setType(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION);
             for (IBaseResource resource : theResources) {
                 bundle.addEntry(
@@ -110,6 +118,9 @@ public class BundleResources extends Operation {
         }
         else if (context.getVersion().getVersion() == FhirVersionEnum.R4) {
             org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
+            if (bundleId != null && !bundleId.isEmpty()) {
+                bundle.setId(bundleId);
+            }
             bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
             for (IBaseResource resource : theResources) {
                 bundle.addEntry(
@@ -167,7 +178,12 @@ public class BundleResources extends Operation {
     
     // Output
     public void output(IBaseResource resource, FhirContext context) {
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + getOutputPath().substring(getOutputPath().lastIndexOf(File.separator)) + "-bundle." + encoding)) {
+        String fileNameBase = getOutputPath() + getOutputPath().substring(getOutputPath().lastIndexOf(File.separator));
+        if (bundleId != null && !bundleId.isEmpty()) {
+            fileNameBase = getOutputPath() + File.separator + bundleId;
+        }
+
+        try (FileOutputStream writer = new FileOutputStream(fileNameBase + "-bundle." + encoding)) {
             writer.write(
                 encoding.equals("json")
                     ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
