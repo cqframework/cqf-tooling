@@ -62,6 +62,14 @@ public class BundleResources extends Operation {
             }
         }
 
+        if (encoding == null || encoding.isEmpty()) {
+            encoding = "json";
+        } else {
+            if (!encoding.equalsIgnoreCase("xml") && !encoding.equalsIgnoreCase("json")) {
+                throw new IllegalArgumentException(String.format("Unsupported encoding: %s. Allowed encodings { json, xml }", encoding));
+            }
+        }
+
         if (pathToDirectory == null) {
             throw new IllegalArgumentException("The path to the resource directory is required");
         }
