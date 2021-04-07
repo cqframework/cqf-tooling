@@ -58,10 +58,10 @@ public class DroolToElmVisitorTest {
                 "../CQLGenerationDocs/GeneratedDocs/elm/expressions/[]_Thrombocytopenia__Expression.txt");
         List<Object> results = new ArrayList<Object>();
         for (String expression : expressions) {
-            String observationInterpretationRelatedExpressions = "(?i)Group 1.1-d5acd129f47353d9de23d4f5c54c4821|Group 2.2-bd2434cd92e9dc1f22b181256d29884b|Lab Result Interpretation-bcfb9161a92a6b6575cf9e6658816c12|Group 1-b2ec8fd8ef385f444209414cdd4f0bad|Lab Result Interpretation-459dc3e6db577f49f4221697c63ffec9|Group 2-5acef8b7bbc1bdea7569c54d5f407772|ConditionCriteriaMet";
-            if (expression.matches(observationInterpretationRelatedExpressions)) {
-                System.out.println("Awaiting engine fix Observation Interpretation logic");
-            } else {
+            //String observationInterpretationRelatedExpressions = "(?i)Group 1.1-d5acd129f47353d9de23d4f5c54c4821|Group 2.2-bd2434cd92e9dc1f22b181256d29884b|Lab Result Interpretation-bcfb9161a92a6b6575cf9e6658816c12|Group 1-b2ec8fd8ef385f444209414cdd4f0bad|Lab Result Interpretation-459dc3e6db577f49f4221697c63ffec9|Group 2-5acef8b7bbc1bdea7569c54d5f407772|ConditionCriteriaMet";
+            // if (expression.matches(observationInterpretationRelatedExpressions)) {
+            //     System.out.println("Awaiting engine fix Observation Interpretation logic");
+            // } else {
                 if (expression.equals(
                         "Patient has lab result with test name (specific or an organism or substance)-3f12c73cbe886ab3f908544bb1ca8266")) {
                     System.out.println("Missing ValueSet: https://hln.com/fhir/ValueSet/VHF008");
@@ -80,7 +80,7 @@ public class DroolToElmVisitorTest {
                         e.printStackTrace();
                     }
                 }
-            }
+            //}
         }
         // generateElmForDebug();
 

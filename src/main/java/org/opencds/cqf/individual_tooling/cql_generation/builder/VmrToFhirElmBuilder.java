@@ -33,7 +33,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
      * @param decimalFormat decimalFormat
      */
     public VmrToFhirElmBuilder(String modelVersion, DecimalFormat decimalFormat) {
-        super("FHIR", modelVersion, "http://hl7.org/fhir", new FhirLibrarySourceProvider(), decimalFormat);
+        super("FHIR", modelVersion, "http://hl7.org/FHIR", new FhirLibrarySourceProvider(), decimalFormat);
         IncludeDef includeHelper = of.createIncludeDef().withLocalIdentifier("FHIRHelpers").withPath("FHIRHelpers")
             .withVersion(modelVersion);
         this.setIncludeHelper(includeHelper);

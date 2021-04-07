@@ -1,29 +1,26 @@
 package org.opencds.cqf.individual_tooling.cql_generation.drool.visitor;
 
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
 import org.cqframework.cql.elm.visiting.ElmBaseLibraryVisitor;
-import org.cqframework.cql.gen.cqlBaseVisitor;
-import org.cqframework.cql.gen.cqlLexer;
-import org.cqframework.cql.gen.cqlParser;
 import org.hl7.elm.r1.*;
 import org.hl7.elm.r1.Library.Statements;
 import org.opencds.cqf.individual_tooling.cql_generation.context.ElmContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Strings;
 
+/**
+ * Visits every node in a Library elm tree and builds the cql string.
+ * 
+ * @author Joshua Reynolds
+ * @since 2021-04-05
+ */
 public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     private boolean useSpaces = true;
 
     public boolean getUseSpaces() {
@@ -176,7 +173,6 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         if (terminal.trim().isEmpty() || terminal.startsWith("//") || terminal.startsWith("/*")) {
             return false;
         }
-
         switch (terminal) {
             case ":":
                 return false;
@@ -269,6 +265,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
     }
 
     private void newConstruct(String section) {
+        logger.info("Adding new construct: " + section);
         resetIndentLevel();
         newLine();
         addToSection(section);
@@ -288,32 +285,14 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         groups = new Stack<>();
     }
 
-    //TODO: Once every visit has a basic implementation figure out how to connect through space
-    // public Object visitChildren(Expression expression, ElmContext context) {
-    //     Object result = defaultResult();
-    //     int n = node.getChildCount();
-    //     for (int i = 0; i < n; i++) {
-    //         if (!shouldVisitNextChild(node, result)) {
-    //             break;
-    //         }
-
-    //         ParseTree c = node.getChild(i);
-
-    //         if ((node instanceof cqlParser.TupleSelectorContext || node instanceof cqlParser.TupleTypeSpecifierContext)
-    //                 && c instanceof TerminalNodeImpl) {
-    //             if (((TerminalNodeImpl) c).getSymbol().getText().equals("}")) {
-    //                 decreaseIndentLevel();
-    //                 newLine();
-    //             }
-    //         }
-
-    //         Object childResult = c.accept(this);
-    //         result = aggregateResult(result, childResult);
-    //     }
-
-    //     return result;
-    // }
-
+    /**
+     * Visit a Library. This method will be called for
+     * every node in the tree that is a Library.
+     *
+     * @param library     the Library
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitLibrary(Library library, ElmContext context) {
         reset();
@@ -323,37 +302,18 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         String version = library.getIdentifier().getVersion();
         output.append(currentSection + " " + id + " version " + "\'" + version + "\'");
         super.visitLibrary(library, context);
-        if(library.getUsings() != null && library.getUsings().getDef() != null && !library.getUsings().getDef().isEmpty()) {
-            library.getUsings().getDef().stream().forEach(using -> visitUsingDef(using, context));
-        }
-        if (library.getIncludes() != null && library.getIncludes().getDef() != null && !library.getIncludes().getDef().isEmpty()) {
-            library.getIncludes().getDef().stream().forEach(include -> visitIncludeDef(include, context));
-        }
-        if (library.getCodeSystems() != null && library.getCodeSystems().getDef() != null && !library.getCodeSystems().getDef().isEmpty()) {
-            library.getCodeSystems().getDef().stream().forEach(codeSystem -> visitCodeSystemDef(codeSystem, context));
-        }
-        if (library.getValueSets() != null && library.getValueSets().getDef() != null && !library.getValueSets().getDef().isEmpty()) {
-            library.getValueSets().getDef().stream().forEach(valueset -> visitValueSetDef(valueset, context));
-        }
-        if (library.getCodes() != null && library.getCodes().getDef() != null && !library.getCodes().getDef().isEmpty()) {
-            library.getCodes().getDef().stream().forEach(code -> visitCodeDef(code, context));
-        }
-        if (library.getConcepts() != null && library.getConcepts().getDef() != null && !library.getConcepts().getDef().isEmpty()) {
-            library.getConcepts().getDef().stream().forEach(concept -> visitConceptDef(concept, context));
-        }
-        if (library.getParameters() != null && library.getParameters().getDef() != null && !library.getParameters().getDef().isEmpty()) {
-            library.getParameters().getDef().stream().forEach(param -> visitParameterDef(param, context));
-        }
-        if (library.getContexts() != null && library.getContexts().getDef() != null && !library.getContexts().getDef().isEmpty()) {
-            library.getContexts().getDef().stream().forEach(contextDef -> visitContextDef(contextDef, context));
-        }
-        if (library.getStatements() != null && library.getStatements().getDef() != null && !library.getStatements().getDef().isEmpty()) {
-            visitStatement(library.getStatements(), context);
-        }
-        // newLine();
+        newLine();
         return null;
     }
 
+    /**
+     * Visit a UsingDef. This method will be called for
+     * every node in the tree that is a UsingDef.
+     *
+     * @param using     the UsingDef
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitUsingDef(UsingDef using, ElmContext context) {
         if (!using.getLocalIdentifier().equals("System")) {
@@ -363,6 +323,14 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         return super.visitUsingDef(using, context);
     }
 
+    /**
+     * Visit a IncludeDef. This method will be called for
+     * every node in the tree that is a IncludeDef.
+     *
+     * @param include     the IncludeDef
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitIncludeDef(IncludeDef include, ElmContext context) {
         newConstruct("include");
@@ -376,19 +344,33 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         return super.visitIncludeDef(include, context);
     }
 
+    /**
+     * Visit a CodeSystemDef. This method will be called for
+     * every node in the tree that is a CodeSystemDef.
+     *
+     * @param codeSystem     the CodeSystemDef
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitCodeSystemDef(CodeSystemDef codeSystem, ElmContext context) {
         newConstruct("codesystem");
-        if (codeSystem.getAccessLevel() != null) {
-            visitAccessModifier(codeSystem.getAccessLevel(), context);
-        }
+        super.visitCodeSystemDef(codeSystem, context);
         output.append(String.format("%s \"%s\" : \'%s\'", currentSection, codeSystem.getName(), codeSystem.getId()));
         if (!Strings.isNullOrEmpty(codeSystem.getVersion())) {
             output.append(String.format("version %s", codeSystem.getVersion()));
         }
-        return super.visitCodeSystemDef(codeSystem, context);
+        return null;
     }
 
+    /**
+     * Visit a ValueSetDef. This method will be called for
+     * every node in the tree that is a ValueSetDef.
+     *
+     * @param valueset     the ValueSetDef
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitValueSetDef(ValueSetDef valueset, ElmContext context) {
         newConstruct("valueset");
@@ -410,9 +392,17 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
             }
             output.append(" }");
         }
-        return super.visitValueSetDef(valueset, context);
+        return null;
     }
 
+    /**
+     * Visit a CodeSystemRef. This method will be called for
+     * every node in the tree that is a CodeSystemRef.
+     *
+     * @param codeSystem     the CodeSystemRef
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitCodeSystemRef(CodeSystemRef codeSystem, ElmContext context) {
         output.append(" ");
@@ -423,6 +413,15 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         return null;
     }
 
+    /**
+     * Visit a CodeDef. This method will be called for
+     * every node in the tree that is a CodeDef.
+     *
+     * @param code     the CodeDef
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
+    @Override
     public Void visitCodeDef(CodeDef code, ElmContext context) {
         newConstruct("code");
         if (code.getAccessLevel() != null) {
@@ -436,31 +435,71 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         return null;
     }
 
+    /**
+     * Visit a ConceptDef. This method will be called for
+     * every node in the tree that is a ConceptDef.
+     *
+     * @param concept     the ConceptDef
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     public Void visitConceptDef(ConceptDef concept, ElmContext context) {
         newConstruct("concept");
         return null;
     }
 
+    /**
+     * Visit a ParameterDef. This method will be called for
+     * every node in the tree that is a ParameterDef.
+     *
+     * @param parameter     the ParamterDef
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitParameterDef(ParameterDef parameter, ElmContext context) {
         newConstruct("parameter");
         return super.visitParameterDef(parameter, context);
     }
 
+    /**
+     * Visit a IdentifierRef. This method will be called for
+     * every node in the tree that is a IdentifierRef.
+     *
+     * @param identifier     the IdentifierRef
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitIdentifierRef(IdentifierRef identifier, ElmContext context) {
         return super.visitIdentifierRef(identifier, context);
     }
 
+    /**
+     * Visit AccessModifier. This method will be called for
+     * every node in the tree that is a AccessModifier.
+     *
+     * @param access     the AccessModifier
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     public Void visitAccessModifier(AccessModifier access, ElmContext context) {
         if (access.equals(AccessModifier.PRIVATE)) {
             output.append("private ");
         } else {
-            // default to nothing for now.
+            logger.info("Default cql output to ignore public access modifier");
         }
         return null;
     }
 
+    /**
+     * Visit a TypeSpecifier. This method will be called for
+     * every node in the tree that is a TypeSpecifier.
+     *
+     * @param typeSpecifier     the TypeSpecifier
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitTypeSpecifier(TypeSpecifier typeSpecifier, ElmContext context) {
         enterTypeSpecifier();
@@ -471,28 +510,68 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         }
     }
 
+    /**
+     * Visit a NamedTypeSpecifier. This method will be called for
+     * every node in the tree that is a NamedTypeSpecifier.
+     *
+     * @param namedTypeSpecifier     the NamedTypeSpecifier
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitNamedTypeSpecifier(NamedTypeSpecifier namedTypeSpecifier, ElmContext context) {
         output.append(" " + namedTypeSpecifier.getResultType().toLabel());
         return super.visitNamedTypeSpecifier(namedTypeSpecifier, context);
     }
 
+    /**
+     * Visit a ListTypeSpecifier. This method will be called for
+     * every node in the tree that is a ListTypeSpecifier.
+     *
+     * @param typeSpecifier     the ListTypeSpecifier
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitListTypeSpecifier(ListTypeSpecifier typeSpecifier, ElmContext context) {
         return super.visitListTypeSpecifier(typeSpecifier, context);
     }
-
+  
+    /**
+     * Visit a IntervalTypeSpecifier. This method will be called for
+     * every node in the tree that is a IntervalTypeSpecifier.
+     *
+     * @param intervalTypeSpecifier     the IntervalTypeSpecifier
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitIntervalTypeSpecifier(IntervalTypeSpecifier intervalTypeSpecifier, ElmContext context) {
         return super.visitIntervalTypeSpecifier(intervalTypeSpecifier, context);
     }
 
+    /**
+     * Visit a TupleTypeSpecifier. This method will be called for
+     * every node in the tree that is a TupleTypeSpecifier.
+     *
+     * @param typeSpecifier     the TupleTypeSpecifier
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitTupleTypeSpecifier(TupleTypeSpecifier typeSpecifier, ElmContext context) {
         isFirstTupleElement = true;
         return super.visitTupleTypeSpecifier(typeSpecifier, context);
     }
 
+    /**
+     * Visit a TupleElementDefinition. This method will be called for
+     * every node in the tree that is a TupleElementDefinition.
+     *
+     * @param tuple     the TupleElementDefinition
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitTupleElementDefinition(TupleElementDefinition tuple, ElmContext context) {
         if (isFirstTupleElement) {
@@ -503,88 +582,102 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         return super.visitTupleElementDefinition(tuple, context);
     }
 
+    /**
+     * Visit a ChoiceTypeSpecifier. This method will be called for
+     * every node in the tree that is a ChoiceTypeSpecifier.
+     *
+     * @param choice     the ChoiceTypeSpecifier
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     public Void visitChoiceTypeSpecifier(ChoiceTypeSpecifier choice, ElmContext context) {
         return null;
     }
 
-    public Void visitStatement(Statements statements, ElmContext context) {
+    /**
+     * Visit Statements. This method will be called for
+     * every node in the tree that is a Statements.
+     *
+     * @param statements     the Statements
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
+    public Void visitStatements(Statements statements, ElmContext context) {
         newConstruct("statement");
-        Object result = "TODO";//defaultResult();
         int n = statements.getDef().size();
         for (int i=0; i<n; i++) {
-            // if (!shouldVisitNextChild(statements.get(i), result)) {
-            //     break;
-            // }
-
             Element c = statements.getDef().get(i);
             if (c instanceof ExpressionDef) {
                 enterClause();
                 try {
-                    Object childResult = visitExpressionDef((ExpressionDef)c, context);
-                    result = childResult;
-                    // result = aggregateResult(result, childResult);
+                    visitExpressionDef((ExpressionDef)c, context);
                 }
                 finally {
                     exitClause();
                 }
             } else if (c instanceof ContextDef) {
-                Object childResult = visitContextDef((ContextDef)c, context);
-                result = childResult;
+                visitContextDef((ContextDef)c, context);
             } else if (c instanceof FunctionDef) {
-                Object childResult = visitFunctionDef((FunctionDef)c, context);
-                result = childResult;
+                visitFunctionDef((FunctionDef)c, context);
             }
         }
-
         return null;
     }
 
+    /**
+     * Visit ExpressionDef. This method will be called for
+     * every node in the tree that is a ExpressionDef.
+     *
+     * @param expressionDef     the ExpressionDef
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
+    @Override
     public Void visitExpressionDef(ExpressionDef expressionDef, ElmContext context) {
         newConstruct("statement");
         output.append("define");
         if (expressionDef.getAccessLevel() != null) {
             visitAccessModifier(expressionDef.getAccessLevel(), context);
         }
-        if (expressionDef.getName().equals("Patient has a discharge disposition of-6ff8beb15ce0add65b41d080669c199b")){
-            System.out.println("Units:-81c2ddf471455503cd0e601e");
-        }
         output.append(String.format(" \"%s\":", expressionDef.getName()));
+        enterClause();
         if (expressionDef.getExpression() != null) {
-            visitExpression(expressionDef.getExpression(), context);
+            visitElement(expressionDef.getExpression(), context);
         }
+        if (expressionDef instanceof FunctionDef) {
+            visitFunctionDef((FunctionDef)expressionDef, context);
+        }
+        exitClause();
         return null;
     }
 
+    /**
+     * Visit ContextDef. This method will be called for
+     * every node in the tree that is a ContextDef.
+     *
+     * @param contextDef     the ContextDef
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     public Void visitContextDef(ContextDef contextDef, ElmContext context) {
         newConstruct("context");
         output.append(String.format("%s %s", currentSection, contextDef.getName()));
-        //System.out.println(output.toString());
-        return null;
+        return super.visitContextDef(contextDef, context);
     }
 
+    /**
+     * Visit FunctionDef. This method will be called for
+     * every node in the tree that is a FunctionDef.
+     *
+     * @param function     the FunctionDef
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitFunctionDef(FunctionDef function, ElmContext context) {
         newConstruct("statement");
-
         if (function.getAccessLevel() != null) {
             visitAccessModifier(function.getAccessLevel(), context);
-        }
-        Object result = "TODO"; // defaultResult();
-        int n = function.getOperand().size();
-        boolean clauseEntered = false;
-        try {
-            for (int i = 0; i < n; i++) {
-                // if (!shouldVisitNextChild(ctx, result)) {
-                //     break;
-                // }
-
-                OperandDef c = function.getOperand().get(i);
-            }
-        }
-        finally {
-            if (clauseEntered) {
-                exitClause();
-            }
         }
         if (function.getExpression() != null) {
             visitExpression(function.getExpression(), context);
@@ -596,47 +689,74 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         return null;
     }
 
+    /**
+     * Visit OperandDef. This method will be called for
+     * every node in the tree that is a OperandDef.
+     *
+     * @param operand     the OperandDef
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitOperandDef(OperandDef operand, ElmContext context) {
         return super.visitOperandDef(operand, context);
     }
 
+    /**
+     * Visit AliasedQuerySource. This method will be called for
+     * every node in the tree that is a AliasedQuerySource.
+     *
+     * @param source     the AliasedQuerySource
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitAliasedQuerySource(AliasedQuerySource source, ElmContext context) {
         try {
-            output.append("(");
             if (!(source.getExpression() instanceof Retrieve)) {
                 enterClause();
+                output.append("(");
             }
-            visitExpression(source.getExpression(), context);
+            super.visitAliasedQuerySource(source, context);
         } finally {
             if (!(source.getExpression() instanceof Retrieve)) {
                 exitClause();
                 newLine();
+                output.append(")");
             }
-            output.append(") ");
         }
         output.append(" " + source.getAlias());
-        return super.visitAliasedQuerySource(source, context);
+        return null;
     }
 
+    /**
+     * Visit AliasRef. This method will be called for
+     * every node in the tree that is a AliasRef.
+     *
+     * @param alias     the AliasRef
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitAliasRef(AliasRef alias, ElmContext context) {
         output.append(" " + alias.getName());
         return super.visitAliasRef(alias, context);
     }
 
+    /**
+     * Visit RelationshipClause. This method will be called for
+     * every node in the tree that is a RelationshipClause.
+     *
+     * @param relationship     the RelationshipClause
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitRelationshipClause(RelationshipClause relationship, ElmContext context) {
-        Object result = "TODO";// defaultResult();
         boolean clauseEntered = false;     
         try {
             enterClause();
-            if (relationship instanceof With) {
-                visitWith((With) relationship, context);
-            } else if (relationship instanceof Without) {
-                visitWithout((Without) relationship, context);
-            }
+            super.visitRelationshipClause(relationship, context);
             clauseEntered = true;
         }
         finally {
@@ -647,18 +767,42 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         return null;
     }
 
+    /**
+     * Visit With. This method will be called for
+     * every node in the tree that is a With.
+     *
+     * @param with     the With
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitWith(With with, ElmContext context) {
         output.append(String.format("with"));
         return null;
     }
 
+    /**
+     * Visit Without. This method will be called for
+     * every node in the tree that is a Without.
+     *
+     * @param without     the Without
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitWithout(Without without, ElmContext context) {
         output.append(String.format("without"));
         return null;
     }
 
+    /**
+     * Visit Retrieve. This method will be called for
+     * every node in the tree that is a Retrieve.
+     *
+     * @param retrieve     the Retrieve
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitRetrieve(Retrieve retrieve, ElmContext context) {
         enterRetrieve();
@@ -673,22 +817,24 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
                     output.append(" :");
                 }
                 output.append(" ");
-                //TODO: ToList should exist in UnaryExpression super Visitor
-                if (retrieve.getCodes() instanceof ToList) {
-                    //System.out.println(output.toString());
-                    visitToList((ToList)retrieve.getCodes(), context);
-                } else {
-                    visitExpression(retrieve.getCodes(), context);
-                }
+                visitElement(retrieve.getCodes(), context);
             }
             output.append("]");
-            return super.visitRetrieve(retrieve, context);
+            return null;
         }
         finally {
             exitRetrieve();
         }
     }
 
+    /**
+     * Visit Query. This method will be called for
+     * every node in the tree that is a Query.
+     *
+     * @param query     the Query
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitQuery(Query query, ElmContext context) {
         boolean internalValidation = false;
@@ -711,7 +857,6 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
                 query.getLet().stream().forEach(let -> visitLetClause(let, context));
                 exitClause();
             }
-            //System.out.println(output.toString());
             if (query.getRelationship() != null && !query.getRelationship().isEmpty()) {
                 query.getRelationship().stream().forEach(relationship -> visitRelationshipClause(relationship, context));
             }
@@ -725,25 +870,33 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
                 visitSortClause(query.getSort(), context);
             }
         }
-        return super.visitQuery(query, context);
+        return null;
     }
 
+    /**
+     * Visit ToList. This method will be called for
+     * every node in the tree that is a ToList.
+     *
+     * @param toList     the ToList
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
+    @Override
     public Void visitToList(ToList toList, ElmContext context) {
         output.append("{ ");
-        //TODO: ToList should exist in UnaryExpression super Visitor
-        if (toList.getOperand() instanceof ToList) {
-            visitToList((ToList)toList.getOperand(), context);
-        } else {
-            if (toList.getOperand() instanceof CodeRef) {
-                visitCodeRef((CodeRef)toList.getOperand(), context);
-            } else {
-                visitExpression(toList.getOperand(), context);
-            }
-        }
+        super.visitElement(toList.getOperand(), context);
         output.append(" }");
         return null;
     }
 
+    /**
+     * Visit Union. This method will be called for
+     * every node in the tree that is a Union.
+     *
+     * @param union     the Union
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitUnion(Union union, ElmContext context) {
         int operandCount = 0;
@@ -763,35 +916,61 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         return null;
     }
 
+    /**
+     * Visit Intersect. This method will be called for
+     * every node in the tree that is a Intersect.
+     *
+     * @param intersect     the Intersect
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitIntersect(Intersect intersect, ElmContext context) {
         return null;
     }
 
+    /**
+     * Visit Except. This method will be called for
+     * every node in the tree that is a Except.
+     *
+     * @param except     the Except
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitExcept(Except except, ElmContext context) {
         return null;
     }
 
+    /**
+     * Visit LetClause. This method will be called for
+     * every node in the tree that is a LetClause.
+     *
+     * @param let     the LetClause
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitLetClause(LetClause let, ElmContext context) {
         output.append(String.format(" %s: ", let.getIdentifier()));
-        // System.out.println(output.toString());
-        visitExpression(let.getExpression(), context);
+        super.visitLetClause(let, context);
         newLine();
         return null;
     }
 
-    // @Override
-    // public Object visitLetClauseItem(cqlParser.LetClauseItemContext ctx) {
-    //     return super.visitLetClauseItem(ctx);
-    // }
-
+    /**
+     * Visit WhereClause. This method will be called for
+     * WhereClause expression nodes.
+     *
+     * @param where     the Expression
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     public Void visitWhereClause(Expression where, ElmContext context) {
         try {
             enterClause();
             output.append("where");
-            visitExpression(where, context);
+            visitElement(where, context);
             return null;
         }
         finally {
@@ -799,11 +978,18 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         }
     }
 
+    /**
+     * Visit ReturnClause. This method will be called for
+     * every node in the tree that is a ReturnClause.
+     *
+     * @param returnClause     the ReturnClause
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitReturnClause(ReturnClause returnClause, ElmContext context) {
         enterClause();
         output.append("return");
-        visitExpression(returnClause.getExpression(), context);
         try {
             return super.visitReturnClause(returnClause, context);
         }
@@ -812,6 +998,14 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         }
     }
 
+    /**
+     * Visit SortClause. This method will be called for
+     * every node in the tree that is a SortClause.
+     *
+     * @param sortClause     the SortClause
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitSortClause(SortClause sortClause, ElmContext context) {
         enterClause();
@@ -823,162 +1017,316 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         }
     }
 
+    /**
+     * Visit SortDirection. This method will be called for
+     * every node in the tree that is a SortDirection.
+     *
+     * @param sortDirection     the SortDirection
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     public Void visitSortDirection(SortDirection sortDirection, ElmContext context) {
         return null;
     }
 
+    /**
+     * Visit SortByItem. This method will be called for
+     * every node in the tree that is a SortByItem.
+     *
+     * @param sortByItem     the SortByItem
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitSortByItem(SortByItem sortByItem, ElmContext context) {
-        return super.visitSortByItem(sortByItem, context);
+        return super.visitElement(sortByItem, context);
     }
 
+    /**
+     * Visit DurationBetween. This method will be called for
+     * every node in the tree that is a DurationBetween.
+     *
+     * @param durationBetween     the DurationBetween
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitDurationBetween(DurationBetween durationBetween, ElmContext context) {
-        return super.visitDurationBetween(durationBetween, context);
+        return super.visitElement(durationBetween, context);
     }
 
+    /**
+     * Visit Null. This method will be called for
+     * every node in the tree that is a Null.
+     *
+     * @param nullElement     the Null
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitNull(Null nullElement, ElmContext context) {
         output.append("null");
         return super.visitNull(nullElement, context);
     }
 
+    /**
+     * Visit Not. This method will be called for
+     * every node in the tree that is a Not.
+     *
+     * @param not     the Not
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitNot(Not not, ElmContext context) {
         output.append(" not ");
-        if (not.getOperand() instanceof AnyInValueSet) {
-            visitAnyInValueSet((AnyInValueSet) not.getOperand(), context);
-        } else {
-            visitExpression(not.getOperand(), context);
-        }
-        return super.visitNot(not, context);
+        return super.visitElement(not.getOperand(), context);
     }
 
+    /**
+     * Visit Equal. This method will be called for
+     * every node in the tree that is a Equal.
+     *
+     * @param equal     the Equal
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitEqual(Equal equal, ElmContext context) {
         output.append(" Equal(");
-        visitExpression(equal.getOperand().get(0), context);
+        visitElement(equal.getOperand().get(0), context);
         output.append(", ");
-        visitExpression(equal.getOperand().get(1), context);
+        visitElement(equal.getOperand().get(1), context);
         output.append(")");
-        //System.out.println(output.toString());
-        return super.visitEqual(equal, context);
+        return null;
     }
 
+    /**
+     * Visit Or. This method will be called for
+     * every node in the tree that is a Or.
+     *
+     * @param or     the Or
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitOr(Or or, ElmContext context) {
-        visitExpression(or.getOperand().get(0), context);
-        output.append(" or (");
-        enterClause();
-        visitExpression(or.getOperand().get(1), context);
-        exitClause();
+        visitElement(or.getOperand().get(0), context);
         newLine();
+        enterGroup();
+        output.append(" or (");
+        visitElement(or.getOperand().get(1), context);
+        exitGroup();
         output.append(")");
-        return super.visitOr(or, context);
+        return null;
     }
 
-    @Override
-    public Void visitBinaryExpression(BinaryExpression binary, ElmContext context) {
-        try {
-            enterClause();
-            return super.visitBinaryExpression(binary, context);
-        }
-        finally {
-            exitClause();
-        }
-    }
-
+    /**
+     * Visit Equivalent. This method will be called for
+     * every node in the tree that is a Equivalent.
+     *
+     * @param equivalent     the Equivalent
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitEquivalent(Equivalent equivalent, ElmContext context) {
-        visitExpression(equivalent.getOperand().get(0), context);
+        visitElement(equivalent.getOperand().get(0), context);
         output.append(" ~ ");
-        visitExpression(equivalent.getOperand().get(1), context);
-        return super.visitEquivalent(equivalent, context);
+        visitElement(equivalent.getOperand().get(1), context);
+        return null;
     }
 
+    /**
+     * Visit In. This method will be called for
+     * every node in the tree that is a In.
+     *
+     * @param in     the In
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitIn(In in, ElmContext context) {
-        visitExpression(in.getOperand().get(0), context);
+        visitElement(in.getOperand().get(0), context);
         output.append(" in ");
-        visitExpression(in.getOperand().get(1), context);
-        return super.visitIn(in, context);
+        visitElement(in.getOperand().get(1), context);
+        return null;
     }
 
+    /**
+     * Visit And. This method will be called for
+     * every node in the tree that is a And.
+     *
+     * @param and     the And
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitAnd(And and, ElmContext context) {
-        visitExpression(and.getOperand().get(0), context);
-        output.append(" and (");
-        enterClause();
-        visitExpression(and.getOperand().get(1), context);
-        exitClause();
+        visitElement(and.getOperand().get(0), context);
         newLine();
+        enterGroup();
+        output.append(" and (");
+        visitElement(and.getOperand().get(1), context);
+        exitGroup();
         output.append(")");
-        return super.visitAnd(and, context);
+        return null;
     }
 
+    /**
+     * Visit DifferenceBetween. This method will be called for
+     * every node in the tree that is a DifferenceBetween.
+     *
+     * @param differenceBetween     the DifferenceBetween
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitDifferenceBetween(DifferenceBetween differenceBetween, ElmContext context) {
         return super.visitDifferenceBetween(differenceBetween, context);
     }
 
+    /**
+     * Visit Exists. This method will be called for
+     * every node in the tree that is a Exists.
+     *
+     * @param exists     the Exists
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitExists(Exists exists, ElmContext context) {
-        enterClause();
         output.append("exists (");
-        enterClause();
-        visitExpression(exists.getOperand(), context);
+        visitElement(exists.getOperand(), context);
         exitClause();
         newLine();
         output.append(")");
-        exitClause();
-        //System.out.println(output.toString());
-        return super.visitExists(exists, context);
+        return null;
     }
 
+    /**
+     * Visit Implies. This method will be called for
+     * every node in the tree that is a Implies.
+     *
+     * @param implies     the Implies
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     public Void visitImplies(Implies implies, ElmContext context) {
         return null;
     }
 
+    /**
+     * Visit DateTimePrecision. This method will be called for
+     * every node in the tree that is a DateTimePrecision.
+     *
+     * @param dateTimePrecision     the DateTimePrecision
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     public Void visitDateTimePrecision(DateTimePrecision dateTimePrecision, ElmContext context) {
         return null;
     }
 
+    /**
+     * Visit DateTimeComponentFrom. This method will be called for
+     * every node in the tree that is a DateTimeComponentFrom.
+     *
+     * @param dateTime     the DateTimeComponentFrom
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitDateTimeComponentFrom(DateTimeComponentFrom dateTime, ElmContext context) {
         return super.visitDateTimeComponentFrom(dateTime, context);
     }
 
+    /**
+     * Visit Today. This method will be called for
+     * every node in the tree that is a Today.
+     *
+     * @param today     the Today
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitToday(Today today, ElmContext context) {
         output.append(" Today()");
-        //System.out.println(output.toString());
         return super.visitToday(today, context);
     }
 
+    /**
+     * Visit Add. This method will be called for
+     * every node in the tree that is a Add.
+     *
+     * @param add     the Add
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitAdd(Add add, ElmContext context) {
         return super.visitAdd(add, context);
     }
 
+    /**
+     * Visit Width. This method will be called for
+     * every node in the tree that is a Width.
+     *
+     * @param width     the Width
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitWidth(Width width, ElmContext context) {
         return super.visitWidth(width, context);
     }
 
+    /**
+     * Visit Time. This method will be called for
+     * every node in the tree that is a Time.
+     *
+     * @param time     the Time
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitTime(Time time, ElmContext context) {
         return super.visitTime(time, context);
     }
 
+    /**
+     * Visit If. This method will be called for
+     * every node in the tree that is a If.
+     *
+     * @param ifExpression     the If
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitIf(If ifExpression, ElmContext context) {
         return super.visitIf(ifExpression, context);
     }
 
+    /**
+     * Visit Expand. This method will be called for
+     * every node in the tree that is a Expand.
+     *
+     * @param expand     the Expand
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     public Void visitExpand(Expand expand, ElmContext context) {
         return null;
     }
 
+    /**
+     * Visit Flatten. This method will be called for
+     * every node in the tree that is a Flatten.
+     *
+     * @param flatten     the Flatten
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitFlatten(Flatten flatten, ElmContext context) {
         output.append("flatten (");
@@ -990,19 +1338,33 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         return null;
     }
 
+    /**
+     * Visit Distinct. This method will be called for
+     * every node in the tree that is a Distinct.
+     *
+     * @param distinct     the Distinct
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitDistinct(Distinct distinct, ElmContext context) {
-        // could be a keyword in returnClause but adding parentheses to be safe
         output.append("distinct (");
         enterClause();
         visitExpression(distinct.getOperand(), context);
         exitClause();
         newLine();
         output.append(")");
-        //System.out.println(output.toString());
-        return super.visitDistinct(distinct, context);
+        return null;
     }
 
+    /**
+     * Visit First. This method will be called for
+     * every node in the tree that is a First.
+     *
+     * @param first     the First
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitFirst(First first, ElmContext context) {
         output.append(" First (");
@@ -1011,9 +1373,17 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         exitClause();
         newLine();
         output.append(")");
-        return super.visitFirst(first, context);
+        return null;
     }
 
+    /**
+     * Visit Last. This method will be called for
+     * every node in the tree that is a Last.
+     *
+     * @param last     the Last
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitLast(Last last, ElmContext context) {
         output.append(" Last (");
@@ -1022,9 +1392,17 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         exitClause();
         newLine();
         output.append(")");
-        return super.visitLast(last, context);
+        return null;
     }
 
+    /**
+     * Visit Split. This method will be called for
+     * every node in the tree that is a Split.
+     *
+     * @param split     the Split
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitSplit(Split split, ElmContext context) {
         output.append("Split (");
@@ -1032,35 +1410,74 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         output.append(", ");
         visitExpression(split.getSeparator(), context);
         output.append(")");
-        //System.out.println(output.toString());
-        return super.visitSplit(split, context);
+        return null;
     }
 
+    /**
+     * Visit AnyInValueSet. This method will be called for
+     * every node in the tree that is a AnyInValueSet.
+     *
+     * @param anyInValueSet     the AnyInValueSet
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
+    @Override
     public Void visitAnyInValueSet(AnyInValueSet anyInValueSet, ElmContext context) {
         output.append("AnyInValueSet(");
         visitExpression(anyInValueSet.getCodes(), context);
         output.append(", ");
         visitExpression(anyInValueSet.getValueset(), context);
         output.append(")");
-        //System.out.println(output.toString());
         return null;
     }
 
+    /**
+     * Visit Collapse. This method will be called for
+     * every node in the tree that is a Collapse.
+     *
+     * @param collapse     the Collapse
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitCollapse(Collapse collapse, ElmContext context) {
         return null;
     }
 
+    /**
+     * Visit Predecessor. This method will be called for
+     * every node in the tree that is a Predecessor.
+     *
+     * @param predecessor     the Predecessor
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitPredecessor(Predecessor predecessor, ElmContext context) {
         return super.visitPredecessor(predecessor, context);
     }
 
+    /**
+     * Visit Multiply. This method will be called for
+     * every node in the tree that is a Multiply.
+     *
+     * @param multiply     the Multiply
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitMultiply(Multiply multiply, ElmContext context) {
         return super.visitMultiply(multiply, context);
     }
 
+    /**
+     * Visit AggregateExpression. This method will be called for
+     * every node in the tree that is a AggregateExpression.
+     *
+     * @param expression     the AggregateExpression
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitAggregateExpression(AggregateExpression expression, ElmContext context) {
         if (expression instanceof Count) {
@@ -1071,6 +1488,14 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         return super.visitAggregateExpression(expression, context);
     }
 
+    /**
+     * Visit Case. This method will be called for
+     * every node in the tree that is a Case.
+     *
+     * @param caseExpression     the Case
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitCase(Case caseExpression, ElmContext context) {
             newLine();
@@ -1081,16 +1506,40 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         return super.visitCase(caseExpression, context);
     }
 
+    /**
+     * Visit Power. This method will be called for
+     * every node in the tree that is a Power.
+     *
+     * @param power     the Power
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitPower(Power power, ElmContext context) {
         return super.visitPower(power, context);
     }
 
+    /**
+     * Visit Successor. This method will be called for
+     * every node in the tree that is a Successor.
+     *
+     * @param successor     the Successor
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitSuccessor(Successor successor, ElmContext context) {
         return super.visitSuccessor(successor, context);
     }
 
+    /**
+     * Visit CaseItem. This method will be called for
+     * every node in the tree that is a CaseItem.
+     *
+     * @param caseItem     the CaseItem
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitCaseItem(CaseItem caseItem, ElmContext context) {
         try {
@@ -1101,6 +1550,14 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         }
     }
 
+    /**
+     * Visit Less. This method will be called for
+     * every node in the tree that is a Less.
+     *
+     * @param less     the Less
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitLess(Less less, ElmContext context) {
         int operandCount = 0;
@@ -1108,12 +1565,20 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
             if (operandCount > 0) {
                 output.append(" < ");
             }
-            visitExpression(expression, context);
+            visitElement(expression, context);
             operandCount++;
         }
-        return super.visitLess(less, context);
+        return null;
     }
 
+    /**
+     * Visit LessOrEqual. This method will be called for
+     * every node in the tree that is a LessOrEqual.
+     *
+     * @param lessOrElement     the LessOrEqual
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitLessOrEqual(LessOrEqual lessOrElement, ElmContext context) {
         int operandCount = 0;
@@ -1121,12 +1586,20 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
             if (operandCount > 0) {
                 output.append(" <= ");
             }
-            visitExpression(expression, context);
+            visitElement(expression, context);
             operandCount++;
         }
-        return super.visitLessOrEqual(lessOrElement, context);
+        return null;
     }
 
+    /**
+     * Visit Greater. This method will be called for
+     * every node in the tree that is a Greater.
+     *
+     * @param greater     the Greater
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitGreater(Greater greater, ElmContext context) {
         int operandCount = 0;
@@ -1134,12 +1607,20 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
             if (operandCount > 0) {
                 output.append(" > ");
             }
-            visitExpression(expression, context);
+            visitElement(expression, context);
             operandCount++;
         }
-        return super.visitGreater(greater, context);
+        return null;
     }
 
+    /**
+     * Visit GreaterOrEqual. This method will be called for
+     * every node in the tree that is a GreaterOrEqual.
+     *
+     * @param greaterOrElement     the GreaterOrEqual
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitGreaterOrEqual(GreaterOrEqual greaterOrElement, ElmContext context) {
         int operandCount = 0;
@@ -1147,56 +1628,136 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
             if (operandCount > 0) {
                 output.append(" >= ");
             }
-            visitExpression(expression, context);
+            visitElement(expression, context);
             operandCount++;
         }
-        return super.visitGreaterOrEqual(greaterOrElement, context);
+        return null;
     }
 
+    /**
+     * Visit Includes. This method will be called for
+     * every node in the tree that is a Includes.
+     *
+     * @param includes     the Includes
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitIncludes(Includes includes, ElmContext context) {
         return super.visitIncludes(includes, context);
     }
 
+    /**
+     * Visit IncludedIn. This method will be called for
+     * every node in the tree that is a IncludedIn.
+     *
+     * @param includedIn     the IncludedIn
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitIncludedIn(IncludedIn includedIn, ElmContext context) {
         return super.visitIncludedIn(includedIn, context);
     }
 
+    /**
+     * Visit BinaryExpression. This method will be called for
+     * every node in the tree that is a BinaryExpression.
+     *
+     * @param beforeOrAfter     the BinaryExpression
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     public Object visitBeforeOrAfter(BinaryExpression beforeOrAfter, ElmContext context) {
         return null;
     }
 
+    /**
+     * Visit Before. This method will be called for
+     * every node in the tree that is a Before.
+     *
+     * @param before     the Before
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitBefore(Before before, ElmContext context) {
         return super.visitBefore(before, context);
     }
 
+    /**
+     * Visit After. This method will be called for
+     * every node in the tree that is a After.
+     *
+     * @param after     the After
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitAfter(After after, ElmContext context) {
         return super.visitAfter(after, context);
     }
 
+    /**
+     * Visit Meets. This method will be called for
+     * every node in the tree that is a Meets.
+     *
+     * @param meet     the Meets
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitMeets(Meets meet, ElmContext context) {
         return super.visitMeets(meet, context);
     }
 
+    /**
+     * Visit Overlaps. This method will be called for
+     * every node in the tree that is a Overlaps.
+     *
+     * @param overlaps     the Overlaps
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitOverlaps(Overlaps overlaps, ElmContext context) {
         return super.visitOverlaps(overlaps, context);
     }
 
+    /**
+     * Visit Starts. This method will be called for
+     * every node in the tree that is a Starts.
+     *
+     * @param starts     the Starts
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitStarts(Starts starts, ElmContext context) {
         return super.visitStarts(starts, context);
     }
 
+    /**
+     * Visit Ends. This method will be called for
+     * every node in the tree that is a Ends.
+     *
+     * @param ends     the Ends
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitEnds(Ends ends, ElmContext context) {
         return super.visitEnds(ends, context);
     }
 
+    /**
+     * Visit Literal. This method will be called for
+     * every node in the tree that is a Literal.
+     *
+     * @param literal     the Literal
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitLiteral(Literal literal, ElmContext context) {
         if (literal.getResultType().toLabel().equals("System.String")) {
@@ -1207,18 +1768,33 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         return super.visitLiteral(literal, context);
     }
 
+    /**
+     * Visit Interval. This method will be called for
+     * every node in the tree that is a Interval.
+     *
+     * @param interval     the Interval
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitInterval(Interval interval, ElmContext context) {
         return super.visitInterval(interval, context);
     }
 
+    /**
+     * Visit FunctionRef. This method will be called for
+     * every node in the tree that is a FunctionRef.
+     *
+     * @param function     the FunctionRef
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitFunctionRef(FunctionRef function, ElmContext context) {
         if (function.getLibraryName() != null && function.getLibraryName().equals("FHIRHelpers")) {
-            function.getOperand().stream().forEach(operand -> visitExpression(operand, context));
+            function.getOperand().stream().forEach(operand -> visitElement(operand, context));
         } else if (function.getLibraryName() != null) {
             if (function.getLibraryName().equals("System")) {
-                //log system function
                 output.append(String.format(" %s(", function.getName()));
                 commaDeliminatedOperandVisitation(function, context);
                 output.append(")");
@@ -1233,7 +1809,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
             commaDeliminatedOperandVisitation(function, context);
             output.append(")");
         }
-        return null; //result;
+        return null;
     }
 
     private void commaDeliminatedOperandVisitation(FunctionRef function, ElmContext context) {
@@ -1242,15 +1818,19 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
             if (operandCount > 0) {
                 output.append(", ");
             }
-            visitExpression(operand, context);
+            visitElement(operand, context);
             operandCount++;
         }
     }
 
-    public Object visitParamList(cqlParser.ParamListContext ctx) {
-        return null;
-    }
-
+    /**
+     * Visit Quantity. This method will be called for
+     * every node in the tree that is a Quantity.
+     *
+     * @param quantity     the Quantity
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitQuantity(Quantity quantity, ElmContext context) {
         if (quantity.getValue() != null) {
@@ -1259,23 +1839,30 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         if (quantity.getUnit() != null) {
             output.append(" \'" + quantity.getUnit() + "\'");
         }
-        //System.out.println(output.toString());
         return super.visitQuantity(quantity, context);
     }
 
+    /**
+     * Visit Property. This method will be called for
+     * every node in the tree that is a Property.
+     *
+     * @param property     the Property
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitProperty(Property property, ElmContext context) {
         if (property.getSource() != null) {
             if (property.getSource() instanceof As) {
                 output.append("(");
-                visitExpression(property.getSource(), context);
+                visitElement(property.getSource(), context);
                 output.append(")");
             } else {
-                visitExpression(property.getSource(), context);
+                visitElement(property.getSource(), context);
             }
         } else if (!Strings.isNullOrEmpty(property.getScope())) {
             if (property.getScope().equals("$this")) {
-                // log internalValidation
+                logger.info("Found internal scope, outputting property path only");
             } else {
                 output.append(" " + property.getScope());
             }
@@ -1284,17 +1871,33 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
             .filter(split -> !(split.equals("Observation") || split.equals("Condition") || split.equals("System")))
             .collect(Collectors.joining("."));
         output.append(String.format(".%s", removeResourceType));
-        return super.visitProperty(property, context);
+        return null;
     }
 
+    /**
+     * Visit InValueSet. This method will be called for
+     * every node in the tree that is a InValueSet.
+     *
+     * @param inValueSet     the InValueSet
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override 
     public Void visitInValueSet(InValueSet inValueSet, ElmContext context) {
         visitExpression(inValueSet.getCode(), context);
         output.append(" in");
         visitExpression(inValueSet.getValueset(), context);
-        return super.visitInValueSet(inValueSet, context);
+        return null;
     }
 
+    /**
+     * Visit ExpressionRef. This method will be called for
+     * every node in the tree that is a ExpressionRef.
+     *
+     * @param expressionRef     the ExpressionRef
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitExpressionRef(ExpressionRef expressionRef, ElmContext context) {
         if (expressionRef instanceof FunctionRef) {
@@ -1306,9 +1909,17 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
                 output.append(String.format(" \"%s\"", expressionRef.getName()));
             }
         }
-        return super.visitExpressionRef(expressionRef, context);
+        return null;
     }
 
+    /**
+     * Visit ValueSetRef. This method will be called for
+     * every node in the tree that is a ValueSetRef.
+     *
+     * @param valueSetRef     the ValueSetRef
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitValueSetRef(ValueSetRef valueSetRef, ElmContext context) {
         if (valueSetRef.getLibraryName() != null) {
@@ -1316,9 +1927,17 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         } else {
             output.append(" \"" + valueSetRef.getName() + "\"");
         }
-        return super.visitValueSetRef(valueSetRef, context);
+        return null;
     }
 
+    /**
+     * Visit CodeRef. This method will be called for
+     * every node in the tree that is a CodeRef.
+     *
+     * @param codeRef     the CodeRef
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     public Void visitCodeRef(CodeRef codeRef, ElmContext context) {
         if (codeRef.getLibraryName() != null) {
             output.append(String.format("\"%s\".\"%s\"", codeRef.getLibraryName(), codeRef.getName()));
@@ -1328,40 +1947,62 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         return null;
     }
 
+    /**
+     * Visit ToConcept. This method will be called for
+     * every node in the tree that is a ToConcept.
+     *
+     * @param toConcept     the ToConcept
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitToConcept(ToConcept toConcept, ElmContext context) {
         output.append("ToConcept(");
-        if (toConcept.getOperand() instanceof CodeRef) {
-            visitCodeRef((CodeRef)toConcept.getOperand(), context);
-        } else {
-            visitExpression(toConcept.getOperand(), context);
-        }
+        visitElement(toConcept.getOperand(), context);
         output.append(")");
-        return super.visitToConcept(toConcept, context);
+        return null;
     }
 
+    /**
+     * Visit ToQuantity. This method will be called for
+     * every node in the tree that is a ToQuantity.
+     *
+     * @param toQuantity     the ToQuantity
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitToQuantity(ToQuantity toQuantity, ElmContext context) {
         output.append("ToQuantity(");
-        visitExpression(toQuantity.getOperand(), context);
+        visitElement(toQuantity.getOperand(), context);
         output.append(")");
         return super.visitToQuantity(toQuantity, context);
     }
 
+    /**
+     * Visit ToDecimal. This method will be called for
+     * every node in the tree that is a ToDecimal.
+     *
+     * @param toDecimal     the ToDecimal
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitToDecimal(ToDecimal toDecimal, ElmContext context) {
         output.append("ToDecimal(");
-        visitExpression(toDecimal.getOperand(), context);
+        visitElement(toDecimal.getOperand(), context);
         output.append(")");
         return super.visitToDecimal(toDecimal, context);
     }
 
-    @Override
-    public Void visitElement(Element elm, ElmContext context) {
-        if (elm instanceof CodeRef) return visitCodeRef((CodeRef) elm, context);
-        else return super.visitElement(elm, context);
-    }
-
+    /**
+     * Visit List. This method will be called for
+     * every node in the tree that is a List.
+     *
+     * @param list     the List
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitList(org.hl7.elm.r1.List list, ElmContext context) {
         output.append("{ ");
@@ -1380,28 +2021,161 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         return null;
     }
 
+    /**
+     * Visit As. This method will be called for
+     * every node in the tree that is a As.
+     *
+     * @param as     the As
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
     @Override
     public Void visitAs(As as, ElmContext context) {
-        visitExpression(as.getOperand(), context);
+        if (as.getOperand() != null) {
+            visitExpression(as.getOperand(), context);
+        }
         output.append(" as");
-        visitTypeSpecifier(as.getAsTypeSpecifier(), context);
-        return super.visitAs(as, context);
+        if (as.getAsTypeSpecifier() != null) {
+            visitElement(as.getAsTypeSpecifier(), context);
+        }
+        return null;
     }
 
-    private static class SyntaxErrorListener extends BaseErrorListener {
+    /**
+     * Visit UnaryExpression. This method will be called for
+     * every node in the tree that is a UnaryExpression.
+     *
+     * @param elm     the UnaryExpression
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
+    @Override
+    public Void visitUnaryExpression(UnaryExpression elm, ElmContext context) {
+        if (elm instanceof Abs) return visitAbs((Abs)elm, context);
+        else if (elm instanceof As) return visitAs((As)elm, context);
+        else if (elm instanceof Ceiling) return visitCeiling((Ceiling)elm, context);
+        else if (elm instanceof CanConvert) return visitCanConvert((CanConvert)elm, context);
+        else if (elm instanceof Convert) return visitConvert((Convert)elm, context);
+        else if (elm instanceof ConvertsToBoolean) return visitConvertsToBoolean((ConvertsToBoolean) elm, context);
+        else if (elm instanceof ConvertsToDate) return visitConvertsToDate((ConvertsToDate)elm, context);
+        else if (elm instanceof ConvertsToDateTime) return visitConvertsToDateTime((ConvertsToDateTime)elm, context);
+        else if (elm instanceof ConvertsToDecimal) return visitConvertsToDecimal((ConvertsToDecimal)elm, context);
+        else if (elm instanceof ConvertsToInteger) return visitConvertsToInteger((ConvertsToInteger)elm, context);
+        else if (elm instanceof ConvertsToLong) return visitConvertsToLong((ConvertsToLong)elm, context);
+        else if (elm instanceof ConvertsToQuantity) return visitConvertsToQuantity((ConvertsToQuantity)elm, context);
+        else if (elm instanceof ConvertsToRatio) return visitConvertsToRatio((ConvertsToRatio)elm, context);
+        else if (elm instanceof ConvertsToString) return visitConvertsToString((ConvertsToString)elm, context);
+        else if (elm instanceof ConvertsToTime) return visitConvertsToTime((ConvertsToTime)elm, context);
+        else if (elm instanceof DateFrom) return visitDateFrom((DateFrom)elm, context);
+        else if (elm instanceof DateTimeComponentFrom) return visitDateTimeComponentFrom((DateTimeComponentFrom)elm, context);
+        else if (elm instanceof Distinct) return visitDistinct((Distinct)elm, context);
+        else if (elm instanceof End) return visitEnd((End)elm, context);
+        else if (elm instanceof Exists) return visitExists((Exists)elm, context);
+        else if (elm instanceof Exp) return visitExp((Exp)elm, context);
+        else if (elm instanceof Flatten) return visitFlatten((Flatten)elm, context);
+        else if (elm instanceof Floor) return visitFloor((Floor)elm, context);
+        else if (elm instanceof Is) return visitIs((Is)elm, context);
+        else if (elm instanceof IsFalse) return visitIsFalse((IsFalse)elm, context);
+        else if (elm instanceof IsNull) return visitIsNull((IsNull)elm, context);
+        else if (elm instanceof IsTrue) return visitIsTrue((IsTrue)elm, context);
+        else if (elm instanceof Length) return visitLength((Length)elm, context);
+        else if (elm instanceof Ln) return visitLn((Ln)elm, context);
+        else if (elm instanceof Lower) return visitLower((Lower)elm, context);
+        else if (elm instanceof Negate) return visitNegate((Negate)elm, context);
+        else if (elm instanceof Not) return visitNot((Not)elm, context);
+        else if (elm instanceof PointFrom) return visitPointFrom((PointFrom)elm, context);
+        else if (elm instanceof Precision) return visitPrecision((Precision)elm, context);
+        else if (elm instanceof Predecessor) return visitPredecessor((Predecessor)elm, context);
+        else if (elm instanceof SingletonFrom) return visitSingletonFrom((SingletonFrom)elm, context);
+        else if (elm instanceof Size) return visitSize((Size)elm, context);
+        else if (elm instanceof Start) return visitStart((Start)elm, context);
+        else if (elm instanceof Successor) return visitSuccessor((Successor)elm, context);
+        else if (elm instanceof TimeFrom) return visitTimeFrom((TimeFrom)elm, context);
+        else if (elm instanceof TimezoneFrom) return visitTimezoneFrom((TimezoneFrom)elm, context);
+        else if (elm instanceof TimezoneOffsetFrom) return visitTimezoneOffsetFrom((TimezoneOffsetFrom)elm, context);
+        else if (elm instanceof ToBoolean) return visitToBoolean((ToBoolean)elm, context);
+        else if (elm instanceof ToConcept) return visitToConcept((ToConcept)elm, context);
+        else if (elm instanceof ToChars) return visitToChars((ToChars)elm, context);
+        else if (elm instanceof ToDate) return visitToDate((ToDate)elm, context);
+        else if (elm instanceof ToDateTime) return visitToDateTime((ToDateTime)elm, context);
+        else if (elm instanceof ToDecimal) return visitToDecimal((ToDecimal)elm, context);
+        else if (elm instanceof ToInteger) return visitToInteger((ToInteger)elm, context);
+        else if (elm instanceof ToLong) return visitToLong((ToLong)elm, context);
+        else if (elm instanceof ToList) return visitToList((ToList)elm, context);
+        else if (elm instanceof ToQuantity) return visitToQuantity((ToQuantity)elm, context);
+        else if (elm instanceof ToRatio) return visitToRatio((ToRatio)elm, context);
+        else if (elm instanceof ToString) return visitToString((ToString)elm, context);
+        else if (elm instanceof ToTime) return visitToTime((ToTime)elm, context);
+        else if (elm instanceof Truncate) return visitTruncate((Truncate)elm, context);
+        else if (elm instanceof Upper) return visitUpper((Upper)elm, context);
+        else if (elm instanceof Width) return visitWidth((Width)elm, context);
+        else return null;
+    }
 
-        private List<Exception> errors = new ArrayList<>();
-
-        @Override
-        public void syntaxError(Recognizer<?, ?> recognizer,
-                                Object offendingSymbol,
-                                int line, int charPositionInLine,
-                                String msg, RecognitionException e)
-        {
-            if (!((Token) offendingSymbol).getText().trim().isEmpty()) {
-                errors.add(new Exception(String.format("[%d:%d]: %s", line, charPositionInLine, msg)));
-            }
-        }
+    /**
+     * Visit BinaryExpression. This method will be called for
+     * every node in the tree that is a BinaryExpression.
+     *
+     * @param elm     the BinaryExpression
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
+    @Override
+    public Void visitBinaryExpression(BinaryExpression elm, ElmContext context) {
+        if (elm instanceof Add) return visitAdd((Add)elm, context);
+        else if (elm instanceof After) return visitAfter((After)elm, context);
+        else if (elm instanceof And) return visitAnd((And)elm, context);
+        else if (elm instanceof Before) return visitBefore((Before)elm, context);
+        else if (elm instanceof CanConvertQuantity) return visitCanConvertQuantity((CanConvertQuantity)elm, context);
+        else if (elm instanceof Contains) return visitContains((Contains)elm, context);
+        else if (elm instanceof ConvertQuantity) return visitConvertQuantity((ConvertQuantity)elm, context);
+        else if (elm instanceof Collapse) return visitCollapse((Collapse)elm, context);
+        else if (elm instanceof DifferenceBetween) return visitDifferenceBetween((DifferenceBetween)elm, context);
+        else if (elm instanceof Divide) return visitDivide((Divide)elm, context);
+        else if (elm instanceof DurationBetween) return visitDurationBetween((DurationBetween)elm, context);
+        else if (elm instanceof Ends) return visitEnds((Ends)elm, context);
+        else if (elm instanceof EndsWith) return visitEndsWith((EndsWith)elm, context);
+        else if (elm instanceof Equal) return visitEqual((Equal)elm, context);
+        else if (elm instanceof Equivalent) return visitEquivalent((Equivalent)elm, context);
+        else if (elm instanceof Expand) return visitExpand((Expand)elm, context);
+        else if (elm instanceof Greater) return visitGreater((Greater)elm, context);
+        else if (elm instanceof GreaterOrEqual) return visitGreaterOrEqual((GreaterOrEqual)elm, context);
+        else if (elm instanceof HighBoundary) return visitHighBoundary((HighBoundary)elm, context);
+        else if (elm instanceof Implies) return visitImplies((Implies)elm, context);
+        else if (elm instanceof In) return visitIn((In)elm, context);
+        else if (elm instanceof IncludedIn) return visitIncludedIn((IncludedIn)elm, context);
+        else if (elm instanceof Includes) return visitIncludes((Includes)elm, context);
+        else if (elm instanceof Indexer) return visitIndexer((Indexer)elm, context);
+        else if (elm instanceof Less) return visitLess((Less)elm, context);
+        else if (elm instanceof LessOrEqual) return visitLessOrEqual((LessOrEqual)elm, context);
+        else if (elm instanceof Log) return visitLog((Log)elm, context);
+        else if (elm instanceof LowBoundary) return visitLowBoundary((LowBoundary)elm, context);
+        else if (elm instanceof Matches) return visitMatches((Matches)elm, context);
+        else if (elm instanceof Meets) return visitMeets((Meets)elm, context);
+        else if (elm instanceof MeetsAfter) return visitMeetsAfter((MeetsAfter)elm, context);
+        else if (elm instanceof MeetsBefore) return visitMeetsBefore((MeetsBefore)elm, context);
+        else if (elm instanceof Modulo) return visitModulo((Modulo)elm, context);
+        else if (elm instanceof Multiply) return visitMultiply((Multiply)elm, context);
+        else if (elm instanceof NotEqual) return visitNotEqual((NotEqual)elm, context);
+        else if (elm instanceof Or) return visitOr((Or)elm, context);
+        else if (elm instanceof Overlaps) return visitOverlaps((Overlaps)elm, context);
+        else if (elm instanceof OverlapsAfter) return visitOverlapsAfter((OverlapsAfter)elm, context);
+        else if (elm instanceof OverlapsBefore) return visitOverlapsBefore((OverlapsBefore)elm, context);
+        else if (elm instanceof Power) return visitPower((Power)elm, context);
+        else if (elm instanceof ProperContains) return visitProperContains((ProperContains)elm, context);
+        else if (elm instanceof ProperIn) return visitProperIn((ProperIn)elm, context);
+        else if (elm instanceof ProperIncludedIn) return visitProperIncludedIn((ProperIncludedIn)elm, context);
+        else if (elm instanceof ProperIncludes) return visitProperIncludes((ProperIncludes)elm, context);
+        else if (elm instanceof SameAs) return visitSameAs((SameAs)elm, context);
+        else if (elm instanceof SameOrAfter) return visitSameOrAfter((SameOrAfter)elm, context);
+        else if (elm instanceof SameOrBefore) return visitSameOrBefore((SameOrBefore)elm, context);
+        else if (elm instanceof Starts) return visitStarts((Starts)elm, context);
+        else if (elm instanceof StartsWith) return visitStartsWith((StartsWith)elm, context);
+        else if (elm instanceof Subtract) return visitSubtract((Subtract)elm, context);
+        else if (elm instanceof Times) return visitTimes((Times)elm, context);
+        else if (elm instanceof TruncatedDivide) return visitTruncatedDivide((TruncatedDivide)elm, context);
+        else if (elm instanceof Xor) return visitXor((Xor)elm, context);
+        else return null;
     }
 
     public String getOutput() {

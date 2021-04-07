@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -28,7 +29,17 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.util.BundleBuilder;
 
+/**
+ * Provides Transformation processing from vMR to Fhir.
+ * 
+ * @author Joshua Reynolds
+ * @since 2021-04-05
+ */
 public class VmrToFhirProcessor {
+    /**
+     * Transforms Vmr CDSOutput data to FHIR equivalent
+     * @param params the {@link VmrToFhirParameters VmrToFhirParameters}
+     */
     public static void transform(VmrToFhirParameters params) {
         FhirContext context = FhirVersionEnum.forVersionString(params.fhirVersion).newContext();
         File file = new File(params.vmrDataPath);
@@ -41,9 +52,8 @@ public class VmrToFhirProcessor {
         Patient patient = transformer.transform(deomographics);
         List<IAnyResource> resources = transformer.transform(clinicalStatements);
         BundleBuilder bundleBuilder = new BundleBuilder(context);
-        bundleBuilder.setBundleField("id", new IdType("bundle-1").getIdPart());
+        bundleBuilder.setBundleField("id", new IdType(UUID.randomUUID().toString()).getIdPart());
         writeOutput(params.fhirOutputPath, context, patient, resources, bundleBuilder);
-        System.out.println("break");
     }
 
     private static void writeOutput(String fhirOutputPath, FhirContext context, Patient patient, List<IAnyResource> resources,
