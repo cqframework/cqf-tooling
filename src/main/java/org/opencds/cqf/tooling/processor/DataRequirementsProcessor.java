@@ -222,7 +222,7 @@ public class DataRequirementsProcessor {
         e.addExtension(new Extension().setUrl("libraryName").setValue(toString(req.getLibraryIdentifier().getId())));
         e.addExtension(new Extension().setUrl("name").setValue(toString(def.getName())));
         e.addExtension(new Extension().setUrl("statement").setValue(toString(text)));
-        e.addExtension(new Extension().setUrl("sequence").setValue(toInteger(sequence)));
+        e.addExtension(new Extension().setUrl("displaySequence").setValue(toInteger(sequence)));
         return e;
     }
 

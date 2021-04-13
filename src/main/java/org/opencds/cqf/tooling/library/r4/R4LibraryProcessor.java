@@ -98,7 +98,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
             org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) VersionConvertor_40_50.convertResource(resource);
             fileMap.put(library.getId(), libraryFile.getAbsolutePath());
             libraries.add(library);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             logMessage(String.format("Error reading library: %s. Error: %s", libraryFile.getAbsolutePath(), ex.getMessage()));
         }
     }
