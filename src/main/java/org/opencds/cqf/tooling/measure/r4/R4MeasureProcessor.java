@@ -90,8 +90,8 @@ public class R4MeasureProcessor extends MeasureProcessor {
             org.hl7.fhir.r5.model.Measure measure = (org.hl7.fhir.r5.model.Measure) VersionConvertor_40_50.convertResource(resource);
             fileMap.put(measure.getId(), measureFile.getAbsolutePath());
             measures.add(measure);
-        } catch (IOException ex) {
-            logMessage(String.format("Error reading library: %s. Error: %s", measureFile.getAbsolutePath(), ex.getMessage()));
+        } catch (Exception ex) {
+            logMessage(String.format("Error reading measure: %s. Error: %s", measureFile.getAbsolutePath(), ex.getMessage()));
         }
     }
 
