@@ -1,4 +1,4 @@
-package org.opencds.cqf.tooling.processor;
+package org.opencds.cqf.tooling.library.r4;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.formats.FormatUtilities;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper;
+import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;

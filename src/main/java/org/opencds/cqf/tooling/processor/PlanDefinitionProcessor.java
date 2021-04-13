@@ -3,6 +3,7 @@ package org.opencds.cqf.tooling.processor;
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.utilities.*;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 

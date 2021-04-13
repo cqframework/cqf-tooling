@@ -2,7 +2,10 @@ package org.opencds.cqf.tooling.processor;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
+import org.fhir.ucum.UcumEssenceService;
+import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.elementmodel.Manager;
@@ -14,7 +17,9 @@ import org.hl7.fhir.utilities.IniFile;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.VersionUtilities;
+import org.opencds.cqf.tooling.npm.LibraryLoader;
 import org.opencds.cqf.tooling.npm.NpmPackageManager;
+import org.opencds.cqf.tooling.utilities.IGUtils;
 
 public class BaseProcessor implements IProcessorContext, IWorkerContext.ILoggingService {
 
@@ -66,6 +71,8 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
             this.packageId = parentContext.getPackageId();
             this.ucumService = parentContext.getUcumService();
             this.packageManager = parentContext.getPackageManager();
+            this.binaryPaths = parentContext.getBinaryPaths();
+            this.cqlProcessor = parentContext.getCqlProcessor();
         }
     }
 
@@ -101,6 +108,15 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
         catch (IOException e) {
             logMessage(String.format("Exceptions occurred loading npm package manager:", e.getMessage()));
         }
+
+        // Setup binary paths (cql source directories)
+        try {
+            binaryPaths = IGUtils.extractBinaryPaths(rootDir, sourceIg);
+        }
+        catch (IOException e) {
+            logMessage(String.format("Errors occurred extracting binary path from IG: ", e.getMessage()));
+            throw new IllegalArgumentException("Could not obtain binary path from IG");
+        }
     }
 
     /*
@@ -121,6 +137,31 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
         catch (Exception e) {
             logMessage(String.format("Exceptions occurred initializing refresh from ini file '%s':%s", iniFile, e.getMessage()));
         }
+    }
+
+    private List<String> binaryPaths;
+    public List<String> getBinaryPaths() {
+        return binaryPaths;
+    }
+    protected void setBinaryPaths(List<String> binaryPaths) {
+        this.binaryPaths = binaryPaths;
+    }
+
+    private CqlProcessor cqlProcessor;
+    public CqlProcessor getCqlProcessor() {
+        if (cqlProcessor == null) {
+            LibraryLoader reader = new LibraryLoader(fhirVersion);
+            try {
+                ucumService = new UcumEssenceService(UcumEssenceService.class.getResourceAsStream("/ucum-essence.xml"));
+            } catch (UcumException e) {
+                System.err.println("Could not create UCUM validation service:");
+                e.printStackTrace();
+            }
+            cqlProcessor = new CqlProcessor(packageManager.getNpmList(), binaryPaths, reader, this, ucumService,
+                    packageId, canonicalBase);
+        }
+
+        return cqlProcessor;
     }
 
     private ImplementationGuide loadSourceIG(String igPath) throws Exception {
