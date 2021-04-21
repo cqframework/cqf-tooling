@@ -8,6 +8,7 @@ import org.cqframework.cql.cql2elm.model.LibraryRef;
 import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
 import org.hl7.elm.r1.*;
 
+import javax.xml.namespace.QName;
 import java.util.*;
 
 public class ElmRequirementsContext {
@@ -43,9 +44,64 @@ public class ElmRequirementsContext {
         return libraryStack.peek();
     }
 
+    /*
+    Prepares a library visit if necessary (i.e. localLibraryName is not null) and returns the associated translated
+    library. If there is no localLibraryName, returns the current library.
+     */
+    private TranslatedLibrary prepareLibraryVisit(VersionedIdentifier libraryIdentifier, String localLibraryName) {
+        TranslatedLibrary targetLibrary = resolveLibrary(libraryIdentifier);
+        if (localLibraryName != null) {
+            IncludeDef includeDef = targetLibrary.resolveIncludeRef(localLibraryName);
+            if (!visited.contains(includeDef)) {
+                visitor.visitElement(includeDef, this);
+            }
+            targetLibrary = resolveLibraryFromIncludeDef(includeDef);
+            enterLibrary(targetLibrary.getIdentifier());
+        }
+        return targetLibrary;
+    }
+
+    private void unprepareLibraryVisit(String localLibraryName) {
+        if (localLibraryName != null) {
+            exitLibrary();
+        }
+    }
+
+    private Stack<ElmQueryContext> queryStack = new Stack<ElmQueryContext>();
+    public void enterQueryContext(Query query) {
+        queryStack.push(new ElmQueryContext(getCurrentLibraryIdentifier(), query));
+    }
+    public void exitQueryContext() {
+        ElmQueryContext queryContext = queryStack.pop();
+        queryContext.analyzeDataRequirements();
+    }
+    public ElmQueryContext getCurrentQueryContext() {
+        if (queryStack.empty()) {
+            throw new IllegalArgumentException("Not in a query context");
+        }
+
+        return queryStack.peek();
+    }
+
+    public ElmQueryAliasContext resolveAlias(String aliasName) {
+        ElmQueryAliasContext aliasContext = null;
+        for (ElmQueryContext queryContext : queryStack) {
+            aliasContext = queryContext.resolveAlias(aliasName);
+            if (aliasContext != null) {
+                break;
+            }
+        }
+
+        if (aliasContext == null) {
+            throw new IllegalArgumentException(String.format("Could not resolve alias %s", aliasName));
+        }
+
+        return aliasContext;
+    }
+
     private Set<Element> visited = new HashSet<Element>();
 
-    private ElmRequirements requirements = new ElmRequirements();
+    private ElmRequirements requirements;
     public ElmRequirements getRequirements() {
         return requirements;
     }
@@ -66,11 +122,16 @@ public class ElmRequirementsContext {
             throw new IllegalArgumentException("visitor required");
         }
         this.visitor = visitor;
+        this.requirements = new ElmRequirements(new VersionedIdentifier().withId("result"), new Null());
+    }
+
+    private void reportRequirement(ElmRequirement requirement) {
+        visited.add(requirement.getElement());
+        requirements.reportRequirement(requirement);
     }
 
     private void reportRequirement(Element element) {
-        visited.add(element);
-        requirements.reportRequirement(getCurrentLibraryIdentifier(), element);
+        reportRequirement(new ElmRequirement(getCurrentLibraryIdentifier(), element));
     }
 
     public void reportUsingDef(UsingDef usingDef) {
@@ -113,29 +174,6 @@ public class ElmRequirementsContext {
 
     public void reportFunctionDef(FunctionDef functionDef) {
         reportRequirement(functionDef);
-    }
-
-    /*
-    Prepares a library visit if necessary (i.e. localLibraryName is not null) and returns the associated translated
-    library. If there is no localLibraryName, returns the current library.
-     */
-    private TranslatedLibrary prepareLibraryVisit(VersionedIdentifier libraryIdentifier, String localLibraryName) {
-        TranslatedLibrary targetLibrary = resolveLibrary(libraryIdentifier);
-        if (localLibraryName != null) {
-            IncludeDef includeDef = targetLibrary.resolveIncludeRef(localLibraryName);
-            if (!visited.contains(includeDef)) {
-                visitor.visitElement(includeDef, this);
-            }
-            targetLibrary = resolveLibraryFromIncludeDef(includeDef);
-            enterLibrary(targetLibrary.getIdentifier());
-        }
-        return targetLibrary;
-    }
-
-    private void unprepareLibraryVisit(String localLibraryName) {
-        if (localLibraryName != null) {
-            exitLibrary();
-        }
     }
 
     public void reportCodeRef(CodeRef codeRef) {
@@ -237,7 +275,92 @@ public class ElmRequirementsContext {
     }
 
     public void reportRetrieve(Retrieve retrieve) {
+        // Report the retrieve as an overall data requirement
         reportRequirement(retrieve);
+        // Data Requirements analysis is done within the query processing
+        /*
+        ElmDataRequirement retrieveRequirement = new ElmDataRequirement(getCurrentLibraryIdentifier(), retrieve);
+        if (!queryStack.empty()) {
+            getCurrentQueryContext().reportRetrieve(retrieveRequirement);
+        }
+        else {
+            reportRequirement(retrieveRequirement);
+        }
+        */
+    }
+
+    private QName getType(Expression expression) {
+        if (expression != null) {
+            if (expression.getResultTypeName() != null) {
+                return expression.getResultTypeName();
+            }
+            else if (expression.getResultTypeSpecifier() instanceof NamedTypeSpecifier) {
+                return ((NamedTypeSpecifier)expression.getResultTypeSpecifier()).getName();
+            }
+        }
+
+        return null;
+    }
+
+    private Map<QName, ElmDataRequirement> unboundDataRequirements = new HashMap<QName, ElmDataRequirement>();
+
+    private ElmDataRequirement getDataRequirementForTypeName(QName typeName) {
+        ElmDataRequirement requirement = unboundDataRequirements.get(typeName);
+        if (requirement == null) {
+            Retrieve retrieve = new Retrieve();
+            retrieve.setDataType(typeName);
+            requirement = new ElmDataRequirement(getCurrentLibraryIdentifier(), retrieve);
+            unboundDataRequirements.put(typeName, requirement);
+        }
+
+        return requirement;
+    }
+
+    public ElmPropertyRequirement reportProperty(Property property) {
+        // if scope is specified, it's a reference to an alias in a current query context
+        // if source is an AliasRef, it's a reference to an alias in a current query context
+        // if source is a Property, add the current property to a qualifier
+        // Otherwise, report it as an unbound property reference to the type of source
+        if (property.getScope() != null || property.getSource() instanceof AliasRef) {
+            String aliasName = property.getScope() != null ? property.getScope() : ((AliasRef)property.getSource()).getName();
+            ElmQueryAliasContext aliasContext = getCurrentQueryContext().resolveAlias(aliasName);
+            boolean inCurrentScope = true;
+            if (aliasContext == null) {
+                // This is a reference to an alias in an outer scope
+                aliasContext = resolveAlias(aliasName);
+                inCurrentScope = false;
+            }
+            ElmPropertyRequirement propertyRequirement = new ElmPropertyRequirement(getCurrentLibraryIdentifier(),
+                    property, aliasContext.getQuerySource(), inCurrentScope);
+
+            aliasContext.reportProperty(propertyRequirement);
+            return propertyRequirement;
+        }
+
+        if (property.getSource() instanceof Property) {
+            Property sourceProperty = (Property)property.getSource();
+            Property qualifiedProperty = new Property();
+            qualifiedProperty.setSource(sourceProperty.getSource());
+            qualifiedProperty.setScope(sourceProperty.getScope());
+            qualifiedProperty.setResultType(property.getResultType());
+            qualifiedProperty.setResultTypeName(property.getResultTypeName());
+            qualifiedProperty.setResultTypeSpecifier(property.getResultTypeSpecifier());
+            qualifiedProperty.setLocalId(sourceProperty.getLocalId());
+            qualifiedProperty.setPath(sourceProperty.getPath() + "." + property.getPath());
+            return reportProperty(qualifiedProperty);
+        }
+        else {
+            QName typeName = getType(property.getSource());
+            if (typeName != null) {
+                ElmDataRequirement requirement = getDataRequirementForTypeName(typeName);
+                ElmPropertyRequirement propertyRequirement = new ElmPropertyRequirement(getCurrentLibraryIdentifier(),
+                        property, property.getSource(), false);
+                requirement.reportProperty(propertyRequirement);
+                return propertyRequirement;
+            }
+        }
+
+        return null;
     }
 
     public Concept toConcept(ElmRequirement conceptDef) {
