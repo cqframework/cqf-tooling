@@ -404,6 +404,24 @@ public class Processor extends Operation {
         return activityID;
     }
 
+    private String getDataElementLabel(Row row, HashMap<String, Integer> colIds) {
+        String dataElementLabel = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "DataElementLabel"));
+        dataElementLabel = dataElementLabel.replace("?", "");
+        return dataElementLabel;
+    }
+
+    private String getLabel(Row row, HashMap<String, Integer> colIds) {
+        String label = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Label"));
+        label = label.replace("?", "");
+        return label;
+    }
+
+    private String getName(Row row, HashMap<String, Integer> colIds) {
+        String name = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Name"));
+        name = name.replace("?", "");
+        return name;
+    }
+
     private String getMasterDataType(Row row, HashMap<String, Integer> colIds) {
         String masterDataType = null;
         String activityID = getActivityID(row, colIds);
@@ -477,7 +495,7 @@ public class Processor extends Operation {
                     concept.setDisplay(code.getLabel());
 
                     String parentLabel = null;
-                    String parentName = SpreadsheetHelper.getCellAsString(currentInputOptionParentRow, getColId(colIds,"DataElementLabel")).trim();
+                    String parentName = getDataElementLabel(currentInputOptionParentRow, colIds).trim();
                     if (parentName != null && !parentName.trim().isEmpty()) {
                         parentName = parentName.trim();
                         DictionaryElement currentElement = elementMap.get(parentName);
@@ -549,7 +567,6 @@ public class Processor extends Operation {
     }
 
     private DictionaryElement createDataElement(String page, String group, Row row, HashMap<String, Integer> colIds) {
-        // String label = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Label"));
         String type = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Type"));
         if (type != null) {
             type = type.trim();
@@ -561,7 +578,7 @@ public class Processor extends Operation {
                 }
             }
         }
-        String name = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Name"));
+        String name = getName(row, colIds);
         if (name.isEmpty()) {
             return null;
         }
@@ -592,9 +609,7 @@ public class Processor extends Operation {
         e.setDue(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Due")));
         e.setRelevance(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Relevance")));
         e.setDescription(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Description")));
-        e.setDataElementLabel(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "DataElementLabel")) != null
-                ? SpreadsheetHelper.getCellAsString(row, getColId(colIds, "DataElementLabel")).trim()
-                : null);
+        e.setDataElementLabel(getDataElementLabel(row, colIds) != null ? getDataElementLabel(row, colIds).trim() : null);
         e.setDataElementName(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "DataElementName")));
         e.setNotes(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Notes")));
         e.setCalculation(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Calculation")));
@@ -621,8 +636,7 @@ public class Processor extends Operation {
     }
 
     private void addInputOptionToParentElement(Row row, HashMap<String, Integer> colIds) {
-        String parentName =
-                SpreadsheetHelper.getCellAsString(currentInputOptionParentRow, getColId(colIds,"DataElementLabel")).trim();
+        String parentName = getDataElementLabel(currentInputOptionParentRow, colIds).trim();
 
         if (parentName != null && !parentName.isEmpty())
         {
@@ -1409,7 +1423,7 @@ public class Processor extends Operation {
                 } else {
                     String elementFhirType = getFhirTypeOfTargetElement(elementPath);
 
-                    // Split the elementPath on . then ensure and element for all between 1st and last.
+                    // Split the elementPath on . then ensure an element for all between 1st and last.
                     String[] pathParts = elementPath.getResourcePath().split("\\.");
                     if (pathParts.length > 1) {
                         List<String> pathPartsCumulative = new ArrayList<>();
@@ -1507,8 +1521,8 @@ public class Processor extends Operation {
     private void ensureChoicesDataElement(DictionaryElement dictionaryElement, StructureDefinition sd) {
         // Ensure Element for Choices path
         if (dictionaryElement.getChoices() != null && dictionaryElement.getChoices().getFhirElementPath() != null) {
-            String choicesElementPath = dictionaryElement.getChoices().getFhirElementPath().getResourceTypeAndPath();
-            ElementDefinition existingChoicesElement = getDifferentialElement(sd, choicesElementPath);
+            String choicesElementId = dictionaryElement.getChoices().getFhirElementPath().getResourceTypeAndPath();
+            ElementDefinition existingChoicesElement = getDifferentialElement(sd, choicesElementId);
 
             CodeCollection codes = dictionaryElement.getChoices().getCodes();
             String customChoicesValueSetName = dictionaryElement.getChoices().getCustomValueSetName();
@@ -1516,7 +1530,7 @@ public class Processor extends Operation {
                 customChoicesValueSetName = dictionaryElement.getName() + "-choices";
             }
 
-            if (dictionaryElement.getFhirElementPath().getResourceTypeAndPath().equalsIgnoreCase(choicesElementPath)) {
+            if (dictionaryElement.getFhirElementPath().getResourceTypeAndPath().equalsIgnoreCase(choicesElementId)) {
                 List<DictionaryCode> primaryCodes = dictionaryElement.getPrimaryCodes().getCodes();
                 codes.getCodes().addAll(primaryCodes);
             }
@@ -1528,7 +1542,21 @@ public class Processor extends Operation {
                 }
             } else {
                 ElementDefinition ed = new ElementDefinition();
-                ed.setId(choicesElementPath);
+                ed.setId(choicesElementId);
+                String choicesElementPath = choicesElementId;
+
+                // If the Id is one of an extension element, that path should not include the slice name
+                if (choicesElementId.contains(":")) {
+                    String[] pathParts = choicesElementId.split("\\.");
+                    List<String> outputPathParts = new ArrayList<>();
+                    for (String pathElement : pathParts) {
+                        String[] components = pathElement.split("\\:");
+                        outputPathParts.add(components[0]);
+                    }
+
+                    choicesElementPath = String.join(".", outputPathParts);
+                }
+
                 ed.setPath(choicesElementPath);
                 ed.setMin(1);
                 ed.setMax(isMultipleChoiceElement(dictionaryElement) ? "*" : "1");
