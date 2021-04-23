@@ -406,19 +406,25 @@ public class Processor extends Operation {
 
     private String getDataElementLabel(Row row, HashMap<String, Integer> colIds) {
         String dataElementLabel = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "DataElementLabel"));
-        dataElementLabel = dataElementLabel.replace("?", "");
+        dataElementLabel = dataElementLabel
+                .replace("?", "")
+                .replace("–", "-");
         return dataElementLabel;
     }
 
     private String getLabel(Row row, HashMap<String, Integer> colIds) {
         String label = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Label"));
-        label = label.replace("?", "");
+        label = label
+                .replace("?", "")
+                .replace("–", "-");
         return label;
     }
 
     private String getName(Row row, HashMap<String, Integer> colIds) {
         String name = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Name"));
-        name = name.replace("?", "");
+        name = name
+                .replace("?", "")
+                .replace("–", "-");
         return name;
     }
 
@@ -1435,7 +1441,11 @@ public class Processor extends Operation {
                             ElementDefinition pathElement = new ElementDefinition();
                             pathElement.setId(id);
                             pathElement.setPath(path);
-                            sd.getDifferential().addElement(pathElement);
+
+                            ElementDefinition existing = getDifferentialElement(sd, id);
+                            if (existing == null) {
+                                sd.getDifferential().addElement(pathElement);
+                            }
                         }
                     }
 
@@ -2220,41 +2230,41 @@ public class Processor extends Operation {
                 // TODO: Switch on sd.baseDefinition to provide filtering here (e.g. status = 'not-done')
 
                 switch (sd.getBaseDefinition()) {
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-procedure":
+                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-procedure":
                         sb.append(" P");
                         sb.append(System.lineSeparator());
                         sb.append("    where P.status in { 'preparation', 'in-progress', 'completed' }");
                         break;
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-procedurenotdone":
+                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-procedurenotdone":
                         sb.append(" P");
                         sb.append(System.lineSeparator());
                         sb.append("    where P.status = 'not-done'");
                         break;
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-medicationrequest":
+                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-medicationrequest":
                         sb.append(" MR");
                         sb.append(System.lineSeparator());
                         sb.append("    where MR.status = 'completed'");
                         sb.append(System.lineSeparator());
                         sb.append("      and Coalesce(MR.doNotPerform, false) is false");
                         break;
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-medicationnotrequested":
+                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-medicationnotrequested":
                         sb.append(" MR");
                         sb.append(System.lineSeparator());
                         sb.append("    where MR.status = 'completed'");
                         sb.append(System.lineSeparator());
                         sb.append("      and MR.doNotPerform");
                         break;
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-observationnotdone":
+                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-observationnotdone":
                         sb.append(" O");
                         sb.append(System.lineSeparator());
                         sb.append("    //where Not Implemented");
                         break;
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-servicenotrequested":
+                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-servicenotrequested":
                         sb.append(" SR");
                         sb.append(System.lineSeparator());
                         sb.append("    //where Not Implemented");
                         break;
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/who-immunizationnotdone":
+                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-immunizationnotdone":
                         sb.append(" I");
                         sb.append(System.lineSeparator());
                         sb.append("    //where Not Implemented");
