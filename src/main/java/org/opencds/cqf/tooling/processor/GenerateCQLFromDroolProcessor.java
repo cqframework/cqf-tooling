@@ -1,7 +1,7 @@
 package org.opencds.cqf.tooling.processor;
 
-import org.opencds.cqf.individual_tooling.cql_generation.CqlGenerator;
-import org.opencds.cqf.individual_tooling.cql_generation.drool.DroolCqlGenerator;
+import org.opencds.cqf.tooling.cql_generation.CqlGenerator;
+import org.opencds.cqf.tooling.cql_generation.drool.DroolCqlGenerator;
 import org.opencds.cqf.tooling.parameter.GenerateCQLFromDroolParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 

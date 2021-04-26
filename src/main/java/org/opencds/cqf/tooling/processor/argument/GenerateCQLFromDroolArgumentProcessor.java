@@ -2,7 +2,7 @@ package org.opencds.cqf.tooling.processor.argument;
 
 import static java.util.Arrays.asList;
 
-import org.opencds.cqf.individual_tooling.cql_generation.drool.visitor.DroolToElmVisitor.CQLTYPES;
+import org.opencds.cqf.tooling.cql_generation.drool.visitor.DroolToElmVisitor.CQLTYPES;
 import org.opencds.cqf.tooling.parameter.GenerateCQLFromDroolParameters;
 import org.opencds.cqf.tooling.utilities.ArgUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
