@@ -14,6 +14,7 @@ import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.opencds.cqf.tooling.visitor.ElmRequirement;
+import org.opencds.cqf.tooling.visitor.ElmRequirements;
 import org.opencds.cqf.tooling.visitor.ElmRequirementsContext;
 import org.opencds.cqf.tooling.visitor.ElmRequirementsVisitor;
 
@@ -43,14 +44,21 @@ public class DataRequirementsProcessor {
         ElmRequirementsVisitor visitor = new ElmRequirementsVisitor();
         ElmRequirementsContext context = new ElmRequirementsContext(libraryManager, options, visitor);
 
+        List<ExpressionDef> expressionDefs = null;
         if (expressions == null) {
             visitor.visitLibrary(translatedLibrary.getLibrary(), context);
+            expressionDefs = translatedLibrary.getLibrary().getStatements().getDef();
         }
         else {
             context.enterLibrary(translatedLibrary.getIdentifier());
             try {
                 for (String expression : expressions) {
-                    visitor.visitElement(translatedLibrary.resolve(expression), context);
+                    ExpressionDef ed = translatedLibrary.resolveExpressionRef(expression);
+                    if (expressionDefs == null) {
+                        expressionDefs = new ArrayList<ExpressionDef>();
+                    }
+                    expressionDefs.add(ed);
+                    visitor.visitElement(ed, context);
                 }
             }
             finally {
@@ -58,10 +66,20 @@ public class DataRequirementsProcessor {
             }
         }
 
-        return createLibrary(context, includeLogicDefinitions);
+        ElmRequirements requirements = new ElmRequirements(translatedLibrary.getIdentifier(), translatedLibrary.getLibrary());
+        // Collect all the dependencies
+        requirements.reportRequirement(context.getRequirements());
+        // Collect reported data requirements from each expression
+        for (ExpressionDef ed : expressionDefs) {
+            ElmRequirements reportedRequirements = context.getReportedRequirements(ed);
+            requirements.reportRequirement(reportedRequirements);
+        }
+
+        return createLibrary(context, requirements, translatedLibrary.getIdentifier(), expressionDefs, includeLogicDefinitions);
     }
 
-    private Library createLibrary(ElmRequirementsContext context, boolean includeLogicDefinitions) {
+    private Library createLibrary(ElmRequirementsContext context, ElmRequirements requirements,
+            VersionedIdentifier libraryIdentifier, Iterable<ExpressionDef> expressionDefs, boolean includeLogicDefinitions) {
         Library returnLibrary = new Library();
         returnLibrary.setStatus(Enumerations.PublicationStatus.ACTIVE);
         CodeableConcept libraryType = new CodeableConcept();
@@ -71,12 +89,12 @@ public class DataRequirementsProcessor {
         returnLibrary.setType(libraryType);
         returnLibrary.setDate(new Date());
         returnLibrary.setSubject(extractSubject(context));
-        returnLibrary.getExtension().addAll(extractDirectReferenceCodes(context));
-        returnLibrary.getRelatedArtifact().addAll(extractRelatedArtifacts(context));
-        returnLibrary.getDataRequirement().addAll(extractDataRequirements(context));
-        returnLibrary.getParameter().addAll(extractParameters(context));
+        returnLibrary.getExtension().addAll(extractDirectReferenceCodes(context, requirements));
+        returnLibrary.getRelatedArtifact().addAll(extractRelatedArtifacts(context, requirements));
+        returnLibrary.getDataRequirement().addAll(extractDataRequirements(context, requirements));
+        returnLibrary.getParameter().addAll(extractParameters(context, requirements, libraryIdentifier, expressionDefs));
         if (includeLogicDefinitions) {
-            returnLibrary.getExtension().addAll(extractLogicDefinitions(context));
+            returnLibrary.getExtension().addAll(extractLogicDefinitions(context, requirements));
         }
         return returnLibrary;
 
@@ -87,10 +105,10 @@ public class DataRequirementsProcessor {
         return null;
     }
 
-    private List<Extension> extractDirectReferenceCodes(ElmRequirementsContext context) {
+    private List<Extension> extractDirectReferenceCodes(ElmRequirementsContext context, ElmRequirements requirements) {
         List<Extension> result = new ArrayList<>();
 
-        for (ElmRequirement def : context.getRequirements().getCodeDefs()) {
+        for (ElmRequirement def : requirements.getCodeDefs()) {
             result.add(toDirectReferenceCode(context, def.getLibraryIdentifier(), (CodeDef)def.getElement()));
         }
 
@@ -105,12 +123,12 @@ public class DataRequirementsProcessor {
         return e;
     }
 
-    private List<RelatedArtifact> extractRelatedArtifacts(ElmRequirementsContext context) {
+    private List<RelatedArtifact> extractRelatedArtifacts(ElmRequirementsContext context, ElmRequirements requirements) {
         List<RelatedArtifact> result = new ArrayList<>();
 
         // Report model dependencies
         // URL for a model info is: [baseCanonical]/Library/[model-name]-ModelInfo
-        for (ElmRequirement def : context.getRequirements().getUsingDefs()) {
+        for (ElmRequirement def : requirements.getUsingDefs()) {
             // System model info is an implicit dependency, do not report
             if (!((UsingDef)def.getElement()).getLocalIdentifier().equals("System")) {
                 result.add(toRelatedArtifact(def.getLibraryIdentifier(), (UsingDef)def.getElement()));
@@ -118,34 +136,56 @@ public class DataRequirementsProcessor {
         }
 
         // Report library dependencies
-        for (ElmRequirement def : context.getRequirements().getIncludeDefs()) {
+        for (ElmRequirement def : requirements.getIncludeDefs()) {
             result.add(toRelatedArtifact(def.getLibraryIdentifier(), (IncludeDef)def.getElement()));
         }
 
         // Report CodeSystem dependencies
-        for (ElmRequirement def : context.getRequirements().getCodeSystemDefs()) {
+        for (ElmRequirement def : requirements.getCodeSystemDefs()) {
             result.add(toRelatedArtifact(def.getLibraryIdentifier(), (CodeSystemDef)def.getElement()));
         }
 
         // Report ValueSet dependencies
-        for (ElmRequirement def : context.getRequirements().getValueSetDefs()) {
+        for (ElmRequirement def : requirements.getValueSetDefs()) {
             result.add(toRelatedArtifact(def.getLibraryIdentifier(), (ValueSetDef)def.getElement()));
         }
 
         return result;
     }
 
-    private List<ParameterDefinition> extractParameters(ElmRequirementsContext context) {
+    private boolean isEquivalentDefinition(ParameterDefinition existingPd, ParameterDefinition pd) {
+        // TODO: Consider cardinality
+        return pd.getType() == existingPd.getType();
+    }
+
+    private List<ParameterDefinition> extractParameters(ElmRequirementsContext context, ElmRequirements requirements,
+            VersionedIdentifier libraryIdentifier, Iterable<ExpressionDef> expressionDefs) {
         List<ParameterDefinition> result = new ArrayList<>();
 
-        for (ElmRequirement def : context.getRequirements().getParameterDefs()) {
-            result.add(toParameterDefinition(def.getLibraryIdentifier(), (ParameterDef)def.getElement()));
+        // TODO: Support library qualified parameters
+        // Until then, name clashes should result in a warning
+        Map<String, ParameterDefinition> pds = new HashMap<String, ParameterDefinition>();
+        for (ElmRequirement def : requirements.getParameterDefs()) {
+            ParameterDefinition pd = toParameterDefinition(def.getLibraryIdentifier(), (ParameterDef)def.getElement());
+            if (pds.containsKey(pd.getName())) {
+                ParameterDefinition existingPd = pds.get(pd.getName());
+                if (!isEquivalentDefinition(existingPd, pd)) {
+                    // Issue a warning that the parameter has a duplicate name but an incompatible type
+                    validationMessages.add(new ValidationMessage(ValidationMessage.Source.Publisher, ValidationMessage.IssueType.NOTSUPPORTED, "CQL Library Packaging",
+                            String.format("Parameter declaration %s.%s is already defined in a different library with a different type. Parameter binding may result in errors during evaluation.",
+                                    def.getLibraryIdentifier().getId(), pd.getName()), ValidationMessage.IssueSeverity.WARNING));
+                }
+            }
+            else {
+                pds.put(pd.getName(), pd);
+                result.add(pd);
+            }
         }
 
-        for (ElmRequirement def : context.getRequirements().getExpressionDefs()) {
-            if (!(def.getElement() instanceof FunctionDef) && (((ExpressionDef)def.getElement()).getAccessLevel() == null
-                    || ((ExpressionDef)def.getElement()).getAccessLevel() == AccessModifier.PUBLIC)) {
-                result.add(toOutputParameterDefinition(def.getLibraryIdentifier(), (ExpressionDef)def.getElement()));
+        for (ExpressionDef def : expressionDefs) {
+            if (!(def instanceof FunctionDef) && (def.getAccessLevel() == null
+                    || def.getAccessLevel() == AccessModifier.PUBLIC)) {
+                result.add(toOutputParameterDefinition(libraryIdentifier, def));
             }
         }
 
@@ -188,11 +228,11 @@ public class DataRequirementsProcessor {
         }
     }
 
-    private List<Extension> extractLogicDefinitions(ElmRequirementsContext context) {
+    private List<Extension> extractLogicDefinitions(ElmRequirementsContext context, ElmRequirements requirements) {
         List<Extension> result = new ArrayList<Extension>();
 
         int sequence = 0;
-        for (ElmRequirement req : context.getRequirements().getExpressionDefs()) {
+        for (ElmRequirement req : requirements.getExpressionDefs()) {
             ExpressionDef def = (ExpressionDef)req.getElement();
             org.hl7.cql_annotations.r1.Annotation a = getAnnotation(def);
             if (a != null) {
@@ -226,11 +266,13 @@ public class DataRequirementsProcessor {
         return e;
     }
 
-    private List<DataRequirement> extractDataRequirements(ElmRequirementsContext context) {
+    private List<DataRequirement> extractDataRequirements(ElmRequirementsContext context, ElmRequirements requirements) {
         List<DataRequirement> result = new ArrayList<>();
 
-        for (ElmRequirement retrieve : context.getRequirements().getRetrieves()) {
-            result.add(toDataRequirement(context, retrieve.getLibraryIdentifier(), (Retrieve)retrieve.getElement()));
+        for (ElmRequirement retrieve : requirements.getRetrieves()) {
+            if (((Retrieve)retrieve.getElement()).getDataType() != null) {
+                result.add(toDataRequirement(context, retrieve.getLibraryIdentifier(), (Retrieve) retrieve.getElement()));
+            }
         }
 
         return result;
@@ -402,6 +444,84 @@ public class DataRequirementsProcessor {
         return "Any";
     }
 
+    private org.hl7.fhir.r5.model.DataRequirement.DataRequirementCodeFilterComponent toCodeFilterComponent(ElmRequirementsContext context, VersionedIdentifier libraryIdentifier, String property, Expression value) {
+        org.hl7.fhir.r5.model.DataRequirement.DataRequirementCodeFilterComponent cfc =
+                new org.hl7.fhir.r5.model.DataRequirement.DataRequirementCodeFilterComponent();
+
+        cfc.setPath(property);
+
+        // TODO: Support retrieval when the target is a CodeSystemRef
+
+        if (value instanceof ValueSetRef) {
+            ValueSetRef vsr = (ValueSetRef)value;
+            cfc.setValueSet(toReference(context.resolveValueSetRef(libraryIdentifier, vsr)));
+        }
+
+        if (value instanceof org.hl7.elm.r1.ToList) {
+            org.hl7.elm.r1.ToList toList = (org.hl7.elm.r1.ToList)value;
+            resolveCodeFilterCodes(context, libraryIdentifier, cfc, toList.getOperand());
+        }
+
+        if (value instanceof org.hl7.elm.r1.List) {
+            org.hl7.elm.r1.List codeList = (org.hl7.elm.r1.List)value;
+            for (Expression e : codeList.getElement()) {
+                resolveCodeFilterCodes(context, libraryIdentifier, cfc, e);
+            }
+        }
+
+        if (value instanceof org.hl7.elm.r1.Literal) {
+            org.hl7.elm.r1.Literal literal = (org.hl7.elm.r1.Literal)value;
+            cfc.addCode().setCode(literal.getValue());
+        }
+
+        return cfc;
+    }
+
+    private DataType toFhirValue(ElmRequirementsContext context, Expression value) {
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Interval) {
+            // TODO: Handle lowclosed/highclosed
+            return new Period().setStartElement((DateTimeType)toFhirValue(context, ((Interval)value).getLow()))
+                    .setEndElement((DateTimeType)toFhirValue(context, ((Interval)value).getHigh()));
+        }
+        else if (value instanceof Literal) {
+            if (context.getTypeResolver().isDateTimeType(value.getResultType())) {
+                return new DateTimeType(((Literal)value).getValue());
+            }
+            else if (context.getTypeResolver().isDateType(value.getResultType())) {
+                return new DateType(((Literal)value).getValue());
+            }
+        }
+        else if (value instanceof DateTime) {
+            throw new IllegalArgumentException("toFhirValue not implemented for DateTime");
+        }
+        else if (value instanceof org.hl7.elm.r1.Date) {
+            throw new IllegalArgumentException("toFhirValue not implemented for Date");
+        }
+        throw new IllegalArgumentException(String.format("toFhirValue not implemented for %s", value.getClass().getSimpleName()));
+    }
+
+    private org.hl7.fhir.r5.model.DataRequirement.DataRequirementDateFilterComponent toDateFilterComponent(ElmRequirementsContext context, VersionedIdentifier libraryIdentifier, String property, Expression value) {
+        org.hl7.fhir.r5.model.DataRequirement.DataRequirementDateFilterComponent dfc =
+                new org.hl7.fhir.r5.model.DataRequirement.DataRequirementDateFilterComponent();
+
+        dfc.setPath(property);
+
+        if (value instanceof ParameterRef) {
+            dfc.setValue(new DateTimeType());
+            dfc.getValue().addExtension("http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                    new org.hl7.fhir.r5.model.Expression().setLanguage("text/cql-identifier").setExpression(((ParameterRef)value).getName()));
+        }
+        else {
+            dfc.setValue(toFhirValue(context, value));
+        }
+
+        return dfc;
+    }
+
     private org.hl7.fhir.r5.model.DataRequirement toDataRequirement(ElmRequirementsContext context, VersionedIdentifier libraryIdentifier, Retrieve retrieve) {
         org.hl7.fhir.r5.model.DataRequirement dr = new org.hl7.fhir.r5.model.DataRequirement();
 
@@ -414,34 +534,23 @@ public class DataRequirementsProcessor {
 
         // Set code path if specified
         if (retrieve.getCodeProperty() != null) {
-            org.hl7.fhir.r5.model.DataRequirement.DataRequirementCodeFilterComponent cfc =
-                    new org.hl7.fhir.r5.model.DataRequirement.DataRequirementCodeFilterComponent();
-
-            cfc.setPath(retrieve.getCodeProperty());
-
-            // TODO: Support retrieval when the target is a CodeSystemRef
-
-            if (retrieve.getCodes() instanceof ValueSetRef) {
-                ValueSetRef vsr = (ValueSetRef)retrieve.getCodes();
-                cfc.setValueSet(toReference(context.resolveValueSetRef(libraryIdentifier, vsr)));
-            }
-
-            if (retrieve.getCodes() instanceof org.hl7.elm.r1.ToList) {
-                org.hl7.elm.r1.ToList toList = (org.hl7.elm.r1.ToList)retrieve.getCodes();
-                resolveCodeFilterCodes(context, libraryIdentifier, cfc, toList.getOperand());
-            }
-
-            if (retrieve.getCodes() instanceof org.hl7.elm.r1.List) {
-                org.hl7.elm.r1.List codeList = (org.hl7.elm.r1.List)retrieve.getCodes();
-                for (Expression e : codeList.getElement()) {
-                    resolveCodeFilterCodes(context, libraryIdentifier, cfc, e);
-                }
-            }
-
-            dr.getCodeFilter().add(cfc);
+            dr.getCodeFilter().add(toCodeFilterComponent(context, libraryIdentifier, retrieve.getCodeProperty(), retrieve.getCodes()));
         }
 
-        // TODO: Set date range filters if literal
+        // Add any additional code filters
+        for (CodeFilterElement cfe : retrieve.getCodeFilter()) {
+            dr.getCodeFilter().add(toCodeFilterComponent(context, libraryIdentifier, cfe.getProperty(), cfe.getValue()));
+        }
+
+        // Set date path if specified
+        if (retrieve.getDateProperty() != null) {
+            dr.getDateFilter().add(toDateFilterComponent(context, libraryIdentifier, retrieve.getDateProperty(), retrieve.getDateRange()));
+        }
+
+        // Add any additional date filters
+        for (DateFilterElement dfe : retrieve.getDateFilter()) {
+            dr.getDateFilter().add(toDateFilterComponent(context, libraryIdentifier, dfe.getProperty(), dfe.getValue()));
+        }
 
         return dr;
     }

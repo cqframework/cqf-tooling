@@ -15,7 +15,7 @@ public class ElmConditionRequirement extends ElmExpressionRequirement {
         if (comparand == null) {
             throw new IllegalArgumentException("comparand is required");
         }
-        this.comparand = property;
+        this.comparand = comparand;
     }
 
     protected ElmPropertyRequirement property;

@@ -16,6 +16,7 @@ public class ElmQueryContext {
         this.libraryIdentifier = libraryIdentifier;
         this.query = query;
         this.queryRequirements = new ElmConjunctiveRequirement(libraryIdentifier, query);
+        this.queryRequirement = new ElmQueryRequirement(libraryIdentifier, query);
     }
 
     private VersionedIdentifier libraryIdentifier;
@@ -23,7 +24,7 @@ public class ElmQueryContext {
     private ElmExpressionRequirement queryRequirements;
     private ElmQueryAliasContext definitionContext;
     private List<ElmQueryAliasContext> aliasContexts = new ArrayList<ElmQueryAliasContext>();
-    private Set<ElmAliasDataRequirement> aliasDataRequirements = new HashSet<ElmAliasDataRequirement>();
+    private ElmQueryRequirement queryRequirement;
 
     public void enterAliasDefinitionContext(AliasedQuerySource querySource) {
         if (definitionContext != null) {
@@ -32,12 +33,15 @@ public class ElmQueryContext {
         definitionContext = new ElmQueryAliasContext(libraryIdentifier, querySource);
     }
 
-    public void exitAliasDefinitionContext() {
+    public ElmQueryAliasContext exitAliasDefinitionContext(ElmRequirement requirements) {
         if (definitionContext == null) {
             throw new IllegalArgumentException("Alias definition not in progress");
         }
         aliasContexts.add(definitionContext);
+        ElmQueryAliasContext result = definitionContext;
+        result.setRequirements(requirements);
         definitionContext = null;
+        return result;
     }
 
     public ElmQueryAliasContext resolveAlias(String aliasName) {
@@ -60,15 +64,11 @@ public class ElmQueryContext {
         return null;
     }
 
-    private void addAliasDataRequirements(ElmAliasDataRequirement aliasDataRequirement) {
-        aliasDataRequirements.add(aliasDataRequirement);
-    }
-
     public void descopeAlias(AliasedQuerySource querySource) {
         ElmQueryAliasContext aliasContext = getAliasContext(querySource);
         if (aliasContext != null) {
             aliasContexts.remove(aliasContext);
-            addAliasDataRequirements(aliasContext.getRequirements());
+            queryRequirement.addDataRequirements(aliasContext.getRequirements());
         }
         aliasContexts.removeIf(x -> x.getAlias().equals(querySource.getAlias()));
     }
@@ -79,46 +79,18 @@ public class ElmQueryContext {
         }
     }
 
-    private ElmAliasDataRequirement getAliasDataRequirement(Element querySource) {
-        if (querySource instanceof AliasedQuerySource) {
-            for (ElmAliasDataRequirement aliasDataRequirement : aliasDataRequirements) {
-                if (aliasDataRequirement.getQuerySource().getAlias().equals(((AliasedQuerySource)querySource).getAlias())) {
-                    return aliasDataRequirement;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private void distributeConditionRequirement(ElmConditionRequirement requirement) {
-        ElmAliasDataRequirement aliasDataRequirement = getAliasDataRequirement(requirement.getProperty().getSource());
-        if (aliasDataRequirement != null) {
-            aliasDataRequirement.addConditionRequirement(requirement);
-        }
-    }
-
-    private void distributeExpressionRequirement(ElmExpressionRequirement requirement) {
-        if (requirement instanceof ElmConjunctiveRequirement) {
-            for (ElmExpressionRequirement expressionRequirement : ((ElmConjunctiveRequirement)requirement).getArguments()) {
-                distributeExpressionRequirement(expressionRequirement);
-            }
-        }
-        else if (requirement instanceof ElmDisjunctiveRequirement) {
-            // TODO: Distribute disjunctive requirements (requires union rewrite)
-        }
-        else if (requirement instanceof ElmConditionRequirement) {
-            distributeConditionRequirement((ElmConditionRequirement)requirement);
-        }
-    }
-
-    public void analyzeDataRequirements() {
+    public ElmQueryRequirement getQueryRequirement(ElmRequirement childRequirements) {
         // Gather requirements from any sources still in scope in the query
         for (ElmQueryAliasContext aliasContext : aliasContexts) {
-            addAliasDataRequirements(aliasContext.getRequirements());
+            queryRequirement.addDataRequirements(aliasContext.getRequirements());
         }
 
+        // add child requirements gathered during the context
+        queryRequirement.addChildRequirements(childRequirements);
+
         // distribute query requirements to each alias
-        distributeExpressionRequirement(queryRequirements);
+        queryRequirement.distributeExpressionRequirement(queryRequirements);
+
+        return queryRequirement;
     }
 }

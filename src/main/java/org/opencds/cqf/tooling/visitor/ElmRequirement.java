@@ -28,6 +28,10 @@ public class ElmRequirement {
         this.element = element;
     }
 
+    public boolean hasRequirement(ElmRequirement requirement) {
+        return requirement != null && requirement.getElement() == element;
+    }
+
     @Override
     public int hashCode() {
         return 47 + (39 * libraryIdentifier.hashCode()) + (53 * element.hashCode());

@@ -26,6 +26,59 @@ public class ElmRequirementsContext {
         return libraryManager;
     }
 
+    private TypeResolver typeResolver;
+    public TypeResolver getTypeResolver() {
+        return this.typeResolver;
+    }
+
+    private Stack<ElmExpressionDefContext> expressionDefStack = new Stack<ElmExpressionDefContext>();
+    public void enterExpressionDef(ExpressionDef expressionDef) {
+        if (expressionDef == null) {
+            throw new IllegalArgumentException("expressionDef required");
+        }
+        ElmExpressionDefContext expressionDefContext = new ElmExpressionDefContext(getCurrentLibraryIdentifier(), expressionDef);
+        expressionDefStack.push(expressionDefContext);
+    }
+    public void exitExpressionDef(ElmRequirement inferredRequirements) {
+        if (expressionDefStack.empty()) {
+            throw new IllegalArgumentException("Not in an expressionDef context");
+        }
+        ElmExpressionDefContext expressionDefContext = expressionDefStack.pop();
+        ExpressionDef ed = expressionDefContext.getExpressionDef();
+        reportExpressionDef(ed);
+        this.reportedRequirements.put(ed, expressionDefContext.getReportedRequirements());
+        this.inferredRequirements.put(ed, inferredRequirements);
+    }
+    public ElmExpressionDefContext getCurrentExpressionDefContext() {
+        if (expressionDefStack.empty()) {
+            throw new IllegalArgumentException("Expression definition is not in progress");
+        }
+        return expressionDefStack.peek();
+    }
+    public boolean inExpressionDefContext() {
+        return !expressionDefStack.empty();
+    }
+
+    /*
+    Reported requirements are collected during the traversal, reported at query boundaries, or  at retrieves
+    that are outside of a query scope.
+    These are collected by the ElmExpressionDefContext as expression defs are visited, and reported to the context after
+    the visit is complete
+     */
+    private Map<ExpressionDef, ElmRequirements> reportedRequirements = new HashMap<ExpressionDef, ElmRequirements>();
+    public ElmRequirements getReportedRequirements(ExpressionDef ed) {
+        return reportedRequirements.get(ed);
+    }
+
+    /*
+    Inferred requirements are the result of the traversal, the computed/inferred data requirements for an expression.
+    These are calculated by the visit and reported to the context here after the visit is complete
+     */
+    private Map<ExpressionDef, ElmRequirement> inferredRequirements = new HashMap<ExpressionDef, ElmRequirement>();
+    public ElmRequirement getInferredRequirements(ExpressionDef ed) {
+        return inferredRequirements.get(ed);
+    }
+
     private Stack<VersionedIdentifier> libraryStack = new Stack<VersionedIdentifier>();
     public void enterLibrary(VersionedIdentifier libraryIdentifier) {
         if (libraryIdentifier == null) {
@@ -67,36 +120,21 @@ public class ElmRequirementsContext {
         }
     }
 
-    private Stack<ElmQueryContext> queryStack = new Stack<ElmQueryContext>();
     public void enterQueryContext(Query query) {
-        queryStack.push(new ElmQueryContext(getCurrentLibraryIdentifier(), query));
+        getCurrentExpressionDefContext().enterQueryContext(query);
     }
-    public void exitQueryContext() {
-        ElmQueryContext queryContext = queryStack.pop();
-        queryContext.analyzeDataRequirements();
+    public ElmQueryContext exitQueryContext() {
+        return getCurrentExpressionDefContext().exitQueryContext();
     }
     public ElmQueryContext getCurrentQueryContext() {
-        if (queryStack.empty()) {
-            throw new IllegalArgumentException("Not in a query context");
-        }
-
-        return queryStack.peek();
+        return getCurrentExpressionDefContext().getCurrentQueryContext();
+    }
+    public boolean inQueryContext() {
+        return getCurrentExpressionDefContext().inQueryContext();
     }
 
     public ElmQueryAliasContext resolveAlias(String aliasName) {
-        ElmQueryAliasContext aliasContext = null;
-        for (ElmQueryContext queryContext : queryStack) {
-            aliasContext = queryContext.resolveAlias(aliasName);
-            if (aliasContext != null) {
-                break;
-            }
-        }
-
-        if (aliasContext == null) {
-            throw new IllegalArgumentException(String.format("Could not resolve alias %s", aliasName));
-        }
-
-        return aliasContext;
+        return getCurrentExpressionDefContext().resolveAlias(aliasName);
     }
 
     private Set<Element> visited = new HashSet<Element>();
@@ -117,6 +155,7 @@ public class ElmRequirementsContext {
         }
         this.libraryManager = libraryManager;
         this.options = options;
+        this.typeResolver = new TypeResolver(libraryManager);
 
         if (visitor == null) {
             throw new IllegalArgumentException("visitor required");
@@ -125,9 +164,32 @@ public class ElmRequirementsContext {
         this.requirements = new ElmRequirements(new VersionedIdentifier().withId("result"), new Null());
     }
 
+    private boolean isDefinition(Element elm) {
+        return elm instanceof Library
+                || elm instanceof UsingDef
+                || elm instanceof IncludeDef
+                || elm instanceof CodeSystemDef
+                || elm instanceof ValueSetDef
+                || elm instanceof CodeDef
+                || elm instanceof ConceptDef
+                || elm instanceof ParameterDef
+                || elm instanceof ContextDef
+                || elm instanceof ExpressionDef;
+    }
+
     private void reportRequirement(ElmRequirement requirement) {
-        visited.add(requirement.getElement());
-        requirements.reportRequirement(requirement);
+        if (isDefinition(requirement.getElement())) {
+            visited.add(requirement.getElement());
+            requirements.reportRequirement(requirement);
+        }
+        else {
+            if (expressionDefStack.empty()) {
+                requirements.reportRequirement(requirement);
+            }
+            else {
+                expressionDefStack.peek().reportRequirement(requirement);
+            }
+        }
     }
 
     private void reportRequirement(Element element) {
@@ -241,15 +303,22 @@ public class ElmRequirementsContext {
         }
     }
 
-    public void reportExpressionRef(ExpressionRef expressionRef) {
+    public ElmRequirement reportExpressionRef(ExpressionRef expressionRef) {
         TranslatedLibrary targetLibrary = prepareLibraryVisit(getCurrentLibraryIdentifier(), expressionRef.getLibraryName());
         try {
             ExpressionDef ed = targetLibrary.resolveExpressionRef(expressionRef.getName());
             if (!visited.contains(ed)) {
                 visitor.visitElement(ed, this);
-
-                // TODO: Report context?
             }
+            ElmRequirement inferredRequirements = getInferredRequirements(ed);
+
+            // Report data requirements for this expression def to the current context (that are not already part of the inferred requirements
+            ElmRequirements reportedRequirements = getReportedRequirements(ed);
+            if (reportedRequirements != null) {
+                reportRequirements(reportedRequirements, inferredRequirements);
+            }
+            // Return the inferred requirements for the expression def
+            return inferredRequirements;
         }
         finally {
             unprepareLibraryVisit(expressionRef.getLibraryName());
@@ -287,6 +356,34 @@ public class ElmRequirementsContext {
             reportRequirement(retrieveRequirement);
         }
         */
+    }
+
+    /*
+    Report the requirements inferred from visit of an expression tree, typically an ExpressionDef
+    Except do not report a requirement if it is present in the inferred requirements for the expression
+    (The alternative is to calculate total requirements as part of the inference mechanism, but that
+    complicates the inferencing calculations, as they would always have to be based on a collection
+    of requirements, rather than the current focus of either a DataRequirement or a QueryRequirement)
+     */
+    public void reportRequirements(ElmRequirement requirement, ElmRequirement inferredRequirements) {
+        if (requirement instanceof ElmRequirements) {
+            for (ElmRequirement childRequirement : ((ElmRequirements)requirement).getRequirements()) {
+                if (inferredRequirements == null || !inferredRequirements.hasRequirement(childRequirement)) {
+                    reportRequirement(childRequirement);
+                }
+            }
+        }
+        else if (requirement instanceof ElmQueryRequirement) {
+            ElmQueryRequirement queryRequirement = (ElmQueryRequirement)requirement;
+            for (ElmDataRequirement dataRequirement : queryRequirement.getDataRequirements()) {
+                if (inferredRequirements == null || !inferredRequirements.hasRequirement(dataRequirement)) {
+                    reportRequirement(dataRequirement);
+                }
+            }
+        }
+        else {
+            reportRequirement(requirement);
+        }
     }
 
     private QName getType(Expression expression) {

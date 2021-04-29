@@ -15,7 +15,6 @@ public class ElmQueryAliasContext {
         }
         this.libraryIdentifier = libraryIdentifier;
         this.querySource = querySource;
-        this.requirements = new ElmAliasDataRequirement(libraryIdentifier, querySource);
     }
 
     private VersionedIdentifier libraryIdentifier;
@@ -27,9 +26,22 @@ public class ElmQueryAliasContext {
         return querySource.getAlias();
     }
 
-    private ElmAliasDataRequirement requirements;
-    public ElmAliasDataRequirement getRequirements() {
+    private ElmDataRequirement requirements;
+    public ElmDataRequirement getRequirements() {
         return requirements;
+    }
+    public void setRequirements(ElmRequirement requirements) {
+        if (requirements instanceof ElmDataRequirement) {
+            this.requirements = (ElmDataRequirement)requirements;
+        }
+        else if (requirements instanceof ElmExpressionRequirement) {
+            this.requirements = ElmDataRequirement.inferFrom((ElmExpressionRequirement)requirements);
+        }
+        else {
+            // Should never land here, but defensively...
+            this.requirements = new ElmDataRequirement(this.libraryIdentifier, new Retrieve());
+        }
+        this.requirements.setQuerySource(getQuerySource());
     }
 
     public void reportProperty(ElmPropertyRequirement propertyRequirement) {

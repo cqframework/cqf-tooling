@@ -22,7 +22,14 @@ public class ElmRequirements extends ElmRequirement {
     }
 
     public void reportRequirement(ElmRequirement requirement) {
-        requirements.add(requirement);
+        if (requirement instanceof ElmRequirements) {
+            for (ElmRequirement r : ((ElmRequirements)requirement).getRequirements()) {
+                reportRequirement(r);
+            }
+        }
+        else {
+            requirements.add(requirement);
+        }
     }
 
     public Iterable<ElmRequirement> getUsingDefs() {
