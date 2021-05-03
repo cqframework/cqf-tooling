@@ -19,7 +19,10 @@ public class DictionaryCode {
         if (label == null) {
             this.label = null;
         }
-        this.label = label.replace((char)160, (char)32).trim();
+
+        if (label != null) {
+            this.label = label.replace((char) 160, (char) 32).trim();
+        }
     }
 
     private String display;
@@ -30,7 +33,10 @@ public class DictionaryCode {
         if (display == null) {
             this.display = null;
         }
-        this.display = display.replace((char)160, (char)32).trim();
+
+        if (display != null) {
+            this.display = display.replace((char) 160, (char) 32).trim();
+        }
     }
 
     private String parent;

@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.acceleratorkit;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.*;
 
 import javax.annotation.Nonnull;
@@ -10,6 +11,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.fhir.ucum.Canonical;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -444,6 +446,52 @@ public class Processor extends Operation {
         return multipleChoiceType;
     }
 
+    private String cleanseCodeComments(String rawComment) {
+        String result = null;
+        if (rawComment != null) {
+            result = rawComment
+                    .replace("Code title: ", "")
+                    .replace("Code LongName: ", "");
+        }
+
+        return result;
+    }
+    private String getICD10Comments(Row row, HashMap<String, Integer> colIds) {
+        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ICD-10Comments"));
+        comments = cleanseCodeComments(comments);
+        return comments;
+    }
+
+    private String getICD11Comments(Row row, HashMap<String, Integer> colIds) {
+        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ICD-11Comments"));
+        comments = cleanseCodeComments(comments);
+        return comments;
+    }
+
+    private String getLOINCComments(Row row, HashMap<String, Integer> colIds) {
+        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "LOINCComments"));
+        comments = cleanseCodeComments(comments);
+        return comments;
+    }
+
+    private String getICFComments(Row row, HashMap<String, Integer> colIds) {
+        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ICFComments"));
+        comments = cleanseCodeComments(comments);
+        return comments;
+    }
+
+    private String getICHIComments(Row row, HashMap<String, Integer> colIds) {
+        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ICHIComments"));
+        comments = cleanseCodeComments(comments);
+        return comments;
+    }
+
+    private String getSNOMEDComments(Row row, HashMap<String, Integer> colIds) {
+        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "SNOMEDComments"));
+        comments = cleanseCodeComments(comments);
+        return comments;
+    }
+
     private List<DictionaryCode> cleanseCodes(List<DictionaryCode> codes) {
         // Remove "Not classifiable in" instances
         codes.removeIf(c -> c.getCode().startsWith("Not classifiable in"));
@@ -456,11 +504,29 @@ public class Processor extends Operation {
         String codeListString = SpreadsheetHelper.getCellAsString(row, getColId(colIds, codeSystemKey));
         if (codeListString != null && !codeListString.isEmpty()) {
             List<String> codesList = Arrays.asList(codeListString.split(";"));
-            String display;
+            String display = null;
             for (String c : codesList) {
-                // TODO: This is wrong. We need a solution for constructing Display. Likely
-                // needs to be in input in the Data Dictionary.
-                display = String.format("%s (%s)", label, codeSystemKey);
+                switch (codeSystemKey) {
+                    case "ICD-10":
+                        display = getICD10Comments(row, colIds);
+                        break;
+                    case "ICD-11":
+                        display = getICD11Comments(row, colIds);
+                        break;
+                    case "ICHI":
+                        display = getICHIComments(row, colIds);
+                        break;
+                    case "ICF":
+                        display = getICFComments(row, colIds);
+                        break;
+                    case "SNOMED-CT":
+                        display = getSNOMEDComments(row, colIds);
+                        break;
+                    case "LOINC":
+                        display = getLOINCComments(row, colIds);
+                        break;
+                }
+
                 codes.add(getCode(system, label, display, c, null));
             }
         }
@@ -471,7 +537,7 @@ public class Processor extends Operation {
     private List<DictionaryCode> getFhirCodes(String label, Row row, HashMap<String, Integer> colIds) {
         List<DictionaryCode> codes = new ArrayList<>();
         String system = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
-        String display = String.format("%s (%s)", label, "FHIR");
+        String display = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4CodeDisplay"));
         if (system != null && !system.isEmpty()) {
             String codeListString = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4Code"));
             if (codeListString != null && !codeListString.isEmpty()) {
@@ -656,15 +722,32 @@ public class Processor extends Operation {
                     parentElement.getChoices().setFhirElementPath(parentChoicesFhirElementPath);
                 }
 
-                String parentChoicesCustomValueSetName = parentElement.getChoices().getCustomValueSetName();
-                if (parentChoicesCustomValueSetName == null) {
-                    parentChoicesCustomValueSetName = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomValueSetName"));
-                    parentElement.getChoices().setCustomValueSetName(parentChoicesCustomValueSetName);
-                }
+                Map<String, List<DictionaryCode>> valueSetCodes = parentElement.getChoices().getValueSetCodes();
+                if (valueSetCodes != null) {
+                    String inputOptionValueSetName = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomValueSetName"));
+                    if (inputOptionValueSetName == null || inputOptionValueSetName.isEmpty()) {
+                        inputOptionValueSetName = parentName;
+                    }
 
-                List<DictionaryCode> dataElementCodes = getDataElementCodes(row, colIds, parentName);
-                if (dataElementCodes != null && !dataElementCodes.isEmpty()) {
-                    parentElement.getChoices().getCodes().getCodes().addAll(dataElementCodes);
+                    if (!inputOptionValueSetName.endsWith("Choices")) {
+                        inputOptionValueSetName = inputOptionValueSetName + " Choices";
+                    }
+
+                    String optionLabel = getDataElementLabel(row, colIds);
+                    List<DictionaryCode> inputOptionCodes = getDataElementCodes(row, colIds, optionLabel != null && !optionLabel.isEmpty() ? optionLabel : parentName);
+
+                    if (valueSetCodes.containsKey(inputOptionValueSetName)) {
+                        List<DictionaryCode> entryCodes = valueSetCodes.get(inputOptionValueSetName);
+                        for (DictionaryCode code: inputOptionCodes) {
+                            if (entryCodes.stream().noneMatch(c -> c.getCode().equals(code.getCode())
+                                                                && c.getSystem().equals(code.getSystem()))) {
+                                entryCodes.add(code);
+                            }
+
+                        }
+                    } else {
+                        valueSetCodes.put(inputOptionValueSetName, inputOptionCodes);
+                    }
                 }
             }
         }
@@ -797,22 +880,28 @@ public class Processor extends Operation {
                         case "icd-10-who":
                         case "icd-10 code":
                         case "icd-10?code": colIds.put("ICD-10", cell.getColumnIndex()); break;
+                        case "icd-10?comments / considerations": colIds.put("ICD-10Comments", cell.getColumnIndex()); break;
                         case "icf?code": colIds.put("ICF", cell.getColumnIndex()); break;
+                        case "icf?comments / considerations": colIds.put("ICFComments", cell.getColumnIndex()); break;
                         case "ichi?code":
                         case "ichi (beta 3)?code": colIds.put("ICHI", cell.getColumnIndex()); break;
+                        case "ichi?comments / considerations": colIds.put("ICHIComments", cell.getColumnIndex()); break;
                         case "snomed-ct":
                         case "snomed-ct code":
                         case "snomed ct":
                         case "snomed ct?code":
                         case "snomed ct international version?code": colIds.put("SNOMED-CT", cell.getColumnIndex()); break;
+                        case "snomed ct international version?comments / considerations": colIds.put("SNOMEDComments", cell.getColumnIndex()); break;
                         case "loinc":
                         case "loinc code":
                         case "loinc version 2.68?code":
                             colIds.put("LOINC", cell.getColumnIndex()); break;
+                        case "loinc version 2.68?comments / considerations": colIds.put("LOINCComments", cell.getColumnIndex()); break;
                         case "rxnorm": colIds.put("RxNorm", cell.getColumnIndex()); break;
                         case "icd-11":
                         case "icd-11 code":
                         case "icd-11?code":colIds.put("ICD-11", cell.getColumnIndex()); break;
+                        case "icd-11?comments / considerations": colIds.put("ICD-11Comments", cell.getColumnIndex()); break;
                         case "ciel": colIds.put("CIEL", cell.getColumnIndex()); break;
                         case "openmrs entity parent": colIds.put("OpenMRSEntityParent", cell.getColumnIndex()); break;
                         case "openmrs entity": colIds.put("OpenMRSEntity", cell.getColumnIndex()); break;
@@ -1529,26 +1618,41 @@ public class Processor extends Operation {
     }
 
     private void ensureChoicesDataElement(DictionaryElement dictionaryElement, StructureDefinition sd) {
-        // Ensure Element for Choices path
         if (dictionaryElement.getChoices() != null && dictionaryElement.getChoices().getFhirElementPath() != null) {
             String choicesElementId = dictionaryElement.getChoices().getFhirElementPath().getResourceTypeAndPath();
             ElementDefinition existingChoicesElement = getDifferentialElement(sd, choicesElementId);
 
-            CodeCollection codes = dictionaryElement.getChoices().getCodes();
-            String customChoicesValueSetName = dictionaryElement.getChoices().getCustomValueSetName();
-            if (customChoicesValueSetName == null || customChoicesValueSetName.isEmpty()) {
-                customChoicesValueSetName = dictionaryElement.getName() + "-choices";
+            ValueSet valueSetToBind = null;
+
+            Map<String, List<DictionaryCode>> valueSetCodes = dictionaryElement.getChoices().getValueSetCodes();
+            String parentCustomValueSetName = dictionaryElement.getCustomValueSetName();
+            if (parentCustomValueSetName == null || parentCustomValueSetName.isEmpty()) {
+                parentCustomValueSetName = dictionaryElement.getDataElementLabel();
             }
 
-            if (dictionaryElement.getFhirElementPath().getResourceTypeAndPath().equalsIgnoreCase(choicesElementId)) {
-                List<DictionaryCode> primaryCodes = dictionaryElement.getPrimaryCodes().getCodes();
-                codes.getCodes().addAll(primaryCodes);
+            List<ValueSet> valueSets = new ArrayList<ValueSet>();
+            for (Map.Entry<String, List<DictionaryCode>> vs: valueSetCodes.entrySet()) {
+                ValueSet valueSet = ensureValueSetWithCodes(toId(vs.getKey()), vs.getKey(), new CodeCollection(vs.getValue()));
+                valueSets.add(valueSet);
+
+                valueSetToBind = valueSet;
             }
+
+            if (valueSetCodes != null && valueSetCodes.size() > 1) {
+            String choicesGrouperValueSetName =  parentCustomValueSetName + " Choices Grouper";
+            valueSetToBind = createGrouperValueSet(toId(choicesGrouperValueSetName), choicesGrouperValueSetName, valueSets);
+            }
+
+            //TODO: Include the primaryCodes valueset in the grouper. Add the codes to the VS in the single VS case.
+//            if (dictionaryElement.getFhirElementPath().getResourceTypeAndPath().equalsIgnoreCase(choicesElementId)) {
+//                List<DictionaryCode> primaryCodes = dictionaryElement.getPrimaryCodes().getCodes();
+//                codes.getCodes().addAll(primaryCodes);
+//            }
 
             if (existingChoicesElement != null) {
                 ElementDefinition.ElementDefinitionBindingComponent existingBinding = existingChoicesElement.getBinding();
                 if (existingBinding == null || existingBinding.getId() == null) {
-                    ensureTerminologyAndBindToElement(dictionaryElement, sd, existingChoicesElement, codes, customChoicesValueSetName, false);
+                    bindValueSetToElement(existingChoicesElement, valueSetToBind, dictionaryElement.getBindingStrength());
                 }
             } else {
                 ElementDefinition ed = new ElementDefinition();
@@ -1579,7 +1683,7 @@ public class Processor extends Operation {
                     ed.addType(tr);
                 }
 
-                ensureTerminologyAndBindToElement(dictionaryElement, sd, ed, codes, customChoicesValueSetName, false);
+                bindValueSetToElement(ed, valueSetToBind, dictionaryElement.getBindingStrength());
                 sd.getDifferential().addElement(ed);
             }
         }
@@ -1702,10 +1806,7 @@ public class Processor extends Operation {
             if (valueSet != null) {
                 Enumerations.BindingStrength bindingStrength = dictionaryElement.getBindingStrength();
                 // Bind the current element to the valueSet
-                ElementDefinition.ElementDefinitionBindingComponent binding = new ElementDefinition.ElementDefinitionBindingComponent();
-                binding.setStrength(bindingStrength);
-                binding.setValueSet(valueSet.getUrl());
-                targetElement.setBinding(binding);
+                bindValueSetToElement(targetElement, valueSet, bindingStrength);
 
                 if (isPrimaryDataElement) {
                     valueSetLabel = valueSetId;
@@ -1719,6 +1820,14 @@ public class Processor extends Operation {
                 }
             }
         }
+    }
+
+    private void bindValueSetToElement(ElementDefinition targetElement, ValueSet valueSet, Enumerations.BindingStrength bindingStrength) {
+        ElementDefinition.ElementDefinitionBindingComponent binding =
+            new ElementDefinition.ElementDefinitionBindingComponent();
+        binding.setStrength(bindingStrength);
+        binding.setValueSet(valueSet.getUrl());
+        targetElement.setBinding(binding);
     }
 
     @Nonnull
@@ -1775,12 +1884,92 @@ public class Processor extends Operation {
                     List<ValueSet.ConceptReferenceComponent> conceptReferences = conceptSet.getConcept();
                     ValueSet.ConceptReferenceComponent conceptReference = new ValueSet.ConceptReferenceComponent();
                     conceptReference.setCode(code.getCode());
-                    conceptReference.setDisplay(code.getLabel());
+                    conceptReference.setDisplay(code.getDisplay());
 
                     // Only add the concept if it does not already exist in the ValueSet (based on both Code and Display)
                     if (conceptReferences.stream().noneMatch(o -> o.getCode().equals(conceptReference.getCode())
                             && o.getDisplay().equals(conceptReference.getDisplay()))) {
                         conceptSet.addConcept(conceptReference);
+                    }
+                }
+            }
+        }
+
+        // If the ValueSet did not already exist, add it to the valueSets collection
+        if (!valueSetExisted) {
+            valueSets.add(valueSet);
+        }
+        return valueSet;
+    }
+
+    @Nonnull
+    private ValueSet createGrouperValueSet(String valueSetId, String valueSetLabel, List<ValueSet> valueSetsToGroup) {
+        // Ensure the ValueSet
+        ValueSet valueSet = null;
+        Boolean valueSetExisted = false;
+        for (ValueSet vs : valueSets) {
+            if (vs.getId().equals(valueSetId)) {
+                valueSet = vs;
+                valueSetExisted = true;
+            }
+        }
+
+        if (valueSet == null) {
+            valueSet = new ValueSet();
+            valueSet.setId(valueSetId);
+            valueSet.setUrl(String.format("%s/ValueSet/%s", canonicalBase, valueSetId));
+            valueSet.setName(valueSetLabel);
+            valueSet.setTitle(valueSetLabel);
+            valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
+            valueSet.setExperimental(false);
+            valueSet.setDescription(String.format("Group Valueset with codes representing possible values for the %s element", valueSetLabel));
+            valueSet.setImmutable(true);
+        }
+
+        valueSet.setDate(java.util.Date.from(Instant.now()));
+
+        // Ensure Compose element
+        ValueSet.ValueSetComposeComponent compose = valueSet.getCompose();
+        if (compose == null) {
+            compose = new ValueSet.ValueSetComposeComponent();
+            valueSet.setCompose(compose);
+        }
+
+        // Ensure Expansion element
+        ValueSet.ValueSetExpansionComponent targetExpansion = valueSet.getExpansion();
+        if (targetExpansion == null) {
+            targetExpansion = new ValueSet.ValueSetExpansionComponent();
+            valueSet.setExpansion(targetExpansion);
+        }
+        targetExpansion.setTimestamp(java.util.Date.from(Instant.now()));
+
+        // Add source valueset urls to compose of the grouper and all of the compose codes to the expansion of the grouper
+        List<ValueSet.ConceptSetComponent> includes = valueSet.getCompose().getInclude();
+//        ValueSet.ValueSetExpansionComponent targetExpansion = valueSet.getExpansion();
+        List<ValueSet.ValueSetExpansionContainsComponent> targetContains = targetExpansion.getContains();
+
+        for (ValueSet vs: valueSetsToGroup) {
+            // Add source ValueSet URLs to grouper Compose
+            if (includes.stream().noneMatch(i -> i.hasValueSet(vs.getUrl()))) {
+                ValueSet.ConceptSetComponent include = new ValueSet.ConceptSetComponent();
+                include.addValueSet(vs.getUrl());
+                valueSet.getCompose().addInclude(include);
+            }
+
+            // NOTE: Very naive implementation that assumes a compose made up of actual include concepts. That is
+            // a safe assumption in context of this Processor though and the ValueSets it creates at the time of this
+            // implementation.
+            if (vs.hasCompose() && vs.getCompose().hasInclude()) {
+                for (ValueSet.ConceptSetComponent sourceInclude : vs.getCompose().getInclude()) {
+                    String system = sourceInclude.getSystem();
+                    for (ValueSet.ConceptReferenceComponent concept : sourceInclude.getConcept()) {
+                        if (targetContains.stream().noneMatch(c -> c.getSystem().equals(system) && c.getCode().equals(concept.getCode()))) {
+                            ValueSet.ValueSetExpansionContainsComponent newContains = new ValueSet.ValueSetExpansionContainsComponent();
+                            newContains.setSystem(system);
+                            newContains.setCode(concept.getCode());
+                            newContains.setDisplay(concept.getDisplay());
+                            targetContains.add(newContains);
+                        }
                     }
                 }
             }

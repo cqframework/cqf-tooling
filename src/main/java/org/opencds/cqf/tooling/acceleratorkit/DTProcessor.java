@@ -615,6 +615,9 @@ public class DTProcessor extends Operation {
 
     private String buildPlanDefinitionIndex() {
         StringBuilder index = new StringBuilder();
+        index.append("### Plan Definitions by Decision ID");
+        index.append(newLine);
+        index.append(newLine);
         index.append("|Decision Table|Description|");
         index.append(newLine);
         index.append("|---|---|");

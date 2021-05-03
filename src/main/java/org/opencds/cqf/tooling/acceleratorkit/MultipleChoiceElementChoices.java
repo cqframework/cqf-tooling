@@ -1,7 +1,11 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
+import org.hl7.fhir.r4.model.PlanDefinition;
+
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MultipleChoiceElementChoices {
@@ -13,18 +17,12 @@ public class MultipleChoiceElementChoices {
         this.fhirElementPath = fhirElementPath;
     }
 
-    private String customValueSetName;
-    public String getCustomValueSetName() { return this.customValueSetName; }
-    public void setCustomValueSetName(String customValueSetName) {
-        this.customValueSetName = customValueSetName;
-    }
-
-    private CodeCollection codes;
-    public CodeCollection getCodes() {
-        if (this.codes == null) {
-            this.codes = new CodeCollection();
+    private Map<String, List<DictionaryCode>> valueSetCodes;
+    public Map<String, List<DictionaryCode>> getValueSetCodes() {
+        if (this.valueSetCodes == null) {
+            this.valueSetCodes = new LinkedHashMap<>();
         }
 
-        return this.codes;
+        return this.valueSetCodes;
     }
 }
