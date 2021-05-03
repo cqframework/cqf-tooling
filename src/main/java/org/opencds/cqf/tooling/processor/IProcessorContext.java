@@ -4,6 +4,8 @@ import org.fhir.ucum.UcumService;
 import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.opencds.cqf.tooling.npm.NpmPackageManager;
 
+import java.util.List;
+
 public interface IProcessorContext {
     String getRootDir();
 
@@ -18,4 +20,8 @@ public interface IProcessorContext {
     UcumService getUcumService();
 
     NpmPackageManager getPackageManager();
+
+    List<String> getBinaryPaths();
+
+    CqlProcessor getCqlProcessor();
 }

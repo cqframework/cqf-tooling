@@ -1,4 +1,4 @@
-package org.opencds.cqf.tooling.processor;
+package org.opencds.cqf.tooling.library;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,18 +7,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
-import org.fhir.ucum.UcumEssenceService;
-import org.fhir.ucum.UcumException;
-import org.fhir.ucum.UcumService;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
-import org.opencds.cqf.tooling.npm.LibraryLoader;
+import org.opencds.cqf.tooling.library.r4.R4LibraryProcessor;
+import org.opencds.cqf.tooling.library.stu3.STU3LibraryProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
-import org.opencds.cqf.tooling.utilities.IGUtils;
+import org.opencds.cqf.tooling.processor.*;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.LogUtils;
@@ -49,7 +47,7 @@ public class LibraryProcessor extends BaseProcessor {
                         "Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
 
-        String libraryPath = FilenameUtils.concat(parentContext.rootDir, IGProcessor.libraryPathElement);
+        String libraryPath = FilenameUtils.concat(parentContext.getRootDir(), IGProcessor.libraryPathElement);
         RefreshLibraryParameters params = new RefreshLibraryParameters();
         params.libraryPath = libraryPath;
         params.parentContext = parentContext;
@@ -79,9 +77,6 @@ public class LibraryProcessor extends BaseProcessor {
         return shouldPersist;
     }
 
-    private UcumService ucumService;
-    private List<String> binaryPaths;
-    private CqlProcessor cqlProcessor;
     protected boolean versioned;
 
     /*
@@ -116,7 +111,7 @@ public class LibraryProcessor extends BaseProcessor {
         if (attachment != null) {
             sourceLibrary.getContent().clear();
             sourceLibrary.getContent().add(attachment);
-            CqlProcessor.CqlSourceFileInformation info = cqlProcessor.getFileInformation(attachment.getUrl());
+            CqlProcessor.CqlSourceFileInformation info = getCqlProcessor().getFileInformation(attachment.getUrl());
             attachment.setUrlElement(null);
             if (info != null) {
                 //f.getErrors().addAll(info.getErrors());
@@ -142,24 +137,6 @@ public class LibraryProcessor extends BaseProcessor {
     }
 
     protected List<Library> refreshGeneratedContent(List<Library> sourceLibraries) {
-        try {
-            binaryPaths = IGUtils.extractBinaryPaths(rootDir, sourceIg);
-        }
-        catch (IOException e) {
-            logMessage(String.format("Errors occurred extracting binary path from IG: ", e.getMessage()));
-            throw new IllegalArgumentException("Could not obtain binary path from IG");
-        }
-
-        LibraryLoader reader = new LibraryLoader(fhirVersion);
-        try {
-            ucumService = new UcumEssenceService(UcumEssenceService.class.getResourceAsStream("/ucum-essence.xml"));
-        } catch (UcumException e) {
-            System.err.println("Could not create UCUM validation service:");
-            e.printStackTrace();
-        }
-        cqlProcessor = new CqlProcessor(packageManager.getNpmList(), binaryPaths, reader, this, ucumService,
-                packageId, canonicalBase);
-
         return internalRefreshGeneratedContent(sourceLibraries);
     }
 
@@ -169,26 +146,17 @@ public class LibraryProcessor extends BaseProcessor {
         if (input.exists() && input.isDirectory()) {
             result.add(input.getAbsolutePath());
         }
-        binaryPaths = result;
+        setBinaryPaths(result);
 
-        LibraryLoader reader = new LibraryLoader(fhirVersion);
-        try {
-            ucumService = new UcumEssenceService(UcumEssenceService.class.getResourceAsStream("/ucum-essence.xml"));
-        } catch (UcumException e) {
-            System.err.println("Could not create UCUM validation service:");
-            e.printStackTrace();
-        }
-        cqlProcessor = new CqlProcessor(null, binaryPaths, reader, this, ucumService,
-                null, null);
         List<Library> libraries = new ArrayList<Library>();
         return internalRefreshGeneratedContent(libraries);
     }
 
     private List<Library> internalRefreshGeneratedContent(List<Library> sourceLibraries) {
-        cqlProcessor.execute();
+        getCqlProcessor().execute();
 
         // For each CQL file, ensure that there is a Library resource with a matching name and version
-        for (CqlProcessor.CqlSourceFileInformation fileInfo : cqlProcessor.getAllFileInformation()) {
+        for (CqlProcessor.CqlSourceFileInformation fileInfo : getCqlProcessor().getAllFileInformation()) {
             if (fileInfo.getIdentifier() != null && fileInfo.getIdentifier().getId() != null && !fileInfo.getIdentifier().getId().equals("")) {
                 Library existingLibrary = null;
                 for (Library sourceLibrary : sourceLibraries) {
@@ -219,7 +187,7 @@ public class LibraryProcessor extends BaseProcessor {
     }
 
     private Attachment loadFile(String fn) throws IOException {
-        for (String dir : binaryPaths) {
+        for (String dir : getBinaryPaths()) {
             File f = new File(Utilities.path(dir, fn));
             if (f.exists()) {
                 Attachment att = new Attachment();

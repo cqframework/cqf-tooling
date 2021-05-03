@@ -32,6 +32,7 @@ public class RefreshR4MeasureOperation extends RefreshGeneratedContentOperation 
         super(FilenameUtils.getPath(pathToMeasures), "-RefreshR4Measure", FhirContext.forR4(), null, pathToMeasures);
         jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
         xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
+        xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
     }
 
     @Override
@@ -74,6 +75,9 @@ public class RefreshR4MeasureOperation extends RefreshGeneratedContentOperation 
 
     public Measure refreshMeasure(Measure measure) {
         cqfmHelper.ensureCQFToolingExtensionAndDevice(measure, this.getFhirContext());
+        R4MeasureProcessor refresher = new R4MeasureProcessor();
+        //refresher.refreshMeasure(measure, );
         return measure;
     }
+
 }

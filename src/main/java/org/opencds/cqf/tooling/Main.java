@@ -88,12 +88,23 @@ package org.opencds.cqf.tooling;
             - Example: mvn exec:java -Dexec.args="-RefreshLibrary -ini=C:\Users\Bryn\Documents\Src\HL7\sample-ig\ig.ini -fv=fhir4 -lp=C:\Users\Bryn\Documents\Src\HL7\sample-ig\input\examples\Library-example.json"
 
         - Bundle Resources
-            - mvn exec:java -Dexec.args="[-BundleResources] [-pathtodirectory | -ptd] (-outputpath | -op) (-version | -v) "
+            - mvn exec:java -Dexec.args="[-BundleResources] [-pathtodirectory | -ptd] (-outputpath | -op) (-version | -v) (-encoding | -e) (-bundleid | -bid) "
             - Example: mvn exec:java -Dexec.args="-BundleResources -ptd=/Users/adam/Src/cqframework/opioid-cds-r4/quickstartcontent -op=/Users/adam/Src/cqframework/opioid-cds-r4/quickstartcontentbundle -v=r4"
-            - This tooling consolidates all resources from files in the 'pathtodirectory' directory into a single FHIR Bundle.
-            - Default output path: src/main/resources/org/opencds/cqf/tooling/bundle/output
-            - version = FHIR version { dstu2, stu3, r4 }
-                Default version: Dstu3
+            - This Operation consolidates all resources from files in the 'pathtodirectory' directory into a single FHIR Bundle with
+            - an ID that is the value specified in the 'bunldeid' argument and outputs that generated bundle in file format
+            - of the type specified by the 'encoding' argument to the 'outputpath' directory.
+            - Arguments:
+            -   [-pathtodirectory | -ptd] - Path to the directory containing the resource files to be consolidated into the new bundle
+            -   (-outputpath | -op) - The directory path to which the generated Bundle file should be written
+            -       Default output path: src/main/resources/org/opencds/cqf/tooling/bundle/output
+            -   (-version | -v) - FHIR version { dstu2, stu3, r4 }
+            -       Default version: stu3
+            -   (-encoding | -e) - The file format to be used for representing the resulting Bundle { json, xml }
+            -       Default Value: json
+            -   (-bundleid | -bid) - A valid FHIR ID to be used as the ID for the resulting FHIR Bundle. The Publisher
+            -       validation for Bundle requires a Bundle to have an ID. If no ID is provided, the output Bundle
+            -       will not have an ID value.
+
 
         - Bundle consolidation
             - mvn exec:java -Dexec.args="[-BundlesToBundle] [input directory path] (output encoding) (output file name) (org.opencds.cqf.qdm.output directory path)"

@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.processor;
 
 import java.util.ArrayList;
 
+import org.opencds.cqf.tooling.measure.MeasureProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
