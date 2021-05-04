@@ -8,16 +8,16 @@ import org.hl7.fhir.r4.model.Enumerations;
  * Created by Bryn on 8/18/2019.
  */
 public class DictionaryFhirElementPath {
-    private String resourceType = "Observation";
+    private String resourceType;
     public String getResourceType() {
         return this.resourceType;
     }
-    private String resourcePath = "value[x]";
+    private String resourcePath;
     public String getResourcePath() {
         return this.resourcePath;
     }
 
-    private String resourceTypeAndPath = "Observation.value[x]";
+    private String resourceTypeAndPath;
     public String getResourceTypeAndPath() {
         return this.resourceTypeAndPath;
     }

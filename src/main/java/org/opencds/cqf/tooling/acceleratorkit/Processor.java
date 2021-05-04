@@ -82,9 +82,10 @@ public class Processor extends Operation {
     private Row currentInputOptionParentRow;
 
     private class RetrieveInfo {
-        public RetrieveInfo(StructureDefinition structureDefinition, String terminologyIdentifier) {
+        public RetrieveInfo(StructureDefinition structureDefinition, String terminologyIdentifier, DictionaryFhirElementPath fhirElementPath) {
             this.structureDefinition = structureDefinition;
             this.terminologyIdentifier = terminologyIdentifier;
+            this.fhirElementPath = fhirElementPath;
         }
 
         private StructureDefinition structureDefinition;
@@ -95,6 +96,9 @@ public class Processor extends Operation {
         public String getTerminologyIdentifier() {
             return terminologyIdentifier;
         }
+
+        private DictionaryFhirElementPath fhirElementPath;
+        public DictionaryFhirElementPath getFhirElementPath() { return this.fhirElementPath; }
     }
 
     @Override
@@ -619,11 +623,12 @@ public class Processor extends Operation {
     }
 
     private DictionaryFhirElementPath getFhirElementPath(Row row, HashMap<String, Integer> colIds) {
-        DictionaryFhirElementPath fhirType = new DictionaryFhirElementPath();
+        DictionaryFhirElementPath fhirType = null;
         String resource = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4Resource"));
 
         if (resource != null && !resource.isEmpty()) {
             resource = resource.trim();
+            fhirType = new DictionaryFhirElementPath();
             fhirType.setResource(resource);
             fhirType.setFhirElementType(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4ResourceType")));
         }
@@ -692,7 +697,10 @@ public class Processor extends Operation {
         //TODO: Get all codes specified on the element, create a valueset and bind to it. Required
         e.setPrimaryCodes(getPrimaryCodes(name, row, colIds));
 
-        e.setFhirElementPath(getFhirElementPath(row, colIds));
+        DictionaryFhirElementPath fhirElementPath = getFhirElementPath(row, colIds);
+        if (fhirElementPath != null) {
+            e.setFhirElementPath(fhirElementPath);
+        }
         e.setMasterDataElementPath(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "MasterDataElementPath")));
         e.setBaseProfile(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4BaseProfile")));
         e.setCustomProfileId(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CustomProfileId")));
@@ -718,7 +726,15 @@ public class Processor extends Operation {
                 // overridden, if set, by subsequent input option rows.
                 DictionaryFhirElementPath parentChoicesFhirElementPath = parentElement.getChoices().getFhirElementPath();
                 if (parentChoicesFhirElementPath == null) {
+                    DictionaryFhirElementPath parentElementFhirElementPath = parentElement.getFhirElementPath();
                     parentChoicesFhirElementPath = getFhirElementPath(row, colIds);
+
+                    if (parentChoicesFhirElementPath == null
+                            && parentElementFhirElementPath != null
+                            && parentElementFhirElementPath.getResourceTypeAndPath().equals("Observation.value[x]")) {
+                        parentChoicesFhirElementPath = parentElementFhirElementPath;
+                    }
+
                     parentElement.getChoices().setFhirElementPath(parentChoicesFhirElementPath);
                 }
 
@@ -1816,7 +1832,13 @@ public class Processor extends Operation {
                         }
                     }
 
-                    retrieves.add(new RetrieveInfo(targetStructureDefinition, valueSetLabel));
+                    DictionaryFhirElementPath retrieveFhirElementPath = null;
+                    MultipleChoiceElementChoices choices = dictionaryElement.getChoices();
+                    // If element has choices, set the choices FhirElementPath in the retrieveInfo
+                    if (choices.getFhirElementPath() != null && choices.getValueSetCodes().size() > 0) {
+                        retrieveFhirElementPath = dictionaryElement.getFhirElementPath();
+                    }
+                    retrieves.add(new RetrieveInfo(targetStructureDefinition, valueSetLabel, retrieveFhirElementPath));
                 }
             }
         }
@@ -2416,45 +2438,66 @@ public class Processor extends Operation {
                 sb.append(String.format("define \"%s\":", title));
                 sb.append(System.lineSeparator());
                 sb.append(String.format("  [%s: Cx.\"%s\"]", sd.getType(), retrieve.getTerminologyIdentifier()));
-                // TODO: Switch on sd.baseDefinition to provide filtering here (e.g. status = 'not-done')
 
+                DictionaryFhirElementPath fhirElementPath = retrieve.getFhirElementPath();
+
+                // TODO: Switch on sd.baseDefinition to provide filtering here (e.g. status = 'not-done')
+                String alias;
                 switch (sd.getBaseDefinition()) {
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-procedure":
-                        sb.append(" P");
+                        alias = "P";
+                        sb.append(String.format(" %s", alias));
                         sb.append(System.lineSeparator());
-                        sb.append("    where P.status in { 'preparation', 'in-progress', 'completed' }");
+                        sb.append(String.format("    where %s.status in { 'preparation', 'in-progress', 'completed' }", alias));
+                        appendReturnClause(sb, fhirElementPath, alias);
                         break;
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-procedurenotdone":
-                        sb.append(" P");
+                        alias = "P";
+                        sb.append(String.format(" %s", alias));
                         sb.append(System.lineSeparator());
                         sb.append("    where P.status = 'not-done'");
+                        appendReturnClause(sb, fhirElementPath, alias);
                         break;
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-medicationrequest":
-                        sb.append(" MR");
+                        alias = "MR";
+                        sb.append(String.format(" %s", alias));
                         sb.append(System.lineSeparator());
                         sb.append("    where MR.status = 'completed'");
                         sb.append(System.lineSeparator());
                         sb.append("      and Coalesce(MR.doNotPerform, false) is false");
+                        appendReturnClause(sb, fhirElementPath, alias);
                         break;
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-medicationnotrequested":
-                        sb.append(" MR");
+                        alias = "MR";
+                        sb.append(String.format(" %s", alias));
                         sb.append(System.lineSeparator());
                         sb.append("    where MR.status = 'completed'");
                         sb.append(System.lineSeparator());
                         sb.append("      and MR.doNotPerform");
+                        appendReturnClause(sb, fhirElementPath, alias);
+                        break;
+                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-observation":
+                        alias = "O";
+                        sb.append(String.format(" %s", alias));
+                        sb.append(System.lineSeparator());
+                        sb.append("    //where Not Implemented");
+                        appendReturnClause(sb, fhirElementPath, alias);
                         break;
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-observationnotdone":
-                        sb.append(" O");
+                        alias = "O";
+                        sb.append(String.format(" %s", alias));
                         sb.append(System.lineSeparator());
                         sb.append("    //where Not Implemented");
                         break;
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-servicenotrequested":
-                        sb.append(" SR");
+                        alias = "SR";
+                        sb.append(String.format(" %s", alias));
                         sb.append(System.lineSeparator());
                         sb.append("    //where Not Implemented");
                         break;
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-immunizationnotdone":
-                        sb.append(" I");
+                        alias = "I";
+                        sb.append(String.format(" %s", alias));
                         sb.append(System.lineSeparator());
                         sb.append("    //where Not Implemented");
                         break;
@@ -2464,6 +2507,20 @@ public class Processor extends Operation {
                 sb.append(System.lineSeparator());
                 sb.append(System.lineSeparator());
             }
+        }
+    }
+
+    private void appendReturnClause(StringBuilder sb, DictionaryFhirElementPath fhirElementPath, String alias) {
+        if (fhirElementPath != null) {
+            String returnElementPath = fhirElementPath.getResourcePath();
+            String cast = "";
+            if (isChoiceType(fhirElementPath)) {
+                 returnElementPath = fhirElementPath.getResourcePath().replace("[x]", "");
+                 cast = String.format(" as FHIR.%s", fhirElementPath.getFhirElementType());
+            }
+
+            sb.append(System.lineSeparator());
+            sb.append(String.format("    return %s.%s%s", alias, returnElementPath, cast));
         }
     }
 
