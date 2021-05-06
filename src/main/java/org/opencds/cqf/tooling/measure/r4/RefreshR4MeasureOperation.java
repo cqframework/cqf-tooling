@@ -75,7 +75,7 @@ public class RefreshR4MeasureOperation extends RefreshGeneratedContentOperation 
 
     public Measure refreshMeasure(Measure measure) {
         cqfmHelper.ensureCQFToolingExtensionAndDevice(measure, this.getFhirContext());
-        R4MeasureProcessor refresher = new R4MeasureProcessor();
+        // R4MeasureProcessor refresher = new R4MeasureProcessor();
         //refresher.refreshMeasure(measure, );
         return measure;
     }

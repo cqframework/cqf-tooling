@@ -176,7 +176,6 @@ package org.opencds.cqf.tooling;
 public class Main {
 
     public static void main(String[] args) {
-        System.console().readLine();
         if (args.length == 0) {
             System.out.println("cqf-tooling version: " + Main.class.getPackage().getImplementationVersion());
             System.out.println("Requests must include which operation to run as a command line argument. See docs for examples on how to use this project.");

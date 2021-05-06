@@ -23,7 +23,6 @@ import org.opencds.cqf.tooling.cql_generation.drool.traversal.DepthFirstDroolTra
 import org.opencds.cqf.tooling.cql_generation.drool.traversal.DroolTraverser;
 import org.opencds.cqf.tooling.cql_generation.drool.visitor.DroolToElmVisitor;
 import org.opencds.cqf.tooling.cql_generation.drool.visitor.ElmToCqlVisitor;
-import org.opencds.cqf.tooling.cql_generation.drool.visitor.HtmlFileVisitor;
 import org.opencds.cqf.tooling.cql_generation.drool.visitor.Visitor;
 import org.opencds.cqf.tooling.cql_generation.drool.visitor.DroolToElmVisitor.CQLTYPES;
 

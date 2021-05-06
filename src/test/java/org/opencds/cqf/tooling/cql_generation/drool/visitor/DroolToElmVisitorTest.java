@@ -2,30 +2,21 @@ package org.opencds.cqf.tooling.cql_generation.drool.visitor;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
-import com.google.gson.Gson;
-
-import org.cdsframework.dto.ConditionDTO;
 import org.cqframework.cql.elm.execution.Library;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.junit.Test;
 
 import org.opencds.cqf.cql.engine.execution.CqlLibraryReader;
@@ -36,15 +27,6 @@ import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
-import org.opencds.cqf.tooling.cql_generation.IOUtil;
-import org.opencds.cqf.tooling.cql_generation.builder.VmrToFhirElmBuilder;
-import org.opencds.cqf.tooling.cql_generation.context.ElmContext;
-import org.opencds.cqf.tooling.cql_generation.drool.serialization.Deserializer;
-import org.opencds.cqf.tooling.cql_generation.drool.traversal.DepthFirstDroolTraverser;
-import org.opencds.cqf.tooling.cql_generation.drool.traversal.DroolTraverser;
-import org.opencds.cqf.tooling.cql_generation.drool.visitor.DroolToElmVisitor;
-import org.opencds.cqf.tooling.cql_generation.drool.visitor.Visitor;
-import org.opencds.cqf.tooling.cql_generation.drool.visitor.DroolToElmVisitor.CQLTYPES;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.Context;
@@ -166,26 +148,6 @@ public class DroolToElmVisitorTest {
         return results;
     }
 
-    private void generateElmForDebug() {
-        String encodingPath = "../CQLGenerationDocs/NonGeneratedDocs/default.json";
-        File file = new File(encodingPath);
-        readAndGenerateCQL(file);
-    }
-
-    private void readAndGenerateCQL(File file) {
-        Deserializer deserializer = new Deserializer(file);
-        List<ConditionDTO> conditions = deserializer.deserialize();
-        doVisit(conditions);
-    }
-
-    private void doVisit(List<ConditionDTO> rootNode) {
-        DroolToElmVisitor visitor = new DroolToElmVisitor(CQLTYPES.CONDITION,
-                new VmrToFhirElmBuilder("4.0.0", new DecimalFormat("#.#")));
-        DroolTraverser<Visitor> traverser = new DepthFirstDroolTraverser<Visitor>(visitor);
-        ElmContext context = traverser.traverse(rootNode);
-        System.out.println("");
-    }
-
     private Library library;
     private Context context;
 
@@ -198,42 +160,9 @@ public class DroolToElmVisitorTest {
         }
         FhirContext fhirContext = FhirContext.forR4();
         this.context = new Context(library);
-        File valuesetIdFile = new File("../CQLGenerationDocs/GeneratedDocs/valueset/valuesetids" + ".txt");
-        String json = IOUtil.readFile(valuesetIdFile);
-        Gson gson = new Gson();
-        // Set<String> ids = gson.fromJson(json, Set.class);
         IBaseBundle bundle = fhirContext.newJsonParser().parseResource(Bundle.class,
                 DroolToElmVisitorTest.class.getResourceAsStream("concepts_full.json"));
-        // writeMissingValueSets(gson, ids, bundle);
         registerProviders(fhirContext, bundle);
-    }
-
-        //TODO: remove after resolving missing valuesets
-    private void writeMissingValueSets(Gson gson, Set<String> ids, IBaseBundle bundle) {
-    Set<String> values = new HashSet<String>();
-      for (String id : ids) {
-         boolean matching = false;
-         for (BundleEntryComponent entry : ((Bundle) bundle).getEntry()) {
-        if (entry.getResource() != null && entry.getResource() instanceof ValueSet) {
-            if (entry.getResource().getIdElement().getIdPart().equals("VHF008")) {
-                System.out.println("");
-            }
-            if (id.equals("VHF008")) {
-                System.out.println("");
-            }
-            if (id.equals(entry.getResource().getIdElement().getIdPart())) {
-                matching = true;
-            }
-        }
-         }
-         if (!matching && !id.toLowerCase().equals("active")) {
-        values.add(id);
-         }
-         
-      }
-      String missingValueSets = gson.toJson(values);
-      File outputFile = new File("../CQLGenerationDocs/GeneratedDocs/valueset/missingValueSets" + ".txt");
-      IOUtil.writeToFile(outputFile, missingValueSets);
     }
 
     private InputStream getLibraryHelpersElm(FhirContext fhirContext) {

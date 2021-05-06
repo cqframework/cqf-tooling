@@ -8,8 +8,6 @@ import org.junit.Test;
 import org.opencds.cqf.tooling.cql_generation.drool.serialization.Deserializer;
 import org.opencds.cqf.tooling.cql_generation.drool.traversal.DepthFirstDroolTraverser;
 import org.opencds.cqf.tooling.cql_generation.drool.traversal.DroolTraverser;
-import org.opencds.cqf.tooling.cql_generation.drool.visitor.HtmlFileVisitor;
-import org.opencds.cqf.tooling.cql_generation.drool.visitor.Visitor;
 
 public class HtmlFileVisitorTest {
     @Test

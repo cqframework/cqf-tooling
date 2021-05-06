@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonTokenId;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 
+@SuppressWarnings("deprecation")
 public class UnixTimeStampDeserializer extends DateDeserializer {
 
     private static final long serialVersionUID = -2275951539867772400L;

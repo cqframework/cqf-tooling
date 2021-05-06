@@ -75,6 +75,7 @@ public class VmrToFhirProcessor {
         IOUtils.writeBundle(bundleBuilder.getBundle(), dataDirectory.getAbsolutePath(), Encoding.JSON, context);
     }
 
+    @SuppressWarnings("rawtypes")
     private static CDSOutput unmarshallCdsOutput(File file) {
         CDSOutput cdsOutput = null;
         String cdsCanonical = CDSOutput.class.getCanonicalName();

@@ -160,6 +160,7 @@ public class DroolPredicateToElmExpressionAdapter {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void resolveFunction(String criteriaResourceName, LibraryBuilder libraryBuilder) {
         if (!startedFunction) {
             if (!Strings.isNullOrEmpty(criteriaResourceName) && criteriaResourceName.toLowerCase().equals("countunique")) {

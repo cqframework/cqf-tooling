@@ -40,8 +40,9 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
     private final String newLine = "\r\n";
 
     private int currentLine = 0;
+    @SuppressWarnings("unused")
     private boolean onNewLine;
-    private boolean needsWhitespace;
+    // private boolean needsWhitespace;
     private int indentLevel = 0;
     private int previousIndentLevel = 0;
 
@@ -89,6 +90,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         return sectionCount > 0;
     }
 
+    @SuppressWarnings("unused")
     private int typeSpecifierLevel = 0;
 
     private void enterTypeSpecifier() {
@@ -99,38 +101,39 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         typeSpecifierLevel--;
     }
 
-    private boolean inTypeSpecifier() {
-        return typeSpecifierLevel > 0;
-    }
+    // private boolean inTypeSpecifier() {
+    //     return typeSpecifierLevel > 0;
+    // }
 
-    private int functionDefinitionLevel = 0;
+    // private int functionDefinitionLevel = 0;
 
-    private void enterFunctionDefinition() {
-        functionDefinitionLevel++;
-    }
+    // private void enterFunctionDefinition() {
+    //     functionDefinitionLevel++;
+    // }
 
-    private void exitFunctionDefinition() {
-        functionDefinitionLevel--;
-    }
+    // private void exitFunctionDefinition() {
+    //     functionDefinitionLevel--;
+    // }
 
-    private boolean inFunctionDefinition() {
-        return functionDefinitionLevel > 0;
-    }
+    // private boolean inFunctionDefinition() {
+    //     return functionDefinitionLevel > 0;
+    // }
 
-    private int functionInvocationLevel = 0;
+    // private int functionInvocationLevel = 0;
 
-    private void enterFunctionInvocation() {
-        functionInvocationLevel++;
-    }
+    // private void enterFunctionInvocation() {
+    //     functionInvocationLevel++;
+    // }
 
-    private void exitFunctionInvocation() {
-        functionInvocationLevel--;
-    }
+    // private void exitFunctionInvocation() {
+    //     functionInvocationLevel--;
+    // }
 
-    private boolean inFunctionInvocation() {
-        return functionInvocationLevel > 0;
-    }
+    // private boolean inFunctionInvocation() {
+    //     return functionInvocationLevel > 0;
+    // }
 
+    @SuppressWarnings("unused")
     private int retrieveLevel = 0;
 
     private void enterRetrieve() {
@@ -141,9 +144,9 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         retrieveLevel--;
     }
 
-    private boolean inRetrieve() {
-        return retrieveLevel > 0;
-    }
+    // private boolean inRetrieve() {
+    //     return retrieveLevel > 0;
+    // }
 
     private void enterClause() {
         increaseIndentLevel();
@@ -169,71 +172,71 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         }
     }
 
-    private boolean needsWhitespaceBefore(String terminal) {
-        if (terminal.trim().isEmpty() || terminal.startsWith("//") || terminal.startsWith("/*")) {
-            return false;
-        }
-        switch (terminal) {
-            case ":":
-                return false;
-            case ".":
-                return false;
-            case ",":
-                return false;
-            case "<":
-                return !inTypeSpecifier();
-            case ">":
-                return !inTypeSpecifier();
-            case "(":
-                return !inFunctionDefinition() && !inFunctionInvocation();
-            case ")":
-                return !inFunctionDefinition() && !inFunctionInvocation();
-            case "[":
-                return inRetrieve();
-            case "]":
-                return false;
-            default:
-                return true;
-        }
-    }
+    // private boolean needsWhitespaceBefore(String terminal) {
+    //     if (terminal.trim().isEmpty() || terminal.startsWith("//") || terminal.startsWith("/*")) {
+    //         return false;
+    //     }
+    //     switch (terminal) {
+    //         case ":":
+    //             return false;
+    //         case ".":
+    //             return false;
+    //         case ",":
+    //             return false;
+    //         case "<":
+    //             return !inTypeSpecifier();
+    //         case ">":
+    //             return !inTypeSpecifier();
+    //         case "(":
+    //             return !inFunctionDefinition() && !inFunctionInvocation();
+    //         case ")":
+    //             return !inFunctionDefinition() && !inFunctionInvocation();
+    //         case "[":
+    //             return inRetrieve();
+    //         case "]":
+    //             return false;
+    //         default:
+    //             return true;
+    //     }
+    // }
 
-    private boolean needsWhitespaceAfter(String terminal) {
-        switch (terminal) {
-            case ".":
-                return false;
-            case "<":
-                return !inTypeSpecifier();
-            case ">":
-                return !inTypeSpecifier();
-            case "(":
-                return !inFunctionDefinition() && !inFunctionInvocation();
-            case ")":
-                return !inFunctionDefinition() && !inFunctionInvocation();
-            case "[":
-                return false;
-            case "]":
-                return inRetrieve();
-            default:
-                return true;
-        }
-    }
+    // private boolean needsWhitespaceAfter(String terminal) {
+    //     switch (terminal) {
+    //         case ".":
+    //             return false;
+    //         case "<":
+    //             return !inTypeSpecifier();
+    //         case ">":
+    //             return !inTypeSpecifier();
+    //         case "(":
+    //             return !inFunctionDefinition() && !inFunctionInvocation();
+    //         case ")":
+    //             return !inFunctionDefinition() && !inFunctionInvocation();
+    //         case "[":
+    //             return false;
+    //         case "]":
+    //             return inRetrieve();
+    //         default:
+    //             return true;
+    //     }
+    // }
 
-    private void appendTerminal(String terminal) {
-        if (needsWhitespaceBefore(terminal)) {
-            ensureWhitespace();
-        }
-        if (terminal.equals("else")) {
-            increaseIndentLevel();
-            newLine();
-            decreaseIndentLevel();
-        }
-        if (terminal.equals("end")) {
-            newLine();
-        }
-        output.append(terminal);
-        onNewLine = false;
-        needsWhitespace = needsWhitespaceAfter(terminal);
-    }
+    // private void appendTerminal(String terminal) {
+    //     if (needsWhitespaceBefore(terminal)) {
+    //         ensureWhitespace();
+    //     }
+    //     if (terminal.equals("else")) {
+    //         increaseIndentLevel();
+    //         newLine();
+    //         decreaseIndentLevel();
+    //     }
+    //     if (terminal.equals("end")) {
+    //         newLine();
+    //     }
+    //     output.append(terminal);
+    //     onNewLine = false;
+    //     needsWhitespace = needsWhitespaceAfter(terminal);
+    // }
 
     private void increaseIndentLevel() {
         previousIndentLevel = indentLevel;
@@ -271,11 +274,11 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         addToSection(section);
     }
 
-    private void ensureWhitespace() {
-        if (!onNewLine && needsWhitespace) {
-            output.append(space);
-        }
-    }
+    // private void ensureWhitespace() {
+    //     if (!onNewLine && needsWhitespace) {
+    //         output.append(space);
+    //     }
+    // }
 
     private void reset() {
         resetIndentLevel();

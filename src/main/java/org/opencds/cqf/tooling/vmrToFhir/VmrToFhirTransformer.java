@@ -414,7 +414,7 @@ public class VmrToFhirTransformer {
 
         if (operand instanceof String) {
             try {
-                return new DateTime((String) operand, null);
+                return new DateTime(operand, null);
             } catch (DateTimeParseException dtpe) {
                 logger.debug("Unable to parse DateTime from: " + operand);
                 return null;

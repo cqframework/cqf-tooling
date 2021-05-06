@@ -6,7 +6,6 @@ import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
-import org.hl7.elm.r1.Library;
 //import org.hl7.fhir.r5.formats.IParser;
 import ca.uhn.fhir.parser.IParser;
 import org.junit.Test;
@@ -14,11 +13,8 @@ import org.opencds.cqf.tooling.processor.DataRequirementsProcessor;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertTrue;
@@ -56,7 +52,6 @@ public class DataRequirementsProcessorTest {
                 PreventiveCareandWellness-v0-0-001-FHIR-4-0-1.xml
              */
             CqlTranslator translator = createTranslator("CompositeMeasures/cql/EXM124-9.0.000.cql", cqlTranslatorOptions);//"OpioidCDS/cql/OpioidCDSCommon.cql", cqlTranslatorOptions);
-            Library elmLibrary = translator.toELM();
             assertTrue(translator.getErrors().isEmpty());
             cacheLibrary(translator.getTranslatedLibrary());
 
@@ -89,7 +84,6 @@ public class DataRequirementsProcessorTest {
             // TODO - add expressions to expressions
             expressions.add("Conditions Indicating End of Life or With Limited Life Expectancy");//Active Ambulatory Opioid Rx");
             CqlTranslator translator = createTranslator("OpioidCDS/cql/OpioidCDSCommon.cql", cqlTranslatorOptions);
-            Library elmLibrary = translator.toELM();
             assertTrue(translator.getErrors().isEmpty());
             cacheLibrary(translator.getTranslatedLibrary());
             DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
@@ -112,7 +106,6 @@ public class DataRequirementsProcessorTest {
         try {
 //            CqlTranslator translator = createTranslator("/ecqm/resources/library-EXM506-2.2.000.json", cqlTranslatorOptions);
             CqlTranslator translator = createTranslator("CompositeMeasures/cql/BCSComponent.cql", cqlTranslatorOptions);
-            Library elmLibrary = translator.toELM();
             assertTrue(translator.getErrors().isEmpty());
             cacheLibrary(translator.getTranslatedLibrary());
             DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
@@ -189,13 +182,9 @@ public class DataRequirementsProcessorTest {
 
     public static CqlTranslator createTranslator(NamespaceInfo namespaceInfo, String testFileName, CqlTranslatorOptions options) throws IOException {
         File translationTestFile = new File(DataRequirementsProcessorTest.class.getResource(testFileName).getFile());
-        if(null != translationTestFile) {
-            reset();
-            setup(translationTestFile.getParent());
-            CqlTranslator translator = CqlTranslator.fromFile(namespaceInfo, translationTestFile, getModelManager(), getLibraryManager(), getUcumService(), options);
-            return translator;
-
-        }
-        return null;
+        reset();
+        setup(translationTestFile.getParent());
+        CqlTranslator translator = CqlTranslator.fromFile(namespaceInfo, translationTestFile, getModelManager(), getLibraryManager(), getUcumService(), options);
+        return translator;
     }
 }

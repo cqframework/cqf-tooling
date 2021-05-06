@@ -99,6 +99,7 @@ public abstract class VmrToModelElmBuilder {
     public abstract Expression resolveModeling(LibraryBuilder libraryBuilder, Pair<String, String> left, Expression right, String operator);
 
     // This may be more appropriate to live in DroolPredicateToElmExpressionAdapter
+    @SuppressWarnings({ "unchecked", "rawtypes" })
 	public Expression resolvePredicate(LibraryBuilder libraryBuilder, Object left, Expression right, String operator) {
         if (left instanceof Pair) {
             Pair pair = (Pair) left;

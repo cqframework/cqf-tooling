@@ -12,13 +12,14 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-public class PairJacksonProvider extends JsonDeserializer<Pair> {
+@SuppressWarnings("unchecked")
+public class PairJacksonProvider extends JsonDeserializer<Pair<Object, Object>> {
         @Override
-        public Pair deserialize( JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+        public Pair<Object, Object> deserialize( JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
             final Object object = jsonParser.readValueAs(Object.class);
             if (object instanceof LinkedHashMap) {
                 LinkedHashMap<String, String> map = (LinkedHashMap<String, String>) object;
-                List<Pair> pairs = new ArrayList<Pair>();
+                List<Pair<Object, Object>> pairs = new ArrayList<Pair<Object, Object>>();
                 for (Entry<String, String> entry : map.entrySet()) {
                     pairs.add(Pair.of(entry.getKey(), entry.getValue()));
                 }

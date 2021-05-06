@@ -18,6 +18,7 @@ import org.cdsframework.rs.provider.BaseDTODeserializer;
 import org.cdsframework.rs.provider.CoreJaxbAnnotationIntrospector;
 import org.cdsframework.util.ClassUtils;
 
+@SuppressWarnings({"unchecked", "deprecation", "rawtypes"})
 public class RCKMSJacksonProvider  {
     private ObjectMapper objectMapper = null;
 

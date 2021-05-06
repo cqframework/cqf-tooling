@@ -26,7 +26,6 @@ public class ECQMCreatorTest {
         cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
         cqlTranslatorOptions.getOptions().add(CqlTranslator.Options.EnableAnnotations);
         CqlTranslator translator = createTranslator(primaryLibraryPath, cqlTranslatorOptions);
-        org.hl7.elm.r1.Library elmLibrary = translator.toELM();
         cacheLibrary(translator.getTranslatedLibrary());
         FhirContext context =  FhirContext.forR5();
         IParser parser = measurePath.endsWith(".json") ? context.newJsonParser() : context.newXmlParser();
@@ -138,7 +137,6 @@ public class ECQMCreatorTest {
         String libraryPath = "CompositeMeasures/cql/BCSComponent.cql"; //EXM124-9.0.000.cql";//library-EXM124-9.0.000.json";
         try {
             CqlTranslator translator = createTranslator(libraryPath, cqlTranslatorOptions);
-            org.hl7.elm.r1.Library elmLibrary = translator.toELM();
             cacheLibrary(translator.getTranslatedLibrary());
             FhirContext context = FhirContext.forR5();
             IParser parser = context.newJsonParser();
@@ -221,14 +219,10 @@ public class ECQMCreatorTest {
 
     public static CqlTranslator createTranslator(NamespaceInfo namespaceInfo, String libraryName, CqlTranslatorOptions options) throws IOException {
         File translationTestFile = new File(ECQMCreatorTest.class.getResource(libraryName).getFile());
-        if(null != translationTestFile) {
-            reset();
-            setup(translationTestFile.getParent());
-            CqlTranslator translator = CqlTranslator.fromFile(namespaceInfo, translationTestFile, getModelManager(), getLibraryManager(), getUcumService(), options);
-            return translator;
-
-        }
-        return null;
+        reset();
+        setup(translationTestFile.getParent());
+        CqlTranslator translator = CqlTranslator.fromFile(namespaceInfo, translationTestFile, getModelManager(), getLibraryManager(), getUcumService(), options);
+        return translator;
     }
 
 }
