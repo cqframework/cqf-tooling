@@ -319,8 +319,15 @@ public class DataRequirementsProcessor {
 
     private ParameterDefinition toOutputParameterDefinition(VersionedIdentifier libraryIdentifier, ExpressionDef def) {
         AtomicBoolean isList = new AtomicBoolean(false);
-        Enumerations.FHIRAllTypes typeCode = Enumerations.FHIRAllTypes.fromCode(
-                toFHIRResultTypeCode(def.getResultType(), def.getName(), isList));
+        Enumerations.FHIRAllTypes typeCode = null;
+        try{
+                typeCode = Enumerations.FHIRAllTypes.fromCode(
+                        toFHIRResultTypeCode(def.getResultType(), def.getName(), isList));
+        }catch(org.hl7.fhir.exceptions.FHIRException fhirException){
+            validationMessages.add(new ValidationMessage(ValidationMessage.Source.Publisher, ValidationMessage.IssueType.NOTSUPPORTED, "CQL Library Packaging",
+                    String.format("Result type %s of library %s is not supported; implementations may not be able to use the result of this expression",
+                            def.getResultType().toLabel(), libraryIdentifier.getId()), ValidationMessage.IssueSeverity.WARNING));
+        }
 
         return new ParameterDefinition()
                 .setName(def.getName())
@@ -404,8 +411,14 @@ public class DataRequirementsProcessor {
 
     private org.hl7.fhir.r5.model.DataRequirement toDataRequirement(ElmRequirementsContext context, VersionedIdentifier libraryIdentifier, Retrieve retrieve) {
         org.hl7.fhir.r5.model.DataRequirement dr = new org.hl7.fhir.r5.model.DataRequirement();
+        try{
+            dr.setType(org.hl7.fhir.r5.model.Enumerations.FHIRAllTypes.fromCode(retrieve.getDataType().getLocalPart()));
+        }catch(org.hl7.fhir.exceptions.FHIRException fhirException){
+            validationMessages.add(new ValidationMessage(ValidationMessage.Source.Publisher, ValidationMessage.IssueType.NOTSUPPORTED, "CQL Library Packaging",
+                    String.format("Result type %s of library %s is not supported; implementations may not be able to use the result of this expression",
+                            retrieve.getDataType().getLocalPart(), libraryIdentifier.getId()), ValidationMessage.IssueSeverity.WARNING));
 
-        dr.setType(org.hl7.fhir.r5.model.Enumerations.FHIRAllTypes.fromCode(retrieve.getDataType().getLocalPart()));
+        }
 
         // Set profile if specified
         if (retrieve.getTemplateId() != null) {
