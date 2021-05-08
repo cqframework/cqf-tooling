@@ -1,6 +1,9 @@
 package org.opencds.cqf.tooling.visitor;
 
+import org.hl7.cql.model.ClassType;
 import org.hl7.cql.model.DataType;
+import org.hl7.cql.model.ListType;
+import org.hl7.cql.model.SearchType;
 import org.hl7.elm.r1.*;
 
 import java.util.HashSet;
@@ -29,12 +32,39 @@ public class ElmDataRequirement extends ElmExpressionRequirement {
         return inferredFrom;
     }
 
-    private AliasedQuerySource querySource;
-    public AliasedQuerySource getQuerySource() {
+    /**
+     * May be an AliasedQuerySource or a LetClause
+     */
+    private Element querySource;
+    public Element getQuerySource() {
         return querySource;
     }
-    public void setQuerySource(AliasedQuerySource querySource) {
+    public void setQuerySource(Element querySource) {
         this.querySource = querySource;
+    }
+
+    public String getAlias() {
+        if (querySource instanceof AliasedQuerySource) {
+            return ((AliasedQuerySource)querySource).getAlias();
+        }
+        else if (querySource instanceof LetClause) {
+            return ((LetClause)querySource).getIdentifier();
+        }
+        else {
+            throw new IllegalArgumentException("Cannot determine alias from data requirement because source is not an AliasedQuerySource or LetClause");
+        }
+    }
+
+    public Expression getExpression() {
+        if (querySource instanceof AliasedQuerySource) {
+            return ((AliasedQuerySource)querySource).getExpression();
+        }
+        else if (querySource instanceof LetClause) {
+            return ((LetClause)querySource).getExpression();
+        }
+        else {
+            throw new IllegalArgumentException("Cannot determine expression for data requirement because source is not an AliasedQuerySource or LetClause");
+        }
     }
 
     private static ElmDataRequirement inferFrom(ElmDataRequirement requirement) {
@@ -105,6 +135,11 @@ public class ElmDataRequirement extends ElmExpressionRequirement {
     public void addConditionRequirement(ElmConditionRequirement conditionRequirement) {
         ensureConjunctiveRequirement();
         conjunctiveRequirement.combine(conditionRequirement);
+    }
+
+    public void addJoinRequirement(ElmJoinRequirement joinRequirement) {
+        ensureConjunctiveRequirement();
+        conjunctiveRequirement.combine(joinRequirement);
     }
 
     // TODO:
@@ -243,20 +278,93 @@ public class ElmDataRequirement extends ElmExpressionRequirement {
         }
     }
 
-    private void applyTo(Retrieve retrieve, ElmRequirementsContext context) {
+    private ClassType getRetrieveType(ElmRequirementsContext context, Retrieve retrieve) {
+        DataType elementType = retrieve.getResultType() instanceof ListType
+                ? ((ListType)retrieve.getResultType()).getElementType()
+                : retrieve.getResultType();
+        if (elementType instanceof ClassType) {
+            return (ClassType)elementType;
+        }
+        return null;
+    }
+
+    private void applyJoinRequirementTo(ElmJoinRequirement joinRequirement, Retrieve retrieve, ElmRequirementsContext context, ElmQueryRequirement queryRequirements) {
+        ElmDataRequirement leftRequirement = queryRequirements.getDataRequirement(joinRequirement.getLeftProperty().getSource());
+        ElmDataRequirement rightRequirement = queryRequirements.getDataRequirement(joinRequirement.getRightProperty().getSource());
+        if (leftRequirement != null && rightRequirement != null) {
+            Retrieve leftRetrieve = leftRequirement.getRetrieve();
+            Retrieve rightRetrieve = rightRequirement.getRetrieve();
+            ClassType leftRetrieveType = getRetrieveType(context, leftRetrieve);
+            ClassType rightRetrieveType = getRetrieveType(context, rightRetrieve);
+            if (leftRetrieveType != null && rightRetrieveType != null) {
+                SearchType leftSearch;
+                SearchType rightSearch;
+                for (SearchType search : leftRetrieveType.getSearches()) {
+                    if (joinRequirement.getLeftProperty().getProperty().getPath().startsWith(search.getPath())) {
+                        if (search.getType().isCompatibleWith(rightRetrieveType)) {
+                            leftSearch = search;
+                            break;
+                        }
+                    }
+                }
+                for (SearchType search : rightRetrieveType.getSearches()) {
+                    if (joinRequirement.getRightProperty().getProperty().getPath().startsWith(search.getPath())) {
+                        if (search.getType().isCompatibleWith(leftRetrieveType)) {
+                            rightSearch = search;
+                            break;
+                        }
+                    }
+                }
+
+                // Search from the model info should be used to inform the selection, but will in general resolve to multiple choices
+                // May be a choice better left to the capabilitystatement-informed planning phase anyway
+            }
+
+            // In the absence of search information, either of these formulations is correct, favor primary query sources over withs
+            if (leftRetrieve.getLocalId() == null) {
+                leftRetrieve.setLocalId(context.generateLocalId());
+            }
+            if (rightRetrieve.getLocalId() == null) {
+                rightRetrieve.setLocalId(context.generateLocalId());
+            }
+            if (rightRequirement.getQuerySource() instanceof With) {
+                leftRetrieve.getInclude().add(
+                        new IncludeElement()
+                                .withIncludeFrom(rightRetrieve.getLocalId())
+                                .withRelatedDataType(rightRetrieve.getDataType())
+                                .withRelatedProperty(joinRequirement.getLeftProperty().getProperty().getPath())
+                                .withIsReverse(false));
+                rightRetrieve.setIncludedIn(leftRetrieve.getLocalId());
+            }
+            else {
+                rightRetrieve.getInclude().add(
+                        new IncludeElement()
+                                .withIncludeFrom(leftRetrieve.getLocalId())
+                                .withRelatedDataType(leftRetrieve.getDataType())
+                                .withRelatedProperty(joinRequirement.getRightProperty().getProperty().getPath())
+                                .withIsReverse(false));
+                leftRetrieve.setIncludedIn(rightRetrieve.getLocalId());
+            }
+        }
+    }
+
+    private void applyTo(Retrieve retrieve, ElmRequirementsContext context, ElmQueryRequirement queryRequirements) {
         // for each ConditionRequirement
         // apply to the retrieve
         for (ElmExpressionRequirement conditionRequirement : getConjunctiveRequirement().getArguments()) {
             if (conditionRequirement instanceof ElmConditionRequirement) {
                 applyConditionRequirementTo((ElmConditionRequirement)conditionRequirement, retrieve, context);
             }
+            else if (conditionRequirement instanceof ElmJoinRequirement) {
+                applyJoinRequirementTo(((ElmJoinRequirement)conditionRequirement), retrieve, context, queryRequirements);
+            }
         }
     }
 
-    public void applyDataRequirements(ElmRequirementsContext context) {
+    public void applyDataRequirements(ElmRequirementsContext context, ElmQueryRequirement queryRequirements) {
         // If the source of the alias is a direct retrieve, query requirements can be applied directly
         // Otherwise, the query requirements are applied to an "inferred" retrieve representing the query source
         extractStatedRequirements(getRetrieve());
-        applyTo(getRetrieve(), context);
+        applyTo(getRetrieve(), context, queryRequirements);
     }
 }

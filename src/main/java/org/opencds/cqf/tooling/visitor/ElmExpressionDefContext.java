@@ -58,6 +58,22 @@ public class ElmExpressionDefContext {
         return !queryStack.empty();
     }
 
+    public ElmQueryLetContext resolveLet(String letName) {
+        ElmQueryLetContext letContext = null;
+        for (ElmQueryContext queryContext : queryStack) {
+            letContext = queryContext.resolveLet(letName);
+            if (letName != null) {
+                break;
+            }
+        }
+
+        if (letContext == null) {
+            throw new IllegalArgumentException(String.format("Could not resolve let %s", letName));
+        }
+
+        return letContext;
+    }
+
     public ElmQueryAliasContext resolveAlias(String aliasName) {
         ElmQueryAliasContext aliasContext = null;
         for (ElmQueryContext queryContext : queryStack) {

@@ -40,6 +40,15 @@ public class ElmCloner {
         return clonedElm;
     }
 
+    public static Property clone(Property elm) {
+        Property clonedElm = new Property();
+        cloneElement(elm, clonedElm);
+        clonedElm.setPath(elm.getPath());
+        clonedElm.setScope(elm.getScope());
+        clonedElm.setSource(elm.getSource());
+        return clonedElm;
+    }
+
     public static Expression clone(Expression elm) {
         return (Expression)clone((Element)elm);
     }
@@ -90,6 +99,7 @@ public class ElmCloner {
         else if (elm instanceof OtherFilterElement) return clone((OtherFilterElement)elm);
         // TODO: Cloning of expressions is not necessary at this point because there would be no impact
         // If that assumption changes, this will need to be built out
+        else if (elm instanceof Property) return clone((Property)elm);
         else if (elm instanceof Expression) return elm;
         else {
             throw new IllegalArgumentException(String.format("clone of %s not implemented", elm.getClass().getSimpleName()));

@@ -24,7 +24,45 @@ public class ElmQueryContext {
     private ElmExpressionRequirement queryRequirements;
     private ElmQueryAliasContext definitionContext;
     private List<ElmQueryAliasContext> aliasContexts = new ArrayList<ElmQueryAliasContext>();
+    private ElmQueryLetContext letDefinitionContext;
+    private List<ElmQueryLetContext> letContexts = new ArrayList<ElmQueryLetContext>();
     private ElmQueryRequirement queryRequirement;
+
+    public void enterLetDefinitionContext(LetClause letClause) {
+        if (letDefinitionContext != null) {
+            throw new IllegalArgumentException("Let clause definition already in progress");
+        }
+        letDefinitionContext = new ElmQueryLetContext(libraryIdentifier, letClause);
+    }
+
+    public ElmQueryLetContext exitLetDefinitionContext(ElmRequirement requirements) {
+        if (letDefinitionContext == null) {
+            throw new IllegalArgumentException("Let definition not in progress");
+        }
+        letContexts.add(letDefinitionContext);
+        ElmQueryLetContext result = letDefinitionContext;
+        result.setRequirements(requirements);
+        letDefinitionContext = null;
+        return result;
+    }
+
+    public ElmQueryLetContext resolveLet(String identifier) {
+        for (ElmQueryLetContext letContext : letContexts) {
+            if (letContext.getIdentifier().equals(identifier)) {
+                return letContext;
+            }
+        }
+        return null;
+    }
+
+    public ElmQueryLetContext getLetContext(LetClause letClause) {
+        for (ElmQueryLetContext letContext : letContexts) {
+            if (letContext.getLetClause() == letClause) {
+                return letContext;
+            }
+        }
+        return null;
+    }
 
     public void enterAliasDefinitionContext(AliasedQuerySource querySource) {
         if (definitionContext != null) {
@@ -79,7 +117,12 @@ public class ElmQueryContext {
         }
     }
 
-    public ElmQueryRequirement getQueryRequirement(ElmRequirement childRequirements) {
+    public ElmQueryRequirement getQueryRequirement(ElmRequirement childRequirements, ElmRequirementsContext context) {
+        // Gather requirements from any lets in scope in the query
+        for (ElmQueryLetContext letContext : letContexts) {
+            queryRequirement.addDataRequirements(letContext.getRequirements());
+        }
+
         // Gather requirements from any sources still in scope in the query
         for (ElmQueryAliasContext aliasContext : aliasContexts) {
             queryRequirement.addDataRequirements(aliasContext.getRequirements());
@@ -89,7 +132,7 @@ public class ElmQueryContext {
         queryRequirement.addChildRequirements(childRequirements);
 
         // distribute query requirements to each alias
-        queryRequirement.distributeExpressionRequirement(queryRequirements);
+        queryRequirement.distributeExpressionRequirement(queryRequirements, context);
 
         return queryRequirement;
     }

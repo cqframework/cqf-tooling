@@ -31,6 +31,16 @@ public class ElmRequirementsContext {
         return this.typeResolver;
     }
 
+    // Arbitrary starting point for generated local Ids.
+    // If the input ELM does not have local Ids, some of the optimization
+    // outputs require references to be established between ELM nodes,
+    // so local ids are generated if not present in those cases.
+    private int nextLocalId = 10000;
+    public String generateLocalId() {
+        nextLocalId++;
+        return String.format("G%d", nextLocalId);
+    }
+
     private Stack<ElmExpressionDefContext> expressionDefStack = new Stack<ElmExpressionDefContext>();
     public void enterExpressionDef(ExpressionDef expressionDef) {
         if (expressionDef == null) {
@@ -135,6 +145,10 @@ public class ElmRequirementsContext {
 
     public ElmQueryAliasContext resolveAlias(String aliasName) {
         return getCurrentExpressionDefContext().resolveAlias(aliasName);
+    }
+
+    public ElmQueryLetContext resolveLet(String letName) {
+        return getCurrentExpressionDefContext().resolveLet(letName);
     }
 
     private Set<Element> visited = new HashSet<Element>();
@@ -360,7 +374,8 @@ public class ElmRequirementsContext {
 
     /*
     Report the requirements inferred from visit of an expression tree, typically an ExpressionDef
-    Except do not report a requirement if it is present in the inferred requirements for the expression
+    Except do not report a requirement if it is present in the inferred requirements for the expression,
+    or if it can be correlated with a data requirement in the current query context
     (The alternative is to calculate total requirements as part of the inference mechanism, but that
     complicates the inferencing calculations, as they would always have to be based on a collection
     of requirements, rather than the current focus of either a DataRequirement or a QueryRequirement)
@@ -416,6 +431,7 @@ public class ElmRequirementsContext {
     public ElmPropertyRequirement reportProperty(Property property) {
         // if scope is specified, it's a reference to an alias in a current query context
         // if source is an AliasRef, it's a reference to an alias in a current query context
+        // if source is a LetRef, it's a reference to a let in a current query context
         // if source is a Property, add the current property to a qualifier
         // Otherwise, report it as an unbound property reference to the type of source
         if (property.getScope() != null || property.getSource() instanceof AliasRef) {
@@ -431,6 +447,22 @@ public class ElmRequirementsContext {
                     property, aliasContext.getQuerySource(), inCurrentScope);
 
             aliasContext.reportProperty(propertyRequirement);
+            return propertyRequirement;
+        }
+
+        if (property.getSource() instanceof QueryLetRef) {
+            String letName = ((QueryLetRef)property.getSource()).getName();
+            ElmQueryLetContext letContext = getCurrentQueryContext().resolveLet(letName);
+            boolean inCurrentScope = true;
+            if (letContext == null) {
+                // This is a reference to a let definition in an outer scope
+                letContext = resolveLet(letName);
+                inCurrentScope = false;
+            }
+            ElmPropertyRequirement propertyRequirement = new ElmPropertyRequirement(getCurrentLibraryIdentifier(),
+                    property, letContext.getLetClause(), inCurrentScope);
+
+            letContext.reportProperty(propertyRequirement);
             return propertyRequirement;
         }
 

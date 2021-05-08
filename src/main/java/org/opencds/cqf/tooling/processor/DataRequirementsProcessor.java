@@ -269,9 +269,16 @@ public class DataRequirementsProcessor {
     private List<DataRequirement> extractDataRequirements(ElmRequirementsContext context, ElmRequirements requirements) {
         List<DataRequirement> result = new ArrayList<>();
 
+        Map<String, Retrieve> retrieveMap = new HashMap<String, Retrieve>();
+        for (ElmRequirement retrieve : requirements.getRetrieves()) {
+            if (retrieve.getElement().getLocalId() != null) {
+                retrieveMap.put(retrieve.getElement().getLocalId(), (Retrieve)retrieve.getElement());
+            }
+        }
+
         for (ElmRequirement retrieve : requirements.getRetrieves()) {
             if (((Retrieve)retrieve.getElement()).getDataType() != null) {
-                result.add(toDataRequirement(context, retrieve.getLibraryIdentifier(), (Retrieve) retrieve.getElement()));
+                result.add(toDataRequirement(context, retrieve.getLibraryIdentifier(), (Retrieve) retrieve.getElement(), retrieveMap));
             }
         }
 
@@ -522,8 +529,30 @@ public class DataRequirementsProcessor {
         return dfc;
     }
 
-    private org.hl7.fhir.r5.model.DataRequirement toDataRequirement(ElmRequirementsContext context, VersionedIdentifier libraryIdentifier, Retrieve retrieve) {
+    /**
+     * Remove .reference from the path if the path is being used as a reference search
+     * @param path
+     * @return
+     */
+    private String stripReference(String path) {
+        if (path.endsWith(".reference")) {
+            return path.substring(0, path.lastIndexOf("."));
+        }
+        return path;
+    }
+
+    private org.hl7.fhir.r5.model.DataRequirement toDataRequirement(ElmRequirementsContext context,
+            VersionedIdentifier libraryIdentifier, Retrieve retrieve, Map<String, Retrieve> retrieveMap) {
         org.hl7.fhir.r5.model.DataRequirement dr = new org.hl7.fhir.r5.model.DataRequirement();
+
+        // Set the id attribute of the data requirement if it will be referenced from an included retrieve
+        if (retrieve.getLocalId() != null && retrieve.getInclude() != null && retrieve.getInclude().size() > 0) {
+            for (IncludeElement ie : retrieve.getInclude()) {
+                if (ie.getIncludeFrom() != null) {
+                    dr.setId(retrieve.getLocalId());
+                }
+            }
+        }
 
         dr.setType(org.hl7.fhir.r5.model.Enumerations.FHIRAllTypes.fromCode(retrieve.getDataType().getLocalPart()));
 
@@ -550,6 +579,24 @@ public class DataRequirementsProcessor {
         // Add any additional date filters
         for (DateFilterElement dfe : retrieve.getDateFilter()) {
             dr.getDateFilter().add(toDateFilterComponent(context, libraryIdentifier, dfe.getProperty(), dfe.getValue()));
+        }
+
+        // Add any related data requirements
+        if (retrieve.getIncludedIn() != null) {
+            Retrieve relatedRetrieve = retrieveMap.get(retrieve.getIncludedIn());
+            IncludeElement includeElement = null;
+            for (IncludeElement ie : relatedRetrieve.getInclude()) {
+                if (ie.getIncludeFrom() != null && ie.getIncludeFrom().equals(retrieve.getLocalId())) {
+                    includeElement = ie;
+                    break;
+                }
+            }
+            if (relatedRetrieve != null && includeElement != null) {
+                Extension relatedRequirement = new Extension().setUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-relatedRequirement");
+                relatedRequirement.addExtension("targetId", new StringType(retrieve.getIncludedIn()));
+                relatedRequirement.addExtension("targetProperty", new StringType(stripReference(includeElement.getRelatedProperty())));
+                dr.addExtension(relatedRequirement);
+            }
         }
 
         return dr;

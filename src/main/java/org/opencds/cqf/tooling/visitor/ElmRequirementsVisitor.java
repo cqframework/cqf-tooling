@@ -201,13 +201,46 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
         return super.visitUnaryExpression(elm, context);
     }
 
+    /**
+     * If both sides are column references that point to the same column in the same alias
+     *   the condition is a tautology
+     * If both sides are column references that point to different columns in the same alias
+     *   the condition is a constraint
+     * If both sides are column references that point to different aliases
+     *   the condition is a join
+     * If one side or the other is a column reference
+     *   the condition is a potentially sargeable condition
+     * @param elm
+     * @param context
+     * @param left
+     * @param right
+     * @return
+     */
     protected ElmRequirement inferConditionRequirement(Expression elm, ElmRequirementsContext context, ElmRequirement left, ElmRequirement right) {
-        if (left instanceof ElmPropertyRequirement && ((ElmPropertyRequirement)left).getInCurrentScope()) {
+        ElmPropertyRequirement leftProperty = left instanceof ElmPropertyRequirement ? (ElmPropertyRequirement)left : null;
+        ElmPropertyRequirement rightProperty = right instanceof ElmPropertyRequirement ? (ElmPropertyRequirement)right : null;
+        if (leftProperty != null && leftProperty.getInCurrentScope()) {
+            if (rightProperty != null && rightProperty.getInCurrentScope()) {
+                if (leftProperty.getSource() == rightProperty.getSource()) {
+                    return new ElmConstraintRequirement(context.getCurrentLibraryIdentifier(), elm, leftProperty, rightProperty);
+                }
+                else if (leftProperty.getSource() instanceof AliasedQuerySource && rightProperty.getSource() instanceof AliasedQuerySource) {
+                    return new ElmJoinRequirement(context.getCurrentLibraryIdentifier(), elm, leftProperty, rightProperty);
+                }
+            }
             if (right instanceof ElmExpressionRequirement) {
-                return new ElmConditionRequirement(context.getCurrentLibraryIdentifier(), elm, (ElmPropertyRequirement)left, (ElmExpressionRequirement)right);
+                return new ElmConditionRequirement(context.getCurrentLibraryIdentifier(), elm, leftProperty, (ElmExpressionRequirement)right);
             }
         }
-        else if (right instanceof ElmPropertyRequirement && ((ElmPropertyRequirement)right).getInCurrentScope()) {
+        else if (rightProperty != null && rightProperty.getInCurrentScope()) {
+            if (leftProperty != null && leftProperty.getInCurrentScope()) {
+                if (leftProperty.getSource() == rightProperty.getSource()) {
+                    return new ElmConstraintRequirement(context.getCurrentLibraryIdentifier(), elm, leftProperty, rightProperty);
+                }
+                else if (leftProperty.getSource() instanceof AliasedQuerySource && rightProperty.getSource() instanceof AliasedQuerySource) {
+                    return new ElmJoinRequirement(context.getCurrentLibraryIdentifier(), elm, leftProperty, rightProperty);
+                }
+            }
             if (left instanceof ElmExpressionRequirement) {
                 return new ElmConditionRequirement(context.getCurrentLibraryIdentifier(), elm, (ElmPropertyRequirement)right, (ElmExpressionRequirement)left);
             }
@@ -626,6 +659,10 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
 
     @Override
     public ElmRequirement visitSplit(Split elm, ElmRequirementsContext context) {
+        // If the separtor is a literal, infer based only on the string to split argument
+        if (elm.getSeparator() instanceof Literal) {
+            return visitElement(elm.getStringToSplit(), context);
+        }
         return super.visitSplit(elm, context);
     }
 
@@ -1036,7 +1073,19 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
 
     @Override
     public ElmRequirement visitLetClause(LetClause elm, ElmRequirementsContext context) {
-        return super.visitLetClause(elm, context);
+        ElmRequirement result = defaultResult();
+        ElmQueryLetContext letContext = null;
+        context.getCurrentQueryContext().enterLetDefinitionContext(elm);
+        try {
+            if (elm.getExpression() != null) {
+                ElmRequirement childResult = super.visitLetClause(elm, context);
+                result = aggregateResult(result, childResult);
+            }
+        }
+        finally {
+            letContext = context.getCurrentQueryContext().exitLetDefinitionContext(result);
+        }
+        return letContext.getRequirements();
     }
 
     @Override
@@ -1044,7 +1093,7 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
         ElmRequirement result = visitChildren((AliasedQuerySource)elm, context);
 
         if (elm.getSuchThat() != null) {
-            ElmRequirement childResult = visitElement(elm.getSuchThat(), context);
+            ElmRequirement childResult = visitSuchThatClause(elm.getSuchThat(), elm instanceof With, context);
             result = aggregateResult(result, childResult);
         }
 
@@ -1126,7 +1175,7 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
         finally {
             queryContext = context.exitQueryContext();
         }
-        ElmQueryRequirement result = queryContext.getQueryRequirement(childResult);
+        ElmQueryRequirement result = queryContext.getQueryRequirement(childResult, context);
         result.analyzeDataRequirements(context);
         context.reportRequirements(result, null);
         return result;

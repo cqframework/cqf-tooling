@@ -513,6 +513,311 @@ public class DataRequirementsProcessorTest {
         //outputModuleDefinitionLibrary(moduleDefinitionLibrary);
     }
 
+    @Test
+    public void TestDataRequirementsAnalysisCase9a() throws IOException {
+        CqlTranslatorOptions translatorOptions = getTranslatorOptions();
+        CqlTranslator translator = setupDataRequirementsAnalysis("TestCases/TestCase9a.cql", translatorOptions);
+        org.hl7.fhir.r5.model.Library moduleDefinitionLibrary = getModuleDefinitionLibrary(translator, translatorOptions);
+
+        /*
+        Singleton element that is a reference
+        [MedicationRequest.encounter](http://hl7.org/fhir/medicationrequest-definitions.html#MedicationRequest.encounter)
+        dataRequirement: { type: MedicationRequest, relatedDataRequirement: { type: Encounter, relatedByPath: encounter } }
+
+        define MedicationRequestWithEncounter:
+          [MedicationRequest] M
+            with [Encounter] E
+              such that E.id = Last(Split(M.encounter.reference, '/'))
+        */
+
+        // Validate the ELM is correct
+        ExpressionDef ed = translator.getTranslatedLibrary().resolveExpressionRef("MedicationRequestWithEncounter");
+        assertTrue(ed.getExpression() instanceof Query);
+        Query q = (Query)ed.getExpression();
+        assertTrue(q.getSource() != null && q.getSource().size() == 1);
+        AliasedQuerySource source = q.getSource().get(0);
+        assertTrue(source.getExpression() instanceof Retrieve);
+        Retrieve r = (Retrieve)source.getExpression();
+        assertTrue(r.getDataType().getLocalPart().equals("MedicationRequest"));
+        assertTrue(r.getInclude().size() == 1);
+        String primarySourceId = r.getLocalId();
+        IncludeElement ie = r.getInclude().get(0);
+        assertTrue(ie.getRelatedDataType().getLocalPart().equals("Encounter"));
+        assertTrue(ie.getRelatedProperty().equals("encounter.reference"));
+        assertTrue(!ie.isIsReverse());
+        assertTrue(q.getRelationship().size() == 1);
+        assertTrue(q.getRelationship().get(0) instanceof With);
+        With w = (With)q.getRelationship().get(0);
+        assertTrue(w.getExpression() instanceof Retrieve);
+        r = (Retrieve)w.getExpression();
+        assertTrue(r.getDataType().getLocalPart().equals("Encounter"));
+        assertTrue(r.getIncludedIn().equals(primarySourceId));
+
+        // Validate the data requirement is reported in the module definition library
+        DataRequirement expectedDataRequirement = null;
+        for (DataRequirement dr : moduleDefinitionLibrary.getDataRequirement()) {
+            if (dr.getType() == Enumerations.FHIRAllTypes.MEDICATIONREQUEST) {
+                expectedDataRequirement = dr;
+            }
+        }
+        assertTrue(expectedDataRequirement != null);
+
+        DataRequirement includedDataRequirement = null;
+        for (DataRequirement dr : moduleDefinitionLibrary.getDataRequirement()) {
+            if (dr.getType() == Enumerations.FHIRAllTypes.ENCOUNTER) {
+                Extension e = dr.getExtensionByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-relatedRequirement");
+                if (e != null) {
+                    Extension targetId = e.getExtensionByUrl("targetId");
+                    Extension targetProperty = e.getExtensionByUrl("targetProperty");
+                    if (targetId != null && targetProperty != null && targetProperty.getValueStringType().getValue().equals("encounter")) {
+                        includedDataRequirement = dr;
+                    }
+                }
+            }
+        }
+        assertTrue(includedDataRequirement != null);
+
+        //outputModuleDefinitionLibrary(moduleDefinitionLibrary);
+    }
+
+    //@Test
+    // TODO: Enable include when the reference is in a let
+    public void TestDataRequirementsAnalysisCase9d() throws IOException {
+        CqlTranslatorOptions translatorOptions = getTranslatorOptions();
+        CqlTranslator translator = setupDataRequirementsAnalysis("TestCases/TestCase9d.cql", translatorOptions);
+        org.hl7.fhir.r5.model.Library moduleDefinitionLibrary = getModuleDefinitionLibrary(translator, translatorOptions);
+
+        /*
+        Element that is a choice, one of which is a reference, included in a let with the relationship in a where
+        [MedicationRequest.medication](http://hl7.org/fhir/medicationrequest-definitions.html#MedicationRequest.medication[x])
+        dataRequirement: { id: G10001, type: MedicationRequest }
+        dataRequirement: { type: Medication, codeFilter: { path: code, valueset: Aspirin }, relatedRequirement { targetId : G10001, targetPath: medication } }
+
+        define MedicationRequestWithAspirinInLet:
+          [MedicationRequest] R
+            let M: singleton from (
+                [Medication] M
+                    where M.id = Last(Split(R.medication.reference, '/'))
+                        and M.code in "Aspirin"
+            )
+        */
+
+        // Validate the ELM is correct
+        ExpressionDef ed = translator.getTranslatedLibrary().resolveExpressionRef("MedicationRequestWithAspirinInLet");
+        assertTrue(ed.getExpression() instanceof Query);
+        Query q = (Query)ed.getExpression();
+        assertTrue(q.getSource() != null && q.getSource().size() == 1);
+        AliasedQuerySource source = q.getSource().get(0);
+        assertTrue(source.getExpression() instanceof Retrieve);
+        Retrieve r = (Retrieve)source.getExpression();
+        assertTrue(r.getDataType().getLocalPart().equals("MedicationRequest"));
+        assertTrue(r.getInclude().size() == 1);
+        String primarySourceId = r.getLocalId();
+        IncludeElement ie = r.getInclude().get(0);
+        assertTrue(ie.getRelatedDataType().getLocalPart().equals("Medication"));
+        assertTrue(ie.getRelatedProperty().equals("medication.reference"));
+        assertTrue(!ie.isIsReverse());
+
+        assertTrue(q.getLet().size() == 1);
+        LetClause lc = q.getLet().get(0);
+        assertTrue(lc.getExpression() instanceof SingletonFrom);
+        SingletonFrom sf = (SingletonFrom)lc.getExpression();
+        assertTrue(sf.getOperand() instanceof Query);
+        q = (Query)sf.getOperand();
+        assertTrue(q.getSource().size() == 1);
+        source = q.getSource().get(0);
+        assertTrue(source.getExpression() instanceof Retrieve);
+        r = (Retrieve)source.getExpression();
+        assertTrue(r.getDataType().getLocalPart().equals("Medication"));
+        assertTrue(r.getIncludedIn().equals(primarySourceId));
+        assertTrue(r.getCodeFilter().size() == 2);
+        CodeFilterElement cfe = r.getCodeFilter().get(0);
+        assertTrue(cfe.getProperty().equals("id"));
+        assertTrue(cfe.getComparator().equals("="));
+        cfe = r.getCodeFilter().get(1);
+        assertTrue(cfe.getProperty().equals("code"));
+        assertTrue(cfe.getComparator().equals("in"));
+
+        // Validate the data requirement is reported in the module definition library
+        DataRequirement expectedDataRequirement = null;
+        for (DataRequirement dr : moduleDefinitionLibrary.getDataRequirement()) {
+            if (dr.getType() == Enumerations.FHIRAllTypes.MEDICATIONREQUEST) {
+                expectedDataRequirement = dr;
+            }
+        }
+        assertTrue(expectedDataRequirement != null);
+
+        DataRequirement includedDataRequirement = null;
+        for (DataRequirement dr : moduleDefinitionLibrary.getDataRequirement()) {
+            if (dr.getType() == Enumerations.FHIRAllTypes.MEDICATION) {
+                Extension e = dr.getExtensionByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-relatedRequirement");
+                if (e != null) {
+                    Extension targetId = e.getExtensionByUrl("targetId");
+                    Extension targetProperty = e.getExtensionByUrl("targetProperty");
+                    if (targetId != null && targetProperty != null && targetProperty.getValueStringType().getValue().equals("medication")) {
+                        includedDataRequirement = dr;
+                    }
+                }
+            }
+        }
+        assertTrue(includedDataRequirement != null);
+
+        //outputModuleDefinitionLibrary(moduleDefinitionLibrary);
+    }
+
+    @Test
+    public void TestDataRequirementsAnalysisCase9e() throws IOException {
+        CqlTranslatorOptions translatorOptions = getTranslatorOptions();
+        CqlTranslator translator = setupDataRequirementsAnalysis("TestCases/TestCase9e.cql", translatorOptions);
+        org.hl7.fhir.r5.model.Library moduleDefinitionLibrary = getModuleDefinitionLibrary(translator, translatorOptions);
+
+        /*
+        Element that is a choice, one of which is a reference, included in a nested query in a where clause
+        [MedicationRequest.medication](http://hl7.org/fhir/medicationrequest-definitions.html#MedicationRequest.medication[x])
+        dataRequirement: { id: G10001, type: MedicationRequest }
+        dataRequirement: { type: Medication, codeFilter: { path: code, valueset: Aspirin }, relatedRequirement { targetId : G10001, targetPath: medication } }
+
+        define MedicationRequestWithAspirinInWhere:
+          [MedicationRequest] R
+            where exists (
+              [Medication] M
+                where M.id = Last(Split(R.medication.reference, '/'))
+                  and M.code in "Aspirin"
+            )
+        */
+
+        // Validate the ELM is correct
+        ExpressionDef ed = translator.getTranslatedLibrary().resolveExpressionRef("MedicationRequestWithAspirinInWhere");
+        assertTrue(ed.getExpression() instanceof Query);
+        Query q = (Query)ed.getExpression();
+        assertTrue(q.getSource() != null && q.getSource().size() == 1);
+        AliasedQuerySource source = q.getSource().get(0);
+        assertTrue(source.getExpression() instanceof Retrieve);
+        Retrieve r = (Retrieve)source.getExpression();
+        assertTrue(r.getDataType().getLocalPart().equals("MedicationRequest"));
+        assertTrue(r.getInclude().size() == 1);
+        String primarySourceId = r.getLocalId();
+        IncludeElement ie = r.getInclude().get(0);
+        assertTrue(ie.getRelatedDataType().getLocalPart().equals("Medication"));
+        assertTrue(ie.getRelatedProperty().equals("medication.reference"));
+        assertTrue(!ie.isIsReverse());
+
+        assertTrue(q.getWhere() != null);
+        assertTrue(q.getWhere() instanceof Exists);
+        Exists ex = (Exists)q.getWhere();
+        assertTrue(ex.getOperand() instanceof Query);
+        q = (Query)ex.getOperand();
+        assertTrue(q.getSource().size() == 1);
+        source = q.getSource().get(0);
+        assertTrue(source.getExpression() instanceof Retrieve);
+        r = (Retrieve)source.getExpression();
+        assertTrue(r.getDataType().getLocalPart().equals("Medication"));
+        assertTrue(r.getIncludedIn().equals(primarySourceId));
+        assertTrue(r.getCodeFilter().size() == 1);
+        CodeFilterElement cfe = r.getCodeFilter().get(0);
+        assertTrue(cfe.getProperty().equals("code"));
+        assertTrue(cfe.getComparator().equals("in"));
+
+        // Validate the data requirement is reported in the module definition library
+        DataRequirement expectedDataRequirement = null;
+        for (DataRequirement dr : moduleDefinitionLibrary.getDataRequirement()) {
+            if (dr.getType() == Enumerations.FHIRAllTypes.MEDICATIONREQUEST) {
+                expectedDataRequirement = dr;
+            }
+        }
+        assertTrue(expectedDataRequirement != null);
+
+        DataRequirement includedDataRequirement = null;
+        for (DataRequirement dr : moduleDefinitionLibrary.getDataRequirement()) {
+            if (dr.getType() == Enumerations.FHIRAllTypes.MEDICATION) {
+                Extension e = dr.getExtensionByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-relatedRequirement");
+                if (e != null) {
+                    Extension targetId = e.getExtensionByUrl("targetId");
+                    Extension targetProperty = e.getExtensionByUrl("targetProperty");
+                    if (targetId != null && targetProperty != null && targetProperty.getValueStringType().getValue().equals("medication")) {
+                        includedDataRequirement = dr;
+                    }
+                }
+            }
+        }
+        assertTrue(includedDataRequirement != null);
+
+        //outputModuleDefinitionLibrary(moduleDefinitionLibrary);
+    }
+
+    @Test
+    public void TestDataRequirementsAnalysisCase9f() throws IOException {
+        CqlTranslatorOptions translatorOptions = getTranslatorOptions();
+        CqlTranslator translator = setupDataRequirementsAnalysis("TestCases/TestCase9f.cql", translatorOptions);
+        org.hl7.fhir.r5.model.Library moduleDefinitionLibrary = getModuleDefinitionLibrary(translator, translatorOptions);
+
+        /*
+        Element that is a choice, one of which is a reference, joined in a where clause in a multi-source query
+        [MedicationRequest.medication](http://hl7.org/fhir/medicationrequest-definitions.html#MedicationRequest.medication[x])
+        dataRequirement: { id: G10001, type: MedicationRequest }
+        dataRequirement: { type: Medication, codeFilter: { path: code, valueset: Aspirin }, relatedRequirement { targetId : G10001, targetPath: medication } }
+
+        define MedicationRequestWithAspirinInFrom:
+          from
+              [MedicationRequest] R,
+              [Medication] M
+            where M.id = Last(Split(R.medication.reference, '/'))
+              and M.code in "Aspirin"
+        */
+
+        // Validate the ELM is correct
+        ExpressionDef ed = translator.getTranslatedLibrary().resolveExpressionRef("MedicationRequestWithAspirinInFrom");
+        assertTrue(ed.getExpression() instanceof Query);
+        Query q = (Query)ed.getExpression();
+        assertTrue(q.getSource() != null && q.getSource().size() == 2);
+        AliasedQuerySource source = q.getSource().get(0);
+        assertTrue(source.getExpression() instanceof Retrieve);
+        Retrieve r = (Retrieve)source.getExpression();
+        assertTrue(r.getDataType().getLocalPart().equals("MedicationRequest"));
+        assertTrue(r.getInclude().size() == 1);
+        String primarySourceId = r.getLocalId();
+        IncludeElement ie = r.getInclude().get(0);
+        assertTrue(ie.getRelatedDataType().getLocalPart().equals("Medication"));
+        assertTrue(ie.getRelatedProperty().equals("medication.reference"));
+        assertTrue(!ie.isIsReverse());
+
+        source = q.getSource().get(1);
+        assertTrue(source.getExpression() instanceof Retrieve);
+        r = (Retrieve)source.getExpression();
+        assertTrue(r.getDataType().getLocalPart().equals("Medication"));
+        assertTrue(r.getIncludedIn().equals(primarySourceId));
+        assertTrue(r.getCodeFilter().size() == 1);
+        CodeFilterElement cfe = r.getCodeFilter().get(0);
+        assertTrue(cfe.getProperty().equals("code"));
+        assertTrue(cfe.getComparator().equals("in"));
+
+        // Validate the data requirement is reported in the module definition library
+        DataRequirement expectedDataRequirement = null;
+        for (DataRequirement dr : moduleDefinitionLibrary.getDataRequirement()) {
+            if (dr.getType() == Enumerations.FHIRAllTypes.MEDICATIONREQUEST) {
+                expectedDataRequirement = dr;
+            }
+        }
+        assertTrue(expectedDataRequirement != null);
+
+        DataRequirement includedDataRequirement = null;
+        for (DataRequirement dr : moduleDefinitionLibrary.getDataRequirement()) {
+            if (dr.getType() == Enumerations.FHIRAllTypes.MEDICATION) {
+                Extension e = dr.getExtensionByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-relatedRequirement");
+                if (e != null) {
+                    Extension targetId = e.getExtensionByUrl("targetId");
+                    Extension targetProperty = e.getExtensionByUrl("targetProperty");
+                    if (targetId != null && targetProperty != null && targetProperty.getValueStringType().getValue().equals("medication")) {
+                        includedDataRequirement = dr;
+                    }
+                }
+            }
+        }
+        assertTrue(includedDataRequirement != null);
+
+        //outputModuleDefinitionLibrary(moduleDefinitionLibrary);
+    }
+
     private static void setup(String relativePath) {
         modelManager = new ModelManager();
         libraryManager = new LibraryManager(modelManager);
