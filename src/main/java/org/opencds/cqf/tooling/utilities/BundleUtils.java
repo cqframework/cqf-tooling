@@ -141,20 +141,28 @@ public class BundleUtils {
         }
     }
     
-    public static void extractStu3Resources(org.hl7.fhir.dstu3.model.Bundle bundle, String encoding, String outputPath) {
+    public static void extractStu3Resources(org.hl7.fhir.dstu3.model.Bundle bundle, String encoding, String outputPath, boolean suppressNarrative) {
     	FhirContext context = FhirContext.forDstu3();
     	for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
-    		if (entry.getResource() != null) {
-    			ResourceUtils.outputResource(entry.getResource(), encoding, context, outputPath);
+            org.hl7.fhir.dstu3.model.Resource entryResource = entry.getResource();
+            if (entryResource != null) {
+                if(entryResource.fhirType().equals("Measure") && suppressNarrative){
+                    ((org.hl7.fhir.dstu3.model.Measure)entryResource).setText(null);
+                }
+    			ResourceUtils.outputResource(entryResource, encoding, context, outputPath);
     		}
     	}
     }
     
-    public static void extractR4Resources(org.hl7.fhir.r4.model.Bundle bundle, String encoding, String outputPath) {
+    public static void extractR4Resources(org.hl7.fhir.r4.model.Bundle bundle, String encoding, String outputPath, boolean suppressNarrative) {
     	FhirContext context = FhirContext.forR4();
     	for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
-    		if (entry.getResource() != null) {
-    			ResourceUtils.outputResource(entry.getResource(), encoding, context, outputPath);
+            org.hl7.fhir.r4.model.Resource entryResource = entry.getResource();
+    		if (entryResource != null) {
+    		    if(entryResource.fhirType().equals("Measure") && suppressNarrative){
+                    ((org.hl7.fhir.r4.model.Measure)entryResource).setText(null);
+                }
+     			ResourceUtils.outputResource(entryResource, encoding, context, outputPath);
     		}
     	}
     }
