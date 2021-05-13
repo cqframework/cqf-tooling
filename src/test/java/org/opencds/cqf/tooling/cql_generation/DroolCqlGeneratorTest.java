@@ -3,7 +3,7 @@ package org.opencds.cqf.tooling.cql_generation;
 import java.io.File;
 import java.net.URI;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 import org.opencds.cqf.tooling.cql_generation.drool.DroolCqlGenerator;
 import org.opencds.cqf.tooling.cql_generation.drool.visitor.DroolToElmVisitor.CQLTYPES;
 

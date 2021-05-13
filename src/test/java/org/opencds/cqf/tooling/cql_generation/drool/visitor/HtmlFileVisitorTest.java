@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import org.cdsframework.dto.ConditionDTO;
-import org.junit.Test;
+import org.testng.annotations.Test;
 import org.opencds.cqf.tooling.cql_generation.drool.serialization.Deserializer;
 import org.opencds.cqf.tooling.cql_generation.drool.traversal.DepthFirstDroolTraverser;
 import org.opencds.cqf.tooling.cql_generation.drool.traversal.DroolTraverser;

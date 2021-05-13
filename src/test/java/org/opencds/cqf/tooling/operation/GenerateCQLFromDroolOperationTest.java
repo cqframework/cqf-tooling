@@ -1,6 +1,6 @@
 package org.opencds.cqf.tooling.operation;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 import org.opencds.cqf.tooling.Operation;
 
 public class GenerateCQLFromDroolOperationTest {

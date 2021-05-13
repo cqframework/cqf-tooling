@@ -1,14 +1,14 @@
 package org.opencds.cqf.tooling.npm;
 
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.r5.context.IWorkerContext;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.testng.annotations.Ignore;
+import org.testng.annotations.Test;
 
 public class NpmPackageManagerTests implements IWorkerContext.ILoggingService {
     /*

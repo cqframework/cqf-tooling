@@ -1,13 +1,13 @@
 package org.opencds.cqf.tooling.measure.adapters;
 
 import org.hl7.fhir.dstu3.model.MeasureReport;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertTrue;
 
 public class Dstu3MeasureReportAdapterTest {
 

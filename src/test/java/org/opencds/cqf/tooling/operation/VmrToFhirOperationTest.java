@@ -1,6 +1,6 @@
 package org.opencds.cqf.tooling.operation;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class VmrToFhirOperationTest {
     private String vmrFilePath = "C:/Users/jreys/Documents/src/cqf-tooling/src/test/resources/org/opencds/cqf/tooling/operation/VmrToFhir";

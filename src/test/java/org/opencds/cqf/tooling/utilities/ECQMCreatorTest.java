@@ -8,13 +8,13 @@ import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.r5.model.Measure;
-import org.junit.Test;
+import org.testng.annotations.Test;
 import org.opencds.cqf.tooling.measure.MeasureRefreshProcessor;
 
 import java.io.*;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertTrue;
 
 public class ECQMCreatorTest {
     private static ModelManager modelManager;

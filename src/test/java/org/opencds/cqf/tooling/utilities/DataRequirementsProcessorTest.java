@@ -8,7 +8,7 @@ import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
 //import org.hl7.fhir.r5.formats.IParser;
 import ca.uhn.fhir.parser.IParser;
-import org.junit.Test;
+import org.testng.annotations.Test;
 import org.opencds.cqf.tooling.processor.DataRequirementsProcessor;
 
 import java.io.File;
@@ -17,7 +17,7 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertTrue;
 
 public class DataRequirementsProcessorTest {
     private static ModelManager modelManager;
