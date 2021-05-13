@@ -3,24 +3,33 @@ package org.opencds.cqf.tooling.visitor;
 import org.hl7.elm.r1.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
-public class ElmRequirements {
+public class ElmRequirements extends ElmRequirement {
 
-    private List<ElmRequirement> requirements = new ArrayList<ElmRequirement>();
+    private HashSet<ElmRequirement> requirements = new LinkedHashSet<ElmRequirement>();
     public Iterable<ElmRequirement> getRequirements() {
         return requirements;
     }
 
-    public void reportRequirement(VersionedIdentifier libraryIdentifier, Element element) {
-        reportRequirement(new ElmRequirement(libraryIdentifier, element));
+    public ElmRequirements(VersionedIdentifier libraryIdentifier, Element element) {
+        super(libraryIdentifier, element);
     }
 
     public void reportRequirement(ElmRequirement requirement) {
-        requirements.add(requirement);
+        if (requirement instanceof ElmRequirements) {
+            for (ElmRequirement r : ((ElmRequirements)requirement).getRequirements()) {
+                reportRequirement(r);
+            }
+        }
+        else {
+            requirements.add(requirement);
+        }
     }
 
     public Iterable<ElmRequirement> getUsingDefs() {
