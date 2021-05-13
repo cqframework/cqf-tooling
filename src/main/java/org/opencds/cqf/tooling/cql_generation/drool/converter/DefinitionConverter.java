@@ -1,5 +1,6 @@
-package org.opencds.cqf.tooling.cql_generation.drool.adapter;
+package org.opencds.cqf.tooling.cql_generation.drool.converter;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
@@ -29,14 +30,13 @@ import org.slf4j.MarkerFactory;
  * @author Joshua Reynolds
  * @since 2021-02-24
  */
-public class DefinitionAdapter {
+public class DefinitionConverter {
     private Logger logger;
-    private Map<String, Marker> markers = Map.of(
-        "ExpressionDef", MarkerFactory.getMarker("ExpressionDef")
-    );
+    private Map<String, Marker> markers = new HashMap<String, Marker>();
 
-    public DefinitionAdapter() {
+    public DefinitionConverter() {
         logger = LoggerFactory.getLogger(this.getClass());
+        markers.put("ExpressionDef", MarkerFactory.getMarker("ExpressionDef"));
     }
     private String identifier;
     private String expressionContext = "Patient";

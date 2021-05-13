@@ -19,6 +19,8 @@ import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.processor.*;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
@@ -29,8 +31,9 @@ public class LibraryProcessor extends BaseProcessor {
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
     }
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     
-    public static List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext) {
+    public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext) {
         System.out.println("Refreshing libraries...");
         // ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
 
@@ -57,11 +60,11 @@ public class LibraryProcessor extends BaseProcessor {
         return libraryProcessor.refreshLibraryContent(params);
     }
 
-    public static Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
+    public Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
             Encoding encoding, boolean versioned) {
         Boolean shouldPersist = true;
         try {
-            Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding, versioned);
+            Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding, versioned, logger);
             // String currentResourceID = IOUtils.getTypeQualifiedResourceId(path, fhirContext);
             for (IBaseResource resource : dependencies.values()) {
                 resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
@@ -173,7 +176,7 @@ public class LibraryProcessor extends BaseProcessor {
                     newLibrary.setName(fileInfo.getIdentifier().getId());
                     newLibrary.setVersion(fileInfo.getIdentifier().getVersion());
                     newLibrary.setUrl(String.format("%s/Library/%s", (newLibrary.getName().equals("FHIRHelpers") ? "http://hl7.org/fhir" : canonicalBase), fileInfo.getIdentifier().getId()));
-                    newLibrary.setId(LibraryProcessor.getId(newLibrary.getName()) + (versioned ? "-" + newLibrary.getVersion() : ""));
+                    newLibrary.setId(getId(newLibrary.getName()) + (versioned ? "-" + newLibrary.getVersion() : ""));
                     List<Attachment> attachments = new ArrayList<Attachment>();
                     Attachment attachment = new Attachment();
                     attachment.setContentType("application/elm+xml");

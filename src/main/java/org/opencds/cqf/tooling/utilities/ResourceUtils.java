@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.opencds.cqf.tooling.processor.ValueSetsProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
+import org.slf4j.Logger;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -125,13 +126,13 @@ public class ResourceUtils
       return ((org.hl7.fhir.r4.model.Library)mainLibrary).getRelatedArtifact();
     }
 
-    public static Map<String, IBaseResource> getDepLibraryResources(String path, FhirContext fhirContext, Encoding encoding, Boolean versioned) {
+    public static Map<String, IBaseResource> getDepLibraryResources(String path, FhirContext fhirContext, Encoding encoding, Boolean versioned, Logger logger) {
       Map<String, IBaseResource> dependencyLibraries = new HashMap<String, IBaseResource>();
       switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:
             return getStu3DepLibraryResources(path, dependencyLibraries, fhirContext, encoding, versioned);
         case R4:
-            return getR4DepLibraryResources(path, dependencyLibraries, fhirContext, encoding, versioned);
+            return getR4DepLibraryResources(path, dependencyLibraries, fhirContext, encoding, versioned, logger);
         default:
             throw new IllegalArgumentException("Unsupported fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
       }
@@ -208,11 +209,11 @@ public class ResourceUtils
       return paths;
     }
 
-    private static Map<String, IBaseResource> getR4DepLibraryResources(String path, Map<String, IBaseResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding, Boolean versioned) {      
+    private static Map<String, IBaseResource> getR4DepLibraryResources(String path, Map<String, IBaseResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding, Boolean versioned, Logger logger) {      
       List<String> dependencyLibraryPaths = getR4DepLibraryPaths(path, fhirContext, encoding, versioned);
       for (String dependencyLibraryPath : dependencyLibraryPaths) {
         if (dependencyLibraryPath.contains("ModelInfo")) {
-          System.out.println("skip");
+          logger.debug("skipping ModelInfo");
         } else {
           Object resource = IOUtils.readResource(dependencyLibraryPath, fhirContext);
           if (resource instanceof org.hl7.fhir.r4.model.Library) {

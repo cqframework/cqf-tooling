@@ -18,6 +18,15 @@ import org.opencds.cqf.tooling.utilities.LogUtils;
 import ca.uhn.fhir.context.FhirContext;
 
 public class IGProcessor extends BaseProcessor {
+    protected IGBundleProcessor igBundleProcessor;
+    protected LibraryProcessor libraryProcessor;
+    protected MeasureProcessor measureProcessor;
+
+    public IGProcessor(IGBundleProcessor igBundleProcessor, LibraryProcessor libraryProcessor, MeasureProcessor measureProcessor) {
+        this.igBundleProcessor = igBundleProcessor;
+        this.libraryProcessor = libraryProcessor;
+        this.measureProcessor = measureProcessor;
+    }
     //mega ig method
     public void publishIG(RefreshIGParameters params) {
         if (params.ini != null) {
@@ -68,7 +77,7 @@ public class IGProcessor extends BaseProcessor {
         //Use case 3
         //package everything
         LogUtils.info("IGProcessor.publishIG - bundleIg");
-        IGBundleProcessor.bundleIg(refreshedResourcesNames, rootDir, encoding, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
+        igBundleProcessor.bundleIg(refreshedResourcesNames, rootDir, encoding, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
         versioned, cdsHooksIg, fhirContext, fhirUri);
         //test everything
         //IGTestProcessor.testIg(IGTestParameters);
@@ -112,14 +121,14 @@ public class IGProcessor extends BaseProcessor {
         IGProcessor.ensure(rootDir, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
 
         List<String> refreshedLibraryNames;
-        refreshedLibraryNames = LibraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
+        refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
         // Only add libraries if this is a cds IG, else only measures.
         if (params.cdsHooksIg) {
             refreshedResourcesNames.addAll(refreshedLibraryNames);
         }
 
         List<String> refreshedMeasureNames;
-        refreshedMeasureNames = MeasureProcessor.refreshIgMeasureContent(this, encoding, versioned, fhirContext, measureToRefreshPath);
+        refreshedMeasureNames = measureProcessor.refreshIgMeasureContent(this, encoding, versioned, fhirContext, measureToRefreshPath);
         refreshedResourcesNames.addAll(refreshedMeasureNames);
 
         if (refreshedResourcesNames.isEmpty()) {

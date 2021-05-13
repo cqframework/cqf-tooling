@@ -1,5 +1,6 @@
-package org.opencds.cqf.tooling.cql_generation.drool.adapter;
+package org.opencds.cqf.tooling.cql_generation.drool.converter;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -18,15 +19,14 @@ import org.slf4j.MarkerFactory;
  * @author Joshua Reynolds
  * @since 2021-02-24
  */
-public class LibraryAdapter {
+public class LibraryConverter {
 
     private Logger logger;
-    private Map<String, Marker> markers = Map.of(
-        "Library", MarkerFactory.getMarker("Library")
-    );
+    private Map<String, Marker> markers = new HashMap<String, Marker>();
 
-    public LibraryAdapter() {
+    public LibraryConverter() {
         logger = LoggerFactory.getLogger(this.getClass());
+        markers.put("Library", MarkerFactory.getMarker("Library"));
     }
 
     /**

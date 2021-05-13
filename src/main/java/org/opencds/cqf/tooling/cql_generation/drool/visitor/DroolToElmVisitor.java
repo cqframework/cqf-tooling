@@ -1,5 +1,6 @@
 package org.opencds.cqf.tooling.cql_generation.drool.visitor;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,9 +24,9 @@ import org.hl7.elm.r1.ExpressionRef;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.tooling.cql_generation.builder.VmrToModelElmBuilder;
 import org.opencds.cqf.tooling.cql_generation.context.ElmContext;
-import org.opencds.cqf.tooling.cql_generation.drool.adapter.DefinitionAdapter;
-import org.opencds.cqf.tooling.cql_generation.drool.adapter.DroolPredicateToElmExpressionAdapter;
-import org.opencds.cqf.tooling.cql_generation.drool.adapter.LibraryAdapter;
+import org.opencds.cqf.tooling.cql_generation.drool.converter.DefinitionConverter;
+import org.opencds.cqf.tooling.cql_generation.drool.converter.DroolPredicateToElmExpressionConverter;
+import org.opencds.cqf.tooling.cql_generation.drool.converter.LibraryConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -49,15 +50,11 @@ public class DroolToElmVisitor implements Visitor {
     private Enum<CQLTYPES> type = null;
     private VmrToModelElmBuilder modelBuilder;
     private ElmContext context;
-    private DroolPredicateToElmExpressionAdapter expressionBodyAdapter;
-    private DefinitionAdapter definitionAdapter = new DefinitionAdapter();
-    private LibraryAdapter libraryAdapter = new LibraryAdapter();
+    private DroolPredicateToElmExpressionConverter expressionBodyAdapter;
+    private DefinitionConverter definitionAdapter = new DefinitionConverter();
+    private LibraryConverter libraryAdapter = new LibraryConverter();
     private Logger logger;
-    private Map<String, Marker> markers = Map.of(
-        "Expression", MarkerFactory.getMarker("Expression"),
-        "Library", MarkerFactory.getMarker("Library"),
-        "ExpressionDef", MarkerFactory.getMarker("ExpressionDef")
-    );
+    private Map<String, Marker> markers = new HashMap<String, Marker>();
 
     /**
      * Default to CONDITION granularity.
@@ -67,15 +64,18 @@ public class DroolToElmVisitor implements Visitor {
         this.type = CQLTYPES.CONDITION;
         this.modelBuilder = modelBuilder;
         context = new ElmContext(modelBuilder);
-        expressionBodyAdapter = new DroolPredicateToElmExpressionAdapter(modelBuilder);
+        expressionBodyAdapter = new DroolPredicateToElmExpressionConverter(modelBuilder);
         logger = LoggerFactory.getLogger(this.getClass());
+        markers.put("Expression", MarkerFactory.getMarker("Expression"));
+        markers.put("Library", MarkerFactory.getMarker("Library"));
+        markers.put("ExpressionDef", MarkerFactory.getMarker("ExpressionDef"));
     }
 
     public DroolToElmVisitor(Enum<CQLTYPES> type, VmrToModelElmBuilder modelBuilder) {
         this.type = type;
         this.modelBuilder = modelBuilder;
         context = new ElmContext(modelBuilder);
-        expressionBodyAdapter = new DroolPredicateToElmExpressionAdapter(modelBuilder);
+        expressionBodyAdapter = new DroolPredicateToElmExpressionConverter(modelBuilder);
         logger = LoggerFactory.getLogger(this.getClass());
     }
 

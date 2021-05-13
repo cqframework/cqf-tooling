@@ -18,6 +18,8 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -78,9 +80,7 @@ public abstract class VmrToModelElmBuilder {
     protected IncludeDef includeHelper;
     protected DecimalFormat decimalFormat;
     protected Logger logger;
-    protected Map<String, Marker> markers = Map.of(
-        "Modeling", MarkerFactory.getMarker("Modeling")
-    );
+    protected Map<String, Marker> markers = new HashMap<String, Marker>();
 
 
     public VmrToModelElmBuilder(String modelIdentifier, String modelVersion, String modelUri, LibrarySourceProvider lsp, DecimalFormat decimalFormat) {
@@ -90,7 +90,8 @@ public abstract class VmrToModelElmBuilder {
         this.lsp = lsp;
         this.decimalFormat = decimalFormat;
         this.decimalFormat.setParseBigDecimal(true);
-        logger = LoggerFactory.getLogger(this.getClass());                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+        logger = LoggerFactory.getLogger(this.getClass());   
+        markers.put("Modeling", MarkerFactory.getMarker("Modeling"));                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
     }
 
     // These two methods are only appropriate for building predicates...  need to abstract this a bit in the future.
@@ -310,8 +311,8 @@ public abstract class VmrToModelElmBuilder {
             elements.add(where);
         }
         Query query = resolveQuery(libraryBuilder, sources, elements);
-        Expression distinct = libraryBuilder.resolveFunction("System", "Distinct", List.of(query));
-        Expression count = libraryBuilder.resolveFunction("System", "Count", List.of(distinct));
+        Expression distinct = libraryBuilder.resolveFunction("System", "Distinct", Arrays.asList(query));
+        Expression count = libraryBuilder.resolveFunction("System", "Count", Arrays.asList(distinct));
         return count;
     }
 

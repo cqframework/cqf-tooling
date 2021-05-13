@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.UUID;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -148,7 +150,7 @@ public class VmrToFhirTransformer {
                 result.add(resource);
                 Encounter encounter = new Encounter();
                 encounter.setId(new IdType(UUID.randomUUID().toString()));
-                encounter.setReasonReference(List.of(new Reference(resource)));
+                encounter.setReasonReference(Arrays.asList(new Reference(resource)));
                 result.add(encounter);
             });
         }
@@ -319,7 +321,7 @@ public class VmrToFhirTransformer {
                 result.add(resource);
                 MedicationAdministration medicationAdministration = new MedicationAdministration();
                 medicationAdministration.setId(new IdType(UUID.randomUUID().toString()));
-                medicationAdministration.setReasonReference(List.of(new Reference(resource)));
+                medicationAdministration.setReasonReference(Arrays.asList(new Reference(resource)));
                 medicationAdministration.setSubject(new Reference(patient));
                 result.add(medicationAdministration);
             });

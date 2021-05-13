@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -191,7 +192,7 @@ public class DroolToElmVisitorTest {
             e.getCause().getCause().getMessage();
             throw new IllegalArgumentException("Error reading ELM: " + e.getMessage());
         }
-        LibraryLoader libraryLoader = new InMemoryLibraryLoader(List.of(library, fhirHelpers));
+        LibraryLoader libraryLoader = new InMemoryLibraryLoader(Arrays.asList(library, fhirHelpers));
         context.registerDataProvider(Constants.FHIR_MODEL_URI, dataProvider);
         context.registerLibraryLoader(libraryLoader);
         context.registerTerminologyProvider(terminologyProvider);

@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.cql_generation.builder;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -615,13 +616,13 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
         }
         Expression referenceProperty = libraryBuilder.buildProperty(as, "reference", false, referenceType);
         Expression separator = libraryBuilder.createLiteral("/");
-        Expression split = libraryBuilder.resolveFunction("System", "Split", List.of(referenceProperty, separator));
-        Expression last = libraryBuilder.resolveFunction("System", "Last", List.of(split));
+        Expression split = libraryBuilder.resolveFunction("System", "Split", Arrays.asList(referenceProperty, separator));
+        Expression last = libraryBuilder.resolveFunction("System", "Last", Arrays.asList(split));
 
         Expression idList = of.createList().withElement(last);
         idList.setResultType(new ListType(last.getResultType()));
         Retrieve medicationRetrieve = resolveRetrieve(libraryBuilder, "Medication", idList, "in", "id");
-        Expression function = libraryBuilder.resolveFunction("System", "First", List.of(medicationRetrieve));
+        Expression function = libraryBuilder.resolveFunction("System", "First", Arrays.asList(medicationRetrieve));
         LetClause let = of.createLetClause().withIdentifier("medicationResource").withExpression(function);
         let.setResultType(function.getResultType());
         elements.add(let);
@@ -652,8 +653,8 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
         DataType referenceType = libraryBuilder.resolvePath(((ListType)reasonReferenceProperty.getResultType()).getElementType(), "reference");
         Expression referenceProperty = libraryBuilder.buildProperty(reasonReferenceSource.getAlias(), "reference", false, referenceType);
         Expression separator = libraryBuilder.createLiteral("/");
-        Expression split = libraryBuilder.resolveFunction("System", "Split", List.of(referenceProperty, separator));
-        Expression last = libraryBuilder.resolveFunction("System", "Last", List.of(split));
+        Expression split = libraryBuilder.resolveFunction("System", "Split", Arrays.asList(referenceProperty, separator));
+        Expression last = libraryBuilder.resolveFunction("System", "Last", Arrays.asList(split));
         ReturnClause letQueryReturn = of.createReturnClause().withExpression(last);
         letQueryReturn.setResultType(new ListType(last.getResultType()));
         letQueryElements.add(letQueryReturn);
@@ -690,7 +691,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
         birthDateProperty.setResultType(birthDateType);
         Expression today = of.createToday();
         today.setResultType(libraryBuilder.resolveTypeName("System", "Date"));
-        Expression operand = libraryBuilder.resolveFunction("System", "CalculateAgeAt", List.of(birthDateProperty, today));
+        Expression operand = libraryBuilder.resolveFunction("System", "CalculateAgeAt", Arrays.asList(birthDateProperty, today));
         return operand;
     }
 }

@@ -1,6 +1,8 @@
-package org.opencds.cqf.tooling.cql_generation.drool.adapter;
+package org.opencds.cqf.tooling.cql_generation.drool.converter;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +44,7 @@ import org.slf4j.MarkerFactory;
  * @author Joshua Reynolds
  * @since 2021-02-24
  */
-public class DroolPredicateToElmExpressionAdapter {
+public class DroolPredicateToElmExpressionConverter {
     /**
      * the {@link VmrToModelElmBuilder ModelElmBuilder } is needed to determine the respective mapping 
      * from the VMR Model to a Model used in Cql i.e. FHIR
@@ -68,23 +70,21 @@ public class DroolPredicateToElmExpressionAdapter {
 
     public static Set<String> valueSetIds = new HashSet<String>();
     private Logger logger;
-    private Map<String, Marker> markers = Map.of(
-        "Left_Operand", MarkerFactory.getMarker("Left_Operand"),
-        "Right_Operand", MarkerFactory.getMarker("Right_Operand"),
-        "Expression", MarkerFactory.getMarker("Expression"),
-        "Modeling", MarkerFactory.getMarker("Modeling"),
-        "Function", MarkerFactory.getMarker("Function"),
-        "Operator", MarkerFactory.getMarker("Operator")
-    );
+    private Map<String, Marker> markers = new HashMap<String, Marker>();
 
     /**
      * Provides adapter functionality from any node in a ConditionCriteriaPredicateDTO object graph to the respective elm representation.
      * @param modelBuilder modelBuilder
     */
-    public DroolPredicateToElmExpressionAdapter(VmrToModelElmBuilder modelBuilder) {
+    public DroolPredicateToElmExpressionConverter(VmrToModelElmBuilder modelBuilder) {
         logger = LoggerFactory.getLogger(this.getClass());
         this.modelBuilder = modelBuilder;
-        
+        markers.put("Left_Operand", MarkerFactory.getMarker("Left_Operand"));
+        markers.put("Right_Operand", MarkerFactory.getMarker("Right_Operand"));
+        markers.put("Expression", MarkerFactory.getMarker("Expression"));
+        markers.put("Modeling", MarkerFactory.getMarker("Modeling"));
+        markers.put("Function", MarkerFactory.getMarker("Function"));
+        markers.put("Operator", MarkerFactory.getMarker("Operator"));
     }
     
     /**
@@ -188,7 +188,7 @@ public class DroolPredicateToElmExpressionAdapter {
     private void resolveQuantity(String text, BigDecimal dataInputNumericValue, LibraryBuilder libraryBuilder) {
         if (dataInputNumericValue != null) {
             if (!Strings.isNullOrEmpty(text)) {
-                List<String> unitParts = List.of(text.split(" "));
+                List<String> unitParts = Arrays.asList(text.split(" "));
                 if (unitParts.contains("mg/24") && unitParts.contains("hours")) {
                     logger.info("Found units: {}, adapting to mg/(24.h)", unitParts);
                     adaptQuantityOperand("mg/(24.h)", dataInputNumericValue, libraryBuilder);

@@ -19,7 +19,7 @@ public class CDSHooksProcessor {
     public static final String responsesPathElement = "input/pagecontent/responses/";   
     public static final String requestFilesPathElement = "requests/";  
     public static final String responseFilesPathElement = "responses/"; 
-    public static void addRequestAndResponseFilesToBundle(String igPath, String bundleDestPath, String libraryName) {
+    public void addRequestAndResponseFilesToBundle(String igPath, String bundleDestPath, String libraryName) {
         String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, libraryName + "-" + IGBundleProcessor.bundleFilesPathElement);
         String requestFilesPath = FilenameUtils.concat(igPath, requestsPathElement);
         String responseFilesPath = FilenameUtils.concat(igPath, responsesPathElement);
@@ -63,7 +63,7 @@ public class CDSHooksProcessor {
         return activityDefinitionPaths;
     }
 
-    public static void addActivityDefinitionFilesToBundle(String igPath, String bundleDestPath, String libraryName, List<String> activityDefinitionPaths, FhirContext fhirContext, Encoding encoding) {
+    public void addActivityDefinitionFilesToBundle(String igPath, String bundleDestPath, String libraryName, List<String> activityDefinitionPaths, FhirContext fhirContext, Encoding encoding) {
         String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, libraryName + "-" + IGBundleProcessor.bundleFilesPathElement);
         for (String path : activityDefinitionPaths) {
             IOUtils.copyFile(path, FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(path)));
