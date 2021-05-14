@@ -24,26 +24,49 @@ public class ExtractMatBundleOperation extends Operation {
 	private String version = "r4";
 	private FhirContext context;
 	private String encoding;
+	private boolean suppressNarrative = true;
 	
 	@Override
-	public void execute(String[] args) {		
-		// Set file to extract
-		inputFile = args[1];
-		if (inputFile == null) {
-			throw new IllegalArgumentException("The path to a bundle file is required");
-		}
-		
-		// Set version
-		if (args.length > 2) {
-			if (args[2] != null) {
-				String[] flagAndValue = args[2].split("=");
-				String flag = flagAndValue[0];
-		        String value = flagAndValue[1];
-		        if (flag != "-v") {
-		        	throw new IllegalArgumentException("Invalid argument: " + flag);
-		        } else {
-		        	version = value;
-		        }
+	public void execute(String[] args) {
+
+		for (int i = 0; i < args.length;i++) {
+			if(i == 0 && args[i].equalsIgnoreCase("-ExtractMatBundle")){
+				continue;		//
+			}
+			if(i == 1){
+				inputFile = args[i];
+				if (inputFile == null) {
+					throw new IllegalArgumentException("The path to a bundle file is required");
+				}
+				continue;
+			}
+
+			String[] flagAndValue = args[i].split("=");
+			if (flagAndValue.length < 2) {
+				throw new IllegalArgumentException("Invalid argument: " + args[i]);
+			}
+			String flag = flagAndValue[0];
+			String value = flagAndValue[1];
+
+			switch (flag.replace("-", "").toLowerCase()) {
+				case "encoding":
+				case "e":
+					encoding = value.toLowerCase();
+					break;
+				case "supressNarrative":
+				case "sn":
+					if(value.equalsIgnoreCase("false")) {
+						suppressNarrative = false;
+					}
+					break;
+				case "outputpath":
+				case "op":
+					setOutputPath(value);
+					break; // -outputpath (-op)
+				case "version": case "v":
+					version = value;
+					break;
+				default: throw new IllegalArgumentException("Unknown flag: " + flag);
 			}
 		}
 
@@ -99,13 +122,14 @@ public class ExtractMatBundleOperation extends Operation {
         // Now call the Bundle utilities to extract the bundle
         String outputDir = bundleFile.getAbsoluteFile().getParent();
         if (version == "stu3") {
-        	BundleUtils.extractStu3Resources((org.hl7.fhir.dstu3.model.Bundle)bundle, encoding, outputDir);
+        	BundleUtils.extractStu3Resources((org.hl7.fhir.dstu3.model.Bundle)bundle, encoding, outputDir, suppressNarrative);
         } else if (version == "r4") {
-        	BundleUtils.extractR4Resources((org.hl7.fhir.r4.model.Bundle)bundle, encoding, outputDir);
+        	BundleUtils.extractR4Resources((org.hl7.fhir.r4.model.Bundle)bundle, encoding, outputDir, suppressNarrative);
         }
         
         // Now move and properly rename the files
         moveAndRenameFiles(outputDir);
+
 
         LogUtils.info("Extraction completed successfully");
 	}
