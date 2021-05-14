@@ -722,7 +722,7 @@
             </build>
         </profile>
         <profile>
-            <id>java-11</id>
+            <id>java-9</id>
             <activation>
                 <jdk>[9,)</jdk>
             </activation>
