@@ -17,6 +17,44 @@ parameter "Measurement Period" Interval<DateTime>
 context Patient
 
 /*
+# Overall optimization/dependency tracing strategy:
+Two different types of requirements, reported requirements and inferred requirements.
+Reported requirements are tracked at the ExpressionDef level and rolled-up across expression defs
+Inferred requirements are inferred through expressions and reported at query boundaries
+  (or reported directly if the retrieve occurs outside a query boundary)
+
+The visitor is focused on two main tasks:
+* Gathering dependencies (any artifacts or declarations used)
+* Inferring data requirements (the minimum set of retrieves required to achieve a successful evaluation)
+
+Dependencies in any give visit are tracked cumulatively at the root
+Data Requirements must be tracked as inferred per expression def
+
+So in the context, when a requirement is reported, if it's a data requirement, it's tracked at the expression def level,
+whereas if it's a dependency, it's always tracked at the root.
+
+# Where clause optimization strategy:
+Visit a where clause looking for sargeable conditions of the form:
+
+    A op B
+
+Where:
+* A is an order-preserving expression with a single property reference to a property of some source in the current query context
+* op is a positive relative comparison operation (=, >, <, >=, <=)
+* B is a functional, repeatable, and deterministic context literal expression with respect to the current query context
+
+Gather sargeable conditions as Lists of conditions. At an AND, combine conditions from sub-nodes.
+At an OR, the result is separate lists of condition lists.
+At an AND, if there are already lists of lists, the condition is too complex for analysis (i.e. it's not in DNF or CNF)
+
+At a property, return an ElmPropertyRequirement
+At a literal return an ElmExpressionRequirement w/ contextLiteral true
+At a parameter return an ElmExpressionRequirement w/ contextLiteral true
+At a unary expression, return an ElmExpressionRequirement w/ contextLiteral false
+At a binary comparison expression, return ElmConditionRequirement if possible
+At a logical expression, return ElmConjuntiveRequirement or ElmDisjunctiveRequirement
+
+
 Library
 normalize / de-duplicate across all expressions
 ----
@@ -36,6 +74,7 @@ Query Boundary
      DataRequirement {
        type: Y
        codeFilters : !ANDS
+
      }
   },
   {
@@ -46,10 +85,9 @@ Query Boundary
   })
 */
 
-
 /*
 1.
-DataRequirement
+Stated DataRequirement: ERSD Observations
 type: Observation
 codeFilter: { path:  code, valueSet:  'http://fakeurl.com/ersd-diagnosis' }
 */
@@ -161,6 +199,7 @@ dateFilter: { path: onset }
   [Condition: "Hospice Encounter"] HospiceEncounterACond
     where IsActiveAndConfirmed(HospiceEncounterACond)
       and date from HospiceEncounterACond.onset in day of "Measurement Period"
+
 define function "IsActiveAndConfirmed"(c FHIR.Condition):
   true */
 
@@ -191,6 +230,7 @@ dateFilter: { path : item.serviced.start }
   [Claim] C
     where IsNephrologistVisit(C)
     return NephrologistVisitSupport(C)
+
 define function "IsNephrologistVisit"(C Claim):
   exists ( ( ClaimAndItemsForClaim(C)) T
       let c: T.c,
@@ -198,6 +238,7 @@ define function "IsNephrologistVisit"(C Claim):
       where HasValidNephrologistProvider(C, ci.careTeamLinkId)
         and date from ci.serviced."start" in day of "Measurement Period"
   )
+
 define function "ClaimAndItemsForClaim"(C Claim):
   C.item CI
     let i: {
@@ -213,6 +254,7 @@ define function "ClaimAndItemsForClaim"(C Claim):
 
 /* define function "HasValidNephrologistProvider"(c Claim, ct List<FHIR.Claim.CareTeam>):
   true
+
 define function "NephrologistVisitSupport"(C Claim):
   true */
 
@@ -234,6 +276,7 @@ DataRequirement
 type: Procedure
 codeFilter: { path: code, url : http://fakeurl.com/ed }
 dateFilter: { path: performed.start }
+
 DataRequirement
 type: Claim
 codeFilter: { path: id}
@@ -246,19 +289,24 @@ codeFilter: { path: id}
       such that Dt = date from start of ( Proc.performed as FHIR.Period )
     where ( date from Proc.performed."start" in day of i )
     return VisitDescriptor(Proc.performed, 'ed')
+
 define function VisitDescriptor(P FHIR.Period, V String):
   {
     period: P,
     type: V
   }
+
 define function "ClaimIdForReference"(ref String):
   Split(ref, '#')[0]
+
 define function "Claim"(ref String):
   First([Claim] C
       where EndsWith(ClaimIdForReference(ref), C.id)
   )
+
 define function "ClaimItem"(P Procedure):
   null
+
 define "All Fracture Dates":
   { @2012-01-01 } */
 
@@ -289,3 +337,24 @@ codeFilter : { path : gender,  code: 'female'}
 
 /* define "Is Female":
   Patient.gender = 'female' */
+
+/*
+9: Support "include"
+9a. Support include when the reference is through a "Last(Split())" in a with
+9b. Support include when the reference is through a "Last(Split())" in a let
+9c. Support include when the reference is through a "Last(Split())" in an exists
+9d. Support include when the reference is through a "Last(Split())" with an "or"
+9e. Support include when the reference is through a ".resolve()" in a with
+9f. Support include when the reference is through a ".resolve()" in a let
+9g. Support include when the reference is through a ".resolve()" in an exists
+9h. Support include when the reference is through a ".resolve()" with an "or"
+9i. Support include when the reference is through a ".reference()" in a with
+9j. Support include when the reference is through a ".reference()" in a let
+9k. Support include when the reference is through a ".reference()" in a exists
+9l. Support include when the reference is through a ".reference()" with an "or"
+9m. Support include when the reference is through a related-context retrieve in a with
+9n. Support include when the reference is through a related-context retrieve in a let
+9o. Support include when the reference is through a related-context retrieve in an exists
+9p. Support include when the reference is through a related-context retrieve with an "or"
+*/
+
