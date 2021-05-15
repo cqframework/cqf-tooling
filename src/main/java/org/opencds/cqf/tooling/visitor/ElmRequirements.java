@@ -28,7 +28,9 @@ public class ElmRequirements extends ElmRequirement {
             }
         }
         else {
-            requirements.add(requirement);
+            if (requirement != null) {
+                requirements.add(requirement);
+            }
         }
     }
 

@@ -71,8 +71,11 @@ public class DataRequirementsProcessor {
         requirements.reportRequirement(context.getRequirements());
         // Collect reported data requirements from each expression
         for (ExpressionDef ed : expressionDefs) {
-            ElmRequirements reportedRequirements = context.getReportedRequirements(ed);
-            requirements.reportRequirement(reportedRequirements);
+            // Just being defensive here, can happen when there are errors deserializing the measure
+            if (ed != null) {
+                ElmRequirements reportedRequirements = context.getReportedRequirements(ed);
+                requirements.reportRequirement(reportedRequirements);
+            }
         }
 
         return createLibrary(context, requirements, translatedLibrary.getIdentifier(), expressionDefs, includeLogicDefinitions);
@@ -183,7 +186,7 @@ public class DataRequirementsProcessor {
         }
 
         for (ExpressionDef def : expressionDefs) {
-            if (!(def instanceof FunctionDef) && (def.getAccessLevel() == null
+            if (def != null && !(def instanceof FunctionDef) && (def.getAccessLevel() == null
                     || def.getAccessLevel() == AccessModifier.PUBLIC)) {
                 result.add(toOutputParameterDefinition(libraryIdentifier, def));
             }
@@ -328,9 +331,9 @@ public class DataRequirementsProcessor {
         if (uri != null) {
             // The translator has no way to correctly infer the namespace of the FHIRHelpers library, since it will happily provide that source to any namespace that wants it
             // So override the declaration here so that it points back to the FHIRHelpers library in the base specification
-            if (name.equals("FHIRHelpers") && !(uri.equals("http://hl7.org/fhir") || uri.equals("http://fhir.org/guides/cqf/common"))) {
-                uri = "http://fhir.org/guides/cqf/common";
-            }
+            //if (name.equals("FHIRHelpers") && !(uri.equals("http://hl7.org/fhir") || uri.equals("http://fhir.org/guides/cqf/common"))) {
+            //    uri = "http://fhir.org/guides/cqf/common";
+            //}
             return String.format("%s/Library/%s%s", uri, name, version != null ? ("|" + version) : "");
         }
 
