@@ -136,7 +136,7 @@ public class MeasureProcessor extends BaseProcessor {
                     String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), MeasureTestGroupName), measureName);
                     persistBundle(igPath, bundleDestPath, measureName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri);
                     bundleFiles(igPath, bundleDestPath, measureName, measureSourcePath, primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion);
-                    bundledMeasures.add(measureName);
+                    bundledMeasures.add(measureSourcePath);
                 }
             } catch (Exception e) {
                 LogUtils.putException(measureName, e);
