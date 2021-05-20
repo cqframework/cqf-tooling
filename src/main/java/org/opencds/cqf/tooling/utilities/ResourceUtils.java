@@ -362,18 +362,20 @@ public class ResourceUtils
       return valueSetDefs;
     }
 
-    private static CqlTranslatorOptions getTranslatorOptions(String folder) {
+    public static CqlTranslatorOptions getTranslatorOptions(String folder) {
       String optionsFileName = folder + File.separator + "cql-options.json";
       CqlTranslatorOptions options = null;
       File file = new File(optionsFileName);
       if (file.exists()) {
           options = CqlTranslatorOptionsMapper.fromFile(file.getAbsolutePath());
+          System.out.println(String.format("cql-options loaded from: %s", file.getAbsolutePath()));
       }
       else {
           options = CqlTranslatorOptions.defaultOptions();
           if (!options.getFormats().contains(CqlTranslator.Format.XML)) {
               options.getFormats().add(CqlTranslator.Format.XML);
           }
+          System.out.println("cql-options not found. Using default options.");
       }
 
       return options;
