@@ -33,7 +33,6 @@ public class IGProcessor extends BaseProcessor {
         Boolean includeTerminology = params.includeTerminology;
         Boolean includePatientScenarios = params.includePatientScenarios;
         Boolean versioned = params.versioned;
-        Boolean cdsHooksIg = params.cdsHooksIg;
         String fhirUri = params.fhirUri;
         // String measureToRefreshPath = params.measureToRefreshPath;
         ArrayList<String> resourceDirs = new ArrayList<String>();
@@ -69,7 +68,7 @@ public class IGProcessor extends BaseProcessor {
         //package everything
         LogUtils.info("IGProcessor.publishIG - bundleIg");
         IGBundleProcessor.bundleIg(refreshedResourcesNames, rootDir, encoding, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
-        versioned, cdsHooksIg, fhirContext, fhirUri);
+        versioned, fhirContext, fhirUri);
         //test everything
         //IGTestProcessor.testIg(IGTestParameters);
         //Publish?
@@ -110,13 +109,6 @@ public class IGProcessor extends BaseProcessor {
         FhirContext fhirContext = IGProcessor.getIgFhirContext(fhirVersion);
 
         IGProcessor.ensure(rootDir, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
-
-        List<String> refreshedLibraryNames;
-        refreshedLibraryNames = LibraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
-        // Only add libraries if this is a cds IG, else only measures.
-        if (params.cdsHooksIg) {
-            refreshedResourcesNames.addAll(refreshedLibraryNames);
-        }
 
         List<String> refreshedMeasureNames;
         refreshedMeasureNames = MeasureProcessor.refreshIgMeasureContent(this, encoding, versioned, fhirContext, measureToRefreshPath);
@@ -161,6 +153,7 @@ public class IGProcessor extends BaseProcessor {
     public static final String cqlLibraryPathElement = "input/pagecontent/cql/";
     public static final String libraryPathElement = "input/resources/library/";
     public static final String measurePathElement = "input/resources/measure/";
+    public static final String planDefinitionPathElement = "input/resources/plandefinition/";
     public static final String valuesetsPathElement = "input/vocabulary/valueset/";
     public static final String testCasePathElement = "input/tests/";
     public static final String devicePathElement = "input/resources/device/";
@@ -174,6 +167,7 @@ public class IGProcessor extends BaseProcessor {
             ensureDirectory(igPath, IGProcessor.cqlLibraryPathElement);
             ensureDirectory(igPath, IGProcessor.libraryPathElement);
             ensureDirectory(igPath, IGProcessor.measurePathElement);
+            ensureDirectory(igPath, IGProcessor.planDefinitionPathElement);
             ensureDirectory(igPath, IGProcessor.valuesetsPathElement);
             ensureDirectory(igPath, IGProcessor.testCasePathElement);
         }
@@ -181,6 +175,7 @@ public class IGProcessor extends BaseProcessor {
             checkForDirectory(igPath, IGProcessor.cqlLibraryPathElement);
             checkForDirectory(igPath, IGProcessor.libraryPathElement);
             checkForDirectory(igPath, IGProcessor.measurePathElement);
+            checkForDirectory(igPath, IGProcessor.planDefinitionPathElement);
             checkForDirectory(igPath, IGProcessor.valuesetsPathElement);
             checkForDirectory(igPath, IGProcessor.testCasePathElement);
         }

@@ -63,8 +63,10 @@ public class CDSHooksProcessor {
         return activityDefinitionPaths;
     }
 
-    public static void addActivityDefinitionFilesToBundle(String igPath, String bundleDestPath, String libraryName, List<String> activityDefinitionPaths, FhirContext fhirContext, Encoding encoding) {
-        String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, libraryName + "-" + IGBundleProcessor.bundleFilesPathElement);
+    public static void addActivityDefinitionFilesToBundle(String igPath, String bundleDestPath, List<String> activityDefinitionPaths,
+                                                          FhirContext fhirContext, Encoding encoding) {
+        String bundleDestFilesPath =
+                FilenameUtils.concat(bundleDestPath, FilenameUtils.getBaseName(bundleDestPath) + "-" + IGBundleProcessor.bundleFilesPathElement);
         for (String path : activityDefinitionPaths) {
             IOUtils.copyFile(path, FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(path)));
         }

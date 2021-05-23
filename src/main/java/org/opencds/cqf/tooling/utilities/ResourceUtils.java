@@ -586,6 +586,29 @@ public class ResourceUtils
             String parts[] = reference.split("/");
             return parts[parts.length - 1];
         }
+        else if (resource instanceof org.hl7.fhir.r5.model.PlanDefinition) {
+            org.hl7.fhir.r5.model.PlanDefinition planDefinition = (org.hl7.fhir.r5.model.PlanDefinition)resource;
+            if (!planDefinition.hasLibrary() || planDefinition.getLibrary().size() != 1) {
+                throw new IllegalArgumentException("PlanDefinition is expected to have one and only one library");
+            }
+            return planDefinition.getLibrary().get(0).getValue();
+        }
+        else if (resource instanceof org.hl7.fhir.r4.model.PlanDefinition) {
+            org.hl7.fhir.r4.model.PlanDefinition planDefinition = (org.hl7.fhir.r4.model.PlanDefinition)resource;
+            if (!planDefinition.hasLibrary() || planDefinition.getLibrary().size() != 1) {
+                throw new IllegalArgumentException("PlanDefinition is expected to have one and only one library");
+            }
+            return planDefinition.getLibrary().get(0).getValue();
+        }
+        else if (resource instanceof org.hl7.fhir.dstu3.model.PlanDefinition) {
+            org.hl7.fhir.dstu3.model.PlanDefinition planDefinition = (org.hl7.fhir.dstu3.model.PlanDefinition)resource;
+            if (!planDefinition.hasLibrary() || planDefinition.getLibrary().size() != 1) {
+                throw new IllegalArgumentException("PlanDefinition is expected to have one and only one library");
+            }
+            String reference = planDefinition.getLibrary().get(0).getReference();
+            String parts[] = reference.split("/");
+            return parts[parts.length - 1];
+        }
         else {
            throw new IllegalArgumentException("Unsupported fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
       }

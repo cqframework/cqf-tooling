@@ -746,6 +746,20 @@ public class IOUtils
         }
         return planDefinitionPaths;
     }
+    private static Map<String, String> planDefinitionPathMap = new LinkedHashMap<String, String>();
+    public static Map<String, String> getPlanDefinitionPathMap(FhirContext fhirContext) {
+        if (planDefinitionPathMap.isEmpty()) {
+            setupPlanDefinitionPaths(fhirContext);
+        }
+        return planDefinitionPathMap;
+    }
+    private static Map<String, IBaseResource> planDefinitions = new LinkedHashMap<String, IBaseResource>();
+    public static Map<String, IBaseResource> getPlanDefinitions(FhirContext fhirContext) {
+        if (planDefinitions.isEmpty()) {
+            setupPlanDefinitionPaths(fhirContext);
+        }
+        return planDefinitions;
+    }
     private static void setupPlanDefinitionPaths(FhirContext fhirContext) {
         HashMap<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {
@@ -762,7 +776,11 @@ public class IOUtils
             resources.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)
                 .filter(entry ->  planDefinitionClassName.equals(entry.getValue().getClass().getName()))
-                .forEach(entry -> planDefinitionPaths.add(entry.getKey()));
+                .forEach(entry -> {
+                    planDefinitionPaths.add(entry.getKey());
+                    planDefinitions.put(entry.getValue().getIdElement().getIdPart(), entry.getValue());
+                    planDefinitionPathMap.put(entry.getValue().getIdElement().getIdPart(), entry.getKey());
+                });
         }
     }
 
