@@ -1,4 +1,4 @@
-package org.opencds.cqf.testcase.generator;
+package org.opencds.cqf.tooling.terminology.opioidValuesetGenerator.testcase.generator;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -11,10 +11,10 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.GuidanceResponse;
 import org.hl7.fhir.r4.model.Reference;
-import org.opencds.cqf.Operation;
-import org.opencds.cqf.terminology.SpreadsheetHelper;
-import org.opencds.cqf.testcase.TestCase;
-import org.opencds.cqf.testcase.DataElement;
+import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
+import org.opencds.cqf.tooling.terminology.opioidValuesetGenerator.testcase.TestCase;
+import org.opencds.cqf.tooling.terminology.opioidValuesetGenerator.testcase.DataElement;
 
 import java.io.FileOutputStream;
 import java.io.IOException;

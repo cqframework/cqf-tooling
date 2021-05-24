@@ -1,8 +1,7 @@
-package org.opencds.cqf.testcase;
+package org.opencds.cqf.tooling.terminology.opioidValuesetGenerator.testcase;
 
 
 import org.hl7.fhir.DataElement;
-import org.hl7.fhir.Parameters;
 
 public class TestCaseOld {
 

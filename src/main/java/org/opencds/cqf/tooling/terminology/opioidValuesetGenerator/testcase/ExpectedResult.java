@@ -1,4 +1,4 @@
-package org.opencds.cqf.testcase;
+package org.opencds.cqf.tooling.terminology.opioidValuesetGenerator.testcase;
 
 public class ExpectedResult {
     private String action;
