@@ -28,7 +28,6 @@ public class RefreshIGArgumentProcessor {
     public static final String[] INCLUDE_TERMINOLOGY_OPTIONS = {"t", "include-terminology"};
     public static final String[] INCLUDE_PATIENT_SCENARIOS_OPTIONS = {"p", "include-patients"};
     public static final String[] VERSIONED_OPTIONS = {"v", "versioned"};
-    public static final String[] CDS_HOOKS_OPTIONS = {"cdsig", "cds-hooks-ig"};
     public static final String[] FHIR_URI_OPTIONS = {"fs", "fhir-uri"};
     public static final String[] MEASURE_TO_REFRESH_PATH = {"mtrp", "measure-to-refresh-path"};
     public static final String[] RESOURCE_PATH_OPTIONS = {"rp", "resourcepath"};
@@ -61,7 +60,6 @@ public class RefreshIGArgumentProcessor {
         parser.acceptsAll(asList(INCLUDE_TERMINOLOGY_OPTIONS),"If omitted terminology will not be packaged.");
         parser.acceptsAll(asList(INCLUDE_PATIENT_SCENARIOS_OPTIONS),"If omitted patient scenario information will not be packaged.");
         parser.acceptsAll(asList(VERSIONED_OPTIONS),"If omitted resources must be uniquely named.");
-        parser.acceptsAll(asList(CDS_HOOKS_OPTIONS),"If omitted defaulted to non cds-hooks ig.");
 
         OptionSpec<Void> help = parser.acceptsAll(asList(ArgUtils.HELP_OPTIONS), "Show this help page").forHelp();
 
@@ -91,7 +89,6 @@ public class RefreshIGArgumentProcessor {
         Boolean includeTerminology = options.has(INCLUDE_TERMINOLOGY_OPTIONS[0]);
         Boolean includePatientScenarios = options.has(INCLUDE_PATIENT_SCENARIOS_OPTIONS[0]);
         Boolean versioned = options.has(VERSIONED_OPTIONS[0]);
-        Boolean cdsHooksIg = options.has(CDS_HOOKS_OPTIONS[0]);
         String fhirUri = (String)options.valueOf(FHIR_URI_OPTIONS[0]);
         String measureToRefreshPath = (String)options.valueOf(MEASURE_TO_REFRESH_PATH[0]);
 
@@ -110,7 +107,6 @@ public class RefreshIGArgumentProcessor {
         ip.includeTerminology = includeTerminology;
         ip.includePatientScenarios = includePatientScenarios;
         ip.versioned = versioned;
-        ip.cdsHooksIg = cdsHooksIg;
         ip.resourceDirs = paths;
         ip.fhirUri = fhirUri;
         ip.measureToRefreshPath = measureToRefreshPath;
