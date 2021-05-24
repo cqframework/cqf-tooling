@@ -1,0 +1,204 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - ExecuteMeasureTestOperation",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.tooling.operation.ExecuteMeasureTestOperation",
+            "projectName": "tooling"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Attach)",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5051
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - RefreshIG",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.igtools.RefreshIG",
+            "projectName": "tooling"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch) - Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "CqlToR4LibraryOperation",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.tooling.Main",
+            "projectName": "tooling",
+            "args": [
+                "-CqlToR4Library",
+                "-ptcql=../connectathon/fhir401/input/pagecontent/cql",
+                "-op=../connectathon/fhir401/resources/library"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "CqlToSTU3LibraryOperation",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.tooling.Main",
+            "projectName": "tooling",
+            "args": [
+                "-CqlToSTU3Library",
+                "-ptcql=../connectathon/fhir3/cql/EXM104_FHIR3-8.1.000.cql",
+                "-op=../connectathon/fhir3/resources/library/test"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "APHL eICR FHIR4",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.tooling.Main",
+            "projectName": "tooling",
+            "args": [
+                "-RefreshIG",
+                "-ip=../aphl-ig",
+                "-rp=../aphl-ig/input/resources",
+                "-rp=../input/pagecontent/cql",
+                "-rp=../aphl-ig/input/vocabulary",
+                "-fs=http://localhost:8080/cqf-ruler-r4/fhir",
+                "-e=json",
+                "-v",
+                "-t",
+                "-d",
+                "-p",
+                "-ini=../aphl-ig/ig.ini",
+                "-cdsig"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "VSAC Spreadsheet Directory To ValueSet Resources",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.tooling.Main",
+            "projectName": "tooling",
+            "args": [
+                "-VsacXlsxToValueSetBatch",
+                "-ptsd=../aphl-ig/input/vocabulary/valueset/spreadsheets",
+                "-vssrc=vsac",
+                "-op=../aphl-ig/input/vocabulary/valueset/spreadsheets"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Refresh Library Operation",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.tooling.Main",
+            "projectName": "tooling",
+            "args": [
+                "-RefreshLibrary",
+                "-cql=../connectathon/fhir401/input/pagecontent/cql/EXM124-9.0.000.cql",
+                "-lp=../connectathon/fhir401/input/resources/library/library-EXM124-9.0.000.json",
+                "-e=json",
+                "-fv=fhir4",
+                "-v"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Opioid CDS FHIR3",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.tooling.Main",
+            "projectName": "tooling",
+            "args": [
+                "-RefreshIG",
+                "-ip=../opioid-cds",
+                "-rp=../opioid-cds/input/resources",
+                "-rp=../opioid-cds/input/pagecontent/cql",
+                "-rp=../opioid-cds/input/vocabulary",
+                "-fs=http://localhost:8080/cqf-ruler-dstu3/fhir",
+                "-iv=fhir3",
+                "-e=xml",
+                "-t",
+                "-d",
+                "-v",
+                "-p"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Connectathon FHIR3",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.tooling.Main",
+            "projectName": "tooling",
+            "args": [
+                "-RefreshIG",
+                "-root-dir=/home/jp/repos/connectathon/fhir3",
+                "-ig-path=input/connectathon.xml",
+                "-rp=input/resources",
+                "-t",
+                "-d",
+                "-p",
+                "-v"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Connectathon FHIR4",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.tooling.Main",
+            "projectName": "tooling",
+            "args": [
+                "-RefreshIG",
+                "-ip=../connectathon/fhir4/",
+                "-iv=fhir4",
+                "-t",
+                "-d",
+                "-v",
+                "-p"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Connectathon FHIR401",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.tooling.Main",
+            "projectName": "tooling",
+            "args": [
+                "-RefreshIG",
+                "-ini=../connectathon/fhir401/ig.ini",
+                "-t",
+                "-d",
+                "-v",
+                "-p"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Single VSAC ValueSet Spreadsheet Resource Generation",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.tooling.Main",
+            "projectName": "tooling",
+            "args": [
+                "-VsacXlsxToValueSet",
+                "-pts=../valueset-spreadsheet/2.16.840.1.113762.1.4.1108.15.xlsx",
+                "-op=../valueset-spreadsheet"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "PostBundles to Fhir Uri",
+            "request": "launch",
+            "mainClass": "jreyno77.com.github.Main",
+            "projectName": "tooling",
+            "args": [
+                "-PostBundlesInDir",
+                "-dp=../hedis-ig-r4/bundles/MRP-FHIR/MRP-FHIR-files",
+                "-fs=http://localhost:8080/cqf-ruler-r4/fhir",
+                "-fv=fhir4",
+                "-e=json"
+            ]
+        }
+    ]
+}
