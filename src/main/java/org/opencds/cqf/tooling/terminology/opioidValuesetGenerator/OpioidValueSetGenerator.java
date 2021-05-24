@@ -1,14 +1,13 @@
-package org.opencds.cqf.terminology.r4;
+package org.opencds.cqf.tooling.terminology.opioidValuesetGenerator;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.*;
-import org.hl7.elm.r1.Null;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.opencds.cqf.Operation;
-import org.opencds.cqf.terminology.SpreadsheetHelper;
+import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
+import org.opencds.cqf.tooling.terminology.distributable.OrganizationalMetaData;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -59,9 +58,9 @@ public class OpioidValueSetGenerator extends Operation {
 
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
 
-        OrganizationalMeta organizationalMeta = resolveOrganizationalMeta(workbook.getSheetAt(0));
+        OrganizationalMetaData organizationalMetaData = resolveOrganizationalMeta(workbook.getSheetAt(0));
         Map<String, Integer> vsMap = resolveVsMap(workbook, workbook.getSheetAt(0));
-        List<ValueSet> valueSets = resolveValueSets(organizationalMeta, vsMap, workbook);
+        List<ValueSet> valueSets = resolveValueSets(organizationalMetaData, vsMap, workbook);
         output(valueSets);
     }
 
@@ -78,51 +77,51 @@ public class OpioidValueSetGenerator extends Operation {
      * @param sheet
      * @return OrganizationalMeta object with properties parsed from given sheet.
      */
-    private OrganizationalMeta resolveOrganizationalMeta(Sheet sheet) {
-        OrganizationalMeta organizationalMeta = new OrganizationalMeta();
+    private OrganizationalMetaData resolveOrganizationalMeta(Sheet sheet) {
+        OrganizationalMetaData organizationalMetaData = new OrganizationalMetaData();
         Iterator<Row> rowIterator = sheet.rowIterator();
 
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
             switch (row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue()) {
                 case "Canonical URL":
-                    organizationalMeta.setCanonicalUrlBase(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    organizationalMetaData.setCanonicalUrlBase(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
                 case "Copyright":
-                    organizationalMeta.setCopyright(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    organizationalMetaData.setCopyright(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
                 case "Jurisdiction":
-                    organizationalMeta.setJurisdiction(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    organizationalMetaData.setJurisdiction(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
                 case "Publisher":
-                    organizationalMeta.setPublisher(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    organizationalMetaData.setPublisher(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
                 case "approvalDate":
-                    organizationalMeta.setApprovalDate(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    organizationalMetaData.setApprovalDate(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
                 case "effectiveDate":
-                    organizationalMeta.setEffectiveDate(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    organizationalMetaData.setEffectiveDate(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
                 case "lastReviewDate":
-                    organizationalMeta.setLastReviewDate(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    organizationalMetaData.setLastReviewDate(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
                 case "author.name":
-                    organizationalMeta.setAuthorName(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    organizationalMetaData.setAuthorName(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
                 case "author.telecom.system":
-                    organizationalMeta.setAuthorTelecomSystem(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    organizationalMetaData.setAuthorTelecomSystem(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
                 case "author.telecom.value":
-                    organizationalMeta.setAuthorTelecomValue(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    organizationalMetaData.setAuthorTelecomValue(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
                 case "SNOMED CT":
-                    organizationalMeta.setSnomedVersion(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    organizationalMetaData.setSnomedVersion(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
                 default:
                     break;
             }
         }
-        return organizationalMeta;
+        return organizationalMetaData;
     }
 
     /**
@@ -136,8 +135,8 @@ public class OpioidValueSetGenerator extends Operation {
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
 
-            int cellType = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getCellType();
-            String cellString = cellType == 1
+            CellType cellType = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getCellType();
+            String cellString = cellType.compareTo(CellType.STRING) == 1
                     ? row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue()
                     : String.valueOf(row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getNumericCellValue());
 
@@ -242,7 +241,7 @@ public class OpioidValueSetGenerator extends Operation {
      * @param workbook
      * @return List of ValueSets
      */
-    private List<ValueSet> resolveValueSets(OrganizationalMeta meta, Map<String, Integer> vsMap, Workbook workbook) {
+    private List<ValueSet> resolveValueSets(OrganizationalMetaData meta, Map<String, Integer> vsMap, Workbook workbook) {
         List<ValueSet> valueSets = new ArrayList<>();
         CPGMeta cpgMeta;
         ValueSet vs;

@@ -1,15 +1,11 @@
-package org.opencds.cqf.terminology.r4;
+package org.opencds.cqf.tooling.terminology.opioidValuesetGenerator;
 
 import ca.uhn.fhir.context.FhirContext;
-import lombok.Getter;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.*;
 
 import java.time.Instant;
 import java.util.Date;
 
-@Getter
-@Setter
 public class CPGMeta {
     private String id;
     private String version;
@@ -72,7 +68,7 @@ public class CPGMeta {
                                     new Expression()
                                             .setDescription(expressionDescription)
                                             .setName(expressionName)
-                                            .setLanguage(Expression.ExpressionLanguage.fromCode(expressionLanguage))
+                                            .setLanguage(expressionLanguage)
                                             .setExpression(expressionExpression)
                                             .setReference(expressionReference)
                             )
@@ -107,5 +103,181 @@ public class CPGMeta {
         }
 
         return vs;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getExperimental() {
+        return experimental;
+    }
+
+    public void setExperimental(String experimental) {
+        this.experimental = experimental;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getPurpose() {
+        return purpose;
+    }
+
+    public void setPurpose(String purpose) {
+        this.purpose = purpose;
+    }
+
+    public String getCompose() {
+        return compose;
+    }
+
+    public void setCompose(String compose) {
+        this.compose = compose;
+    }
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
+    }
+
+    public String getRulesText() {
+        return rulesText;
+    }
+
+    public void setRulesText(String rulesText) {
+        this.rulesText = rulesText;
+    }
+
+    public String getExpressionDescription() {
+        return expressionDescription;
+    }
+
+    public void setExpressionDescription(String expressionDescription) {
+        this.expressionDescription = expressionDescription;
+    }
+
+    public String getExpressionName() {
+        return expressionName;
+    }
+
+    public void setExpressionName(String expressionName) {
+        this.expressionName = expressionName;
+    }
+
+    public String getExpressionLanguage() {
+        return expressionLanguage;
+    }
+
+    public void setExpressionLanguage(String expressionLanguage) {
+        this.expressionLanguage = expressionLanguage;
+    }
+
+    public String getExpressionExpression() {
+        return expressionExpression;
+    }
+
+    public void setExpressionExpression(String expressionExpression) {
+        this.expressionExpression = expressionExpression;
+    }
+
+    public String getExpressionReference() {
+        return expressionReference;
+    }
+
+    public void setExpressionReference(String expressionReference) {
+        this.expressionReference = expressionReference;
+    }
+
+    public String getWarning() {
+        return warning;
+    }
+
+    public void setWarning(String warning) {
+        this.warning = warning;
+    }
+
+    public String getPurposeClinicalFocus() {
+        return purposeClinicalFocus;
+    }
+
+    public void setPurposeClinicalFocus(String purposeClinicalFocus) {
+        this.purposeClinicalFocus = purposeClinicalFocus;
+    }
+
+    public String getPurposeDataElementScope() {
+        return purposeDataElementScope;
+    }
+
+    public void setPurposeDataElementScope(String purposeDataElementScope) {
+        this.purposeDataElementScope = purposeDataElementScope;
+    }
+
+    public String getPurposeInclusionCriteria() {
+        return purposeInclusionCriteria;
+    }
+
+    public void setPurposeInclusionCriteria(String purposeInclusionCriteria) {
+        this.purposeInclusionCriteria = purposeInclusionCriteria;
+    }
+
+    public String getPurposeExclusionCriteria() {
+        return purposeExclusionCriteria;
+    }
+
+    public void setPurposeExclusionCriteria(String purposeExclusionCriteria) {
+        this.purposeExclusionCriteria = purposeExclusionCriteria;
     }
 }
