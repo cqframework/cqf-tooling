@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.utilities.Utilities;
-import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.MeasureProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.utilities.IGUtils;
@@ -56,7 +55,7 @@ public class IGProcessor extends BaseProcessor {
         //ScaffoldProcessor.scaffold(ScaffoldParameters);
 
         //Use case 2 while developing in Atom refresh content and run tests for either entire IG or targeted Artifact
-        //refreshcontent
+        //refreshContent
         LogUtils.info("IGProcessor.publishIG - refreshIG");
         refreshIG(params);
         //validate

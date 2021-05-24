@@ -18,7 +18,6 @@ import org.opencds.cqf.tooling.processor.*;
 import org.opencds.cqf.tooling.utilities.*;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,7 +31,6 @@ public class MeasureProcessor extends BaseProcessor {
     public static List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, String measureToRefreshPath) {
 
         System.out.println("Refreshing measures...");
-        ArrayList<String> refreshedMeasureNames = new ArrayList<String>();
 
         MeasureProcessor measureProcessor;
         switch (fhirContext.getVersion().getVersion()) {

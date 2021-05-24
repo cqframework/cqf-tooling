@@ -3,8 +3,6 @@ package org.opencds.cqf.tooling.visitor;
 import org.cqframework.cql.elm.visiting.ElmBaseLibraryVisitor;
 import org.hl7.elm.r1.*;
 
-import javax.xml.namespace.QName;
-
 public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequirement, ElmRequirementsContext>{
 
     public ElmRequirementsVisitor() {
@@ -105,7 +103,7 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
     @Override
     public ElmRequirement visitRetrieve(Retrieve elm, ElmRequirementsContext context) {
         // TODO: childResult reporting?
-        ElmRequirement childResult = super.visitRetrieve(elm, context);
+        super.visitRetrieve(elm, context);
         ElmDataRequirement result = new ElmDataRequirement(context.getCurrentLibraryIdentifier(), elm);
         // If not in a query context, report the data requirement
         // If in a query context, the requirement will be reported as an inferred requirement at the query boundary
@@ -324,7 +322,7 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
             case "ProperIncludes":
             case "ProperIncludedIn":
             default: {
-                ElmRequirement childResult = super.visitChildren(elm, context);
+                super.visitChildren(elm, context);
                 return new ElmExpressionRequirement(context.getCurrentLibraryIdentifier(), elm);
             }
         }
@@ -337,13 +335,13 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
 
     @Override
     public ElmRequirement visitTernaryExpression(TernaryExpression elm, ElmRequirementsContext context) {
-        ElmRequirement childResult = super.visitTernaryExpression(elm, context);
+        super.visitTernaryExpression(elm, context);
         return new ElmExpressionRequirement(context.getCurrentLibraryIdentifier(), elm);
     }
 
     @Override
     public ElmRequirement visitNaryExpression(NaryExpression elm, ElmRequirementsContext context) {
-        ElmRequirement childResult = super.visitNaryExpression(elm, context);
+        super.visitNaryExpression(elm, context);
         return new ElmExpressionRequirement(context.getCurrentLibraryIdentifier(), elm);
     }
 
@@ -659,7 +657,7 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
 
     @Override
     public ElmRequirement visitSplit(Split elm, ElmRequirementsContext context) {
-        // If the separtor is a literal, infer based only on the string to split argument
+        // If the separator is a literal, infer based only on the string to split argument
         if (elm.getSeparator() instanceof Literal) {
             return visitElement(elm.getStringToSplit(), context);
         }

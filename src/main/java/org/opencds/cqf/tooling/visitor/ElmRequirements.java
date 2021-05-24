@@ -1,14 +1,21 @@
 package org.opencds.cqf.tooling.visitor;
 
-import org.hl7.elm.r1.*;
-
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
+import org.hl7.elm.r1.CodeDef;
+import org.hl7.elm.r1.CodeSystemDef;
+import org.hl7.elm.r1.ConceptDef;
+import org.hl7.elm.r1.Element;
+import org.hl7.elm.r1.ExpressionDef;
+import org.hl7.elm.r1.FunctionDef;
+import org.hl7.elm.r1.IncludeDef;
+import org.hl7.elm.r1.ParameterDef;
+import org.hl7.elm.r1.Retrieve;
+import org.hl7.elm.r1.UsingDef;
+import org.hl7.elm.r1.ValueSetDef;
+import org.hl7.elm.r1.VersionedIdentifier;
 
 public class ElmRequirements extends ElmRequirement {
 

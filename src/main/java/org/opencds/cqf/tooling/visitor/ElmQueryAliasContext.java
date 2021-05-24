@@ -1,7 +1,6 @@
 package org.opencds.cqf.tooling.visitor;
 
 import org.hl7.elm.r1.AliasedQuerySource;
-import org.hl7.elm.r1.Property;
 import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.VersionedIdentifier;
 
