@@ -45,6 +45,7 @@ import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
 import org.opencds.cqf.tooling.npm.ILibraryReader;
 import org.opencds.cqf.tooling.npm.NpmLibrarySourceProvider;
 import org.opencds.cqf.tooling.npm.NpmModelInfoProvider;
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 public class CqlProcessor {
 
@@ -252,32 +253,10 @@ public class CqlProcessor {
         return cachedLibraryManager;
     }
 
-    /**
-     * Reads configuration file named cql-options.json from the given folder if present. Otherwise returns default options.
-     * @param folder
-     * @return
-     */
-    private CqlTranslatorOptions getTranslatorOptions(String folder) {
-        String optionsFileName = folder + File.separator + "cql-options.json";
-        CqlTranslatorOptions options = null;
-        File file = new File(optionsFileName);
-        if (file.exists()) {
-            options = CqlTranslatorOptionsMapper.fromFile(file.getAbsolutePath());
-        }
-        else {
-            options = CqlTranslatorOptions.defaultOptions();
-            if (!options.getFormats().contains(CqlTranslator.Format.XML)) {
-                options.getFormats().add(CqlTranslator.Format.XML);
-            }
-        }
-
-        return options;
-    }
-
     private void translateFolder(String folder) {
         logger.logMessage(String.format("Translating CQL source in folder %s", folder));
 
-        CqlTranslatorOptions options = getTranslatorOptions(folder);
+        CqlTranslatorOptions options = ResourceUtils.getTranslatorOptions(folder);
 
         // Setup
         // Construct DefaultLibrarySourceProvider
