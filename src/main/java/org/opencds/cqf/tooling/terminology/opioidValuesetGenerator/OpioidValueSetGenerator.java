@@ -136,7 +136,7 @@ public class OpioidValueSetGenerator extends Operation {
             Row row = rowIterator.next();
 
             CellType cellType = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getCellType();
-            String cellString = cellType.compareTo(CellType.STRING) == 1
+            String cellString = cellType.compareTo(CellType.STRING) == 0
                     ? row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue()
                     : String.valueOf(row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getNumericCellValue());
 
