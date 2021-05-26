@@ -24,6 +24,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
         super(rootDir);
     }
 
+    @SuppressWarnings("serial")
     protected <T extends DomainResource> void validateResourceForSoftwareSystemExtension(T resource) {
         if (resource == null) {
             throw new IllegalArgumentException("No resource provided.");
