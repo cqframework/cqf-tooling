@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.utilities.Utilities;
+import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.MeasureProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.utilities.IGUtils;
@@ -108,6 +109,8 @@ public class IGProcessor extends BaseProcessor {
         FhirContext fhirContext = IGProcessor.getIgFhirContext(fhirVersion);
 
         IGProcessor.ensure(rootDir, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
+
+        LibraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
 
         List<String> refreshedMeasureNames;
         refreshedMeasureNames = MeasureProcessor.refreshIgMeasureContent(this, encoding, versioned, fhirContext, measureToRefreshPath);
