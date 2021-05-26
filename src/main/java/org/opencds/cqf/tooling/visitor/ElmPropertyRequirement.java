@@ -1,7 +1,6 @@
 package org.opencds.cqf.tooling.visitor;
 
 import org.hl7.elm.r1.Element;
-import org.hl7.elm.r1.Expression;
 import org.hl7.elm.r1.Property;
 import org.hl7.elm.r1.VersionedIdentifier;
 

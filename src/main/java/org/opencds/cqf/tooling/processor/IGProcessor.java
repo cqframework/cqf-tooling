@@ -56,7 +56,7 @@ public class IGProcessor extends BaseProcessor {
         //ScaffoldProcessor.scaffold(ScaffoldParameters);
 
         //Use case 2 while developing in Atom refresh content and run tests for either entire IG or targeted Artifact
-        //refreshcontent
+        //refreshContent
         LogUtils.info("IGProcessor.publishIG - refreshIG");
         refreshIG(params);
         //validate
@@ -109,6 +109,8 @@ public class IGProcessor extends BaseProcessor {
         FhirContext fhirContext = IGProcessor.getIgFhirContext(fhirVersion);
 
         IGProcessor.ensure(rootDir, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
+
+        LibraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
 
         List<String> refreshedMeasureNames;
         refreshedMeasureNames = MeasureProcessor.refreshIgMeasureContent(this, encoding, versioned, fhirContext, measureToRefreshPath);

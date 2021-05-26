@@ -1,6 +1,5 @@
 package org.opencds.cqf.tooling.measure.r4;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.r4.formats.FormatUtilities;
 import org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper;
@@ -9,7 +8,6 @@ import org.opencds.cqf.tooling.parameter.RefreshMeasureParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 public class R4MeasureProcessor extends MeasureProcessor {
