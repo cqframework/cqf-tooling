@@ -1,17 +1,7 @@
 package org.opencds.cqf.tooling.utilities;
 
-import ca.uhn.fhir.context.FhirContext;
-import org.cqframework.cql.cql2elm.*;
-import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
-import org.fhir.ucum.UcumEssenceService;
-import org.fhir.ucum.UcumException;
-import org.fhir.ucum.UcumService;
-import org.hl7.elm.r1.*;
-import ca.uhn.fhir.parser.IParser;
-import org.hl7.elm.r1.Library;
-import org.hl7.fhir.r5.model.*;
-import org.junit.Test;
-import org.opencds.cqf.tooling.processor.DataRequirementsProcessor;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,8 +10,43 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
+import org.cqframework.cql.cql2elm.FhirLibrarySourceProvider;
+import org.cqframework.cql.cql2elm.LibraryManager;
+import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.cql2elm.NamespaceInfo;
+import org.cqframework.cql.cql2elm.NamespaceManager;
+import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
+import org.fhir.ucum.UcumEssenceService;
+import org.fhir.ucum.UcumException;
+import org.fhir.ucum.UcumService;
+import org.hl7.elm.r1.AliasedQuerySource;
+import org.hl7.elm.r1.CodeFilterElement;
+import org.hl7.elm.r1.DateFilterElement;
+import org.hl7.elm.r1.Exists;
+import org.hl7.elm.r1.ExpressionDef;
+import org.hl7.elm.r1.IncludeElement;
+import org.hl7.elm.r1.LetClause;
+import org.hl7.elm.r1.Literal;
+import org.hl7.elm.r1.ParameterRef;
+import org.hl7.elm.r1.Query;
+import org.hl7.elm.r1.Retrieve;
+import org.hl7.elm.r1.SingletonFrom;
+import org.hl7.elm.r1.ValueSetRef;
+import org.hl7.elm.r1.With;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.DataRequirement;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.Extension;
+import org.hl7.fhir.r5.model.ParameterDefinition;
+import org.hl7.fhir.r5.model.RelatedArtifact;
+import org.junit.Test;
+import org.opencds.cqf.tooling.processor.DataRequirementsProcessor;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 
 public class DataRequirementsProcessorTest {
     private static ModelManager modelManager;
@@ -56,7 +81,7 @@ public class DataRequirementsProcessorTest {
                 PreventiveCareandWellness-v0-0-001-FHIR-4-0-1.xml
              */
             CqlTranslator translator = createTranslator("CompositeMeasures/cql/EXM124-9.0.000.cql", cqlTranslatorOptions);//"OpioidCDS/cql/OpioidCDSCommon.cql", cqlTranslatorOptions);
-            Library elmLibrary = translator.toELM();
+            translator.toELM();
             assertTrue(translator.getErrors().isEmpty());
             cacheLibrary(translator.getTranslatedLibrary());
 
@@ -89,7 +114,7 @@ public class DataRequirementsProcessorTest {
             // TODO - add expressions to expressions
             expressions.add("Conditions Indicating End of Life or With Limited Life Expectancy");//Active Ambulatory Opioid Rx");
             CqlTranslator translator = createTranslator("OpioidCDS/cql/OpioidCDSCommon.cql", cqlTranslatorOptions);
-            Library elmLibrary = translator.toELM();
+            translator.toELM();
             assertTrue(translator.getErrors().isEmpty());
             cacheLibrary(translator.getTranslatedLibrary());
             DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
@@ -157,7 +182,7 @@ public class DataRequirementsProcessorTest {
         try {
 //            CqlTranslator translator = createTranslator("/ecqm/resources/library-EXM506-2.2.000.json", cqlTranslatorOptions);
             CqlTranslator translator = createTranslator("CompositeMeasures/cql/BCSComponent.cql", cqlTranslatorOptions);
-            Library elmLibrary = translator.toELM();
+            translator.toELM();
             assertTrue(translator.getErrors().isEmpty());
             cacheLibrary(translator.getTranslatedLibrary());
             DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
@@ -225,7 +250,7 @@ public class DataRequirementsProcessorTest {
 
     private CqlTranslator setupDataRequirementsAnalysis(String fileName, CqlTranslatorOptions cqlTranslatorOptions) throws IOException {
         CqlTranslator translator = createTranslator(fileName, cqlTranslatorOptions);
-        Library elmLibrary = translator.toELM();
+        translator.toELM();
         assertTrue(translator.getErrors().isEmpty());
         cacheLibrary(translator.getTranslatedLibrary());
         return translator;
@@ -879,13 +904,9 @@ public class DataRequirementsProcessorTest {
 
     public static CqlTranslator createTranslator(NamespaceInfo namespaceInfo, String testFileName, CqlTranslatorOptions options) throws IOException {
         File translationTestFile = new File(DataRequirementsProcessorTest.class.getResource(testFileName).getFile());
-        if(null != translationTestFile) {
-            reset();
-            setup(translationTestFile.getParent());
-            CqlTranslator translator = CqlTranslator.fromFile(namespaceInfo, translationTestFile, getModelManager(), getLibraryManager(), getUcumService(), options);
-            return translator;
-
-        }
-        return null;
+        reset();
+        setup(translationTestFile.getParent());
+        CqlTranslator translator = CqlTranslator.fromFile(namespaceInfo, translationTestFile, getModelManager(), getLibraryManager(), getUcumService(), options);
+        return translator;
     }
 }
