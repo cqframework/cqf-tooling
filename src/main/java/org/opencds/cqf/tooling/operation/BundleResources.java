@@ -163,6 +163,8 @@ public class BundleResources extends Operation {
                     throw new RuntimeException(e.getMessage());
                 }
                 catch (Exception e) {
+                    String message = String.format("'%s' will not be included in the bundle because the following error occurred: '%s'", resource.getName(), e.getMessage());
+                    System.out.println(message);
                     continue;
                 }
             }
@@ -174,6 +176,8 @@ public class BundleResources extends Operation {
                     throw new RuntimeException(e.getMessage());
                 }
                 catch (Exception e) {
+                    String message = String.format("'%s' will not be included in the bundle because the following error occurred: '%s'", resource.getName(), e.getMessage());
+                    System.out.println(message);
                     continue;
                 }
             }
