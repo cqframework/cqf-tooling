@@ -9,7 +9,7 @@ import org.opencds.cqf.tooling.cql_generation.drool.visitor.DroolToElmVisitor.CQ
 
 public class DroolCqlGeneratorTest {
 
-    @Test
+    // @Test
     public void   test_worked() {
         String dataInputPath = "../CQLGenerationDocs/NonGeneratedDocs/default.json";
         String outputPath = "../CQLGenerationDocs/GeneratedDocs/elm";

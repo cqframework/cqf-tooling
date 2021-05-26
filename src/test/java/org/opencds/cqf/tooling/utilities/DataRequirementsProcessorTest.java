@@ -10,6 +10,8 @@ import org.fhir.ucum.UcumService;
 import ca.uhn.fhir.parser.IParser;
 import org.testng.annotations.Test;
 import org.opencds.cqf.tooling.processor.DataRequirementsProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +22,8 @@ import java.util.Set;
 import static org.testng.Assert.assertTrue;
 
 public class DataRequirementsProcessorTest {
+    private static Logger logger = LoggerFactory.getLogger(DataRequirementsProcessorTest.class);
+
     private static ModelManager modelManager;
     private static LibraryManager libraryManager;
     private static UcumService ucumService;
@@ -62,7 +66,7 @@ public class DataRequirementsProcessorTest {
             FhirContext context =  FhirContext.forR5();
             IParser parser = context.newJsonParser();
             String moduleDefString = parser.setPrettyPrint(true).encodeResourceToString(moduleDefinitionLibrary);
-            System.out.println(moduleDefString);
+            logger.debug(moduleDefString);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -93,7 +97,7 @@ public class DataRequirementsProcessorTest {
             FhirContext context =  FhirContext.forR5();
             IParser parser = context.newJsonParser();
             String moduleDefString = parser.setPrettyPrint(true).encodeResourceToString(moduleDefinitionLibrary);
-            System.out.println(moduleDefString);
+            logger.debug(moduleDefString);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -115,7 +119,7 @@ public class DataRequirementsProcessorTest {
             FhirContext context =  FhirContext.forR5();
             IParser parser = context.newJsonParser();
             String moduleDefString = parser.setPrettyPrint(true).encodeResourceToString(moduleDefinitionLibrary);
-            System.out.println(moduleDefString);
+            logger.debug(moduleDefString);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }

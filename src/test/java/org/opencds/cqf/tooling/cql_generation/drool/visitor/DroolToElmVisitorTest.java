@@ -35,7 +35,7 @@ import org.opencds.cqf.cql.engine.execution.Context;
 import ca.uhn.fhir.context.FhirContext;
 
 public class DroolToElmVisitorTest {
-    @Test
+    // @Test
     public void EvaluatePatienthasadiagnosisof() {
         setup("[]_Thrombocytopenia_UPDATED_TEMPLATE_5477e.xml");
         List<String> expressions = readFileInList("../CQLGenerationDocs/GeneratedDocs/elm/expressions/[]_Thrombocytopenia__Expression.txt");
@@ -70,7 +70,7 @@ public class DroolToElmVisitorTest {
         // results.forEach(object -> Assert.assertTrue(((List<?>) object).size() == 2));
     }
 
-    @Test
+    // @Test
     public void test_ModelingK() {
         String xmlFileName = "GeneratedCql14_922c0.xml";
         String expressionListFilePath =
@@ -81,7 +81,7 @@ public class DroolToElmVisitorTest {
         // results.forEach(object -> Assert.assertTrue(((List<?>) object).size() == 2));
     }
 
-    @Test
+    // @Test
     public void test_ModelingLAndD() {
         String xmlFileName = "_Medications_Administered_2764c.xml";
         String expressionListFilePath = "../CQLGenerationDocs/GeneratedDocs/elm/expressions/_Medications_Adminis_Expression.txt";
@@ -91,7 +91,7 @@ public class DroolToElmVisitorTest {
         // results.forEach(object -> Assert.assertTrue(((List<?>) object).size() == 2));
     }
 
-    @Test
+    // @Test
     public void test_ModelingN() {
         String xmlFileName = "Patient_is_deceased_84755.xml";
         String expressionListFilePath = "../CQLGenerationDocs/GeneratedDocs/elm/expressions/Patient_is_deceased__Expression.txt";
@@ -112,7 +112,7 @@ public class DroolToElmVisitorTest {
     //     // results.forEach(object -> Assert.assertTrue(((List<?>) object).size() == 2));
     // }
 
-    @Test
+    // @Test
     public void other() {
         String xmlFileName = "Abdominal_Cramps_314c4.xml";
         String expressionListFilePath = "../CQLGenerationDocs/GeneratedDocs/elm/expressions/Abdominal_Cramps_314_Expression.txt";
@@ -123,7 +123,7 @@ public class DroolToElmVisitorTest {
         // results.forEach(object -> Assert.assertTrue(((List<?>) object).size() == 2));
     }
 
-    @Test
+    // @Test
     public void otherOther() {
         String xmlFileName = "Anorexia_baace.xml";
         String expressionListFilePath = "../CQLGenerationDocs/GeneratedDocs/elm/expressions/Anorexia_baace_Expression.txt";

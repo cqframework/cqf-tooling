@@ -105,90 +105,42 @@
                 <groupId>org.opencds.cqf.cql</groupId>
                 <artifactId>engine.fhir</artifactId>
                 <version>${cql-engine.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                </exclusions>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>cql-formatter</artifactId>
                 <version>${cqframework.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>jaxb</groupId>
-                        <artifactId>jaxb-api</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>quick</artifactId>
                 <version>${cqframework.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>jaxb</groupId>
-                        <artifactId>jaxb-api</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>qdm</artifactId>
                 <version>${cqframework.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>jaxb</groupId>
-                        <artifactId>jaxb-api</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>model</artifactId>
                 <version>${cqframework.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>jaxb</groupId>
-                        <artifactId>jaxb-api</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>elm</artifactId>
                 <version>${cqframework.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>jaxb</groupId>
-                        <artifactId>jaxb-api</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>cql-to-elm</artifactId>
                 <version>${cqframework.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>jaxb</groupId>
-                        <artifactId>jaxb-api</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>cql</artifactId>
                 <version>${cqframework.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>jaxb</groupId>
-                        <artifactId>jaxb-api</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -221,16 +173,6 @@
             <groupId>org.cdsframework.rckms</groupId>
             <artifactId>mts-support-rckms</artifactId>
             <version>2.0.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-                 <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!-- WikiMedia to HTML conversion library (-QdmToQiCore) -->
@@ -308,12 +250,6 @@
             <version>${hapi.version}</version>
         </dependency>
 
-        <!-- <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-jpaserver-base</artifactId>
-            <version>${hapi.version}</version>
-        </dependency> -->
-
         <!-- StructureDef to ModelInfo -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -361,7 +297,7 @@
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
-            <version>3.0.1</version>
+            <version>2.9.1</version>
         </dependency>
 
         <dependency>
@@ -396,6 +332,20 @@
             <version>2.0.1.Final</version>
         </dependency>
 
+        <!--redirects apache commons-logging to slf4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>1.7.30</version>
+        </dependency>
+
+        <!-- uses log4j as slf4j implementation-->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.30</version>
+        </dependency>
+
 
         <!-- test dependencies -->
         <dependency>
@@ -414,13 +364,6 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>3.9.0</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.30</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -523,6 +466,10 @@
                     <version>3.1.1</version>
                     <configuration>
                         <source>8</source>
+                        <excludePackageNames>*.vmr</excludePackageNames>
+                        <sourceFileExcludes>
+                            <sourceFileExclude>**/generated-sources/**/*.java</sourceFileExclude>
+                        </sourceFileExcludes>
                     </configuration>
                     <executions>
                         <execution>

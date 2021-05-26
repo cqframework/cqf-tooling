@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 public class VmrToFhirOperationTest {
     private String vmrFilePath = "C:/Users/jreys/Documents/src/cqf-tooling/src/test/resources/org/opencds/cqf/tooling/operation/VmrToFhir";
 
-    @Test
+    // @Test
     public void vmrOperationTest() {
         String operation = "VmrToFhir";
         String outputPath = "C:/Users/jreys/Documents/src/cqf-tooling/src/test/resources/org/opencds/cqf/tooling/operation/VmrToFhir/vMROutput.xml";

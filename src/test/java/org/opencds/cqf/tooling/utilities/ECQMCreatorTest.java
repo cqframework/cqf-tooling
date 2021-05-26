@@ -10,6 +10,8 @@ import org.fhir.ucum.UcumService;
 import org.hl7.fhir.r5.model.Measure;
 import org.testng.annotations.Test;
 import org.opencds.cqf.tooling.measure.MeasureRefreshProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Paths;
@@ -20,6 +22,8 @@ public class ECQMCreatorTest {
     private static ModelManager modelManager;
     private static LibraryManager libraryManager;
     private static UcumService ucumService;
+
+    private static Logger logger = LoggerFactory.getLogger(ECQMCreatorTest.class);
 
     private String refreshMeasure(String primaryLibraryPath, String measurePath) throws IOException {
         CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
@@ -42,8 +46,7 @@ public class ECQMCreatorTest {
     public void TestBCSComponent() {
         try {
             String measureResourceContent = refreshMeasure("CompositeMeasures/cql/BCSComponent.cql", "CompositeMeasures/resources/BCSComponent-v0-0-001-FHIR-4-0-1.xml");
-            System.out.println(measureResourceContent);
-            System.out.println();
+            logger.debug(measureResourceContent);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -53,8 +56,7 @@ public class ECQMCreatorTest {
     public void TestCCSComponent() {
         try {
             String measureResourceContent = refreshMeasure("CompositeMeasures/cql/CCSComponent.cql", "CompositeMeasures/resources/CCSComponent-v0-0-001-FHIR-4-0-1.xml");
-            System.out.println(measureResourceContent);
-            System.out.println();
+            logger.debug(measureResourceContent);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -64,8 +66,7 @@ public class ECQMCreatorTest {
     public void TestHBPComponent() {
         try {
             String measureResourceContent = refreshMeasure("CompositeMeasures/cql/HBPComponent.cql", "CompositeMeasures/resources/HBPComponent-v0-0-001-FHIR-4-0-1.xml");
-            System.out.println(measureResourceContent);
-            System.out.println();
+            logger.debug(measureResourceContent);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -75,8 +76,7 @@ public class ECQMCreatorTest {
     public void TestPVSComponent() {
         try {
             String measureResourceContent = refreshMeasure("CompositeMeasures/cql/PVSComponent.cql", "CompositeMeasures/resources/PVSComponent-v0-0-001-FHIR-4-0-1.xml");
-            System.out.println(measureResourceContent);
-            System.out.println();
+            logger.debug(measureResourceContent);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -86,8 +86,7 @@ public class ECQMCreatorTest {
     public void TestTSCComponent() {
         try {
             String measureResourceContent = refreshMeasure("CompositeMeasures/cql/TSCComponent.cql", "CompositeMeasures/resources/TSCComponent-v0-0-001-FHIR-4-0-1.xml");
-            System.out.println(measureResourceContent);
-            System.out.println();
+            logger.debug(measureResourceContent);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -99,8 +98,7 @@ public class ECQMCreatorTest {
         // TODO - translate measure into ELM measure then call creator with that measure
         try {
             String measureResourceContent = refreshMeasure("CompositeMeasures/cql/EXM124-9.0.000.cql", "/ecqm/resources/measure-EXM124-9.0.000.json");
-            System.out.println(measureResourceContent);
-            System.out.println();
+            logger.debug(measureResourceContent);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -109,10 +107,6 @@ public class ECQMCreatorTest {
 
 
 /*
-        System.out.println(parser.setPrettyPrint(true).encodeResourceToString(measureToConvert));
-        System.out.println();
-
-
         Set<String> expressions = new HashSet<>();
         expressions.add("Conditions Indicating End of Life or With Limited Life Expectancy");
         expressions.add("Active Ambulatory Opioid Rx");
@@ -124,7 +118,6 @@ public class ECQMCreatorTest {
 
         Measure newMeasure = eCQMCreator.create_eCQMFromLibrary(modDefLibrary);
         String measureString = parser.setPrettyPrint(true).encodeResourceToString(newMeasure);
-        System.out.println(measureString);
 */
     }
 
@@ -148,8 +141,7 @@ public class ECQMCreatorTest {
             MeasureRefreshProcessor refreshProcessor = new MeasureRefreshProcessor();
             Measure returnMeasure = refreshProcessor.refreshMeasure(measureToConvert, libraryManager, translator.getTranslatedLibrary(), cqlTranslatorOptions);
             assertTrue(null != returnMeasure);
-            System.out.println(parser.setPrettyPrint(true).encodeResourceToString(returnMeasure));
-            System.out.println();
+            logger.debug(parser.setPrettyPrint(true).encodeResourceToString(returnMeasure));
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }

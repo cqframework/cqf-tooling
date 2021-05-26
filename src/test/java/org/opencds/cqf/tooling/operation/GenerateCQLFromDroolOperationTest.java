@@ -4,7 +4,7 @@ import org.testng.annotations.Test;
 import org.opencds.cqf.tooling.Operation;
 
 public class GenerateCQLFromDroolOperationTest {
-    @Test
+    // @Test
     public void test_worked() {
         String operation = "GenerateCQLFromDrool";
         String inputFilePath = "../CQLGenerationDocs/NonGeneratedDocs/default.json";
