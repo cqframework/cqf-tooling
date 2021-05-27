@@ -70,10 +70,10 @@ public class MeasureProcessor extends BaseProcessor {
                 Map<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
 
                 Boolean shouldPersist = ResourceUtils.safeAddResource(measureSourcePath, resources, fhirContext);
-                if (!resources.containsKey("Measure-" + measureEntry.getKey())) {
+                if (!resources.containsKey("Measure/" + measureEntry.getKey())) {
                     throw new IllegalArgumentException(String.format("Could not retrieve base resource for measure %s", measureName));
                 }
-                IBaseResource measure = resources.get("Measure-" + measureEntry.getKey());
+                IBaseResource measure = resources.get("Measure/" + measureEntry.getKey());
                 String primaryLibraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
                 IBaseResource primaryLibrary;
                 if (primaryLibraryUrl.startsWith("http")) {

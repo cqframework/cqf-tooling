@@ -430,7 +430,7 @@ public class ResourceUtils
 //              if(resources.containsKey(resource.getIdElement().getIdPart())){
 //                  IBaseResource storedResource = resources.get(resource.getIdElement().getIdPart());
 //              }
-              resources.putIfAbsent(resource.fhirType() + "-" + resource.getIdElement().getIdPart(), resource);
+              resources.putIfAbsent(resource.fhirType() + "/" + resource.getIdElement().getIdPart(), resource);
           } else {
             added = false;
             LogUtils.putException(path, new Exception("Unable to add Resource: " + path));
