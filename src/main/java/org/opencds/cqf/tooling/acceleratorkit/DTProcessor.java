@@ -1,6 +1,7 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -8,7 +9,9 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Instant;
@@ -555,6 +558,8 @@ public class DTProcessor extends Operation {
         cql.append("include FHIRHelpers version '4.0.1'");
         cql.append(newLine);
         cql.append(newLine);
+        cql.append("include ANCConfig called Config");
+        cql.append(newLine);
         cql.append("include ANCConcepts called Cx");
         cql.append(newLine);
         cql.append("include ANCDataElements called PatientData");
@@ -567,8 +572,16 @@ public class DTProcessor extends Operation {
 
     private void writeLibraries(String outputPath) {
         if (libraries != null && libraries.size() > 0) {
+            String outputFilePath = outputPath + File.separator + "input" + File.separator + "resources" + File.separator + "library";
+            try {
+                ensurePath(outputFilePath);
+            }
+            catch (IOException e) {
+                throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
+            }
+
             for (Library library : libraries.values()) {
-                writeResource(outputPath, library);
+                writeResource(outputFilePath, library);
             }
         }
     }
@@ -576,7 +589,15 @@ public class DTProcessor extends Operation {
     private void writeLibraryCQL(String outputPath) {
         if (libraryCQL != null && libraryCQL.size() > 0) {
             for (Map.Entry<String, StringBuilder> entry : libraryCQL.entrySet()) {
-                String outputFilePath = outputPath + "/" + entry.getKey() + ".cql";
+                String outputDirectoryPath = outputPath + File.separator + "input" + File.separator + "cql";
+                String outputFilePath = outputDirectoryPath + File.separator + entry.getKey() + ".cql";
+                try {
+                    ensurePath(outputDirectoryPath);
+                }
+                catch (IOException e) {
+                    throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
+                }
+
                 try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
                     writer.write(entry.getValue().toString().getBytes());
                     writer.flush();
@@ -592,14 +613,21 @@ public class DTProcessor extends Operation {
     private void writePlanDefinitions(String outputPath) {
         if (planDefinitions != null && planDefinitions.size() > 0) {
             for (PlanDefinition planDefinition : planDefinitions.values()) {
-                writeResource(outputPath, planDefinition);
+                String outputFilePath = outputPath + File.separator + "input" + File.separator + "resources" + File.separator + "plandefinition";
+                try {
+                    ensurePath(outputFilePath);
+                }
+                catch (IOException e) {
+                    throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
+                }
+                writeResource(outputFilePath, planDefinition);
             }
         }
     }
 
     /* Write Methods */
     public void writeResource(String path, Resource resource) {
-        String outputFilePath = path + "/" + resource.getResourceType().toString().toLowerCase() + "-" + resource.getIdElement().getIdPart() + "." + encoding;
+        String outputFilePath = path + File.separator + resource.getResourceType().toString().toLowerCase() + "-" + resource.getIdElement().getIdPart() + "." + encoding;
         try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
             writer.write(
                     encoding.equals("json")
@@ -631,8 +659,15 @@ public class DTProcessor extends Operation {
         return index.toString();
     }
 
-    public void writePlanDefinitionIndex(String path) {
-        String outputFilePath = path + "/PlanDefinitionIndex.md";
+    public void writePlanDefinitionIndex(String outputPath) {
+        String outputFilePath = outputPath + File.separator + "input" + File.separator + "pagecontent"+ File.separator + "PlanDefinitionIndex.md";
+        try {
+            ensurePath(outputFilePath);
+        }
+        catch (IOException e) {
+            throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
+        }
+
         try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
             writer.write(buildPlanDefinitionIndex().getBytes());
             writer.flush();

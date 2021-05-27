@@ -1820,6 +1820,7 @@ public class Processor extends Operation {
             }
 
             if (valueSet != null) {
+
                 Enumerations.BindingStrength bindingStrength = dictionaryElement.getBindingStrength();
                 // Bind the current element to the valueSet
                 bindValueSetToElement(targetElement, valueSet, bindingStrength);
@@ -2408,7 +2409,7 @@ public class Processor extends Operation {
         }
     };
 
-    private void writeDataElement(StringBuilder sb, StructureDefinition sd) {
+    private void writeDataElement(StringBuilder sb, StructureDefinition sd, String context) {
         // TODO: Consider writing this to an extension on the structuredefinition instead of to the retrieveInfo like this
         for (RetrieveInfo retrieve : retrieves) {
             if (retrieve.structureDefinition.getId().equals(sd.getId())) {
@@ -2449,14 +2450,18 @@ public class Processor extends Operation {
                         sb.append(String.format(" %s", alias));
                         sb.append(System.lineSeparator());
                         sb.append(String.format("    where %s.status in { 'preparation', 'in-progress', 'completed' }", alias));
-                        appendReturnClause(sb, fhirElementPath, alias);
+                        if (context.equals("Encounter")) {
+                            appendReturnClause(sb, fhirElementPath, alias);
+                        }
                         break;
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-procedurenotdone":
                         alias = "P";
                         sb.append(String.format(" %s", alias));
                         sb.append(System.lineSeparator());
                         sb.append("    where P.status = 'not-done'");
-                        appendReturnClause(sb, fhirElementPath, alias);
+                        if (context.equals("Encounter")) {
+                            appendReturnClause(sb, fhirElementPath, alias);
+                        }
                         break;
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-medicationrequest":
                         alias = "MR";
@@ -2465,7 +2470,9 @@ public class Processor extends Operation {
                         sb.append("    where MR.status = 'completed'");
                         sb.append(System.lineSeparator());
                         sb.append("      and Coalesce(MR.doNotPerform, false) is false");
-                        appendReturnClause(sb, fhirElementPath, alias);
+                        if (context.equals("Encounter")) {
+                            appendReturnClause(sb, fhirElementPath, alias);
+                        }
                         break;
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-medicationnotrequested":
                         alias = "MR";
@@ -2474,14 +2481,18 @@ public class Processor extends Operation {
                         sb.append("    where MR.status = 'completed'");
                         sb.append(System.lineSeparator());
                         sb.append("      and MR.doNotPerform");
-                        appendReturnClause(sb, fhirElementPath, alias);
+                        if (context.equals("Encounter")) {
+                            appendReturnClause(sb, fhirElementPath, alias);
+                        }
                         break;
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-observation":
                         alias = "O";
                         sb.append(String.format(" %s", alias));
                         sb.append(System.lineSeparator());
                         sb.append("    //where Not Implemented");
-                        appendReturnClause(sb, fhirElementPath, alias);
+                        if (context.equals("Encounter")) {
+                            appendReturnClause(sb, fhirElementPath, alias);
+                        }
                         break;
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-observationnotdone":
                         alias = "O";
@@ -2548,10 +2559,15 @@ public class Processor extends Operation {
     }
 
     public void writeDataElements(String scope, String scopePath) {
+        writeDataElements(scope, scopePath, "Patient");
+        writeDataElements(scope, scopePath, "Encounter");
+    }
+
+    public void writeDataElements(String scope, String scopePath, String context) {
         StringBuilder sb = new StringBuilder();
         StringBuilder activityIndex = new StringBuilder();
 
-        sb.append(String.format("library %sDataElements", scope));
+        sb.append(String.format("library %s%sDataElements", scope, context.equals("Encounter") ? "Contact" : ""));
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
 
@@ -2563,6 +2579,10 @@ public class Processor extends Operation {
         sb.append(System.lineSeparator());
 
         sb.append(String.format("include %sConcepts called Cx", scope));
+        sb.append(System.lineSeparator());
+        sb.append(System.lineSeparator());
+
+        sb.append(String.format("context %s", context != null ? context : "Patient"));
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
 
@@ -2583,13 +2603,13 @@ public class Processor extends Operation {
             List<StructureDefinition> sds = profilesByActivityId.get(activityId);
             sds.sort(Comparator.comparing(StructureDefinition::getId));
             for (StructureDefinition sd : sds) {
-                writeDataElement(sb, sd);
+                writeDataElement(sb, sd, context);
                 writeActivityIndexEntry(activityIndex, sd);
             }
         }
 
         ensureCqlPath(scopePath);
-        try (FileOutputStream writer = new FileOutputStream(getCqlPath(scopePath) + "/" + scope + "DataElements.cql")) {
+        try (FileOutputStream writer = new FileOutputStream(getCqlPath(scopePath) + "/" + scope + (context.equals("Encounter") ? "Contact" : "") + "DataElements.cql")) {
             writer.write(sb.toString().getBytes());
             writer.flush();
         }
