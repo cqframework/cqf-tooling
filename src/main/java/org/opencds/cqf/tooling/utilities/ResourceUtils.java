@@ -427,7 +427,10 @@ public class ResourceUtils
       try {
           IBaseResource resource = IOUtils.readResource(path, fhirContext, true);
           if (resource != null) {
-            resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
+//              if(resources.containsKey(resource.getIdElement().getIdPart())){
+//                  IBaseResource storedResource = resources.get(resource.getIdElement().getIdPart());
+//              }
+              resources.putIfAbsent(resource.fhirType() + "/" + resource.getIdElement().getIdPart(), resource);
           } else {
             added = false;
             LogUtils.putException(path, new Exception("Unable to add Resource: " + path));
