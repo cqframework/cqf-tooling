@@ -12,7 +12,7 @@ JAVA -jar tooling-1.3.1-SNAPSHOT-jar-with-dependencies.jar -OpioidXlsxToValueSet
 ```
 tooling-1.3.1-SNAPSHOT-jar-with-dependencies.jar is the path and actual name of the current version of the cqf-tooling jar. The possible command line arguments are:
 
-* -pts Which is the path to the spreadsheet containing the valuesets. i.e. ipts="D:\sandbox\vsac_xlsx\input\CDC Opioid Terminology Template.xlsx"
+* -pts Which is the path to the spreadsheet containing the valuesets. i.e. -pts="D:\sandbox\vsac_xlsx\input\CDC Opioid Terminology Template.xlsx"
 * -op Which is the output path for the created valuesets. i.e. -op="D:\sandbox\vsac_xlsx\output"
 * -e Which is the output format. If not provided this defaults to *.json format. i.e. -e=json
 * -opp Which is the output file prefix. If not provided it defaults to "valueset-".
