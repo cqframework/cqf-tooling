@@ -1,4 +1,4 @@
-package org.opencds.cqf.tooling.terminology.opioidValuesetGenerator;
+package org.opencds.cqf.tooling.terminology.templateValuesetGenerator;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.*;
