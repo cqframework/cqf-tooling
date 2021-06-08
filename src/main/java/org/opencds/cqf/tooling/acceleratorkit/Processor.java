@@ -2522,12 +2522,14 @@ public class Processor extends Operation {
     }
 
     private void appendReturnClause(StringBuilder sb, DictionaryFhirElementPath fhirElementPath, String alias) {
+        //TODO: If an extension, append the extension-specific return clause
+        // P.extension E where E.url = 'http://fhir.org/guides/who-int/anc-cds/StructureDefinition/occupation' return E.value as CodeableConcept
         if (fhirElementPath != null) {
             String returnElementPath = fhirElementPath.getResourcePath();
             String cast = "";
             if (isChoiceType(fhirElementPath)) {
-                 returnElementPath = fhirElementPath.getResourcePath().replace("[x]", "");
-                 cast = String.format(" as FHIR.%s", fhirElementPath.getFhirElementType());
+                returnElementPath = fhirElementPath.getResourcePath().replace("[x]", "");
+                cast = String.format(" as FHIR.%s", fhirElementPath.getFhirElementType());
             }
 
             sb.append(System.lineSeparator());
