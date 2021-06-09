@@ -5,6 +5,13 @@ import java.util.List;
 
 public class ValueSet {
 
+    private String profile;
+    private String getProfile() { return profile; }
+    private ValueSet setProfile(String in) {
+        profile = in;
+        return this;
+    }
+
     private String system;
     public String getSystem() {
         return system;

@@ -162,6 +162,10 @@ public class ElmDataRequirement extends ElmExpressionRequirement {
     }
 
     private void applyConditionRequirementTo(ElmConditionRequirement conditionRequirement, Retrieve retrieve, ElmRequirementsContext context) {
+        if (retrieve.getDataType() == null) {
+            // If the retrieve has no data type, it is neither useful nor possible to apply requirements to it
+            return;
+        }
         // if the column is terminology-valued, express as a code filter
         // if the column is date-valued, express as a date filter
         // else express as an other filter

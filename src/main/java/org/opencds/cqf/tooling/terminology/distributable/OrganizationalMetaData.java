@@ -6,6 +6,7 @@ import org.hl7.fhir.r4.model.ContactDetail;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.DateType;
 
 public class OrganizationalMetaData {
 
@@ -13,11 +14,19 @@ public class OrganizationalMetaData {
     private String copyright;
     private String jurisdiction;
     private String publisher;
+    private String approvalDate;
+    private String effectiveDate;
+    private String lastReviewDate;
     private String authorName;
     private String authorTelecomSystem;
     private String authorTelecomValue;
 
+    private String snomedVersion;
+
     private final String JURISDICTION_URL = "urn:iso:std:iso:3166";
+    private final String APPROVAL_DATE_URL = "http://hl7.org/fhir/StructureDefinition/resource-approvalDate";
+    private final String EFFECTIVE_DATE_URL = "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate";
+    private final String LAST_REVIEW_DATE_URL = "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate";
     private final String AUTHOR_URL = "http://hl7.org/fhir/StructureDefinition/valueset-author";
 
     public void populate(ValueSet valueSet) {
@@ -31,6 +40,15 @@ public class OrganizationalMetaData {
         );
         valueSet.setPublisher(publisher);
 
+        if (approvalDate != null) {
+            valueSet.addExtension(new Extension().setUrl(APPROVAL_DATE_URL).setValue(new DateType(approvalDate)));
+        }
+        if (effectiveDate != null) {
+            valueSet.addExtension(new Extension().setUrl(EFFECTIVE_DATE_URL).setValue(new DateType(effectiveDate)));
+        }
+        if (lastReviewDate != null) {
+            valueSet.addExtension(new Extension().setUrl(LAST_REVIEW_DATE_URL).setValue(new DateType(lastReviewDate)));
+        }
         if (authorName != null || authorTelecomSystem != null || authorTelecomValue != null) {
             ContactDetail authorDetail =
                     new ContactDetail()
@@ -101,4 +119,35 @@ public class OrganizationalMetaData {
         this.authorTelecomValue = authorTelecomValue;
     }
 
+    public String getApprovalDate() {
+        return approvalDate;
+    }
+
+    public void setApprovalDate(String approvalDate) {
+        this.approvalDate = approvalDate;
+    }
+
+    public String getEffectiveDate() {
+        return effectiveDate;
+    }
+
+    public void setEffectiveDate(String effectiveDate) {
+        this.effectiveDate = effectiveDate;
+    }
+
+    public String getLastReviewDate() {
+        return lastReviewDate;
+    }
+
+    public void setLastReviewDate(String lastReviewDate) {
+        this.lastReviewDate = lastReviewDate;
+    }
+
+    public String getSnomedVersion() {
+        return snomedVersion;
+    }
+
+    public void setSnomedVersion(String snomedVersion) {
+        this.snomedVersion = snomedVersion;
+    }
 }

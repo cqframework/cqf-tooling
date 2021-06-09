@@ -33,10 +33,10 @@ public class PlanDefinitionProcessor {
                 Map<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
 
                 Boolean shouldPersist = ResourceUtils.safeAddResource(planDefinitionSourcePath, resources, fhirContext);
-                if (!resources.containsKey(planDefinitionEntry.getKey())) {
+                if (!resources.containsKey("PlanDefinition/" + planDefinitionEntry.getKey())) {
                     throw new IllegalArgumentException(String.format("Could not retrieve base resource for PlanDefinition %s", planDefinitionName));
                 }
-                IBaseResource planDefinition = resources.get(planDefinitionEntry.getKey());
+                IBaseResource planDefinition = resources.get("PlanDefinition/" + planDefinitionEntry.getKey());
                 String primaryLibraryUrl = ResourceUtils.getPrimaryLibraryUrl(planDefinition, fhirContext);
                 IBaseResource primaryLibrary;
                 if (primaryLibraryUrl.startsWith("http")) {
