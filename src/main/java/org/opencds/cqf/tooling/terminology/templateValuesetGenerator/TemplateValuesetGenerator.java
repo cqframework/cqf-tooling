@@ -27,8 +27,6 @@ public class TemplateValuesetGenerator extends Operation {
     private String outputPrefix  = "valueset-"; // -outputPrefix (-opp)
     private String outputVersion = "r4";        // -fhirv (-fhv)
 
-    private final int VSLIST_IDX = 17;
-
     @Override
     public void execute(String[] args) {
         setOutputPath("src/main/resources/org/opencds/cqf/terminology/r4/output");
@@ -59,7 +57,7 @@ public class TemplateValuesetGenerator extends Operation {
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
 
         OrganizationalMetaData organizationalMetaData = resolveOrganizationalMeta(workbook.getSheetAt(0));
-        Map<String, Integer> vsMap = resolveVsMap(workbook, workbook.getSheetAt(0));
+        Map<String, Integer> vsMap = resolveVsMap(workbook, workbook.getSheetAt(1));
         List<ValueSet> valueSets = resolveValueSets(organizationalMetaData, vsMap, workbook);
         output(valueSets);
     }
@@ -175,7 +173,11 @@ public class TemplateValuesetGenerator extends Operation {
 //                    meta.setName(SpreadsheetHelper.getCellAsString(row.getCell(1)));
 //                    break;
                 case "title":
-                    meta.setTitle(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    String title = SpreadsheetHelper.getCellAsString(row.getCell(1));
+                    meta.setTitle(title);
+                    if((null != title && title.length() > 0) && (null == meta.getId() || meta.getId().length() < 1)){
+                        meta.setId(title.toLowerCase(Locale.ROOT).replace(" ", "-"));
+                    }
                     break;
                 case "status":
                     meta.setStatus(SpreadsheetHelper.getCellAsString(row.getCell(1)));
@@ -206,7 +208,7 @@ public class TemplateValuesetGenerator extends Operation {
                     break;
                 case "compose":
                     if (row.getCell(1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue().length() > 1)
-                        meta.setCompose(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                        meta.setCompose(SpreadsheetHelper.getCellAsStringNoReplacement(row.getCell(1)));
                     break;
                 default:
                     break;
@@ -218,11 +220,9 @@ public class TemplateValuesetGenerator extends Operation {
     private Map<String, Integer> resolveVsMap(Workbook workbook, Sheet sheet) {
         Map<String, Integer> vsMap = new HashMap<>();
         Iterator<Row> rowIterator = sheet.rowIterator();
-        while (rowIterator.next().getRowNum() < VSLIST_IDX) {
-            //
-        }
+        Row row = rowIterator.next();// skip first row
         while (rowIterator.hasNext()) {
-            Row row = rowIterator.next();
+            row = rowIterator.next();
             String sheetName = SpreadsheetHelper.getCellAsString(row.getCell(2, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
 
             if (sheetName.length() <= 0) continue;
@@ -351,7 +351,9 @@ public class TemplateValuesetGenerator extends Operation {
             String prefixedOutputPath = String.format(
                     "%s/%s%s.%s", getOutputPath(), outputPrefix, valueSet.getName(), encoding);
 
-            valueSet.setName(valueSet.getName().replace('-', '_'));
+            if(null != valueSet.getName()) {
+                valueSet.setName(valueSet.getName().replace('-', '_'));
+            }
 
             try (FileOutputStream writer = new FileOutputStream(prefixedOutputPath)) {
                 writer.write(

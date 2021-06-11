@@ -3,6 +3,8 @@
 ##Introduction
 This operation is designed to take a spreadsheet template with definitions created by **_MD Partners, Inc._** and produce valuesets. The operation does not deduplicate valuesets. If one is entered into the spreadsheet tiwce, it will appear in the resulting valueset twice.
 
+NOTE: If downloading the Excel spreadsheet from Google Sheets, first make sure that the Codes have been formatted as text and not as numbers. Otherwise when downloaded as Excel the larger numbers will appear as numbers with scientific notation and will not be correct.  To do this in Google sheets, select the column of codes, click on "Format/Number" and select "Plain Text". Doing this after the download does not rectify the situation.   
+
 add part to set up environment get info on how to do that and put in *HERE*
 
 ##Setup
@@ -59,3 +61,16 @@ If there is a compose section then the valueset is computable and will contain t
 ```
 
 These are not mutually exclusive. There can be both or either of them.
+
+##Spreadsheet Requirements
+Currently the valueset generator depends on sheet and cell location to determine values.
+Sheet 1 is the Common MetaData sheet and contains informational data such as the author, publisher and additional information. It also contains the CodeSystems with url, version and date updated. This is not position or row dependent, beyond the fact that the fist column is the key word that is used to access the corresponding data located in the second column. For example, column one might contain "Publisher" and the second column would contain the text for the publisher. 
+
+Sheet 2 is the Value Set List. Row 1 is the titles. Subsequent rows contain valueset titles and references to the sheets containing metadata and codes for inclusion in the valuesets. 
+
+
+##Errors
+Possible errors that may occur:
+1. com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character '?' (code 63) in end tag Expected '>'.
+    
+Control characters are not allowed in spreadsheets. They are replaced with the '?' character and this will cause this error, which will stop processing. This may include such characters as '\n' (form feed). Look up the "cntrl" Character Class in regex for other examples.  
