@@ -16,6 +16,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.opencds.cqf.tooling.utilities.IOUtils.ensurePath;
 
@@ -38,6 +39,7 @@ public class DTProcessor extends Operation {
 
     private String activityCodeSystem = "http://fhir.org/guides/who/anc-cds/CodeSystem/activity-codes";
     private Map<String, Coding> activityMap = new LinkedHashMap<String, Coding>();
+    private Map<String, Integer> expressionNameCounterMap = new HashMap<String, Integer>();
 
     @Override
     public void execute(String[] args) {
@@ -300,6 +302,7 @@ public class DTProcessor extends Operation {
         String currentAnnotationValue = null;
         for (;;) {
             PlanDefinition.PlanDefinitionActionComponent subAction = processAction(it, inputColumnIndex, outputColumnIndex, actionColumnIndex, annotationColumnIndex, actionId, currentAnnotationValue, referenceColumnIndex);
+
             if (subAction == null) {
                 break;
             }
@@ -307,6 +310,21 @@ public class DTProcessor extends Operation {
             if (!actionsEqual(currentAction, subAction)) {
                 actionId++;
                 currentAction = subAction;
+
+                Integer nextCounter = 1;
+                String actionDescription = subAction.getAction().size() > 1
+                        ? subAction.getAction().get(0).getTitle().replace(System.getProperty("line.separator"), "")
+                        : subAction.getDescription();
+                if (!expressionNameCounterMap.containsKey(actionDescription)) {
+                    expressionNameCounterMap.put(actionDescription, 1);
+                }
+
+                nextCounter = expressionNameCounterMap.get(actionDescription);
+                expressionNameCounterMap.put(actionDescription, nextCounter + 1);
+
+                actionDescription = actionDescription + (nextCounter > 1 ? String.format(" %s", nextCounter) : "");
+                subAction.setDescription(actionDescription);
+
                 currentAnnotationValue = subAction.getTextEquivalent();
                 action.getAction().add(subAction);
             }
@@ -337,9 +355,18 @@ public class DTProcessor extends Operation {
             return false;
         }
 
+        List<PlanDefinition.PlanDefinitionActionComponent> currentActionSubs = currentAction.getAction();
+        List<PlanDefinition.PlanDefinitionActionComponent> newActionSubs = newAction.getAction();
+
+
+        String currentActionDescription = currentActionSubs.stream().map(PlanDefinition.PlanDefinitionActionComponent::getTitle)
+                .collect(Collectors.joining(" AND "));
+        String newActionDescription = newActionSubs.stream().map(PlanDefinition.PlanDefinitionActionComponent::getTitle)
+                .collect(Collectors.joining(" AND "));
+
         return stringsEqual(currentAction.getTitle(), newAction.getTitle())
                 && stringsEqual(currentAction.getTextEquivalent(), newAction.getTextEquivalent())
-                && stringsEqual(currentAction.getDescription(), newAction.getDescription())
+                && stringsEqual(currentActionDescription, newActionDescription)
                 && subActionsEqual(currentAction.getAction(), newAction.getAction());
     }
 
@@ -370,9 +397,9 @@ public class DTProcessor extends Operation {
         return false;
     }
 
-    private boolean rowIsValid(Row row, int inputColumnIndex, int outputColumnIndex, int actionColumnIndex, int annotationColumnIndex) {
+    private boolean rowIsValid(Row row, int inputColumnIndex, int actionColumnIndex, int annotationColumnIndex) {
         // Currently considered "valid" if any of the four known columns have a non-null, non-empty string value.
-        int[] valueColumnIndexes = new int[] { inputColumnIndex, outputColumnIndex, actionColumnIndex, annotationColumnIndex };
+        int[] valueColumnIndexes = new int[] { inputColumnIndex, actionColumnIndex, annotationColumnIndex };
 
         for (int i=0; i < valueColumnIndexes.length - 1; i++) {
             int columnIndex = valueColumnIndexes[i];
@@ -397,7 +424,7 @@ public class DTProcessor extends Operation {
         if (it.hasNext()) {
             Row row = it.next();
             // If the row is not valid, do not process it.
-            if (!rowIsValid(row, inputColumnIndex, outputColumnIndex, actionColumnIndex, annotationColumnIndex)) {
+            if (!rowIsValid(row, inputColumnIndex, actionColumnIndex, annotationColumnIndex)) {
                 return null;
             }
 
@@ -437,12 +464,6 @@ public class DTProcessor extends Operation {
                 }
             }
 
-            if (outputColumnIndex >= 0) {
-                cell = row.getCell(outputColumnIndex);
-                String outputValue = cell.getStringCellValue();
-                action.setDescription(outputValue);
-            }
-
             PlanDefinition.PlanDefinitionActionConditionComponent condition = new PlanDefinition.PlanDefinitionActionConditionComponent();
             condition.setKind(PlanDefinition.ActionConditionKind.APPLICABILITY);
             condition.setExpression(new Expression().setLanguage("text/cql-identifier").setDescription(applicabilityCondition.toString()));
@@ -454,15 +475,19 @@ public class DTProcessor extends Operation {
                 if (cell != null) {
                     String actionValue = cell.getStringCellValue();
                     if (actionValue != null && !actionValue.isEmpty() && !actionValue.equals("")) {
-                        actionValues.add(actionValue);
+                        actionValues.add(actionValue.replace(System.getProperty("line.separator"), ""));
                     }
                 }
             }
 
+            String actionsDescription = String.join(" AND ", actionValues);
+            action.setDescription(actionsDescription);
+
             if (actionValues.size() == 1) {
-                action.setTitle(actionValues.get(0));
+                action.setTitle(actionValues.get(0).replace(System.getProperty("line.separator"), ""));
             }
             else {
+                action.setTitle(actionValues.get(0).replace(System.getProperty("line.separator"), ""));
                 for (String actionValue : actionValues) {
                     PlanDefinition.PlanDefinitionActionComponent subAction = new PlanDefinition.PlanDefinitionActionComponent();
                     subAction.setTitle(actionValue);
