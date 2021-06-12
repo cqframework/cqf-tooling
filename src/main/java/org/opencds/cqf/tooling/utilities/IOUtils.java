@@ -71,7 +71,7 @@ public class IOUtils
         return fileName.replaceAll("_", "-");
     }
 
-    public static byte[] parseResource(IBaseResource resource, Encoding encoding, FhirContext fhirContext) 
+    public static byte[] encodeResource(IBaseResource resource, Encoding encoding, FhirContext fhirContext)
     {
         if (encoding == Encoding.UNKNOWN) {
             return new byte[] { };
@@ -104,6 +104,14 @@ public class IOUtils
             outputPath = path;
         }
         else {
+            try {
+                ensurePath(path);
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Error writing Resource to file: " + e.getMessage());
+            }
+
         	String baseName = resource.getIdElement().getIdPart();
         	// Issue 96
         	// If includeVersion is false then just use name and not id for the file baseName
@@ -112,11 +120,11 @@ public class IOUtils
         		baseName = baseName.split("-")[0];
         	}
             outputPath = FilenameUtils.concat(path, formatFileName(baseName, encoding, fhirContext));
-            }
+        }
 
         try (FileOutputStream writer = new FileOutputStream(outputPath))
         {
-            writer.write(parseResource(resource, encoding, fhirContext));
+            writer.write(encodeResource(resource, encoding, fhirContext));
             writer.flush();
         }
         catch (IOException e)

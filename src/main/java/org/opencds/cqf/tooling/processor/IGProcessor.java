@@ -67,7 +67,7 @@ public class IGProcessor extends BaseProcessor {
         //Use case 3
         //package everything
         LogUtils.info("IGProcessor.publishIG - bundleIg");
-        IGBundleProcessor.bundleIg(refreshedResourcesNames, rootDir, encoding, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
+        IGBundleProcessor.bundleIg(refreshedResourcesNames, rootDir, getBinaryPaths(), encoding, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
         versioned, fhirContext, fhirUri);
         //test everything
         //IGTestProcessor.testIg(IGTestParameters);
