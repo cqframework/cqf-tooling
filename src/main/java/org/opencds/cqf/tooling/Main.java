@@ -35,9 +35,9 @@ package org.opencds.cqf.tooling;
             - This tooling converts an exported VSAC Excel spreadsheet (.xlsx extension) to a FHIR ValueSet resource and prints to output directory
             - This operation is configurable and can be used with spreadsheets that do not conform to VSAC export format (although we suggest using the -XlsxToValueSet operation as it is much more flexible and configurable).
 
-        - XLSX Opioid ValueSet terminology generator
-            - command: mvn exec:java -Dexec.args="[-OpioidXlsxToValueSet] [-pathtospreadsheet=<path> | -pts] (-outputpath | -op) (-encoding | -e) (-outputprefix | -opp) (-outputversion | -opv)"
-            - This tooling converts the CDC Opioid XLSX spreadsheet to valuesets.
+        - TemplateValuesetGenerator - WAS: XLSX Opioid ValueSet terminology generator
+            - command: mvn exec:java -Dexec.args="[-TemplateValuesetGenerator] [-pathtospreadsheet=<path> | -pts] (-outputpath | -op) (-encoding | -e) (-outputprefix | -opp) (-outputversion | -opv)"
+            - This tooling converts the CDC Opioid XLSX spreadsheet from MD Partners to valuesets.
             - Outputversion, if not specified, defaults to R4.
 
         - Generic Excel spreadsheet to FHIR ValueSet resource conversion

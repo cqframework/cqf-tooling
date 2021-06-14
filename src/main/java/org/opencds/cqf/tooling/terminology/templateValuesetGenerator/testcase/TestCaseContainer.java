@@ -1,4 +1,4 @@
-package org.opencds.cqf.tooling.terminology.opioidValuesetGenerator.testcase;
+package org.opencds.cqf.tooling.terminology.templateValuesetGenerator.testcase;
 
 import java.util.ArrayList;
 import java.util.List;

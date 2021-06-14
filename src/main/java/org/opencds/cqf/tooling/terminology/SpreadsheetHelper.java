@@ -49,15 +49,47 @@ public class SpreadsheetHelper {
         return newString.toString();
     }
 
-    public static String protectedString(String rawValue) {
+    private static String cleanseStringNoReplacement(String rawValue) {
+        StringBuilder newString = new StringBuilder(rawValue.length());
+        for (int offset = 0; offset < rawValue.length();)
+        {
+            int codePoint = rawValue.codePointAt(offset);
+            offset += Character.charCount(codePoint);
+
+            // Replace invisible control characters and unused code points
+            switch (Character.getType(codePoint))
+            {
+                case Character.CONTROL:     // \p{Cc}
+                case Character.FORMAT:      // \p{Cf}
+                case Character.PRIVATE_USE: // \p{Co}
+                case Character.SURROGATE:   // \p{Cs}
+                case Character.UNASSIGNED:  // \p{Cn}
+                    //just skip it
+                    break;
+                default:
+                    newString.append(Character.toChars(codePoint));
+                    break;
+            }
+        }
+        return newString.toString();
+    }
+
+    public static String protectedString(String rawValue, boolean replace) {
         String result = rawValue;
         if (result == null) {
             return result;
         }
         result = result.trim();
-        result.replaceAll("\\p{Cntrl}", "?");
-        result.replaceAll("\\p{C}", "?");
-        result = SpreadsheetHelper.cleanseString(result);
+        if(replace) {
+            result.replaceAll("\\p{Cntrl}", "?");
+            result.replaceAll("\\p{C}", "?");
+            result = SpreadsheetHelper.cleanseString(result);
+        }
+        else{
+            result.replaceAll("\\p{Cntrl}", "");
+            result.replaceAll("\\p{C}", "");
+            result = SpreadsheetHelper.cleanseStringNoReplacement(result);
+        }
         return result;
     }
 
@@ -74,7 +106,15 @@ public class SpreadsheetHelper {
             return null;
         }
         String valueAsString = SpreadsheetHelper.getDataFormatter().formatCellValue(cell);
-        return SpreadsheetHelper.protectedString(valueAsString);
+        return SpreadsheetHelper.protectedString(valueAsString, true);
+    }
+
+    public static String getCellAsStringNoReplacement(Cell cell) {
+        if (cell == null) {
+            return null;
+        }
+        String valueAsString = SpreadsheetHelper.getDataFormatter().formatCellValue(cell);
+        return SpreadsheetHelper.protectedString(valueAsString, false);
     }
 
     public static Integer getCellAsInteger(Cell cell) {

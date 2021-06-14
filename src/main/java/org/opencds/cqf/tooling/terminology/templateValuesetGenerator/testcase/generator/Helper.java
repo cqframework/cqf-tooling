@@ -1,10 +1,10 @@
-package org.opencds.cqf.tooling.terminology.opioidValuesetGenerator.testcase.generator;
+package org.opencds.cqf.tooling.terminology.templateValuesetGenerator.testcase.generator;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.opencds.cqf.tooling.terminology.opioidValuesetGenerator.testcase.TestCaseOld;
+import org.opencds.cqf.tooling.terminology.templateValuesetGenerator.testcase.TestCaseOld;
 
 import java.util.*;
 
