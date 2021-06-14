@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.utilities.*;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
@@ -17,7 +18,7 @@ public class PlanDefinitionProcessor {
     public static final String ResourcePrefix = "plandefinition-";
     public static final String PlanDefinitionTestGroupName = "plandefinition";
 
-    public static void bundlePlanDefinitions(ArrayList<String> refreshedLibraryNames, String igPath, Boolean includeDependencies,
+    public static void bundlePlanDefinitions(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
                                              Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion,
                                              FhirContext fhirContext, String fhirUri, Encoding encoding) {
 
@@ -60,10 +61,23 @@ public class PlanDefinitionProcessor {
                         & ResourceUtils.safeAddResource(primaryLibrarySourcePath, resources, fhirContext);
 
                 String cqlFileName = IOUtils.formatFileName(primaryLibraryName, Encoding.CQL, fhirContext);
+
+                // Old way, requires the resourcePaths argument to include cql directories, which is wrong
                 List<String> cqlLibrarySourcePaths = IOUtils.getCqlLibraryPaths().stream()
                         .filter(path -> path.endsWith(cqlFileName))
                         .collect(Collectors.toList());
                 String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
+
+                // Correct way, uses the binaryPaths loaded from the BaseProcessor (passed here because static)
+                if (cqlLibrarySourcePath == null) {
+                    for (String path : binaryPaths) {
+                        File f = new File(Utilities.path(path, cqlFileName));
+                        if (f.exists()) {
+                            cqlLibrarySourcePath = f.getAbsolutePath();
+                            break;
+                        }
+                    }
+                }
 
                 if (cqlLibrarySourcePath == null) {
                     throw new IllegalArgumentException(String.format("Could not determine CqlLibrarySource path for library %s", primaryLibraryName));
