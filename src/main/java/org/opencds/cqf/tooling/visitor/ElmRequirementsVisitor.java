@@ -295,6 +295,12 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
                             .combine((ElmExpressionRequirement)left)
                             .combine((ElmExpressionRequirement)right);
                 }
+                else if (left instanceof ElmExpressionRequirement && right == null) {
+                    return left;
+                }
+                else if (right instanceof ElmExpressionRequirement && left == null) {
+                    return right;
+                }
 
                 throw new IllegalArgumentException("Expected ElmExpressionRequirement");
             }
@@ -307,6 +313,12 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
                     return new ElmDisjunctiveRequirement(context.getCurrentLibraryIdentifier(), elm)
                             .combine((ElmExpressionRequirement)left)
                             .combine((ElmExpressionRequirement)right);
+                }
+                else if (left instanceof ElmExpressionRequirement && right == null) {
+                    return left;
+                }
+                else if (right instanceof ElmExpressionRequirement && left == null) {
+                    return right;
                 }
 
                 throw new IllegalArgumentException("Expected ElmExpressionRequirement");
