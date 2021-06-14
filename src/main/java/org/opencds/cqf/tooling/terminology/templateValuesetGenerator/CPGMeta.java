@@ -98,6 +98,7 @@ public class CPGMeta {
                 ValueSet tempVs = fhirContext.newXmlParser().parseResource(ValueSet.class, "<ValueSet>" + compose + "</ValueSet>");
                 vs.setCompose(tempVs.getCompose());
             } catch (Exception e) {
+                System.out.println("An error occurred in the compose for the sheet with id: " + this.id);
                 e.printStackTrace();
             }
         }
