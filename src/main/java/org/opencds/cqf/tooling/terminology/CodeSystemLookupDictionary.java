@@ -63,6 +63,8 @@ public class CodeSystemLookupDictionary {
         CDT                         2.16.840.1.113883.6.13          ->      http://terminology.hl7.org/CodeSystem-CD2.html
         mediaType                   2.16.840.1.113883.5.79          ->      http://terminology.hl7.org/CodeSystem-v3-mediatypes.html
         SOP                         2.16.840.1.113883.3.221.5       ->      urn:oid:2.16.840.1.113883.3.221.5
+        NDC                         2.16.840.1.113883.6.69          ->      urn:oid:2.16.840.1.113883.6.69
+        RxNorm                      2.16.840.1.113883.6.68          ->      urn:oid:2.16.840.1.113883.6.68
         UCUM                        1.3.6.1.4.1.12009.10.3.1        ->      urn:oid:1.3.6.1.4.1.12009.10.3.1
         UCUM                        2.16.840.1.113883.6.8           ->      http://terminology.hl7.org/NamingSystem-v3-ucum.html
         UMLS                        2.16.840.1.113883.6.86          ->      http://terminology.hl7.org/CodeSystem-umls.html
@@ -123,6 +125,8 @@ public class CodeSystemLookupDictionary {
             case "2.16.840.1.113883.6.13": return "http://terminology.hl7.org/CodeSystem/CD2";
             case "2.16.840.1.113883.5.79": return "http://terminology.hl7.org/CodeSystem/v3-mediatypes";
             case "2.16.840.1.113883.3.221.5": return "urn:oid:2.16.840.1.113883.3.221.5";
+            case "2.16.840.1.113883.6.69": return "urn:oid:2.16.840.1.113883.6.69";
+            case "2.16.840.1.113883.6.68": return "urn:oid:2.16.840.1.113883.6.68";
             case "1.3.6.1.4.1.12009.10.3.1": return "urn:oid:1.3.6.1.4.1.12009.10.3.1";
             case "2.16.840.1.113883.6.8": return "http://unitsofmeasure.org";
             case "2.16.840.1.113883.6.86": return "http://terminology.hl7.org/CodeSystem/umls";
@@ -188,6 +192,8 @@ public class CodeSystemLookupDictionary {
             case "CDT": return "http://terminology.hl7.org/CodeSystem/CD2";
             case "mediaType": return "http://terminology.hl7.org/CodeSystem/v3-mediatypes";
             case "SOP":  return "urn:oid:2.16.840.1.113883.3.221.5";
+            case "NDC": return "urn:oid:2.16.840.1.113883.6.69";
+            case "RxNorm": return "urn:oid:2.16.840.1.113883.6.68";
             case "UCUM": return "http://unitsofmeasure.org";
             case "UMLS": return "http://terminology.hl7.org/CodeSystem/umls";
             default: throw new IllegalArgumentException("Unknown CodeSystem name: " + name);
