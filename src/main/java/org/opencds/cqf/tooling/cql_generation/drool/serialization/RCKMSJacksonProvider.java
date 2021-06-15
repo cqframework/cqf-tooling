@@ -18,6 +18,9 @@ import org.cdsframework.rs.provider.BaseDTODeserializer;
 import org.cdsframework.rs.provider.CoreJaxbAnnotationIntrospector;
 import org.cdsframework.util.ClassUtils;
 
+/**
+ * @author Rckms
+ */
 @SuppressWarnings({"unchecked", "deprecation", "rawtypes"})
 public class RCKMSJacksonProvider  {
     private ObjectMapper objectMapper = null;

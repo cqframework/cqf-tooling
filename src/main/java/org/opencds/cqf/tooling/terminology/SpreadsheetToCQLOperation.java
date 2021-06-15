@@ -12,7 +12,9 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
 import org.opencds.cqf.tooling.Operation;
-
+/**
+ * @author Adam Stevenson
+ */
 public class SpreadsheetToCQLOperation extends Operation {
 
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)

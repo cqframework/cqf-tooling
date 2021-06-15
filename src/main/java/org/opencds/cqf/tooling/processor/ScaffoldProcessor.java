@@ -11,7 +11,9 @@ import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import ca.uhn.fhir.context.FhirContext;
-
+/**
+ * @author Adam Stevenson
+ */
 public class ScaffoldProcessor extends BaseProcessor {
     private static String LibraryPath = "/input/resources/library";
     private static String MeasurePath = "/input/resources/measure";

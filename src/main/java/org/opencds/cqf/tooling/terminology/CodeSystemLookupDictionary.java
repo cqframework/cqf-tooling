@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling.terminology;
-
+/**
+ * @author Adam Stevenson
+ */
 public class CodeSystemLookupDictionary {
 
     /*

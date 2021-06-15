@@ -5,7 +5,9 @@ import java.util.Map;
 
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.opencds.cqf.tooling.modelinfo.ClassInfoBuilder;
-
+/**
+ * @author Adam Stevenson
+ */
 public class QuickClassInfoBuilder extends ClassInfoBuilder {
 
     public QuickClassInfoBuilder(Map<String, StructureDefinition> structureDefinitions) {

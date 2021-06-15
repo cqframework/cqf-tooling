@@ -18,9 +18,13 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
+/**
+ * @author Adam Stevenson
+ */
 public class IGTestProcessor extends BaseProcessor {
-
+/**
+ * @author Adam Stevenson
+ */
     public class TestCaseResultSummaryComparator implements Comparator<TestCaseResultSummary> {
         public int compare(TestCaseResultSummary o1, TestCaseResultSummary o2) {
             int value1 = o1.resourceTypeGroup.compareTo(o2.resourceTypeGroup);
@@ -35,7 +39,9 @@ public class IGTestProcessor extends BaseProcessor {
             return value1;
         }
     }
-
+/**
+ * @author Adam Stevenson
+ */
     public class TestCaseResultSummary {
         public TestCaseResultSummary(String resourceTypeGroup, String testArtifactName, String testCaseID) {
             this.resourceTypeGroup = resourceTypeGroup;

@@ -6,7 +6,9 @@ import java.util.Map;
 import org.hl7.elm_modelinfo.r1.TypeSpecifier;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.opencds.cqf.tooling.modelinfo.ClassInfoBuilder;
-
+/**
+ * @author Adam Stevenson
+ */
 public class USCoreClassInfoBuilder extends ClassInfoBuilder {
 
     public USCoreClassInfoBuilder(Map<String, StructureDefinition> structureDefinitions) {

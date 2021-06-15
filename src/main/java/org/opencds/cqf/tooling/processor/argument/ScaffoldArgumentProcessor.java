@@ -15,7 +15,9 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
-
+/**
+ * @author Adam Stevenson
+ */
 public class ScaffoldArgumentProcessor {
 	public static final String[] OPERATION_OPTIONS = {"ScaffoldIG"};
 

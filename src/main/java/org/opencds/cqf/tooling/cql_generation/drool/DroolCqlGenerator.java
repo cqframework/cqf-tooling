@@ -25,6 +25,8 @@ import org.opencds.cqf.tooling.cql_generation.drool.visitor.DroolToElmVisitor;
 import org.opencds.cqf.tooling.cql_generation.drool.visitor.ElmToCqlVisitor;
 import org.opencds.cqf.tooling.cql_generation.drool.visitor.Visitor;
 import org.opencds.cqf.tooling.cql_generation.drool.visitor.DroolToElmVisitor.CQLTYPES;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implements the {@link CqlGenerator CqlGenerator} Interface, {@link Deserializer Deserializes} the {@link ConditionDTO ConditionDTO}
@@ -35,6 +37,7 @@ import org.opencds.cqf.tooling.cql_generation.drool.visitor.DroolToElmVisitor.CQ
  * @since   2021-02-24 
  */
 public class DroolCqlGenerator implements CqlGenerator {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     private CQLTYPES type;
     private File cqlOutput;
 
@@ -121,7 +124,7 @@ public class DroolCqlGenerator implements CqlGenerator {
                 File outputFile = new File(outpuDirectory.getAbsolutePath() + "/" + vi.getId() + "-" + vi.getVersion() + ".cql");
                 IOUtil.writeToFile(outputFile, cql);
             } else {
-                System.out.println("Output directory is not a directory: " + outpuDirectory.getAbsolutePath());
+                logger.info("Output directory is not a directory: " + outpuDirectory.getAbsolutePath());
             }
         });
     }
@@ -129,14 +132,14 @@ public class DroolCqlGenerator implements CqlGenerator {
     private void writeElm(ElmContext context, VmrToModelElmBuilder modelBuilder, File outpuDirectory) {
         Serializer serializer = new Serializer(Library.class);
         context.libraries.entrySet().stream().forEach(entry -> {
-            System.out.println(entry.getKey());
+            logger.info(entry.getKey());
             try {
                 String elm = serializer.convertToXml(modelBuilder.of.createLibrary(entry.getValue()), serializer.getJaxbContext());
                 if (outpuDirectory.isDirectory()) {
                     File outputFile = new File(outpuDirectory.getAbsolutePath() + "/" + entry.getKey() + ".xml");
                     IOUtil.writeToFile(outputFile, elm);
                 } else {
-                    System.out.println("Output directory is not a directory: " + outpuDirectory.getAbsolutePath());
+                    logger.info("Output directory is not a directory: " + outpuDirectory.getAbsolutePath());
                 }
             } catch (JAXBException e) {
                 e.printStackTrace();

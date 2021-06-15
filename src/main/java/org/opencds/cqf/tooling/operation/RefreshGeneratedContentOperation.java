@@ -5,7 +5,9 @@ import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
-
+/**
+ * @author Adam Stevenson
+ */
 public abstract class RefreshGeneratedContentOperation extends Operation {
     // private String igPath;
     private FhirContext fhirContext;

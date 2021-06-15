@@ -23,7 +23,9 @@ import org.opencds.cqf.tooling.Operation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-
+/**
+ * @author Adam Stevenson
+ */
 public abstract class FlatMultiValueSetGeneratorBase extends Operation {
 
     private String pathToSpreadsheet;        // -pathtospreadsheet (-pts)

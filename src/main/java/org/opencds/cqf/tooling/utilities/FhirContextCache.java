@@ -6,7 +6,9 @@ import java.util.Objects;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-
+/**
+ * @author Adam Stevenson
+ */
 public class FhirContextCache {
 
     private final static Map<FhirVersionEnum, FhirContext> contextCache = new HashMap<>();

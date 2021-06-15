@@ -10,7 +10,9 @@ import org.opencds.cqf.tooling.utilities.ArgUtils;
 
 import static java.util.Arrays.asList;
 
-
+/**
+ * @author Adam Stevenson
+ */
 public class TestIGArgumentsProcessor {
 
     public static final String[] OPERATION_OPTIONS = {"TestIG"};

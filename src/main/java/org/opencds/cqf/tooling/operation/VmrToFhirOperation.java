@@ -4,7 +4,9 @@ import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.parameter.VmrToFhirParameters;
 import org.opencds.cqf.tooling.processor.VmrToFhirProcessor;
 import org.opencds.cqf.tooling.processor.argument.VmrToFhirArgumentProcessor;
-
+/**
+ * @author Joshua Reynolds
+ */
 public class VmrToFhirOperation extends Operation {
 
     public VmrToFhirOperation() {

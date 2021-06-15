@@ -34,7 +34,7 @@ public class LibraryConverter {
      * @param conditionDTO conditionDTO
      * @param modelBuilder modelBuilder
      * @param libraryIndex library index to include in the name
-     * @return Pair<VersionedIdentifier, ContextDef>
+     * @return Pair of (VersionedIdentifier, ContextDef)
      */
     public Pair<VersionedIdentifier, ContextDef> adapt(ConditionDTO conditionDTO, VmrToModelElmBuilder modelBuilder, Integer libraryIndex) {
         String libraryName = null;
@@ -56,7 +56,7 @@ public class LibraryConverter {
      * @param conditionCriteriaRel conditionCriteriaRel
      * @param modelBuilder modelBuilder
      * @param libraryIndex library index to include in the name
-     * @return Pair<VersionedIdentifier, ContextDef>
+     * @return Pair of (VersionedIdentifier, ContextDef)
      */
     public Pair<VersionedIdentifier, ContextDef> adapt(ConditionCriteriaRelDTO conditionCriteriaRel, VmrToModelElmBuilder modelBuilder, Integer libraryIndex) {
         String libraryName = inferLibraryName(conditionCriteriaRel.getLabel(), libraryIndex);

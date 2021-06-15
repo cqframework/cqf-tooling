@@ -13,7 +13,9 @@ import org.opencds.cqf.tooling.Operation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-
+/**
+ * @author Adam Stevenson
+ */
 public class BundleResources extends Operation {
 
     private String encoding; // -encoding (-e)

@@ -9,7 +9,9 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
-
+/**
+ * @author Adam Stevenson
+ */
 public class GenericValueSetGenerator extends Operation {
 
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)

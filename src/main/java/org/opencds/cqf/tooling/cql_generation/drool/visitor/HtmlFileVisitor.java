@@ -20,6 +20,11 @@ import org.cdsframework.dto.OpenCdsConceptDTO;
 import org.opencds.cqf.tooling.cql_generation.IOUtil;
 import org.opencds.cqf.tooling.cql_generation.context.ElmContext;
 
+/**
+ * Generates html files from an RCKMS Drool Object graph.
+ * @author Joshua Reynolds
+ * @since 2021-02-24
+ */
 public class HtmlFileVisitor implements Visitor {
     private String outputDirectoryPath;
     private Map<String, String> htmlStrings = new HashMap<String, String>();

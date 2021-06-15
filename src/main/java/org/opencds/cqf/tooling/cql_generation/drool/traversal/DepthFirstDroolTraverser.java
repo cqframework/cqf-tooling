@@ -19,9 +19,17 @@ import org.cdsframework.enumeration.CriteriaResourceType;
 import org.cdsframework.enumeration.DataModelClassType;
 import org.opencds.cqf.tooling.cql_generation.context.ElmContext;
 import org.opencds.cqf.tooling.cql_generation.drool.visitor.Visitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Traverses Depth First through a Drool Object Graph.
+ * @author Joshua Reynolds
+ * @since 2021-02-24
+ */
 public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
 
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     private Stack<CriteriaResourceParamDTO> criteriaResourceParamDTOExtensionStack = new Stack<CriteriaResourceParamDTO>();
     private Boolean unableToDetermineModeling = false;
     public DepthFirstDroolTraverser(Visitor visitor) {
@@ -44,7 +52,7 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
             .filter(rel -> 
             rel.getConditionCriteriaPredicateDTOs().isEmpty()
              || rel.getName().toLowerCase().contains("not yet implemented"))
-            .forEach(rel -> System.out.println("Not Yet Implemented: " + rel.getUuid()));
+            .forEach(rel -> logger.warn("Not Yet Implemented: " + rel.getUuid()));
             
             conditionCriteriaRels.stream()
             .filter(rel -> 
@@ -113,7 +121,7 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
             criteriaResourceParamDTOExtensionStack.push(predicatePart.getCriteriaResourceParamDTO());
         }
         if (unknownOperatorModeling(predicatePart)) {
-            System.out.println("Unable to determine operator from " + predicatePart.getCriteriaResourceDTO().getUuid());
+            logger.warn("Unable to determine operator from " + predicatePart.getCriteriaResourceDTO().getUuid());
             unableToDetermineModeling = true;
             return;
         }
@@ -146,12 +154,12 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
                     }
                 } else if (sourcePredicatePartDTO.getDataInputClassType().equals(DataModelClassType.String)) {
                     if (sourcePredicatePartDTO.getPartAlias() != null && sourcePredicatePartDTO.getPartAlias().equals("an order and only an order")) {
-                        System.out.println("Unable to determine modeling from " + sourcePredicatePartDTO.getUuid());
+                        logger.warn("Unable to determine modeling from " + sourcePredicatePartDTO.getUuid());
                         unableToDetermineModeling = true;
                     }
                     break;
                 } else if (unknownConceptModeling(sourcePredicatePartDTO)){
-                    System.out.println("Unable to determine modeling from " + sourcePredicatePartDTO.getUuid());
+                    logger.warn("Unable to determine modeling from " + sourcePredicatePartDTO.getUuid());
                     unableToDetermineModeling = true;
                     return;
                 }

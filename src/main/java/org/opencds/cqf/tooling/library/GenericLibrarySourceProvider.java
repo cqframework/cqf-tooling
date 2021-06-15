@@ -8,7 +8,9 @@ import java.util.Scanner;
 
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
-
+/**
+ * @author Adam Stevenson
+ */
 public class GenericLibrarySourceProvider implements LibrarySourceProvider {
 
     private String pathToSource;

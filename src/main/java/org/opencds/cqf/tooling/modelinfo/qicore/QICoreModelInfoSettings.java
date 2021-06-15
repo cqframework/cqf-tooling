@@ -1,7 +1,9 @@
 package org.opencds.cqf.tooling.modelinfo.qicore;
 
 import org.opencds.cqf.tooling.modelinfo.ModelInfoSettings;
-
+/**
+ * @author Adam Stevenson
+ */
 public class QICoreModelInfoSettings extends ModelInfoSettings {
 
     public QICoreModelInfoSettings(String version) {

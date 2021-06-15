@@ -8,6 +8,11 @@ import javax.xml.bind.Marshaller;
 
 import org.hl7.cql_annotations.r1.Annotation;
 
+/**
+ * Serializes Objects to xml
+ * @author Joshua Reynolds
+ * @since 2021-02-24
+ */
 public class Serializer {
     Class<?> clazz;
 

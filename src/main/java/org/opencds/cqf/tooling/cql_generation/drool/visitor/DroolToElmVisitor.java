@@ -43,6 +43,9 @@ import org.slf4j.MarkerFactory;
  * @since 2021-02-24
  */
 public class DroolToElmVisitor implements Visitor {
+    /**
+     * Toggle ** of cql output
+     */
     public enum CQLTYPES {
         CONDITION, CONDITIONREL
     }

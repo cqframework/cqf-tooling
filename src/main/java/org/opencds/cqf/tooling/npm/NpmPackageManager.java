@@ -23,7 +23,9 @@ import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.ToolsVersion;
 import org.hl7.fhir.utilities.json.JsonTrackingParser;
-
+/**
+ * @author Adam Stevenson
+ */
 public class NpmPackageManager implements IWorkerContext.ILoggingService {
     private FilesystemPackageCacheManager pcm;
     private List<NpmPackage> npmList = new ArrayList<>();

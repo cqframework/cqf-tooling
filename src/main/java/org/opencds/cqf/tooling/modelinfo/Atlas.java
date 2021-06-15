@@ -33,7 +33,9 @@ import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-
+/**
+ * @author Adam Stevenson
+ */
 public class Atlas {
 
     public Atlas() {

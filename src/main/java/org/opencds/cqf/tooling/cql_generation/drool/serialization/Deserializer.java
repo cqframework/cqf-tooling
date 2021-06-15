@@ -18,6 +18,11 @@ import org.cdsframework.dto.ConditionDTO;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+/**
+ * Deserializes RCKMS Drool data
+ * @author Joshua Reynolds
+ * @since 2021-02-24
+ */
 public class Deserializer {
 
     private ObjectMapper objectMapper = initializeObjectMapper();

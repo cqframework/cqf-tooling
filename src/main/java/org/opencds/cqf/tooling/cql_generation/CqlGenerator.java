@@ -27,7 +27,7 @@ public interface CqlGenerator {
     /**
      * 
      * @param inputURI URI of the input Data Source File
-     * @param outputPath URI of the the output Directory
+     * @param outputURI URI of the the output Directory
      * @param fhirVersion fhir Version of elm to output
      */
     public void generateAndWriteToFile(URI inputURI, URI outputURI, String fhirVersion);/**

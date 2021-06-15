@@ -6,7 +6,9 @@ import org.hl7.fhir.r4.model.ContactDetail;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ValueSet;
-
+/**
+ * @author Adam Stevenson
+ */
 public class OrganizationalMetaData {
 
     private String canonicalUrlBase;

@@ -8,7 +8,9 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Library;
 import org.opencds.cqf.tooling.library.LibraryResourceProvider;
-
+/**
+ * @author Adam Stevenson
+ */
 public class InMemoryLibraryResourceProvider implements LibraryResourceProvider {
 
     private Map<String, Library> libraries = new HashMap<>();

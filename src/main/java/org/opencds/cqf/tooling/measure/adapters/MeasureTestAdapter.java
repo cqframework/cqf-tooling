@@ -11,7 +11,9 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.util.BundleUtil;
-
+/**
+ * @author Adam Stevenson
+ */
 public abstract class MeasureTestAdapter {
 
     protected String testPath;

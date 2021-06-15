@@ -9,7 +9,9 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
-
+/**
+ * @author Joshua Reynolds
+ */
 public class VmrToFhirArgumentProcessor {
 
     public static final String[] OPERATION_OPTIONS = {"VmrToFhir"};
@@ -56,9 +58,9 @@ public class VmrToFhirArgumentProcessor {
         Encoding encodingEnum = Encoding.parse(encoding.toLowerCase());
     
         VmrToFhirParameters vtfp = new VmrToFhirParameters();
-        vtfp.vmrDataPath = outputPath;
+        vtfp.vmrDataPath = inputFilePath;
         vtfp.encoding = encodingEnum;
-        vtfp.fhirOutputPath = inputFilePath;
+        vtfp.fhirOutputPath = outputPath;
         vtfp.fhirVersion = fhirVersion;
        
         return vtfp;

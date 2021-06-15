@@ -21,6 +21,9 @@ import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
 import ca.uhn.fhir.narrative2.ThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
+/**
+ * @author Adam Stevenson
+ */
 public class JarEnabledCustomThymeleafNarrativeGenerator extends ThymeleafNarrativeGenerator {
 	private List<String> myPropertyFile;
 

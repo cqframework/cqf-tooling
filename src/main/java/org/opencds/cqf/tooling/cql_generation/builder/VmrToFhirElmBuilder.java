@@ -26,6 +26,11 @@ import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.ReturnClause;
 import org.hl7.elm.r1.TypeSpecifier;
 
+/**
+ * Builds ELM after transforming vMR expression to FHIR Data Model expressions
+ * @author Joshua Reynolds
+ * @since 2021-02-24
+ */
 public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
 
     /**

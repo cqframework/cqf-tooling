@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling.terminology;
-
+/**
+ * @author Adam Stevenson
+ */
 public class CMSFlatMultiValueSetGenerator extends FlatMultiValueSetGeneratorBase {
 
     private static final String outputPath = "src/main/resources/org/opencds/cqf/tooling/terminology/output/vsac";  // -outputpath (-op)

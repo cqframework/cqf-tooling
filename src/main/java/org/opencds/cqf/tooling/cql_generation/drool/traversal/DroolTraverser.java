@@ -16,6 +16,12 @@ import org.cdsframework.dto.DataInputNodeDTO;
 import org.cdsframework.dto.OpenCdsConceptDTO;
 import org.opencds.cqf.tooling.cql_generation.context.ElmContext;
 
+
+/**
+ * Traversal Abstraction for RCKMS Drool Object Graph
+ * @author Joshua Reynolds
+ * @since 2021-02-24
+ */
 public abstract class DroolTraverser<T> {
     protected T visitor;
 

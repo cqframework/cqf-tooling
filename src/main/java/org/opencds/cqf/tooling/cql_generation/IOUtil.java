@@ -13,6 +13,10 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 
 // This should be replaced by a FileDal
+/**
+ * @author Joshua Reynolds
+ * @since 2021-02-24
+ */
 public class IOUtil {
 
     public static String readFile(String path) {

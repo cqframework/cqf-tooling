@@ -5,7 +5,9 @@ import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.opencds.cqf.tooling.npm.NpmPackageManager;
 
 import java.util.List;
-
+/**
+ * @author Adam Stevenson
+ */
 public interface IProcessorContext {
     String getRootDir();
 

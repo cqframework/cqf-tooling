@@ -15,7 +15,9 @@ import org.opencds.cqf.tooling.modelinfo.Atlas;
 import org.opencds.cqf.tooling.modelinfo.ContextInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.ModelInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.SearchInfoBuilder;
-
+/**
+ * @author Adam Stevenson
+ */
 public class FHIRModelInfoBuilder extends ModelInfoBuilder {
     private String fhirHelpersPath;
     private SearchInfoBuilder searchInfoBuilder;

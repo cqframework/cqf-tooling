@@ -7,7 +7,9 @@ import org.opencds.cqf.tooling.common.JarEnabledCustomThymeleafNarrativeGenerato
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.narrative2.ThymeleafNarrativeGenerator;
-
+/**
+ * @author Adam Stevenson
+ */
 public abstract class BaseNarrativeProvider<T extends INarrative> {
     private INarrativeGenerator generator;
     

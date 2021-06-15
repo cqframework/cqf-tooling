@@ -24,7 +24,9 @@ import org.hl7.fhir.r4.model.UsageContext;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-
+/**
+ * @author Adam Stevenson
+ */
 @ResourceDef(name="CqfMeasure")
 public class CqfMeasure extends Measure {
     private static final long serialVersionUID = -1297192817969868337L;

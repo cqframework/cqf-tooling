@@ -9,7 +9,9 @@ import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
 import org.hl7.elm.r1.*;
 
 import java.util.*;
-
+/**
+ * @author Bryant
+ */
 public class ElmRequirementsContext {
 
     private CqlTranslatorOptions options;

@@ -8,7 +8,9 @@ import org.hl7.elm_modelinfo.r1.ClassInfo;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.elm_modelinfo.r1.ModelSpecifier;
 import org.hl7.elm_modelinfo.r1.TypeInfo;
-
+/**
+ * @author Adam Stevenson
+ */
 public class ModelInfoBuilder {
 
     protected Collection<TypeInfo> typeInfos;

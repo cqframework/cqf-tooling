@@ -16,6 +16,12 @@ import org.cdsframework.dto.DataInputNodeDTO;
 import org.cdsframework.dto.OpenCdsConceptDTO;
 import org.opencds.cqf.tooling.cql_generation.context.ElmContext;
 
+
+/**
+ * Visitation for RCKMS Drool Data Graph
+ * @author Joshua Reynolds
+ * @since 2021-02-24
+ */
 public interface Visitor {
 
 	public void visit(CriteriaPredicatePartConceptDTO predicatePartConcepts);

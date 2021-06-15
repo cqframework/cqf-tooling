@@ -12,7 +12,9 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
 
-
+/**
+ * @author Adam Stevenson
+ */
 public class RefreshLibraryArgumentProcessor {
     public static final String[] OPERATION_OPTIONS = {"RefreshLibrary"};
 

@@ -11,7 +11,9 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
-
+/**
+ * @author Joshua Reynolds
+ */
 public class GenerateCQLFromDroolArgumentProcessor {
 
     public static final String[] OPERATION_OPTIONS = {"GenerateCQLFromDrool"};

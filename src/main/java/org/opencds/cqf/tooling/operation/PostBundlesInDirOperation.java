@@ -4,7 +4,9 @@ import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.parameter.PostBundlesInDirParameters;
 import org.opencds.cqf.tooling.processor.PostBundlesInDirProcessor;
 import org.opencds.cqf.tooling.processor.argument.PostBundlesInDirArgumentProcessor;
-
+/**
+ * @author Adam Stevenson
+ */
 public class PostBundlesInDirOperation extends Operation {
 
     public PostBundlesInDirOperation() {    

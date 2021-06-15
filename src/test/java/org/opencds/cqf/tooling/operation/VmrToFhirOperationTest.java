@@ -1,16 +1,19 @@
 package org.opencds.cqf.tooling.operation;
 
+import java.net.URISyntaxException;
+
 import org.testng.annotations.Test;
 
 public class VmrToFhirOperationTest {
-    private String vmrFilePath = "C:/Users/jreys/Documents/src/cqf-tooling/src/test/resources/org/opencds/cqf/tooling/operation/VmrToFhir";
+    private String vmrFilePath = "vMROutput.xml";
 
-    // @Test
-    public void vmrOperationTest() {
+    @Test
+    public void vmrOperationTest() throws URISyntaxException {
+        String inputFilePath = VmrToFhirOperationTest.class.getResource(vmrFilePath).toURI().getPath();
         String operation = "VmrToFhir";
-        String outputPath = "C:/Users/jreys/Documents/src/cqf-tooling/src/test/resources/org/opencds/cqf/tooling/operation/VmrToFhir/vMROutput.xml";
+        String outputPath = "./src/test/resources/org/opencds/cqf/tooling/operation/VmrToFhir";
         String encoding = "xml";
-        String[] args = { "-" + operation, "-ifp=" + vmrFilePath, "-op=" + outputPath, "-e=" + encoding };
+        String[] args = { "-" + operation, "-ifp=" + inputFilePath, "-op=" + outputPath, "-e=" + encoding };
         VmrToFhirOperation vmr = new VmrToFhirOperation();
         vmr.execute(args);
     }

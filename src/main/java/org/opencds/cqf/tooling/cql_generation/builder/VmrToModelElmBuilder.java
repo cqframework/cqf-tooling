@@ -70,6 +70,9 @@ import org.slf4j.MarkerFactory;
 import org.hl7.elm.r1.Or;
 
 // Some of these methods should probably live in LibraryBuilder... possible all
+/**
+ * @author Joshua Reynolds
+ */
 public abstract class VmrToModelElmBuilder {
     public final ObjectFactory of = new ObjectFactory();
     public final org.hl7.cql_annotations.r1.ObjectFactory af = new org.hl7.cql_annotations.r1.ObjectFactory();

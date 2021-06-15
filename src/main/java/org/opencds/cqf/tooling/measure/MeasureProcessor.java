@@ -22,7 +22,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
+/**
+ * @author Adam Stevenson
+ */
 public class MeasureProcessor extends BaseProcessor {
     public static final String ResourcePrefix = "measure-";
     public static final String MeasureTestGroupName = "measure";

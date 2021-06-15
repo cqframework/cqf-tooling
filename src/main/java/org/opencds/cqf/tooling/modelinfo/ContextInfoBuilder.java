@@ -13,7 +13,9 @@ import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.hl7.fhir.r4.model.CompartmentDefinition;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
-
+/**
+ * @author Adam Stevenson
+ */
 public class ContextInfoBuilder {
     protected Atlas atlas;
     protected Map<String, ContextInfo> contextInfos;

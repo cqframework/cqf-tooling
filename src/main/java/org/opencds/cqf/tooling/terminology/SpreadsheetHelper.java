@@ -14,7 +14,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-
+/**
+ * @author Adam Stevenson
+ */
 public class SpreadsheetHelper {
 
     public static Workbook getWorkbook(String pathToSpreadsheet) {

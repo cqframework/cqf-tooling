@@ -17,7 +17,9 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
-
+/**
+ * @author Adam Stevenson
+ */
 public class R4LibraryProcessor extends LibraryProcessor {
     private String libraryPath;
     private FhirContext fhirContext;

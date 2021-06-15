@@ -5,7 +5,9 @@ import org.hl7.elm.r1.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
+/**
+ * @author Adam Stevenson
+ */
 public class ElmRequirements {
 
     private List<ElmRequirement> requirements = new ArrayList<ElmRequirement>();

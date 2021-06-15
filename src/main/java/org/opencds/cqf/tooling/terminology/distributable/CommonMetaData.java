@@ -2,7 +2,9 @@ package org.opencds.cqf.tooling.terminology.distributable;
 
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * @author Adam Stevenson
+ */
 public class CommonMetaData {
 
     private OrganizationalMetaData organizationalMetaData = new OrganizationalMetaData();

@@ -6,7 +6,9 @@ import java.util.Map;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-
+/**
+ * @author Adam Stevenson
+ */
 public class Primitives {
 
     // This class provides a JSONSchema scaffolding map for FHIR primitive types (http://hl7.org/fhir/STU3/datatypes.html)

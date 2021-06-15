@@ -12,6 +12,10 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+/**
+ * 
+ * @author Rckms
+ */
 @SuppressWarnings("unchecked")
 public class PairJacksonProvider extends JsonDeserializer<Pair<Object, Object>> {
         @Override

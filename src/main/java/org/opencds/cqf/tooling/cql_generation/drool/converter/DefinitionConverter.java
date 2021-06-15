@@ -80,7 +80,7 @@ public class DefinitionConverter {
      * @param modelBuilder modelBuilder
      * @param expressionStack expressionStack
      * @param referenceStack referenceStack (Conjunction, ExpressionRef)
-     * @return Pair<String, ExpressionRef>
+     * @return Pair of (String, ExpressionRef)
      */
     public Pair<String, ExpressionRef> adapt(ConditionCriteriaPredicateDTO predicate, LibraryBuilder libraryBuilder, VmrToModelElmBuilder modelBuilder, Stack<Expression> expressionStack, Stack<Pair<String, ExpressionRef>> referenceStack) {
         if (Strings.isNullOrEmpty(identifier)) {

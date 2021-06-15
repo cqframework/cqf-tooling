@@ -24,7 +24,9 @@ import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
-
+/**
+ * @author Adam Stevenson
+ */
 public class LibraryRefresher extends BaseLibraryGenerator<Library, NarrativeProvider> {
 
     private Map<String, IBaseResource> libraryMap = new HashMap<>();

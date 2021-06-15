@@ -5,7 +5,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-
+/**
+ * @author Adam Stevenson
+ */
 @SuppressWarnings("serial")
 public class ClassInfoSettings {
     public String modelName;

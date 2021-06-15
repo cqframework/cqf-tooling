@@ -20,7 +20,9 @@ import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.opencds.cqf.tooling.library.BaseLibraryGenerator;
 
 import ca.uhn.fhir.context.FhirContext;
-
+/**
+ * @author Adam Stevenson
+ */
 public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativeProvider> {
 
     public LibraryGenerator() {

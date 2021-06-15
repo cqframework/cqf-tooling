@@ -12,7 +12,9 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import java.io.File;
 import java.time.Instant;
 import java.util.Date;
-
+/**
+ * @author Adam Stevenson
+ */
 public class EnsureExecutableValueSetOperation extends Operation {
     private String valueSetPath;
     private String encoding = IOUtils.Encoding.JSON.toString();

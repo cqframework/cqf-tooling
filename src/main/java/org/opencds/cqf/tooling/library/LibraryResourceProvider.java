@@ -1,7 +1,9 @@
 package org.opencds.cqf.tooling.library;
 
 import org.hl7.fhir.dstu3.model.Library;
-
+/**
+ * @author Adam Stevenson
+ */
 public interface LibraryResourceProvider {
 
     Library resolveLibraryById(String libraryId);

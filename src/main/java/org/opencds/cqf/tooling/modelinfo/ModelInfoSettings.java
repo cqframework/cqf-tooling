@@ -3,7 +3,9 @@ package org.opencds.cqf.tooling.modelinfo;
 import java.util.Collection;
 
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
-
+/**
+ * @author Adam Stevenson
+ */
 public class ModelInfoSettings {
 
     public String name;

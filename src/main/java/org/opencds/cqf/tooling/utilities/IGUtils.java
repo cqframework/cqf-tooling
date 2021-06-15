@@ -7,7 +7,9 @@ import java.util.List;
 
 import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.utilities.Utilities;
-
+/**
+ * @author Adam Stevenson
+ */
 public class IGUtils {
     public static String getImplementationGuideCanonicalBase(String url) {
         String canonicalBase = null;

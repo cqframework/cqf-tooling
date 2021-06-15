@@ -2,7 +2,9 @@ package org.opencds.cqf.tooling.parameter;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.opencds.cqf.tooling.processor.IProcessorContext;
-
+/**
+ * @author Adam Stevenson
+ */
 public class TestIGParameters {
     /*
     The ig ini file

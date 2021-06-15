@@ -2,7 +2,9 @@ package org.opencds.cqf.tooling.terminology;
 
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * @author Adam Stevenson
+ */
 public class ValueSet {
 
     private String system;

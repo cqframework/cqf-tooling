@@ -6,7 +6,9 @@ import java.util.Map;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
+/**
+ * @author Adam Stevenson
+ */
 public class FhirSchema {
 
     private String name;

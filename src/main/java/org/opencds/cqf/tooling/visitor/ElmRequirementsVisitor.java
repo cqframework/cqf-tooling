@@ -2,7 +2,9 @@ package org.opencds.cqf.tooling.visitor;
 
 import org.cqframework.cql.elm.visiting.ElmBaseLibraryVisitor;
 import org.hl7.elm.r1.*;
-
+/**
+ * @author Bryant
+ */
 public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequirements, ElmRequirementsContext>{
 
     public ElmRequirementsVisitor() {

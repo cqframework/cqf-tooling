@@ -1,5 +1,8 @@
 package org.opencds.cqf.tooling.common;
 
+/**
+ * @author Adam Stevenson
+ */
 public class CqfmSoftwareSystem {
     protected String name;
     public String getName() { return this.name; }

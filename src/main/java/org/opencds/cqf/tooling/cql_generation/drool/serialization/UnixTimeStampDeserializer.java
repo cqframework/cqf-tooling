@@ -10,6 +10,11 @@ import com.fasterxml.jackson.core.JsonTokenId;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 
+/**
+ * Deserializes Unix Time Stamps
+ * @author Joshua Reynolds
+ * @since 2021-02-24
+ */
 @SuppressWarnings("deprecation")
 public class UnixTimeStampDeserializer extends DateDeserializer {
 

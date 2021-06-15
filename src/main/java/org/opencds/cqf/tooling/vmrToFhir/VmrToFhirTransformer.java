@@ -32,7 +32,7 @@ public class VmrToFhirTransformer {
     private Patient patient = new Patient();
 
     /**
-     * Transforms ClinicalStatements to List<IAnyResource>
+     * Transforms ClinicalStatements to List(IAnyResource)
      * @param statements the clincal statements
      * @return
      */
@@ -44,7 +44,7 @@ public class VmrToFhirTransformer {
                 try {
                     result.addAll(transform(adverseEvent));
                 } catch (Exception e) {
-                    System.out.println(e.getMessage());
+                    logger.error(e.getMessage());
                 }
             });
         }
@@ -82,7 +82,7 @@ public class VmrToFhirTransformer {
                 try {
                     result.addAll(transform(procedureEvent));
                 } catch (Exception e) {
-                    System.out.println(e.getMessage());
+                    logger.error(e.getMessage());
                 }
             });
         }
@@ -91,7 +91,7 @@ public class VmrToFhirTransformer {
                 try {
                     result.addAll(transform(procedureOrder));
                 } catch (Exception e) {
-                    System.out.println(e.getMessage());
+                    logger.error(e.getMessage());
                 }
             });
         }
@@ -137,7 +137,7 @@ public class VmrToFhirTransformer {
     }
 
     /**
-     * Transforms EncounterEvent to List<IAnyResource>
+     * Transforms EncounterEvent to List(IAnyResource)
      * @param encounterEvent the encounter event
      * @return
      */
@@ -308,7 +308,7 @@ public class VmrToFhirTransformer {
     }
 
     /**
-     * Transforms SubstanceAdministrationEvent to List<IAnyResource>
+     * Transforms SubstanceAdministrationEvent to List(IAnyResource)
      * @param substanceAdministrationEvent the substance administration Event
      * @return
      */
@@ -340,7 +340,7 @@ public class VmrToFhirTransformer {
     }
 
     /**
-     * Transforms SubstanceAdministrationOrder to List<IAnyResource> (MedicationRequest)
+     * Transforms SubstanceAdministrationOrder to List(IAnyResource) (MedicationRequest)
      * @param substanceAdministrationOrder the substance administration order
      * @return
      */
@@ -380,7 +380,7 @@ public class VmrToFhirTransformer {
     }
 
     /**
-     * Transforms List<AD> to List<Address>
+     * Transforms List(AD) to List(Address)
      * @param addresses the list of addresses
      * @return
      */

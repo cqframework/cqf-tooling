@@ -8,7 +8,9 @@ import org.opencds.cqf.tooling.Operation;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * @author Adam Stevenson
+ */
 public class BundleToResources extends Operation {
 
     private String encoding; // -encoding (-e)

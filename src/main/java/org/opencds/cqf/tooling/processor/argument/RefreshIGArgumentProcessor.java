@@ -14,7 +14,9 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
 
-
+/**
+ * @author Adam Stevenson
+ */
 public class RefreshIGArgumentProcessor {
 
     public static final String[] OPERATION_OPTIONS = {"RefreshIG"};

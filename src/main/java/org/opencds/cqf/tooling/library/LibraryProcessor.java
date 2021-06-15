@@ -25,7 +25,9 @@ import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import ca.uhn.fhir.context.FhirContext;
-
+/**
+ * @author Adam Stevenson
+ */
 public class LibraryProcessor extends BaseProcessor {
     public static final String ResourcePrefix = "library-";   
     public static String getId(String baseId) {

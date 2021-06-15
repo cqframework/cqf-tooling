@@ -20,7 +20,9 @@ import org.jsoup.nodes.Element;
 import org.opencds.cqf.tooling.Operation;
 
 import ca.uhn.fhir.context.FhirContext;
-
+/**
+ * @author Adam Stevenson
+ */
 public class QuickPageGenerator extends Operation {
 
     // Assuming R4

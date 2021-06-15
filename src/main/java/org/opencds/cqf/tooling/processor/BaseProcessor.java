@@ -20,7 +20,9 @@ import org.hl7.fhir.utilities.VersionUtilities;
 import org.opencds.cqf.tooling.npm.LibraryLoader;
 import org.opencds.cqf.tooling.npm.NpmPackageManager;
 import org.opencds.cqf.tooling.utilities.IGUtils;
-
+/**
+ * @author Adam Stevenson
+ */
 public class BaseProcessor implements IProcessorContext, IWorkerContext.ILoggingService {
 
     protected String rootDir;

@@ -1,14 +1,18 @@
 package org.opencds.cqf.tooling.operation;
 
 import org.testng.annotations.Test;
+
+import java.net.URISyntaxException;
+
 import org.opencds.cqf.tooling.Operation;
 
 public class GenerateCQLFromDroolOperationTest {
-    // @Test
-    public void test_worked() {
+    @Test
+    public void test_worked() throws URISyntaxException {
+        String dataInputPath = "default.json";
         String operation = "GenerateCQLFromDrool";
-        String inputFilePath = "../CQLGenerationDocs/NonGeneratedDocs/default.json";
-        String outputPath = "../CQLGenerationDocs/GeneratedDocs/elm";
+        String inputFilePath = GenerateCQLFromDroolOperationTest.class.getResource(dataInputPath).toURI().getPath();
+        String outputPath = "src\\test\\resources\\org\\opencds\\cqf\\tooling\\cql_generation\\drool\\visitor";
         String encoding = "json";
         String[] args = { "-" + operation, "-ifp=" + inputFilePath, "-op=" + outputPath, "-e=" + encoding };
         Operation generateCQLFromDroolOperation = new GenerateCQLFromDroolOperation();

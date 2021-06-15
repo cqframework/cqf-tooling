@@ -1,15 +1,13 @@
 package org.opencds.cqf.tooling.cql_generation.drool.visitor;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
@@ -28,6 +26,8 @@ import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.Context;
@@ -35,26 +35,27 @@ import org.opencds.cqf.cql.engine.execution.Context;
 import ca.uhn.fhir.context.FhirContext;
 
 public class DroolToElmVisitorTest {
-    // @Test
-    public void EvaluatePatienthasadiagnosisof() {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    @Test
+    public void EvaluatePatienthasadiagnosisof() throws IOException {
         setup("[]_Thrombocytopenia_UPDATED_TEMPLATE_5477e.xml");
-        List<String> expressions = readFileInList("../CQLGenerationDocs/GeneratedDocs/elm/expressions/[]_Thrombocytopenia__Expression.txt");
+        List<String> expressions = readFileInList("[]_Thrombocytopenia__Expression.txt");
         List<Object> results = new ArrayList<Object>();
         for (String expression : expressions) {
             String observationInterpretationRelatedExpressions = "(?i)Group 1.1-d5acd129f47353d9de23d4f5c54c4821|Group 2.2-bd2434cd92e9dc1f22b181256d29884b|Lab Result Interpretation-bcfb9161a92a6b6575cf9e6658816c12|Group 1-b2ec8fd8ef385f444209414cdd4f0bad|Lab Result Interpretation-459dc3e6db577f49f4221697c63ffec9|Group 2-5acef8b7bbc1bdea7569c54d5f407772|ConditionCriteriaMet";
             if (expression.matches(observationInterpretationRelatedExpressions)) {
-                System.out.println("Awaiting engine fix Observation Interpretation logic");
+                logger.debug("Awaiting engine fix Observation Interpretation logic");
             } else {
                 if (expression.equals(
                         "Patient has lab result with test name (specific or an organism or substance)-3f12c73cbe886ab3f908544bb1ca8266")) {
-                    System.out.println("Missing ValueSet: https://hln.com/fhir/ValueSet/VHF008");
+                            logger.debug("Missing ValueSet: https://hln.com/fhir/ValueSet/VHF008");
                 } else {
-                    System.out.println(" Expression: " + expression);
+                    logger.debug(" Expression: " + expression);
                     try {
                         Object result = context.resolveExpressionRef(expression).getExpression().evaluate(context);
                         if (result instanceof Boolean) {
                             if (((Boolean) result).booleanValue() == false) {
-                                System.out.println("False");
+                                logger.debug("False");
                             }
                         }
                         results.add(result);
@@ -70,31 +71,31 @@ public class DroolToElmVisitorTest {
         // results.forEach(object -> Assert.assertTrue(((List<?>) object).size() == 2));
     }
 
-    // @Test
-    public void test_ModelingK() {
+    @Test
+    public void test_ModelingK() throws IOException {
         String xmlFileName = "GeneratedCql14_922c0.xml";
         String expressionListFilePath =
-        "../CQLGenerationDocs/GeneratedDocs/elm/expressions/GeneratedCql14_922c0_Expression.txt";
+        "GeneratedCql14_922c0_Expression.txt";
         runAllExpressionsFromFile(xmlFileName, expressionListFilePath);
         //generateElmForDebug();
 
         // results.forEach(object -> Assert.assertTrue(((List<?>) object).size() == 2));
     }
 
-    // @Test
-    public void test_ModelingLAndD() {
+    @Test
+    public void test_ModelingLAndD() throws IOException {
         String xmlFileName = "_Medications_Administered_2764c.xml";
-        String expressionListFilePath = "../CQLGenerationDocs/GeneratedDocs/elm/expressions/_Medications_Adminis_Expression.txt";
+        String expressionListFilePath = "_Medications_Adminis_Expression.txt";
         runAllExpressionsFromFile(xmlFileName, expressionListFilePath);
         // generateElmForDebug();
 
         // results.forEach(object -> Assert.assertTrue(((List<?>) object).size() == 2));
     }
 
-    // @Test
-    public void test_ModelingN() {
+    @Test
+    public void test_ModelingN() throws IOException {
         String xmlFileName = "Patient_is_deceased_84755.xml";
-        String expressionListFilePath = "../CQLGenerationDocs/GeneratedDocs/elm/expressions/Patient_is_deceased__Expression.txt";
+        String expressionListFilePath = "Patient_is_deceased__Expression.txt";
         runAllExpressionsFromFile(xmlFileName, expressionListFilePath);
         // generateElmForDebug();
         // System.out.println("test");
@@ -105,17 +106,17 @@ public class DroolToElmVisitorTest {
     // @Test
     // public void test_ModelingC() {
     //     String xmlFileName = "GeneratedCql136_89fdc.xml";
-    //     String expressionListFilePath = "../CQLGenerationDocs/GeneratedDocs/elm/expressions/GeneratedCql136_89fd_Expression.txt";
+    //     String expressionListFilePath = "GeneratedCql136_89fd_Expression.txt";
     //     runAllExpressionsFromFile(xmlFileName, expressionListFilePath);
     //     //generateElmForDebug();
 
     //     // results.forEach(object -> Assert.assertTrue(((List<?>) object).size() == 2));
     // }
 
-    // @Test
-    public void other() {
+    @Test
+    public void other() throws IOException {
         String xmlFileName = "Abdominal_Cramps_314c4.xml";
-        String expressionListFilePath = "../CQLGenerationDocs/GeneratedDocs/elm/expressions/Abdominal_Cramps_314_Expression.txt";
+        String expressionListFilePath = "Abdominal_Cramps_314_Expression.txt";
         runAllExpressionsFromFile(xmlFileName, expressionListFilePath);
         // setup("Patient_is_deceased_84755.xml");
         //generateElmForDebug();
@@ -123,17 +124,17 @@ public class DroolToElmVisitorTest {
         // results.forEach(object -> Assert.assertTrue(((List<?>) object).size() == 2));
     }
 
-    // @Test
-    public void otherOther() {
+    @Test
+    public void otherOther() throws IOException {
         String xmlFileName = "Anorexia_baace.xml";
-        String expressionListFilePath = "../CQLGenerationDocs/GeneratedDocs/elm/expressions/Anorexia_baace_Expression.txt";
+        String expressionListFilePath = "Anorexia_baace_Expression.txt";
         runAllExpressionsFromFile(xmlFileName, expressionListFilePath);
         // generateElmForDebug();
 
         // results.forEach(object -> Assert.assertTrue(((List<?>) object).size() == 2));
     }
 
-    private List<Object> runAllExpressionsFromFile(String xmlFileName, String expressionListFilePath) {
+    private List<Object> runAllExpressionsFromFile(String xmlFileName, String expressionListFilePath) throws IOException {
         setup(xmlFileName);
         List<String> expressions = readFileInList(expressionListFilePath);
         List<Object> results = new ArrayList<Object>();
@@ -141,7 +142,7 @@ public class DroolToElmVisitorTest {
             Object result = context.resolveExpressionRef(expression).getExpression().evaluate(context);
             if (result instanceof Boolean) {
                 if (((Boolean) result).booleanValue() == false) {
-                    System.out.println("False");
+                    logger.debug("False");
                 }
             }
             results.add(result);
@@ -198,16 +199,12 @@ public class DroolToElmVisitorTest {
         context.registerTerminologyProvider(terminologyProvider);
     }
 
-    public static List<String> readFileInList(String fileName) {
-        List<String> lines = Collections.emptyList();
-        try {
-            lines = Files.readAllLines(Paths.get(fileName), StandardCharsets.UTF_8);
+    public static List<String> readFileInList(String fileName) throws IOException {
+        List<String> list = new ArrayList<String>();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(DroolToElmVisitorTest.class.getResourceAsStream(fileName)));
+        while(reader.ready()) {
+            list.add(reader.readLine());
         }
-
-        catch (IOException e) {
-            // do something
-            e.printStackTrace();
-        }
-        return lines;
+        return list;
     }
 }

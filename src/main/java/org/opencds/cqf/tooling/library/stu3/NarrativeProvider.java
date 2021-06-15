@@ -6,7 +6,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.library.BaseNarrativeProvider;
 
 import ca.uhn.fhir.context.FhirContext;
-
+/**
+ * @author Adam Stevenson
+ */
 public class NarrativeProvider extends BaseNarrativeProvider<Narrative> {
     public NarrativeProvider() {
         super(Thread.currentThread().getContextClassLoader().getResource("narratives/stu3/narrative.properties").toString()); 

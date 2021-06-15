@@ -3,7 +3,9 @@ package org.opencds.cqf.tooling.measure.stu3;
 import org.hl7.fhir.dstu3.model.Type;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-
+/**
+ * @author Adam Stevenson
+ */
 @SuppressWarnings("serial")
 @DatatypeDef(name = "CodeTerminologyRef")
 public class CodeTerminologyRef extends TerminologyRef {

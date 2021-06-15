@@ -6,11 +6,15 @@ import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.Type;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-
+/**
+ * @author Adam Stevenson
+ */
 @SuppressWarnings("serial")
 @DatatypeDef(name = "TerminologyRef")
 public abstract class TerminologyRef extends Type {
-
+/**
+ * @author Adam Stevenson
+ */
 	public static enum TerminologyRefType {
 		VALUESET, CODE, CODESYSTEM
 	}

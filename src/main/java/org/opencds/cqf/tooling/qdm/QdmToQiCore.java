@@ -13,7 +13,9 @@ import org.apache.commons.lang.StringUtils;
 import org.opencds.cqf.tooling.Operation;
 
 import info.bliki.wiki.model.WikiModel;
-
+/**
+ * @author Adam Stevenson
+ */
 public class QdmToQiCore extends Operation {
 
     private final String[] typeURLS = {

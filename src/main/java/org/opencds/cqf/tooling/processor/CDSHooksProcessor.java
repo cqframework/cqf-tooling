@@ -13,7 +13,9 @@ import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import ca.uhn.fhir.context.FhirContext;
-
+/**
+ * @author Adam Stevenson
+ */
 public class CDSHooksProcessor {
     public static final String requestsPathElement = "input/pagecontent/requests/";  
     public static final String responsesPathElement = "input/pagecontent/responses/";   

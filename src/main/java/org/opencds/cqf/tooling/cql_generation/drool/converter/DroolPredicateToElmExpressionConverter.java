@@ -297,7 +297,7 @@ public class DroolPredicateToElmExpressionConverter {
     private void adaptQuantityOperand(String text, BigDecimal bigDecimal, LibraryBuilder libraryBuilder) {
         if (Strings.isNullOrEmpty(text) || text.toLowerCase().equals("null")) {
             logger.warn("No unit found");
-            System.out.println("No Unit Provided");
+            logger.info("No Unit Provided");
         }
         if (bigDecimal == null && (Strings.isNullOrEmpty(text) || text.toLowerCase().equals("null"))) {
             logger.warn("Data Input was null");

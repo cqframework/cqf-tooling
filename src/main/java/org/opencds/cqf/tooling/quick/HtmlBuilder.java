@@ -2,7 +2,9 @@ package org.opencds.cqf.tooling.quick;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-
+/**
+ * @author Adam Stevenson
+ */
 public class HtmlBuilder {
 
     private QuickAtlas atlas;

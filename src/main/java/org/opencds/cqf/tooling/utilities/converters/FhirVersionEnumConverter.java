@@ -4,7 +4,9 @@ import java.util.Objects;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import joptsimple.ValueConverter;
-
+/**
+ * @author Adam Stevenson
+ */
 public class FhirVersionEnumConverter implements ValueConverter<FhirVersionEnum> {
 
     @Override

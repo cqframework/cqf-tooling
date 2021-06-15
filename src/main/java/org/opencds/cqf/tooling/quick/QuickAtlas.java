@@ -13,7 +13,9 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
 import ca.uhn.fhir.context.FhirContext;
-
+/**
+ * @author Adam Stevenson
+ */
 public class QuickAtlas {
 
     // Container for the QiCore-defined profiles (StructureDefinition.type -> StructureDefinition)

@@ -22,7 +22,9 @@ import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
 import org.opencds.cqf.tooling.npm.ILibraryReader;
 import org.opencds.cqf.tooling.npm.NpmLibrarySourceProvider;
 import org.opencds.cqf.tooling.npm.NpmModelInfoProvider;
-
+/**
+ * @author Adam Stevenson
+ */
 public class CqlProcessor {
 
     /**

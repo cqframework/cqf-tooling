@@ -9,7 +9,9 @@ import org.opencds.cqf.tooling.processor.IGBundleProcessor;
 import org.opencds.cqf.tooling.processor.IGProcessor;
 import org.opencds.cqf.tooling.processor.PlanDefinitionProcessor;
 import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
-
+/**
+ * @author Adam Stevenson
+ */
 public class RefreshIGOperation extends Operation {
 
     public RefreshIGOperation() {    
