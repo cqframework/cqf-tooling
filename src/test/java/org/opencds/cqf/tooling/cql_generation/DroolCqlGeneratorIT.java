@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 import org.opencds.cqf.tooling.cql_generation.drool.DroolCqlGenerator;
 import org.opencds.cqf.tooling.cql_generation.drool.visitor.DroolToElmVisitor.CQLTYPES;
 
-public class DroolCqlGeneratorTest {
+public class DroolCqlGeneratorIT {
 
     @Test
     public void   test_worked() throws URISyntaxException {
@@ -16,7 +16,7 @@ public class DroolCqlGeneratorTest {
         String outputPath = "src\\test\\resources\\org\\opencds\\cqf\\tooling\\cql_generation\\drool\\visitor";
         CQLTYPES cqlType = CQLTYPES.CONDITION;
         String fhirVersion = "4.0.0";
-        URI encodingUri = DroolCqlGeneratorTest.class.getResource(dataInputPath).toURI();
+        URI encodingUri = DroolCqlGeneratorIT.class.getResource(dataInputPath).toURI();
         URI outputUri = new File(outputPath).toURI();
         CqlGenerator droolIshCqlGenerator = new DroolCqlGenerator(cqlType);
         droolIshCqlGenerator.generateAndWriteToFile(encodingUri, outputUri, fhirVersion);

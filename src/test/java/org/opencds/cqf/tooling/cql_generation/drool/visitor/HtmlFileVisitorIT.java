@@ -9,7 +9,7 @@ import org.opencds.cqf.tooling.cql_generation.drool.serialization.Deserializer;
 import org.opencds.cqf.tooling.cql_generation.drool.traversal.DepthFirstDroolTraverser;
 import org.opencds.cqf.tooling.cql_generation.drool.traversal.DroolTraverser;
 
-public class HtmlFileVisitorTest {
+public class HtmlFileVisitorIT {
     @Test
     public void test_worked() {
         String encodingPath = "../CQLGenerationDocs/NonGeneratedDocs/default.json";

@@ -34,7 +34,7 @@ import org.opencds.cqf.cql.engine.execution.Context;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class DroolToElmVisitorTest {
+public class DroolToElmVisitorIT {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Test
     public void EvaluatePatienthasadiagnosisof() throws IOException {
@@ -155,7 +155,7 @@ public class DroolToElmVisitorTest {
 
     public void setup(String libraryPath) {
         try {
-            this.library = CqlLibraryReader.read(DroolToElmVisitorTest.class.getResourceAsStream(libraryPath));
+            this.library = CqlLibraryReader.read(DroolToElmVisitorIT.class.getResourceAsStream(libraryPath));
         } catch (IOException | JAXBException e) {
             e.getCause().getCause().getMessage();
             throw new IllegalArgumentException("Error reading ELM: " + e.getMessage());
@@ -163,14 +163,14 @@ public class DroolToElmVisitorTest {
         FhirContext fhirContext = FhirContext.forR4();
         this.context = new Context(library);
         IBaseBundle bundle = fhirContext.newJsonParser().parseResource(Bundle.class,
-                DroolToElmVisitorTest.class.getResourceAsStream("concepts_full.json"));
+                DroolToElmVisitorIT.class.getResourceAsStream("concepts_full.json"));
         registerProviders(fhirContext, bundle);
     }
 
     private InputStream getLibraryHelpersElm(FhirContext fhirContext) {
         org.hl7.fhir.r4.model.Library fhirHelpersLibrary = fhirContext.newJsonParser().parseResource(
                 org.hl7.fhir.r4.model.Library.class,
-                DroolToElmVisitorTest.class.getResourceAsStream("FHIRHelpers.json"));
+                DroolToElmVisitorIT.class.getResourceAsStream("FHIRHelpers.json"));
         for (Attachment attachment : fhirHelpersLibrary.getContent()) {
             if (attachment.getContentType().equals("application/elm+xml")) {
                 InputStream xmlInput = new DataInputStream(new ByteArrayInputStream(attachment.getData()));
@@ -182,7 +182,7 @@ public class DroolToElmVisitorTest {
 
     private void registerProviders(FhirContext fhirContext, IBaseBundle bundle) {
         IBaseBundle dataBundle = fhirContext.newJsonParser().parseResource(Bundle.class,
-                DroolToElmVisitorTest.class.getResourceAsStream("AllResources.json"));
+                DroolToElmVisitorIT.class.getResourceAsStream("AllResources.json"));
         DataProvider dataProvider = new CompositeDataProvider(new R4FhirModelResolver(),
                 new BundleRetrieveProvider(fhirContext, dataBundle));
         TerminologyProvider terminologyProvider = new BundleTerminologyProvider(fhirContext, bundle);
@@ -201,7 +201,7 @@ public class DroolToElmVisitorTest {
 
     public static List<String> readFileInList(String fileName) throws IOException {
         List<String> list = new ArrayList<String>();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(DroolToElmVisitorTest.class.getResourceAsStream(fileName)));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(DroolToElmVisitorIT.class.getResourceAsStream(fileName)));
         while(reader.ready()) {
             list.add(reader.readLine());
         }

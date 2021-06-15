@@ -1,0 +1,13 @@
+{
+  "resourceType": "Patient",
+  "id": "51d0dfff-6c71-4b70-b76b-7f43907e4552",
+  "gender": "male",
+  "deceasedBoolean": false,
+  "address": [ {
+    "text": "2222 Home Street",
+    "city": "Ann Arbor",
+    "state": "NY",
+    "postalCode": "99999",
+    "country": "US"
+  } ]
+}

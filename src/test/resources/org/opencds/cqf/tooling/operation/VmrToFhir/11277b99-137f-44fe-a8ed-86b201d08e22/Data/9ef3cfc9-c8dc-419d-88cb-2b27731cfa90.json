@@ -1,0 +1,551 @@
+{
+  "resourceType": "Bundle",
+  "id": "9ef3cfc9-c8dc-419d-88cb-2b27731cfa90",
+  "type": "collection",
+  "entry": [ {
+    "fullUrl": "5b472abe-72cd-46d1-b3ea-b9025a53be5c",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "5b472abe-72cd-46d1-b3ea-b9025a53be5c",
+      "code": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.3.1829.11.4.3.12",
+          "code": "PH_DischargeDisposition_HL7_2x"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      }
+    }
+  }, {
+    "fullUrl": "8e54efd1-3d89-45fe-bc9d-b77f44feb4e9",
+    "resource": {
+      "resourceType": "Encounter",
+      "id": "8e54efd1-3d89-45fe-bc9d-b77f44feb4e9",
+      "reasonReference": [ {
+        "reference": "Observation/5b472abe-72cd-46d1-b3ea-b9025a53be5c"
+      } ]
+    }
+  }, {
+    "fullUrl": "5dd449e8-aa6d-4a4a-8b91-2b4081a500c9",
+    "resource": {
+      "resourceType": "Condition",
+      "id": "5dd449e8-aa6d-4a4a-8b91-2b4081a500c9",
+      "code": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.90",
+          "code": "Z11.3",
+          "display": "Encounter for screening for infections with a predominantly sexual mode of transmission"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      }
+    }
+  }, {
+    "fullUrl": "263d5294-59e2-4bbf-b933-dd84f218a848",
+    "resource": {
+      "resourceType": "Encounter",
+      "id": "263d5294-59e2-4bbf-b933-dd84f218a848",
+      "reasonReference": [ {
+        "reference": "Condition/5dd449e8-aa6d-4a4a-8b91-2b4081a500c9"
+      } ]
+    }
+  }, {
+    "fullUrl": "d8367bfd-3e57-4eff-8d0b-cc4d83324a71",
+    "resource": {
+      "resourceType": "ServiceRequest",
+      "id": "d8367bfd-3e57-4eff-8d0b-cc4d83324a71",
+      "code": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.1",
+          "code": "57021-8",
+          "display": "CBC W Auto Differential panel in Blood"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      }
+    }
+  }, {
+    "fullUrl": "ec4366dc-3840-4fa0-ac4d-6988b4fc46cf",
+    "resource": {
+      "resourceType": "ServiceRequest",
+      "id": "ec4366dc-3840-4fa0-ac4d-6988b4fc46cf",
+      "code": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.1",
+          "code": "45074-2",
+          "display": "Chlamydia trachomatis+Neisseria gonorrhoeae rRNA [Presence] in Urine by DNA probe"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      }
+    }
+  }, {
+    "fullUrl": "5e796627-f6f3-48d1-a74a-be43a1af9e52",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "5e796627-f6f3-48d1-a74a-be43a1af9e52",
+      "code": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "364703007",
+          "display": "Employment detail"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      }
+    }
+  }, {
+    "fullUrl": "a01e001b-7a94-4c48-b2cc-b086cc345361",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "a01e001b-7a94-4c48-b2cc-b086cc345361",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "61462000",
+          "display": "Malaria (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "9f31b967-6c2d-42c3-ab1c-8711446a69f9",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "9f31b967-6c2d-42c3-ab1c-8711446a69f9",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "406583002",
+          "display": "Invasive Haemophilus influenzae disease (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "58b630f3-b32c-4fd8-9b42-725092db2852",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "58b630f3-b32c-4fd8-9b42-725092db2852",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "404681006",
+          "display": "Infection caused by vancomycin resistant Staphylococcus aureus (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "bf739cb1-b4b3-49c1-ae63-4e04f06ca5cc",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "bf739cb1-b4b3-49c1-ae63-4e04f06ca5cc",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "734351004",
+          "display": "Carbapenemase-producing Enterobacteriaceae (organism)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "21b60c8d-71ef-40f0-a24a-c4f3dbebe002",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "21b60c8d-71ef-40f0-a24a-c4f3dbebe002",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "14189004",
+          "display": "Measles (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "b74897ea-ac3b-4112-9f53-5d97047c08e3",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "b74897ea-ac3b-4112-9f53-5d97047c08e3",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "406617004",
+          "display": "Invasive Streptococcus pneumoniae disease (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "bf886136-911e-47a4-875c-1f68c41aac1b",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "bf886136-911e-47a4-875c-1f68c41aac1b",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "23511006",
+          "display": "Meningococcal infectious disease (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "28239fbe-4065-4c5a-93c9-d7c382f4cbc6",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "28239fbe-4065-4c5a-93c9-d7c382f4cbc6",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "302231008",
+          "display": "Salmonella infection (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "6ad2b7d6-8d20-4976-950f-353357e18cef",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "6ad2b7d6-8d20-4976-950f-353357e18cef",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "17383000",
+          "display": "Toxic effect of carbon monoxide (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "6eff277b-5221-4aa2-bb70-0b07ea2aa573",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "6eff277b-5221-4aa2-bb70-0b07ea2aa573",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "398447004",
+          "display": "Severe acute respiratory syndrome (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "5c1b9afc-44f8-41d2-9aaf-ac9b17cef2c2",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "5c1b9afc-44f8-41d2-9aaf-ac9b17cef2c2",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "128302006",
+          "display": "Chronic hepatitis C (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "2e46d0c5-ec3e-4d42-8f9f-10c690034b0b",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "2e46d0c5-ec3e-4d42-8f9f-10c690034b0b",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "105629000",
+          "display": "Chlamydial infection (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "74a179c2-ebb7-4509-883e-23d07248e624",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "74a179c2-ebb7-4509-883e-23d07248e624",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "79128009",
+          "display": "Salmonella Paratyphi A (organism)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "d8901d92-a7cb-4677-afa0-43511dbc3250",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "d8901d92-a7cb-4677-afa0-43511dbc3250",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "186747009",
+          "display": "Coronavirus infection (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "ffddde66-9422-449f-9253-b969f11f2ecd",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "ffddde66-9422-449f-9253-b969f11f2ecd",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "359761005",
+          "display": "Disease caused by Hantavirus (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "fdbf6055-f6f7-4f66-9213-61c66f8c4df5",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "fdbf6055-f6f7-4f66-9213-61c66f8c4df5",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "266143009",
+          "display": "Chancroid (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "5829a915-03f9-4fab-9235-3c2d31fe1c7d",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "5829a915-03f9-4fab-9235-3c2d31fe1c7d",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "242253008",
+          "display": "Overdose of opiate (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "e3fcfd0b-64a1-4e00-970a-6f0d56ddc6c5",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "e3fcfd0b-64a1-4e00-970a-6f0d56ddc6c5",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "36989005",
+          "display": "Mumps (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "69166a5e-bd42-41f9-ada8-c530202773db",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "69166a5e-bd42-41f9-ada8-c530202773db",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "88488004",
+          "display": "Lead (substance)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "048c266c-c0b4-4fe8-b5b7-02255c4cb2fa",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "048c266c-c0b4-4fe8-b5b7-02255c4cb2fa",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "1857005",
+          "display": "Congenital rubella syndrome (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "f90820e7-ce14-450e-9d07-accdf43b4a38",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "f90820e7-ce14-450e-9d07-accdf43b4a38",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "240523007",
+          "display": "Viral hemorrhagic fever (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "c3a32573-9d6d-4291-916e-4bf43c720a10",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "c3a32573-9d6d-4291-916e-4bf43c720a10",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "27836007",
+          "display": "Pertussis (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "4a043836-519c-473a-af31-1cd65695ac74",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "4a043836-519c-473a-af31-1cd65695ac74",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "3928002",
+          "display": "Zika virus disease (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "6d67066f-aeb0-40c8-994c-a5663968a176",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "6d67066f-aeb0-40c8-994c-a5663968a176",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "651000146102",
+          "display": "Middle East respiratory syndrome (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "893aa496-c8bf-487a-9110-38f295d9f831",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "893aa496-c8bf-487a-9110-38f295d9f831",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "15628003",
+          "display": "Gonorrhea (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "ae03a099-b685-491a-9e9a-0abc10d46b2a",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "ae03a099-b685-491a-9e9a-0abc10d46b2a",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "56717001",
+          "display": "Tuberculosis (disorder)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "3d1925c4-b854-4093-81b6-7a91f4aab7fa",
+    "resource": {
+      "resourceType": "Observation",
+      "id": "3d1925c4-b854-4093-81b6-7a91f4aab7fa",
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      },
+      "valueCodeableConcept": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "5595000",
+          "display": "Salmonella Typhi (organism)"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl": "a85eb6e3-a72f-4c6d-aa14-2784e25c1d57",
+    "resource": {
+      "resourceType": "Condition",
+      "id": "a85eb6e3-a72f-4c6d-aa14-2784e25c1d57",
+      "code": {
+        "coding": [ {
+          "system": "2.16.840.1.113883.6.96",
+          "code": "240589008",
+          "display": "Chlamydia trachomatis infection (disorder)"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/11277b99-137f-44fe-a8ed-86b201d08e22"
+      }
+    }
+  } ]
+}

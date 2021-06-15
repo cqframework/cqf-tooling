@@ -396,33 +396,6 @@
                             <include>vmr.xsd</include>
                         </schemaIncludes>
                         <episode>false</episode>
-                        <!-- <args>
-                            <arg>-Xfluent-api</arg>
-                            <arg>-Xequals</arg>
-                            <arg>-XhashCode</arg>
-                            <arg>-XtoString</arg>
-                            <arg>-npa</arg>
-                            <arg>-XautoInheritance</arg>
-                            <arg>-XautoInheritance-xmlTypesExtend=org.opencds.cqf.cql.engine.elm.execution.Executable</arg>
-                            <arg>-Xannotate</arg>
-                        </args> -->
-                        <!-- <plugins>
-                            <plugin>
-                                <groupId>org.jvnet.jaxb2_commons</groupId>
-                                <artifactId>jaxb2-fluent-api</artifactId>
-                                <version>3.0</version>
-                            </plugin>
-                            <plugin>
-                                <groupId>org.jvnet.jaxb2_commons</groupId>
-                                <artifactId>jaxb2-basics</artifactId>
-                                <version>0.12.0</version>
-                            </plugin>
-                            <plugin>
-                                <groupId>org.jvnet.jaxb2_commons</groupId>
-                                <artifactId>jaxb2-basics-annotate</artifactId>
-                                <version>1.1.0</version>
-                            </plugin>
-                        </plugins> -->
                         <generatePackage>org.opencds.cqf.tooling.vmr</generatePackage>
                         <readOnly>false</readOnly>
                         <markGenerated>false</markGenerated>
@@ -545,26 +518,14 @@
                     <version>3.0.0-M5</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>flatten-maven-plugin</artifactId>
-                    <version>1.1.0</version>
-                    <configuration>
-                        <updatePomFile>true</updatePomFile>
-                        <flattenMode>ossrh</flattenMode>
-                    </configuration>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.0.0-M5</version>
                     <executions>
                         <execution>
-                            <id>flatten</id>
-                            <phase>process-resources</phase>
                             <goals>
-                                <goal>flatten</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>flatten.clean</id>
-                            <phase>clean</phase>
-                            <goals>
-                                <goal>clean</goal>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
                             </goals>
                         </execution>
                     </executions>
@@ -619,10 +580,6 @@
                 <artifactId>exec-maven-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>flatten-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
@@ -646,6 +603,10 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
