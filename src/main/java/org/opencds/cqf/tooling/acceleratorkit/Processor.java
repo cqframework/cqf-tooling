@@ -1208,8 +1208,6 @@ public class Processor extends Operation {
         rootElement.setMin(toBoolean(element.getRequired()) ? 1 : 0);
         rootElement.setMax(isMultipleChoiceElement(element) ? "*" : "1");
 
-        ensureTerminologyAndBindToElement(element, sd, rootElement, null, null, false);
-
         sd.getDifferential().addElement(rootElement);
 
         // Add extension element
@@ -1287,6 +1285,8 @@ public class Processor extends Operation {
         if (sd == null) {
             sd = createExtensionStructureDefinition(element, extensionId);
         }
+
+        ensureChoicesDataElement(element, sd);
 
         if (!extensions.contains(sd)) {
             extensions.add(sd);
