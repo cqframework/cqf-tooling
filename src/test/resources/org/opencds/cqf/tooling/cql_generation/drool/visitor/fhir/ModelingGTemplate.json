@@ -1,0 +1,14 @@
+{
+  "resourceType": "Observation",
+  "id": "modelingG-some-patient",
+  "code": {
+    "coding": [{
+      "code": "final"
+    }]
+  },
+  "interpertation": [{
+    "coding": [{
+      "code": "some-code"
+    }]
+  }]
+}

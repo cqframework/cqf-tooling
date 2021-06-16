@@ -6,7 +6,7 @@ import org.hl7.fhir.Parameters;
 import org.hl7.fhir.ParametersParameter;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.r4.model.Quantity;
-import org.junit.Test;
+import org.testng.annotations.Test;
 import org.opencds.cqf.tooling.measure.adapters.Dstu3MeasureReportAdapter;
 import org.opencds.cqf.tooling.measure.adapters.IMeasureReportAdapter;
 import org.opencds.cqf.tooling.measure.adapters.R4MeasureReportAdapter;
@@ -15,7 +15,7 @@ import org.opencds.cqf.tooling.utilities.FhirContextCache;
 import java.util.List;
 import java.util.ArrayList;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 public class MeasureReportComparerTest {
 
@@ -106,7 +106,7 @@ public class MeasureReportComparerTest {
 
         Boolean resultContainsAllExpectedParameters = containsMeasureIdResult & containsPatientIdResult & containsReportTypeResult & containsTestPassesResult & groupScoreMatches;
 
-        assertTrue("Mismatched measureId test", resultContainsAllExpectedParameters);
+        assertTrue(resultContainsAllExpectedParameters, "Mismatched measureId test");
     }
 
     @Test
@@ -136,7 +136,7 @@ public class MeasureReportComparerTest {
 
         Boolean resultContainsAllExpectedParameters = containsMeasureIdResult & containsPatientIdResult & containsReportTypeResult & containsTestPassesResult & groupScoreMatches;
 
-        assertTrue("Mismatched patientId test", resultContainsAllExpectedParameters);
+        assertTrue(resultContainsAllExpectedParameters, "Mismatched patientId test");
     }
 
     @Test
@@ -165,7 +165,7 @@ public class MeasureReportComparerTest {
 
         Boolean resultContainsAllExpectedParameters = containsMeasureIdResult & containsPatientIdResult & containsReportTypeResult & containsTestPassesResult & groupScoreMatches;
 
-        assertTrue("Mismatched reportType test", resultContainsAllExpectedParameters);
+        assertTrue(resultContainsAllExpectedParameters, "Mismatched reportType test");
     }
 
     @Test
@@ -193,7 +193,7 @@ public class MeasureReportComparerTest {
 
         Boolean resultContainsAllExpectedParameters = containsMeasureIdResult & containsPatientIdResult & containsReportTypeResult & containsTestPassesResult & groupScoreMatches;
 
-        assertTrue("Mismatched measureScore test", resultContainsAllExpectedParameters);
+        assertTrue(resultContainsAllExpectedParameters, "Mismatched measureScore test");
     }
 
     // R4 Test Cases
@@ -265,7 +265,7 @@ public class MeasureReportComparerTest {
 
         Boolean resultContainsAllExpectedParameters = containsMeasureIdResult & containsPatientIdResult & containsReportTypeResult & containsTestPassesResult & groupScoreMatches;
 
-        assertTrue("Mismatched measureId test", resultContainsAllExpectedParameters);
+        assertTrue(resultContainsAllExpectedParameters, "Mismatched measureId test");
     }
 
     @Test
@@ -295,7 +295,7 @@ public class MeasureReportComparerTest {
 
         Boolean resultContainsAllExpectedParameters = containsMeasureIdResult & containsPatientIdResult & containsReportTypeResult & containsTestPassesResult & groupScoreMatches;
 
-        assertTrue("Mismatched patientId test", resultContainsAllExpectedParameters);
+        assertTrue(resultContainsAllExpectedParameters, "Mismatched patientId test");
     }
 
     @Test
@@ -324,7 +324,7 @@ public class MeasureReportComparerTest {
 
         Boolean resultContainsAllExpectedParameters = containsMeasureIdResult & containsPatientIdResult & containsReportTypeResult & containsTestPassesResult & groupScoreMatches;
 
-        assertTrue("Mismatched reportType test", resultContainsAllExpectedParameters);
+        assertTrue(resultContainsAllExpectedParameters, "Mismatched reportType test");
     }
 
     @Test
@@ -352,6 +352,6 @@ public class MeasureReportComparerTest {
 
         Boolean resultContainsAllExpectedParameters = containsMeasureIdResult & containsPatientIdResult & containsReportTypeResult & containsTestPassesResult & groupScoreMatches;
 
-        assertTrue("Mismatched measureScore test", resultContainsAllExpectedParameters);
+        assertTrue(resultContainsAllExpectedParameters, "Mismatched measureScore test");
     }
 }

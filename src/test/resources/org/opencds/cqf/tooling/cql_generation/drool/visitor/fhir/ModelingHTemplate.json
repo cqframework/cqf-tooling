@@ -1,0 +1,9 @@
+{
+  "resourceType": "Observation",
+  "id": "modelingH-some-patient",
+  "code": {
+    "coding": [{
+      "code": "some-code"
+    }]
+  }
+}

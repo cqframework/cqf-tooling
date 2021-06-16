@@ -5,14 +5,14 @@
 
     <groupId>org.opencds.cqf</groupId>
     <artifactId>tooling</artifactId>
-    <version>${revision}</version>
+    <version>1.3.1-SNAPSHOT</version>
 
     <properties>
-        <revision>1.3.1-SNAPSHOT</revision>
-
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+        <cql-engine.version>1.5.1</cql-engine.version>
+        <cql-evaluator.version>1.2.0</cql-evaluator.version>
         <cqframework.version>1.5.4-SNAPSHOT</cqframework.version>
         <hapi.version>5.3.2</hapi.version>
         <core.version>5.3.9</core.version>
@@ -58,6 +58,16 @@
 
     <repositories>
         <repository>
+            <id>support.hln.com-release</id>
+            <name>support.hln.com-release</name>
+            <url>https://support.hln.com/artifactory/libs-release-local/</url>
+        </repository>
+        <repository>
+            <id>support.hln.com-snapshot</id>
+            <name>support.hln.com-snapshot</name>
+            <url>https://support.hln.com/artifactory/libs-snapshot-local/</url>
+        </repository>
+        <repository>
             <id>oss-sonatype</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
             <snapshots>
@@ -72,6 +82,29 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.opencds.cqf.cql</groupId>
+                <artifactId>evaluator.builder</artifactId>
+                <version>${cql-evaluator.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.opencds.cqf.cql</groupId>
+                <artifactId>engine</artifactId>
+                <version>${cql-engine.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.opencds.cqf.cql</groupId>
+                <artifactId>engine.fhir</artifactId>
+                <version>${cql-engine.version}</version>
+                <scope>test</scope>
+            </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>cql-formatter</artifactId>
@@ -112,9 +145,32 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.builder</artifactId>
+            <version>${cql-evaluator.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>engine.fhir</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>javax.xml.stream</groupId>
             <artifactId>stax-api</artifactId>
             <version>1.0-2</version>
+        </dependency>
+
+        <!-- RCKMS Data Objects -->
+        <dependency>
+            <groupId>org.cdsframework.rckms</groupId>
+            <artifactId>mts-support-rckms</artifactId>
+            <version>2.0.0</version>
         </dependency>
 
         <!-- WikiMedia to HTML conversion library (-QdmToQiCore) -->
@@ -122,6 +178,12 @@
             <groupId>info.bliki.wiki</groupId>
             <artifactId>bliki-core</artifactId>
             <version>3.1.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- HTML Parser/Manipulator (-QiCoreQUICK) -->
@@ -141,7 +203,7 @@
         <!-- FHIR Core Dependencies -->
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>org.hl7.fhir.r5</artifactId>
+            <artifactId>org.hl7.fhir.r4</artifactId>
             <version>${core.version}</version>
         </dependency>
         <dependency>
@@ -192,12 +254,6 @@
             <version>${hapi.version}</version>
         </dependency>
 
-        <!-- <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-jpaserver-base</artifactId>
-            <version>${hapi.version}</version>
-        </dependency> -->
-
         <!-- StructureDef to ModelInfo -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -245,7 +301,7 @@
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
-            <version>3.0.1</version>
+            <version>2.9.1</version>
         </dependency>
 
         <dependency>
@@ -254,17 +310,57 @@
             <version>2.4.0-b180830.0359</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/javax.activation/activation -->
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime -->
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>2.4.0-b180725.0644</version>
+        </dependency>
+
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
             <version>2.12.3</version>
         </dependency>
 
-        <!-- test dependencies -->
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>2.0.1.Final</version>
+        </dependency>
+
+        <!--redirects apache commons-logging to slf4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>1.7.30</version>
+        </dependency>
+
+        <!-- uses log4j as slf4j implementation-->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.30</version>
+        </dependency>
+
+        <!-- Should switch over to testng-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.2</version>
+        </dependency>
+        <!-- test dependencies -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>7.4.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -279,16 +375,7 @@
             <version>3.9.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.xml.bind</groupId>
-            <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>2.3.3</version>
-        </dependency>
+
         <!-- https://mvnrepository.com/artifact/net.sf.jopt-simple/jopt-simple -->
         <dependency>
             <groupId>net.sf.jopt-simple</groupId>
@@ -304,6 +391,32 @@
                     <groupId>org.jvnet.jaxb2.maven2</groupId>
                     <artifactId>maven-jaxb2-plugin</artifactId>
                     <version>0.14.0</version>
+                    <executions>
+                        <execution>
+                            <id>generate</id>
+                            <goals>
+                                <goal>generate</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.glassfish.jaxb</groupId>
+                            <artifactId>jaxb-runtime</artifactId>
+                            <version>2.4.0-b180830.0438</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <schemaDirectory>${project.basedir}/src/main/resources/org/opencds/cqf/tooling/vmr</schemaDirectory>
+                        <schemaIncludes>
+                            <include>vmr.xsd</include>
+                        </schemaIncludes>
+                        <episode>false</episode>
+                        <generatePackage>org.opencds.cqf.tooling.vmr</generatePackage>
+                        <readOnly>false</readOnly>
+                        <markGenerated>false</markGenerated>
+                        <disableXmlSecurity>true</disableXmlSecurity>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -311,13 +424,14 @@
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
-                        <release>8</release>
                         <failOnWarning>true</failOnWarning>
                         <showWarnings>true</showWarnings>
                         <compilerArgs>
                             <arg>-Xlint:all</arg>
                             <!-- This fixes a boostrapclass path warning which the "release" property fixes on Java 9+ -->
                             <arg>-Xlint:-options</arg>
+                            <!-- This fixes a warning about Test annotations not being processed as part of compilation - They won't be since they are processed as part of testing-->
+                            <arg>-Xlint:-processing</arg>
                             <arg>-Werror</arg>
                         </compilerArgs>
                     </configuration>
@@ -338,9 +452,10 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.2.0</version>
                     <configuration>
                         <source>8</source>
+                        <excludePackageNames>org.opencds.cqf.tooling.vmr</excludePackageNames>
                     </configuration>
                     <executions>
                         <execution>
@@ -419,6 +534,19 @@
                     <version>3.0.0-M5</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.0.0-M5</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
                     <version>1.6.0</version>
@@ -471,6 +599,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb2-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 
@@ -487,6 +619,10 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -512,6 +648,25 @@
                         <artifactId>nexus-staging-maven-plugin</artifactId>
                     </plugin>
                 </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>java-9</id>
+            <activation>
+                <jdk>[9,)</jdk>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-compiler-plugin</artifactId>
+                            <configuration>
+                                <release>8</release>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
             </build>
         </profile>
     </profiles>

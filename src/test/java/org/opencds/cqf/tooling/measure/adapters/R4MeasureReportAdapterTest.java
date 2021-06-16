@@ -2,13 +2,13 @@ package org.opencds.cqf.tooling.measure.adapters;
 
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Quantity;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertTrue;
 
 public class R4MeasureReportAdapterTest {
 

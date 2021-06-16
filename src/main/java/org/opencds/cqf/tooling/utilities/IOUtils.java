@@ -31,6 +31,7 @@ import ca.uhn.fhir.parser.IParser;
 
 public class IOUtils 
 {        
+    
     public enum Encoding 
     { 
         CQL("cql"), JSON("json"), XML("xml"), UNKNOWN(""); 
@@ -117,7 +118,7 @@ public class IOUtils
         	// If includeVersion is false then just use name and not id for the file baseName
         	if (!versioned) {
         		// Assumes that the id will be a string with - separating the version number
-        		baseName = baseName.split("-")[0];
+        		// baseName = baseName.split("-")[0];
         	}
             outputPath = FilenameUtils.concat(path, formatFileName(baseName, encoding, fhirContext));
         }

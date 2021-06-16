@@ -14,8 +14,6 @@ import org.opencds.cqf.tooling.qdm.QdmToQiCore;
 import org.opencds.cqf.tooling.quick.QuickPageGenerator;
 import org.opencds.cqf.tooling.terminology.*;
 import org.opencds.cqf.tooling.terminology.distributable.DistributableValueSetGenerator;
-import org.opencds.cqf.tooling.terminology.opioidValuesetGenerator.OpioidValueSetGenerator;
-
 
 class OperationFactory {
 
@@ -57,6 +55,10 @@ class OperationFactory {
                 return new IgBundler();
 //            case "PackageIG":
 //                return new PackageOperation();
+            case "GenerateCQLFromDrool":
+                return new GenerateCQLFromDroolOperation();
+            case "VmrToFhir": 
+                return new VmrToFhirOperation();
             case "RefreshIG":
                 return new RefreshIGOperation();
             case "RefreshLibrary":

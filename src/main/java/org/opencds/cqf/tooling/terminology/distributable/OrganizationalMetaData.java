@@ -6,6 +6,7 @@ import org.hl7.fhir.r4.model.ContactDetail;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ValueSet;
+
 import org.hl7.fhir.r4.model.DateType;
 
 public class OrganizationalMetaData {

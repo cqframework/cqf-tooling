@@ -1,0 +1,14 @@
+{
+    "resourceType": "Observation",
+    "id": "modelingJ-some-patient",
+    "status" : "final",
+    "code": {
+      "coding": [{
+        "code": "some-code"
+      }]
+    },
+    "valueQuantity" : {
+        "value": 2.0,
+        "unit": "some-unit"
+    }
+  }

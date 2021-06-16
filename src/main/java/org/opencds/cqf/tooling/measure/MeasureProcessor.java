@@ -18,6 +18,8 @@ import org.opencds.cqf.tooling.parameter.RefreshMeasureParameters;
 import org.opencds.cqf.tooling.processor.*;
 import org.opencds.cqf.tooling.utilities.*;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,11 +29,13 @@ import java.util.stream.Collectors;
 public class MeasureProcessor extends BaseProcessor {
     public static final String ResourcePrefix = "measure-";
     public static final String MeasureTestGroupName = "measure";
+
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
     }
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public static List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, String measureToRefreshPath) {
+    public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, String measureToRefreshPath) {
 
         System.out.println("Refreshing measures...");
 
@@ -57,6 +61,8 @@ public class MeasureProcessor extends BaseProcessor {
         params.versioned = versioned;
         return measureProcessor.refreshMeasureContent(params);
     }
+
+    
 
     public static String getCqlLibrarySourcePath(String libraryName, String cqlFileName, List<String> binaryPaths) {
         // Old way, requires the resourcePaths argument to include cql directories, which is wrong
@@ -85,7 +91,7 @@ public class MeasureProcessor extends BaseProcessor {
         return cqlLibrarySourcePath;
     }
 
-    public static void bundleMeasures(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
+    public void bundleMeasures(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
             Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, FhirContext fhirContext, String fhirUri,
             Encoding encoding) {
         Map<String, IBaseResource> measures = IOUtils.getMeasures(fhirContext);
@@ -143,7 +149,8 @@ public class MeasureProcessor extends BaseProcessor {
                 }
 
                 if (includeDependencies) {
-                    boolean result = LibraryProcessor.bundleLibraryDependencies(primaryLibrarySourcePath, fhirContext, resources, encoding, includeVersion);
+                    LibraryProcessor libraryProcessor = new LibraryProcessor();
+                    boolean result = libraryProcessor.bundleLibraryDependencies(primaryLibrarySourcePath, fhirContext, resources, encoding, includeVersion);
                     if (shouldPersist && !result) {
                         LogUtils.info("Measure will not be bundled because Library Dependency bundling failed.");
                     }
@@ -194,7 +201,7 @@ public class MeasureProcessor extends BaseProcessor {
         LogUtils.info(message);
     }
 
-    private static void persistBundle(String igPath, String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, List<IBaseResource> resources, String fhirUri) {
+    private void persistBundle(String igPath, String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, List<IBaseResource> resources, String fhirUri) {
         IOUtils.initializeDirectory(bundleDestPath);
         Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext);
         IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);
@@ -202,7 +209,7 @@ public class MeasureProcessor extends BaseProcessor {
         BundleUtils.postBundle(encoding, fhirContext, fhirUri, (IBaseResource) bundle);
     }
 
-    private static void bundleFiles(String igPath, String bundleDestPath, String libraryName, List<String> binaryPaths, String resourceFocusSourcePath, String librarySourcePath, FhirContext fhirContext, Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios, Boolean includeVersion) {
+    private void bundleFiles(String igPath, String bundleDestPath, String libraryName, List<String> binaryPaths, String resourceFocusSourcePath, String librarySourcePath, FhirContext fhirContext, Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios, Boolean includeVersion) {
         String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, libraryName + "-" + IGBundleProcessor.bundleFilesPathElement);
         IOUtils.initializeDirectory(bundleDestFilesPath);
 
@@ -228,7 +235,7 @@ public class MeasureProcessor extends BaseProcessor {
         }
         
         if (includeDependencies) {
-            Map<String, IBaseResource> depLibraries = ResourceUtils.getDepLibraryResources(librarySourcePath, fhirContext, encoding, includeVersion);
+            Map<String, IBaseResource> depLibraries = ResourceUtils.getDepLibraryResources(librarySourcePath, fhirContext, encoding, includeVersion, logger);
             if (!depLibraries.isEmpty()) {
                 String depLibrariesID = "library-deps-" + libraryName;
                 Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<IBaseResource>(depLibraries.values()), fhirContext);            

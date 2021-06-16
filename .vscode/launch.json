@@ -69,12 +69,23 @@
                 "-rp=../aphl-ig/input/vocabulary",
                 "-fs=http://localhost:8080/cqf-ruler-r4/fhir",
                 "-e=json",
-                "-v",
                 "-t",
                 "-d",
                 "-p",
-                "-ini=../aphl-ig/ig.ini",
+                "-ini=../hedis/ig.ini",
                 "-cdsig"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "DEBUG CQLGenerateFromDrool",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.tooling.Main",
+            "projectName": "tooling",
+            "args": [
+                "-GenerateCQLFromDrool",
+                "-ifp=../CQLGenerationDocs/default.json",
+                "-op=../CQLGenerationDocs/generatedCQL"
             ]
         },
         {
@@ -85,9 +96,9 @@
             "projectName": "tooling",
             "args": [
                 "-VsacXlsxToValueSetBatch",
-                "-ptsd=../aphl-ig/input/vocabulary/valueset/spreadsheets",
-                "-vssrc=vsac",
-                "-op=../aphl-ig/input/vocabulary/valueset/spreadsheets"
+                "-ptsd=../hedis-ig-r4/input/vocabulary/valueset/spreadsheets",
+                "-vssrc=hedis",
+                "-op=../hedis-ig-r4/input/vocabulary/valueset/spreadsheets"
             ]
         },
         {

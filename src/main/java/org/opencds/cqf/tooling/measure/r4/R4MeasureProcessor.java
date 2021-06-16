@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.*;
 
 public class R4MeasureProcessor extends MeasureProcessor {
+
     private String measurePath;
     private IOUtils.Encoding encoding;
     private static CqfmSoftwareSystemHelper cqfmHelper;

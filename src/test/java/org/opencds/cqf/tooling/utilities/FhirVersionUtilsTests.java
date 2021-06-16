@@ -1,9 +1,9 @@
 package org.opencds.cqf.tooling.utilities;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 
@@ -33,7 +33,7 @@ public class FhirVersionUtilsTests {
         assertEquals(FhirVersionEnum.DSTU3, version);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expectedExceptions = NullPointerException.class)
     public void TestNullVersion() {
         FhirVersionUtils.getVersionEnum(null);
     }

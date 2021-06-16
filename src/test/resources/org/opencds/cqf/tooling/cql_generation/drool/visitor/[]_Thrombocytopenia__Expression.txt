@@ -1,0 +1,21 @@
+Group 3.1-c63dd2568e38422ed1dc57de271f5665
+Lab Result Value (other nominal)-233c10c116aff81ebc168fb51d2c1e9b
+Group 3-c1ce2bef369ac35cc035a7ffe971b59c
+Lab Result Value (ordinal)-8967fdeb8531c69f9d8026eb13ca3a81
+Lab Result Value (nominal)-f29c0369974aea3665180bf91a2c05a8
+Lab Result Value (nominal)-b7ac4b7948677a1b8d16d52f2a3a394c
+Patient has lab result with test name (specific for an organism or substance)-222fb3065003af33e0c74f67be284064
+Group 1.1-d5acd129f47353d9de23d4f5c54c4821
+Group 2.2-bd2434cd92e9dc1f22b181256d29884b
+Lab Result Value (quantitative)-9da45e8eee5fa68c6a32bcaebfa1dbd2
+Lab Result Interpretation-bcfb9161a92a6b6575cf9e6658816c12
+Patient has lab result with test name (specific or an organism or substance)-3f12c73cbe886ab3f908544bb1ca8266
+Lab Result Value (nominal)-3026e8a04cb65ffec722e2bbf89162b8
+Patient has lab result with test name (NOT specific for an organism or substance)-d91bcd067e766656c8a3d2ba2b66b5c7
+Lab Result Value (other nominal)-89bc0ecdd9d82aa8a5161bf9368885d0
+Lab Result Value (ordinal)-5dd95ba5be2c6a5d32b17d415197f2d7
+Group 1-b2ec8fd8ef385f444209414cdd4f0bad
+Lab Result Value (quantitative)-e7caab27a09ab646bd578115ede7fac4
+Lab Result Interpretation-459dc3e6db577f49f4221697c63ffec9
+Group 2-5acef8b7bbc1bdea7569c54d5f407772
+ConditionCriteriaMet

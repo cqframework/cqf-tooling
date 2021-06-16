@@ -1,0 +1,3 @@
+Patient has medication administered with name of-ea6502a7451bfa7a6d4df67aa370bcb8
+Patient has therapeutic response to administered medication of-38479a6180d587c3f8b6ec61f55be7f3
+ConditionCriteriaMet

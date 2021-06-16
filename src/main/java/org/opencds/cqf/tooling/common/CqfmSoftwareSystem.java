@@ -1,5 +1,6 @@
 package org.opencds.cqf.tooling.common;
 
+
 public class CqfmSoftwareSystem {
     protected String name;
     public String getName() { return this.name; }

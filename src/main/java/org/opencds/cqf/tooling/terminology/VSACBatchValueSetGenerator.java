@@ -83,5 +83,14 @@ public class VSACBatchValueSetGenerator extends Operation {
                 generator.execute(argsForSpreadsheet);
             }
         }
+        else if (valueSetSource.equals("hedis")) {
+            HEDISValueSetGenerator generator;
+            for (File valueSet : valueSetFiles) {
+                if (!valueSet.getPath().endsWith(".xlsx")) continue;
+                String[] argsForSpreadsheet = { "-HedisXlsxToValueSet", "-pts=" + valueSet.getAbsolutePath(), "-op=" + getOutputPath() };
+                generator =  new HEDISValueSetGenerator();
+                generator.execute(argsForSpreadsheet);
+            }
+        }
     }
 }
