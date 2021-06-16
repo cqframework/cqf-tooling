@@ -153,7 +153,7 @@ public class MeasureProcessor extends BaseProcessor {
                 if (includePatientScenarios) {
                     boolean result = TestCaseProcessor.bundleTestCases(igPath, MeasureTestGroupName, primaryLibraryName, fhirContext, resources);
                     if (shouldPersist && !result) {
-                        LogUtils.info("PlanDefinitions will not be bundled because Test Case bundling failed.");
+                        LogUtils.info("Measure will not be bundled because Test Case bundling failed.");
                     }
                     shouldPersist = shouldPersist & result;
                 }
