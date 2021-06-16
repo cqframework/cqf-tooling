@@ -1,7 +1,6 @@
 package org.opencds.cqf.tooling.cql_generation.drool;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.text.DecimalFormat;
 import java.util.List;
