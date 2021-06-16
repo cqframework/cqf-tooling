@@ -13,7 +13,7 @@ public class DroolCqlGeneratorIT {
     @Test
     public void   test_worked() throws URISyntaxException {
         String dataInputPath = "default.json";
-        String outputPath = "src\\test\\resources\\org\\opencds\\cqf\\tooling\\cql_generation\\drool\\visitor";
+        String outputPath = "target/CqlFromDrool";
         CQLTYPES cqlType = CQLTYPES.CONDITION;
         String fhirVersion = "4.0.0";
         URI encodingUri = DroolCqlGeneratorIT.class.getResource(dataInputPath).toURI();
