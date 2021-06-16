@@ -20,7 +20,7 @@ public class HtmlFileVisitorIT {
     private void readAndGenerateCQL(File file) {
         Deserializer deserializer = new Deserializer(file);
         List<ConditionDTO> conditions = deserializer.deserialize();
-        doVisit("../CQLGenerationDocs/GeneratedDocs/Html", conditions);
+        doVisit("target/test-output/html-from-drool", conditions);
     }
 
     private void doVisit(String outputPath, List<ConditionDTO> rootNode) {
