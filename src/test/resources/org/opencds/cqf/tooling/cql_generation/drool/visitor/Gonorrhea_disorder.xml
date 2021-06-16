@@ -79,7 +79,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea (Tests for Neisseria gonorrhoeae Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea (Tests for Neisseria gonorrhoeae Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -125,7 +125,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -149,7 +149,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -171,7 +171,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea (Tests for Neisseria gonorrhoeae by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea (Tests for Neisseria gonorrhoeae by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -217,7 +217,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -241,7 +241,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -263,7 +263,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea (Tests for Neisseria species by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea (Tests for Neisseria species by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -309,7 +309,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -333,7 +333,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -355,7 +355,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea (Tests for Neisseria gonorrhoeae Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea (Tests for Neisseria gonorrhoeae Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -401,7 +401,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -447,7 +447,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea [Neisseria gonorrhoeae] (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea [Neisseria gonorrhoeae] (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -471,7 +471,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -493,7 +493,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests for Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests for Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -539,7 +539,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea [Neisseria gonorrhoeae] (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea [Neisseria gonorrhoeae] (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -565,7 +565,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea [Cervicitis Urethritis] (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea [Cervicitis Urethritis] (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -591,7 +591,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea [Cervicitis Urethritis] (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea [Cervicitis Urethritis] (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -651,7 +651,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea [Conjunctivitis] (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea [Conjunctivitis] (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -677,7 +677,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea [Conjunctivitis] (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea [Conjunctivitis] (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -737,7 +737,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea [Secondary Sites Complications Chronic] (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea [Secondary Sites Complications Chronic] (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -763,7 +763,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea [Secondary Sites Complications Chronic] (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea [Secondary Sites Complications Chronic] (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -819,7 +819,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea (Tests for Neisseria gonorrhoeae by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea (Tests for Neisseria gonorrhoeae by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -865,7 +865,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -911,7 +911,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea [Neisseria gonorrhoeae] (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea [Neisseria gonorrhoeae] (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -935,7 +935,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -957,7 +957,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Bacteria (Tests by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Bacteria (Tests by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1003,7 +1003,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea [Neisseria gonorrhoeae] (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea [Neisseria gonorrhoeae] (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1025,7 +1025,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea (Tests for Neisseria species by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea (Tests for Neisseria species by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1071,7 +1071,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1117,7 +1117,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea [Neisseria species Unspecified] (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea [Neisseria species Unspecified] (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1141,7 +1141,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -1187,7 +1187,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea [Neisseria gonorrhoeae] (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea [Neisseria gonorrhoeae] (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1227,7 +1227,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Bacteria (Tests by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Bacteria (Tests by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1273,7 +1273,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea [Neisseria gonorrhoeae] (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea [Neisseria gonorrhoeae] (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1319,7 +1319,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea [Neisseria species Unspecified] (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea [Neisseria species Unspecified] (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1353,7 +1353,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea (Tests for Neisseria gonorrhoeae Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea (Tests for Neisseria gonorrhoeae Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -1399,7 +1399,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Indeterminate or Equivocal Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Indeterminate or Equivocal Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1423,7 +1423,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -1445,7 +1445,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea (Tests for Neisseria gonorrhoeae by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea (Tests for Neisseria gonorrhoeae by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1491,7 +1491,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Indeterminate or Equivocal Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Indeterminate or Equivocal Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1515,7 +1515,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -1537,7 +1537,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Bacteria (Tests by Microscopic Observation of Genital and Urethral Specimens by Gram Stain)" xsi:type="ValueSetRef"/>
+                  <valueset name="Bacteria (Tests by Microscopic Observation of Genital and Urethral Specimens by Gram Stain)"/>
                </where>
             </operand>
          </expression>
@@ -1583,7 +1583,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1629,7 +1629,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea [Neisseria gonorrhoeae] (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea [Neisseria gonorrhoeae] (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1653,7 +1653,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -1675,7 +1675,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea (Tests for Neisseria gonorrhoeae Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea (Tests for Neisseria gonorrhoeae Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -1721,7 +1721,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Negative or Undetected Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Negative or Undetected Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1743,7 +1743,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea (Tests for Neisseria gonorrhoeae by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea (Tests for Neisseria gonorrhoeae by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1789,7 +1789,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Negative or Undetected Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Negative or Undetected Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1811,7 +1811,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Gonorrhea (Tests for Neisseria species by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Gonorrhea (Tests for Neisseria species by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1857,7 +1857,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Negative or Undetected Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Negative or Undetected Lab Result Value"/>
                </where>
             </operand>
          </expression>

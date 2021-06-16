@@ -99,7 +99,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Carbon Monoxide Poisoning (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Carbon Monoxide Poisoning (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -125,7 +125,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Carbon Monoxide Poisoning (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Carbon Monoxide Poisoning (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -185,7 +185,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chest Pain" xsi:type="ValueSetRef"/>
+                  <valueset name="Chest Pain"/>
                </where>
             </operand>
          </expression>
@@ -211,7 +211,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chest Pain" xsi:type="ValueSetRef"/>
+                  <valueset name="Chest Pain"/>
                </where>
             </operand>
          </expression>
@@ -271,7 +271,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Confusion" xsi:type="ValueSetRef"/>
+                  <valueset name="Confusion"/>
                </where>
             </operand>
          </expression>
@@ -297,7 +297,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Confusion" xsi:type="ValueSetRef"/>
+                  <valueset name="Confusion"/>
                </where>
             </operand>
          </expression>
@@ -357,7 +357,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Loss of Consciousness" xsi:type="ValueSetRef"/>
+                  <valueset name="Loss of Consciousness"/>
                </where>
             </operand>
          </expression>
@@ -383,7 +383,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Loss of Consciousness" xsi:type="ValueSetRef"/>
+                  <valueset name="Loss of Consciousness"/>
                </where>
             </operand>
          </expression>
@@ -443,7 +443,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Nausea" xsi:type="ValueSetRef"/>
+                  <valueset name="Nausea"/>
                </where>
             </operand>
          </expression>
@@ -469,7 +469,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Nausea" xsi:type="ValueSetRef"/>
+                  <valueset name="Nausea"/>
                </where>
             </operand>
          </expression>
@@ -529,7 +529,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Smoking Status [Unknown]" xsi:type="ValueSetRef"/>
+                  <valueset name="Smoking Status [Unknown]"/>
                </where>
             </operand>
          </expression>
@@ -555,7 +555,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Smoking Status [Unknown]" xsi:type="ValueSetRef"/>
+                  <valueset name="Smoking Status [Unknown]"/>
                </where>
             </operand>
          </expression>
@@ -615,7 +615,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Dyspnea" xsi:type="ValueSetRef"/>
+                  <valueset name="Dyspnea"/>
                </where>
             </operand>
          </expression>
@@ -641,7 +641,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Dyspnea" xsi:type="ValueSetRef"/>
+                  <valueset name="Dyspnea"/>
                </where>
             </operand>
          </expression>
@@ -697,7 +697,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Carbon Monoxide Poisoning (Tests for Carboxyhemoglobin in Blood [Quantitative])" xsi:type="ValueSetRef"/>
+                  <valueset name="Carbon Monoxide Poisoning (Tests for Carboxyhemoglobin in Blood [Quantitative])"/>
                </where>
             </operand>
          </expression>
@@ -837,7 +837,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -861,7 +861,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -908,7 +908,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Carbon Monoxide Poisoning (Carbon Monoxide Exposure)" xsi:type="ValueSetRef"/>
+                  <valueset name="Carbon Monoxide Poisoning (Carbon Monoxide Exposure)"/>
                </where>
             </operand>
          </expression>
@@ -934,7 +934,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Carbon Monoxide Poisoning (Carbon Monoxide Exposure)" xsi:type="ValueSetRef"/>
+                  <valueset name="Carbon Monoxide Poisoning (Carbon Monoxide Exposure)"/>
                </where>
             </operand>
          </expression>
@@ -994,7 +994,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Vomiting" xsi:type="ValueSetRef"/>
+                  <valueset name="Vomiting"/>
                </where>
             </operand>
          </expression>
@@ -1020,7 +1020,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Vomiting" xsi:type="ValueSetRef"/>
+                  <valueset name="Vomiting"/>
                </where>
             </operand>
          </expression>

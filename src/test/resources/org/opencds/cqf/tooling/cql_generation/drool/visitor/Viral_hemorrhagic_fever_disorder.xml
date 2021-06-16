@@ -82,7 +82,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="VHF Symptoms" xsi:type="ValueSetRef"/>
+                  <valueset name="VHF Symptoms"/>
                </where>
             </operand>
          </expression>
@@ -108,7 +108,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="VHF Symptoms" xsi:type="ValueSetRef"/>
+                  <valueset name="VHF Symptoms"/>
                </where>
             </operand>
          </expression>
@@ -164,7 +164,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Viral Hemorrhagic Fever (Tests for Viral Hemorrhagic Fever Viruses Antigen)" xsi:type="ValueSetRef"/>
+                  <valueset name="Viral Hemorrhagic Fever (Tests for Viral Hemorrhagic Fever Viruses Antigen)"/>
                </where>
             </operand>
          </expression>
@@ -210,7 +210,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -256,7 +256,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Viral Hemorrhagic Fever (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Viral Hemorrhagic Fever (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -280,7 +280,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -302,7 +302,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Viral Hemorrhagic Fever (Tests for Viral Hemorrhagic Fever Viruses Antibody)" xsi:type="ValueSetRef"/>
+                  <valueset name="Viral Hemorrhagic Fever (Tests for Viral Hemorrhagic Fever Viruses Antibody)"/>
                </where>
             </operand>
          </expression>
@@ -348,7 +348,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -394,7 +394,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Viral Hemorrhagic Fever (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Viral Hemorrhagic Fever (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -418,7 +418,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -440,7 +440,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Viral Hemorrhagic Fever (Tests for Viral Hemorrhagic Fever Viruses Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Viral Hemorrhagic Fever (Tests for Viral Hemorrhagic Fever Viruses Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -486,7 +486,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -532,7 +532,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Viral Hemorrhagic Fever (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Viral Hemorrhagic Fever (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -556,7 +556,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -578,7 +578,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests for Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests for Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -624,7 +624,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Viral Hemorrhagic Fever (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Viral Hemorrhagic Fever (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -650,7 +650,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Fever" xsi:type="ValueSetRef"/>
+                  <valueset name="Fever"/>
                </where>
             </operand>
          </expression>
@@ -676,7 +676,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Fever" xsi:type="ValueSetRef"/>
+                  <valueset name="Fever"/>
                </where>
             </operand>
          </expression>
@@ -756,7 +756,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -780,7 +780,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -802,7 +802,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Viruses (Tests by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Viruses (Tests by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -848,7 +848,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Viral Hemorrhagic Fever (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Viral Hemorrhagic Fever (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -870,7 +870,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Viral Hemorrhagic Fever (Tests for Viral Hemorrhagic Fever Viruses Antibody)" xsi:type="ValueSetRef"/>
+                  <valueset name="Viral Hemorrhagic Fever (Tests for Viral Hemorrhagic Fever Viruses Antibody)"/>
                </where>
             </operand>
          </expression>
@@ -892,7 +892,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Viral Hemorrhagic Fever (Tests for Viral Hemorrhagic Fever Viruses Antigen)" xsi:type="ValueSetRef"/>
+                  <valueset name="Viral Hemorrhagic Fever (Tests for Viral Hemorrhagic Fever Viruses Antigen)"/>
                </where>
             </operand>
          </expression>
@@ -914,7 +914,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Viral Hemorrhagic Fever (Tests for Viral Hemorrhagic Fever Viruses Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Viral Hemorrhagic Fever (Tests for Viral Hemorrhagic Fever Viruses Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -936,7 +936,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Viral Hemorrhagic Fever (Test Panels for Viral Hemorrhagic Fever Virus Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Viral Hemorrhagic Fever (Test Panels for Viral Hemorrhagic Fever Virus Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -958,7 +958,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Proteinuria (Tests for Total Protein in 24H Urine)" xsi:type="ValueSetRef"/>
+                  <valueset name="Proteinuria (Tests for Total Protein in 24H Urine)"/>
                </where>
             </operand>
          </expression>
@@ -1096,7 +1096,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1120,7 +1120,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -1163,7 +1163,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Thrombocytopenia (Tests for Platelets [#/volume] in Blood) " xsi:type="ValueSetRef"/>
+                  <valueset name="Thrombocytopenia (Tests for Platelets [#/volume] in Blood) "/>
                </where>
             </operand>
          </expression>
@@ -1257,7 +1257,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1281,7 +1281,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -1328,7 +1328,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Viral Hemorrhagic Fever (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Viral Hemorrhagic Fever (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -1354,7 +1354,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Viral Hemorrhagic Fever (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Viral Hemorrhagic Fever (Disorders)"/>
                </where>
             </operand>
          </expression>

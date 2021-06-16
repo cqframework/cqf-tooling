@@ -49,7 +49,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Plasmodium species (Tests by Microscopic Observation in Blood)" xsi:type="ValueSetRef"/>
+                  <valueset name="Plasmodium species (Tests by Microscopic Observation in Blood)"/>
                </where>
             </operand>
          </expression>
@@ -143,7 +143,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -189,7 +189,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Malaria (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Malaria (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -213,7 +213,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -253,7 +253,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Tests by Microscopic Observation in Blood Smear" xsi:type="ValueSetRef"/>
+                  <valueset name="Tests by Microscopic Observation in Blood Smear"/>
                </where>
             </operand>
          </expression>
@@ -299,7 +299,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Malaria (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Malaria (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>

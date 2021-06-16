@@ -7,12 +7,12 @@ import org.hl7.elm.r1.VersionedIdentifier;
  */
 public class ElmRequirement {
 
-    private VersionedIdentifier libraryIdentifier;
+    protected VersionedIdentifier libraryIdentifier;
     public VersionedIdentifier getLibraryIdentifier() {
         return this.libraryIdentifier;
     }
 
-    private Element element;
+    protected Element element;
     public Element getElement() {
         return this.element;
     }
@@ -28,5 +28,25 @@ public class ElmRequirement {
 
         this.libraryIdentifier = libraryIdentifier;
         this.element = element;
+    }
+
+    public boolean hasRequirement(ElmRequirement requirement) {
+        return requirement != null && requirement.getElement() == element;
+    }
+
+    @Override
+    public int hashCode() {
+        return 47 + (39 * libraryIdentifier.hashCode()) + (53 * element.hashCode());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ElmRequirement) {
+            ElmRequirement that = (ElmRequirement)obj;
+            return this.libraryIdentifier.equals(that.libraryIdentifier)
+                    && this.element == that.element;
+        }
+
+        return false;
     }
 }

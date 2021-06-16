@@ -67,7 +67,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Elevated Blood Lead Level (Tests for Lead in Blood)" xsi:type="ValueSetRef"/>
+                  <valueset name="Elevated Blood Lead Level (Tests for Lead in Blood)"/>
                </where>
             </operand>
          </expression>
@@ -113,7 +113,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -137,7 +137,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -163,7 +163,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Elevated Blood Lead Level (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Elevated Blood Lead Level (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -189,7 +189,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Elevated Blood Lead Level (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Elevated Blood Lead Level (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -260,7 +260,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Elevated Blood Lead Level (Tests for Lead [Quantitative] in Capillary Blood" xsi:type="ValueSetRef"/>
+                  <valueset name="Elevated Blood Lead Level (Tests for Lead [Quantitative] in Capillary Blood"/>
                </where>
             </operand>
          </expression>
@@ -398,7 +398,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -422,7 +422,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -469,7 +469,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Toxic Effects of Lead (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Toxic Effects of Lead (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -495,7 +495,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Toxic Effects of Lead (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Toxic Effects of Lead (Disorders)"/>
                </where>
             </operand>
          </expression>

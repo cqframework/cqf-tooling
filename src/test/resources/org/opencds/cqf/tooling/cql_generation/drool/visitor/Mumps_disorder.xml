@@ -111,7 +111,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Aseptic meningitis" xsi:type="ValueSetRef"/>
+                  <valueset name="Aseptic meningitis"/>
                </where>
             </operand>
          </expression>
@@ -137,7 +137,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Aseptic meningitis" xsi:type="ValueSetRef"/>
+                  <valueset name="Aseptic meningitis"/>
                </where>
             </operand>
          </expression>
@@ -193,7 +193,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mumps (Tests for mumps virus Antigen)" xsi:type="ValueSetRef"/>
+                  <valueset name="Mumps (Tests for mumps virus Antigen)"/>
                </where>
             </operand>
          </expression>
@@ -239,7 +239,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -285,7 +285,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mumps (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Mumps (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -309,7 +309,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -331,7 +331,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mumps (Tests for mumps virus IgM Antibody)" xsi:type="ValueSetRef"/>
+                  <valueset name="Mumps (Tests for mumps virus IgM Antibody)"/>
                </where>
             </operand>
          </expression>
@@ -377,7 +377,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -423,7 +423,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mumps (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Mumps (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -447,7 +447,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -469,7 +469,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mumps (Tests for mumps virus Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Mumps (Tests for mumps virus Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -515,7 +515,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -561,7 +561,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mumps (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Mumps (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -585,7 +585,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -607,7 +607,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests for Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests for Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -653,7 +653,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mumps (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Mumps (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -679,7 +679,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Encephalitis" xsi:type="ValueSetRef"/>
+                  <valueset name="Encephalitis"/>
                </where>
             </operand>
          </expression>
@@ -705,7 +705,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Encephalitis" xsi:type="ValueSetRef"/>
+                  <valueset name="Encephalitis"/>
                </where>
             </operand>
          </expression>
@@ -765,7 +765,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Hearing Loss" xsi:type="ValueSetRef"/>
+                  <valueset name="Hearing Loss"/>
                </where>
             </operand>
          </expression>
@@ -791,7 +791,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Hearing Loss" xsi:type="ValueSetRef"/>
+                  <valueset name="Hearing Loss"/>
                </where>
             </operand>
          </expression>
@@ -847,7 +847,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mumps (Tests for mumps virus by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Mumps (Tests for mumps virus by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -893,7 +893,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -939,7 +939,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mumps (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Mumps (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -963,7 +963,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -985,7 +985,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Viruses (Tests by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Viruses (Tests by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1031,7 +1031,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mumps (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Mumps (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1053,7 +1053,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mumps (Tests for mumps virus IgM Antibody)" xsi:type="ValueSetRef"/>
+                  <valueset name="Mumps (Tests for mumps virus IgM Antibody)"/>
                </where>
             </operand>
          </expression>
@@ -1075,7 +1075,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mumps (Tests for mumps virus IgG Antibody)" xsi:type="ValueSetRef"/>
+                  <valueset name="Mumps (Tests for mumps virus IgG Antibody)"/>
                </where>
             </operand>
          </expression>
@@ -1097,7 +1097,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mumps (Test Panels for mumps virus IgM IgG Antibody)" xsi:type="ValueSetRef"/>
+                  <valueset name="Mumps (Test Panels for mumps virus IgM IgG Antibody)"/>
                </where>
             </operand>
          </expression>
@@ -1119,7 +1119,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mumps (Tests for mumps virus Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Mumps (Tests for mumps virus Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -1141,7 +1141,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mumps (Test Panels for mumps virus Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Mumps (Test Panels for mumps virus Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -1163,7 +1163,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mumps (Tests for mumps virus by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Mumps (Tests for mumps virus by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1189,7 +1189,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mastitis" xsi:type="ValueSetRef"/>
+                  <valueset name="Mastitis"/>
                </where>
             </operand>
          </expression>
@@ -1215,7 +1215,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mastitis" xsi:type="ValueSetRef"/>
+                  <valueset name="Mastitis"/>
                </where>
             </operand>
          </expression>
@@ -1275,7 +1275,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mumps (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Mumps (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -1301,7 +1301,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Mumps (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Mumps (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -1361,7 +1361,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Oophoritis" xsi:type="ValueSetRef"/>
+                  <valueset name="Oophoritis"/>
                </where>
             </operand>
          </expression>
@@ -1387,7 +1387,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Oophoritis" xsi:type="ValueSetRef"/>
+                  <valueset name="Oophoritis"/>
                </where>
             </operand>
          </expression>
@@ -1447,7 +1447,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Orchitis" xsi:type="ValueSetRef"/>
+                  <valueset name="Orchitis"/>
                </where>
             </operand>
          </expression>
@@ -1473,7 +1473,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Orchitis" xsi:type="ValueSetRef"/>
+                  <valueset name="Orchitis"/>
                </where>
             </operand>
          </expression>
@@ -1533,7 +1533,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pancreatitis" xsi:type="ValueSetRef"/>
+                  <valueset name="Pancreatitis"/>
                </where>
             </operand>
          </expression>
@@ -1559,7 +1559,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pancreatitis" xsi:type="ValueSetRef"/>
+                  <valueset name="Pancreatitis"/>
                </where>
             </operand>
          </expression>
@@ -1619,7 +1619,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Parotitis [Unspecified Cause]" xsi:type="ValueSetRef"/>
+                  <valueset name="Parotitis [Unspecified Cause]"/>
                </where>
             </operand>
          </expression>
@@ -1645,7 +1645,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Parotitis [Unspecified Cause]" xsi:type="ValueSetRef"/>
+                  <valueset name="Parotitis [Unspecified Cause]"/>
                </where>
             </operand>
          </expression>
@@ -1705,7 +1705,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Salivary Gland Swelling [Unspecified Cause] (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Salivary Gland Swelling [Unspecified Cause] (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -1731,7 +1731,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Salivary Gland Swelling [Unspecified Cause] (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Salivary Gland Swelling [Unspecified Cause] (Disorders)"/>
                </where>
             </operand>
          </expression>

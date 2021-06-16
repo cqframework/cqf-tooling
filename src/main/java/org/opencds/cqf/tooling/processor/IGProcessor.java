@@ -44,7 +44,6 @@ public class IGProcessor extends BaseProcessor {
         Boolean includeTerminology = params.includeTerminology;
         Boolean includePatientScenarios = params.includePatientScenarios;
         Boolean versioned = params.versioned;
-        Boolean cdsHooksIg = params.cdsHooksIg;
         String fhirUri = params.fhirUri;
         // String measureToRefreshPath = params.measureToRefreshPath;
         ArrayList<String> resourceDirs = new ArrayList<String>();
@@ -68,7 +67,7 @@ public class IGProcessor extends BaseProcessor {
         //ScaffoldProcessor.scaffold(ScaffoldParameters);
 
         //Use case 2 while developing in Atom refresh content and run tests for either entire IG or targeted Artifact
-        //refreshcontent
+        //refreshContent
         LogUtils.info("IGProcessor.publishIG - refreshIG");
         refreshIG(params);
         //validate
@@ -79,8 +78,8 @@ public class IGProcessor extends BaseProcessor {
         //Use case 3
         //package everything
         LogUtils.info("IGProcessor.publishIG - bundleIg");
-        igBundleProcessor.bundleIg(refreshedResourcesNames, rootDir, encoding, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
-        versioned, cdsHooksIg, fhirContext, fhirUri);
+        igBundleProcessor.bundleIg(refreshedResourcesNames, rootDir, getBinaryPaths(), encoding, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
+        versioned, fhirContext, fhirUri);
         //test everything
         //IGTestProcessor.testIg(IGTestParameters);
         //Publish?
@@ -122,12 +121,7 @@ public class IGProcessor extends BaseProcessor {
 
         IGProcessor.ensure(rootDir, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
 
-        List<String> refreshedLibraryNames;
-        refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
-        // Only add libraries if this is a cds IG, else only measures.
-        if (params.cdsHooksIg) {
-            refreshedResourcesNames.addAll(refreshedLibraryNames);
-        }
+        libraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
 
         List<String> refreshedMeasureNames;
         refreshedMeasureNames = measureProcessor.refreshIgMeasureContent(this, encoding, versioned, fhirContext, measureToRefreshPath);
@@ -172,6 +166,7 @@ public class IGProcessor extends BaseProcessor {
     public static final String cqlLibraryPathElement = "input/pagecontent/cql/";
     public static final String libraryPathElement = "input/resources/library/";
     public static final String measurePathElement = "input/resources/measure/";
+    public static final String planDefinitionPathElement = "input/resources/plandefinition/";
     public static final String valuesetsPathElement = "input/vocabulary/valueset/";
     public static final String testCasePathElement = "input/tests/";
     public static final String devicePathElement = "input/resources/device/";
@@ -185,6 +180,7 @@ public class IGProcessor extends BaseProcessor {
             ensureDirectory(igPath, IGProcessor.cqlLibraryPathElement);
             ensureDirectory(igPath, IGProcessor.libraryPathElement);
             ensureDirectory(igPath, IGProcessor.measurePathElement);
+            ensureDirectory(igPath, IGProcessor.planDefinitionPathElement);
             ensureDirectory(igPath, IGProcessor.valuesetsPathElement);
             ensureDirectory(igPath, IGProcessor.testCasePathElement);
         }
@@ -192,6 +188,7 @@ public class IGProcessor extends BaseProcessor {
             checkForDirectory(igPath, IGProcessor.cqlLibraryPathElement);
             checkForDirectory(igPath, IGProcessor.libraryPathElement);
             checkForDirectory(igPath, IGProcessor.measurePathElement);
+            checkForDirectory(igPath, IGProcessor.planDefinitionPathElement);
             checkForDirectory(igPath, IGProcessor.valuesetsPathElement);
             checkForDirectory(igPath, IGProcessor.testCasePathElement);
         }

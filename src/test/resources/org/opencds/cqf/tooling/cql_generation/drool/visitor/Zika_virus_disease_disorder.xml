@@ -104,7 +104,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Zika Virus Disease (Tests for Zika virus IgM Antibody)" xsi:type="ValueSetRef"/>
+                  <valueset name="Zika Virus Disease (Tests for Zika virus IgM Antibody)"/>
                </where>
             </operand>
          </expression>
@@ -150,7 +150,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -174,7 +174,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -196,7 +196,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Zika Virus Disease (Tests for Zika virus Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Zika Virus Disease (Tests for Zika virus Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -242,7 +242,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -266,7 +266,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -292,7 +292,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Arthralgia" xsi:type="ValueSetRef"/>
+                  <valueset name="Arthralgia"/>
                </where>
             </operand>
          </expression>
@@ -346,7 +346,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Arthralgia" xsi:type="ValueSetRef"/>
+                  <valueset name="Arthralgia"/>
                </where>
             </operand>
          </expression>
@@ -378,7 +378,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Congenital Zika Syndromes (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Congenital Zika Syndromes (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -432,7 +432,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Congenital Zika Syndromes (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Congenital Zika Syndromes (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -464,7 +464,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Conjunctivitis" xsi:type="ValueSetRef"/>
+                  <valueset name="Conjunctivitis"/>
                </where>
             </operand>
          </expression>
@@ -518,7 +518,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Conjunctivitis" xsi:type="ValueSetRef"/>
+                  <valueset name="Conjunctivitis"/>
                </where>
             </operand>
          </expression>
@@ -546,7 +546,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Assertion" xsi:type="ValueSetRef"/>
+                  <valueset name="Assertion"/>
                </where>
             </operand>
          </expression>
@@ -592,7 +592,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pregnant" xsi:type="ValueSetRef"/>
+                  <valueset name="Pregnant"/>
                </where>
             </operand>
          </expression>
@@ -624,7 +624,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pregnant" xsi:type="ValueSetRef"/>
+                  <valueset name="Pregnant"/>
                </where>
             </operand>
          </expression>
@@ -680,7 +680,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Zika Virus Disease (Tests for Zika virus IgM Antibody)" xsi:type="ValueSetRef"/>
+                  <valueset name="Zika Virus Disease (Tests for Zika virus IgM Antibody)"/>
                </where>
             </operand>
          </expression>
@@ -726,7 +726,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -772,7 +772,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Zika Virus Disease  (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Zika Virus Disease  (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -796,7 +796,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -818,7 +818,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Zika Virus Disease (Tests for Zika virus Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Zika Virus Disease (Tests for Zika virus Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -864,7 +864,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -910,7 +910,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Zika Virus Disease  (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Zika Virus Disease  (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -934,7 +934,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -956,7 +956,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests for Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests for Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -1002,7 +1002,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Zika Virus Disease  (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Zika Virus Disease  (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1028,7 +1028,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Fever" xsi:type="ValueSetRef"/>
+                  <valueset name="Fever"/>
                </where>
             </operand>
          </expression>
@@ -1082,7 +1082,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Fever" xsi:type="ValueSetRef"/>
+                  <valueset name="Fever"/>
                </where>
             </operand>
          </expression>
@@ -1114,7 +1114,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Guillain-Barre Syndrome (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Guillain-Barre Syndrome (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -1168,7 +1168,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Guillain-Barre Syndrome (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Guillain-Barre Syndrome (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -1220,7 +1220,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1244,7 +1244,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -1266,7 +1266,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Arboviral Diseases [Reportable] (Tests for Arbovirus by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Arboviral Diseases [Reportable] (Tests for Arbovirus by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1288,7 +1288,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Arboviral Infection (Tests for Flavivirus by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Arboviral Infection (Tests for Flavivirus by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1310,7 +1310,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Viruses (Tests by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Viruses (Tests by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1365,7 +1365,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Zika Virus Disease  (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Zika Virus Disease  (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1399,7 +1399,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Zika Virus Disease (Tests for Zika virus IgM Antibody)" xsi:type="ValueSetRef"/>
+                  <valueset name="Zika Virus Disease (Tests for Zika virus IgM Antibody)"/>
                </where>
             </operand>
          </expression>
@@ -1445,7 +1445,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Negative or Indeterminate Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Negative or Indeterminate Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1469,7 +1469,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -1491,7 +1491,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Zika Virus Disease (Tests for Zika virus Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Zika Virus Disease (Tests for Zika virus Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -1537,7 +1537,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Negative or Indeterminate Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Negative or Indeterminate Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1561,7 +1561,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -1583,7 +1583,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Zika Virus Disease (Tests for Zika virus IgM Antibody)" xsi:type="ValueSetRef"/>
+                  <valueset name="Zika Virus Disease (Tests for Zika virus IgM Antibody)"/>
                </where>
             </operand>
          </expression>
@@ -1605,7 +1605,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Zika Virus Disease (Test Panels for Zika virus IgM Antibody)" xsi:type="ValueSetRef"/>
+                  <valueset name="Zika Virus Disease (Test Panels for Zika virus IgM Antibody)"/>
                </where>
             </operand>
          </expression>
@@ -1627,7 +1627,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Zika Virus Disease (Tests for Zika virus Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Zika Virus Disease (Tests for Zika virus Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -1649,7 +1649,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Zika Virus Disease (Test Panels for Zika virus Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Zika Virus Disease (Test Panels for Zika virus Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -1671,7 +1671,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Zika Virus Disease (Tests for Zika virus IgM Antibody)" xsi:type="ValueSetRef"/>
+                  <valueset name="Zika Virus Disease (Tests for Zika virus IgM Antibody)"/>
                </where>
             </operand>
          </expression>
@@ -1717,7 +1717,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Negative or Undetected Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Negative or Undetected Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1739,7 +1739,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Zika Virus Disease (Tests for Zika virus Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Zika Virus Disease (Tests for Zika virus Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -1785,7 +1785,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Negative or Undetected Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Negative or Undetected Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1826,7 +1826,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Postpartum" xsi:type="ValueSetRef"/>
+                  <valueset name="Postpartum"/>
                </where>
             </operand>
          </expression>
@@ -1880,7 +1880,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Postpartum" xsi:type="ValueSetRef"/>
+                  <valueset name="Postpartum"/>
                </where>
             </operand>
          </expression>
@@ -1912,7 +1912,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Rash" xsi:type="ValueSetRef"/>
+                  <valueset name="Rash"/>
                </where>
             </operand>
          </expression>
@@ -1966,7 +1966,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Rash" xsi:type="ValueSetRef"/>
+                  <valueset name="Rash"/>
                </where>
             </operand>
          </expression>
@@ -1998,7 +1998,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Zika Virus Disease (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Zika Virus Disease (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -2052,7 +2052,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Zika Virus Disease (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Zika Virus Disease (Disorders)"/>
                </where>
             </operand>
          </expression>

@@ -68,7 +68,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Influenza (Tests for influenza A or B virus Antigen)" xsi:type="ValueSetRef"/>
+                  <valueset name="Influenza (Tests for influenza A or B virus Antigen)"/>
                </where>
             </operand>
          </expression>
@@ -114,7 +114,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -160,7 +160,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Influenza (influenza A or B virus in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Influenza (influenza A or B virus in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -184,7 +184,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -206,7 +206,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Influenza (Tests for Influenza A or B Virus Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Influenza (Tests for Influenza A or B Virus Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -252,7 +252,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -298,7 +298,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Influenza (influenza A or B virus in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Influenza (influenza A or B virus in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -322,7 +322,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -344,7 +344,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests for Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests for Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -390,7 +390,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Influenza (influenza A or B virus in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Influenza (influenza A or B virus in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -412,7 +412,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Influenza (Tests for influenza A or B virus by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Influenza (Tests for influenza A or B virus by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -458,7 +458,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -504,7 +504,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Influenza (influenza A or B virus in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Influenza (influenza A or B virus in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -528,7 +528,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -550,7 +550,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Viruses (Tests by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Viruses (Tests by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -596,7 +596,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Influenza (influenza A or B virus in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Influenza (influenza A or B virus in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -622,7 +622,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Influenza (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Influenza (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -648,7 +648,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Influenza (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Influenza (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -770,7 +770,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Discharge Disposition [Expired]" xsi:type="ValueSetRef"/>
+                  <valueset name="Discharge Disposition [Expired]"/>
                </where>
             </operand>
          </expression>

@@ -66,7 +66,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="COVID-19 (Tests for SARS-CoV-2 Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="COVID-19 (Tests for SARS-CoV-2 Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -112,7 +112,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -136,7 +136,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -162,7 +162,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Cough" xsi:type="ValueSetRef"/>
+                  <valueset name="Cough"/>
                </where>
             </operand>
          </expression>
@@ -188,7 +188,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Cough" xsi:type="ValueSetRef"/>
+                  <valueset name="Cough"/>
                </where>
             </operand>
          </expression>
@@ -244,7 +244,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="COVID-19 (Tests for SARS-CoV-2 Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="COVID-19 (Tests for SARS-CoV-2 Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -290,7 +290,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -336,7 +336,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="COVID-19 (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="COVID-19 (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -360,7 +360,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -382,7 +382,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests for Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests for Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -428,7 +428,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="COVID-19 (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="COVID-19 (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -474,7 +474,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -520,7 +520,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="COVID-19 (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="COVID-19 (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -544,7 +544,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -566,7 +566,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="COVID-19 (Tests for SARS-CoV-2 Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="COVID-19 (Tests for SARS-CoV-2 Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -588,7 +588,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="COVID-19 (Test Panels for SARS-CoV-2 Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="COVID-19 (Test Panels for SARS-CoV-2 Nucleic Acid)"/>
                </where>
             </operand>
          </expression>

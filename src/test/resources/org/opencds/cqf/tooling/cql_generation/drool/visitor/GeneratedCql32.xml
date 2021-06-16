@@ -72,7 +72,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Pneumococcal Disease (Tests for Streptococcus pneumoniae Antigen)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Pneumococcal Disease (Tests for Streptococcus pneumoniae Antigen)"/>
                </where>
             </operand>
          </expression>
@@ -118,7 +118,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -164,7 +164,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -188,7 +188,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -210,7 +210,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Pneumococcal Disease (Tests for Streptococcus pneumoniae Antigen in Specimen from Normally Sterile Site)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Pneumococcal Disease (Tests for Streptococcus pneumoniae Antigen in Specimen from Normally Sterile Site)"/>
                </where>
             </operand>
          </expression>
@@ -256,7 +256,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -302,7 +302,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -326,7 +326,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -348,7 +348,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Pneumococcal Disease (Tests for Streptococcus pneumoniae Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Pneumococcal Disease (Tests for Streptococcus pneumoniae Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -394,7 +394,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -440,7 +440,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -464,7 +464,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -486,7 +486,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests for Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests for Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -532,7 +532,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -554,7 +554,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Pneumococcal Disease (Tests for Streptococcus pneumoniae Nucleic Acid in Specimen from Normally Sterile Site)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Pneumococcal Disease (Tests for Streptococcus pneumoniae Nucleic Acid in Specimen from Normally Sterile Site)"/>
                </where>
             </operand>
          </expression>
@@ -600,7 +600,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -646,7 +646,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -670,7 +670,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -692,7 +692,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests for Nucleic Acid in Specimen from Normally Sterile Site)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests for Nucleic Acid in Specimen from Normally Sterile Site)"/>
                </where>
             </operand>
          </expression>
@@ -738,7 +738,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -760,7 +760,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Pneumococcal Disease (Tests for Streptococcus pneumoniae by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Pneumococcal Disease (Tests for Streptococcus pneumoniae by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -806,7 +806,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -852,7 +852,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -876,7 +876,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -898,7 +898,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Bacteria (Tests by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Bacteria (Tests by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -944,7 +944,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -966,7 +966,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Pneumococcal Disease (Tests for Streptococcus pneumoniae in Specimen from Normally Sterile Site by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Pneumococcal Disease (Tests for Streptococcus pneumoniae in Specimen from Normally Sterile Site by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1012,7 +1012,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1058,7 +1058,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1082,7 +1082,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -1104,7 +1104,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Bacteria (Tests in Specimen from Normally Sterile Site by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Bacteria (Tests in Specimen from Normally Sterile Site by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1150,7 +1150,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Pneumococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1176,7 +1176,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Pneumococcal Disease (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Pneumococcal Disease (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -1202,7 +1202,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Pneumococcal Disease (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Pneumococcal Disease (Disorders)"/>
                </where>
             </operand>
          </expression>

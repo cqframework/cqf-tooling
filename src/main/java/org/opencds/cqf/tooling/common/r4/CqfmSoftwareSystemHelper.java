@@ -114,9 +114,13 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
             final List<Extension> extensions = resource.getExtension();
             Extension softwareSystemExtension = null;
             for (Extension ext : extensions) {
-                if (ext.getValue().fhirType().equals("Reference") && ((Reference) ext.getValue()).getReference().equals(systemReferenceID)) {
-                    softwareSystemExtension = ext;
-                    ((Reference)softwareSystemExtension.getValue()).setResource(null);
+                if(ext.getValue() != null
+                    && ext.getValue().fhirType() != null
+                    && ext.getValue().fhirType().equals("Reference")
+                    && ((Reference)ext.getValue()).getReference() != null
+                    && ((Reference) ext.getValue()).getReference().equals(systemReferenceID)){
+                        softwareSystemExtension = ext;
+                        ((Reference) softwareSystemExtension.getValue()).setResource(null);
                 }
             }
 

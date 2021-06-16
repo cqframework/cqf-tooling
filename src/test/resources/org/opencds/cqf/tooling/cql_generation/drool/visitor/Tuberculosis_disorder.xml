@@ -98,7 +98,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Tuberculosis (Mammalian Tuberculin Skin Test)" xsi:type="ValueSetRef"/>
+                  <valueset name="Tuberculosis (Mammalian Tuberculin Skin Test)"/>
                </where>
             </operand>
          </expression>
@@ -144,7 +144,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -168,7 +168,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -190,7 +190,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Tuberculosis (Interferon Gamma Release Assays)" xsi:type="ValueSetRef"/>
+                  <valueset name="Tuberculosis (Interferon Gamma Release Assays)"/>
                </where>
             </operand>
          </expression>
@@ -236,7 +236,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -282,7 +282,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Tuberculosis (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Tuberculosis (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -306,7 +306,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -328,7 +328,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Tuberculosis (Tests for Mycobacterium tuberculosis Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Tuberculosis (Tests for Mycobacterium tuberculosis Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -374,7 +374,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -420,7 +420,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Tuberculosis (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Tuberculosis (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -444,7 +444,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -466,7 +466,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests for Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests for Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -512,7 +512,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Tuberculosis (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Tuberculosis (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -534,7 +534,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests by Microscopic Observation in Tissue by Acid Fast Stain)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests by Microscopic Observation in Tissue by Acid Fast Stain)"/>
                </where>
             </operand>
          </expression>
@@ -580,7 +580,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -626,7 +626,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Acid Fast Bacilli (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Acid Fast Bacilli (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -650,7 +650,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -672,7 +672,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Tests by Microscopic Observation in Tissue" xsi:type="ValueSetRef"/>
+                  <valueset name="Tests by Microscopic Observation in Tissue"/>
                </where>
             </operand>
          </expression>
@@ -718,7 +718,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Caseating Granuloma (Finding by Microscopic Observation in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Caseating Granuloma (Finding by Microscopic Observation in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -764,7 +764,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Acid Fast Bacilli (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Acid Fast Bacilli (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -798,7 +798,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Tuberculosis (Tests for Mycobacterium tuberculosis by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Tuberculosis (Tests for Mycobacterium tuberculosis by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -844,7 +844,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -890,7 +890,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Tuberculosis (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Tuberculosis (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -914,7 +914,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -936,7 +936,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Bacteria (Tests by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Bacteria (Tests by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -958,7 +958,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Tuberculosis (Tests for Mycobacterium species by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Tuberculosis (Tests for Mycobacterium species by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1004,7 +1004,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Tuberculosis (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Tuberculosis (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1060,7 +1060,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Azidothymidine (AZT)" xsi:type="ValueSetRef"/>
+                  <valueset name="Azidothymidine (AZT)"/>
                </where>
             </operand>
          </expression>
@@ -1082,7 +1082,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Tuberculosis (Tests for Mycobacterium tuberculosis Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Tuberculosis (Tests for Mycobacterium tuberculosis Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -1104,7 +1104,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Tuberculosis (Tests for Mycobacterium tuberculosis by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Tuberculosis (Tests for Mycobacterium tuberculosis by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1126,7 +1126,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Tuberculosis (Tests for Mycobacterium species by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Tuberculosis (Tests for Mycobacterium species by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1182,7 +1182,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Dapsone" xsi:type="ValueSetRef"/>
+                  <valueset name="Dapsone"/>
                </where>
             </operand>
          </expression>
@@ -1261,7 +1261,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Rifampin" xsi:type="ValueSetRef"/>
+                  <valueset name="Rifampin"/>
                </where>
             </operand>
          </expression>
@@ -1340,7 +1340,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Clofazimine" xsi:type="ValueSetRef"/>
+                  <valueset name="Clofazimine"/>
                </where>
             </operand>
          </expression>
@@ -1419,7 +1419,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Dapsone" xsi:type="ValueSetRef"/>
+                  <valueset name="Dapsone"/>
                </where>
             </operand>
          </expression>
@@ -1475,7 +1475,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Rifampin" xsi:type="ValueSetRef"/>
+                  <valueset name="Rifampin"/>
                </where>
             </operand>
          </expression>
@@ -1531,7 +1531,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Rifampin" xsi:type="ValueSetRef"/>
+                  <valueset name="Rifampin"/>
                </where>
             </operand>
          </expression>
@@ -1587,7 +1587,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Dapsone" xsi:type="ValueSetRef"/>
+                  <valueset name="Dapsone"/>
                </where>
             </operand>
          </expression>
@@ -1700,7 +1700,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Dapsone" xsi:type="ValueSetRef"/>
+                  <valueset name="Dapsone"/>
                </where>
             </operand>
          </expression>
@@ -1795,7 +1795,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Tuberculosis (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Tuberculosis (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -1821,7 +1821,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Tuberculosis (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Tuberculosis (Disorders)"/>
                </where>
             </operand>
          </expression>

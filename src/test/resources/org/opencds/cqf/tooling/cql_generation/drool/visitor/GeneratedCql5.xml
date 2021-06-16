@@ -47,7 +47,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Tests for Vancomycin Susceptibility [OrdQn MIC]" xsi:type="ValueSetRef"/>
+                  <valueset name="Tests for Vancomycin Susceptibility [OrdQn MIC]"/>
                </where>
             </operand>
          </expression>
@@ -139,7 +139,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Resistant Lab Result Value " xsi:type="ValueSetRef"/>
+                  <valueset name="Resistant Lab Result Value "/>
                </where>
             </operand>
          </expression>
@@ -163,7 +163,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Resistant Interpretation of an Observation " xsi:type="ValueSetRef"/>
+                  <valueset name="Resistant Interpretation of an Observation "/>
                </where>
             </operand>
          </expression>

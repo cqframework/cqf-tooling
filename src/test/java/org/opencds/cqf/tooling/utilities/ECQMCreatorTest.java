@@ -1,8 +1,20 @@
 package org.opencds.cqf.tooling.utilities;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
-import org.cqframework.cql.cql2elm.*;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
+
+import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
+import org.cqframework.cql.cql2elm.FhirLibrarySourceProvider;
+import org.cqframework.cql.cql2elm.LibraryManager;
+import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.cql2elm.NamespaceInfo;
+import org.cqframework.cql.cql2elm.NamespaceManager;
 import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
@@ -13,10 +25,8 @@ import org.opencds.cqf.tooling.measure.MeasureRefreshProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.nio.file.Paths;
-
-import static org.testng.Assert.assertTrue;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 
 public class ECQMCreatorTest {
     private static ModelManager modelManager;
@@ -30,6 +40,7 @@ public class ECQMCreatorTest {
         cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
         cqlTranslatorOptions.getOptions().add(CqlTranslator.Options.EnableAnnotations);
         CqlTranslator translator = createTranslator(primaryLibraryPath, cqlTranslatorOptions);
+        translator.toELM();
         cacheLibrary(translator.getTranslatedLibrary());
         FhirContext context =  FhirContext.forR5();
         IParser parser = measurePath.endsWith(".json") ? context.newJsonParser() : context.newXmlParser();
@@ -130,6 +141,7 @@ public class ECQMCreatorTest {
         String libraryPath = "CompositeMeasures/cql/BCSComponent.cql"; //EXM124-9.0.000.cql";//library-EXM124-9.0.000.json";
         try {
             CqlTranslator translator = createTranslator(libraryPath, cqlTranslatorOptions);
+            translator.toELM();
             cacheLibrary(translator.getTranslatedLibrary());
             FhirContext context = FhirContext.forR5();
             IParser parser = context.newJsonParser();

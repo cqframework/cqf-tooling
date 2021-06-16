@@ -75,7 +75,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Haemophilus influenzae Disease (Tests for Haemophilus influenzae Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Haemophilus influenzae Disease (Tests for Haemophilus influenzae Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -121,7 +121,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -167,7 +167,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -191,7 +191,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -213,7 +213,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests for Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests for Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -259,7 +259,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -281,7 +281,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Haemophilus influenzae Disease (Tests for Haemophilus influenzae Nucleic Acid in Specimen from Normally Sterile Site)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Haemophilus influenzae Disease (Tests for Haemophilus influenzae Nucleic Acid in Specimen from Normally Sterile Site)"/>
                </where>
             </operand>
          </expression>
@@ -327,7 +327,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -373,7 +373,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -397,7 +397,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -419,7 +419,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests for Nucleic Acid in Specimen from Normally Sterile Site)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests for Nucleic Acid in Specimen from Normally Sterile Site)"/>
                </where>
             </operand>
          </expression>
@@ -465,7 +465,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -487,7 +487,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Haemophilus influenzae Disease (Tests for Haemophilus influenzae Type B Antigen in Cerebrospinal Fluid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Haemophilus influenzae Disease (Tests for Haemophilus influenzae Type B Antigen in Cerebrospinal Fluid)"/>
                </where>
             </operand>
          </expression>
@@ -533,7 +533,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -579,7 +579,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -603,7 +603,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -625,7 +625,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Haemophilus influenzae Disease (Tests for Haemophilus influenzae by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Haemophilus influenzae Disease (Tests for Haemophilus influenzae by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -671,7 +671,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -717,7 +717,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -741,7 +741,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -763,7 +763,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Bacteria (Tests by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Bacteria (Tests by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -809,7 +809,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -831,7 +831,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Haemophilus influenzae Disease (Tests for Haemophilus influenzae in Specimen from Normally Sterile Site by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Haemophilus influenzae Disease (Tests for Haemophilus influenzae in Specimen from Normally Sterile Site by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -877,7 +877,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -923,7 +923,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -947,7 +947,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -969,7 +969,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Bacteria (Tests in Specimen from Normally Sterile Site by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Bacteria (Tests in Specimen from Normally Sterile Site by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1015,7 +1015,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Haemophilus influenzae Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1041,7 +1041,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Haemophilus Influenza Disease (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Haemophilus Influenza Disease (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -1067,7 +1067,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Invasive Haemophilus Influenza Disease (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Invasive Haemophilus Influenza Disease (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -1127,7 +1127,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningitis" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningitis"/>
                </where>
             </operand>
          </expression>
@@ -1153,7 +1153,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningitis" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningitis"/>
                </where>
             </operand>
          </expression>

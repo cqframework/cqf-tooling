@@ -129,7 +129,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Opioid Overdose and Poisoning (Naloxone) (RxNorm)" xsi:type="ValueSetRef"/>
+                  <valueset name="Opioid Overdose and Poisoning (Naloxone) (RxNorm)"/>
                </where>
             </operand>
          </expression>
@@ -155,7 +155,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Bradypnea" xsi:type="ValueSetRef"/>
+                  <valueset name="Bradypnea"/>
                </where>
             </operand>
          </expression>
@@ -181,7 +181,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Bradypnea" xsi:type="ValueSetRef"/>
+                  <valueset name="Bradypnea"/>
                </where>
             </operand>
          </expression>
@@ -241,7 +241,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Cyanosis" xsi:type="ValueSetRef"/>
+                  <valueset name="Cyanosis"/>
                </where>
             </operand>
          </expression>
@@ -267,7 +267,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Cyanosis" xsi:type="ValueSetRef"/>
+                  <valueset name="Cyanosis"/>
                </where>
             </operand>
          </expression>
@@ -327,7 +327,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Consciousness [Decreased Level]" xsi:type="ValueSetRef"/>
+                  <valueset name="Consciousness [Decreased Level]"/>
                </where>
             </operand>
          </expression>
@@ -353,7 +353,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Consciousness [Decreased Level]" xsi:type="ValueSetRef"/>
+                  <valueset name="Consciousness [Decreased Level]"/>
                </where>
             </operand>
          </expression>
@@ -409,7 +409,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Opioid Overdose and Poisoning  (Tests for Opioids [Quantitative])" xsi:type="ValueSetRef"/>
+                  <valueset name="Opioid Overdose and Poisoning  (Tests for Opioids [Quantitative])"/>
                </where>
             </operand>
          </expression>
@@ -455,7 +455,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -501,7 +501,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Opioid Overdose and Poisoning (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Opioid Overdose and Poisoning (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -525,7 +525,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -547,7 +547,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Drugs [Unspecified] (Tests by Screen or Unspecified Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Drugs [Unspecified] (Tests by Screen or Unspecified Method)"/>
                </where>
             </operand>
          </expression>
@@ -593,7 +593,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Opioid Overdose and Poisoning (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Opioid Overdose and Poisoning (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -615,7 +615,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Opioid Overdose and Poisoning  (Tests for Opioids [Quantitative])" xsi:type="ValueSetRef"/>
+                  <valueset name="Opioid Overdose and Poisoning  (Tests for Opioids [Quantitative])"/>
                </where>
             </operand>
          </expression>
@@ -637,7 +637,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Opioid Overdose and Poisoning  (Tests for Opioids [Qualitative])" xsi:type="ValueSetRef"/>
+                  <valueset name="Opioid Overdose and Poisoning  (Tests for Opioids [Qualitative])"/>
                </where>
             </operand>
          </expression>
@@ -663,7 +663,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Miosis" xsi:type="ValueSetRef"/>
+                  <valueset name="Miosis"/>
                </where>
             </operand>
          </expression>
@@ -689,7 +689,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Miosis" xsi:type="ValueSetRef"/>
+                  <valueset name="Miosis"/>
                </where>
             </operand>
          </expression>
@@ -749,7 +749,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Opioid Abuse, Dependence, and Other Use [Excluding Overdose and Poisoning] (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Opioid Abuse, Dependence, and Other Use [Excluding Overdose and Poisoning] (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -775,7 +775,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Opioid Abuse, Dependence, and Other Use [Excluding Overdose and Poisoning] (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Opioid Abuse, Dependence, and Other Use [Excluding Overdose and Poisoning] (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -835,7 +835,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Opioid Overdose and Poisoning (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Opioid Overdose and Poisoning (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -861,7 +861,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Opioid Overdose and Poisoning (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Opioid Overdose and Poisoning (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -921,7 +921,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Drug Overdose and Poisoning [Suspected]" xsi:type="ValueSetRef"/>
+                  <valueset name="Drug Overdose and Poisoning [Suspected]"/>
                </where>
             </operand>
          </expression>
@@ -947,7 +947,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Drug Overdose and Poisoning [Suspected]" xsi:type="ValueSetRef"/>
+                  <valueset name="Drug Overdose and Poisoning [Suspected]"/>
                </where>
             </operand>
          </expression>
@@ -1037,7 +1037,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Opioid Overdose and Poisoning (Naloxone) (RxNorm)" xsi:type="ValueSetRef"/>
+                  <valueset name="Opioid Overdose and Poisoning (Naloxone) (RxNorm)"/>
                </where>
             </operand>
          </expression>
@@ -1094,7 +1094,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="[TEST] Therapeutic Medication Response" xsi:type="ValueSetRef"/>
+                  <valueset name="[TEST] Therapeutic Medication Response"/>
                </where>
             </operand>
          </expression>
@@ -1170,7 +1170,7 @@
                      </expression>
                   </return>
                </codes>
-               <valueset name="Discharge Disposition [Expired]" xsi:type="ValueSetRef"/>
+               <valueset name="Discharge Disposition [Expired]"/>
             </operand>
          </expression>
       </def>

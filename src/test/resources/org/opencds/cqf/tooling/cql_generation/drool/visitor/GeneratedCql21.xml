@@ -86,7 +86,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Tests for Neisseria meningitidis Antigen)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Tests for Neisseria meningitidis Antigen)"/>
                </where>
             </operand>
          </expression>
@@ -132,7 +132,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -178,7 +178,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -202,7 +202,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -224,7 +224,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Tests for Neisseria meningitidis Antigen in Tissue by Immunohistochemistry)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Tests for Neisseria meningitidis Antigen in Tissue by Immunohistochemistry)"/>
                </where>
             </operand>
          </expression>
@@ -270,7 +270,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -316,7 +316,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -340,7 +340,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -362,7 +362,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Tests for Neisseria meningitidis Antigen in CSF by Latex Agglutination)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Tests for Neisseria meningitidis Antigen in CSF by Latex Agglutination)"/>
                </where>
             </operand>
          </expression>
@@ -408,7 +408,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -454,7 +454,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -478,7 +478,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -500,7 +500,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Tests for Neisseria meningitidis Antigen in Specimen from Normally Sterile Site by Latex Agglutination)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Tests for Neisseria meningitidis Antigen in Specimen from Normally Sterile Site by Latex Agglutination)"/>
                </where>
             </operand>
          </expression>
@@ -546,7 +546,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -592,7 +592,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -616,7 +616,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -638,7 +638,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Tests for Neisseria meningitidis Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Tests for Neisseria meningitidis Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -684,7 +684,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -730,7 +730,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -754,7 +754,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -776,7 +776,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests for Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests for Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -822,7 +822,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -844,7 +844,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Tests for Neisseria meningitidis Nucleic Acid in Specimen from Normally Sterile Site)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Tests for Neisseria meningitidis Nucleic Acid in Specimen from Normally Sterile Site)"/>
                </where>
             </operand>
          </expression>
@@ -890,7 +890,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -936,7 +936,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -960,7 +960,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -982,7 +982,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests for Nucleic Acid in Specimen from Normally Sterile Site)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests for Nucleic Acid in Specimen from Normally Sterile Site)"/>
                </where>
             </operand>
          </expression>
@@ -1028,7 +1028,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1054,7 +1054,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Adrenal Hemorrhage" xsi:type="ValueSetRef"/>
+                  <valueset name="Adrenal Hemorrhage"/>
                </where>
             </operand>
          </expression>
@@ -1080,7 +1080,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Adrenal Hemorrhage" xsi:type="ValueSetRef"/>
+                  <valueset name="Adrenal Hemorrhage"/>
                </where>
             </operand>
          </expression>
@@ -1136,7 +1136,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Tests for Neisseria meningitidis by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Tests for Neisseria meningitidis by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1182,7 +1182,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1228,7 +1228,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1252,7 +1252,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -1274,7 +1274,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Bacteria (Tests by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Bacteria (Tests by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1320,7 +1320,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1346,7 +1346,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -1372,7 +1372,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -1428,7 +1428,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests by Microscopic Observation in Specimen from Normally Sterile Site by Gram Stain)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests by Microscopic Observation in Specimen from Normally Sterile Site by Gram Stain)"/>
                </where>
             </operand>
          </expression>
@@ -1474,7 +1474,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1520,7 +1520,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Meningococcal Disease (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1544,7 +1544,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -1617,7 +1617,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Discharge Disposition [Expired]" xsi:type="ValueSetRef"/>
+                  <valueset name="Discharge Disposition [Expired]"/>
                </where>
             </operand>
          </expression>
@@ -1643,7 +1643,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Purpura" xsi:type="ValueSetRef"/>
+                  <valueset name="Purpura"/>
                </where>
             </operand>
          </expression>
@@ -1669,7 +1669,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Purpura" xsi:type="ValueSetRef"/>
+                  <valueset name="Purpura"/>
                </where>
             </operand>
          </expression>
@@ -1729,7 +1729,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Purulent Meninges" xsi:type="ValueSetRef"/>
+                  <valueset name="Purulent Meninges"/>
                </where>
             </operand>
          </expression>
@@ -1755,7 +1755,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Purulent Meninges" xsi:type="ValueSetRef"/>
+                  <valueset name="Purulent Meninges"/>
                </where>
             </operand>
          </expression>

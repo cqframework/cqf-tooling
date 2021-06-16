@@ -96,7 +96,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Carbidopa Levodopa Combination (RXNORM)" xsi:type="ValueSetRef"/>
+                  <valueset name="Carbidopa Levodopa Combination (RXNORM)"/>
                </where>
             </operand>
          </expression>
@@ -152,7 +152,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Levodopa (RXNORM)" xsi:type="ValueSetRef"/>
+                  <valueset name="Levodopa (RXNORM)"/>
                </where>
             </operand>
          </expression>
@@ -178,7 +178,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Multiple System Atrophy" xsi:type="ValueSetRef"/>
+                  <valueset name="Multiple System Atrophy"/>
                </where>
             </operand>
          </expression>
@@ -204,7 +204,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Multiple System Atrophy" xsi:type="ValueSetRef"/>
+                  <valueset name="Multiple System Atrophy"/>
                </where>
             </operand>
          </expression>
@@ -264,7 +264,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Parkinsons Disease (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Parkinsons Disease (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -290,7 +290,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Parkinsons Disease (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Parkinsons Disease (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -350,7 +350,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Parkinsonism [Secondary]" xsi:type="ValueSetRef"/>
+                  <valueset name="Parkinsonism [Secondary]"/>
                </where>
             </operand>
          </expression>
@@ -376,7 +376,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Parkinsonism [Secondary]" xsi:type="ValueSetRef"/>
+                  <valueset name="Parkinsonism [Secondary]"/>
                </where>
             </operand>
          </expression>

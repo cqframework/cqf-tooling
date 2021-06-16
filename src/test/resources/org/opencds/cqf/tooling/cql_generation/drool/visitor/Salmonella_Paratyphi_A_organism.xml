@@ -82,7 +82,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abdominal Cramps" xsi:type="ValueSetRef"/>
+                  <valueset name="Abdominal Cramps"/>
                </where>
             </operand>
          </expression>
@@ -108,7 +108,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abdominal Cramps" xsi:type="ValueSetRef"/>
+                  <valueset name="Abdominal Cramps"/>
                </where>
             </operand>
          </expression>
@@ -168,7 +168,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Anorexia" xsi:type="ValueSetRef"/>
+                  <valueset name="Anorexia"/>
                </where>
             </operand>
          </expression>
@@ -194,7 +194,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Anorexia" xsi:type="ValueSetRef"/>
+                  <valueset name="Anorexia"/>
                </where>
             </operand>
          </expression>
@@ -250,7 +250,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="S. Paratyphi Infection (Tests for S. Paratyphi Antibody)" xsi:type="ValueSetRef"/>
+                  <valueset name="S. Paratyphi Infection (Tests for S. Paratyphi Antibody)"/>
                </where>
             </operand>
          </expression>
@@ -296,7 +296,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -342,7 +342,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="S. Paratyphi Infection (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="S. Paratyphi Infection (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -366,7 +366,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -412,7 +412,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -436,7 +436,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -458,7 +458,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests for Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests for Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -504,7 +504,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="S. Paratyphi Infection (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="S. Paratyphi Infection (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -530,7 +530,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Diarrhea" xsi:type="ValueSetRef"/>
+                  <valueset name="Diarrhea"/>
                </where>
             </operand>
          </expression>
@@ -556,7 +556,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Diarrhea" xsi:type="ValueSetRef"/>
+                  <valueset name="Diarrhea"/>
                </where>
             </operand>
          </expression>
@@ -636,7 +636,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -660,7 +660,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -682,7 +682,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Bacteria (Tests by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Bacteria (Tests by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -728,7 +728,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="S. Paratyphi Infection (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="S. Paratyphi Infection (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -754,7 +754,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="S. Paratyphi Infection (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="S. Paratyphi Infection (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -780,7 +780,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="S. Paratyphi Infection (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="S. Paratyphi Infection (Disorders)"/>
                </where>
             </operand>
          </expression>

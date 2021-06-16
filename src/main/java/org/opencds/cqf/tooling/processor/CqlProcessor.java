@@ -6,6 +6,22 @@ import java.nio.file.Paths;
 import java.util.*;
 
 import org.cqframework.cql.cql2elm.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.CqlTranslatorException;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
+import org.cqframework.cql.cql2elm.DefaultModelInfoProvider;
+import org.cqframework.cql.cql2elm.FhirLibrarySourceProvider;
+import org.cqframework.cql.cql2elm.LibraryManager;
+import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.cql2elm.NamespaceInfo;
+import org.cqframework.cql.cql2elm.NamespaceManager;
 import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.fhir.ucum.UcumService;
@@ -25,6 +41,8 @@ import org.opencds.cqf.tooling.npm.NpmModelInfoProvider;
 /**
  * @author Adam Stevenson
  */
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
+
 public class CqlProcessor {
 
     /**
@@ -231,32 +249,10 @@ public class CqlProcessor {
         return cachedLibraryManager;
     }
 
-    /**
-     * Reads configuration file named cql-options.json from the given folder if present. Otherwise returns default options.
-     * @param folder
-     * @return
-     */
-    private CqlTranslatorOptions getTranslatorOptions(String folder) {
-        String optionsFileName = folder + File.separator + "cql-options.json";
-        CqlTranslatorOptions options = null;
-        File file = new File(optionsFileName);
-        if (file.exists()) {
-            options = CqlTranslatorOptionsMapper.fromFile(file.getAbsolutePath());
-        }
-        else {
-            options = CqlTranslatorOptions.defaultOptions();
-            if (!options.getFormats().contains(CqlTranslator.Format.XML)) {
-                options.getFormats().add(CqlTranslator.Format.XML);
-            }
-        }
-
-        return options;
-    }
-
     private void translateFolder(String folder) {
         logger.logMessage(String.format("Translating CQL source in folder %s", folder));
 
-        CqlTranslatorOptions options = getTranslatorOptions(folder);
+        CqlTranslatorOptions options = ResourceUtils.getTranslatorOptions(folder);
 
         // Setup
         // Construct DefaultLibrarySourceProvider

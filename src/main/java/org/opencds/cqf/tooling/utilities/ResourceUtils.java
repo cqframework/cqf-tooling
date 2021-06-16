@@ -372,18 +372,20 @@ public class ResourceUtils
       return valueSetDefs;
     }
 
-    private static CqlTranslatorOptions getTranslatorOptions(String folder) {
+    public static CqlTranslatorOptions getTranslatorOptions(String folder) {
       String optionsFileName = folder + File.separator + "cql-options.json";
       CqlTranslatorOptions options = null;
       File file = new File(optionsFileName);
       if (file.exists()) {
           options = CqlTranslatorOptionsMapper.fromFile(file.getAbsolutePath());
+          System.out.println(String.format("cql-options loaded from: %s", file.getAbsolutePath()));
       }
       else {
           options = CqlTranslatorOptions.defaultOptions();
           if (!options.getFormats().contains(CqlTranslator.Format.XML)) {
               options.getFormats().add(CqlTranslator.Format.XML);
           }
+          System.out.println("cql-options not found. Using default options.");
       }
 
       return options;
@@ -435,7 +437,10 @@ public class ResourceUtils
       try {
           IBaseResource resource = IOUtils.readResource(path, fhirContext, true);
           if (resource != null) {
-            resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
+//              if(resources.containsKey(resource.getIdElement().getIdPart())){
+//                  IBaseResource storedResource = resources.get(resource.getIdElement().getIdPart());
+//              }
+              resources.putIfAbsent(resource.fhirType() + "/" + resource.getIdElement().getIdPart(), resource);
           } else {
             added = false;
             LogUtils.putException(path, new Exception("Unable to add Resource: " + path));
@@ -591,6 +596,29 @@ public class ResourceUtils
                 throw new IllegalArgumentException("Measure is expected to have one and only one library");
             }
             String reference = measure.getLibrary().get(0).getReference();
+            String parts[] = reference.split("/");
+            return parts[parts.length - 1];
+        }
+        else if (resource instanceof org.hl7.fhir.r5.model.PlanDefinition) {
+            org.hl7.fhir.r5.model.PlanDefinition planDefinition = (org.hl7.fhir.r5.model.PlanDefinition)resource;
+            if (!planDefinition.hasLibrary() || planDefinition.getLibrary().size() != 1) {
+                throw new IllegalArgumentException("PlanDefinition is expected to have one and only one library");
+            }
+            return planDefinition.getLibrary().get(0).getValue();
+        }
+        else if (resource instanceof org.hl7.fhir.r4.model.PlanDefinition) {
+            org.hl7.fhir.r4.model.PlanDefinition planDefinition = (org.hl7.fhir.r4.model.PlanDefinition)resource;
+            if (!planDefinition.hasLibrary() || planDefinition.getLibrary().size() != 1) {
+                throw new IllegalArgumentException("PlanDefinition is expected to have one and only one library");
+            }
+            return planDefinition.getLibrary().get(0).getValue();
+        }
+        else if (resource instanceof org.hl7.fhir.dstu3.model.PlanDefinition) {
+            org.hl7.fhir.dstu3.model.PlanDefinition planDefinition = (org.hl7.fhir.dstu3.model.PlanDefinition)resource;
+            if (!planDefinition.hasLibrary() || planDefinition.getLibrary().size() != 1) {
+                throw new IllegalArgumentException("PlanDefinition is expected to have one and only one library");
+            }
+            String reference = planDefinition.getLibrary().get(0).getReference();
             String parts[] = reference.split("/");
             return parts[parts.length - 1];
         }

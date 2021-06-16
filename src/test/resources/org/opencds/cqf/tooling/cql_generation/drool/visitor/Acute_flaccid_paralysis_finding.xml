@@ -60,7 +60,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Limb Weakness" xsi:type="ValueSetRef"/>
+                  <valueset name="Limb Weakness"/>
                </where>
             </operand>
          </expression>
@@ -86,7 +86,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Limb Weakness" xsi:type="ValueSetRef"/>
+                  <valueset name="Limb Weakness"/>
                </where>
             </operand>
          </expression>
@@ -146,7 +146,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Myelitis [Non Specific]" xsi:type="ValueSetRef"/>
+                  <valueset name="Myelitis [Non Specific]"/>
                </where>
             </operand>
          </expression>
@@ -172,7 +172,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Myelitis [Non Specific]" xsi:type="ValueSetRef"/>
+                  <valueset name="Myelitis [Non Specific]"/>
                </where>
             </operand>
          </expression>

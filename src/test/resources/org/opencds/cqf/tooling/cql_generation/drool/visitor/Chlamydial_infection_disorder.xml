@@ -85,7 +85,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia species Antigen)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia species Antigen)"/>
                </where>
             </operand>
          </expression>
@@ -131,7 +131,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -155,7 +155,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -177,7 +177,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia species Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia species Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -223,7 +223,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -247,7 +247,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -269,7 +269,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis Antigen)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis Antigen)"/>
                </where>
             </operand>
          </expression>
@@ -315,7 +315,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -339,7 +339,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -361,7 +361,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -407,7 +407,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -431,7 +431,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -453,7 +453,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia species by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia species by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -499,7 +499,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -523,7 +523,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -545,7 +545,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -591,7 +591,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -615,7 +615,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -641,7 +641,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection [Cervicitis Urethritis LGV] (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection [Cervicitis Urethritis LGV] (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -667,7 +667,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection [Cervicitis Urethritis LGV] (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection [Cervicitis Urethritis LGV] (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -727,7 +727,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection [Conjunctivitis] (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection [Conjunctivitis] (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -753,7 +753,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection [Conjunctivitis] (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection [Conjunctivitis] (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -813,7 +813,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection [Secondary Sites Complications] (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection [Secondary Sites Complications] (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -839,7 +839,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection [Secondary Sites Complications] (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection [Secondary Sites Complications] (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -895,7 +895,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia species Antigen)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia species Antigen)"/>
                </where>
             </operand>
          </expression>
@@ -941,7 +941,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -987,7 +987,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1011,7 +1011,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -1057,7 +1057,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia species (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia species (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1097,7 +1097,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia species Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia species Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -1143,7 +1143,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1189,7 +1189,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1213,7 +1213,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -1259,7 +1259,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia species (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia species (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1299,7 +1299,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests for Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests for Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -1345,7 +1345,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1391,7 +1391,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia species (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia species (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1425,7 +1425,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis Antigen)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis Antigen)"/>
                </where>
             </operand>
          </expression>
@@ -1471,7 +1471,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1517,7 +1517,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1541,7 +1541,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -1563,7 +1563,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -1609,7 +1609,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1655,7 +1655,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1679,7 +1679,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -1701,7 +1701,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests for Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests for Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -1747,7 +1747,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1769,7 +1769,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia species by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia species by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1815,7 +1815,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1861,7 +1861,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1885,7 +1885,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -1931,7 +1931,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia species (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia species (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1971,7 +1971,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Bacteria (Tests by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Bacteria (Tests by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -2017,7 +2017,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -2063,7 +2063,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia species (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia species (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -2097,7 +2097,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -2143,7 +2143,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -2189,7 +2189,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -2213,7 +2213,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -2235,7 +2235,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Bacteria (Tests by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Bacteria (Tests by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -2281,7 +2281,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -2303,7 +2303,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis Antigen)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis Antigen)"/>
                </where>
             </operand>
          </expression>
@@ -2349,7 +2349,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Indeterminate or Equivocal Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Indeterminate or Equivocal Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -2373,7 +2373,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -2395,7 +2395,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -2441,7 +2441,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Indeterminate or Equivocal Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Indeterminate or Equivocal Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -2465,7 +2465,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -2487,7 +2487,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -2533,7 +2533,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Indeterminate or Equivocal Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Indeterminate or Equivocal Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -2557,7 +2557,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -2579,7 +2579,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia species Antigen)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia species Antigen)"/>
                </where>
             </operand>
          </expression>
@@ -2625,7 +2625,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Negative or Undetected Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Negative or Undetected Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -2647,7 +2647,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia species Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia species Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -2693,7 +2693,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Negative or Undetected Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Negative or Undetected Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -2715,7 +2715,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis Antigen)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis Antigen)"/>
                </where>
             </operand>
          </expression>
@@ -2761,7 +2761,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Negative or Undetected Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Negative or Undetected Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -2783,7 +2783,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -2829,7 +2829,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Negative or Undetected Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Negative or Undetected Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -2851,7 +2851,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia species by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia species by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -2897,7 +2897,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Negative or Undetected Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Negative or Undetected Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -2919,7 +2919,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Chlamydia trachomatis Infection (Tests for Chlamydia trachomatis by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -2965,7 +2965,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Negative or Undetected Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Negative or Undetected Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -3021,7 +3021,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Trachoma (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Trachoma (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -3047,7 +3047,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Trachoma (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Trachoma (Disorders)"/>
                </where>
             </operand>
          </expression>

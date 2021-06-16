@@ -6,10 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -80,6 +77,13 @@ public class SpreadsheetHelper {
         }
         String valueAsString = SpreadsheetHelper.getDataFormatter().formatCellValue(cell);
         return SpreadsheetHelper.protectedString(valueAsString);
+    }
+
+    public static Integer getCellAsInteger(Cell cell) {
+        if (cell == null) {
+            return null;
+        }
+        return Double.valueOf(cell.getNumericCellValue()).intValue();
     }
 
     public static String getCellAsString(Row row, int cellIndex) {

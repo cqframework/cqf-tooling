@@ -141,7 +141,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Apnea" xsi:type="ValueSetRef"/>
+                  <valueset name="Apnea"/>
                </where>
             </operand>
          </expression>
@@ -167,7 +167,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Apnea" xsi:type="ValueSetRef"/>
+                  <valueset name="Apnea"/>
                </where>
             </operand>
          </expression>
@@ -227,7 +227,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Post-tussive vomiting" xsi:type="ValueSetRef"/>
+                  <valueset name="Post-tussive vomiting"/>
                </where>
             </operand>
          </expression>
@@ -253,7 +253,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Post-tussive vomiting" xsi:type="ValueSetRef"/>
+                  <valueset name="Post-tussive vomiting"/>
                </where>
             </operand>
          </expression>
@@ -309,7 +309,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Tests for Bordetella pertussis Antibody [Excluding Pertussis Toxin Antibody])" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Tests for Bordetella pertussis Antibody [Excluding Pertussis Toxin Antibody])"/>
                </where>
             </operand>
          </expression>
@@ -355,7 +355,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -401,7 +401,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -425,7 +425,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -447,7 +447,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Tests for Bordetella pertussis Antigen)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Tests for Bordetella pertussis Antigen)"/>
                </where>
             </operand>
          </expression>
@@ -493,7 +493,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -539,7 +539,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -563,7 +563,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -585,7 +585,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Tests for Bordetella pertussis Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Tests for Bordetella pertussis Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -631,7 +631,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -677,7 +677,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -701,7 +701,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -723,7 +723,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests for Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests for Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -769,7 +769,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -791,7 +791,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Tests for Bordetella pertussis Toxin Antibody)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Tests for Bordetella pertussis Toxin Antibody)"/>
                </where>
             </operand>
          </expression>
@@ -837,7 +837,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -883,7 +883,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -907,7 +907,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -929,7 +929,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Tests for Bordetella pertussis by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Tests for Bordetella pertussis by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -975,7 +975,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -1021,7 +1021,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1045,7 +1045,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -1067,7 +1067,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Bacteria (Tests by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Bacteria (Tests by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1113,7 +1113,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -1139,7 +1139,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Inspiratory Whoop" xsi:type="ValueSetRef"/>
+                  <valueset name="Inspiratory Whoop"/>
                </where>
             </operand>
          </expression>
@@ -1165,7 +1165,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Inspiratory Whoop" xsi:type="ValueSetRef"/>
+                  <valueset name="Inspiratory Whoop"/>
                </where>
             </operand>
          </expression>
@@ -1221,7 +1221,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Tests for Bordetella pertussis by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Tests for Bordetella pertussis by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1243,7 +1243,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Tests for Bordetella pertussis Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Tests for Bordetella pertussis Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -1265,7 +1265,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Test Panels for Bordetella pertussis and Bordetella parapertussis Nucleic Acid and Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Test Panels for Bordetella pertussis and Bordetella parapertussis Nucleic Acid and Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -1287,7 +1287,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Tests for Bordetella pertussis Antibody [Excluding Pertussis Toxin Antibody])" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Tests for Bordetella pertussis Antibody [Excluding Pertussis Toxin Antibody])"/>
                </where>
             </operand>
          </expression>
@@ -1309,7 +1309,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Test Panels for Bordetella pertussis Antibody)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Test Panels for Bordetella pertussis Antibody)"/>
                </where>
             </operand>
          </expression>
@@ -1331,7 +1331,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Tests for Bordetella pertussis Antigen)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Tests for Bordetella pertussis Antigen)"/>
                </where>
             </operand>
          </expression>
@@ -1353,7 +1353,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Tests for Bordetella pertussis Toxin Antibody)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Tests for Bordetella pertussis Toxin Antibody)"/>
                </where>
             </operand>
          </expression>
@@ -1375,7 +1375,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Test Panels for Bordetella pertussis Toxin Antibody)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Test Panels for Bordetella pertussis Toxin Antibody)"/>
                </where>
             </operand>
          </expression>
@@ -1401,7 +1401,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Paroxysmal Cough" xsi:type="ValueSetRef"/>
+                  <valueset name="Paroxysmal Cough"/>
                </where>
             </operand>
          </expression>
@@ -1427,7 +1427,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Paroxysmal Cough" xsi:type="ValueSetRef"/>
+                  <valueset name="Paroxysmal Cough"/>
                </where>
             </operand>
          </expression>
@@ -1487,7 +1487,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -1513,7 +1513,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Pertussis (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Pertussis (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -1573,7 +1573,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Post-tussive vomiting" xsi:type="ValueSetRef"/>
+                  <valueset name="Post-tussive vomiting"/>
                </where>
             </operand>
          </expression>
@@ -1599,7 +1599,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Post-tussive vomiting" xsi:type="ValueSetRef"/>
+                  <valueset name="Post-tussive vomiting"/>
                </where>
             </operand>
          </expression>

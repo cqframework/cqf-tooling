@@ -71,7 +71,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Salmonellosis (Tests for Salmonella except S. typhi and S. paratyphi Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Salmonellosis (Tests for Salmonella except S. typhi and S. paratyphi Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -117,7 +117,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -163,7 +163,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Salmonellosis [Salmonella Species and Subspecies] (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Salmonellosis [Salmonella Species and Subspecies] (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -187,7 +187,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -233,7 +233,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Salmonellosis [Salmonella serovar] (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Salmonellosis [Salmonella serovar] (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -273,7 +273,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Organisms (Tests for Nucleic Acid)" xsi:type="ValueSetRef"/>
+                  <valueset name="Organisms (Tests for Nucleic Acid)"/>
                </where>
             </operand>
          </expression>
@@ -319,7 +319,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Salmonellosis [Salmonella Species and Subspecies] (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Salmonellosis [Salmonella Species and Subspecies] (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -365,7 +365,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Salmonellosis [Salmonella serovar] (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Salmonellosis [Salmonella serovar] (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -403,7 +403,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Diarrhea" xsi:type="ValueSetRef"/>
+                  <valueset name="Diarrhea"/>
                </where>
             </operand>
          </expression>
@@ -429,7 +429,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Diarrhea" xsi:type="ValueSetRef"/>
+                  <valueset name="Diarrhea"/>
                </where>
             </operand>
          </expression>
@@ -485,7 +485,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Salmonellosis (Tests for Salmonella except S. typhi and S. paratyphi by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Salmonellosis (Tests for Salmonella except S. typhi and S. paratyphi by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -531,7 +531,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Present or Positive Lab Result Value" xsi:type="ValueSetRef"/>
+                  <valueset name="Present or Positive Lab Result Value"/>
                </where>
             </operand>
          </expression>
@@ -577,7 +577,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Salmonellosis [Salmonella Species and Subspecies] (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Salmonellosis [Salmonella Species and Subspecies] (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -601,7 +601,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Abnormal Interpretation of an Observation" xsi:type="ValueSetRef"/>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
                </where>
             </operand>
          </expression>
@@ -647,7 +647,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Salmonellosis [Salmonella serovar] (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Salmonellosis [Salmonella serovar] (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -687,7 +687,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Bacteria (Tests by Culture and Identification Method)" xsi:type="ValueSetRef"/>
+                  <valueset name="Bacteria (Tests by Culture and Identification Method)"/>
                </where>
             </operand>
          </expression>
@@ -733,7 +733,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Salmonellosis [Salmonella Species and Subspecies] (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Salmonellosis [Salmonella Species and Subspecies] (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -779,7 +779,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Salmonellosis [Salmonella serovar] (Organism or Substance in Lab Results)" xsi:type="ValueSetRef"/>
+                  <valueset name="Salmonellosis [Salmonella serovar] (Organism or Substance in Lab Results)"/>
                </where>
             </operand>
          </expression>
@@ -817,7 +817,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Salmonellosis (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Salmonellosis (Disorders)"/>
                </where>
             </operand>
          </expression>
@@ -843,7 +843,7 @@
                   <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
                      <operand name="Alias" xsi:type="AliasRef"/>
                   </code>
-                  <valueset name="Salmonellosis (Disorders)" xsi:type="ValueSetRef"/>
+                  <valueset name="Salmonellosis (Disorders)"/>
                </where>
             </operand>
          </expression>
