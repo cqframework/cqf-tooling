@@ -12,7 +12,7 @@ import org.opencds.cqf.tooling.cql_generation.drool.traversal.DroolTraverser;
 public class HtmlFileVisitorIT {
     @Test
     public void test_worked() {
-        String encodingPath = "../CQLGenerationDocs/NonGeneratedDocs/default.json";
+         String encodingPath = HtmlFileVisitorIT.class.getResource("default.json").getPath();
         File file = new File(encodingPath);
         readAndGenerateCQL(file);
     }
