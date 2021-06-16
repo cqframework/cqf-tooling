@@ -11,7 +11,7 @@ public class VmrToFhirOperationTest {
     public void vmrOperationTest() throws URISyntaxException {
         String inputFilePath = VmrToFhirOperationTest.class.getResource(vmrFilePath).toURI().getPath();
         String operation = "VmrToFhir";
-        String outputPath = "./src/test/resources/org/opencds/cqf/tooling/operation/VmrToFhir";
+        String outputPath = "./target/VmrToFhir";
         String encoding = "xml";
         String[] args = { "-" + operation, "-ifp=" + inputFilePath, "-op=" + outputPath, "-e=" + encoding };
         VmrToFhirOperation vmr = new VmrToFhirOperation();

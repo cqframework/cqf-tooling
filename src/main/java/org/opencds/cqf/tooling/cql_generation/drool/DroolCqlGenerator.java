@@ -49,13 +49,8 @@ public class DroolCqlGenerator implements CqlGenerator {
     public void generateAndWriteToFile(String inputPath, String outputPath, String fhirVersion) {
         File input = new File(inputPath);
         File output = new File(outputPath);
-        if (!output.isFile()) {
-            try {
-                output.createNewFile();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+        if (!output.isDirectory()) {
+            output.mkdirs();
         }
         this.cqlOutput = new File(output.getAbsolutePath() + "/cql");
         cqlOutput.mkdir();

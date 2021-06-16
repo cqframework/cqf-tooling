@@ -12,7 +12,7 @@ public class GenerateCQLFromDroolOperationTest {
         String dataInputPath = "default.json";
         String operation = "GenerateCQLFromDrool";
         String inputFilePath = GenerateCQLFromDroolOperationTest.class.getResource(dataInputPath).toURI().getPath();
-        String outputPath = "src\\test\\resources\\org\\opencds\\cqf\\tooling\\cql_generation\\drool\\visitor";
+        String outputPath = "target/CqlFromDrool";
         String encoding = "json";
         String[] args = { "-" + operation, "-ifp=" + inputFilePath, "-op=" + outputPath, "-e=" + encoding };
         Operation generateCQLFromDroolOperation = new GenerateCQLFromDroolOperation();
