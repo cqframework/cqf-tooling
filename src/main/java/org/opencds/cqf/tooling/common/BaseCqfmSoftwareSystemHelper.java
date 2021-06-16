@@ -6,9 +6,7 @@ import org.opencds.cqf.tooling.utilities.LogUtils;
 import java.io.IOException;
 import java.util.Objects;
 
-/**
- * @author Adam Stevenson
- */
+
 public abstract class BaseCqfmSoftwareSystemHelper {
     private String rootDir;
     protected String getRootDir() {

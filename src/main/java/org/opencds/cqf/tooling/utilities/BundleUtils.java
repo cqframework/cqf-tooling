@@ -14,9 +14,7 @@ import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-/**
- * @author Adam Stevenson
- */
+
 public class BundleUtils {
 
     public static Object bundleArtifacts(String id, List<IBaseResource> resources, FhirContext fhirContext) {

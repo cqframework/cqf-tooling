@@ -10,9 +10,7 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.BundleUtil;
-/**
- * @author Adam Stevenson
- */
+
 public class ContentLoadingFhirServerMeasureTestAdapter extends FhirServerMeasureTestAdapter {
 
     private IBaseResource contentBundle;

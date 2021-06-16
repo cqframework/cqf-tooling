@@ -4,9 +4,7 @@ import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.parameter.ValidateParameters;
 import org.opencds.cqf.tooling.processor.ValidateProcessor;
 import org.opencds.cqf.tooling.processor.argument.ValidateArgumentProcessor;
-/**
- * @author Adam Stevenson
- */
+
 public class ValidateOperation extends Operation {
 
     public ValidateOperation() {

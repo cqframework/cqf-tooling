@@ -2,9 +2,7 @@ package org.opencds.cqf.tooling.utilities;
 
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.r4.model.CanonicalType;
-/**
- * @author Adam Stevenson
- */
+
 public class CanonicalUtils {
 
     public static String getHead(String url) {

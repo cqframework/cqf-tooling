@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hl7.elm_modelinfo.r1.ClassInfoElement;
-/**
- * @author Adam Stevenson
- */
+
 public class SliceList {
     public SliceList() {
         this.slices = new ArrayList<ClassInfoElement>();

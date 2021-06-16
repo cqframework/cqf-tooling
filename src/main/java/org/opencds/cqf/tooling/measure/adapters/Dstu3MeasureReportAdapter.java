@@ -7,9 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-/**
- * @author Adam Stevenson
- */
+
 public class Dstu3MeasureReportAdapter implements IMeasureReportAdapter {
     private MeasureReport measureReport;
     public Dstu3MeasureReportAdapter(MeasureReport measureReport) {

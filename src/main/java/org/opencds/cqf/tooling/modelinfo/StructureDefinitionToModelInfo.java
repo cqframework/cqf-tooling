@@ -29,9 +29,7 @@ import org.opencds.cqf.tooling.modelinfo.uscore.USCoreModelInfoBuilder;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
-/**
- * @author Adam Stevenson
- */
+
 public class StructureDefinitionToModelInfo extends Operation {
 
     private String inputPath;

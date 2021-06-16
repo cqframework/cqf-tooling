@@ -4,9 +4,7 @@ import org.hl7.elm_modelinfo.r1.*;
 import org.hl7.fhir.r4.model.*;
 
 import java.util.*;
-/**
- * @author Adam Stevenson
- */
+
 public class SearchInfoBuilder {
     protected Atlas atlas;
     protected Map<String, TypeInfo> typeInfos;

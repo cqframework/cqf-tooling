@@ -16,9 +16,7 @@ import org.opencds.cqf.tooling.processor.ITestProcessor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-/**
- * @author Adam Stevenson
- */
+
 public class MeasureTestProcessor implements ITestProcessor {
 
     //TODO: Should probably introduce a BaseTestProcessor and this would belong there.

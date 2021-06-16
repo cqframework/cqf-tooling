@@ -17,9 +17,7 @@ import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
-/**
- * @author Adam Stevenson
- */
+
 public class STU3LibraryProcessor extends LibraryProcessor {
     private String libraryPath;
     private FhirContext fhirContext;

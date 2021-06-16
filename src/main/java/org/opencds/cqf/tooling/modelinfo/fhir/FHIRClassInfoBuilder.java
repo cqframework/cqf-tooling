@@ -9,9 +9,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.r4.model.StructureDefinition.TypeDerivationRule;
 import org.opencds.cqf.tooling.modelinfo.ClassInfoBuilder;
-/**
- * @author Adam Stevenson
- */
+
 public class FHIRClassInfoBuilder extends ClassInfoBuilder {
 
     public FHIRClassInfoBuilder(Map<String, StructureDefinition> structureDefinitions) {

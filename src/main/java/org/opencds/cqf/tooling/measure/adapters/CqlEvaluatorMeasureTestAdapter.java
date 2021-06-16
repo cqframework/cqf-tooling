@@ -4,9 +4,7 @@ import org.apache.commons.lang.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-/**
- * @author Adam Stevenson
- */
+
 public class CqlEvaluatorMeasureTestAdapter extends MeasureTestAdapter {
 
     // private String contentPath;

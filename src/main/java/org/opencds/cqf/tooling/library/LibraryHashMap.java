@@ -4,9 +4,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 
 import org.hl7.elm.r1.VersionedIdentifier;
-/**
- * @author Adam Stevenson
- */
+
 @SuppressWarnings("serial")
 public class LibraryHashMap extends HashMap<VersionedIdentifier, InputStream> {
 

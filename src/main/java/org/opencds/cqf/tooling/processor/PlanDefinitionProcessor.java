@@ -15,9 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-/**
- * @author Adam Stevenson
- */
+
 public class PlanDefinitionProcessor {
     public static final String ResourcePrefix = "plandefinition-";
     public static final String PlanDefinitionTestGroupName = "plandefinition";

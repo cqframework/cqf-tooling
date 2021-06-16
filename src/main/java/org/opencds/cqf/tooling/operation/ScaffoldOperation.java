@@ -5,9 +5,7 @@ import org.opencds.cqf.tooling.parameter.ScaffoldParameters;
 import org.opencds.cqf.tooling.processor.ScaffoldProcessor;
 import org.opencds.cqf.tooling.processor.argument.ScaffoldArgumentProcessor;
 
-/**
- * @author Adam Stevenson
- */
+
 public class ScaffoldOperation extends Operation {
 
     public ScaffoldOperation() {

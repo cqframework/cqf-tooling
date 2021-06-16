@@ -13,9 +13,7 @@ Tracks slices at the root of the slice list
 Each slicename resets the slice map
 Slice elements contribute to the slice map for discriminator paths
 */
-/**
- * @author Adam Stevenson
- */
+
 public class SliceInfo {
     public SliceInfo(ElementDefinition sliceRoot, SliceInfo parentSliceInfo) {
         this.sliceRoot = sliceRoot;

@@ -20,9 +20,7 @@ import org.opencds.cqf.tooling.library.LibraryResourceProvider;
 //import org.opencds.cqf.tooling.dstu3.providers.CqfMeasure.TerminologyRef;
 //import org.opencds.cqf.tooling.dstu3.providers.CqfMeasure.TerminologyRef.TerminologyRefType;
 
-/**
- * @author Adam Stevenson
- */
+
 public class DataRequirementsProvider {
 //
 //    // For creating the CQF measure we need to:

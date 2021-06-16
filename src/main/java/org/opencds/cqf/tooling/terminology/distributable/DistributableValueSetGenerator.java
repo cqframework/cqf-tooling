@@ -17,9 +17,7 @@ import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
 
 import ca.uhn.fhir.context.FhirContext;
-/**
- * @author Adam Stevenson
- */
+
 public class DistributableValueSetGenerator extends Operation {
 
     private FhirContext fhirContext;

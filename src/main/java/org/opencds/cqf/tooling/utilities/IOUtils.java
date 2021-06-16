@@ -28,14 +28,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.parser.IParser;
-/**
- * @author Adam Stevenson
- */
+
 public class IOUtils 
 {        
-    /**
- * @author Adam Stevenson
- */
+    
     public enum Encoding 
     { 
         CQL("cql"), JSON("json"), XML("xml"), UNKNOWN(""); 

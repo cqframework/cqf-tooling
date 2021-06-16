@@ -2,9 +2,7 @@ package org.opencds.cqf.tooling.visitor;
 
 import org.hl7.elm.r1.Element;
 import org.hl7.elm.r1.VersionedIdentifier;
-/**
- * @author Adam Stevenson
- */
+
 public class ElmRequirement {
 
     protected VersionedIdentifier libraryIdentifier;

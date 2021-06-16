@@ -7,9 +7,7 @@ import org.opencds.cqf.tooling.measure.MeasureProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
-/**
- * @author Adam Stevenson
- */
+
 public class IGBundleProcessor {
     public static final String bundleFilesPathElement = "files/";  
     MeasureProcessor measureProcessor;

@@ -177,9 +177,7 @@ package org.opencds.cqf.tooling;
             - command: mvn exec: java -Dexec.args="-VmrToFhir -ifp=./src/test/resources/org/opencds/cqf/tooling/operation/VmrToFhir -op=./src/test/resources/org/opencds/cqf/tooling/operation/VmrToFhir/vMROutput.xml -e=xml"
             - this tooling transforms vMR data to FHIR data
         */
-/**
- * @author Adam Stevenson
- */
+
 public class Main {
 
     public static void main(String[] args) {

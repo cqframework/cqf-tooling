@@ -7,9 +7,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.r4.model.Type;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-/**
- * @author Adam Stevenson
- */
+
 @SuppressWarnings("serial")
 @DatatypeDef(name = "PopulationCriteriaMap")
 public class PopulationCriteriaMap extends Type {

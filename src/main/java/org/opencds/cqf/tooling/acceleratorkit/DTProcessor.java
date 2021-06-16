@@ -15,9 +15,7 @@ import java.time.Instant;
 import java.util.*;
 
 import static org.opencds.cqf.tooling.utilities.IOUtils.ensurePath;
-/**
- * @author Adam Stevenson
- */
+
 public class DTProcessor extends Operation {
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
     private String encoding = "json"; // -encoding (-e)

@@ -9,9 +9,7 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import java.io.File;
 import java.util.*;
-/**
- * @author Adam Stevenson
- */
+
 public class R4MeasureProcessor extends MeasureProcessor {
 
     private String measurePath;

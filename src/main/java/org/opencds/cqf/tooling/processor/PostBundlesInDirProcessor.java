@@ -10,13 +10,9 @@ import org.opencds.cqf.tooling.utilities.HttpClientUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
-/**
- * @author Adam Stevenson
- */
+
 public class PostBundlesInDirProcessor {
-    /**
- * @author Adam Stevenson
- */
+    
     public enum FHIRVersion {
         FHIR3("fhir3"), FHIR4("fhir4");
 

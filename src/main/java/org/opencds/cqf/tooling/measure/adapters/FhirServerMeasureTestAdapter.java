@@ -11,9 +11,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.opencds.cqf.tooling.utilities.HttpClientUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
-/**
- * @author Adam Stevenson
- */
+
 public abstract class FhirServerMeasureTestAdapter extends MeasureTestAdapter {
 
     protected IGenericClient fhirServer;

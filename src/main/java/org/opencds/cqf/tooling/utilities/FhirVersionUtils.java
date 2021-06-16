@@ -3,9 +3,7 @@ package org.opencds.cqf.tooling.utilities;
 import java.util.Objects;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-/**
- * @author Adam Stevenson
- */
+
 public class FhirVersionUtils {
     /**
      * This method handles numeric versions (3, 2.0, 4.0.1, etc.) and release versions (R4, DSTU3, etc.)

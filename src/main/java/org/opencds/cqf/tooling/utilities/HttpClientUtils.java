@@ -14,9 +14,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
-/**
- * @author Adam Stevenson
- */
+
 public class HttpClientUtils {
     public static void post(String fhirServerUrl, IBaseResource resource, Encoding encoding, FhirContext fhirContext)
             throws IOException {  

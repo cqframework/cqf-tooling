@@ -3,9 +3,7 @@ package org.opencds.cqf.tooling.measure.r4;
 import org.hl7.fhir.r4.model.Type;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-/**
- * @author Adam Stevenson
- */
+
 @SuppressWarnings("serial")
 @DatatypeDef(name = "VersionedTerminologyRef")
 public class VersionedTerminologyRef extends TerminologyRef {

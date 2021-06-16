@@ -10,9 +10,7 @@ import org.hl7.elm.r1.*;
 
 import javax.xml.namespace.QName;
 import java.util.*;
-/**
- * @author Bryant
- */
+
 public class ElmRequirementsContext {
 
     private CqlTranslatorOptions options;

@@ -7,9 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-/**
- * @author Adam Stevenson
- */
+
 public class R4MeasureReportAdapter implements IMeasureReportAdapter {
 
     private MeasureReport measureReport;

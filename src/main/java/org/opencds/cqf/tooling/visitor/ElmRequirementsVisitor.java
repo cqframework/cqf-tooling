@@ -5,9 +5,7 @@ import org.hl7.elm.r1.*;
 
 import java.util.Iterator;
 
-/**
- * @author Bryant
- */
+
 public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequirement, ElmRequirementsContext>{
 
     public ElmRequirementsVisitor() {

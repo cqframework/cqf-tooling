@@ -22,9 +22,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-/**
- * @author Adam Stevenson
- */
+
 public class ResourceLoader {
 
     public Map<String, StructureDefinition> loadPaths(String basePath, String resourcePaths) {

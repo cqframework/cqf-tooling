@@ -15,9 +15,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-/**
- * @author Adam Stevenson
- */
+
 public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperation {
 
     private JsonParser jsonParser;

@@ -8,9 +8,7 @@ import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.opencds.cqf.tooling.modelinfo.Atlas;
 import org.opencds.cqf.tooling.modelinfo.ContextInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.ModelInfoBuilder;
-/**
- * @author Adam Stevenson
- */
+
 public class QICoreModelInfoBuilder extends ModelInfoBuilder {
     private String helpersPath;
     private ContextInfoBuilder contextInfoBuilder;

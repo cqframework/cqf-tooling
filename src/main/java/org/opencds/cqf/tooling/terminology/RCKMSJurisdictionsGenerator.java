@@ -15,9 +15,7 @@ import org.opencds.cqf.tooling.Operation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-/**
- * @author Adam Stevenson
- */
+
 public class RCKMSJurisdictionsGenerator extends Operation {
 
     private String pathToSource; // -pathtosource (-pts)

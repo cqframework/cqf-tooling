@@ -14,9 +14,7 @@ import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
-/**
- * @author Adam Stevenson
- */
+
 public class ToJsonValueSetDbOperation extends Operation {
     private String valueSetPath;
 

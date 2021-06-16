@@ -6,9 +6,7 @@ import java.util.List;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-/**
- * @author Adam Stevenson
- */
+
 public class ArgUtils {
     public static final String[] HELP_OPTIONS = {"h", "help", "?"};
 

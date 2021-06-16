@@ -15,9 +15,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-/**
- * @author Adam Stevenson
- */
+
 public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 
     public CqfmSoftwareSystemHelper() { }

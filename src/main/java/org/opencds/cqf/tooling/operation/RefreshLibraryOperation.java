@@ -11,9 +11,7 @@ import org.opencds.cqf.tooling.utilities.LogUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-/**
- * @author Adam Stevenson
- */
+
 public class RefreshLibraryOperation extends Operation {
 
     public RefreshLibraryOperation() {    

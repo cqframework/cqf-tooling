@@ -17,9 +17,7 @@ import org.hl7.elm.r1.UsingDef;
 import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.elm.r1.VersionedIdentifier;
 
-/**
- * @author Adam Stevenson
- */
+
 public class ElmRequirements extends ElmRequirement {
 
     private HashSet<ElmRequirement> requirements = new LinkedHashSet<ElmRequirement>();

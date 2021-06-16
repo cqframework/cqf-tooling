@@ -20,9 +20,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 
 import ca.uhn.fhir.context.FhirContext;
-/**
- * @author Adam Stevenson
- */
+
 public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends BaseNarrativeProvider<?>> extends Operation {
 
     private T narrativeProvider;

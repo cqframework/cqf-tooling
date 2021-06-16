@@ -25,9 +25,7 @@ import org.opencds.cqf.tooling.library.BaseLibraryGenerator;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
-/**
- * @author Adam Stevenson
- */
+
 public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativeProvider> {
 
     private Map<String, IBaseResource> libraryMap = new HashMap<>();

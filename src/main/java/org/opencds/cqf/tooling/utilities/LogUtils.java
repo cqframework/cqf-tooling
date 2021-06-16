@@ -6,9 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
-/**
- * @author Adam Stevenson
- */
+
 public class LogUtils 
 {    
     private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LogUtils.class);

@@ -4,9 +4,7 @@ import org.opencds.cqf.tooling.processor.IProcessorContext;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
-/**
- * @author Adam Stevenson
- */
+
 public class RefreshMeasureParameters {
     /*
     The ig ini file

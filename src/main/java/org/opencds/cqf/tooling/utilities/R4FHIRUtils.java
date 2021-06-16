@@ -18,9 +18,7 @@ import org.hl7.elm.r1.ValueSetRef;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-/**
- * @author Adam Stevenson
- */
+
 public class R4FHIRUtils {
 
     public static Coding toCoding(Code code, TranslatedLibrary library, LibraryManager libraryManager) {

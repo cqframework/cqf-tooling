@@ -25,9 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-/**
- * @author Adam Stevenson
- */
+
 public class MeasureProcessor extends BaseProcessor {
     public static final String ResourcePrefix = "measure-";
     public static final String MeasureTestGroupName = "measure";

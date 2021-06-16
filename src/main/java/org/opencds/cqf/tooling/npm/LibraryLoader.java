@@ -11,9 +11,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.r5.formats.JsonParser;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.utilities.VersionUtilities;
-/**
- * @author Adam Stevenson
- */
+
 public class LibraryLoader implements ILibraryReader {
 
     private String version;

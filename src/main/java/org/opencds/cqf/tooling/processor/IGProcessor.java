@@ -16,9 +16,7 @@ import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 
 import ca.uhn.fhir.context.FhirContext;
-/**
- * @author Adam Stevenson
- */
+
 public class IGProcessor extends BaseProcessor {
     protected IGBundleProcessor igBundleProcessor;
     protected LibraryProcessor libraryProcessor;

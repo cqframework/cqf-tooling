@@ -42,14 +42,10 @@ import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 
 import static org.opencds.cqf.tooling.utilities.CanonicalUtils.getTail;
-/**
- * @author Adam Stevenson
- */
+
 public class ResourceUtils 
 {
-  /**
- * @author Adam Stevenson
- */
+  
     public enum FhirVersion 
     { 
         DSTU3("dstu3"), R4("r4"); 

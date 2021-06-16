@@ -4,9 +4,7 @@ import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
 
 import java.util.List;
 import java.util.Map;
-/**
- * @author Adam Stevenson
- */
+
 public class ScaffoldParameters {
     //I believe all we need is what kind of Content they want to create
     //Maybe it is a list of Name value pairs, (NAME_OF_CONTENT, TYPE)

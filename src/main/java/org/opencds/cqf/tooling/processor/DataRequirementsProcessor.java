@@ -24,9 +24,7 @@ import java.util.*;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-/**
- * @author Adam Stevenson
- */
+
 public class DataRequirementsProcessor {
 
     private java.util.List<ValidationMessage> validationMessages = new ArrayList<ValidationMessage>();

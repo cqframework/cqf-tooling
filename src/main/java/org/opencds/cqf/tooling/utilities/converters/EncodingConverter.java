@@ -3,9 +3,7 @@ package org.opencds.cqf.tooling.utilities.converters;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
 import joptsimple.ValueConverter;
-/**
- * @author Adam Stevenson
- */
+
 public class EncodingConverter implements ValueConverter<Encoding> {
 
     @Override

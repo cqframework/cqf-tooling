@@ -9,9 +9,7 @@ import org.opencds.cqf.tooling.measure.MeasureTestProcessor;
 import org.opencds.cqf.tooling.measure.adapters.IMeasureReportAdapter;
 
 import ca.uhn.fhir.context.FhirContext;
-/**
- * @author Adam Stevenson
- */
+
 public class MeasureReportComparer {
 
     // private FhirContext fhirContext;
