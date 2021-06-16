@@ -24,6 +24,7 @@ import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
+import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
 import org.slf4j.Logger;
@@ -183,7 +184,7 @@ public class DroolToElmVisitorIT {
     private void registerProviders(FhirContext fhirContext, IBaseBundle bundle) {
         IBaseBundle dataBundle = fhirContext.newJsonParser().parseResource(Bundle.class,
                 DroolToElmVisitorIT.class.getResourceAsStream("AllResources.json"));
-        DataProvider dataProvider = new CompositeDataProvider(new R4FhirModelResolver(),
+        DataProvider dataProvider = new CompositeDataProvider(new CachingModelResolverDecorator(new R4FhirModelResolver()),
                 new BundleRetrieveProvider(fhirContext, dataBundle));
         TerminologyProvider terminologyProvider = new BundleTerminologyProvider(fhirContext, bundle);
         Library fhirHelpers;
