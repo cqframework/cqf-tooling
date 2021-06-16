@@ -14,8 +14,6 @@ import org.opencds.cqf.tooling.qdm.QdmToQiCore;
 import org.opencds.cqf.tooling.quick.QuickPageGenerator;
 import org.opencds.cqf.tooling.terminology.*;
 import org.opencds.cqf.tooling.terminology.distributable.DistributableValueSetGenerator;
-import org.opencds.cqf.tooling.terminology.opioidValuesetGenerator.OpioidValueSetGenerator;
-
 
 class OperationFactory {
 

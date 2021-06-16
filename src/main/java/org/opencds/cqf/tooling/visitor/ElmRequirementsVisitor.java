@@ -3,9 +3,6 @@ package org.opencds.cqf.tooling.visitor;
 import org.cqframework.cql.elm.visiting.ElmBaseLibraryVisitor;
 import org.hl7.elm.r1.*;
 
-import java.util.Iterator;
-
-
 public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequirement, ElmRequirementsContext>{
 
     public ElmRequirementsVisitor() {
