@@ -1,8 +1,8 @@
 package org.opencds.cqf.tooling.utilities;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.Assert.assertEquals;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -39,17 +39,17 @@ public class FhirContextCacheTests {
         assertEquals(FhirVersionEnum.R5, context.getVersion().getVersion());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expectedExceptions = NullPointerException.class)
     public void TestNullVersionString() {
         FhirContextCache.getContext((String) null);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expectedExceptions = NullPointerException.class)
     public void TestNullVersionVersion() {
         FhirContextCache.getContext((FhirVersionEnum) null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void TestGarbageIn() {
         FhirContextCache.getContext("not-a-version");
     }

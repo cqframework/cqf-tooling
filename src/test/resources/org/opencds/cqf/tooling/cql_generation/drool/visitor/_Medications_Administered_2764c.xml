@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<library xmlns="urn:hl7-org:elm:r1" xmlns:t="urn:hl7-org:elm-types:r1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:fhir="http://hl7.org/fhir" xmlns:qdm43="urn:healthit-gov:qdm:v4_3" xmlns:qdm53="urn:healthit-gov:qdm:v5_3" xmlns:a="urn:hl7-org:cql-annotations:r1">
+   <annotation translatorOptions="EnableAnnotations,EnableLocators,DisableListDemotion,DisableListPromotion" xsi:type="a:CqlToElmInfo"/>
+   <identifier id="_Medications_Administered_2764c" version="4.0.1"/>
+   <schemaIdentifier id="urn:hl7-org:elm" version="r1"/>
+   <usings>
+      <def localIdentifier="FHIR" uri="http://hl7.org/fhir" version="4.0.0"/>
+      <def localIdentifier="System" uri="urn:hl7-org:elm-types:r1"/>
+   </usings>
+   <includes>
+      <def localIdentifier="FHIRHelpers" path="FHIRHelpers" version="4.0.0"/>
+   </includes>
+   <valueSets>
+      <def name="Rifampin" id="https://hln.com/fhir/ValueSet/MED007" accessLevel="Public"/>
+      <def name="Dapsone" id="https://hln.com/fhir/ValueSet/MED006" accessLevel="Public"/>
+   </valueSets>
+   <contexts>
+      <def name="Patient"/>
+   </contexts>
+   <statements>
+      <def name="Medication Administered-85929c02d1f35520aab4a6e9523e8f68" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Union">
+                     <operand xsi:type="Query">
+                        <source alias="M">
+                           <expression dataType="fhir:MedicationAdministration" xsi:type="Retrieve"/>
+                        </source>
+                        <return>
+                           <expression strict="false" xsi:type="As">
+                              <operand path="medication" scope="M" xsi:type="Property"/>
+                              <asTypeSpecifier name="fhir:CodeableConcept" xsi:type="NamedTypeSpecifier"/>
+                           </expression>
+                        </return>
+                     </operand>
+                     <operand xsi:type="Query">
+                        <source alias="M">
+                           <expression dataType="fhir:MedicationAdministration" xsi:type="Retrieve"/>
+                        </source>
+                        <let identifier="medicationResource">
+                           <expression xsi:type="First">
+                              <source dataType="fhir:Medication" codeProperty="id" codeComparator="in" xsi:type="Retrieve">
+                                 <codes xsi:type="List">
+                                    <element xsi:type="Last">
+                                       <source xsi:type="Split">
+                                          <stringToSplit name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                                             <operand path="reference" xsi:type="Property">
+                                                <source strict="false" xsi:type="As">
+                                                   <operand path="medication" scope="M" xsi:type="Property"/>
+                                                   <asTypeSpecifier name="fhir:Reference" xsi:type="NamedTypeSpecifier"/>
+                                                </source>
+                                             </operand>
+                                          </stringToSplit>
+                                          <separator valueType="t:String" value="/" xsi:type="Literal"/>
+                                       </source>
+                                    </element>
+                                 </codes>
+                              </source>
+                           </expression>
+                        </let>
+                        <return>
+                           <expression path="code" scope="medicationResource" xsi:type="Property"/>
+                        </return>
+                     </operand>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Rifampin" xsi:type="ValueSetRef"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Medication Administered-e77dfb5eeb7a4485f5e7e3d030773ef5" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Union">
+                     <operand xsi:type="Query">
+                        <source alias="M">
+                           <expression dataType="fhir:MedicationRequest" xsi:type="Retrieve"/>
+                        </source>
+                        <return>
+                           <expression strict="false" xsi:type="As">
+                              <operand path="medication" scope="M" xsi:type="Property"/>
+                              <asTypeSpecifier name="fhir:CodeableConcept" xsi:type="NamedTypeSpecifier"/>
+                           </expression>
+                        </return>
+                     </operand>
+                     <operand xsi:type="Query">
+                        <source alias="M">
+                           <expression dataType="fhir:MedicationAdministration" xsi:type="Retrieve"/>
+                        </source>
+                        <let identifier="medicationResource">
+                           <expression xsi:type="First">
+                              <source dataType="fhir:Medication" codeProperty="id" codeComparator="in" xsi:type="Retrieve">
+                                 <codes xsi:type="List">
+                                    <element xsi:type="Last">
+                                       <source xsi:type="Split">
+                                          <stringToSplit name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                                             <operand path="reference" xsi:type="Property">
+                                                <source strict="false" xsi:type="As">
+                                                   <operand path="medication" scope="M" xsi:type="Property"/>
+                                                   <asTypeSpecifier name="fhir:Reference" xsi:type="NamedTypeSpecifier"/>
+                                                </source>
+                                             </operand>
+                                          </stringToSplit>
+                                          <separator valueType="t:String" value="/" xsi:type="Literal"/>
+                                       </source>
+                                    </element>
+                                 </codes>
+                              </source>
+                           </expression>
+                        </let>
+                        <return>
+                           <expression path="code" scope="medicationResource" xsi:type="Property"/>
+                        </return>
+                     </operand>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Dapsone" xsi:type="ValueSetRef"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="ConditionCriteriaMet" context="Patient" accessLevel="Public">
+         <expression xsi:type="And">
+            <operand name="Medication Administered-e77dfb5eeb7a4485f5e7e3d030773ef5" xsi:type="ExpressionRef"/>
+            <operand name="Medication Administered-85929c02d1f35520aab4a6e9523e8f68" xsi:type="ExpressionRef"/>
+         </expression>
+      </def>
+   </statements>
+</library>

@@ -18,7 +18,10 @@ package org.opencds.cqf.tooling.igtools;
 //
 //import ca.uhn.fhir.context.FhirContext;
 //import ca.uhn.fhir.context.RuntimeResourceDefinition;
-
+/**
+ * Implementation Guide Processing
+ * @author Joshua Reynolds
+ */
 public class IGProcessor {
 //    public enum IGVersion {
 //        FHIR3("fhir3"), FHIR4("fhir4");

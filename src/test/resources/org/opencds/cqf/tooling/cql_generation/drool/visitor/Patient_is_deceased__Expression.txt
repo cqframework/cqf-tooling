@@ -1,0 +1,3 @@
+Patient is deceased-5c32d09b8bff7c8945353e9f589b1133
+Patient has a discharge disposition of-54190975fad7c3157df4c233c10af50d
+ConditionCriteriaMet

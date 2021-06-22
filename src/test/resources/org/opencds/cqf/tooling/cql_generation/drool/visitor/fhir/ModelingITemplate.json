@@ -1,0 +1,15 @@
+{
+    "resourceType": "Observation",
+    "id": "modelingI-some-patient",
+    "status" : "final",
+    "code": {
+      "coding": [{
+        "code": "code"
+      }]
+    },
+    "valueCodeableConcept" : {
+        "coding": [{
+            "code": "some-code"
+        }]
+    }
+  }

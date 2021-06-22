@@ -41,6 +41,9 @@ public class LogUtils
 
     private static String truncateMessage(String message) {   
         int maxSize = 500;     
+        if (message == null) {
+            return "null message"; 
+        }
         String[] messages = message.split("\r\n");
         int cutoffIndex = 0;
         for (String string : messages) {

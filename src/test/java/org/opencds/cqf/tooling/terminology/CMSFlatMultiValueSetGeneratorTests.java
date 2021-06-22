@@ -1,7 +1,7 @@
 package org.opencds.cqf.tooling.terminology;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.testng.annotations.Ignore;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.nio.file.Paths;

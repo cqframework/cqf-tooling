@@ -1,0 +1,1012 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns3:cdsOutput xmlns:ns2="org.opencds.vmr.v1_0.schema.vmr" xmlns:ns3="org.opencds.vmr.v1_0.schema.cdsoutput" xmlns:ns4="org.opencds.vmr.v1_0.schema.cdsinput.specification" xmlns:ns5="org.opencds.vmr.v1_0.schema.cdsinput">
+    <vmrOutput>
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.18" />
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.3.3" />
+            <id root="2.16.840.1.113883.19.5" extension="a6cddef0-c159-470f-9a71-c4c8c166d643" />
+            <demographics>
+                <birthTime value="19741124000000.000+0000" />
+                <gender code="M" codeSystem="2.16.840.1.113883.1.11.1" />
+                <address use="H">
+                    <part type="SAL" value="2222 Home Street" />
+                    <part type="CTY" value="Ann Arbor" />
+                    <part type="STA" value="NY" />
+                    <part type="ZIP" value="99999" />
+                    <part type="CNT" value="US" />
+                </address>
+                <telecom value="tel:+1-(555)555-2003" use="HP" />
+                <telecom value="tel:+1(555)555-2004" use="WP" />
+                <isDeceased value="false" />
+            </demographics>
+            <clinicalStatements>
+                <encounterEvents>
+                    <encounterEvent>
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.8" />
+                        <id root="2.16.840.1.113883.19" extension="71432550-9d51-4a17-8437-3a978da8cf70" />
+                        <encounterType code="AMB" codeSystem="2.16.840.1.113883.5.4" codeSystemName="HL7 ActEncounterCode" displayName="Ambulatory" />
+                        <encounterEventTime high="20151107000000.000+0000" low="20151107000000.000+0000" />
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002" />
+                            <observationResult>
+                                <templateId root="2.16.840.1.113883.3.795.11.6.3.1" />
+                                <id root="93faad2a-c77f-48b9-842e-12ffbd0bce02" />
+                                <observationFocus code="PH_DischargeDisposition_HL7_2x" codeSystem="2.16.840.1.113883.3.1829.11.4.3.12" />
+                            </observationResult>
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    <encounterEvent>
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.8" />
+                        <id root="2a620155-9d11-439e-92b3-5d9815ff4de8" extension="3c6cfeff-f04a-441a-9293-8e8089e48263" />
+                        <encounterType code="99213" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT-4" displayName="Office outpatient visit 15 minutes" />
+                        <encounterEventTime high="20151107000000.000+0000" low="20151107000000.000+0000" />
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002" />
+                            <problem>
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.20" />
+                                <id root="db734647-fc99-424c-a864-7e3cda82e704" extension="a8a94f9e-de16-4346-9ac7-566ce4ca92f0" />
+                                <problemCode code="Z11.3" codeSystem="2.16.840.1.113883.6.90" codeSystemName="ICD10CM" displayName="Encounter for screening for infections with a predominantly sexual mode of transmission" />
+                                <problemEffectiveTime high="20151107000000.000+0000" low="20151107000000.000+0000" />
+                                <diagnosticEventTime low="20151107000000.000+0000" />
+                                <problemStatus code="completed" codeSystem="2.16.840.1.113883.3.1937.98.5.8" codeSystemName="SNOMED-CT" />
+                            </problem>
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                </encounterEvents>
+                <observationResults>
+                    <observationResult>
+                        <templateId root="2.16.840.1.113883.3.795.11.6.3.1" />
+                        <id root="37f76c51-6411-4e1d-8a37-957fd49d2cef" extension="ae7c08b8-05d3-4b83-ab7a-754025e45581" />
+                        <observationFocus code="364703007" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Employment detail" />
+                    </observationResult>
+                    <observationResult>
+                        <id root="83b6d409-f53d-42be-a84f-5f9b2e589407" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.618+0000" low="20201111210546.618+0000" />
+                        <observationValue>
+                            <identifier root="27beae32998f500c68ede553d3f53e11" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="646bba59-f103-4dca-aaa4-9fb90249c905" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.628+0000" low="20201111210546.628+0000" />
+                        <observationValue>
+                            <identifier root="690134aa05374305bf7210335b062650" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="b5d51ee8-3467-4354-b0d2-99713c5ff3b3" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.619+0000" low="20201111210546.619+0000" />
+                        <observationValue>
+                            <identifier root="ff5d617da1d01ff869ed11a6ef9c6381" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="8a4b7de7-15fd-4dcb-8001-85dcf84e056c" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.626+0000" low="20201111210546.626+0000" />
+                        <observationValue>
+                            <identifier root="6c3ae0689b9b57a8ed65e7829255d203" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="6668021b-8814-4f96-96d0-a8d2dcbed188" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.620+0000" low="20201111210546.620+0000" />
+                        <observationValue>
+                            <concept code="61462000" codeSystem="2.16.840.1.113883.6.96" displayName="Malaria (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: [TEST] Microscopic observation of Plasmodium species in blood UPDATED TEMPLATE" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="d5fb712a-6345-4f29-aaa9-0fb9c9bd0b75" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.620+0000" low="20201111210546.620+0000" />
+                        <observationValue>
+                            <concept code="406583002" codeSystem="2.16.840.1.113883.6.96" displayName="Invasive Haemophilus influenzae disease (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Identification of Haemophilus influenzae in a specimen from a normally sterile site by culture method, including identification tests performed on an isolate - include preliminary results (Preliminary status of results is not?yet implemented)" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="c6c1f373-384d-476d-aacf-09b83aea95c1" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.619+0000" low="20201111210546.619+0000" />
+                        <observationValue>
+                            <identifier root="4554b885bb255d164b356be49d9e21e9" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="c2cf43f5-ac74-46ed-a7a8-875b3884fa62" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.622+0000" low="20201111210546.622+0000" />
+                        <observationValue>
+                            <identifier root="5f89c71df0d3c15d265e702eb0379ef3" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="1a91db4a-6c9b-42ed-af08-953a4930674a" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.627+0000" low="20201111210546.627+0000" />
+                        <observationValue>
+                            <identifier root="20eef5315ca54a93665d0d9e963b9c9e" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="3cc77b1d-68e9-420d-8aad-ea473208c711" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.619+0000" low="20201111210546.619+0000" />
+                        <observationValue>
+                            <identifier root="adea6b9b109f4d309757d9e3e33ba4af" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="fd29e20b-6308-4650-9849-5bd4b168357a" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.619+0000" low="20201111210546.619+0000" />
+                        <observationValue>
+                            <identifier root="cc09ed458d6b47e1a426fb703486c5e3" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="147f2245-5a14-4ea2-9c73-99060f477fb1" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.622+0000" low="20201111210546.622+0000" />
+                        <observationValue>
+                            <identifier root="930dd08ee0021ef56332991dded2e7eb" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="9aead6d4-94bc-4d38-9b86-abec2ff51a1d" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.610+0000" low="20201111210546.610+0000" />
+                        <observationValue>
+                            <identifier root="b75504478f797e05ec43ba9f8edf20c6" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="6e7e8c59-dda9-4f85-ad40-13cb36ed5c4c" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.622+0000" low="20201111210546.622+0000" />
+                        <observationValue>
+                            <identifier root="376cf25bb289f352c80b2a9cbe8fc36c" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="33ce8a56-b166-4e48-b2fd-42970c8184c0" />
+                        <observationFocus code="RCKMS_Reporting_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.609+0000" low="20201111210546.609+0000" />
+                        <observationValue>
+                            <identifier root="e6076108607b4ed6bc561addc57aeb4b" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="a690a18c-6909-42de-b6be-268df18fcae5" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.626+0000" low="20201111210546.626+0000" />
+                        <observationValue>
+                            <identifier root="86a86870a64a890be44ddd64ddad92aa" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="6490ba24-1bbe-4495-a77f-ead9b2d13789" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.618+0000" low="20201111210546.618+0000" />
+                        <observationValue>
+                            <concept code="404681006" codeSystem="2.16.840.1.113883.6.96" displayName="Infection caused by vancomycin resistant Staphylococcus aureus (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: [TEST] Resistance of the S. aureus isolate to vancomycin (Minimum Inhibitory Concentration [MIC] ?16 ?g/mL) UPDATED TEMPLATE" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="fde8a4b2-3a77-4242-a6d5-9cb636e6fec0" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.610+0000" low="20201111210546.610+0000" />
+                        <observationValue>
+                            <concept code="734351004" codeSystem="2.16.840.1.113883.6.96" displayName="Carbapenemase-producing Enterobacteriaceae (organism)" originalText="Reportability could not be determined due to missing information needed for the following criteria: [TEST 3] Resistant to imipenem, meropenem or doripenem (MIC** ?4 ?g/ml) UPDATED TEMPLATE" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="6ac3cd8a-77e8-48cf-a81f-88af2d3b99f5" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.623+0000" low="20201111210546.623+0000" />
+                        <observationValue>
+                            <identifier root="4dfaa48054de079d279053fa0d1b4268" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="c8b0aa1e-a10d-4343-9e71-de64f299e89d" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.621+0000" low="20201111210546.621+0000" />
+                        <observationValue>
+                            <identifier root="00ab3bdf25134a4586c787abf2a3f1f9" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="289c4df6-8450-4a30-8f44-12542bd7fda1" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.618+0000" low="20201111210546.618+0000" />
+                        <observationValue>
+                            <concept code="14189004" codeSystem="2.16.840.1.113883.6.96" displayName="Measles (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Identification of Measles virus in a clinical specimen by culture method, including identification tests performed on an isolate - include preliminary results (Preliminary status of results is not?yet implemented)" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="708993b6-0f45-48fc-ab06-2fd216c2179b" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.621+0000" low="20201111210546.621+0000" />
+                        <observationValue>
+                            <identifier root="258f5134da464855acbad4b0ea5766e2" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="0e19c401-318c-4313-b501-3663e154ee31" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.610+0000" low="20201111210546.610+0000" />
+                        <observationValue>
+                            <identifier root="e3b46ba2d1754961902d84a1fe5df02b" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="503d317f-d6c5-4632-8ba7-c8b50648c08b" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.619+0000" low="20201111210546.619+0000" />
+                        <observationValue>
+                            <concept code="406617004" codeSystem="2.16.840.1.113883.6.96" displayName="Invasive Streptococcus pneumoniae disease (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Detection of Streptococcus pneumoniae antigen in a specimen from a normally sterile site by any method" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="dbd6d83f-1874-4a4e-a542-9396043d2e8c" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.626+0000" low="20201111210546.626+0000" />
+                        <observationValue>
+                            <identifier root="672aeec442439762e981031ff33bd056" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="5a303108-e2b3-42b7-9170-d96865182892" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.622+0000" low="20201111210546.622+0000" />
+                        <observationValue>
+                            <identifier root="52dc5dd831fa55bf34a11252d6fcaed5" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="d7e2b480-ec19-455c-a55f-a91f2644daa8" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.627+0000" low="20201111210546.627+0000" />
+                        <observationValue>
+                            <identifier root="fab2cafbdd5f889baa0d2efc464c2acf" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="1211363c-9aaa-4caa-a4cd-49a1625fc882" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.619+0000" low="20201111210546.619+0000" />
+                        <observationValue>
+                            <identifier root="fe6a968d2c8593dcf88eea6def2081ce" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="17c32f45-6d33-4175-a820-a32d9b8734b0" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.618+0000" low="20201111210546.618+0000" />
+                        <observationValue>
+                            <identifier root="1c8e67a98fb1773c1609703b852cdb72" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="5218c760-af4f-42f7-9328-afc0bd4763d9" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.618+0000" low="20201111210546.618+0000" />
+                        <observationValue>
+                            <identifier root="fcfc955fe4274265b7d2e78212c344ca" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="f457aa50-9b13-4a46-9f5b-7e4e3c6e236c" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.622+0000" low="20201111210546.622+0000" />
+                        <observationValue>
+                            <identifier root="e2b2cf992b4b461785c8a6e3fd8727a8" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="d1e686de-38bc-4b93-8fc7-5a2a5639f9d8" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.620+0000" low="20201111210546.620+0000" />
+                        <observationValue>
+                            <identifier root="10260ade1fe34351a364fd489587a02a" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="14d20bef-a0e8-4c1d-8da1-08a1a5c6ed19" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.621+0000" low="20201111210546.621+0000" />
+                        <observationValue>
+                            <identifier root="8058745517504f2d9bb1aa51f05b11ce" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="bc42d955-7607-4e0c-b510-04ff5d253b39" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.622+0000" low="20201111210546.622+0000" />
+                        <observationValue>
+                            <identifier root="8194cddd2d60472f8ce126f5f8f74864" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="b8fd1244-c717-46e1-991e-b99d584e18da" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.619+0000" low="20201111210546.619+0000" />
+                        <observationValue>
+                            <concept code="23511006" codeSystem="2.16.840.1.113883.6.96" displayName="Meningococcal infectious disease (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Detection of Neisseria meningitidis antigen in a formalin-fixed tissue specimen by immunohistochemistry method" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="50692ae0-a787-45ff-8ac0-dd1199b85e03" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.620+0000" low="20201111210546.620+0000" />
+                        <observationValue>
+                            <identifier root="be353f5fcb474dd48e51ee4d3092f612" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="ba600b73-abe4-436a-8166-c706901b509a" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.620+0000" low="20201111210546.620+0000" />
+                        <observationValue>
+                            <identifier root="65dbff401c20d2c1d39815544af50e8f" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="f66cd3e1-09b8-4010-a921-e81cb25f99c9" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.627+0000" low="20201111210546.627+0000" />
+                        <observationValue>
+                            <identifier root="27fc45f19187080b8327766c42c0988d" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="d65cb6f6-db9e-4c66-adc7-42e528536214" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.622+0000" low="20201111210546.622+0000" />
+                        <observationValue>
+                            <identifier root="c9d2d6f9d50d408aa45fbbca1a330682" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="85527d04-9c64-4c06-8699-ea1ed8f0efa5" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.619+0000" low="20201111210546.619+0000" />
+                        <observationValue>
+                            <concept code="302231008" codeSystem="2.16.840.1.113883.6.96" displayName="Salmonella infection (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Identification of Salmonella species and serovars (except S. typhi and S. paratyphi) in a clinical specimen by culture method, including identification tests performed on an isolate" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="a87247a5-cd0d-4921-a8b6-d25c6101b3be" />
+                        <observationFocus code="RCKMS_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.609+0000" low="20201111210546.609+0000" />
+                        <observationValue>
+                            <concept code="17383000" codeSystem="2.16.840.1.113883.6.96" displayName="Toxic effect of carbon monoxide (disorder)" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="574d926c-fb4f-4429-b6a6-a84c1523dbfa" />
+                        <observationFocus code="RCKMS_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Fired Indicator" />
+                        <observationEventTime high="20201111210546.620+0000" low="20201111210546.620+0000" />
+                        <observationValue>
+                            <identifier root="41bfa99388ea5ebc6e3fdbe6628cd66c" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="8f3d6c8d-a88c-4aac-966e-11d5b1c763b6" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.627+0000" low="20201111210546.627+0000" />
+                        <observationValue>
+                            <identifier root="c2c4d3fc6032460fa09668bf5a3f94b4" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="46385669-4589-46cd-b4c8-44589786c672" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.610+0000" low="20201111210546.610+0000" />
+                        <observationValue>
+                            <identifier root="e5d9b0b30dda4fd6b8db4d9a867dc223" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="3f4f496a-ce05-4b3e-9562-d7e2b7e827e0" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.627+0000" low="20201111210546.627+0000" />
+                        <observationValue>
+                            <identifier root="3df262c6bd7b569db35b6ff7c51c0114" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="c5de5124-8c96-4ade-a3c3-b72b64b4b8fa" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.627+0000" low="20201111210546.627+0000" />
+                        <observationValue>
+                            <identifier root="dbabe7523c6f41edbbb279013231a5fe" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="ef888faf-8634-484e-a2dd-5a160e1681f3" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.619+0000" low="20201111210546.619+0000" />
+                        <observationValue>
+                            <identifier root="56dd2576ccb9f347f4b79baa84106b82" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="cb83cd75-0c10-4ed6-9d85-c6dc667b3c7e" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.621+0000" low="20201111210546.621+0000" />
+                        <observationValue>
+                            <identifier root="1ce8691d665e78e82b8f2835bdfd18df" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="6cd4e022-ddd0-40a7-81d8-a93da7476e96" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.626+0000" low="20201111210546.626+0000" />
+                        <observationValue>
+                            <identifier root="c5ff076de4ae81f01bb0813f2c7ec5f8" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="d5fae0ba-b837-4e3b-b1c6-224a352ba159" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.621+0000" low="20201111210546.621+0000" />
+                        <observationValue>
+                            <identifier root="a728baed9b6e47549e9bedb28cefea71" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="42d183b5-1c36-46c9-9dc3-d30aaeb87771" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.618+0000" low="20201111210546.618+0000" />
+                        <observationValue>
+                            <identifier root="fd6db8e543e6b3cb868adba539d77db9" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="202f1848-740a-466f-8601-55fad5f29c17" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.610+0000" low="20201111210546.610+0000" />
+                        <observationValue>
+                            <concept code="398447004" codeSystem="2.16.840.1.113883.6.96" displayName="Severe acute respiratory syndrome (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Detection of SARS CoV nucleic acid in a clinical specimen by any method" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="4f8e3610-35bb-4dfa-9395-e5e95b058055" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.621+0000" low="20201111210546.621+0000" />
+                        <observationValue>
+                            <identifier root="8b14b14aa82144b49aa037cdbcf9ce61" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="aa9580bd-af63-42cb-931c-b83ecd1c3221" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.618+0000" low="20201111210546.618+0000" />
+                        <observationValue>
+                            <concept code="128302006" codeSystem="2.16.840.1.113883.6.96" displayName="Chronic hepatitis C (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Detection of hepatitis C virus antigen in a clinical specimen by any method" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="3414359f-e23c-4e27-a0bb-d313712c18b9" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.628+0000" low="20201111210546.628+0000" />
+                        <observationValue>
+                            <identifier root="1631d77d5e604777a864b669475ecfa7" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="8f5899ae-034e-41ae-959e-0126c4066353" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.616+0000" low="20201111210546.616+0000" />
+                        <observationValue>
+                            <identifier root="15873e95179eb7ecc6b1f99ce27b1535" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="b0a34c53-d345-494c-94ae-70d20a0bb348" />
+                        <observationFocus code="RCKMS_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.609+0000" low="20201111210546.609+0000" />
+                        <observationValue>
+                            <concept code="105629000" codeSystem="2.16.840.1.113883.6.96" displayName="Chlamydial infection (disorder)" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="c8cdbfd5-11e5-4029-889a-d09953b164ae" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.626+0000" low="20201111210546.626+0000" />
+                        <observationValue>
+                            <identifier root="23f45d702f26467a908538581ac248bf" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="87988d78-cfae-4e55-a648-0c6421f9e281" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.621+0000" low="20201111210546.621+0000" />
+                        <observationValue>
+                            <identifier root="fb0126f767a64d2e838a880a24279f07" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="5e4c8c3d-31ae-4975-9157-a0478507b1af" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.618+0000" low="20201111210546.618+0000" />
+                        <observationValue>
+                            <identifier root="e9d2822d03f24e98917911deff6fa567" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="c948f7bc-39dc-4882-a511-c20e2ba9bb4f" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.621+0000" low="20201111210546.621+0000" />
+                        <observationValue>
+                            <identifier root="f74270cc1d133a05ba2ead3c1d6e1e25" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="e935e896-13a4-46fa-9db1-c029f4dd7d47" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.626+0000" low="20201111210546.626+0000" />
+                        <observationValue>
+                            <identifier root="d7b76a98d9ad45c7b9f0da65756ba436" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="654f550a-d833-4500-a8b0-f0b8864116c6" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.610+0000" low="20201111210546.610+0000" />
+                        <observationValue>
+                            <identifier root="fe708f0ad22849ab809620ef7de7020e" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="807f6cf6-8ebc-47d7-8f34-d9d74c96d108" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.620+0000" low="20201111210546.620+0000" />
+                        <observationValue>
+                            <identifier root="d706eb62381c4c76b7aa16154177cbb9" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="b95b1be6-a4c1-4223-988f-a88139921094" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.619+0000" low="20201111210546.619+0000" />
+                        <observationValue>
+                            <concept code="79128009" codeSystem="2.16.840.1.113883.6.96" displayName="Salmonella Paratyphi A (organism)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Detection of Salmonella Paratyphi nucleic acid in a clinical specimen by any method" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="a831c797-7cd8-433e-893c-96296ae06697" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.620+0000" low="20201111210546.620+0000" />
+                        <observationValue>
+                            <identifier root="ae3c17cff1e4456fb56b90e2247047e4" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="d90d055c-923e-42aa-b085-2327d248b584" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.619+0000" low="20201111210546.619+0000" />
+                        <observationValue>
+                            <concept code="186747009" codeSystem="2.16.840.1.113883.6.96" displayName="Coronavirus infection (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Detection of SARS-CoV-2 organisms or substance in a clinical specimen" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="c4102544-04a6-4cb3-bf3d-e8f6f38bb84b" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.610+0000" low="20201111210546.610+0000" />
+                        <observationValue>
+                            <concept code="359761005" codeSystem="2.16.840.1.113883.6.96" displayName="Disease caused by Hantavirus (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: [TEST] Thrombocytopenia UPDATED TEMPLATE" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="41200810-ce76-4e2c-9b04-6806d667a7d9" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.618+0000" low="20201111210546.618+0000" />
+                        <observationValue>
+                            <identifier root="c5d6f534137b439d9731731405b1ee60" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="883cb671-8a3f-419f-9b4b-0f1a9b93cc3f" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.623+0000" low="20201111210546.623+0000" />
+                        <observationValue>
+                            <identifier root="f20cfdc2f8f4dc838c25b0b2e444f544" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="a7042e62-e8aa-4da5-89a5-75c065be38e3" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.619+0000" low="20201111210546.619+0000" />
+                        <observationValue>
+                            <identifier root="a2e9c1dd77384fe991f5c610d97912fd" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="e75a5b01-10f2-4da9-b615-136b82e38048" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.616+0000" low="20201111210546.616+0000" />
+                        <observationValue>
+                            <concept code="266143009" codeSystem="2.16.840.1.113883.6.96" displayName="Chancroid (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Identification of Haemophilus ducreyi in a clinical specimen, including genital ulcer and inguinal lymph node, by culture method, including identification tests performed on an isolate" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="9d66dfd5-f92c-4750-8ce3-217c7df1428c" />
+                        <observationFocus code="RCKMS_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Fired Indicator" />
+                        <observationEventTime high="20201111210546.620+0000" low="20201111210546.620+0000" />
+                        <observationValue>
+                            <identifier root="4258a9eae15c473b90981328c06b64a7" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="14e528aa-7325-4bd2-bba6-828352e88516" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.621+0000" low="20201111210546.621+0000" />
+                        <observationValue>
+                            <identifier root="820577a46dc6c3e784aae1dc1b947b0c" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="7dc04bad-8bf2-4977-8f22-fb8c9142db39" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.620+0000" low="20201111210546.620+0000" />
+                        <observationValue>
+                            <identifier root="5749c99419f70101dfb730c84ad340bf" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="8f7ca840-f858-4ae2-ace3-2af19a1e9f56" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.610+0000" low="20201111210546.610+0000" />
+                        <observationValue>
+                            <concept code="242253008" codeSystem="2.16.840.1.113883.6.96" displayName="Overdose of opiate (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Vital status at end of encounter is alive or unknown" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="ba1744e5-4740-4dcf-9c43-75681e1fdce6" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.609+0000" low="20201111210546.609+0000" />
+                        <observationValue>
+                            <concept code="36989005" codeSystem="2.16.840.1.113883.6.96" displayName="Mumps (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Detection of Mumps virus nucleic acid in a clinical specimen by any method" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="b561801f-1bde-4a5b-86a9-0550e78e087e" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.618+0000" low="20201111210546.618+0000" />
+                        <observationValue>
+                            <concept code="88488004" codeSystem="2.16.840.1.113883.6.96" displayName="Lead (substance)" originalText="Reportability could not be determined due to missing information needed for the following criteria: [TEST 3] Quantitative Lab Test Results (Positive)" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="a4366d2c-f5c8-4da0-ba7e-cf1102ed00b9" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.621+0000" low="20201111210546.621+0000" />
+                        <observationValue>
+                            <identifier root="7c3575a7cc8e4061b3932d733b013bb5" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="7c65c865-e78f-4f4b-a035-56d756ff7255" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.626+0000" low="20201111210546.626+0000" />
+                        <observationValue>
+                            <identifier root="18425b69c22a4f25b828c2c98652b5b6" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="b935bea4-b026-4953-9743-12ff6ff63b8d" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.620+0000" low="20201111210546.620+0000" />
+                        <observationValue>
+                            <concept code="1857005" codeSystem="2.16.840.1.113883.6.96" displayName="Congenital rubella syndrome (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Currently Pregnant" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="a329fb35-b577-470c-94cb-9510b8b2b6e9" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.618+0000" low="20201111210546.618+0000" />
+                        <observationValue>
+                            <concept code="240523007" codeSystem="2.16.840.1.113883.6.96" displayName="Viral hemorrhagic fever (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: [TEST 3] Thrombocytopenia &lt; 150000 platelets/?L" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="b7758854-03d0-4804-ae1c-6886ddf5b8c6" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.619+0000" low="20201111210546.619+0000" />
+                        <observationValue>
+                            <concept code="27836007" codeSystem="2.16.840.1.113883.6.96" displayName="Pertussis (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Identification of Bordetella pertussis in a clinical specimen by culture method, including identification tests performed on an isolate " />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="46e3495d-7cde-42d9-aed3-ceac374bb76b" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.620+0000" low="20201111210546.620+0000" />
+                        <observationValue>
+                            <identifier root="124e2e89f68e4ae4825ab29cbe8168a4" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="720e6fc0-885c-48fa-aa6a-6dbb049571b6" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.622+0000" low="20201111210546.622+0000" />
+                        <observationValue>
+                            <identifier root="aa0d4f0658d529e9bd05d9d64e17f804" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="98aa1bcc-62fc-439d-9127-25a8f0edf9db" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.621+0000" low="20201111210546.621+0000" />
+                        <observationValue>
+                            <identifier root="90569f4f9d5230bd50b5f1c9b2964343" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="23cbed7a-9059-497f-bef4-f1527efd2281" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.620+0000" low="20201111210546.620+0000" />
+                        <observationValue>
+                            <identifier root="3959e7c4e1a546b9a525f7056a2ac246" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="996dcddc-3954-44b6-a31b-7487d0b58b30" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.621+0000" low="20201111210546.621+0000" />
+                        <observationValue>
+                            <identifier root="f1a6448afad08d7a330fae483fcfd4f5" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="f1b9dd25-2e6b-427c-9770-f6f7f4f5e6cb" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.626+0000" low="20201111210546.626+0000" />
+                        <observationValue>
+                            <identifier root="6817d2c66f2641dfb82a95b71ab13278" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="ccb623a3-c609-4bd2-965b-5e633c3128d9" />
+                        <observationFocus code="RCKMS_Reporting_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.609+0000" low="20201111210546.609+0000" />
+                        <observationValue>
+                            <identifier root="3f977c9a534227725d6c0044cf35f0bc" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="9cedcf31-130e-4f34-a7d2-fcc9b484eb50" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.621+0000" low="20201111210546.621+0000" />
+                        <observationValue>
+                            <identifier root="66e8b642e72284fa157c85e24afbc8f1" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="7198c8cb-870c-4a94-a074-ca1fe6ba58fa" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.619+0000" low="20201111210546.619+0000" />
+                        <observationValue>
+                            <concept code="3928002" codeSystem="2.16.840.1.113883.6.96" displayName="Zika virus disease (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Detection of Zika virus IgM antibody in a clinical specimen (including serum and cerobrospinal fluid) by any method" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="f3fa641f-c486-45f3-a672-9e4922965b2d" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.620+0000" low="20201111210546.620+0000" />
+                        <observationValue>
+                            <identifier root="2693ded5af70418e961308d63083c97e" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="553b4f5d-7705-4f46-840e-b7e1987f4393" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.622+0000" low="20201111210546.622+0000" />
+                        <observationValue>
+                            <identifier root="9d44fc61b30949d4acd4e6cdbc00d72f" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="0bc06cab-63e6-4de4-a4c5-b8a46c641541" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.623+0000" low="20201111210546.623+0000" />
+                        <observationValue>
+                            <identifier root="0cd2fcfbf1af4744a59f5cbf91ed8bc3" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="962d75d3-2afd-4a4a-b35a-d2ef2c4de2ea" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.620+0000" low="20201111210546.620+0000" />
+                        <observationValue>
+                            <concept code="651000146102" codeSystem="2.16.840.1.113883.6.96" displayName="Middle East respiratory syndrome (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Detection of MERS CoV nucleic acid in a clinical specimen by any method, including rRT-PCR" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="5c6b4679-6dff-427c-aba9-1667cd00d2c3" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.627+0000" low="20201111210546.627+0000" />
+                        <observationValue>
+                            <identifier root="882057a497c7f99e1e813f29ce9c94ca" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="28eafba5-12c2-4d17-96e8-b1b05d92f101" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.609+0000" low="20201111210546.609+0000" />
+                        <observationValue>
+                            <identifier root="18433214927241a1b60164bca0fdc5fa" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="7a0cf1a3-8c3d-4710-a3e7-fb77f6274c3c" />
+                        <observationFocus code="RCKMS_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Fired Indicator" />
+                        <observationEventTime high="20201111210546.620+0000" low="20201111210546.620+0000" />
+                        <observationValue>
+                            <identifier root="ae3c17cff1e4456fb56b90e2247047e4" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="d3281c12-2f34-458d-8657-82b09700ae08" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.622+0000" low="20201111210546.622+0000" />
+                        <observationValue>
+                            <identifier root="508d521089544749a31616de2d547515" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="f4edb0a6-6656-467a-ae3b-d58381a023c3" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.618+0000" low="20201111210546.618+0000" />
+                        <observationValue>
+                            <concept code="15628003" codeSystem="2.16.840.1.113883.6.96" displayName="Gonorrhea (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Detection of Neisseria gonorrhoeae nucleic acid in a clinical specimen by any method" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="5d23a45f-5e2b-41ed-888e-cc062b4bc9cc" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.618+0000" low="20201111210546.618+0000" />
+                        <observationValue>
+                            <identifier root="59ac39ffd97f45ceb901fae1dfa55d8d" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="fc0eae27-5cb4-4dd3-9f86-874d41775ef7" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.623+0000" low="20201111210546.623+0000" />
+                        <observationValue>
+                            <identifier root="6a05807f1241372aa09fc926c7245ede" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="27dd773b-a70a-4e0e-a870-00b5e582e6b6" />
+                        <observationFocus code="RCKMS_Maybe_Specification_ID" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.619+0000" low="20201111210546.619+0000" />
+                        <observationValue>
+                            <identifier root="9973ea9f321edf229b10f0f8844dce62" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="ec834bdd-c6a7-428e-9edc-1660ff7b19e8" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.618+0000" low="20201111210546.618+0000" />
+                        <observationValue>
+                            <concept code="56717001" codeSystem="2.16.840.1.113883.6.96" displayName="Tuberculosis (disorder)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Detection of Mycobacterium tuberculosis complex nucleic acid in a clinical specimen by any method" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="5eb7064f-c4ef-47e5-a6ad-528effd6c855" />
+                        <observationFocus code="RCKMS_Maybe_Reporting_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Reportable Conditions Focus" />
+                        <observationEventTime high="20201111210546.619+0000" low="20201111210546.619+0000" />
+                        <observationValue>
+                            <concept code="5595000" codeSystem="2.16.840.1.113883.6.96" displayName="Salmonella Typhi (organism)" originalText="Reportability could not be determined due to missing information needed for the following criteria: Detection of Salmonella Typhi nucleic acid in a clinical specimen by any method" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="7199ca0f-cdb2-4c81-80e9-3f05277252d1" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.621+0000" low="20201111210546.621+0000" />
+                        <observationValue>
+                            <identifier root="a0b7148b96114cd8b7c1baf646fee90b" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="8f0c4c19-444e-4b7c-b9c9-0b2fb55cfda7" />
+                        <observationFocus code="RCKMS_LogicSet_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Logic Set Fired Indicator" />
+                        <observationEventTime high="20201111210546.627+0000" low="20201111210546.627+0000" />
+                        <observationValue>
+                            <identifier root="ded67b23320c470285d55a59f73bb2f3" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="360b814b-1cbf-4012-a5ef-f3e28846ad63" />
+                        <observationFocus code="RCKMS_Maybe_Criteria_Fired_Indicator" codeSystem="2.16.840.1.113883.3.795.5.4.12.2.3" codeSystemName="Reportable Conditions Focus" displayName="Criteria Maybe Fired Indicator" />
+                        <observationEventTime high="20201111210546.621+0000" low="20201111210546.621+0000" />
+                        <observationValue>
+                            <identifier root="e4cb79a496cc4c5aad4aca6feefd05b9" />
+                        </observationValue>
+                    </observationResult>
+                </observationResults>
+                <observationOrders>
+                    <observationOrder>
+                        <templateId root="2.16.840.1.113883.3.795.11.6.3.1" />
+                        <id root="7d5a02b0-67a4-11db-bd13-0800200c9a66" extension="b0324944-b75a-472b-96b9-f686d694a548" />
+                        <observationFocus code="57021-8" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="CBC W Auto Differential panel in Blood" />
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002" />
+                            <observationResult>
+                                <templateId root="2.16.840.1.113883.3.1829.11.6.3.15" />
+                                <id root="7c0704bb-9c40-41b5-9c7d-26b2d59e234f" extension="dd51d1b3-b784-4849-afe4-70cbe32a2c56" />
+                                <observationFocus code="20570-8" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Hematocrit" />
+                                <observationEventTime high="20151107000000.000+0000" low="20151107000000.000+0000" />
+                                <observationValue>
+                                    <physicalQuantity value="35.3" unit="%" />
+                                </observationValue>
+                                <interpretation code="L" codeSystem="2.16.840.1.113883.1.11.78" />
+                            </observationResult>
+                        </relatedClinicalStatement>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002" />
+                            <observationResult>
+                                <templateId root="2.16.840.1.113883.3.1829.11.6.3.15" />
+                                <id root="7c0704bb-9c40-41b5-9c7d-26b2d59e234f" extension="3f57b4f0-0f62-42a9-b3bf-3b69dcb6daba" />
+                                <observationFocus code="731-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Lymphocytes [#/ï¿½ï¿½ï¿½volume] in Blood by Automated count" />
+                                <observationEventTime high="20151107000000.000+0000" low="20151107000000.000+0000" />
+                                <observationValue>
+                                    <physicalQuantity value="5.2" unit="10*3/uL" />
+                                </observationValue>
+                                <interpretation code="H" codeSystem="2.16.840.1.113883.1.11.78" />
+                            </observationResult>
+                        </relatedClinicalStatement>
+                    </observationOrder>
+                    <observationOrder>
+                        <templateId root="2.16.840.1.113883.3.795.11.6.3.1" />
+                        <id root="a4307cb2-b3b4-4f42-be03-1d9077376f4a" extension="d0d88062-db55-4694-a4df-e2e8b3ac660b" />
+                        <observationFocus code="45074-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Chlamydia trachomatis+Neisseria gonorrhoeae rRNA [Presence] in Urine by DNA probe" />
+                        <orderEventTime high="20151107000000.000+0000" low="20151107000000.000+0000" />
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002" />
+                            <observationResult>
+                                <templateId root="2.16.840.1.113883.3.1829.11.6.3.15" />
+                                <id root="bf9c0a26-4524-4395-b3ce-100450b9c9ac" extension="77e98a1a-0bc3-479f-85a3-0eed6af47105" />
+                                <observationFocus code="42931-6" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Chlamydia trachomatis rRNA [Presence] in Urine by Probe and target amplification method" />
+                                <observationEventTime high="20151107000000.000+0000" low="20151107000000.000+0000" />
+                                <observationValue>
+                                    <concept code="260373001" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT" displayName="Detected" />
+                                </observationValue>
+                                <interpretation code="A" codeSystem="2.16.840.1.113883.5.83" />
+                            </observationResult>
+                        </relatedClinicalStatement>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002" />
+                            <observationResult>
+                                <templateId root="2.16.840.1.113883.3.1829.11.6.3.15" />
+                                <id root="bf9c0a26-4524-4395-b3ce-100450b9c9ac" extension="b06666ee-57b5-4abf-a120-979a748d0799" />
+                                <observationFocus code="60256-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Neisseria gonorrhoeae rRNA [Presence] in Urine by Probe and target amplification method" />
+                                <observationEventTime high="20151107000000.000+0000" low="20151107000000.000+0000" />
+                                <observationValue>
+                                    <concept code="260415000" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT" displayName="Not Detected" />
+                                </observationValue>
+                                <interpretation code="N" codeSystem="2.16.840.1.113883.5.83" />
+                            </observationResult>
+                        </relatedClinicalStatement>
+                    </observationOrder>
+                </observationOrders>
+                <problems>
+                    <problem>
+                        <templateId root="2.16.840.1.113883.3.1829.11.7.2.21" />
+                        <id root="ab1791b0-5c71-11db-b0de-0800200c9a66" extension="be46694a-02e6-4ab1-8934-a28e1d5659f6" />
+                        <problemCode code="240589008" codeSystem="2.16.840.1.113883.6.96" displayName="Chlamydia trachomatis infection (disorder)" />
+                        <problemEffectiveTime high="20151101000000.000+0000" low="20151101000000.000+0000" />
+                        <problemStatus code="active" codeSystem="2.16.840.1.113883.3.1937.98.5.8" />
+                    </problem>
+                </problems>
+            </clinicalStatements>
+        </patient>
+    </vmrOutput>
+</ns3:cdsOutput>
