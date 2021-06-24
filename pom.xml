@@ -14,8 +14,8 @@
         <cql-engine.version>1.5.1</cql-engine.version>
         <cql-evaluator.version>1.2.0</cql-evaluator.version>
         <cqframework.version>1.5.4-SNAPSHOT</cqframework.version>
-        <hapi.version>5.3.2</hapi.version>
-        <core.version>5.3.9</core.version>
+        <hapi.version>5.4.1</hapi.version>
+        <core.version>5.4.5</core.version>
     </properties>
 
     <name>cqf-tooling</name>
