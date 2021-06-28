@@ -43,7 +43,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         List<org.hl7.fhir.r5.model.Library> refreshedLibraries = super.refreshGeneratedContent(libraries);
         for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
             String filePath = fileMap.get(refreshedLibrary.getId());
-            org.hl7.fhir.dstu3.model.Library library = (org.hl7.fhir.dstu3.model.Library) VersionConvertor_30_50.convertResource(refreshedLibrary, false);
+            org.hl7.fhir.dstu3.model.Library library = (org.hl7.fhir.dstu3.model.Library) VersionConvertor_30_50.convertResource(refreshedLibrary);
 
             cleanseRelatedArtifactReferences(library);
 
@@ -92,7 +92,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
     private void loadLibrary(Map<String, String> fileMap, List<org.hl7.fhir.r5.model.Library> libraries, File libraryFile) {
         try {
             Resource resource = (Resource) IOUtils.readResource(libraryFile.getAbsolutePath(), fhirContext);
-            org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) VersionConvertor_30_50.convertResource(resource, false);
+            org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) VersionConvertor_30_50.convertResource(resource);
             fileMap.put(library.getId(), libraryFile.getAbsolutePath());
             libraries.add(library);
         } catch (Exception ex) {
