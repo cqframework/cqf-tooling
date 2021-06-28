@@ -12,21 +12,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.fhir.ucum.Canonical;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Element;
-import org.hl7.fhir.r4.model.ElementDefinition;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.UriType;
-import org.hl7.fhir.r4.model.UsageContext;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.Code;
+import org.hl7.fhir.QuestionnaireItemType;
+import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
 
@@ -48,6 +36,8 @@ public class Processor extends Operation {
     private String dataElementIdentifierSystem = "http://fhir.org/guides/who/anc-cds/Identifier/data-elements";
     private String activityCodeSystem = "http://fhir.org/guides/who/anc-cds/CodeSystem/activity-codes";
     private String whoCodeSystemBase;
+
+    private int questionnaireItemLinkIdCounter = 1;
 
     // Canonical Base
     private String canonicalBase = null;
@@ -73,6 +63,7 @@ public class Processor extends Operation {
     private Map<String, List<StructureDefinition>> profilesByActivityId = new LinkedHashMap<String, List<StructureDefinition>>();
     private Map<String, List<StructureDefinition>> profilesByParentProfile = new LinkedHashMap<String, List<StructureDefinition>>();
     private List<CodeSystem> codeSystems = new ArrayList<CodeSystem>();
+    private List<Questionnaire> questionnaires = new ArrayList<Questionnaire>();
     private List<ValueSet> valueSets = new ArrayList<ValueSet>();
     private Map<String, Coding> concepts = new LinkedHashMap<String, Coding>();
     private List<RetrieveInfo> retrieves = new ArrayList<RetrieveInfo>();
@@ -201,6 +192,7 @@ public class Processor extends Operation {
         extensions = new ArrayList<>();
         profiles = new ArrayList<>();
         codeSystems = new ArrayList<>();
+        questionnaires = new ArrayList<>();
         valueSets = new ArrayList<>();
         igJsonFragments = new ArrayList<>();
         igResourceFragments = new ArrayList<>();
@@ -232,12 +224,14 @@ public class Processor extends Operation {
         writeProfiles(outputPath);
         writeCodeSystems(outputPath);
         writeValueSets(outputPath);
+        writeQuestionnaires(outputPath);
 
         // write concepts CQL
         writeConcepts(scope, outputPath);
 
         // write DataElements CQL
         writeDataElements(scope, outputPath);
+
 
         //ig.json is deprecated and resources a located by convention. If our output isn't satisfying convention, we should
         //modify the tooling to match the convention.
@@ -343,6 +337,15 @@ public class Processor extends Operation {
 
     private String getCodeSystemPath(String scopePath) {
         return scopePath + "/input/vocabulary/codesystem";
+    }
+
+    private void ensureQuestionnairePath(String scopePath) {
+        String questionnairePath = getQuestionnairePath(scopePath);
+        ensurePath(questionnairePath);
+    }
+
+    private String getQuestionnairePath(String scopePath) {
+        return scopePath + "/input/resources/questionnaire";
     }
 
     private void ensureValueSetPath(String scopePath) {
@@ -802,6 +805,9 @@ public class Processor extends Operation {
             System.out.println(String.format("Sheet %s not found in the Workbook, so no processing was done.", page));
         }
 
+        questionnaireItemLinkIdCounter = 1;
+        Questionnaire questionnaire = createQuestionnaireForPage(sheet);
+
         Iterator<Row> it = sheet.rowIterator();
         HashMap<String, Integer> colIds = new LinkedHashMap<String, Integer>();
         String currentGroup = null;
@@ -944,6 +950,7 @@ public class Processor extends Operation {
                             DictionaryElement e = createDataElement(page, currentGroup, row, colIds);
                             if (e != null) {
                                 elementMap.put(e.getName(), e);
+                                updateQuestionnaireForDataElement(e, questionnaire);
                             }
                             break;
                         case "Input Option":
@@ -959,6 +966,47 @@ public class Processor extends Operation {
                 }
             }
         }
+        questionnaires.add(questionnaire);
+    }
+
+    private Questionnaire createQuestionnaireForPage(Sheet sheet) {
+        Questionnaire questionnaire = new Questionnaire();
+        questionnaire.setId(toId(getActivityCoding(sheet.getSheetName()).getCode()));
+
+        questionnaire.getExtension().add(
+                new Extension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability", new CodeType("shareable")));
+        questionnaire.getExtension().add(
+                new Extension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability", new CodeType("computable")));
+        questionnaire.getExtension().add(
+                new Extension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability", new CodeType("publishable")));
+        questionnaire.getExtension().add(
+                new Extension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel", new CodeType("structured")));
+
+        questionnaire.setUrl(String.format("%s/Questionnaire/%s", canonicalBase, questionnaire.getId()));
+        questionnaire.setName(questionnaire.getId());
+        questionnaire.setTitle(sheet.getSheetName());
+        questionnaire.setStatus(Enumerations.PublicationStatus.ACTIVE);
+        questionnaire.setExperimental(false);
+        questionnaire.setDescription("TODO: description goes here");
+
+        Coding useContextCoding = new Coding("http://terminology.hl7.org/CodeSystem/usage-context-type", "task", "Workflow Task");
+        CodeableConcept useContextValue = new CodeableConcept(new Coding("http://fhir.org/guides/who/anc-cds/CodeSystem/activity-codes", questionnaire.getId(), sheet.getSheetName()));
+        UsageContext useContext = new UsageContext(useContextCoding, useContextValue);
+        questionnaire.getUseContext().add(useContext);
+
+        return questionnaire;
+    }
+
+    private void updateQuestionnaireForDataElement(DictionaryElement dataElement, Questionnaire questionnaire) {
+        Questionnaire.QuestionnaireItemComponent questionnaireItem = new Questionnaire.QuestionnaireItemComponent();
+        questionnaireItem.setLinkId(String.valueOf(questionnaireItemLinkIdCounter));
+        String definition = String.format("%s/StructureDefinition/%s", canonicalBase, dataElement.getId().toLowerCase());
+        questionnaireItem.setDefinition(definition);
+        questionnaireItem.setText(dataElement.getDataElementLabel());
+
+        questionnaire.getItem().add(questionnaireItem);
+
+        questionnaireItemLinkIdCounter = questionnaireItemLinkIdCounter + 1;
     }
 
     private void processElementMap() {
@@ -1016,6 +1064,11 @@ public class Processor extends Operation {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Name cannot be null or empty");
         }
+
+        if (name.endsWith(".")) {
+            name = name.substring(0, name.lastIndexOf("."));
+        }
+
         return name.toLowerCase().trim()
                 // remove these characters
                 .replace("(", "").replace(")", "").replace("[", "").replace("]", "").replace("\n", "")
@@ -1457,8 +1510,9 @@ public class Processor extends Operation {
             //     Consolidate getPrimaryCodes() and choicesCodes somehow and bind that VS to the choicesPath
 
             // For Observations, it is a valid scenario for the Data Dictionary (DD) to not have a Data Element entry for the primary code path element - Observation.code.
-            // In this case, the tooling should ensure that this element is created. The fixed code for this element should be the code specified by the Data
-            // Element record mapped to Observation.value[x]. For all other resource types it is invalid to not have a primary code path element entry in the DD.
+            // In this case, the tooling should ensure that this element is created. The code element should be bound to a ValueSet that contains all codes
+            // specified by the Data Element record mapped to Observation.value[x]. For all other resource types it is invalid to not have a primary
+            // code path element entry in the DD
             Boolean primaryCodePathElementAdded = false;
             if (codePath != null
                     && !codePath.isEmpty()
@@ -1825,6 +1879,12 @@ public class Processor extends Operation {
                 // Bind the current element to the valueSet
                 bindValueSetToElement(targetElement, valueSet, bindingStrength);
 
+                Questionnaire questionnaire =
+                        questionnaires.stream().filter(q -> q.getId().equalsIgnoreCase(toId(getActivityCoding(dictionaryElement.getPage()).getCode()))).findFirst().get();
+                Questionnaire.QuestionnaireItemComponent questionnaireItem =
+                        questionnaire.getItem().stream().filter(i -> i.getText().equalsIgnoreCase(dictionaryElement.getLabel())).findFirst().get();
+                questionnaireItem.setAnswerValueSet(valueSet.getUrl());
+
                 if (isPrimaryDataElement) {
                     valueSetLabel = valueSetId;
                     for (ValueSet vs : valueSets) {
@@ -2180,6 +2240,38 @@ public class Processor extends Operation {
                     </resource>
                  */
                 igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"CodeSystem/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", cs.getId()));
+            }
+        }
+    }
+
+    public void writeQuestionnaires(String scopePath) {
+        if (questionnaires != null && questionnaires.size() > 0) {
+            String questionnairePath = getQuestionnairePath(scopePath);
+            ensureQuestionnairePath(scopePath);
+
+            for (Questionnaire q : questionnaires) {
+                writeResource(questionnairePath, q);
+
+                // Generate JSON fragment for inclusion in the IG:
+                /*
+                    "Questionnaire/<id>": {
+                        "source": "questionnaire/questionnaire-<id>.json",
+                        "base": "Questionnaire-<id>.html"
+                    }
+                 */
+                igJsonFragments.add(String.format("\t\t\"Questionnaire/%s\": {\r\n\t\t\t\"source\": \"questionnaire/questionnaire-%s.json\",\r\n\t\t\t\"base\": \"Questionnaire-%s.html\"\r\n\t\t}",
+                        q.getId(), q.getId(), q.getId()));
+
+                // Generate XML fragment for the IG resource:
+                /*
+                    <resource>
+                        <reference>
+                            <reference value="Questionnaire/<id>"/>
+                        </reference>
+                        <groupingId value="main"/>
+                    </resource>
+                 */
+                igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"Questionnaire/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", q.getId()));
             }
         }
     }
