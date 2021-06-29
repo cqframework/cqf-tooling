@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.processor;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.lang.reflect.Array;
 import java.nio.file.Paths;
 
 import java.util.ArrayList;
@@ -186,6 +187,11 @@ public class CqlProcessor {
         }
 
         if (!fileMap.containsKey(filename)) {
+            for (Map.Entry<String, CqlSourceFileInformation> entry: fileMap.entrySet()) {
+                if (filename.equalsIgnoreCase(entry.getKey())) {
+                    System.out.println(String.format("WARNING: File with a similar name but different casing was found. File found: '%s'", entry.getKey()));
+                }
+            }
             return null;
         }
 
