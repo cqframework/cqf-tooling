@@ -232,7 +232,6 @@ public class Processor extends Operation {
         // write DataElements CQL
         writeDataElements(scope, outputPath);
 
-
         //ig.json is deprecated and resources a located by convention. If our output isn't satisfying convention, we should
         //modify the tooling to match the convention.
         //writeIgJsonFragments(scopePath);
@@ -997,12 +996,82 @@ public class Processor extends Operation {
         return questionnaire;
     }
 
+    private Questionnaire.QuestionnaireItemType getQuestionnaireItemType(DictionaryElement dataElement) {
+        Questionnaire.QuestionnaireItemType type = null;
+
+        String typeString = null;
+        if (dataElement.getFhirElementPath() != null) {
+            typeString = dataElement.getFhirElementPath().getFhirElementType();
+        }
+
+        if (typeString == null || typeString.isEmpty()) {
+            typeString = dataElement.getType();
+        }
+
+        if (typeString == null || typeString.isEmpty()) {
+            System.out.println(String.format("Could not determine type for Data Element: %s.", dataElement.getDataElementLabel()));
+            return type;
+        }
+
+        if (typeString.toLowerCase().trim().startsWith("reference(")) {
+            type = Questionnaire.QuestionnaireItemType.REFERENCE;
+            return type;
+        }
+
+        switch (typeString.toLowerCase().trim()) {
+            case "annotation":
+            case "id":
+            case "note":
+            case "string":
+            case "text":
+                type = Questionnaire.QuestionnaireItemType.STRING;
+                break;
+            case "boolean":
+                type = Questionnaire.QuestionnaireItemType.BOOLEAN;
+                break;
+            case "date":
+                type = Questionnaire.QuestionnaireItemType.DATE;
+                break;
+            case "datetime":
+                type = Questionnaire.QuestionnaireItemType.DATETIME;
+                break;
+            case "code":
+            case "coded":
+            case "codes":
+            case "coding":
+            case "codeableconcept":
+            case "coding - n/a":
+            case "coding (select all that apply":
+            case "coding - select all that apply":
+            case "coding - select one":
+                type = Questionnaire.QuestionnaireItemType.CHOICE;
+                break;
+            case "int":
+            case "integer":
+                type = Questionnaire.QuestionnaireItemType.INTEGER;
+                break;
+            case "quantity":
+                type = Questionnaire.QuestionnaireItemType.QUANTITY;
+                break;
+            default:
+                System.out.println(String.format("Questionnaire Item Type not mapped: %s.", typeString));
+        }
+
+        return type;
+    }
+
     private void updateQuestionnaireForDataElement(DictionaryElement dataElement, Questionnaire questionnaire) {
         Questionnaire.QuestionnaireItemComponent questionnaireItem = new Questionnaire.QuestionnaireItemComponent();
         questionnaireItem.setLinkId(String.valueOf(questionnaireItemLinkIdCounter));
         String definition = String.format("%s/StructureDefinition/%s", canonicalBase, dataElement.getId().toLowerCase());
         questionnaireItem.setDefinition(definition);
         questionnaireItem.setText(dataElement.getDataElementLabel());
+        Questionnaire.QuestionnaireItemType questionnaireItemType = getQuestionnaireItemType(dataElement);
+        if (questionnaireItemType != null) {
+            questionnaireItem.setType(questionnaireItemType);
+        } else {
+            System.out.println(String.format("Unable to determine questionnaire item type for item '%s'.", dataElement.getDataElementLabel()));
+        }
 
         questionnaire.getItem().add(questionnaireItem);
 
@@ -1204,7 +1273,7 @@ public class Processor extends Operation {
 
         boolean isBindable =
             (type != null && type.contains("codings"))
-            || (mappedType != null && mappedType.equalsIgnoreCase("CodeableConcept"));
+            || (mappedType != null && (mappedType.equalsIgnoreCase("CodeableConcept") || mappedType.equalsIgnoreCase("Code")));
 
         return isBindable;
     }
@@ -1723,6 +1792,7 @@ public class Processor extends Operation {
                 ElementDefinition.ElementDefinitionBindingComponent existingBinding = existingChoicesElement.getBinding();
                 if (existingBinding == null || existingBinding.getId() == null) {
                     bindValueSetToElement(existingChoicesElement, valueSetToBind, dictionaryElement.getBindingStrength());
+                    bindQuestionnaireItemAnswerValueSet(dictionaryElement, valueSetToBind);
                 }
             } else {
                 ElementDefinition ed = new ElementDefinition();
@@ -1753,10 +1823,20 @@ public class Processor extends Operation {
                     ed.addType(tr);
                 }
 
+                bindQuestionnaireItemAnswerValueSet(dictionaryElement, valueSetToBind);
+
                 bindValueSetToElement(ed, valueSetToBind, dictionaryElement.getBindingStrength());
                 sd.getDifferential().addElement(ed);
             }
         }
+    }
+
+    private void bindQuestionnaireItemAnswerValueSet(DictionaryElement dictionaryElement, ValueSet valueSetToBind) {
+        Questionnaire questionnaire =
+                questionnaires.stream().filter(q -> q.getId().equalsIgnoreCase(toId(getActivityCoding(dictionaryElement.getPage()).getCode()))).findFirst().get();
+        Questionnaire.QuestionnaireItemComponent questionnaireItem =
+                questionnaire.getItem().stream().filter(i -> i.getText().equalsIgnoreCase(dictionaryElement.getLabel())).findFirst().get();
+        questionnaireItem.setAnswerValueSet(valueSetToBind.getUrl());
     }
 
     private void ensureSliceAndBaseElementWithSlicing(DictionaryElement dictionaryElement, DictionaryFhirElementPath elementPath,
@@ -1879,11 +1959,9 @@ public class Processor extends Operation {
                 // Bind the current element to the valueSet
                 bindValueSetToElement(targetElement, valueSet, bindingStrength);
 
-                Questionnaire questionnaire =
-                        questionnaires.stream().filter(q -> q.getId().equalsIgnoreCase(toId(getActivityCoding(dictionaryElement.getPage()).getCode()))).findFirst().get();
-                Questionnaire.QuestionnaireItemComponent questionnaireItem =
-                        questionnaire.getItem().stream().filter(i -> i.getText().equalsIgnoreCase(dictionaryElement.getLabel())).findFirst().get();
-                questionnaireItem.setAnswerValueSet(valueSet.getUrl());
+                if (!targetElement.getPath().equalsIgnoreCase("observation.code")) {
+                    bindQuestionnaireItemAnswerValueSet(dictionaryElement, valueSet);
+                }
 
                 if (isPrimaryDataElement) {
                     valueSetLabel = valueSetId;
