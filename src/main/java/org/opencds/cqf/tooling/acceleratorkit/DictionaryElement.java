@@ -175,6 +175,22 @@ public class DictionaryElement {
         this.scope = scope;
     }
 
+    private String context;
+    public String getContext() {
+        return this.context;
+    }
+    public void setContext(String context) {
+        this.context = context;
+    }
+
+    private String selector;
+    public String getSelector() {
+        return this.selector;
+    }
+    public void setSelector(String selector) {
+        this.selector = selector;
+    }
+
     private CodeCollection primaryCodes;
     public CodeCollection getPrimaryCodes() {
         return this.primaryCodes;
@@ -253,6 +269,10 @@ public class DictionaryElement {
     private String extensionNeeded;
     public String getExtensionNeeded() { return this.extensionNeeded; }
     public void setExtensionNeeded(String extensionNeeded) { this.extensionNeeded = extensionNeeded; }
+
+    private String terminologyIdentifier;
+    public String getTerminologyIdentifier() { return this.terminologyIdentifier; }
+    public void setTerminologyIdentifier(String terminologyIdentifier) { this.terminologyIdentifier = terminologyIdentifier; }
 
     private String version;
     public String getVersion() {
