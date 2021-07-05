@@ -66,6 +66,7 @@ public class Processor extends Operation {
     private List<CodeSystem> codeSystems = new ArrayList<CodeSystem>();
     private List<Questionnaire> questionnaires = new ArrayList<Questionnaire>();
     private List<ValueSet> valueSets = new ArrayList<ValueSet>();
+    private Map<String, ConceptMap> conceptMaps = new LinkedHashMap<String, ConceptMap>();
     private Map<String, Coding> concepts = new LinkedHashMap<String, Coding>();
     private List<RetrieveInfo> retrieves = new ArrayList<RetrieveInfo>();
     private List<String> igJsonFragments = new ArrayList<String>();
@@ -225,6 +226,7 @@ public class Processor extends Operation {
         writeProfiles(outputPath);
         writeCodeSystems(outputPath);
         writeValueSets(outputPath);
+        writeConceptMaps(outputPath);
         writeQuestionnaires(outputPath);
 
         // write concepts CQL
@@ -354,8 +356,17 @@ public class Processor extends Operation {
         ensurePath(valueSetPath);
     }
 
+    private void ensureConceptMapPath(String scopePath) {
+        String conceptMapPath = getConceptMapPath(scopePath);
+        ensurePath(conceptMapPath);
+    }
+
     private String getValueSetPath(String scopePath) {
         return scopePath + "/input/vocabulary/valueset";
+    }
+
+    private String getConceptMapPath(String scopePath) {
+        return scopePath + "/input/vocabulary/conceptmap";
     }
 
     private String getCqlPath(String scopePath) {
@@ -550,9 +561,30 @@ public class Processor extends Operation {
     private List<DictionaryCode> getFhirCodes(String label, Row row, HashMap<String, Integer> colIds) {
         List<DictionaryCode> codes = new ArrayList<>();
         String system = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
+        // If this is an input option with a custom code, add codes for the input options
+        if (system == null || system.isEmpty()) {
+            system = SpreadsheetHelper.getCellAsString(currentInputOptionParentRow, getColId(colIds, "FhirCodeSystem"));
+        }
         String display = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4CodeDisplay"));
+        // If there is no display, use the data element label
+        if (display == null || display.isEmpty()) {
+            display = label;
+        }
+        String parentLabel = null;
+        String parentName = getDataElementLabel(currentInputOptionParentRow, colIds).trim();
+        if (parentName != null && !parentName.trim().isEmpty()) {
+            parentName = parentName.trim();
+            DictionaryElement currentElement = elementMap.get(parentName);
+            if (currentElement != null) {
+                parentLabel = currentElement.getDataElementLabel();
+            }
+        }
         if (system != null && !system.isEmpty()) {
             String codeListString = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4Code"));
+            // If there is no code, use the data element label, prefixed with the parentLabel, if there is one
+            if (codeListString == null || codeListString.isEmpty()) {
+                codeListString = parentLabel != null ? (parentLabel + '-' + label) : label;
+            }
             if (codeListString != null && !codeListString.isEmpty()) {
                 List<String> codesList = Arrays.asList(codeListString.split(";"));
                 for (String c : codesList) {
@@ -578,16 +610,6 @@ public class Processor extends Operation {
                     CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent();
                     concept.setCode(code.getCode());
                     concept.setDisplay(code.getLabel());
-
-                    String parentLabel = null;
-                    String parentName = getDataElementLabel(currentInputOptionParentRow, colIds).trim();
-                    if (parentName != null && !parentName.trim().isEmpty()) {
-                        parentName = parentName.trim();
-                        DictionaryElement currentElement = elementMap.get(parentName);
-                        if (currentElement != null) {
-                            parentLabel = currentElement.getDataElementLabel();
-                        }
-                    }
 
                     String definition = parentLabel != null ? String.format("%s - %s", parentLabel, code.getLabel())
                             : code.getLabel();
@@ -791,17 +813,19 @@ public class Processor extends Operation {
         }
 
         // FHIR choices
-        String fhirCodeSystem = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
-        if (fhirCodeSystem != null && !fhirCodeSystem.isEmpty()) {
+        //String fhirCodeSystem = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
+        //if (fhirCodeSystem != null && !fhirCodeSystem.isEmpty()) {
             List<DictionaryCode> fhirCodes = getFhirCodes(dataElementLabel, row, colIds);
             codes.addAll(fhirCodes);
-        }
+        //}
 
         // Other Terminology choices
         for (String codeSystemKey : supportedCodeSystems.keySet()) {
             List<DictionaryCode> codeSystemCodes = getTerminologyCodes(codeSystemKey, dataElementLabel, row, colIds);
             if (codes != codeSystemCodes && !codeSystemCodes.isEmpty()) {
-                codes.addAll(codeSystemCodes);
+                for (DictionaryCode c : codes) {
+                    c.getMappings().addAll(codeSystemCodes);
+                }
             }
         }
 
@@ -2116,6 +2140,9 @@ public class Processor extends Operation {
                             && o.getDisplay().equals(conceptReference.getDisplay()))) {
                         conceptSet.addConcept(conceptReference);
                     }
+
+                    // Add mappings for this code to the appropriate concept map
+                    addConceptMappings(code);
                 }
             }
         }
@@ -2125,6 +2152,68 @@ public class Processor extends Operation {
             valueSets.add(valueSet);
         }
         return valueSet;
+    }
+
+    private String getCodeSystemLabel(String systemUrl) {
+        for (Map.Entry<String, String> entry : supportedCodeSystems.entrySet()) {
+            if (entry.getValue().equals(systemUrl)) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    /*
+    Not guaranteed to return a concept map, will only return for known supported code systems
+     */
+    private ConceptMap getConceptMapForSystem(String systemUrl) {
+        ConceptMap cm = conceptMaps.get(systemUrl);
+        if (cm == null) {
+            String codeSystemLabel = getCodeSystemLabel(systemUrl);
+            if (codeSystemLabel != null) {
+                cm = new ConceptMap();
+                cm.setId(codeSystemLabel);
+                cm.setUrl(String.format("%s/ConceptMap/%s", canonicalBase, codeSystemLabel));
+                cm.setName(codeSystemLabel);
+                cm.setTitle(String.format("%s", codeSystemLabel));
+                cm.setStatus(Enumerations.PublicationStatus.DRAFT);
+                cm.setExperimental(false);
+                cm.setDescription(String.format("Concept mapping from content extended codes to %s", codeSystemLabel));
+                conceptMaps.put(systemUrl, cm);
+            }
+        }
+
+        return cm;
+    }
+
+    private ConceptMap.ConceptMapGroupComponent getConceptMapGroupComponent(ConceptMap cm, String sourceUri) {
+        for (ConceptMap.ConceptMapGroupComponent cmg : cm.getGroup()) {
+            if (cmg.getSource().equals(sourceUri)) {
+                return cmg;
+            }
+        }
+
+        return null;
+    }
+
+    private void addConceptMappings(DictionaryCode code) {
+        CodeCollection mappings = new CodeCollection(code.getMappings());
+        for (String codeSystemUrl : mappings.getCodeSystemUrls()) {
+            List<DictionaryCode> systemCodes = mappings.getCodesForSystem(codeSystemUrl);
+
+            ConceptMap cm = getConceptMapForSystem(codeSystemUrl);
+            if (cm != null) {
+                ConceptMap.ConceptMapGroupComponent cmg = getConceptMapGroupComponent(cm, code.getSystem());
+                if (cmg == null) {
+                    cmg = cm.addGroup().setSource(code.getSystem()).setTarget(codeSystemUrl);
+                }
+
+                ConceptMap.SourceElementComponent sec = cmg.addElement().setCode(code.getCode()).setDisplay(code.getDisplay());
+                for (DictionaryCode systemCode : systemCodes) {
+                    sec.addTarget().setCode(systemCode.getCode()).setDisplay(systemCode.getDisplay()).setEquivalence(Enumerations.ConceptMapEquivalence.EQUIVALENT);
+                }
+            }
+        }
     }
 
     @Nonnull
@@ -2446,6 +2535,38 @@ public class Processor extends Operation {
                     </resource>
                  */
                 igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"ValueSet/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", vs.getId()));
+            }
+        }
+    }
+
+    public void writeConceptMaps(String scopePath) {
+        if (conceptMaps != null && conceptMaps.size() > 0) {
+            String conceptMapPath = getConceptMapPath(scopePath);
+            ensureConceptMapPath(scopePath);
+
+            for (ConceptMap cm : conceptMaps.values()) {
+                writeResource(conceptMapPath, cm);
+
+                // Generate JSON fragment for inclusion in the IG:
+                /*
+                    "ConceptMap/<id>": {
+                        "source": "conceptmap/conceptmap-<id>.json",
+                        "base": "ConceptMap-<id>.html"
+                    }
+                 */
+                igJsonFragments.add(String.format("\t\t\"ConceptMap/%s\": {\r\n\t\t\t\"source\": \"conceptmap/conceptmap-%s.json\",\r\n\t\t\t\"base\": \"ConceptMap-%s.html\"\r\n\t\t}",
+                        cm.getId(), cm.getId(), cm.getId()));
+
+                // Generate XML fragment for the IG resource:
+                /*
+                    <resource>
+                        <reference>
+                            <reference value="ConceptMap/<id>"/>
+                        </reference>
+                        <groupingId value="main"/>
+                    </resource>
+                 */
+                igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"ConceptMap/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", cm.getId()));
             }
         }
     }

@@ -66,14 +66,10 @@ public class DictionaryCode {
         this.code = code.replace((char)160, (char)32).trim();
     }
 
-    private List<CodeableConcept> terminologies;
-    public List<CodeableConcept> getTerminologies() {
-        if (this.terminologies == null) {
-            this.terminologies = new ArrayList<>();
-        }
-        return this.terminologies;
+    private List<DictionaryCode> mappings = new ArrayList<DictionaryCode>();
+    public List<DictionaryCode> getMappings() {
+        return mappings;
     }
-
 
     public CodeableConcept toCodeableConcept() {
         CodeableConcept cc = new CodeableConcept();
