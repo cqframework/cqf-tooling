@@ -35,7 +35,7 @@ public class Processor extends Operation {
     // TODO: These need to be per scope
     private String dataElementIdentifierSystem = "http://fhir.org/guides/who/anc-cds/Identifier/data-elements";
     private String activityCodeSystem = "http://fhir.org/guides/who/anc-cds/CodeSystem/activity-codes";
-    private String whoCodeSystemBase;
+    private String projectCodeSystemBase;
 
     private int questionnaireItemLinkIdCounter = 1;
 
@@ -43,7 +43,7 @@ public class Processor extends Operation {
     private String canonicalBase = null;
     public void setCanonicalBase(String value) {
         canonicalBase = value;
-        whoCodeSystemBase = canonicalBase;// + "/CodeSystem/anc-custom-codes"; //http://fhir.org/guides/who/anc-cds/CodeSystem/anc-custom-codes
+        projectCodeSystemBase = canonicalBase;// + "/CodeSystem/anc-custom-codes"; //http://fhir.org/guides/who/anc-cds/CodeSystem/anc-custom-codes
     }
     private Map<String, String> scopeCanonicalBaseMap = new LinkedHashMap<String, String>();
 
@@ -161,6 +161,7 @@ public class Processor extends Operation {
         supportedCodeSystems.put("SNOMED-CT", "http://snomed.info/sct");
         supportedCodeSystems.put("LOINC", "http://loinc.org");
         supportedCodeSystems.put("RxNorm", "http://www.nlm.nih.gov/research/umls/rxnorm");
+        supportedCodeSystems.put("CPT", "http://www.ama-assn.org/go/cpt");
 
         // TODO: Determine and add correct URLS for these Systems
         supportedCodeSystems.put("CIEL", "http://hl7.org/fhir/sid/ciel");
@@ -175,6 +176,7 @@ public class Processor extends Operation {
         scopeCanonicalBaseMap.put("fp", "http://fhir.org/guides/who/fp-cds");
         scopeCanonicalBaseMap.put("sti", "http://fhir.org/guides/who/sti-cds");
         scopeCanonicalBaseMap.put("cr", "http://fhir.org/guides/cqframework/cr");
+		scopeCanonicalBaseMap.put("hiv", "http://fhir.org/guides/nachc/hiv-cds");
     }
 
     // private void loadFHIRModel() {
@@ -516,6 +518,12 @@ public class Processor extends Operation {
         return comments;
     }
 
+    private String getCPTComments(Row row, HashMap<String, Integer> colIds) {
+        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CPTComments"));
+        comments = cleanseCodeComments(comments);
+        return comments;
+    }
+
     private List<DictionaryCode> cleanseCodes(List<DictionaryCode> codes) {
         // Remove "Not classifiable in" instances
         codes.removeIf(c -> c.getCode().startsWith("Not classifiable in"));
@@ -548,6 +556,9 @@ public class Processor extends Operation {
                         break;
                     case "LOINC":
                         display = getLOINCComments(row, colIds);
+                        break;
+                    case "CPT":
+                        display = getCPTComments(row, colIds);
                         break;
                 }
 
@@ -592,7 +603,7 @@ public class Processor extends Operation {
                 }
             }
 
-            if (system.startsWith(whoCodeSystemBase)) {
+            if (system.startsWith(projectCodeSystemBase)) {
                 CodeSystem codeSystem = null;
                 for (CodeSystem cs : codeSystems) {
                     if (cs.getUrl().equals(system + "-codes")) {
@@ -602,7 +613,7 @@ public class Processor extends Operation {
 
                 if (codeSystem == null) {
                     String codeSystemName = system.substring(system.indexOf("CodeSystem/") + "CodeSystem/".length());
-                    codeSystem = createCodeSystem(codeSystemName, whoCodeSystemBase, "Extended Codes CodeSystem",
+                    codeSystem = createCodeSystem(codeSystemName, projectCodeSystemBase, "Extended Codes CodeSystem",
                             "Set of codes identified as being needed but not found in existing Code Systems");
                 }
 
@@ -862,9 +873,11 @@ public class Processor extends Operation {
                             .replace("–", "-");
                     switch (header) {
                         case "[anc] data element id":
+                        case "data element id":
                             colIds.put("DataElementID", cell.getColumnIndex());
                             break;
                         case "[anc] activity id":
+                        case "activity id":
                             colIds.put("ActivityID", cell.getColumnIndex());
                             break;
                         case "core, fp, sti":
@@ -970,6 +983,11 @@ public class Processor extends Operation {
                         case "openmrs entity parent": colIds.put("OpenMRSEntityParent", cell.getColumnIndex()); break;
                         case "openmrs entity": colIds.put("OpenMRSEntity", cell.getColumnIndex()); break;
                         case "openmrs entity id": colIds.put("OpenMRSEntityId", cell.getColumnIndex()); break;
+                        case "cpt":
+                        case "cpt code":
+                        case "cpt?code": colIds.put("CPT", cell.getColumnIndex()); break;
+                        case "cpt?comments / considerations": colIds.put("CPTComments", cell.getColumnIndex()); break;
+
                     }
                 }
                 continue;
