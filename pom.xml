@@ -57,11 +57,11 @@
     </distributionManagement>
 
     <repositories>
-            <repository>
+        <repository>
             <id>oss-sonatype-public</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
-                <repository>
+        <repository>
             <id>oss-sonatype</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
             <snapshots>
