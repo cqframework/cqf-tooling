@@ -58,14 +58,8 @@
 
     <repositories>
         <repository>
-            <id>support.hln.com-release</id>
-            <name>support.hln.com-release</name>
-            <url>https://support.hln.com/artifactory/libs-release-local/</url>
-        </repository>
-        <repository>
-            <id>support.hln.com-snapshot</id>
-            <name>support.hln.com-snapshot</name>
-            <url>https://support.hln.com/artifactory/libs-snapshot-local/</url>
+            <id>oss-sonatype-public</id>
+            <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
         <repository>
             <id>oss-sonatype</id>
@@ -75,8 +69,17 @@
             </snapshots>
         </repository>
         <repository>
-            <id>oss-sonatype-public</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
+            <id>support.hln.com-release</id>
+            <name>support.hln.com-release</name>
+            <url>https://support.hln.com/artifactory/libs-release-local/</url>
+        </repository>
+        <repository>
+            <id>support.hln.com-snapshot</id>
+            <name>support.hln.com-snapshot</name>
+            <url>https://support.hln.com/artifactory/libs-snapshot-local/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
