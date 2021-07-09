@@ -72,22 +72,7 @@ public class PlanDefinitionProcessor {
 
                 String cqlFileName = IOUtils.formatFileName(primaryLibraryName, Encoding.CQL, fhirContext);
 
-                // Old way, requires the resourcePaths argument to include cql directories, which is wrong
-                List<String> cqlLibrarySourcePaths = IOUtils.getCqlLibraryPaths().stream()
-                        .filter(path -> path.endsWith(cqlFileName))
-                        .collect(Collectors.toList());
-                String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
-
-                // Correct way, uses the binaryPaths loaded from the BaseProcessor (passed here because static)
-                if (cqlLibrarySourcePath == null) {
-                    for (String path : binaryPaths) {
-                        File f = new File(Utilities.path(path, cqlFileName));
-                        if (f.exists()) {
-                            cqlLibrarySourcePath = f.getAbsolutePath();
-                            break;
-                        }
-                    }
-                }
+                String cqlLibrarySourcePath = IOUtils.getCqlLibrarySourcePath(primaryLibraryName, cqlFileName, binaryPaths);
 
                 if (cqlLibrarySourcePath == null) {
                     throw new IllegalArgumentException(String.format("Could not determine CqlLibrarySource path for library %s", primaryLibraryName));
@@ -122,7 +107,7 @@ public class PlanDefinitionProcessor {
                 if (shouldPersist) {
                     String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), PlanDefinitionTestGroupName), planDefinitionName);
                     persistBundle(igPath, bundleDestPath, planDefinitionName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri);
-                    bundleFiles(igPath, bundleDestPath, primaryLibraryName, planDefinitionSourcePath, primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion);
+                    bundleFiles(igPath, bundleDestPath, primaryLibraryName, binaryPaths, planDefinitionSourcePath, primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion);
                     cdsHooksProcessor.addActivityDefinitionFilesToBundle(igPath, bundleDestPath, activityDefinitionPaths, fhirContext, encoding);
                     bundledPlanDefinitions.add(planDefinitionSourcePath);
                 }
@@ -174,7 +159,7 @@ public class PlanDefinitionProcessor {
         }
     }
 
-    private void bundleFiles(String igPath, String bundleDestPath, String libraryName, String resourceFocusSourcePath, String librarySourcePath, FhirContext fhirContext, Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios, Boolean includeVersion) {
+    private void bundleFiles(String igPath, String bundleDestPath, String libraryName, List<String> binaryPaths, String resourceFocusSourcePath, String librarySourcePath, FhirContext fhirContext, Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios, Boolean includeVersion) {
         String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, FilenameUtils.getBaseName(bundleDestPath) + "-" + IGBundleProcessor.bundleFilesPathElement);
         IOUtils.initializeDirectory(bundleDestFilesPath);
 
@@ -182,10 +167,7 @@ public class PlanDefinitionProcessor {
         IOUtils.copyFile(librarySourcePath, FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(librarySourcePath)));
 
         String cqlFileName = IOUtils.formatFileName(libraryName, Encoding.CQL, fhirContext);
-        List<String> cqlLibrarySourcePaths = IOUtils.getCqlLibraryPaths().stream()
-            .filter(path -> path.endsWith(cqlFileName))
-            .collect(Collectors.toList());
-        String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
+        String cqlLibrarySourcePath = IOUtils.getCqlLibrarySourcePath(libraryName, cqlFileName, binaryPaths);
         String cqlDestPath = FilenameUtils.concat(bundleDestFilesPath, cqlFileName);
         IOUtils.copyFile(cqlLibrarySourcePath, cqlDestPath);
 

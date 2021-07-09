@@ -62,35 +62,6 @@ public class MeasureProcessor extends BaseProcessor {
         return measureProcessor.refreshMeasureContent(params);
     }
 
-    
-
-    public static String getCqlLibrarySourcePath(String libraryName, String cqlFileName, List<String> binaryPaths) {
-        // Old way, requires the resourcePaths argument to include cql directories, which is wrong
-        List<String> cqlLibrarySourcePaths = IOUtils.getCqlLibraryPaths().stream()
-                .filter(path -> path.endsWith(cqlFileName))
-                .collect(Collectors.toList());
-        String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
-
-        // Correct way, uses the binaryPaths loaded from the BaseProcessor (passed here because static)
-        try {
-            if (cqlLibrarySourcePath == null) {
-                for (String path : binaryPaths) {
-                    File f = new File(Utilities.path(path, cqlFileName));
-                    if (f.exists()) {
-                        cqlLibrarySourcePath = f.getAbsolutePath();
-                        break;
-                    }
-                }
-            }
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            LogUtils.putException(libraryName, e);
-        }
-
-        return cqlLibrarySourcePath;
-    }
-
     public void bundleMeasures(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
             Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, FhirContext fhirContext, String fhirUri,
             Encoding encoding) {
@@ -134,7 +105,7 @@ public class MeasureProcessor extends BaseProcessor {
 
                 String cqlFileName = IOUtils.formatFileName(primaryLibraryName, Encoding.CQL, fhirContext);
 
-                String cqlLibrarySourcePath = getCqlLibrarySourcePath(primaryLibraryName, cqlFileName, binaryPaths);
+                String cqlLibrarySourcePath = IOUtils.getCqlLibrarySourcePath(primaryLibraryName, cqlFileName, binaryPaths);
 
                 if (cqlLibrarySourcePath == null) {
                     throw new IllegalArgumentException(String.format("Could not determine CqlLibrarySource path for library %s", primaryLibraryName));
@@ -217,7 +188,7 @@ public class MeasureProcessor extends BaseProcessor {
         IOUtils.copyFile(librarySourcePath, FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(librarySourcePath)));
 
         String cqlFileName = IOUtils.formatFileName(FilenameUtils.getBaseName(librarySourcePath), Encoding.CQL, fhirContext);
-        String cqlLibrarySourcePath = getCqlLibrarySourcePath(libraryName, cqlFileName, binaryPaths);
+        String cqlLibrarySourcePath = IOUtils.getCqlLibrarySourcePath(libraryName, cqlFileName, binaryPaths);
         String cqlDestPath = FilenameUtils.concat(bundleDestFilesPath, cqlFileName);
         IOUtils.copyFile(cqlLibrarySourcePath, cqlDestPath);
 
