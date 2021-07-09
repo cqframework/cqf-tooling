@@ -189,7 +189,7 @@ public class CqlProcessor {
         if (!fileMap.containsKey(filename)) {
             for (Map.Entry<String, CqlSourceFileInformation> entry: fileMap.entrySet()) {
                 if (filename.equalsIgnoreCase(entry.getKey())) {
-                    System.out.println(String.format("WARNING: File with a similar name but different casing was found. File found: '%s'", entry.getKey()));
+                    logger.logDebugMessage(ILoggingService.LogCategory.PROGRESS, String.format("File with a similar name but different casing was found. File found: '%s'", entry.getKey()));
                 }
             }
             return null;
