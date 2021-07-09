@@ -259,8 +259,8 @@ public class CqlProcessor {
             modelManager.getModelInfoLoader().registerModelInfoProvider(new NpmModelInfoProvider(packages, reader, logger), true);
             libraryManager.getLibrarySourceLoader().registerProvider(new NpmLibrarySourceProvider(packages, reader, logger));
         }
-        libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
         libraryManager.getLibrarySourceLoader().registerProvider(new DefaultLibrarySourceProvider(Paths.get(folder)));
+        libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
         modelManager.getModelInfoLoader().registerModelInfoProvider(new DefaultModelInfoProvider(Paths.get(folder)));
 
         loadNamespaces(libraryManager);
