@@ -47,7 +47,12 @@ public class DataRequirementsProcessor {
         List<ExpressionDef> expressionDefs = null;
         if (expressions == null) {
             visitor.visitLibrary(translatedLibrary.getLibrary(), context);
-            expressionDefs = translatedLibrary.getLibrary().getStatements().getDef();
+            if (translatedLibrary.getLibrary() != null && translatedLibrary.getLibrary().getStatements() != null) {
+                expressionDefs = translatedLibrary.getLibrary().getStatements().getDef();
+            }
+            else {
+                expressionDefs = new ArrayList<ExpressionDef>();
+            }
         }
         else {
             context.enterLibrary(translatedLibrary.getIdentifier());
