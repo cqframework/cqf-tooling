@@ -14,8 +14,8 @@
         <cql-engine.version>1.5.1</cql-engine.version>
         <cql-evaluator.version>1.2.0</cql-evaluator.version>
         <cqframework.version>1.5.4-SNAPSHOT</cqframework.version>
-        <hapi.version>5.4.1</hapi.version>
-        <core.version>5.4.5</core.version>
+        <hapi.version>5.4.2</hapi.version>
+        <core.version>5.4.8</core.version>
     </properties>
 
     <name>cqf-tooling</name>
@@ -214,14 +214,14 @@
             <dependency>
                 <groupId>org.jsoup</groupId>
                 <artifactId>jsoup</artifactId>
-                <version>1.13.1</version>
+                <version>1.14.1</version>
             </dependency>
 
             <!-- HTML Generator (-QiCoreQUICK) -->
             <dependency>
                 <groupId>com.j2html</groupId>
                 <artifactId>j2html</artifactId>
-                <version>1.4.0</version>
+                <version>1.5.0</version>
             </dependency>
 
             <!-- FHIR Core Dependencies -->
@@ -278,7 +278,7 @@
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
-                <version>2.8.5</version>
+                <version>2.8.7</version>
             </dependency>
 
             <!-- Useful String ops -->
@@ -299,7 +299,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
-                <version>1.20</version>
+                <version>1.21</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.poi</groupId>
@@ -316,7 +316,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>2.12.3</version>
+                <version>2.12.4</version>
             </dependency>
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
@@ -334,7 +334,7 @@
             <dependency>
                 <groupId>javax.activation</groupId>
                 <artifactId>activation</artifactId>
-                <version>1.1</version>
+                <version>1.1.1</version>
             </dependency>
 
             <!-- https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime -->
@@ -347,7 +347,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>2.12.3</version>
+                <version>2.12.4</version>
             </dependency>
 
             <dependency>
@@ -393,7 +393,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>3.9.0</version>
+                <version>3.11.2</version>
                 <scope>test</scope>
             </dependency>
 
