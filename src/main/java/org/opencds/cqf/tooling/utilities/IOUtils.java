@@ -13,6 +13,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -22,6 +23,7 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -565,6 +567,33 @@ public class IOUtils
             List<String> filePaths = IOUtils.getFilePaths(dir, true);
             filePaths.stream().filter(path -> path.contains(".cql")).forEach(path -> cqlLibraryPaths.add(path));
         }
+    }
+
+    public static String getCqlLibrarySourcePath(String libraryName, String cqlFileName, List<String> binaryPaths) {
+        // Old way, requires the resourcePaths argument to include cql directories, which is wrong
+        List<String> cqlLibrarySourcePaths = IOUtils.getCqlLibraryPaths().stream()
+                .filter(path -> path.endsWith(cqlFileName))
+                .collect(Collectors.toList());
+        String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
+
+        // Correct way, uses the binaryPaths loaded from the BaseProcessor (passed here because static)
+        try {
+            if (cqlLibrarySourcePath == null) {
+                for (String path : binaryPaths) {
+                    File f = new File(Utilities.path(path, cqlFileName));
+                    if (f.exists()) {
+                        cqlLibrarySourcePath = f.getAbsolutePath();
+                        break;
+                    }
+                }
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            LogUtils.putException(libraryName, e);
+        }
+
+        return cqlLibrarySourcePath;
     }
 
     private static HashSet<String> terminologyPaths = new LinkedHashSet<String>();
