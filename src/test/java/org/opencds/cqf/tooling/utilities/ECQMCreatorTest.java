@@ -1,6 +1,6 @@
 package org.opencds.cqf.tooling.utilities;
 
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
