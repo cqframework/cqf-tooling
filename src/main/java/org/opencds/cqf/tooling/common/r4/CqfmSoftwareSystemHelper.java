@@ -176,7 +176,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
         }
     }
 
-    private Device createSoftwareSystemDevice(CqfmSoftwareSystem system) {
+    public Device createSoftwareSystemDevice(CqfmSoftwareSystem system) {
         Device device = null;
 
         if (this.getSystemIsValid(system)) {
