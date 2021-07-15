@@ -1,8 +1,8 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
-import java.util.ArrayList;
+import org.hl7.fhir.r4.model.Enumerations;
+
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by Bryn on 8/18/2019.
@@ -135,40 +135,6 @@ public class DictionaryElement {
         this.type = type;
     }
 
-    private List<DictionaryCode> choices;
-    public List<DictionaryCode> getChoices() {
-        if (this.choices == null) {
-            this.choices = new ArrayList<>();
-        }
-        return this.choices;
-    }
-    public List<DictionaryCode> getValidChoices() {
-        return this.getChoices().stream()
-                .filter((c) -> !c.getCode().trim().isEmpty())
-                .collect(Collectors.toList());
-    }
-    public List<DictionaryCode> getChoicesForSystem(String system) {
-        if (this.choices == null) {
-            this.choices = new ArrayList<>();
-        }
-        List<DictionaryCode> codes = this.getValidChoices().stream()
-                .filter((c) -> c.getSystem().equals(system))
-                .collect(Collectors.toList());
-        return codes;
-    }
-
-    private ArrayList<String> codeSystemUrls;
-    public List<String> getCodeSystemUrls() {
-        if (this.codeSystemUrls == null) {
-            this.codeSystemUrls = new ArrayList<>();
-        }
-        List<String> codeSystemUrls = this.getValidChoices().stream()
-                .map((c) -> c.getSystem())
-                .distinct()
-                .collect(Collectors.toList());
-        return codeSystemUrls;
-    }
-
     private String calculation;
     public String getCalculation() {
         return this.calculation;
@@ -209,13 +175,35 @@ public class DictionaryElement {
         this.scope = scope;
     }
 
-    private DictionaryCode code;
-    public DictionaryCode getCode() {
-        return this.code;
+    private String context;
+    public String getContext() {
+        return this.context;
     }
-    public void setCode(DictionaryCode code) {
-        this.code = code;
+    public void setContext(String context) {
+        this.context = context;
     }
+
+    private String selector;
+    public String getSelector() {
+        return this.selector;
+    }
+    public void setSelector(String selector) {
+        this.selector = selector;
+    }
+
+    private CodeCollection primaryCodes;
+    public CodeCollection getPrimaryCodes() {
+        return this.primaryCodes;
+    }
+    public void setPrimaryCodes(List<DictionaryCode> primaryCodes) {
+        this.primaryCodes = new CodeCollection(primaryCodes);
+    }
+
+    private String masterDataElementPath;
+    public String getMasterDataElementPath() {
+        return this.masterDataElementPath;
+    }
+    public void setMasterDataElementPath(String masterDataElementPath) { this.masterDataElementPath = masterDataElementPath; }
 
     private DictionaryFhirElementPath fhirElementPath;
     public DictionaryFhirElementPath getFhirElementPath() {
@@ -223,6 +211,78 @@ public class DictionaryElement {
     }
     public void setFhirElementPath(DictionaryFhirElementPath fhirElementPath) {
         this.fhirElementPath = fhirElementPath;
+    }
+
+    private MultipleChoiceElementChoices choices;
+    public MultipleChoiceElementChoices getChoices() {
+        if (this.choices == null) {
+            this.choices = new MultipleChoiceElementChoices();
+        }
+        return this.choices;
+    }
+
+    private String baseProfile;
+    public String getBaseProfile() {
+        //TODO: Naive check for a URL may need to be improved.
+        if (this.baseProfile != null && !this.baseProfile.isEmpty() && !this.baseProfile.toLowerCase().equals("fhir")) {
+            return this.baseProfile;
+        }
+        return String.format("http://hl7.org/fhir/StructureDefinition/%s", this.getFhirElementPath().getResourceType());
+    }
+    public void setBaseProfile(String baseProfile) {
+        this.baseProfile = baseProfile;
+    }
+
+    private String customProfileId;
+    public String getCustomProfileId() { return this.customProfileId; }
+    public void setCustomProfileId(String customProfileId) { this.customProfileId = customProfileId; }
+
+    private String additionalFHIRMappingDetails;
+    public String getAdditionalFHIRMappingDetails() { return this.additionalFHIRMappingDetails; }
+    public void setAdditionalFHIRMappingDetails(String additionalFHIRMappingDetails) { this.additionalFHIRMappingDetails = additionalFHIRMappingDetails; }
+
+    private String customValueSetName;
+    public String getCustomValueSetName() { return this.customValueSetName; }
+    public void setCustomValueSetName(String customValueSetName) { this.customValueSetName = customValueSetName; }
+
+    private String bindingStrength;
+    public Enumerations.BindingStrength getBindingStrength() {
+        if (this.bindingStrength == null || this.bindingStrength.isEmpty()) {
+            return Enumerations.BindingStrength.REQUIRED;
+        }
+
+        switch (this.bindingStrength.toLowerCase()) {
+            case "example":
+                return Enumerations.BindingStrength.EXAMPLE;
+            case "extensible":
+                return Enumerations.BindingStrength.EXTENSIBLE;
+            default:
+                return Enumerations.BindingStrength.REQUIRED;
+        }
+    }
+    public void setBindingStrength(String bindingStrength) { this.bindingStrength = bindingStrength; }
+
+    private String unitOfMeasure;
+    public String getUnitOfMeasure() { return this.unitOfMeasure; }
+    public void setUnitOfMeasure(String unitOfMeasure) { this.unitOfMeasure = unitOfMeasure; }
+
+    private String extensionNeeded;
+    public String getExtensionNeeded() { return this.extensionNeeded; }
+    public void setExtensionNeeded(String extensionNeeded) { this.extensionNeeded = extensionNeeded; }
+
+    private String terminologyIdentifier;
+    public String getTerminologyIdentifier() { return this.terminologyIdentifier; }
+    public void setTerminologyIdentifier(String terminologyIdentifier) { this.terminologyIdentifier = terminologyIdentifier; }
+
+    private String version;
+    public String getVersion() {
+        if (this.version != null && !this.version.isEmpty()) {
+            return this.version;
+        }
+        return "4.0.1";
+    }
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     @Override
