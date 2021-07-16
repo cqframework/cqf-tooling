@@ -112,6 +112,9 @@ public class ElmDataRequirement extends ElmExpressionRequirement {
     }
 
     private Set<Property> propertySet;
+    public Iterable<Property> getProperties() {
+        return propertySet;
+    }
 
     public void reportProperty(ElmPropertyRequirement propertyRequirement) {
         if (propertySet == null) {

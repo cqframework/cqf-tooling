@@ -157,6 +157,9 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
                 System.err.println("Could not create UCUM validation service:");
                 e.printStackTrace();
             }
+            if (packageManager == null) {
+                throw new IllegalArgumentException("packageManager is null");
+            }
             cqlProcessor = new CqlProcessor(packageManager.getNpmList(), binaryPaths, reader, this, ucumService,
                     packageId, canonicalBase);
         }
