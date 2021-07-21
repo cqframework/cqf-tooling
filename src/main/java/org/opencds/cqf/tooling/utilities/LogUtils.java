@@ -25,6 +25,20 @@ public class LogUtils
         ourLog.warn(message);
     }
 
+    private static String stripTimestamp(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String[] values = value.split(" ");
+        value = values[values.length - 1];
+        int lastColon = value.lastIndexOf(':');
+        if (lastColon >= 0) {
+            value = value.substring(lastColon + 1);
+        }
+        return value;
+    }
+
     public static void warn(String libraryName) {
         if (resourceWarnings.isEmpty()) {
             return;
@@ -32,7 +46,7 @@ public class LogUtils
         String exceptionMessage = "";
         for (Map.Entry<String, String> resourceException : resourceWarnings.entrySet()) {
             String resourceExceptionMessage = truncateMessage(resourceException.getValue()); 
-            String resource =  FilenameUtils.getBaseName(resourceException.getKey());           
+            String resource =  FilenameUtils.getBaseName(stripTimestamp(resourceException.getKey()));
             exceptionMessage += "\r\n          Resource could not be processed: " + resource + "\r\n                    "  + resourceExceptionMessage;
         }
         ourLog.warn(libraryName +" could not be processed: "  + exceptionMessage);
