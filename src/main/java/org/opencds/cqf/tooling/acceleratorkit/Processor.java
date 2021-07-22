@@ -162,12 +162,14 @@ public class Processor extends Operation {
         supportedCodeSystems.put("LOINC", "http://loinc.org");
         supportedCodeSystems.put("RxNorm", "http://www.nlm.nih.gov/research/umls/rxnorm");
         supportedCodeSystems.put("CPT", "http://www.ama-assn.org/go/cpt");
+        supportedCodeSystems.put("HCPCS", "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets");
 
         // TODO: Determine and add correct URLS for these Systems
         supportedCodeSystems.put("CIEL", "http://hl7.org/fhir/sid/ciel");
         supportedCodeSystems.put("ICD-11", "http://hl7.org/fhir/sid/icd-11");
         supportedCodeSystems.put("ICHI", "https://mitel.dimi.uniud.it/ichi/#http://id.who.int/ichi");
         supportedCodeSystems.put("ICF", "http://hl7.org/fhir/sid/icf-nl");
+        supportedCodeSystems.put("NDC", "http://hl7.org/fhir/sid/ndc");
     }
 
     private void registerScopes() {
@@ -518,8 +520,26 @@ public class Processor extends Operation {
         return comments;
     }
 
+    private String getRXNormComments(Row row, HashMap<String, Integer> colIds) {
+        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "RXNormComments"));
+        comments = cleanseCodeComments(comments);
+        return comments;
+    }
+
     private String getCPTComments(Row row, HashMap<String, Integer> colIds) {
         String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CPTComments"));
+        comments = cleanseCodeComments(comments);
+        return comments;
+    }
+
+    private String getHCPCSComments(Row row, HashMap<String, Integer> colIds) {
+        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "HCPCSComments"));
+        comments = cleanseCodeComments(comments);
+        return comments;
+    }
+
+    private String getNDCComments(Row row, HashMap<String, Integer> colIds) {
+        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "NDCComments"));
         comments = cleanseCodeComments(comments);
         return comments;
     }
@@ -557,8 +577,17 @@ public class Processor extends Operation {
                     case "LOINC":
                         display = getLOINCComments(row, colIds);
                         break;
+                    case "RXNorm":
+                        display = getRXNormComments(row, colIds);
+                        break;
                     case "CPT":
                         display = getCPTComments(row, colIds);
+                        break;
+                    case "HCPCS":
+                        display = getHCPCSComments(row, colIds);
+                        break;
+                    case "NDC":
+                        display = getNDCComments(row, colIds);
                         break;
                 }
 
@@ -971,10 +1000,12 @@ public class Processor extends Operation {
                         case "snomed ct international version?comments / considerations": colIds.put("SNOMEDComments", cell.getColumnIndex()); break;
                         case "loinc":
                         case "loinc code":
-                        case "loinc version 2.68?code":
-                            colIds.put("LOINC", cell.getColumnIndex()); break;
+                        case "loinc version 2.68?code": colIds.put("LOINC", cell.getColumnIndex()); break;
                         case "loinc version 2.68?comments / considerations": colIds.put("LOINCComments", cell.getColumnIndex()); break;
-                        case "rxnorm": colIds.put("RxNorm", cell.getColumnIndex()); break;
+                        case "rxnorm":
+                        case "rxnorm code":
+                        case "rxnorm?code": colIds.put("RxNorm", cell.getColumnIndex()); break;
+                        case "rxnorm?comments / considerations": colIds.put("RXNormComments", cell.getColumnIndex()); break;
                         case "icd-11":
                         case "icd-11 code":
                         case "icd-11?code":colIds.put("ICD-11", cell.getColumnIndex()); break;
@@ -987,7 +1018,16 @@ public class Processor extends Operation {
                         case "cpt code":
                         case "cpt?code": colIds.put("CPT", cell.getColumnIndex()); break;
                         case "cpt?comments / considerations": colIds.put("CPTComments", cell.getColumnIndex()); break;
-
+                        case "hcpcs":
+                        case "hcpcs code":
+                        case "hcpcs?code":
+                        case "hcpcs level ii code":
+                        case "hcpcs?level ii code": colIds.put("HCPCS", cell.getColumnIndex()); break;
+                        case "hcpcs?comments / considerations": colIds.put("HCPCSComments", cell.getColumnIndex()); break;
+                        case "ndc":
+                        case "ndc code":
+                        case "ndc?code": colIds.put("NDC", cell.getColumnIndex()); break;
+                        case "ndc?comments / considerations": colIds.put("NDCComments", cell.getColumnIndex()); break;
                     }
                 }
                 continue;
