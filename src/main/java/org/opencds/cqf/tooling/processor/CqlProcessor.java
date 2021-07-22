@@ -2,7 +2,9 @@ package org.opencds.cqf.tooling.processor;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.lang.reflect.Array;
 import java.nio.file.Paths;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,6 +37,7 @@ import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
 import org.opencds.cqf.tooling.npm.ILibraryReader;
 import org.opencds.cqf.tooling.npm.NpmLibrarySourceProvider;
 import org.opencds.cqf.tooling.npm.NpmModelInfoProvider;
+
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 public class CqlProcessor {
@@ -184,6 +187,11 @@ public class CqlProcessor {
         }
 
         if (!fileMap.containsKey(filename)) {
+            for (Map.Entry<String, CqlSourceFileInformation> entry: fileMap.entrySet()) {
+                if (filename.equalsIgnoreCase(entry.getKey())) {
+                    logger.logDebugMessage(ILoggingService.LogCategory.PROGRESS, String.format("File with a similar name but different casing was found. File found: '%s'", entry.getKey()));
+                }
+            }
             return null;
         }
 
@@ -257,8 +265,8 @@ public class CqlProcessor {
             modelManager.getModelInfoLoader().registerModelInfoProvider(new NpmModelInfoProvider(packages, reader, logger), true);
             libraryManager.getLibrarySourceLoader().registerProvider(new NpmLibrarySourceProvider(packages, reader, logger));
         }
-        libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
         libraryManager.getLibrarySourceLoader().registerProvider(new DefaultLibrarySourceProvider(Paths.get(folder)));
+        libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
         modelManager.getModelInfoLoader().registerModelInfoProvider(new DefaultModelInfoProvider(Paths.get(folder)));
 
         loadNamespaces(libraryManager);

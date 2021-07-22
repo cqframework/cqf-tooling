@@ -10,13 +10,11 @@ import org.hl7.cql.model.NamedType;
 import org.hl7.elm.r1.*;
 import org.hl7.elm.r1.Element;
 import org.hl7.elm.r1.Expression;
+import org.hl7.elm.r1.Property;
 import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
-import org.opencds.cqf.tooling.visitor.ElmRequirement;
-import org.opencds.cqf.tooling.visitor.ElmRequirements;
-import org.opencds.cqf.tooling.visitor.ElmRequirementsContext;
-import org.opencds.cqf.tooling.visitor.ElmRequirementsVisitor;
+import org.opencds.cqf.tooling.visitor.*;
 
 import javax.xml.bind.JAXBElement;
 import java.io.Serializable;
@@ -47,7 +45,12 @@ public class DataRequirementsProcessor {
         List<ExpressionDef> expressionDefs = null;
         if (expressions == null) {
             visitor.visitLibrary(translatedLibrary.getLibrary(), context);
-            expressionDefs = translatedLibrary.getLibrary().getStatements().getDef();
+            if (translatedLibrary.getLibrary() != null && translatedLibrary.getLibrary().getStatements() != null) {
+                expressionDefs = translatedLibrary.getLibrary().getStatements().getDef();
+            }
+            else {
+                expressionDefs = new ArrayList<ExpressionDef>();
+            }
         }
         else {
             context.enterLibrary(translatedLibrary.getIdentifier());
@@ -281,7 +284,8 @@ public class DataRequirementsProcessor {
 
         for (ElmRequirement retrieve : requirements.getRetrieves()) {
             if (((Retrieve)retrieve.getElement()).getDataType() != null) {
-                result.add(toDataRequirement(context, retrieve.getLibraryIdentifier(), (Retrieve) retrieve.getElement(), retrieveMap));
+                result.add(toDataRequirement(context, retrieve.getLibraryIdentifier(), (Retrieve) retrieve.getElement(),
+                        retrieveMap, retrieve instanceof ElmDataRequirement ? ((ElmDataRequirement)retrieve).getProperties() : null));
             }
         }
 
@@ -552,7 +556,7 @@ public class DataRequirementsProcessor {
     }
 
     private org.hl7.fhir.r5.model.DataRequirement toDataRequirement(ElmRequirementsContext context,
-            VersionedIdentifier libraryIdentifier, Retrieve retrieve, Map<String, Retrieve> retrieveMap) {
+            VersionedIdentifier libraryIdentifier, Retrieve retrieve, Map<String, Retrieve> retrieveMap, Iterable<Property> properties) {
         org.hl7.fhir.r5.model.DataRequirement dr = new org.hl7.fhir.r5.model.DataRequirement();
         try {
             dr.setType(org.hl7.fhir.r5.model.Enumerations.FHIRAllTypes.fromCode(retrieve.getDataType().getLocalPart()));
@@ -612,6 +616,13 @@ public class DataRequirementsProcessor {
                 relatedRequirement.addExtension("targetId", new StringType(retrieve.getIncludedIn()));
                 relatedRequirement.addExtension("targetProperty", new StringType(stripReference(includeElement.getRelatedProperty())));
                 dr.addExtension(relatedRequirement);
+            }
+        }
+
+        // Add any properties as mustSupport items
+        if (properties != null) {
+            for (Property p : properties) {
+                dr.addMustSupport(p.getPath());
             }
         }
 

@@ -1,7 +1,7 @@
 package org.opencds.cqf.tooling.utilities;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,13 +42,17 @@ import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.ParameterDefinition;
 import org.hl7.fhir.r5.model.RelatedArtifact;
-import org.junit.Test;
+import org.testng.annotations.Test;
 import org.opencds.cqf.tooling.processor.DataRequirementsProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
 public class DataRequirementsProcessorTest {
+    private static Logger logger = LoggerFactory.getLogger(DataRequirementsProcessorTest.class);
+
     private static ModelManager modelManager;
     private static LibraryManager libraryManager;
     private static UcumService ucumService;
@@ -92,7 +96,7 @@ public class DataRequirementsProcessorTest {
             FhirContext context =  FhirContext.forR5();
             IParser parser = context.newJsonParser();
             String moduleDefString = parser.setPrettyPrint(true).encodeResourceToString(moduleDefinitionLibrary);
-            System.out.println(moduleDefString);
+            logger.debug(moduleDefString);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -169,7 +173,7 @@ public class DataRequirementsProcessorTest {
             FhirContext context =  FhirContext.forR5();
             IParser parser = context.newJsonParser();
             String moduleDefString = parser.setPrettyPrint(true).encodeResourceToString(moduleDefinitionLibrary);
-            System.out.println(moduleDefString);
+            logger.debug(moduleDefString);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -236,7 +240,7 @@ public class DataRequirementsProcessorTest {
             FhirContext context =  FhirContext.forR5();
             IParser parser = context.newJsonParser();
             String moduleDefString = parser.setPrettyPrint(true).encodeResourceToString(moduleDefinitionLibrary);
-            System.out.println(moduleDefString);
+            logger.debug(moduleDefString);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }

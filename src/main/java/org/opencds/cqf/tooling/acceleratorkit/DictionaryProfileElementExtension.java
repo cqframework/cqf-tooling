@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.acceleratorkit;
 
 import org.hl7.fhir.r4.model.StructureDefinition;
 
+
 public class DictionaryProfileElementExtension {
     private String profileId;
     public String getProfileId() {

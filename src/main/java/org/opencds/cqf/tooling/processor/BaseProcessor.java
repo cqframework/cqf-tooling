@@ -157,6 +157,9 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
                 System.err.println("Could not create UCUM validation service:");
                 e.printStackTrace();
             }
+            if (packageManager == null) {
+                throw new IllegalArgumentException("packageManager is null");
+            }
             cqlProcessor = new CqlProcessor(packageManager.getNpmList(), binaryPaths, reader, this, ucumService,
                     packageId, canonicalBase);
         }
@@ -176,7 +179,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
                     Manager.FhirFormat fmt = org.hl7.fhir.r5.formats.FormatUtilities.determineFormat(src);
 
                     org.hl7.fhir.dstu3.formats.ParserBase parser = org.hl7.fhir.dstu3.formats.FormatUtilities.makeParser(fmt.toString());
-                    sourceIg = (ImplementationGuide) VersionConvertor_30_50.convertResource(parser.parse(src), false);
+                    sourceIg = (ImplementationGuide) VersionConvertor_30_50.convertResource(parser.parse(src));
                 }
             }
         } catch (Exception e) {
@@ -192,7 +195,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
                 byte[] src = TextFile.fileToBytes(igPath);
                 Manager.FhirFormat fmt = org.hl7.fhir.r5.formats.FormatUtilities.determineFormat(src);
                 org.hl7.fhir.dstu3.formats.ParserBase parser = org.hl7.fhir.dstu3.formats.FormatUtilities.makeParser(fmt.toString());
-                sourceIg = (ImplementationGuide) VersionConvertor_30_50.convertResource(parser.parse(src), false);
+                sourceIg = (ImplementationGuide) VersionConvertor_30_50.convertResource(parser.parse(src));
             } else if (VersionUtilities.isR4Ver(specifiedFhirVersion)) {
                 org.hl7.fhir.r4.model.Resource res = org.hl7.fhir.r4.formats.FormatUtilities.loadFile(igPath);
                 sourceIg = (ImplementationGuide) VersionConvertor_40_50.convertResource(res);

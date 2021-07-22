@@ -65,16 +65,27 @@
                 "-RefreshIG",
                 "-ip=../aphl-ig",
                 "-rp=../aphl-ig/input/resources",
-                "-rp=../input/pagecontent/cql",
+                "-rp=../aphl-ig/input/pagecontent/cql",
                 "-rp=../aphl-ig/input/vocabulary",
                 "-fs=http://localhost:8080/cqf-ruler-r4/fhir",
                 "-e=json",
-                "-v",
                 "-t",
                 "-d",
                 "-p",
-                "-ini=../aphl-ig/ig.ini",
+                "-ini=../hedis/ig.ini",
                 "-cdsig"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "DEBUG CQLGenerateFromDrool",
+            "request": "launch",
+            "mainClass": "org.opencds.cqf.tooling.Main",
+            "projectName": "tooling",
+            "args": [
+                "-GenerateCQLFromDrool",
+                "-ifp=../CQLGenerationDocs/default.json",
+                "-op=../CQLGenerationDocs/generatedCQL"
             ]
         },
         {
@@ -85,9 +96,9 @@
             "projectName": "tooling",
             "args": [
                 "-VsacXlsxToValueSetBatch",
-                "-ptsd=../aphl-ig/input/vocabulary/valueset/spreadsheets",
-                "-vssrc=vsac",
-                "-op=../aphl-ig/input/vocabulary/valueset/spreadsheets"
+                "-ptsd=../hedis-ig-r4/input/vocabulary/valueset/spreadsheets",
+                "-vssrc=hedis",
+                "-op=../hedis-ig-r4/input/vocabulary/valueset/spreadsheets"
             ]
         },
         {
@@ -98,11 +109,11 @@
             "projectName": "tooling",
             "args": [
                 "-RefreshLibrary",
-                "-cql=../connectathon/fhir401/input/pagecontent/cql/EXM124-9.0.000.cql",
-                "-lp=../connectathon/fhir401/input/resources/library/library-EXM124-9.0.000.json",
+                "-ini=../aphl-ig/ig-structure/ig.ini",
+                "-cql=../aphl-ig/ig-structure/input/pagecontent/cql/RuleFilters-1.0.0.cql",
+                "-lp=../aphl-ig/ig-structure/input/resources/library/RuleFilters.json",
                 "-e=json",
-                "-fv=fhir4",
-                "-v"
+                "-fv=4.0.1"
             ]
         },
         {

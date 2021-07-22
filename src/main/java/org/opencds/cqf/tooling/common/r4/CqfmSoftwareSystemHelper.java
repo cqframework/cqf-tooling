@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 
     public CqfmSoftwareSystemHelper() { }
@@ -175,7 +176,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
         }
     }
 
-    private Device createSoftwareSystemDevice(CqfmSoftwareSystem system) {
+    public Device createSoftwareSystemDevice(CqfmSoftwareSystem system) {
         Device device = null;
 
         if (this.getSystemIsValid(system)) {

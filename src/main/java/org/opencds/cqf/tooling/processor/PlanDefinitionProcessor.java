@@ -4,9 +4,12 @@ import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.utilities.*;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,8 +19,16 @@ import java.util.stream.Collectors;
 public class PlanDefinitionProcessor {
     public static final String ResourcePrefix = "plandefinition-";
     public static final String PlanDefinitionTestGroupName = "plandefinition";
+    private LibraryProcessor libraryProcessor;
+    private CDSHooksProcessor cdsHooksProcessor;
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public static void bundlePlanDefinitions(ArrayList<String> refreshedLibraryNames, String igPath, Boolean includeDependencies,
+    public PlanDefinitionProcessor(LibraryProcessor libraryProcessor, CDSHooksProcessor cdsHooksProcessor) {
+        this.libraryProcessor = libraryProcessor;
+        this.cdsHooksProcessor = cdsHooksProcessor;
+    }
+
+    public void bundlePlanDefinitions(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
                                              Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion,
                                              FhirContext fhirContext, String fhirUri, Encoding encoding) {
 
@@ -60,10 +71,8 @@ public class PlanDefinitionProcessor {
                         & ResourceUtils.safeAddResource(primaryLibrarySourcePath, resources, fhirContext);
 
                 String cqlFileName = IOUtils.formatFileName(primaryLibraryName, Encoding.CQL, fhirContext);
-                List<String> cqlLibrarySourcePaths = IOUtils.getCqlLibraryPaths().stream()
-                        .filter(path -> path.endsWith(cqlFileName))
-                        .collect(Collectors.toList());
-                String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
+
+                String cqlLibrarySourcePath = IOUtils.getCqlLibrarySourcePath(primaryLibraryName, cqlFileName, binaryPaths);
 
                 if (cqlLibrarySourcePath == null) {
                     throw new IllegalArgumentException(String.format("Could not determine CqlLibrarySource path for library %s", primaryLibraryName));
@@ -78,7 +87,7 @@ public class PlanDefinitionProcessor {
                 }
 
                 if (includeDependencies) {
-                    boolean result = LibraryProcessor.bundleLibraryDependencies(primaryLibrarySourcePath, fhirContext, resources, encoding, includeVersion);
+                    boolean result = libraryProcessor.bundleLibraryDependencies(primaryLibrarySourcePath, fhirContext, resources, encoding, includeVersion);
                     if (shouldPersist && !result) {
                         LogUtils.info("PlanDefinition will not be bundled because Library Dependency bundling failed.");
                     }
@@ -98,8 +107,8 @@ public class PlanDefinitionProcessor {
                 if (shouldPersist) {
                     String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), PlanDefinitionTestGroupName), planDefinitionName);
                     persistBundle(igPath, bundleDestPath, planDefinitionName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri);
-                    bundleFiles(igPath, bundleDestPath, primaryLibraryName, planDefinitionSourcePath, primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion);
-                    CDSHooksProcessor.addActivityDefinitionFilesToBundle(igPath, bundleDestPath, activityDefinitionPaths, fhirContext, encoding);
+                    bundleFiles(igPath, bundleDestPath, primaryLibraryName, binaryPaths, planDefinitionSourcePath, primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion);
+                    cdsHooksProcessor.addActivityDefinitionFilesToBundle(igPath, bundleDestPath, activityDefinitionPaths, fhirContext, encoding);
                     bundledPlanDefinitions.add(planDefinitionSourcePath);
                 }
             } catch (Exception e) {
@@ -133,7 +142,7 @@ public class PlanDefinitionProcessor {
         LogUtils.info(message);
     }
 
-    private static void persistBundle(String igPath, String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, List<IBaseResource> resources, String fhirUri) {
+    private void persistBundle(String igPath, String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, List<IBaseResource> resources, String fhirUri) {
         IOUtils.initializeDirectory(bundleDestPath);
         Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext);
         IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);
@@ -150,7 +159,7 @@ public class PlanDefinitionProcessor {
         }
     }
 
-    private static void bundleFiles(String igPath, String bundleDestPath, String libraryName, String resourceFocusSourcePath, String librarySourcePath, FhirContext fhirContext, Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios, Boolean includeVersion) {
+    private void bundleFiles(String igPath, String bundleDestPath, String libraryName, List<String> binaryPaths, String resourceFocusSourcePath, String librarySourcePath, FhirContext fhirContext, Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios, Boolean includeVersion) {
         String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, FilenameUtils.getBaseName(bundleDestPath) + "-" + IGBundleProcessor.bundleFilesPathElement);
         IOUtils.initializeDirectory(bundleDestFilesPath);
 
@@ -158,10 +167,7 @@ public class PlanDefinitionProcessor {
         IOUtils.copyFile(librarySourcePath, FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(librarySourcePath)));
 
         String cqlFileName = IOUtils.formatFileName(libraryName, Encoding.CQL, fhirContext);
-        List<String> cqlLibrarySourcePaths = IOUtils.getCqlLibraryPaths().stream()
-            .filter(path -> path.endsWith(cqlFileName))
-            .collect(Collectors.toList());
-        String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
+        String cqlLibrarySourcePath = IOUtils.getCqlLibrarySourcePath(libraryName, cqlFileName, binaryPaths);
         String cqlDestPath = FilenameUtils.concat(bundleDestFilesPath, cqlFileName);
         IOUtils.copyFile(cqlLibrarySourcePath, cqlDestPath);
 
@@ -178,7 +184,7 @@ public class PlanDefinitionProcessor {
         }
         
         if (includeDependencies) {
-            Map<String, IBaseResource> depLibraries = ResourceUtils.getDepLibraryResources(librarySourcePath, fhirContext, encoding, includeVersion);
+            Map<String, IBaseResource> depLibraries = ResourceUtils.getDepLibraryResources(librarySourcePath, fhirContext, encoding, includeVersion, logger);
             if (!depLibraries.isEmpty()) {
                 String depLibrariesID = "library-deps-" + libraryName;
                 Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<IBaseResource>(depLibraries.values()), fhirContext);            

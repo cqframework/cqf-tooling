@@ -13,6 +13,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -22,6 +23,7 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -31,6 +33,7 @@ import ca.uhn.fhir.parser.IParser;
 
 public class IOUtils 
 {        
+    
     public enum Encoding 
     { 
         CQL("cql"), JSON("json"), XML("xml"), UNKNOWN(""); 
@@ -71,7 +74,7 @@ public class IOUtils
         return fileName.replaceAll("_", "-");
     }
 
-    public static byte[] parseResource(IBaseResource resource, Encoding encoding, FhirContext fhirContext) 
+    public static byte[] encodeResource(IBaseResource resource, Encoding encoding, FhirContext fhirContext)
     {
         if (encoding == Encoding.UNKNOWN) {
             return new byte[] { };
@@ -104,19 +107,27 @@ public class IOUtils
             outputPath = path;
         }
         else {
+            try {
+                ensurePath(path);
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Error writing Resource to file: " + e.getMessage());
+            }
+
         	String baseName = resource.getIdElement().getIdPart();
         	// Issue 96
         	// If includeVersion is false then just use name and not id for the file baseName
         	if (!versioned) {
         		// Assumes that the id will be a string with - separating the version number
-        		baseName = baseName.split("-")[0];
+        		// baseName = baseName.split("-")[0];
         	}
             outputPath = FilenameUtils.concat(path, formatFileName(baseName, encoding, fhirContext));
-            }
+        }
 
         try (FileOutputStream writer = new FileOutputStream(outputPath))
         {
-            writer.write(parseResource(resource, encoding, fhirContext));
+            writer.write(encodeResource(resource, encoding, fhirContext));
             writer.flush();
         }
         catch (IOException e)
@@ -556,6 +567,33 @@ public class IOUtils
             List<String> filePaths = IOUtils.getFilePaths(dir, true);
             filePaths.stream().filter(path -> path.contains(".cql")).forEach(path -> cqlLibraryPaths.add(path));
         }
+    }
+
+    public static String getCqlLibrarySourcePath(String libraryName, String cqlFileName, List<String> binaryPaths) {
+        // Old way, requires the resourcePaths argument to include cql directories, which is wrong
+        List<String> cqlLibrarySourcePaths = IOUtils.getCqlLibraryPaths().stream()
+                .filter(path -> path.endsWith(cqlFileName))
+                .collect(Collectors.toList());
+        String cqlLibrarySourcePath = (cqlLibrarySourcePaths.isEmpty()) ? null : cqlLibrarySourcePaths.get(0);
+
+        // Correct way, uses the binaryPaths loaded from the BaseProcessor (passed here because static)
+        try {
+            if (cqlLibrarySourcePath == null) {
+                for (String path : binaryPaths) {
+                    File f = new File(Utilities.path(path, cqlFileName));
+                    if (f.exists()) {
+                        cqlLibrarySourcePath = f.getAbsolutePath();
+                        break;
+                    }
+                }
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            LogUtils.putException(libraryName, e);
+        }
+
+        return cqlLibrarySourcePath;
     }
 
     private static HashSet<String> terminologyPaths = new LinkedHashSet<String>();

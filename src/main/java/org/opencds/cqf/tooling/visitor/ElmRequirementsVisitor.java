@@ -285,18 +285,41 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
              */
             // TODO: Normalize to DNF
             case "And": {
-                ElmExpressionRequirement left = (ElmExpressionRequirement)visitElement(elm.getOperand().get(0), context);
-                ElmExpressionRequirement right = (ElmExpressionRequirement)visitElement(elm.getOperand().get(1), context);
+                ElmRequirement left = visitElement(elm.getOperand().get(0), context);
+                ElmRequirement right = visitElement(elm.getOperand().get(1), context);
 
-                return new ElmConjunctiveRequirement(context.getCurrentLibraryIdentifier(), (And)elm).combine(left).combine(right);
+                if (left instanceof ElmExpressionRequirement && right instanceof ElmExpressionRequirement) {
+                    return new ElmConjunctiveRequirement(context.getCurrentLibraryIdentifier(), elm)
+                            .combine((ElmExpressionRequirement)left)
+                            .combine((ElmExpressionRequirement)right);
+                }
+                else if (left instanceof ElmExpressionRequirement && right == null) {
+                    return left;
+                }
+                else if (right instanceof ElmExpressionRequirement && left == null) {
+                    return right;
+                }
+
+                throw new IllegalArgumentException("Expected ElmExpressionRequirement");
             }
 
             case "Or": {
+                ElmRequirement left = visitElement(elm.getOperand().get(0), context);
+                ElmRequirement right = visitElement(elm.getOperand().get(1), context);
 
-                ElmExpressionRequirement left = (ElmExpressionRequirement)visitElement(elm.getOperand().get(0), context);
-                ElmExpressionRequirement right = (ElmExpressionRequirement)visitElement(elm.getOperand().get(1), context);
+                if (left instanceof ElmExpressionRequirement && right instanceof ElmExpressionRequirement) {
+                    return new ElmDisjunctiveRequirement(context.getCurrentLibraryIdentifier(), elm)
+                            .combine((ElmExpressionRequirement)left)
+                            .combine((ElmExpressionRequirement)right);
+                }
+                else if (left instanceof ElmExpressionRequirement && right == null) {
+                    return left;
+                }
+                else if (right instanceof ElmExpressionRequirement && left == null) {
+                    return right;
+                }
 
-                return new ElmDisjunctiveRequirement(context.getCurrentLibraryIdentifier(), (Or)elm).combine(left).combine(right);
+                throw new IllegalArgumentException("Expected ElmExpressionRequirement");
             }
 
             // TODO: Rewrite
@@ -417,7 +440,8 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
 
     @Override
     public ElmRequirement visitIf(If elm, ElmRequirementsContext context) {
-        return super.visitIf(elm, context);
+        // TODO: Rewrite the if as equivalent logic
+        return new ElmOperatorRequirement(context.getCurrentLibraryIdentifier(), elm);
     }
 
     @Override
@@ -427,12 +451,36 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
 
     @Override
     public ElmRequirement visitCase(Case elm, ElmRequirementsContext context) {
-        return super.visitCase(elm, context);
+        // TODO: Rewrite the case as equivalent logic
+        ElmOperatorRequirement result = new ElmOperatorRequirement(context.getCurrentLibraryIdentifier(), elm);
+        ElmRequirement childResult = null;
+        if (elm.getComparand() != null) {
+            childResult = this.visitElement(elm.getComparand(), context);
+            if (childResult instanceof ElmExpressionRequirement) {
+                result.combine((ElmExpressionRequirement)childResult);
+            }
+        }
+
+        for (CaseItem ci : elm.getCaseItem()) {
+            childResult = this.visitElement(ci, context);
+            if (childResult instanceof ElmExpressionRequirement) {
+                result.combine((ElmExpressionRequirement)childResult);
+            }
+        }
+
+        if (elm.getElse() != null) {
+            childResult = this.visitElement(elm.getElse(), context);
+            if (childResult instanceof ElmExpressionRequirement) {
+                result.combine((ElmExpressionRequirement)childResult);
+            }
+        }
+
+        return result;
     }
 
     @Override
     public ElmRequirement visitNull(Null elm, ElmRequirementsContext context) {
-        return super.visitNull(elm, context);
+        return new ElmExpressionRequirement(context.getCurrentLibraryIdentifier(), elm);
     }
 
     @Override
@@ -726,17 +774,17 @@ public class ElmRequirementsVisitor extends ElmBaseLibraryVisitor <ElmRequiremen
 
     @Override
     public ElmRequirement visitTimeOfDay(TimeOfDay elm, ElmRequirementsContext context) {
-        return super.visitTimeOfDay(elm, context);
+        return new ElmExpressionRequirement(context.getCurrentLibraryIdentifier(), elm);
     }
 
     @Override
     public ElmRequirement visitToday(Today elm, ElmRequirementsContext context) {
-        return super.visitToday(elm, context);
+        return new ElmExpressionRequirement(context.getCurrentLibraryIdentifier(), elm);
     }
 
     @Override
     public ElmRequirement visitNow(Now elm, ElmRequirementsContext context) {
-        return super.visitNow(elm, context);
+        return new ElmExpressionRequirement(context.getCurrentLibraryIdentifier(), elm);
     }
 
     @Override

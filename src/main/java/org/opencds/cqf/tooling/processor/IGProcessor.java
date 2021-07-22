@@ -18,6 +18,15 @@ import org.opencds.cqf.tooling.utilities.LogUtils;
 import ca.uhn.fhir.context.FhirContext;
 
 public class IGProcessor extends BaseProcessor {
+    protected IGBundleProcessor igBundleProcessor;
+    protected LibraryProcessor libraryProcessor;
+    protected MeasureProcessor measureProcessor;
+
+    public IGProcessor(IGBundleProcessor igBundleProcessor, LibraryProcessor libraryProcessor, MeasureProcessor measureProcessor) {
+        this.igBundleProcessor = igBundleProcessor;
+        this.libraryProcessor = libraryProcessor;
+        this.measureProcessor = measureProcessor;
+    }
     //mega ig method
     public void publishIG(RefreshIGParameters params) {
         if (params.ini != null) {
@@ -67,7 +76,7 @@ public class IGProcessor extends BaseProcessor {
         //Use case 3
         //package everything
         LogUtils.info("IGProcessor.publishIG - bundleIg");
-        IGBundleProcessor.bundleIg(refreshedResourcesNames, rootDir, encoding, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
+        igBundleProcessor.bundleIg(refreshedResourcesNames, rootDir, getBinaryPaths(), encoding, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
         versioned, fhirContext, fhirUri);
         //test everything
         //IGTestProcessor.testIg(IGTestParameters);
@@ -110,10 +119,10 @@ public class IGProcessor extends BaseProcessor {
 
         IGProcessor.ensure(rootDir, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
 
-        LibraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
+        libraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
 
         List<String> refreshedMeasureNames;
-        refreshedMeasureNames = MeasureProcessor.refreshIgMeasureContent(this, encoding, versioned, fhirContext, measureToRefreshPath);
+        refreshedMeasureNames = measureProcessor.refreshIgMeasureContent(this, encoding, versioned, fhirContext, measureToRefreshPath);
         refreshedResourcesNames.addAll(refreshedMeasureNames);
 
         if (refreshedResourcesNames.isEmpty()) {
