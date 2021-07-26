@@ -146,6 +146,7 @@ public class CodeSystemLookupDictionary {
             case "CVX": return "http://hl7.org/fhir/sid/cvx";
             case "Confidentiality": return "http://terminology.hl7.org/CodeSystem/v3-Confidentiality";
             case "DischargeDisposition": return "http://terminology.hl7.org/CodeSystem/discharge-disposition";
+            case "EducationLevel": return "http://terminology.hl7.org/CodeSystem/v3-EducationLevel";
             case "EntityNamePartQualifier": return "http://terminology.hl7.org/CodeSystem/v3-EntityNamePartQualifier";
             case "EntityNameUse": return "http://terminology.hl7.org/CodeSystem/v3-EntityNameUse";
             case "HCPCS": return "http://terminology.hl7.org/CodeSystem/HCPCS";

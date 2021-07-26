@@ -3,6 +3,7 @@ package org.opencds.cqf.tooling;
 //import org.opencds.cqf.tooling.jsonschema.SchemaGenerator;
 import org.apache.commons.lang.NotImplementedException;
 import org.opencds.cqf.tooling.terminology.opioidValuesetGenerator.OpioidValueSetGenerator;
+import org.opencds.cqf.tooling.terminology.TestCaseMockup;
 import org.opencds.cqf.tooling.acceleratorkit.DTProcessor;
 import org.opencds.cqf.tooling.acceleratorkit.Processor;
 import org.opencds.cqf.tooling.library.r4.LibraryGenerator;
@@ -95,6 +96,8 @@ class OperationFactory {
                 return new ExecuteMeasureTestOperation();
             case "SpreadsheetToCQL":
                 return new SpreadsheetToCQLOperation();
+            case "TestCaseMockup":
+                return new TestCaseMockup();
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operationName);
         }
