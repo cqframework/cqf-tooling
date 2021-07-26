@@ -4,7 +4,7 @@ import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
 import org.hl7.fhir.r5.model.*;
-import org.opencds.cqf.tooling.processor.DataRequirementsProcessor;
+import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
 
 import java.util.Date;
 import java.util.HashSet;
