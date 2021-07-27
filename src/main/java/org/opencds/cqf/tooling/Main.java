@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling;
 
+import info.bliki.wiki.tags.SourceTag;
+
 /*
 
     The purpose of this project is to provide tooling for several CDS use cases including Implementation Guide and Measure authoring. See below for
@@ -191,7 +193,8 @@ public class Main {
         if (!operation.startsWith("-")) {
             throw new IllegalArgumentException("Invalid operation: " + operation);
         }
-
+        System.out.println(operation.substring(1));
+        System.out.println(operation.substring(1));
         OperationFactory.createOperation(operation.substring(1)).execute(args);
     }
 }
