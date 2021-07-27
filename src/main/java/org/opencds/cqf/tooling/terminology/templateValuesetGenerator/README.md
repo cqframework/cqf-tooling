@@ -35,7 +35,7 @@ tooling-1.3.1-SNAPSHOT-jar-with-dependencies.jar is the path and actual name of 
 * -op Which is the output path directory for operation to put the created valuesets. i.e. -op="D:\sandbox\vsac_xlsx\output"
 * -e Which is the output format. If not provided this defaults to *.json format. i.e. -e=json
 * -opp Which is the output file prefix. If not provided it defaults to "valueset-".
-* -fhv Which is the output FHIR version. If not provided this defaults to r4.
+* -opv Which is the output FHIR version. If not provided this defaults to r4.
 
 ###Expansion and Compose
 The expansion and compose sections of the valuesets are created versions dstu3 and r4. The cpg extensions are added for only the r4 version. The operation parses the first spreadsheet gathering information and using the Value Sets section to determine which sheets to use corresponding to specific valuesets. There are 2 sheets for each valueset.
