@@ -23,6 +23,7 @@ import org.cqframework.cql.cql2elm.NamespaceInfo;
 import org.cqframework.cql.cql2elm.NamespaceManager;
 import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
 import org.cqframework.cql.elm.tracking.TrackBack;
+import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
 import org.fhir.ucum.UcumService;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.exceptions.FHIRException;
