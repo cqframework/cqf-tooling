@@ -262,7 +262,7 @@ public class TemplateValuesetGenerator extends Operation {
                 resolveCodeList(workbook.getSheet(entrySet.getKey().split("-")[0] + "-cl"), vs, meta.getSnomedVersion());
 
 
-                if (vs.hasCompose() && outputVersion.equalsIgnoreCase("r4")) {
+                if (shouldAddCompose(vs, sheet)) {
                     vs.getMeta().addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-computablevalueset");
                     vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability").setValue(new CodeType("computable"));
                     vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel").setValue(new CodeType("structured"));
@@ -280,6 +280,31 @@ public class TemplateValuesetGenerator extends Operation {
             }
         }
         return valueSets;
+    }
+
+    private boolean shouldAddCompose(ValueSet vs, Sheet sheet){
+        if (vs.hasCompose()&& outputVersion.equalsIgnoreCase("r4")){
+            return true;
+        }
+        Iterator<Row> rowIterator = sheet.rowIterator();
+        while(rowIterator.hasNext()){
+            Row thisRow = rowIterator.next();
+            Cell firstCell = thisRow.getCell(0);
+            Cell secondCell = thisRow.getCell(1);
+            if(firstCell.getStringCellValue() != null &&
+                firstCell.getStringCellValue().equalsIgnoreCase("rules-text") &&
+                secondCell.getStringCellValue() != null &&
+                secondCell.getStringCellValue().length() > 0){
+                return true;
+            }
+            if(firstCell.getStringCellValue() != null &&
+                firstCell.getStringCellValue().equalsIgnoreCase("expression") &&
+                secondCell.getStringCellValue() != null &&
+                secondCell.getStringCellValue().length() > 0){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
