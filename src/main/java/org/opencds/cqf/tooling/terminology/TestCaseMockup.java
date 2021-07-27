@@ -8,7 +8,14 @@ import java.util.List;
 
 import org.apache.poi.ss.usermodel.*;
 
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 
@@ -59,12 +66,14 @@ public class TestCaseMockup extends Operation {
         Encounter reasonForComing = new Encounter();
         List<CodeableConcept> rfcList = new ArrayList<>();
 
+        // Likely unnecessary now that I've received implementation guide.
         Observation healthConcerns = new Observation().setValue(new CodeableConcept());
         Observation dangerSigns = new Observation().setValue(new CodeableConcept());
 
         // 1 observation for each sheet, or one resource per defined structure..?
-        Observation quickCheck = new Observation();
-        //  - - - - - - -
+        // TODO: Come back to this to make sure, though likely not the case.
+        Observation profile = new Observation();
+
 
         Iterator<Cell> cIterator = row.cellIterator();
         Row headerRow = this.sheet.getRow(0);
@@ -87,11 +96,6 @@ public class TestCaseMockup extends Operation {
                 cellStr = Double.toString(currentCell.getNumericCellValue());
             } else {
                 cellStr = currentCell.getStringCellValue();
-            }
-
-            // TODO: Remove this.
-            if (cellStr == "Cherry" || cellStr == "Lily") {
-                continue;
             }
 
             if (cellStr.isEmpty())
@@ -154,89 +158,127 @@ public class TestCaseMockup extends Operation {
                 case "Occupation {occupation}":
                     for (String s : cellStr.split(";"))
                     {
-                        patient.addExtension(new Extension().setValue(new Coding().setDisplay(s)));
+                        // No HL7 FHIR Code was provided in data dictionary.
+                        patient.addExtension(new Extension().setValue(new Coding().setDisplay(s).setCode("Occupation")));
                     }
                     break;
                 case "Last Menstrual Period {lmp}":
-                    // TODO: Gestational age is not clear in data dictionary. Ask about it.
                     break;
                 case "GA from LMP {lmp_gest_age}":
-                    // TODO: Gestational age is not clear in data dictionary. Ask about it.
                     break;
                 case "Ultrasound done? {ultrasound_done}":
-                    // TODO: Gestational age is not clear in data dictionary. Ask about it.
                     break;
                 case "Ultrasound date {ultrasound_date}":
-                    // TODO: Gestational age is not clear in data dictionary. Ask about it.
-                    // TODO: REMOVE ADDED ULTRASOUND_DATE FROM ROW 59
                     break;
                 case "GA from ultrasound - weeks {ultrasound_gest_age_wks}":
-                    // TODO: Gestational age is not clear in data dictionary. Ask about it.
-//                  // TODO: REMOVE ADDED ULTRASOUND_GEST_AGE_WKS & ULTRASOUND_GEST_AGE_DAYS FROM ROW 59
                     break;
                 case "GA from SFH - weeks {sfh_gest_age}":
-                    // TODO: Gestational age is not clear in data dictionary. Ask about it.
                     break;
                 case "Select preferred gestational age {select_gest_age_edd}":
-                    // TODO: Gestational age is not clear in data dictionary. Ask about it.
                     break;
                 case "Obstetric History [No. of pregnancies {gravida}]":
-                    // TODO: There's no way this is correct, ask Rob or Bryn.
-                    if (cellStr.contains("+5")) {
-                        cellStr = "5";
-                    }
-                    quickCheck.getValueIntegerType().setValue(Integer.parseInt(cellStr));
+//                    if (cellStr.contains("+5")) {
+//                        cellStr = "5";
+//                    }
+//                    quickCheck.getValueIntegerType().setValue(Integer.parseInt(cellStr));
                     break;
                 case "Obstetric History [No. of pregnancies lost/ended\t{miscarriages_abortions}]":
-                    // TODO: New observation for each field?
                     break;
                 case "Obstetric History [No. of live births\t{live_births}]":
-                    // TODO: New observation for each field?
                     break;
                 case "Obstetric History [No. of stillbirths\t{stillbirths}]":
-                    // TODO: New observation for each field?
                     break;
                 case "Obstetric History [No. of C-sections\t{c_sections}]":
-                    // TODO: New observation for each field?
 //                    caesarian.getValueIntegerType().setValue(Integer.parseInt(cellStr));
                     break;
                 case "Any past pregnancy problems?\t{prev_preg_comps}":
 //                    ccSplitAndAdd(pastPregnancyComps, cellStr);
                     break;
-//                case "If alcohol or illicit substance use, indicate what type of drug {substances_used}":
-//                    ccSplitAndAdd(substUseComps, cellStr);
-//                    break;
-//                case "Any allergies? {allergies}":
-//                    ccSplitAndAdd(allergies, cellStr);
-//                    break;
-//                case "Any surgeries? {surgeries}":
-//                    ccSplitAndAdd(pastSurgeries, cellStr);
-//                    break;
-//                case "Any chronic or past health conditions? {health_conditions} ":
-//                    ccSplitAndAdd(healthConditions, cellStr);
-//                    break;
-//                case "TT immunisation status {tt_immun_status}":
-//                    ccSplitAndAdd(ttcvStatus, cellStr);
-//                    break;
-//                case "Flu immunisation status {flu_immun_status}":
-//                    ccSplitAndAdd(fluStatus, cellStr);
-//                    break;
-//                case "Any current medications?\t{medications}":
-//                    ccSplitAndAdd(currentMedications, cellStr);
-//                    break;
-//                case "Daily caffeine intake {caffeine_intake}":
-//                    ccSplitAndAdd(caffeineIntake, cellStr);
-//                    break;
-//                case "Uses tobacco products?\t{tobacco_user}":
-//                    tobaccoUse = setObsBool(tobaccoUse, cellStr);
-//                    break;
-//                case "Anyone in the household smokes tobacco products? {shs_exposure}":
-//                    tobaccoExposure = setObsBool(tobaccoExposure, cellStr);
-//                    break;
-//                case "Uses condoms during sex? {condom_use}":
-//                    partnerHIVStatus
-//                    break;
+                case "If alcohol or illicit substance use, indicate what type of drug {substances_used}":
+                    cellStr = cellStr.replace(";", "");
+                    outputVs(
+                            cellStr.split(","),
+                            "current-alcohol-and-or-other-substance-use-alcohol-choices",
+                            row.getRowNum()
+                    );
+//                    profile.addContained(cdSubstances);
+                    break;
+                case "Any allergies? {allergies}":
+                    cellStr = cellStr.replace(";", "");
+                    outputVs(cellStr.split(","), "allergies", row.getRowNum());
+                    break;
+                case "Any surgeries? {surgeries}":
+                    cellStr = cellStr.replace(";", "");
+                    outputVs(
+                            cellStr.split(","),
+                            "past-surgeries-choices",
+                            row.getRowNum()
+                    );
+                    break;
+                case "Any chronic or past health conditions? {health_conditions} ":
+                    cellStr = cellStr.replace(";", "");
+                    outputVs(
+                            cellStr.split(","),
+                            "existing-chronic-health-conditions-choices",
+                            row.getRowNum()
+                    );
+                    break;
+                case "TT immunisation status {tt_immun_status}":
+                    cellStr = cellStr.replace(";", "");
+                    outputVs(
+                            cellStr.split(","),
+                            "tetanus-toxoid-containing-vaccine-ttcv-immunization-history",
+                            row.getRowNum()
+                    );
+                    break;
+                case "Flu immunisation status {flu_immun_status}":
+                    outputVs(
+                            cellStr.split(","),
+                            "flu-immunization-provided",
+                            row.getRowNum()
+                    );
+                    break;
+                case "Any current medications?\t{medications}":
+                    outputVs(
+                            cellStr.split(","),
+                            "current-medications-choices",
+                            row.getRowNum()
+                    );
+                    break;
+                case "Daily caffeine intake {caffeine_intake}":
+                    outputVs(
+                            cellStr.split(","),
+                            "daily-caffeine-intake",
+                            row.getRowNum()
+                    );
+                    break;
+                case "Uses tobacco products?\t{tobacco_user}":
+                    outputVs(
+                            cellStr.split(","),
+                            "tobacco-use",
+                            row.getRowNum()
+                    );
+                    break;
+                case "Anyone in the household smokes tobacco products? {shs_exposure}":
+                    outputVs(
+                            cellStr.split(","),
+                            "exposure-to-second-hand-smoke",
+                            row.getRowNum()
+                    );
+                    break;
+                case "Uses condoms during sex? {condom_use}":
+                    outputVs(
+                            cellStr.split(","),
+                            "contraceptive-use-of-female-condoms",
+                            row.getRowNum()
+                    );
+                    break;
                 case "Clinical enquiry for alcohol and other substance use done? {alcohol_substance_enquiry}":
+                    outputVs(
+                            cellStr.split(","),
+                            "clinical-enquiry-for-alcohol-and-other-substance-use-done",
+                            row.getRowNum()
+                    );
                     break;
                 case "Uses alcohol and/or other substances?	{alcohol_substance_use}":
                     break;
@@ -400,11 +442,10 @@ public class TestCaseMockup extends Operation {
                     break;
             }
         }
-        reasonForComing.setType(rfcList);
-        output(healthConcerns, "json", "healthConcerns", row.getRowNum());
-        output(reasonForComing, "json", "reasonForComing", row.getRowNum());
-        output(dangerSigns, "json", "dangerSigns", row.getRowNum());
-        output(patient, "json", "patient", row.getRowNum());
+//        output(healthConcerns, "json", "healthConcerns", row.getRowNum());
+//        output(reasonForComing, "json", "reasonForComing", row.getRowNum());
+//        output(dangerSigns, "json", "dangerSigns", row.getRowNum());
+        output(profile, "json", "profile", row.getRowNum());
     }
 
     private void mkRespectiveDirs(Sheet sheet) {
@@ -427,6 +468,22 @@ public class TestCaseMockup extends Operation {
         return file;
     }
 
+    private void outputVs(String[] inputs, String name, int rowNum) {
+        ValueSet vs = new ValueSet();
+        ValueSet.ValueSetComposeComponent vsCompose = new ValueSet.ValueSetComposeComponent();
+        ValueSet.ConceptSetComponent vsConcept = new ValueSet.ConceptSetComponent();
+        vsConcept.setSystem("http://fhir.org/guides/who/anc-cds/CodeSystem/anc-custom");
+
+        for (String s : inputs)
+        {
+            vsConcept.addConcept().setCode(name).setDisplay(s);
+        }
+
+        vsCompose.addInclude(vsConcept);
+        vs.setCompose(vsCompose);
+        output(vs, "json", name, rowNum);
+    }
+
     private static boolean isRowEmpty(Row row) {
         for (int c = row.getFirstCellNum(); c < row.getLastCellNum(); c++) {
             Cell cell = row.getCell(c);
@@ -446,15 +503,6 @@ public class TestCaseMockup extends Operation {
             cc.addCoding().setCode(value.replace(",", ""));
         }
         return cc;
-    }
-
-    private Observation setObsBool(Observation obs, String input) {
-        if (input.toLowerCase().contains("yes")) {
-            obs.getValueBooleanType().setValue(true);
-        } else if (input.toLowerCase().contains("no")) {
-            obs.getValueBooleanType().setValue(false);
-        }
-        return obs;
     }
 
     private void output(IBaseResource resource, String encoding, String fileName, int indice) {
