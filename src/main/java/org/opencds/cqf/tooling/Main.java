@@ -193,8 +193,6 @@ public class Main {
         if (!operation.startsWith("-")) {
             throw new IllegalArgumentException("Invalid operation: " + operation);
         }
-        System.out.println(operation.substring(1));
-        System.out.println(operation.substring(1));
         OperationFactory.createOperation(operation.substring(1)).execute(args);
     }
 }
