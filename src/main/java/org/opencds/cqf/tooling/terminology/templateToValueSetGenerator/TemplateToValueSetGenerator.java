@@ -1,4 +1,4 @@
-package org.opencds.cqf.tooling.terminology.templateValuesetGenerator;
+package org.opencds.cqf.tooling.terminology.templateToValueSetGenerator;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.poi.ss.usermodel.*;
@@ -14,11 +14,11 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
-public class TemplateValuesetGenerator extends Operation {
+public class TemplateToValueSetGenerator extends Operation {
 
     private FhirContext fhirContext;
 
-    public TemplateValuesetGenerator() {
+    public TemplateToValueSetGenerator() {
         this.fhirContext = FhirContext.forR4();
     }
 
@@ -32,7 +32,7 @@ public class TemplateValuesetGenerator extends Operation {
         setOutputPath("src/main/resources/org/opencds/cqf/terminology/r4/output");
 
         for (String arg : args) {
-            if (arg.equals("-TemplateValuesetGenerator")) continue;
+            if (arg.equals("-TemplateToValueSetGenerator")) continue;
             String[] flagAndValue = arg.split("=");
             if (flagAndValue.length < 2) {
                 throw new IllegalArgumentException("Invalid argument: " + arg);

@@ -2,7 +2,7 @@ package org.opencds.cqf.tooling;
 
 //import org.opencds.cqf.tooling.jsonschema.SchemaGenerator;
 import org.apache.commons.lang.NotImplementedException;
-import org.opencds.cqf.tooling.terminology.templateValuesetGenerator.TemplateValuesetGenerator;
+import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.TemplateToValueSetGenerator;
 import org.opencds.cqf.tooling.acceleratorkit.DTProcessor;
 import org.opencds.cqf.tooling.acceleratorkit.Processor;
 import org.opencds.cqf.tooling.library.r4.LibraryGenerator;
@@ -36,8 +36,8 @@ class OperationFactory {
                 return new HEDISValueSetGenerator();
             case "XlsxToValueSet":
                 return new GenericValueSetGenerator();
-            case "TemplateValuesetGenerator":
-                 return new TemplateValuesetGenerator();
+            case "TemplateToValueSetGenerator":
+                 return new TemplateToValueSetGenerator();
             case "EnsureExecutableValueSet":
                 return new EnsureExecutableValueSetOperation();
             case "ToJsonValueSetDb":

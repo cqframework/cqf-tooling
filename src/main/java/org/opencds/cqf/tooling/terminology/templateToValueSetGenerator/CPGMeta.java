@@ -1,4 +1,4 @@
-package org.opencds.cqf.tooling.terminology.templateValuesetGenerator;
+package org.opencds.cqf.tooling.terminology.templateToValueSetGenerator;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.*;

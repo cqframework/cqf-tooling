@@ -1,4 +1,4 @@
-package org.opencds.cqf.tooling.terminology.templateValuesetGenerator.testcase;
+package org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.testcase;
 
 import java.util.ArrayList;
 import java.util.List;

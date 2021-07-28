@@ -27,7 +27,7 @@ _updateCQGTooling
 ###Command Line and Arguments 
 The operation can be called from the command line:
 ```
-JAVA -jar \sandbox\valuesets\input-cache\tooling-1.3.1-SNAPSHOT-jar-with-dependencies.jar -TemplateValuesetGenerator -pts="D:\sandbox\valuesets\input\CDC Opioid Terminology Template.xlsx" -op="D:\sandbox\valuesets\output"
+JAVA -jar \sandbox\valuesets\input-cache\tooling-1.3.1-SNAPSHOT-jar-with-dependencies.jar -TemplateToValueSetGenerator -pts="D:\sandbox\valuesets\input\CDC Opioid Terminology Template.xlsx" -op="D:\sandbox\valuesets\output"
 ```
 tooling-1.3.1-SNAPSHOT-jar-with-dependencies.jar is the path and actual name of the current version of the cqf-tooling jar. The possible command line arguments are:
 
