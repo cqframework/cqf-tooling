@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.terminology;
 
 import java.io.*;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -19,21 +20,41 @@ import ca.uhn.fhir.context.FhirContext;
 public class TestCaseMockup extends Operation {
 
     FhirContext fContext;
-    File outputDir;
-//    File inputPath;
+    String outputDir;
     Workbook workbook;
     Sheet sheet;
     
     public TestCaseMockup() {
         this.fContext = FhirContext.forR4();
         // TODO: Operation parameters.
-        this.outputDir = this.makeDirIfAbsent("C:\\Users\\DadeMurphy\\Desktop\\TestCaseMockup");
-        this.workbook = SpreadsheetHelper.getWorkbook("C:\\Users\\DadeMurphy\\Desktop\\TestCaseMockup\\test.xlsx");
     }
 
     @Override
     public void execute(String[] args) {
+        // =======================================================================
+        for (String arg : args) {
+            if (arg.equals("-TestCaseMockup")) continue;
+
+            String[] flagVal = arg.split("=");
+            if (flagVal.length < 2) {
+                throw new IllegalArgumentException("Invalid flag \"" + arg + "\"");
+            }
+
+            String flag  = flagVal[0];
+            String value = flagVal[1];
+
+            switch (flag.replace("-", "").toLowerCase()) {
+                case "output":
+                    this.outputDir = value;
+                    break;
+                case "input":
+                    this.workbook = SpreadsheetHelper.getWorkbook(value);
+                    break;
+            }
+        }
+        // TODO: When finished add input parameter for target sheet.
         this.sheet = this.workbook.getSheet("Respostas ao formulário 1");
+        // =======================================================================
         Iterator<Row> rIterator = sheet.rowIterator();
 
         while (rIterator.hasNext()) {
@@ -55,10 +76,13 @@ public class TestCaseMockup extends Operation {
     }
 
     private void checkCellString(Row row) {
-
+        // Make directory for the current row's output.
+        this.makeDirIfAbsent(this.outputDir + "\\" + row.getRowNum());
+        // =======================================================================
+        // Setting up objects that will be added to throughout the switch statement.
+        // =======================================================================
         Patient patient = new Patient();
         Encounter reasonForComing = new Encounter();
-        // Likely unnecessary now that I've received implementation guide.
         Observation healthConcerns = new Observation().setValue(new CodeableConcept());
         Observation dangerSigns = new Observation().setValue(new CodeableConcept());
         Observation gestationalAge = new Observation();
@@ -67,7 +91,6 @@ public class TestCaseMockup extends Operation {
         Observation profile = new Observation();
 
         List<CodeableConcept> rfcList = new ArrayList<>();
-
         Iterator<Cell> cIterator = row.cellIterator();
         Row headerRow = this.sheet.getRow(0);
 
@@ -90,10 +113,8 @@ public class TestCaseMockup extends Operation {
             } else {
                 cellStr = currentCell.getStringCellValue();
             }
-
             if (cellStr.isEmpty())
                 continue;
-
             switch (headerCellStr) {
                 case "First Name":
                     patient.addName().addGiven(cellStr);
@@ -742,9 +763,8 @@ public class TestCaseMockup extends Operation {
 
     private void output(IBaseResource resource, String encoding, String fileName, int indice) {
         try (FileOutputStream writer = new FileOutputStream(
-                "C:\\Users\\DadeMurphy\\Desktop\\TestCaseMockup\\" + indice + "\\" + fileName + ".json"))
+                this.outputDir + "\\" + indice + "\\" + fileName + ".json"))
         {
-
             writer.write(
                     encoding.equals("json")
                             ? fContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
@@ -770,13 +790,11 @@ public class TestCaseMockup extends Operation {
 
         while (cIterator.hasNext()) {
             Cell cell = cIterator.next();
-
             if (cell== null || cell.getCellType() == CellType.BLANK) {
                 continue;
             }
 
             String cellStr = cell.getStringCellValue();
-
             if (!cellStr.contains("{") && !cellStr.contains("}") || alreadyAdded.contains(cellStr)) {
                 continue;
             }
