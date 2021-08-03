@@ -3,6 +3,7 @@ package org.opencds.cqf.tooling.terminology;
 import java.io.*;
 
 import java.nio.file.Paths;
+import java.security.Provider;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -79,9 +80,10 @@ public class TestCaseMockup extends Operation {
         // Make directory for the current row's output.
         this.makeDirIfAbsent(this.outputDir + "\\" + row.getRowNum());
         // =======================================================================
-        // Setting up objects that will be added to throughout the switch statement.
+        // Set up observations that are added onto throughout the switch statement.
         // =======================================================================
         Patient patient = new Patient();
+        Procedure tbScreening = new Procedure();
         Encounter reasonForComing = new Encounter();
         Observation healthConcerns = new Observation().setValue(new CodeableConcept());
         Observation dangerSigns = new Observation().setValue(new CodeableConcept());
@@ -89,6 +91,8 @@ public class TestCaseMockup extends Operation {
         Observation pastPregComps = new Observation();
         Observation numPrevPreg = new Observation();
         Observation profile = new Observation();
+        // =======================================================================
+
 
         List<CodeableConcept> rfcList = new ArrayList<>();
         Iterator<Cell> cIterator = row.cellIterator();
@@ -446,18 +450,12 @@ public class TestCaseMockup extends Operation {
                 case "Any physiological symptoms?	{phys_symptoms}":
                     for (String physSmp : cellStr.split(",")) {
                         physSmp = physSmp.replace(";", "");
-                        String physName = String.format(
-                                "persistent-physiological-symptoms-%s",
-                                physSmp.toLowerCase()
-                        );
-                        String physDesc = String.format(
-                                "Woman reported %s during a previous contact and is still experiencing %s",
-                                physSmp,
-                                physSmp
-                        );
+                        String physName = String.format("persistent-physiological-symptoms-%s",  physSmp.toLowerCase());
+                        String physDesc = String.format("Woman is experiencing %s", physSmp);
+
                         outputVs(
                                 physSmp,
-                                "persistent-physiological-symptoms",
+                                physName,
                                 "persistent-physiological-symptoms",
                                 physDesc,
                                 "http://fhir.org/guides/who/anc-cds/ValueSet/persistent-physiological-symptoms",
@@ -512,8 +510,24 @@ public class TestCaseMockup extends Operation {
                     );
                     break;
                 case "Systolic blood pressure (SBP) {bp_systolic}":
+                    // I don't think this is the intended way of what the spreadsheet is asking
+                    // for types of Quantity
+                    Observation oSystolic = new Observation();
+                    Quantity qSystolic = new Quantity();
+                    qSystolic.setValue(Double.parseDouble(cellStr.replace(";", "")));
+                    qSystolic.setSystem("http://fhr.org/guides/who/anc-cds/CodeSystem/anc-custom");
+                    oSystolic.setValue(qSystolic);
+
+                    output(oSystolic, "json", "observation-bp-systolic", row.getRowNum());
                     break;
                 case "Diastolic blood pressure (DBP) {bp_diastolic}":
+                    Observation oDiastolic= new Observation();
+                    Quantity qDiastolic = new Quantity();
+                    qDiastolic.setValue(Double.parseDouble(cellStr.replace(";", "")));
+                    qDiastolic.setSystem("http://fhr.org/guides/who/anc-cds/CodeSystem/anc-custom");
+                    oDiastolic.setValue(qDiastolic);
+
+                    output(oDiastolic, "json", "observation-bp-diastolic", row.getRowNum());
                     break;
                 case "Temperature (ºC) {body_temp}":
                     break;
@@ -546,10 +560,53 @@ public class TestCaseMockup extends Operation {
                 case "SFH (cm) {sfh}":
                     break;
                 case "Fetal movement felt?	{fetal_movement}":
+                    // Review output of this, then build func to build this type of output automatically.
+                    // TODO: [MOVE] This belongs in another conditional.
+                    String codeFMF = "";
+                    String displayFMF = "";
+                    String descFMF = "";
+                    if (cellStr.toLowerCase().contains("normal fetal")) {
+                        codeFMF = "Fetal movement-Normal fetal movement";
+                        displayFMF = "Normal fetal movement";
+                        descFMF = "The woman has felt normal fetal movement";
+                    } else if (cellStr.toLowerCase().contains("reduced or poor")) {
+                        codeFMF = "Fetal movement-Reduced or poor fetal movement";
+                        displayFMF = "Reduced or poor fetal movement";
+                        descFMF = "The woman has felt reduced or poor fetal movement";
+                    }
+                    else if (cellStr.toLowerCase().contains("no fetal movement")) {
+                        codeFMF = "Fetal movement-No fetal movement";
+                        displayFMF = "No fetal movement";
+                        descFMF = "The woman has felt no fetal movement";
+                    }
+                    outputVs(
+                            displayFMF,
+                            codeFMF,
+                            "fetal-movement",
+                            descFMF,
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/fetal-movement",
+                            row.getRowNum()
+                    );
                     break;
                 case "Fetal heart beat present? {fetal_heartbeat}":
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "fetal-heartbeat-present",
+                            "fetal-heartbeat-present",
+                            "Whether or not the health worker observes a fetal heartbeat",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/fetal-heartbeat-present",
+                            row.getRowNum()
+                    );
                     break;
                 case "Fetal heart rate (bpm)	{fetal_heart_rate}":
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "fetal-heart-rate",
+                            "fetal-heart-rate",
+                            "Whether or not the health worker observes a fetal heartbeat",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/fetal-heart-rate",
+                            row.getRowNum()
+                    );
                     break;
                 case "No. of fetuses	{no_of_fetuses}":
                     break;
@@ -578,8 +635,28 @@ public class TestCaseMockup extends Operation {
                 case "Placenta location	{us_placenta_location}":
                     break;
                 case "Blood type test {blood_type_test_status}":
+                    if (cellStr.toLowerCase().contains("ordered")) {
+                        outputVs(
+                                "Ordered",
+                                "blood-type-test-status",
+                                "blood-type-test-status-ordered",
+                                "Blood type test has been ordered",
+                                "http://fhir.org/guides/who/anc-cds/ValueSet/blood-type-test",
+                                row.getRowNum()
+                        );
+                    } else if (cellStr.toLowerCase().contains("not done")) {
+                        ValueSet bloodTypeTestDone = new ValueSet();
+                    }
                     break;
                 case "Blood type	{blood_type}":
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "Blood type-" + cellStr.replace(";", ""),
+                            "blood-type",
+                            "Client has blood type " + cellStr.replace(";", ""),
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/blood-type",
+                            row.getRowNum()
+                    );
                     break;
                 case "Rh factor {rh_factor}":
                     break;
@@ -618,16 +695,75 @@ public class TestCaseMockup extends Operation {
                 case "Urine test {urine_test_status}":
                     break;
                 case "Urine result [Midstream urine culture (recommended)  {urine_culture}]":
+                    String descMusc = "";
+                    if (cellStr.toLowerCase().contains("any agent")) {
+                        descMusc = "Midstream urine culture was positive for any agent";
+                    }
+                    if (cellStr.toLowerCase().contains("(gbs)")) {
+                        descMusc = "Midstream urine culture was positive for Group B Streptococcus (GBS)";
+                    }
+                    if (cellStr.toLowerCase().contains("negative")) {
+                        descMusc = "Midstream urine culture was negative for any agent";
+                    }
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "midstream-urine-culture",
+                            "Midstream urine culture-" + cellStr.replace(";", ""),
+                            descMusc,
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/midstream-urine-culture-recommended",
+                            row.getRowNum()
+                    );
                     break;
                 case "Urine result [Midstream urine Gram-staining {urine_gram_stain}]":
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "midstream-urine-gram-staining",
+                            "midstream-urine-gram-staining-" + cellStr.replace(";", ""),
+                            "On-site midstream urine Gram-staining is recommended over the use of dipstick tests as " +
+                                    "the method for diagnosing ASB in pregnancy if midstream culture is not possible",
+                           "http://fhir.org/guides/who/anc-cds/ValueSet/midstream-urine-gram-staining",
+                            row.getRowNum()
+                    );
                     break;
                 case "Urine result - dipstick [Urine dipstick result - nitrites {urine_nitrites}]":
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "urine-dipstick-result-nitrites",
+                            "urine-dipstick-result-nitrites-" + cellStr.replace(";", ""),
+                            "Dipstick test results – nitrites",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/urine-dipstick-result-nitrites",
+                            row.getRowNum()
+                    );
                     break;
                 case "Urine result - dipstick [Urine dipstick result - leukocytes {urine_leukocytes}]":
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "urine-dipstick-result-leukocytes",
+                            "urine-dipstick-result-leukocytes-" + cellStr.replace(";", ""),
+                            "Dipstick test results – leukocytes",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/urine-dipstick-result-leukocytes",
+                            row.getRowNum()
+                    );
                     break;
                 case "Urine result - dipstick [Urine dipstick result - protein {urine_protein}]":
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "urine-dipstick-result-protein",
+                            "urine-dipstick-result-protein-" + cellStr.replace(";", ""),
+                            "Dipstick test results – protein",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/urine-dipstick-result-protein",
+                            row.getRowNum()
+                    );
                     break;
                 case "Urine result - dipstick [Urine dipstick result - glucose {urine_glucose}]":
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "urine-dipstick-result-glucose",
+                            "urine-dipstick-result-glucose-" + cellStr.replace(";", ""),
+                            "Dipstick test results – glucose",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/urine-dipstick-result-glucose",
+                            row.getRowNum()
+                    );
                     break;
                 case "Blood glucose test {glucose_test_status}":
                     break;
@@ -642,6 +778,16 @@ public class TestCaseMockup extends Operation {
                 case "Blood Glucose Result [Random plasma glucose results (mg/dl) {random_plasma}]":
                     break;
                 case "Blood haemoglobin test {hb_test_status}":
+                    if (cellStr.toLowerCase().contains("ordered")) {
+                        outputVs(
+                                cellStr.replace(";", ""),
+                                "Blood haemoglobin test ordered",
+                                "Blood haemoglobin test ordered",
+                                "blood-haemoglobin-test-ordered",
+                                "Whether or not the blood haemoglobin test (Hb test) has been ordered",
+                                row.getRowNum()
+                        );
+                    }
                     break;
                 case "Hb result [Complete blood count test result (g/dl) (recommended) {cbc}]":
                     break;
@@ -650,8 +796,24 @@ public class TestCaseMockup extends Operation {
                 case "Hb result [Hb test result - haemoglobin colour scale (g/dl) {hb_colour}]":
                     break;
                 case "TB screening	 {tb_screening_status}":
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "tb-screening-status",
+                            "tb-screening-status",
+                            "TB screening has been ordered",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/tb-screening-status" ,
+                            row.getRowNum()
+                    );
                     break;
                 case "Tb result {tb_screening_result}":
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "tb-screening-result",
+                            "tb-screening-result",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/tb-screening-result",
+                            "Record the result of the TB screening",
+                            row.getRowNum()
+                    );
                     break;
             }
         }
@@ -664,7 +826,7 @@ public class TestCaseMockup extends Operation {
         for (Row currentRow : sheet) {
             if (!isRowEmpty(currentRow)) {
                 this.makeDirIfAbsent(
-                        "C:\\Users\\DadeMurphy\\Desktop\\TestCaseMockup\\" + currentRow.getRowNum());
+                        this.outputDir + currentRow.getRowNum());
             }
         }
     }
@@ -697,7 +859,7 @@ public class TestCaseMockup extends Operation {
         vs.setDescription(description);
         ValueSet.ValueSetComposeComponent vsCompose = new ValueSet.ValueSetComposeComponent();
         ValueSet.ConceptSetComponent vsConcept = new ValueSet.ConceptSetComponent();
-        vsConcept.setSystem(url);
+        vs.setUrl(url);
 
         vsConcept.setSystem("http://fhir.org/guides/who/anc-cds/CodeSystem/anc-custom");
         for (String value : values) {
@@ -729,7 +891,7 @@ public class TestCaseMockup extends Operation {
         vs.setDescription(description);
         ValueSet.ValueSetComposeComponent vsCompose = new ValueSet.ValueSetComposeComponent();
         ValueSet.ConceptSetComponent vsConcept = new ValueSet.ConceptSetComponent();
-        vsConcept.setSystem(url);
+        vs.setUrl(url);
 
         vsConcept.setSystem("http://fhir.org/guides/who/anc-cds/CodeSystem/anc-custom");
         vsConcept.addConcept().setCode(name).setDisplay(value);
