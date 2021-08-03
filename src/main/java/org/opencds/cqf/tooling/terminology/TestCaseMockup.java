@@ -3,20 +3,15 @@ package org.opencds.cqf.tooling.terminology;
 import java.io.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.*;
 
-import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -62,18 +57,16 @@ public class TestCaseMockup extends Operation {
     private void checkCellString(Row row) {
 
         Patient patient = new Patient();
-
         Encounter reasonForComing = new Encounter();
-        List<CodeableConcept> rfcList = new ArrayList<>();
-
         // Likely unnecessary now that I've received implementation guide.
         Observation healthConcerns = new Observation().setValue(new CodeableConcept());
         Observation dangerSigns = new Observation().setValue(new CodeableConcept());
-
-        // 1 observation for each sheet, or one resource per defined structure..?
-        // TODO: Come back to this to make sure, though likely not the case.
+        Observation gestationalAge = new Observation();
+        Observation pastPregComps = new Observation();
+        Observation numPrevPreg = new Observation();
         Observation profile = new Observation();
 
+        List<CodeableConcept> rfcList = new ArrayList<>();
 
         Iterator<Cell> cIterator = row.cellIterator();
         Row headerRow = this.sheet.getRow(0);
@@ -123,31 +116,34 @@ public class TestCaseMockup extends Operation {
                     }
                     break;
                 case "If specific complaint, please say why: {specific_complaint}":
-                    for (String s : cellStr.split(","))
-                    {
-                        // TODO: Probably not the correct system link.
-                        healthConcerns.getValueCodeableConcept()
-                                .addCoding(new Coding()
-                                .setVersion("4.0.1")
-                                .setDisplay(s.replace(",", ""))
-                                .setSystem("http://fhir.org/guides/who/anc-cds/CodeSystem/anc-custom"));
-                    }
+                    outputVs(
+                            cellStr.split(","),
+                            "Specific health concerns",
+                            "specific-health-concerns",
+                            "If the woman came to the facility with a specific health concern, select the health concern(s) from the list",
+                           "http://fhir.org/guides/who/anc-cds/ValueSet/specific-health-concerns",
+                            row.getRowNum()
+                    );
                     break;
                 case "Any danger sign? {danger_signs}":
-                    for (String s : cellStr.split(";,"))
-                    {
-                        s = s.replace(";", "");
-                        dangerSigns.getValueCodeableConcept().addCoding(
-                                new Coding()
-                                        .setVersion("4.0.1")
-                                        .setDisplay(s.replace(",", ""))
-                                        .setSystem("http://fhir.org/guides/who/anc-cds/CodeSystem/anc-custom"));
-                    }
+                    outputVs(
+                            cellStr.split(","),
+                            "Danger signs",
+                            "danger-signs",
+                            "Before each contact, the health worker should check whether the woman has any of the danger signs listed here – if yes, she should refer to the hospital urgently; if no, she should continue to the normal contact",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/danger-signs",
+                            row.getRowNum()
+                    );
                     break;
                 case "Highest level of school {educ_level}":
-                    patient.addExtension()
-                            .setValue(new StringType().setValue(cellStr))
-                            .setUrl(CodeSystemLookupDictionary.getUrlFromName("EducationLevel"));
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "Highest level of education achieved",
+                            "highest-level-of-education-achieved",
+                            "The highest level of schooling the woman has reached",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/highest-level-of-education-achieved",
+                            row.getRowNum()
+                    );
                     break;
                 case "Marital status {marital_status}":
                     patient.setMaritalStatus(
@@ -156,31 +152,46 @@ public class TestCaseMockup extends Operation {
                                             CodeSystemLookupDictionary.getUrlFromName("MaritalStatus"))));
                     break;
                 case "Occupation {occupation}":
-                    for (String s : cellStr.split(";"))
-                    {
-                        // No HL7 FHIR Code was provided in data dictionary.
-                        patient.addExtension(new Extension().setValue(new Coding().setDisplay(s).setCode("Occupation")));
-                    }
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "Occupation",
+                            "occupation",
+                            "The woman's occupation",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/occupation",
+                            row.getRowNum()
+                    );
                     break;
                 case "Last Menstrual Period {lmp}":
+//                    gestationalAge.getValueDateTimeType().setValue(new Date(cellStr));
                     break;
                 case "GA from LMP {lmp_gest_age}":
+                    gestationalAge.getValueQuantity().setValue(Double.parseDouble(cellStr));
                     break;
-                case "Ultrasound done? {ultrasound_done}":
-                    break;
+//                case "Ultrasound done? {ultrasound_done}":
+//                    BooleanType btus = new BooleanType();
+//                    if (cellStr.toLowerCase().contains("yes")) {
+//                        btus.setValue(true);
+////                        gestationalAge.getValueBooleanType().setValue((true);
+//                    } else {
+//                        btus.setValue(false);
+////                        gestationalAge.getValueBooleanType().setValue(false);
+//                    }
+//                    gestationalAge.getValueBooleanType().setValue(btus);
+//                    break;
                 case "Ultrasound date {ultrasound_date}":
+                    // Resource map - Procedure.performed[x], ask about this.
                     break;
-                case "GA from ultrasound - weeks {ultrasound_gest_age_wks}":
-                    break;
-                case "GA from SFH - weeks {sfh_gest_age}":
-                    break;
-                case "Select preferred gestational age {select_gest_age_edd}":
-                    break;
+//                case "GA from ultrasound - weeks {ultrasound_gest_age_wks}":
+//                    break;
+//                case "GA from SFH - weeks {sfh_gest_age}":
+//                    break;
+//                case "Select preferred gestational age {select_gest_age_edd}":
+//                    break;
                 case "Obstetric History [No. of pregnancies {gravida}]":
 //                    if (cellStr.contains("+5")) {
 //                        cellStr = "5";
 //                    }
-//                    quickCheck.getValueIntegerType().setValue(Integer.parseInt(cellStr));
+//                    numPrevPreg.getValueIntegerType().setValue(Integer.parseInt(cellStr));
                     break;
                 case "Obstetric History [No. of pregnancies lost/ended\t{miscarriages_abortions}]":
                     break;
@@ -196,21 +207,26 @@ public class TestCaseMockup extends Operation {
                     break;
                 case "If alcohol or illicit substance use, indicate what type of drug {substances_used}":
                     cellStr = cellStr.replace(";", "");
-                    outputVs(
-                            cellStr.split(","),
-                            "current-alcohol-and-or-other-substance-use-alcohol-choices",
-                            row.getRowNum()
-                    );
+                    for (String s : cellStr.split(",")) {
+                        pastPregComps.getValueCodeableConcept()
+                                .getCoding()
+                                .add(new Coding()
+                                        .setSystem("http://fhir.org/guides/who/anc-cds/ValueSet/past-pregnancy-complications")
+                                        .setCode("Past pregnancy complications")
+                                        .setDisplay(cellStr));
+                    }
 //                    profile.addContained(cdSubstances);
                     break;
                 case "Any allergies? {allergies}":
                     cellStr = cellStr.replace(";", "");
-                    outputVs(cellStr.split(","), "allergies", row.getRowNum());
                     break;
                 case "Any surgeries? {surgeries}":
                     cellStr = cellStr.replace(";", "");
                     outputVs(
                             cellStr.split(","),
+                            "Allergies",
+                            "allergies",
+                            "Does the woman have any allergies?",
                             "past-surgeries-choices",
                             row.getRowNum()
                     );
@@ -219,7 +235,10 @@ public class TestCaseMockup extends Operation {
                     cellStr = cellStr.replace(";", "");
                     outputVs(
                             cellStr.split(","),
-                            "existing-chronic-health-conditions-choices",
+                            "existing-chronic-health-conditions",
+                            "existing-chronic-health-conditions",
+                            "Does the woman have any current chronic health conditions or problems?",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/existing-chronic-health-conditions",
                             row.getRowNum()
                     );
                     break;
@@ -228,13 +247,19 @@ public class TestCaseMockup extends Operation {
                     outputVs(
                             cellStr.split(","),
                             "tetanus-toxoid-containing-vaccine-ttcv-immunization-history",
+                            "tetanus-toxoid-containing-vaccine-ttcv-immunization-history",
+                            "The woman's history of receiving tetanus toxoid-containing vaccine (TTCV)",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/tetanus-toxoid-containing-vaccine-ttcv-immunization-history",
                             row.getRowNum()
                     );
                     break;
                 case "Flu immunisation status {flu_immun_status}":
                     outputVs(
-                            cellStr.split(","),
+                            cellStr.replace(";", ""),
                             "flu-immunization-provided",
+                            "flu-immunization-provided",
+                            "Whether or not this year's seasonal flu vaccine has been provided",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/flu-immunization-provided",
                             row.getRowNum()
                     );
                     break;
@@ -242,6 +267,9 @@ public class TestCaseMockup extends Operation {
                     outputVs(
                             cellStr.split(","),
                             "current-medications-choices",
+                            "current-medications-choices",
+                            "Select all of the medications the woman is currently taking",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/current-medications-choices",
                             row.getRowNum()
                     );
                     break;
@@ -249,40 +277,118 @@ public class TestCaseMockup extends Operation {
                     outputVs(
                             cellStr.split(","),
                             "daily-caffeine-intake",
+                            "daily-caffeine-intake",
+                            "Assesses whether the woman consumes more than 300 mg of caffeine per day",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/daily-caffeine-intake",
                             row.getRowNum()
                     );
                     break;
                 case "Uses tobacco products?\t{tobacco_user}":
-                    outputVs(
-                            cellStr.split(","),
-                            "tobacco-use",
-                            row.getRowNum()
-                    );
+//                    outputVs(
+//                            cellStr.split(","),
+//                            "Whether the woman uses tobacco products",
+//                            "tobacco-use",
+//                            row.getRowNum()
+//                    );
                     break;
                 case "Anyone in the household smokes tobacco products? {shs_exposure}":
-                    outputVs(
-                            cellStr.split(","),
-                            "exposure-to-second-hand-smoke",
-                            row.getRowNum()
-                    );
+                    if (cellStr.toLowerCase().contains("recently quit")) {
+                        outputVs(
+                                "Recently quit",
+                                "persistent-behaviours-recently-quit-tobacco-products-choices",
+                                "persistent-behaviours-recently-quit-tobacco-products-choices",
+                                "Whether the woman has recently quit using any tobacco products",
+                                "http://fhir.org/guides/who/anc-cds/ValueSet/persistent-behaviours-recently-quit-tobacco-products-choices",
+                                row.getRowNum()
+                        );
+                    }
                     break;
                 case "Uses condoms during sex? {condom_use}":
                     outputVs(
                             cellStr.split(","),
                             "contraceptive-use-of-female-condoms",
+                            "contraceptive-use-of-female-condoms",
+                            "Whether or not the woman (and her partner) use female condoms during sex",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/contraceptive-use-of-female-condoms",
                             row.getRowNum()
                     );
                     break;
                 case "Clinical enquiry for alcohol and other substance use done? {alcohol_substance_enquiry}":
                     outputVs(
                             cellStr.split(","),
-                            "clinical-enquiry-for-alcohol-and-other-substance-use-done",
+                            "contraceptive-use-of-male-condoms",
+                            "contraceptive-use-of-male-condoms",
+                            "Whether or not the woman (and her partner) use male condoms during sex",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/contraceptive-use-of-male-condoms",
                             row.getRowNum()
                     );
                     break;
                 case "Uses alcohol and/or other substances?	{alcohol_substance_use}":
+                    // TODO; Need to account for each possible drug manually?
+//                    outputVs(
+//                            cellStr.replace(";", ""),
+//                            "current-alcohol-and-or-other-substance-use-alcohol-choices",
+//                            "current-alcohol-and-or-other-substance-use-alcohol-choices",
+//                            "Whether or not the woman currently consumes any alcohol or substances",
+//                            "http://fhir.org/guides/who/anc-cds/ValueSet/current-alcohol-and-or-other-substance-use-alcohol-choices",
+//                            row.getRowNum()
+//                    );
+
+                    // Maybe something like this?
+                    String substanceTmp = cellStr.toLowerCase();
+                    if (substanceTmp.contains("marijuana")) {
+                        outputVs(
+                                "Marijuana",
+                                "current-alcohol-and-or-other-substance-use-marijuana",
+                                "current-alcohol-and-or-other-substance-use-marijuana",
+                                "Woman currently uses marijuana",
+                                "http://fhir.org/guides/who/anc-cds/ValueSet/current-alcohol-and-or-other-substance-use-marijuana",
+                                row.getRowNum()
+                        );
+                    }
+                    if (substanceTmp.contains("cocaine")) {
+                        outputVs(
+                                "Cocaine",
+                                "current-alcohol-and-or-other-substance-use-cocaine",
+                                "current-alcohol-and-or-other-substance-use-cocaine",
+                                "Woman currently uses cocaine",
+                                "http://fhir.org/guides/who/anc-cds/ValueSet/current-alcohol-and-or-other-substance-use-cocaine",
+                                row.getRowNum()
+                        );
+                    }
+                    if (substanceTmp.contains("injectable")) {
+                        outputVs(
+                                "Injectable drugs",
+                                "current-alcohol-and-or-other-substance-use-injectable-drugs",
+                                "current-alcohol-and-or-other-substance-use-injectable-drugs",
+                                "Woman currently uses injectable drugs",
+                                "http://fhir.org/guides/who/anc-cds/ValueSet/current-alcohol-and-or-other-substance-use-injectable-drugs",
+                                row.getRowNum()
+                        );
+                    }
+                    if (substanceTmp.contains("alcohol")) {
+                        outputVs(
+                                "Alcohol",
+                                "current-alcohol-and-or-other-substance-use-alcohol",
+                                "current-alcohol-and-or-other-substance-use-alcohol",
+                                "Woman currently uses alcohol",
+                                "http://fhir.org/guides/who/anc-cds/ValueSet/current-alcohol-and-or-other-substance-use-alcohol",
+                                row.getRowNum()
+                        );
+                    }
+                    if (substanceTmp.contains("other")) {
+                        outputVs(
+                                "Other Substances",
+                                "current-alcohol-and-or-other-substance-use-other-substances",
+                                "current-alcohol-and-or-other-substance-use-other-substances",
+                                "Woman currently uses other substances not listed above",
+                                "http://fhir.org/guides/who/anc-cds/ValueSet/current-alcohol-and-or-other-substance-use-other-substances",
+                                row.getRowNum()
+                        );
+                    }
                     break;
                 case "Partner HIV status {partner_hiv_status}":
+
                     break;
                 case "Any physiological symptoms?	{phys_symptoms}":
                     break;
@@ -293,10 +399,34 @@ public class TestCaseMockup extends Operation {
                 case "Has the woman felt the baby move? 	{mat_percept_fetal_move}":
                     break;
                 case "Pre-gestational weight (kg)	{pregest_weight}":
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "Pre-gestational weight",
+                            "pre-gestational-weight",
+                            "The woman's pre-gestational weight in kilograms",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/pre-gestational-weight",
+                            row.getRowNum()
+                    );
                     break;
                 case "Height (m) {height}":
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "Height",
+                            "height",
+                            "The woman's current height in centimetres",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/height",
+                            row.getRowNum()
+                    );
                     break;
                 case "Current weight (kg) {current_weight}":
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "Current weight",
+                            "current-weight",
+                            "The woman's current weight in kilograms",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/current-weight",
+                            row.getRowNum()
+                    );
                     break;
                 case "Systolic blood pressure (SBP) {bp_systolic}":
                     break;
@@ -445,7 +575,9 @@ public class TestCaseMockup extends Operation {
 //        output(healthConcerns, "json", "healthConcerns", row.getRowNum());
 //        output(reasonForComing, "json", "reasonForComing", row.getRowNum());
 //        output(dangerSigns, "json", "dangerSigns", row.getRowNum());
+        output(pastPregComps, "json", "valueset-past-pregnancy-complications", row.getRowNum());
         output(profile, "json", "profile", row.getRowNum());
+        output(gestationalAge, "json", "valueset-gestational-age", row.getRowNum());
     }
 
     private void mkRespectiveDirs(Sheet sheet) {
@@ -468,20 +600,61 @@ public class TestCaseMockup extends Operation {
         return file;
     }
 
-    private void outputVs(String[] inputs, String name, int rowNum) {
+    private void outputVs(
+            String[] values,
+            String name,
+            String id,
+            String description,
+            String url,
+            int rowNum
+    ) {
+        // Transform input id
+        // Get -> "highest-level-education-achieved"
+        // Out -> "valueset-highest-level-education-achieved"
+        id = "valueset-" + id;
+
         ValueSet vs = new ValueSet();
         ValueSet.ValueSetComposeComponent vsCompose = new ValueSet.ValueSetComposeComponent();
         ValueSet.ConceptSetComponent vsConcept = new ValueSet.ConceptSetComponent();
-        vsConcept.setSystem("http://fhir.org/guides/who/anc-cds/CodeSystem/anc-custom");
 
-        for (String s : inputs)
-        {
-            vsConcept.addConcept().setCode(name).setDisplay(s);
+        vsConcept.setSystem("http://fhir.org/guides/who/anc-cds/CodeSystem/anc-custom");
+        for (String value : values) {
+            // Spreadsheet contains semicolons inconsistently. Just in case :^)
+            value.replace(";", "");
+            vsConcept.addConcept().setCode(name).setDisplay(value);
         }
 
         vsCompose.addInclude(vsConcept);
         vs.setCompose(vsCompose);
-        output(vs, "json", name, rowNum);
+
+        output(vs, "json", id, rowNum);
+    }
+
+
+    private void outputVs(
+            String value,
+            String name,
+            String id,
+            String description,
+            String url,
+            int rowNum
+    ) {
+        // Transform input id
+        // Get -> "highest-level-education-achieved"
+        // Out -> "valueset-highest-level-education-achieved"
+        id = "valueset-" + id;
+
+        ValueSet vs = new ValueSet();
+        ValueSet.ValueSetComposeComponent vsCompose = new ValueSet.ValueSetComposeComponent();
+        ValueSet.ConceptSetComponent vsConcept = new ValueSet.ConceptSetComponent();
+
+        vsConcept.setSystem("http://fhir.org/guides/who/anc-cds/CodeSystem/anc-custom");
+        vsConcept.addConcept().setCode(name).setDisplay(value);
+
+        vsCompose.addInclude(vsConcept);
+        vs.setCompose(vsCompose);
+
+        output(vs, "json", id, rowNum);
     }
 
     private static boolean isRowEmpty(Row row) {
