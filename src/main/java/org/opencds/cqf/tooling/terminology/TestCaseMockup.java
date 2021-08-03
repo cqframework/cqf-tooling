@@ -333,7 +333,6 @@ public class TestCaseMockup extends Operation {
 //                            "http://fhir.org/guides/who/anc-cds/ValueSet/current-alcohol-and-or-other-substance-use-alcohol-choices",
 //                            row.getRowNum()
 //                    );
-
                     // Maybe something like this?
                     String substanceTmp = cellStr.toLowerCase();
                     if (substanceTmp.contains("marijuana")) {
@@ -388,11 +387,74 @@ public class TestCaseMockup extends Operation {
                     }
                     break;
                 case "Partner HIV status {partner_hiv_status}":
-
+                    // This could be the proper way of handling multiple choice inputs - I believe it is,
+                    // but make sure to check with Bryn.
+                    // To add: May need to add a function similar to outputVs overloads for expansions.
+                    String partnerHIVTmp = cellStr.toLowerCase();
+                    if (partnerHIVTmp.contains("don't know")) {
+                        outputVs(
+                                "Don't know",
+                                "Partner HIV status (reported)",
+                                "Partner HIV status (reported)",
+                                "Don't know HIV status – woman does not know partner's HIV status",
+                                "http://fhir.org/guides/who/anc-cds/ValueSet/partner-hiv-status-reported",
+                                row.getRowNum()
+                        );
+                    }
+                    if (partnerHIVTmp.contains("negative")) {
+                        outputVs(
+                                "Negative",
+                                "Partner HIV status (reported)",
+                                "Partner HIV status (reported)",
+                                "Woman's partner is HIV negative",
+                                "http://fhir.org/guides/who/anc-cds/ValueSet/partner-hiv-status-reported",
+                                row.getRowNum()
+                        );
+                    }
+                    if (partnerHIVTmp.contains("positive")) {
+                        outputVs(
+                                "Positive",
+                                "Partner HIV status (reported)",
+                                "Partner HIV status (reported)",
+                                "Woman's partner is HIV positive",
+                                "http://fhir.org/guides/who/anc-cds/ValueSet/partner-hiv-status-reported",
+                                row.getRowNum()
+                        );
+                    }
                     break;
                 case "Any physiological symptoms?	{phys_symptoms}":
+                    for (String physSmp : cellStr.split(",")) {
+                        physSmp = physSmp.replace(";", "");
+                        String physName = String.format(
+                                "persistent-physiological-symptoms-%s",
+                                physSmp.toLowerCase()
+                        );
+                        String physDesc = String.format(
+                                "Woman reported %s during a previous contact and is still experiencing %s",
+                                physSmp,
+                                physSmp
+                        );
+                        outputVs(
+                                physSmp,
+                                "persistent-physiological-symptoms",
+                                "persistent-physiological-symptoms",
+                                physDesc,
+                                "http://fhir.org/guides/who/anc-cds/ValueSet/persistent-physiological-symptoms",
+                                row.getRowNum()
+                        );
+                    }
                     break;
                 case "If the woman has varicose veins or oedema, check any of the following symptoms {other_sym_vvo}":
+                    if (cellStr.toLowerCase().contains("varicose")) {
+                        outputVs(
+                                "Varicose veins",
+                                "persistent-physiological-symptoms-varicose-vein",
+                                "persistent-physiological-symptoms-varicose-vein",
+                                "Woman reported varicose veins during a previous contact and is still experiencing varicose veins",
+                                "http://fhir.org/guides/who/anc-cds/ValueSet/persistent-physiological-symptoms-varicose-veins",
+                                row.getRowNum()
+                        );
+                    }
                     break;
                 case "Any other symptoms? 	{other_phys_symptoms}":
                     break;
@@ -572,9 +634,6 @@ public class TestCaseMockup extends Operation {
                     break;
             }
         }
-//        output(healthConcerns, "json", "healthConcerns", row.getRowNum());
-//        output(reasonForComing, "json", "reasonForComing", row.getRowNum());
-//        output(dangerSigns, "json", "dangerSigns", row.getRowNum());
         output(pastPregComps, "json", "valueset-past-pregnancy-complications", row.getRowNum());
         output(profile, "json", "profile", row.getRowNum());
         output(gestationalAge, "json", "valueset-gestational-age", row.getRowNum());
@@ -614,13 +673,15 @@ public class TestCaseMockup extends Operation {
         id = "valueset-" + id;
 
         ValueSet vs = new ValueSet();
+        vs.setDescription(description);
         ValueSet.ValueSetComposeComponent vsCompose = new ValueSet.ValueSetComposeComponent();
         ValueSet.ConceptSetComponent vsConcept = new ValueSet.ConceptSetComponent();
+        vsConcept.setSystem(url);
 
         vsConcept.setSystem("http://fhir.org/guides/who/anc-cds/CodeSystem/anc-custom");
         for (String value : values) {
             // Spreadsheet contains semicolons inconsistently. Just in case :^)
-            value.replace(";", "");
+            value = value.replace(";", "");
             vsConcept.addConcept().setCode(name).setDisplay(value);
         }
 
@@ -629,7 +690,6 @@ public class TestCaseMockup extends Operation {
 
         output(vs, "json", id, rowNum);
     }
-
 
     private void outputVs(
             String value,
@@ -645,8 +705,10 @@ public class TestCaseMockup extends Operation {
         id = "valueset-" + id;
 
         ValueSet vs = new ValueSet();
+        vs.setDescription(description);
         ValueSet.ValueSetComposeComponent vsCompose = new ValueSet.ValueSetComposeComponent();
         ValueSet.ConceptSetComponent vsConcept = new ValueSet.ConceptSetComponent();
+        vsConcept.setSystem(url);
 
         vsConcept.setSystem("http://fhir.org/guides/who/anc-cds/CodeSystem/anc-custom");
         vsConcept.addConcept().setCode(name).setDisplay(value);
