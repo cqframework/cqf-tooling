@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
@@ -19,7 +21,10 @@ import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
+import org.hl7.fhir.r5.model.DataRequirement;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Measure;
+import org.opencds.cqf.tooling.operation.ExtractMatBundleOperation;
 import org.testng.annotations.Test;
 import org.opencds.cqf.tooling.measure.MeasureRefreshProcessor;
 import org.slf4j.Logger;
@@ -35,29 +40,65 @@ public class ECQMCreatorTest {
 
     private static Logger logger = LoggerFactory.getLogger(ECQMCreatorTest.class);
 
-    private String refreshMeasure(String primaryLibraryPath, String measurePath) throws IOException {
+    private static FhirContext context = FhirContext.forR5();
+
+    private Measure refreshMeasure(String primaryLibraryPath, String measurePath) throws IOException {
         CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
         cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
         cqlTranslatorOptions.getOptions().add(CqlTranslator.Options.EnableAnnotations);
+        // This option performs data analysis, including element reference detection
+        cqlTranslatorOptions.setAnalyzeDataRequirements(true);
+        // This option collapses duplicate data requirements
+        cqlTranslatorOptions.setCollapseDataRequirements(true);
         CqlTranslator translator = createTranslator(primaryLibraryPath, cqlTranslatorOptions);
         translator.toELM();
         cacheLibrary(translator.getTranslatedLibrary());
-        FhirContext context =  FhirContext.forR5();
         IParser parser = measurePath.endsWith(".json") ? context.newJsonParser() : context.newXmlParser();
         InputStream inputStream = this.getClass().getResourceAsStream(measurePath);
         Measure measureToConvert = parser.parseResource(Measure.class, inputStream);
         MeasureRefreshProcessor refreshProcessor = new MeasureRefreshProcessor();
         Measure returnMeasure = refreshProcessor.refreshMeasure(measureToConvert, libraryManager, translator.getTranslatedLibrary(), cqlTranslatorOptions);
-        assertTrue(null != returnMeasure);
-        String measureResourceContent = parser.setPrettyPrint(true).encodeResourceToString(returnMeasure);
+        return returnMeasure;
+    }
+
+    private String measureToString(Measure measure) {
+        IParser parser = context.newJsonParser().setPrettyPrint(true);
+        String measureResourceContent = parser.encodeResourceToString(measure);
         return measureResourceContent;
+    }
+
+    @Test
+    public void TestCMS125FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test to use as the template to add the rest of the content for testing
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS125FHIR-v0-0-004-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/BreastCancerScreeningsFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/BreastCancerScreeningsFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
     }
 
     @Test
     public void TestBCSComponent() {
         try {
-            String measureResourceContent = refreshMeasure("CompositeMeasures/cql/BCSComponent.cql", "CompositeMeasures/resources/BCSComponent-v0-0-001-FHIR-4-0-1.xml");
-            logger.debug(measureResourceContent);
+            Measure measure = refreshMeasure("CompositeMeasures/cql/BCSComponent.cql", "CompositeMeasures/resources/BCSComponent-v0-0-001-FHIR-4-0-1.xml");
+            assertTrue(null != measure);
+            logger.debug(measureToString(measure));
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -66,8 +107,9 @@ public class ECQMCreatorTest {
     @Test
     public void TestCCSComponent() {
         try {
-            String measureResourceContent = refreshMeasure("CompositeMeasures/cql/CCSComponent.cql", "CompositeMeasures/resources/CCSComponent-v0-0-001-FHIR-4-0-1.xml");
-            logger.debug(measureResourceContent);
+            Measure measure = refreshMeasure("CompositeMeasures/cql/CCSComponent.cql", "CompositeMeasures/resources/CCSComponent-v0-0-001-FHIR-4-0-1.xml");
+            assertTrue(null != measure);
+            logger.debug(measureToString(measure));
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -76,8 +118,9 @@ public class ECQMCreatorTest {
     @Test
     public void TestHBPComponent() {
         try {
-            String measureResourceContent = refreshMeasure("CompositeMeasures/cql/HBPComponent.cql", "CompositeMeasures/resources/HBPComponent-v0-0-001-FHIR-4-0-1.xml");
-            logger.debug(measureResourceContent);
+            Measure measure = refreshMeasure("CompositeMeasures/cql/HBPComponent.cql", "CompositeMeasures/resources/HBPComponent-v0-0-001-FHIR-4-0-1.xml");
+            assertTrue(null != measure);
+            logger.debug(measureToString(measure));
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -86,8 +129,9 @@ public class ECQMCreatorTest {
     @Test
     public void TestPVSComponent() {
         try {
-            String measureResourceContent = refreshMeasure("CompositeMeasures/cql/PVSComponent.cql", "CompositeMeasures/resources/PVSComponent-v0-0-001-FHIR-4-0-1.xml");
-            logger.debug(measureResourceContent);
+            Measure measure = refreshMeasure("CompositeMeasures/cql/PVSComponent.cql", "CompositeMeasures/resources/PVSComponent-v0-0-001-FHIR-4-0-1.xml");
+            assertTrue(null != measure);
+            logger.debug(measureToString(measure));
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -96,8 +140,9 @@ public class ECQMCreatorTest {
     @Test
     public void TestTSCComponent() {
         try {
-            String measureResourceContent = refreshMeasure("CompositeMeasures/cql/TSCComponent.cql", "CompositeMeasures/resources/TSCComponent-v0-0-001-FHIR-4-0-1.xml");
-            logger.debug(measureResourceContent);
+            Measure measure = refreshMeasure("CompositeMeasures/cql/TSCComponent.cql", "CompositeMeasures/resources/TSCComponent-v0-0-001-FHIR-4-0-1.xml");
+            assertTrue(null != measure);
+            logger.debug(measureToString(measure));
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -105,17 +150,14 @@ public class ECQMCreatorTest {
 
     @Test
     public void TestECQMCreator() {
-
         // TODO - translate measure into ELM measure then call creator with that measure
         try {
-            String measureResourceContent = refreshMeasure("CompositeMeasures/cql/EXM124-9.0.000.cql", "/ecqm/resources/measure-EXM124-9.0.000.json");
-            logger.debug(measureResourceContent);
+            Measure measure = refreshMeasure("CompositeMeasures/cql/EXM124-9.0.000.cql", "/ecqm/resources/measure-EXM124-9.0.000.json");
+            assertTrue(null != measure);
+            logger.debug(measureToString(measure));
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
-
-
-
 
 /*
         Set<String> expressions = new HashSet<>();
@@ -138,6 +180,7 @@ public class ECQMCreatorTest {
         CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
         cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
         cqlTranslatorOptions.getOptions().add(CqlTranslator.Options.EnableAnnotations);
+        cqlTranslatorOptions.setCollapseDataRequirements(true);
         String libraryPath = "CompositeMeasures/cql/BCSComponent.cql"; //EXM124-9.0.000.cql";//library-EXM124-9.0.000.json";
         try {
             CqlTranslator translator = createTranslator(libraryPath, cqlTranslatorOptions);

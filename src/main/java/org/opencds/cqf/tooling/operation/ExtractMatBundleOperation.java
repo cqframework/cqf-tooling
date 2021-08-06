@@ -164,6 +164,12 @@ public class ExtractMatBundleOperation extends Operation {
         	// We want to name them without the resource type, use name, and if needed version
         	String resourceName;
         	Path newOutputDirectory = Paths.get(outputDir.substring(0, outputDir.indexOf("bundles")), "input");
+        	Path newLibraryDirectory = Paths.get(newOutputDirectory.toString(), "resources/library");
+        	newLibraryDirectory.toFile().mkdirs();
+        	Path newCqlDirectory = Paths.get(newOutputDirectory.toString(), "cql");
+        	newCqlDirectory.toFile().mkdirs();
+        	Path newMeasureDirectory = Paths.get(newOutputDirectory.toString(), "resources/measure");
+        	newMeasureDirectory.toFile().mkdirs();
         	if (version == "stu3) ") {
         		if (theResource instanceof org.hl7.fhir.dstu3.model.Library) {
         			org.hl7.fhir.dstu3.model.Library theLibrary = (org.hl7.fhir.dstu3.model.Library)theResource;
@@ -171,10 +177,10 @@ public class ExtractMatBundleOperation extends Operation {
         			
         			// Forcing the encoding to JSON here to make everything the same in input directory
         			ResourceUtils.outputResourceByName(theResource, "json", context,
-        					Paths.get(newOutputDirectory.toString(),"resources/library").toString(), resourceName);
+        					newLibraryDirectory.toString(), resourceName);
         			
         			// Now extract the CQL from the library file
-        			String cqlFilename = Paths.get(newOutputDirectory.toString(), "cql", resourceName) + ".cql";
+        			String cqlFilename = Paths.get(newCqlDirectory.toString(), resourceName) + ".cql";
         			extractStu3CQL(theLibrary, cqlFilename);
         		}
         		else if (theResource instanceof org.hl7.fhir.dstu3.model.Measure) {
@@ -182,7 +188,7 @@ public class ExtractMatBundleOperation extends Operation {
         			
         			// Forcing the encoding to JSON here to make everything the same in input directory
         			ResourceUtils.outputResourceByName(theResource, "json", context,
-        					Paths.get(newOutputDirectory.toString(), "resources/measure").toString(), resourceName);
+        					newMeasureDirectory.toString(), resourceName);
         		}
         	}
         	else if (version == "r4") {
@@ -192,10 +198,10 @@ public class ExtractMatBundleOperation extends Operation {
         			
         			// Forcing the encoding to JSON here to make everything the same in input directory
         			ResourceUtils.outputResourceByName(theResource, "json", context,
-        					Paths.get(newOutputDirectory.toString(), "resources/library").toString(), resourceName);
+        					newLibraryDirectory.toString(), resourceName);
         			
         			// Now extract the CQL from the library file
-        			String cqlFilename = Paths.get(newOutputDirectory.toString(), "cql", resourceName) + ".cql";
+        			String cqlFilename = Paths.get(newCqlDirectory.toString(), resourceName) + ".cql";
         			extractR4CQL(theLibrary, cqlFilename);
         		}
         		else if (theResource instanceof org.hl7.fhir.r4.model.Measure) {
@@ -203,7 +209,7 @@ public class ExtractMatBundleOperation extends Operation {
         			
         			// Forcing the encoding to JSON here to make everything the same in input directory
         			ResourceUtils.outputResourceByName(theResource, "json", context,
-        					Paths.get(newOutputDirectory.toString(), "resources/measure").toString(), resourceName);
+        					newMeasureDirectory.toString(), resourceName);
         		}
         	}
         }
