@@ -119,6 +119,13 @@ public class TestCaseMockup extends Operation {
             }
             if (cellStr.isEmpty())
                 continue;
+
+            // =======================================================================
+            // Primary logic
+            // < This likely needs to be changed. But rather than guessing as to how,
+            // < getting brief feedback will help greatly. I don't want to submit a PR
+            // < until it's proper.
+            // =======================================================================
             switch (headerCellStr) {
                 case "First Name":
                     patient.addName().addGiven(cellStr);
@@ -196,10 +203,10 @@ public class TestCaseMockup extends Operation {
 //                    BooleanType btus = new BooleanType();
 //                    if (cellStr.toLowerCase().contains("yes")) {
 //                        btus.setValue(true);
-////                        gestationalAge.getValueBooleanType().setValue((true);
+//                        gestationalAge.getValueBooleanType().setValue((true);
 //                    } else {
 //                        btus.setValue(false);
-////                        gestationalAge.getValueBooleanType().setValue(false);
+//                       gestationalAge.getValueBooleanType().setValue(false);
 //                    }
 //                    gestationalAge.getValueBooleanType().setValue(btus);
 //                    break;
@@ -240,7 +247,7 @@ public class TestCaseMockup extends Operation {
                                         .setCode("Past pregnancy complications")
                                         .setDisplay(cellStr));
                     }
-//                    profile.addContained(cdSubstances);
+//                    profile.addContained(cdSubstances); ?
                     break;
                 case "Any allergies? {allergies}":
                     cellStr = cellStr.replace(";", "");
@@ -309,12 +316,14 @@ public class TestCaseMockup extends Operation {
                     );
                     break;
                 case "Uses tobacco products?\t{tobacco_user}":
-//                    outputVs(
-//                            cellStr.split(","),
-//                            "Whether the woman uses tobacco products",
-//                            "tobacco-use",
-//                            row.getRowNum()
-//                    );
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "Whether the woman uses tobacco products",
+                            "tobacco-use",
+                            "tobacco-use",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/tobacco-use",
+                            row.getRowNum()
+                    );
                     break;
                 case "Anyone in the household smokes tobacco products? {shs_exposure}":
                     if (cellStr.toLowerCase().contains("recently quit")) {
@@ -349,7 +358,6 @@ public class TestCaseMockup extends Operation {
                     );
                     break;
                 case "Uses alcohol and/or other substances?	{alcohol_substance_use}":
-                    // TODO; Need to account for each possible drug manually?
 //                    outputVs(
 //                            cellStr.replace(";", ""),
 //                            "current-alcohol-and-or-other-substance-use-alcohol-choices",
@@ -358,7 +366,7 @@ public class TestCaseMockup extends Operation {
 //                            "http://fhir.org/guides/who/anc-cds/ValueSet/current-alcohol-and-or-other-substance-use-alcohol-choices",
 //                            row.getRowNum()
 //                    );
-                    // Maybe something like this?
+                    // Maybe something like this? Check if this is correct, if so build functions and overload for each necessary data type.
                     String substanceTmp = cellStr.toLowerCase();
                     if (substanceTmp.contains("marijuana")) {
                         outputVs(
@@ -532,8 +540,24 @@ public class TestCaseMockup extends Operation {
                 case "Temperature (ºC) {body_temp}":
                     break;
                 case "Pulse rate (bpm) {pulse_rate}":
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "pulse-rate",
+                            "pulse-rate",
+                            "The woman's pulse rate in beats per minute (bpm)",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/second-pulse-rate",
+                            row.getRowNum()
+                    );
                     break;
                 case "Pallor present? {pallor}":
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "pallor-present",
+                            "pallor-present",
+                            "Whether or not the woman has pallor",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/pallor-present",
+                            row.getRowNum()
+                    );
                     break;
                 case "Respiratory exam	{repiratory_exam}":
                     break;
@@ -560,7 +584,7 @@ public class TestCaseMockup extends Operation {
                 case "SFH (cm) {sfh}":
                     break;
                 case "Fetal movement felt?	{fetal_movement}":
-                    // Review output of this, then build func to build this type of output automatically.
+                    // Review output of this, then build func to build this type of output automatically (if needed).
                     // TODO: [MOVE] This belongs in another conditional.
                     String codeFMF = "";
                     String displayFMF = "";
@@ -609,12 +633,44 @@ public class TestCaseMockup extends Operation {
                     );
                     break;
                 case "No. of fetuses	{no_of_fetuses}":
+                    outputVs(
+                            cellStr.split(","),
+                            "number-of-fetuses",
+                            "number-of-fetuses",
+                            "Indicate the number of fetuses the woman is carrying",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/number-of-fetuses",
+                            row.getRowNum()
+                    );
                     break;
                 case "Fetal presentation {fetal_presentation}":
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "fetal-presentation",
+                            "fetal-presentation",
+                            "If a single fetus only, indicate the presentation of the fetus in the uterus",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/fetal-presentation",
+                            row.getRowNum()
+                    );
                     break;
                 case "2nd SBP after 10-15 min rest	{bp_systolic_repeat}":
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "repeat-systolic-blood-pressure",
+                            "repeat-systolic-blood-pressure",
+                            "Repeat measurement of the woman's systolic blood pressure in mmHg after 10–15 minutes rest",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/repeat-systolic-blood-pressure",
+                            row.getRowNum()
+                    );
                     break;
                 case "2nd DBP after 10-15 min rest	{bp_diastolic_repeat}":
+                    outputVs(
+                            cellStr.replace(";", ""),
+                            "repeat-systolic-blood-pressure",
+                            "repeat-systolic-blood-pressure",
+                            "Repeat measurement of the woman's diastolic blood pressure in mmHg after 10–15 minutes rest",
+                            "http://fhir.org/guides/who/anc-cds/ValueSet/repeat-diastolic-blood-pressure",
+                            row.getRowNum()
+                    );
                     break;
                 case "Any symptoms of severe pre-eclampsia?	{symp_sev_preeclampsia}":
                     break;
@@ -850,16 +906,13 @@ public class TestCaseMockup extends Operation {
             String url,
             int rowNum
     ) {
-        // Transform input id
-        // Get -> "highest-level-education-achieved"
-        // Out -> "valueset-highest-level-education-achieved"
-        id = "valueset-" + id;
-
         ValueSet vs = new ValueSet();
+        vs.setId(id);
+        vs.setName(name);
+        vs.setUrl(url);
         vs.setDescription(description);
         ValueSet.ValueSetComposeComponent vsCompose = new ValueSet.ValueSetComposeComponent();
         ValueSet.ConceptSetComponent vsConcept = new ValueSet.ConceptSetComponent();
-        vs.setUrl(url);
 
         vsConcept.setSystem("http://fhir.org/guides/who/anc-cds/CodeSystem/anc-custom");
         for (String value : values) {
@@ -882,16 +935,13 @@ public class TestCaseMockup extends Operation {
             String url,
             int rowNum
     ) {
-        // Transform input id
-        // Get -> "highest-level-education-achieved"
-        // Out -> "valueset-highest-level-education-achieved"
-        id = "valueset-" + id;
-
         ValueSet vs = new ValueSet();
+        vs.setId(id);
+        vs.setName(name);
         vs.setDescription(description);
+        vs.setUrl(url);
         ValueSet.ValueSetComposeComponent vsCompose = new ValueSet.ValueSetComposeComponent();
         ValueSet.ConceptSetComponent vsConcept = new ValueSet.ConceptSetComponent();
-        vs.setUrl(url);
 
         vsConcept.setSystem("http://fhir.org/guides/who/anc-cds/CodeSystem/anc-custom");
         vsConcept.addConcept().setCode(name).setDisplay(value);
