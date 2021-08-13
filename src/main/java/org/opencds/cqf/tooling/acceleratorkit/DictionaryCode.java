@@ -11,6 +11,20 @@ import org.hl7.fhir.r4.model.Coding;
  */
 public class DictionaryCode {
 
+    private String id;
+    public String getId() {
+        return this.id;
+    }
+    public void setId(String id) {
+        if (id == null) {
+            this.id = null;
+        }
+
+        if (id != null) {
+            this.id = id.replace((char) 160, (char) 32).trim();
+        }
+    }
+
     private String label;
     public String getLabel() {
         return this.label;

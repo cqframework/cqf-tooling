@@ -55,19 +55,23 @@ public class Processor extends Operation {
 
     // private Map<String, StructureDefinition> fhirModelStructureDefinitions = new LinkedHashMap<String, StructureDefinition>();
     private Map<String, DictionaryElement> elementMap = new LinkedHashMap<String, DictionaryElement>();
+    private Map<String, DictionaryElement> elementsById = new HashMap<>();
     private Map<String, Integer> elementIds = new LinkedHashMap<String, Integer>();
     private Map<String, Coding> activityMap = new LinkedHashMap<String, Coding>();
     private List<DictionaryProfileElementExtension> profileExtensions = new ArrayList<>();
     private List<StructureDefinition> extensions = new ArrayList<StructureDefinition>();
     private List<StructureDefinition> profiles = new ArrayList<StructureDefinition>();
+    private Map<String, StructureDefinition> profilesByElementId = new HashMap<String, StructureDefinition>();
     private Map<String, List<DictionaryElement>> elementsByProfileId = new LinkedHashMap<String, List<DictionaryElement>>();
     private Map<String, List<StructureDefinition>> profilesByActivityId = new LinkedHashMap<String, List<StructureDefinition>>();
     private Map<String, List<StructureDefinition>> profilesByParentProfile = new LinkedHashMap<String, List<StructureDefinition>>();
     private List<CodeSystem> codeSystems = new ArrayList<CodeSystem>();
     private List<Questionnaire> questionnaires = new ArrayList<Questionnaire>();
     private List<ValueSet> valueSets = new ArrayList<ValueSet>();
+    private Map<String, String> valueSetNameMap = new HashMap<String, String>();
     private Map<String, ConceptMap> conceptMaps = new LinkedHashMap<String, ConceptMap>();
     private Map<String, Coding> concepts = new LinkedHashMap<String, Coding>();
+    private Map<String, String> conceptNameMap = new HashMap<String, String>();
     private List<RetrieveInfo> retrieves = new ArrayList<RetrieveInfo>();
     private List<String> igJsonFragments = new ArrayList<String>();
     private List<String> igResourceFragments = new ArrayList<String>();
@@ -224,6 +228,9 @@ public class Processor extends Operation {
 
         // attached the generated extensions to the profiles that reference them
         attachExtensions();
+
+        // process questionnaires
+        processQuestionnaires();
 
         // write all resources
         writeExtensions(outputPath);
@@ -550,7 +557,7 @@ public class Processor extends Operation {
         return codes;
     }
 
-    private List<DictionaryCode> getTerminologyCodes(String codeSystemKey, String label, Row row, HashMap<String, Integer> colIds) {
+    private List<DictionaryCode> getTerminologyCodes(String codeSystemKey, String id, String label, Row row, HashMap<String, Integer> colIds) {
         List<DictionaryCode> codes = new ArrayList<>();
         String system = supportedCodeSystems.get(codeSystemKey);
         String codeListString = SpreadsheetHelper.getCellAsString(row, getColId(colIds, codeSystemKey));
@@ -591,14 +598,14 @@ public class Processor extends Operation {
                         break;
                 }
 
-                codes.add(getCode(system, label, display, c, null));
+                codes.add(getCode(system, id, label, display, c, null));
             }
         }
 
         return cleanseCodes(codes);
     }
 
-    private List<DictionaryCode> getFhirCodes(String label, Row row, HashMap<String, Integer> colIds) {
+    private List<DictionaryCode> getFhirCodes(String id, String label, Row row, HashMap<String, Integer> colIds) {
         List<DictionaryCode> codes = new ArrayList<>();
         String system = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
         // If this is an input option with a custom code, add codes for the input options
@@ -610,12 +617,14 @@ public class Processor extends Operation {
         if (display == null || display.isEmpty()) {
             display = label;
         }
+        String parentId = null;
         String parentLabel = null;
         String parentName = getDataElementLabel(currentInputOptionParentRow, colIds).trim();
         if (parentName != null && !parentName.trim().isEmpty()) {
             parentName = parentName.trim();
             DictionaryElement currentElement = elementMap.get(parentName);
             if (currentElement != null) {
+                parentId = currentElement.getId();
                 parentLabel = currentElement.getDataElementLabel();
             }
         }
@@ -623,12 +632,13 @@ public class Processor extends Operation {
             String codeListString = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirR4Code"));
             // If there is no code, use the data element label, prefixed with the parentLabel, if there is one
             if (codeListString == null || codeListString.isEmpty()) {
-                codeListString = parentLabel != null ? (parentLabel + '-' + label) : label;
+                codeListString = id;
+                //codeListString = parentId != null ? (parentId + '-' + id) : id;
             }
             if (codeListString != null && !codeListString.isEmpty()) {
                 List<String> codesList = Arrays.asList(codeListString.split(";"));
                 for (String c : codesList) {
-                    codes.add(getCode(system, label, display, c, null));
+                    codes.add(getCode(system, id, label, display, c, null));
                 }
             }
 
@@ -661,7 +671,7 @@ public class Processor extends Operation {
         return cleanseCodes(codes);
     }
 
-    private List<DictionaryCode> getOpenMRSCodes(String label, Row row, HashMap<String, Integer> colIds) {
+    private List<DictionaryCode> getOpenMRSCodes(String elementId, String elementLabel, Row row, HashMap<String, Integer> colIds) {
         List<DictionaryCode> codes = new ArrayList<>();
         String system = openMRSSystem;
         String parent = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "OpenMRSEntityParent"));
@@ -671,20 +681,21 @@ public class Processor extends Operation {
             List<String> codesList = Arrays.asList(codeListString.split(";"));
 
             for (String c : codesList) {
-                codes.add(getCode(system, label, display, c, parent));
+                codes.add(getCode(system, elementId, elementLabel, display, c, parent));
             }
         }
         return cleanseCodes(codes);
     }
 
-    private List<DictionaryCode> getPrimaryCodes(String label, Row row, HashMap<String, Integer> colIds) {
+    private List<DictionaryCode> getPrimaryCodes(String elementId, String elementLabel, Row row, HashMap<String, Integer> colIds) {
         List<DictionaryCode> codes;
-        codes = getDataElementCodes(row, colIds, label);
+        codes = getDataElementCodes(row, colIds, elementId, elementLabel);
         return codes;
     }
 
-    private DictionaryCode getCode(String system, String label, String display, String codeValue, String parent) {
+    private DictionaryCode getCode(String system, String id, String label, String display, String codeValue, String parent) {
         DictionaryCode code = new DictionaryCode();
+        code.setId(id);
         code.setLabel(label);
         code.setSystem(system);
         code.setDisplay(display);
@@ -769,7 +780,7 @@ public class Processor extends Operation {
         e.setContext(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Context")));
         e.setSelector(SpreadsheetHelper.getCellAsString(row, getColId(colIds, "Selector")));
         //TODO: Get all codes specified on the element, create a valueset and bind to it. Required
-        e.setPrimaryCodes(getPrimaryCodes(name, row, colIds));
+        e.setPrimaryCodes(getPrimaryCodes(id, name, row, colIds));
 
         DictionaryFhirElementPath fhirElementPath = getFhirElementPath(row, colIds);
         if (fhirElementPath != null) {
@@ -790,9 +801,10 @@ public class Processor extends Operation {
     }
 
     private void addInputOptionToParentElement(Row row, HashMap<String, Integer> colIds) {
+        String parentId = getDataElementID(currentInputOptionParentRow, colIds).trim();
         String parentName = getDataElementLabel(currentInputOptionParentRow, colIds).trim();
 
-        if (parentName != null && !parentName.isEmpty())
+        if ((parentId != null && !parentId.isEmpty()) || (parentName != null && !parentName.isEmpty()))
         {
             DictionaryElement parentElement = elementMap.get(parentName);
             if (parentElement != null) {
@@ -823,8 +835,15 @@ public class Processor extends Operation {
                         inputOptionValueSetName = inputOptionValueSetName + " Choices";
                     }
 
+                    String optionId = getDataElementID(row, colIds);
                     String optionLabel = getDataElementLabel(row, colIds);
-                    List<DictionaryCode> inputOptionCodes = getDataElementCodes(row, colIds, optionLabel != null && !optionLabel.isEmpty() ? optionLabel : parentName);
+                    List<DictionaryCode> inputOptionCodes = getDataElementCodes(row, colIds,
+                            optionId != null && !optionId.isEmpty() ? optionId : parentId,
+                            optionLabel != null && !optionLabel.isEmpty() ? optionLabel : parentName);
+
+                    if (!valueSetNameMap.containsKey(inputOptionValueSetName)) {
+                        valueSetNameMap.put(inputOptionValueSetName, optionId);
+                    }
 
                     if (valueSetCodes.containsKey(inputOptionValueSetName)) {
                         List<DictionaryCode> entryCodes = valueSetCodes.get(inputOptionValueSetName);
@@ -843,25 +862,25 @@ public class Processor extends Operation {
         }
     }
 
-    private List<DictionaryCode> getDataElementCodes(Row row, HashMap<String, Integer> colIds, String dataElementLabel) {
+    private List<DictionaryCode> getDataElementCodes(Row row, HashMap<String, Integer> colIds, String elementId, String elementLabel) {
         List<DictionaryCode> codes = new ArrayList<>();
 
         if (enableOpenMRS) {
             // Open MRS choices
-            List<DictionaryCode> mrsCodes = getOpenMRSCodes(dataElementLabel, row, colIds);
+            List<DictionaryCode> mrsCodes = getOpenMRSCodes(elementId, elementLabel, row, colIds);
             codes.addAll(mrsCodes);
         }
 
         // FHIR choices
         //String fhirCodeSystem = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "FhirCodeSystem"));
         //if (fhirCodeSystem != null && !fhirCodeSystem.isEmpty()) {
-            List<DictionaryCode> fhirCodes = getFhirCodes(dataElementLabel, row, colIds);
+            List<DictionaryCode> fhirCodes = getFhirCodes(elementId, elementLabel, row, colIds);
             codes.addAll(fhirCodes);
         //}
 
         // Other Terminology choices
         for (String codeSystemKey : supportedCodeSystems.keySet()) {
-            List<DictionaryCode> codeSystemCodes = getTerminologyCodes(codeSystemKey, dataElementLabel, row, colIds);
+            List<DictionaryCode> codeSystemCodes = getTerminologyCodes(codeSystemKey, elementId, elementLabel, row, colIds);
             if (codes != codeSystemCodes && !codeSystemCodes.isEmpty()) {
                 for (DictionaryCode c : codes) {
                     c.getMappings().addAll(codeSystemCodes);
@@ -1050,6 +1069,7 @@ public class Processor extends Operation {
                             DictionaryElement e = createDataElement(page, currentGroup, row, colIds);
                             if (e != null) {
                                 elementMap.put(e.getName(), e);
+                                elementsById.put(e.getId(), e);
                                 updateQuestionnaireForDataElement(e, questionnaire);
                             }
                             break;
@@ -1071,7 +1091,8 @@ public class Processor extends Operation {
 
     private Questionnaire createQuestionnaireForPage(Sheet sheet) {
         Questionnaire questionnaire = new Questionnaire();
-        questionnaire.setId(toId(getActivityCoding(sheet.getSheetName()).getCode()));
+        Coding activityCoding = getActivityCoding(sheet.getSheetName());
+        questionnaire.setId(toUpperId(activityCoding.getCode()));
 
         questionnaire.getExtension().add(
                 new Extension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability", new CodeType("shareable")));
@@ -1090,7 +1111,7 @@ public class Processor extends Operation {
         questionnaire.setDescription("TODO: description goes here");
 
         Coding useContextCoding = new Coding("http://terminology.hl7.org/CodeSystem/usage-context-type", "task", "Workflow Task");
-        CodeableConcept useContextValue = new CodeableConcept(new Coding("http://fhir.org/guides/who/anc-cds/CodeSystem/activity-codes", questionnaire.getId(), sheet.getSheetName()));
+        CodeableConcept useContextValue = new CodeableConcept(new Coding(activityCoding.getSystem(), activityCoding.getCode(), activityCoding.getDisplay()));
         UsageContext useContext = new UsageContext(useContextCoding, useContextValue);
         questionnaire.getUseContext().add(useContext);
 
@@ -1164,7 +1185,7 @@ public class Processor extends Operation {
     private void updateQuestionnaireForDataElement(DictionaryElement dataElement, Questionnaire questionnaire) {
         Questionnaire.QuestionnaireItemComponent questionnaireItem = new Questionnaire.QuestionnaireItemComponent();
         questionnaireItem.setLinkId(String.valueOf(questionnaireItemLinkIdCounter));
-        String definition = String.format("%s/StructureDefinition/%s", canonicalBase, dataElement.getId().toLowerCase());
+        String definition = dataElement.getId();
         questionnaireItem.setDefinition(definition);
         questionnaireItem.setText(dataElement.getDataElementLabel());
         Questionnaire.QuestionnaireItemType questionnaireItemType = getQuestionnaireItemType(dataElement);
@@ -1228,6 +1249,29 @@ public class Processor extends Operation {
             default:
                 return false;
         }
+    }
+
+    private String toUpperId(String name) {
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Name cannot be null or empty");
+        }
+
+        if (name.endsWith(".")) {
+            name = name.substring(0, name.lastIndexOf("."));
+        }
+
+        return name.trim()
+                // remove these characters
+                .replace("(", "").replace(")", "").replace("[", "").replace("]", "").replace("\n", "")
+                .replace(":", "")
+                .replace(",", "")
+                .replace("_", "")
+                .replace("/", "")
+                .replace(" ", "")
+                .replace(".", "")
+                .replace("-", "")
+                .replace(">", "")
+                .replace("<", "");
     }
 
     private String toId(String name) {
@@ -1630,6 +1674,9 @@ public class Processor extends Operation {
                 lde.add(element);
             }
         }
+
+        // Record the profile in which the data element is present:
+        profilesByElementId.put(element.getId(), sd);
     }
 
     private void ensureProfile(DictionaryElement element) {
@@ -1897,6 +1944,14 @@ public class Processor extends Operation {
         }
     }
 
+    private String getValueSetId(String valueSetName) {
+        String id = valueSetNameMap.get(valueSetName);
+        if (id == null) {
+            id = valueSetName;
+        }
+        return toId(id);
+    }
+
     private void ensureChoicesDataElement(DictionaryElement dictionaryElement, StructureDefinition sd) {
         if (dictionaryElement.getChoices() != null && dictionaryElement.getChoices().getFhirElementPath() != null) {
             String choicesElementId = dictionaryElement.getChoices().getFhirElementPath().getResourceTypeAndPath();
@@ -1912,15 +1967,17 @@ public class Processor extends Operation {
 
             List<ValueSet> valueSets = new ArrayList<ValueSet>();
             for (Map.Entry<String, List<DictionaryCode>> vs: valueSetCodes.entrySet()) {
-                ValueSet valueSet = ensureValueSetWithCodes(toId(vs.getKey()), vs.getKey(), new CodeCollection(vs.getValue()));
+                ValueSet valueSet = ensureValueSetWithCodes(getValueSetId(vs.getKey()), vs.getKey(), new CodeCollection(vs.getValue()));
                 valueSets.add(valueSet);
 
                 valueSetToBind = valueSet;
             }
 
             if (valueSetCodes != null && valueSetCodes.size() > 1) {
-            String choicesGrouperValueSetName =  parentCustomValueSetName + " Choices Grouper";
-            valueSetToBind = createGrouperValueSet(toId(choicesGrouperValueSetName), choicesGrouperValueSetName, valueSets);
+                String choicesGrouperValueSetName =  parentCustomValueSetName + " Choices Grouper";
+                String choicesGrouperValueSetId = dictionaryElement.getId() + "-choices-grouper";
+                valueSetNameMap.put(choicesGrouperValueSetName, choicesGrouperValueSetId);
+                valueSetToBind = createGrouperValueSet(getValueSetId(choicesGrouperValueSetName), choicesGrouperValueSetName, valueSets);
             }
 
             //TODO: Include the primaryCodes valueset in the grouper. Add the codes to the VS in the single VS case.
@@ -1975,7 +2032,7 @@ public class Processor extends Operation {
 
     private void bindQuestionnaireItemAnswerValueSet(DictionaryElement dictionaryElement, ValueSet valueSetToBind) {
         Questionnaire questionnaire =
-                questionnaires.stream().filter(q -> q.getId().equalsIgnoreCase(toId(getActivityCoding(dictionaryElement.getPage()).getCode()))).findFirst().get();
+                questionnaires.stream().filter(q -> q.getId().equalsIgnoreCase(toUpperId(getActivityCoding(dictionaryElement.getPage()).getCode()))).findFirst().get();
         Questionnaire.QuestionnaireItemComponent questionnaireItem =
                 questionnaire.getItem().stream().filter(i -> i.getText().equalsIgnoreCase(dictionaryElement.getLabel())).findFirst().get();
         questionnaireItem.setAnswerValueSet(valueSetToBind.getUrl());
@@ -2067,6 +2124,7 @@ public class Processor extends Operation {
         // Observation.code is special case - if mapping is Observation.value[x] with a non-bindable type, we'll still need
         // to allow for binding of Observation.code (the primary code path)
         if (isBindableType(dictionaryElement) || targetElement.getPath().equals("Observation.code")) {
+            String valueSetId = toId(dictionaryElement.getId());
             String valueSetLabel = dictionaryElement.getLabel();
             String valueSetName = null;
 
@@ -2090,10 +2148,10 @@ public class Processor extends Operation {
                 codesToBind = dictionaryElement.getPrimaryCodes();
             }
 
-            String valueSetId = toId(valueSetName);
+            valueSetNameMap.put(valueSetName, valueSetId);
             ValueSet valueSet = null;
             if (codesToBind != null) {
-                valueSet = ensureValueSetWithCodes(valueSetId, valueSetLabel, codesToBind);
+                valueSet = ensureValueSetWithCodes(getValueSetId(valueSetName), valueSetLabel, codesToBind);
             }
 
             if (valueSet != null) {
@@ -2529,6 +2587,34 @@ public class Processor extends Operation {
                     </resource>
                  */
                 igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"CodeSystem/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", cs.getId()));
+            }
+        }
+    }
+
+    public void processQuestionnaires() {
+        for (Questionnaire q : questionnaires) {
+            for (Questionnaire.QuestionnaireItemComponent item : q.getItem()) {
+                if (item.hasDefinition()) {
+                    String definition = item.getDefinition();
+                    DictionaryElement de = elementsById.get(definition);
+                    if (de != null) {
+                        StructureDefinition sd = profilesByElementId.get(de.getId());
+                        if (sd != null) {
+                            if (de.getFhirElementPath() != null && de.getFhirElementPath().getResourcePath() != null) {
+                                item.setDefinition(String.format("%s#%s", sd.getUrl(), de.getFhirElementPath().getResourcePath()));
+                            }
+                            else {
+                                item.setDefinition(sd.getUrl());
+                            }
+                        }
+                        else {
+                            item.setDefinition(null);
+                        }
+                    }
+                    else {
+                        item.setDefinition(null);
+                    }
+                }
             }
         }
     }
@@ -3080,18 +3166,29 @@ public class Processor extends Operation {
         }
         activityIndex.append(System.lineSeparator());
         activityIndex.append(System.lineSeparator());
-        activityIndex.append("|Data Element Id|Data Element|");
+        if (activityCoding != null) {
+            String questionnaireId = toUpperId(activityCoding.getCode());
+            activityIndex.append(String.format("Data elements for this activity can be collected using the [%s](Questionnaire-%s.html)", questionnaireId, questionnaireId));
+            activityIndex.append(System.lineSeparator());
+            activityIndex.append(System.lineSeparator());
+        }
+        activityIndex.append("|Id|Label|Description|Type|Profile Path|");
         activityIndex.append(System.lineSeparator());
-        activityIndex.append("|---|---|");
+        activityIndex.append("|---|---|---|---|---|");
         activityIndex.append(System.lineSeparator());
     }
 
     private void writeActivityIndexEntry(StringBuilder activityIndex, StructureDefinition sd) {
-        Identifier dataElementIdentifier = getDataElementIdentifier(sd.getIdentifier());
-        String title = sd.hasTitle() ? sd.getTitle() : sd.hasName() ? sd.getName() : sd.getId();
-        activityIndex.append(String.format("|%s|[%s](StructureDefinition-%s.html)|",
-                dataElementIdentifier != null ? dataElementIdentifier.getValue() : "", title, sd.getId()));
-        activityIndex.append(System.lineSeparator());
+        List<DictionaryElement> lde = elementsByProfileId.get(sd.getId());
+        if (lde != null) {
+            for (DictionaryElement de : lde) {
+                String path = de.getFhirElementPath() != null ? de.getFhirElementPath().getResourceTypeAndPath() : "";
+                String type = de.getFhirElementPath() != null ? de.getFhirElementPath().getFhirElementType() : de.getType();
+                activityIndex.append(String.format("|%s|%s|%s|%s|[%s](StructureDefinition-%s.html)|",
+                        de.getId(), de.getDataElementLabel(), de.getDescription(), type, path, sd.getId()));
+                activityIndex.append(System.lineSeparator());
+            }
+        }
     }
 
     public void writeDataElements(String scope, String scopePath) {

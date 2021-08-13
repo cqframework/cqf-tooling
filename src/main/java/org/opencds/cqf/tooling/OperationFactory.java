@@ -38,6 +38,7 @@ class OperationFactory {
             case "OpioidXlsxToValueSet":
                  return new OpioidValueSetGenerator();
             case "EnsureExecutableValueSet":
+            case "EnsureComputableValueSet":
                 return new EnsureExecutableValueSetOperation();
             case "ToJsonValueSetDb":
                 return new ToJsonValueSetDbOperation();
