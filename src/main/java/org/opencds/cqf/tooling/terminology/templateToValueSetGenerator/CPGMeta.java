@@ -1,4 +1,4 @@
-package org.opencds.cqf.tooling.terminology.opioidValuesetGenerator;
+package org.opencds.cqf.tooling.terminology.templateToValueSetGenerator;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.*;
@@ -98,6 +98,7 @@ public class CPGMeta {
                 ValueSet tempVs = fhirContext.newXmlParser().parseResource(ValueSet.class, "<ValueSet>" + compose + "</ValueSet>");
                 vs.setCompose(tempVs.getCompose());
             } catch (Exception e) {
+                System.out.println("An error occurred in the compose for the sheet with id: " + this.id);
                 e.printStackTrace();
             }
         }

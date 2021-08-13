@@ -2,7 +2,7 @@ package org.opencds.cqf.tooling;
 
 //import org.opencds.cqf.tooling.jsonschema.SchemaGenerator;
 import org.apache.commons.lang.NotImplementedException;
-import org.opencds.cqf.tooling.terminology.opioidValuesetGenerator.OpioidValueSetGenerator;
+import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.TemplateToValueSetGenerator;
 import org.opencds.cqf.tooling.acceleratorkit.DTProcessor;
 import org.opencds.cqf.tooling.acceleratorkit.Processor;
 import org.opencds.cqf.tooling.library.r4.LibraryGenerator;
@@ -14,6 +14,7 @@ import org.opencds.cqf.tooling.qdm.QdmToQiCore;
 import org.opencds.cqf.tooling.quick.QuickPageGenerator;
 import org.opencds.cqf.tooling.terminology.*;
 import org.opencds.cqf.tooling.terminology.distributable.DistributableValueSetGenerator;
+
 
 class OperationFactory {
 
@@ -35,8 +36,8 @@ class OperationFactory {
                 return new HEDISValueSetGenerator();
             case "XlsxToValueSet":
                 return new GenericValueSetGenerator();
-            case "OpioidXlsxToValueSet":
-                 return new OpioidValueSetGenerator();
+            case "TemplateToValueSetGenerator":
+                 return new TemplateToValueSetGenerator();
             case "EnsureExecutableValueSet":
             case "EnsureComputableValueSet":
                 return new EnsureExecutableValueSetOperation();
@@ -58,7 +59,7 @@ class OperationFactory {
 //                return new PackageOperation();
             case "GenerateCQLFromDrool":
                 return new GenerateCQLFromDroolOperation();
-            case "VmrToFhir": 
+            case "VmrToFhir":
                 return new VmrToFhirOperation();
             case "RefreshIG":
                 return new RefreshIGOperation();

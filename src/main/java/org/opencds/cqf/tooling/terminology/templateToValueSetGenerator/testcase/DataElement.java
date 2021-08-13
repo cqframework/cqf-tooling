@@ -1,4 +1,4 @@
-package org.opencds.cqf.tooling.terminology.opioidValuesetGenerator.testcase;
+package org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.testcase;
 
 
 public class DataElement {

@@ -1,4 +1,4 @@
-package org.opencds.cqf.tooling.terminology.opioidValuesetGenerator;
+package org.opencds.cqf.tooling.terminology.templateToValueSetGenerator;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.poi.ss.usermodel.*;
@@ -14,11 +14,11 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
-public class OpioidValueSetGenerator extends Operation {
+public class TemplateToValueSetGenerator extends Operation {
 
     private FhirContext fhirContext;
 
-    public OpioidValueSetGenerator() {
+    public TemplateToValueSetGenerator() {
         this.fhirContext = FhirContext.forR4();
     }
 
@@ -27,14 +27,12 @@ public class OpioidValueSetGenerator extends Operation {
     private String outputPrefix  = "valueset-"; // -outputPrefix (-opp)
     private String outputVersion = "r4";        // -fhirv (-fhv)
 
-    private final int VSLIST_IDX = 17;
-
     @Override
     public void execute(String[] args) {
         setOutputPath("src/main/resources/org/opencds/cqf/terminology/r4/output");
 
         for (String arg : args) {
-            if (arg.equals("-OpioidXlsxToValueSet")) continue;
+            if (arg.equals("-TemplateToValueSetGenerator")) continue;
             String[] flagAndValue = arg.split("=");
             if (flagAndValue.length < 2) {
                 throw new IllegalArgumentException("Invalid argument: " + arg);
@@ -59,7 +57,7 @@ public class OpioidValueSetGenerator extends Operation {
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
 
         OrganizationalMetaData organizationalMetaData = resolveOrganizationalMeta(workbook.getSheetAt(0));
-        Map<String, Integer> vsMap = resolveVsMap(workbook, workbook.getSheetAt(0));
+        Map<String, Integer> vsMap = resolveVsMap(workbook, workbook.getSheetAt(1));
         List<ValueSet> valueSets = resolveValueSets(organizationalMetaData, vsMap, workbook);
         output(valueSets);
     }
@@ -175,7 +173,11 @@ public class OpioidValueSetGenerator extends Operation {
 //                    meta.setName(SpreadsheetHelper.getCellAsString(row.getCell(1)));
 //                    break;
                 case "title":
-                    meta.setTitle(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                    String title = SpreadsheetHelper.getCellAsString(row.getCell(1));
+                    meta.setTitle(title);
+                    if((null != title && title.length() > 0) && (null == meta.getId() || meta.getId().length() < 1)){
+                        meta.setId(title.toLowerCase(Locale.ROOT).replace(" ", "-"));
+                    }
                     break;
                 case "status":
                     meta.setStatus(SpreadsheetHelper.getCellAsString(row.getCell(1)));
@@ -206,7 +208,7 @@ public class OpioidValueSetGenerator extends Operation {
                     break;
                 case "compose":
                     if (row.getCell(1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue().length() > 1)
-                        meta.setCompose(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                        meta.setCompose(SpreadsheetHelper.getCellAsStringNoReplacement(row.getCell(1)));
                     break;
                 default:
                     break;
@@ -218,11 +220,9 @@ public class OpioidValueSetGenerator extends Operation {
     private Map<String, Integer> resolveVsMap(Workbook workbook, Sheet sheet) {
         Map<String, Integer> vsMap = new HashMap<>();
         Iterator<Row> rowIterator = sheet.rowIterator();
-        while (rowIterator.next().getRowNum() < VSLIST_IDX) {
-            //
-        }
+        Row row = rowIterator.next();// skip first row
         while (rowIterator.hasNext()) {
-            Row row = rowIterator.next();
+            row = rowIterator.next();
             String sheetName = SpreadsheetHelper.getCellAsString(row.getCell(2, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
 
             if (sheetName.length() <= 0) continue;
@@ -247,33 +247,64 @@ public class OpioidValueSetGenerator extends Operation {
         ValueSet vs;
 
         for (Map.Entry<String, Integer> entrySet : vsMap.entrySet()) {
-            cpgMeta = resolveCpgMeta(workbook.getSheet(entrySet.getKey()));
-            try {
-                if (cpgMeta.getTitle().equals("only fill this out"))
-                    continue;
-            } catch (NullPointerException e) {
-                System.out.println("cpg instance had null title");
-            }
+            Sheet sheet = workbook.getSheet(entrySet.getKey());
+            if (null != sheet) {
+                cpgMeta = resolveCpgMeta(sheet);
+                try {
+                    if (cpgMeta.getTitle().equals("only fill this out"))
+                        continue;
+                } catch (NullPointerException e) {
+                    System.out.println("cpg instance had null title");
+                }
 
-            vs = cpgMeta.populate(fhirContext, outputVersion);
-            meta.populate(vs);
-            resolveCodeList(workbook.getSheet(entrySet.getKey().split("-")[0] + "-cl"), vs, meta.getSnomedVersion());
+                vs = cpgMeta.populate(fhirContext, outputVersion);
+                meta.populate(vs);
+                resolveCodeList(workbook.getSheet(entrySet.getKey().split("-")[0] + "-cl"), vs, meta.getSnomedVersion());
 
 
-            if (vs.hasCompose() && outputVersion.equalsIgnoreCase("r4")) {
-                vs.getMeta().addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-computablevalueset");
-                vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability").setValue(new CodeType("computable"));
-                vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel").setValue(new CodeType("structured"));
+                if (shouldAddCompose(vs, sheet)) {
+                    vs.getMeta().addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-computablevalueset");
+                    vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability").setValue(new CodeType("computable"));
+                    vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel").setValue(new CodeType("structured"));
+                }
+                if (vs.hasExpansion() && outputVersion.equalsIgnoreCase("r4")) {
+                    vs.getMeta().addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-executablevalueset");
+                    vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability").setValue(new CodeType("executable"));
+                    vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel").setValue(new CodeType("executable"));
+                    vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-usageWarning").setValue(new StringType("This value set contains a point-in-time expansion enumerating the codes that meet the value set intent. As new versions of the code systems used by the value set are released, the contents of this expansion will need to be updated to incorporate newly defined codes that meet the value set intent. Before, and periodically during production use, the value set expansion contents SHOULD be updated. The value set expansion specifies the timestamp when the expansion was produced, SHOULD contain the parameters used for the expansion, and SHALL contain the codes that are obtained by evaluating the value set definition. If this is ONLY an executable value set, a distributable definition of the value set must be obtained to compute the updated expansion."));
+                }
+                valueSets.add(vs);
             }
-            if (vs.hasExpansion() && outputVersion.equalsIgnoreCase("r4")) {
-                vs.getMeta().addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-executablevalueset");
-                vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability").setValue(new CodeType("executable"));
-                vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel").setValue(new CodeType("executable"));
-                vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-usageWarning").setValue(new StringType("This value set contains a point-in-time expansion enumerating the codes that meet the value set intent. As new versions of the code systems used by the value set are released, the contents of this expansion will need to be updated to incorporate newly defined codes that meet the value set intent. Before, and periodically during production use, the value set expansion contents SHOULD be updated. The value set expansion specifies the timestamp when the expansion was produced, SHOULD contain the parameters used for the expansion, and SHALL contain the codes that are obtained by evaluating the value set definition. If this is ONLY an executable value set, a distributable definition of the value set must be obtained to compute the updated expansion."));
+            else{
+                System.out.println("Workbook does NOT contain a sheet named " + entrySet.getKey());
             }
-            valueSets.add(vs);
         }
         return valueSets;
+    }
+
+    private boolean shouldAddCompose(ValueSet vs, Sheet sheet){
+        if (vs.hasCompose()&& outputVersion.equalsIgnoreCase("r4")){
+            return true;
+        }
+        Iterator<Row> rowIterator = sheet.rowIterator();
+        while(rowIterator.hasNext()){
+            Row thisRow = rowIterator.next();
+            Cell firstCell = thisRow.getCell(0);
+            Cell secondCell = thisRow.getCell(1);
+            if(firstCell.getStringCellValue() != null &&
+                firstCell.getStringCellValue().equalsIgnoreCase("rules-text") &&
+                secondCell.getStringCellValue() != null &&
+                secondCell.getStringCellValue().length() > 0){
+                return true;
+            }
+            if(firstCell.getStringCellValue() != null &&
+                firstCell.getStringCellValue().equalsIgnoreCase("expression") &&
+                secondCell.getStringCellValue() != null &&
+                secondCell.getStringCellValue().length() > 0){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -345,7 +376,9 @@ public class OpioidValueSetGenerator extends Operation {
             String prefixedOutputPath = String.format(
                     "%s/%s%s.%s", getOutputPath(), outputPrefix, valueSet.getName(), encoding);
 
-            valueSet.setName(valueSet.getName().replace('-', '_'));
+            if(null != valueSet.getName()) {
+                valueSet.setName(valueSet.getName().replace('-', '_'));
+            }
 
             try (FileOutputStream writer = new FileOutputStream(prefixedOutputPath)) {
                 writer.write(
