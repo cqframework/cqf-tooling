@@ -1,6 +1,7 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -8,11 +9,14 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.opencds.cqf.tooling.utilities.IOUtils.ensurePath;
 
@@ -35,6 +39,7 @@ public class DTProcessor extends Operation {
 
     private String activityCodeSystem = "http://fhir.org/guides/who/anc-cds/CodeSystem/activity-codes";
     private Map<String, Coding> activityMap = new LinkedHashMap<String, Coding>();
+    private Map<String, Integer> expressionNameCounterMap = new HashMap<String, Integer>();
 
     @Override
     public void execute(String[] args) {
@@ -107,6 +112,7 @@ public class DTProcessor extends Operation {
             System.out.println(String.format("Sheet %s not found in the Workbook, so no processing was done.", page));
         }
         else {
+            System.out.println(String.format("Processing Sheet %s.", page));
             processDecisionTableSheet(workbook, sheet);
         }
     }
@@ -130,7 +136,8 @@ public class DTProcessor extends Operation {
             Iterator<Cell> cells = row.cellIterator();
             while (cells.hasNext()) {
                 Cell cell = cells.next();
-                if (cell.getStringCellValue().toLowerCase().startsWith("decision")) {
+                String cellValue = cell.getStringCellValue().toLowerCase();
+                if (cellValue.startsWith("decision")) {
                     PlanDefinition planDefinition = processDecisionTable(workbook, it, cells);
                     if (planDefinition != null) {
                         planDefinitions.put(planDefinition.getId(), planDefinition);
@@ -178,7 +185,7 @@ public class DTProcessor extends Operation {
 
         Cell cell = cells.next();
         int headerInfoColumnIndex = cell.getColumnIndex();
-        String decisionTitle = cell.getStringCellValue();
+        String decisionTitle = cell.getStringCellValue().trim();
         int index = decisionTitle.indexOf(' ');
         if (index < 0) {
             throw new IllegalArgumentException("Expected business rule title of the form '<ID> <Title>'");
@@ -262,19 +269,29 @@ public class DTProcessor extends Operation {
         int referenceColumnIndex = -1;
         while (cells.hasNext()) {
             cell = cells.next();
-            if (cell.getStringCellValue().toLowerCase().startsWith("input")) {
+            if (cell.getStringCellValue().toLowerCase().startsWith("input")
+                || cell.getStringCellValue().toLowerCase().startsWith("inputs")
+                || cell.getStringCellValue().toLowerCase().startsWith("input(s)")) {
                 inputColumnIndex = cell.getColumnIndex();
             }
-            else if (cell.getStringCellValue().toLowerCase().startsWith("output")) {
+            else if (cell.getStringCellValue().toLowerCase().startsWith("output")
+                    || cell.getStringCellValue().toLowerCase().startsWith("outputs")
+                    || cell.getStringCellValue().toLowerCase().startsWith("output(s)")) {
                 outputColumnIndex = cell.getColumnIndex();
             }
-            else if (cell.getStringCellValue().toLowerCase().startsWith("action")) {
+            else if (cell.getStringCellValue().toLowerCase().startsWith("action")
+                    || cell.getStringCellValue().toLowerCase().startsWith("actions")
+                    || cell.getStringCellValue().toLowerCase().startsWith("action(s)")) {
                 actionColumnIndex = cell.getColumnIndex();
             }
-            else if (cell.getStringCellValue().toLowerCase().startsWith("annotation")) {
+            else if (cell.getStringCellValue().toLowerCase().startsWith("annotation")
+                    || cell.getStringCellValue().toLowerCase().startsWith("annotations")
+                    || cell.getStringCellValue().toLowerCase().startsWith("annotation(s)")) {
                 annotationColumnIndex = cell.getColumnIndex();
             }
-            else if (cell.getStringCellValue().toLowerCase().startsWith("reference")) {
+            else if (cell.getStringCellValue().toLowerCase().startsWith("reference")
+                    || cell.getStringCellValue().toLowerCase().startsWith("references")
+                    || cell.getStringCellValue().toLowerCase().startsWith("reference(s)")) {
                 referenceColumnIndex = cell.getColumnIndex();
                 break;
             }
@@ -285,6 +302,7 @@ public class DTProcessor extends Operation {
         String currentAnnotationValue = null;
         for (;;) {
             PlanDefinition.PlanDefinitionActionComponent subAction = processAction(it, inputColumnIndex, outputColumnIndex, actionColumnIndex, annotationColumnIndex, actionId, currentAnnotationValue, referenceColumnIndex);
+
             if (subAction == null) {
                 break;
             }
@@ -292,6 +310,21 @@ public class DTProcessor extends Operation {
             if (!actionsEqual(currentAction, subAction)) {
                 actionId++;
                 currentAction = subAction;
+
+                Integer nextCounter = 1;
+                String actionDescription = subAction.getAction().size() > 1
+                        ? subAction.getAction().get(0).getTitle().replace(System.getProperty("line.separator"), "")
+                        : subAction.getDescription();
+                if (!expressionNameCounterMap.containsKey(actionDescription)) {
+                    expressionNameCounterMap.put(actionDescription, 1);
+                }
+
+                nextCounter = expressionNameCounterMap.get(actionDescription);
+                expressionNameCounterMap.put(actionDescription, nextCounter + 1);
+
+                actionDescription = actionDescription + (nextCounter > 1 ? String.format(" %s", nextCounter) : "");
+                subAction.setDescription(actionDescription);
+
                 currentAnnotationValue = subAction.getTextEquivalent();
                 action.getAction().add(subAction);
             }
@@ -322,9 +355,18 @@ public class DTProcessor extends Operation {
             return false;
         }
 
+        List<PlanDefinition.PlanDefinitionActionComponent> currentActionSubs = currentAction.getAction();
+        List<PlanDefinition.PlanDefinitionActionComponent> newActionSubs = newAction.getAction();
+
+
+        String currentActionDescription = currentActionSubs.stream().map(PlanDefinition.PlanDefinitionActionComponent::getTitle)
+                .collect(Collectors.joining(" AND "));
+        String newActionDescription = newActionSubs.stream().map(PlanDefinition.PlanDefinitionActionComponent::getTitle)
+                .collect(Collectors.joining(" AND "));
+
         return stringsEqual(currentAction.getTitle(), newAction.getTitle())
                 && stringsEqual(currentAction.getTextEquivalent(), newAction.getTextEquivalent())
-                && stringsEqual(currentAction.getDescription(), newAction.getDescription())
+                && stringsEqual(currentActionDescription, newActionDescription)
                 && subActionsEqual(currentAction.getAction(), newAction.getAction());
     }
 
@@ -355,11 +397,37 @@ public class DTProcessor extends Operation {
         return false;
     }
 
+    private boolean rowIsValid(Row row, int inputColumnIndex, int actionColumnIndex, int annotationColumnIndex) {
+        // Currently considered "valid" if any of the four known columns have a non-null, non-empty string value.
+        int[] valueColumnIndexes = new int[] { inputColumnIndex, actionColumnIndex, annotationColumnIndex };
+
+        for (int i=0; i < valueColumnIndexes.length - 1; i++) {
+            int columnIndex = valueColumnIndexes[i];
+            Cell cell = row.getCell(columnIndex);
+            if (cell != null) {
+                String columnValueString = cell.getStringCellValue();
+                if (columnValueString == null || columnValueString.isEmpty()) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+
+        }
+
+        return true;
+    }
+
     private PlanDefinition.PlanDefinitionActionComponent processAction(Iterator<Row> it, int inputColumnIndex,
            int outputColumnIndex, int actionColumnIndex, int annotationColumnIndex, int actionId, String currentAnnotationValue,
            int referenceColumnIndex) {
         if (it.hasNext()) {
             Row row = it.next();
+            // If the row is not valid, do not process it.
+            if (!rowIsValid(row, inputColumnIndex, actionColumnIndex, annotationColumnIndex)) {
+                return null;
+            }
+
             Cell cell;
             PlanDefinition.PlanDefinitionActionComponent action = new PlanDefinition.PlanDefinitionActionComponent();
 
@@ -396,12 +464,6 @@ public class DTProcessor extends Operation {
                 }
             }
 
-            if (outputColumnIndex >= 0) {
-                cell = row.getCell(outputColumnIndex);
-                String outputValue = cell.getStringCellValue();
-                action.setDescription(outputValue);
-            }
-
             PlanDefinition.PlanDefinitionActionConditionComponent condition = new PlanDefinition.PlanDefinitionActionConditionComponent();
             condition.setKind(PlanDefinition.ActionConditionKind.APPLICABILITY);
             condition.setExpression(new Expression().setLanguage("text/cql-identifier").setDescription(applicabilityCondition.toString()));
@@ -413,15 +475,19 @@ public class DTProcessor extends Operation {
                 if (cell != null) {
                     String actionValue = cell.getStringCellValue();
                     if (actionValue != null && !actionValue.isEmpty() && !actionValue.equals("")) {
-                        actionValues.add(actionValue);
+                        actionValues.add(actionValue.replace(System.getProperty("line.separator"), ""));
                     }
                 }
             }
 
+            String actionsDescription = String.join(" AND ", actionValues);
+            action.setDescription(actionsDescription);
+
             if (actionValues.size() == 1) {
-                action.setTitle(actionValues.get(0));
+                action.setTitle(actionValues.get(0).replace(System.getProperty("line.separator"), ""));
             }
             else {
+                action.setTitle(actionValues.get(0).replace(System.getProperty("line.separator"), ""));
                 for (String actionValue : actionValues) {
                     PlanDefinition.PlanDefinitionActionComponent subAction = new PlanDefinition.PlanDefinitionActionComponent();
                     subAction.setTitle(actionValue);
@@ -517,6 +583,8 @@ public class DTProcessor extends Operation {
         cql.append("include FHIRHelpers version '4.0.1'");
         cql.append(newLine);
         cql.append(newLine);
+        cql.append("include ANCConfig called Config");
+        cql.append(newLine);
         cql.append("include ANCConcepts called Cx");
         cql.append(newLine);
         cql.append("include ANCDataElements called PatientData");
@@ -529,8 +597,16 @@ public class DTProcessor extends Operation {
 
     private void writeLibraries(String outputPath) {
         if (libraries != null && libraries.size() > 0) {
+            String outputFilePath = outputPath + File.separator + "input" + File.separator + "resources" + File.separator + "library";
+            try {
+                ensurePath(outputFilePath);
+            }
+            catch (IOException e) {
+                throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
+            }
+
             for (Library library : libraries.values()) {
-                writeResource(outputPath, library);
+                writeResource(outputFilePath, library);
             }
         }
     }
@@ -538,7 +614,15 @@ public class DTProcessor extends Operation {
     private void writeLibraryCQL(String outputPath) {
         if (libraryCQL != null && libraryCQL.size() > 0) {
             for (Map.Entry<String, StringBuilder> entry : libraryCQL.entrySet()) {
-                String outputFilePath = outputPath + "/" + entry.getKey() + ".cql";
+                String outputDirectoryPath = outputPath + File.separator + "input" + File.separator + "cql";
+                String outputFilePath = outputDirectoryPath + File.separator + entry.getKey() + ".cql";
+                try {
+                    ensurePath(outputDirectoryPath);
+                }
+                catch (IOException e) {
+                    throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
+                }
+
                 try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
                     writer.write(entry.getValue().toString().getBytes());
                     writer.flush();
@@ -554,14 +638,21 @@ public class DTProcessor extends Operation {
     private void writePlanDefinitions(String outputPath) {
         if (planDefinitions != null && planDefinitions.size() > 0) {
             for (PlanDefinition planDefinition : planDefinitions.values()) {
-                writeResource(outputPath, planDefinition);
+                String outputFilePath = outputPath + File.separator + "input" + File.separator + "resources" + File.separator + "plandefinition";
+                try {
+                    ensurePath(outputFilePath);
+                }
+                catch (IOException e) {
+                    throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
+                }
+                writeResource(outputFilePath, planDefinition);
             }
         }
     }
 
     /* Write Methods */
     public void writeResource(String path, Resource resource) {
-        String outputFilePath = path + "/" + resource.getResourceType().toString().toLowerCase() + "-" + resource.getIdElement().getIdPart() + "." + encoding;
+        String outputFilePath = path + File.separator + resource.getResourceType().toString().toLowerCase() + "-" + resource.getIdElement().getIdPart() + "." + encoding;
         try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
             writer.write(
                     encoding.equals("json")
@@ -577,6 +668,9 @@ public class DTProcessor extends Operation {
 
     private String buildPlanDefinitionIndex() {
         StringBuilder index = new StringBuilder();
+        index.append("### Plan Definitions by Decision ID");
+        index.append(newLine);
+        index.append(newLine);
         index.append("|Decision Table|Description|");
         index.append(newLine);
         index.append("|---|---|");
@@ -590,8 +684,15 @@ public class DTProcessor extends Operation {
         return index.toString();
     }
 
-    public void writePlanDefinitionIndex(String path) {
-        String outputFilePath = path + "/PlanDefinitionIndex.md";
+    public void writePlanDefinitionIndex(String outputPath) {
+        String outputFilePath = outputPath + File.separator + "input" + File.separator + "pagecontent"+ File.separator + "PlanDefinitionIndex.md";
+        try {
+            ensurePath(outputFilePath);
+        }
+        catch (IOException e) {
+            throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
+        }
+
         try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
             writer.write(buildPlanDefinitionIndex().getBytes());
             writer.flush();

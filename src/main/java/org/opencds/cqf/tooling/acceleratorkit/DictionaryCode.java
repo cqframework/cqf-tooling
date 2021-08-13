@@ -11,6 +11,20 @@ import org.hl7.fhir.r4.model.Coding;
  */
 public class DictionaryCode {
 
+    private String id;
+    public String getId() {
+        return this.id;
+    }
+    public void setId(String id) {
+        if (id == null) {
+            this.id = null;
+        }
+
+        if (id != null) {
+            this.id = id.replace((char) 160, (char) 32).trim();
+        }
+    }
+
     private String label;
     public String getLabel() {
         return this.label;
@@ -19,7 +33,10 @@ public class DictionaryCode {
         if (label == null) {
             this.label = null;
         }
-        this.label = label.replace((char)160, (char)32).trim();
+
+        if (label != null) {
+            this.label = label.replace((char) 160, (char) 32).trim();
+        }
     }
 
     private String display;
@@ -30,7 +47,10 @@ public class DictionaryCode {
         if (display == null) {
             this.display = null;
         }
-        this.display = display.replace((char)160, (char)32).trim();
+
+        if (display != null) {
+            this.display = display.replace((char) 160, (char) 32).trim();
+        }
     }
 
     private String parent;
@@ -60,14 +80,10 @@ public class DictionaryCode {
         this.code = code.replace((char)160, (char)32).trim();
     }
 
-    private List<CodeableConcept> terminologies;
-    public List<CodeableConcept> getTerminologies() {
-        if (this.terminologies == null) {
-            this.terminologies = new ArrayList<>();
-        }
-        return this.terminologies;
+    private List<DictionaryCode> mappings = new ArrayList<DictionaryCode>();
+    public List<DictionaryCode> getMappings() {
+        return mappings;
     }
-
 
     public CodeableConcept toCodeableConcept() {
         CodeableConcept cc = new CodeableConcept();

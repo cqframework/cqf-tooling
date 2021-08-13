@@ -152,8 +152,8 @@ package org.opencds.cqf.tooling;
 
         - Decision Table Processor
             - This tooling converts a WHO accelerator kit decision table to a set of PlanDefinition resources
-            - mvn exec:java -Dexec.args="-ProcessDecisionTable [-pathtospreadsheet | -pts] [-decisiontablepages | -dtp] (-outputpath | -op) (-encoding | -e)"
-            - Example: mvn exec:java -Dexec.args="-ProcessDecisionTable -pts=ANC-Decision-Logic.xlsx -dtp=""ANC.DT.01 Danger signs,ANC.DT.02 Check symptoms"""
+            - mvn exec:java -Dexec.args="-ProcessDecisionTables [-pathtospreadsheet | -pts] [-decisiontablepages | -dtp] (-outputpath | -op) (-encoding | -e)"
+            - Example: mvn exec:java -Dexec.args="-ProcessDecisionTables -pts=ANC-Decision-Logic.xlsx -dtp=""ANC.DT.01 Danger signs,ANC.DT.02 Check symptoms"""
 
         - Jurisdiction List Converter
             - This tooling converts an RCKMS list of jurisdictions from an Excel file to a CodeSystem
@@ -176,6 +176,19 @@ package org.opencds.cqf.tooling;
         - VmrToFhirTransformer
             - command: mvn exec: java -Dexec.args="-VmrToFhir -ifp=./src/test/resources/org/opencds/cqf/tooling/operation/VmrToFhir -op=./src/test/resources/org/opencds/cqf/tooling/operation/VmrToFhir/vMROutput.xml -e=xml"
             - this tooling transforms vMR data to FHIR data
+
+        - EnsureExecutableValueSet
+            - command: mvn exec: java -Dexec.args="-EnsureExecutableValueSet [-valuesetpath | -vsp] (-outputpath | -op) (-declarecpg | -cpg) (-force | -f)"
+            - This tooling generates an expansion if one is not present (and the compose consists only of includes without filters)
+            - The -cpg flag indicates whether to mark the value set as executable with CPG profile indicators
+            - The -force flag indicates that even if the value set has an expansion, this should recompute it
+
+        - EnsureComputableValueSet
+            - command: mvn exec: java -Dexec.args="-EnsureComputableValueSet [-valuesetpath | -vsp] (-outputpath | -op) (-declarecpg | -cpg) (-force | -f) (-skipversion | -sv)"
+            - This tooling infers a compose if one is not present (and there is an expansion)
+            - The -cpg flag indicates whether to mark the value set as computable with CPG profile indicators
+            - The -force flag indicates that even if the value set has a compose, this should reinfer it
+            - The -skipversion flag indicates that code system versions that are present in the expansion should not be expressed in the inferred compose
         */
 
 public class Main {
