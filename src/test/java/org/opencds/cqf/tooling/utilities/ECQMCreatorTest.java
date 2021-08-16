@@ -26,6 +26,7 @@ import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Measure;
 import org.opencds.cqf.tooling.operation.ExtractMatBundleOperation;
 import org.testng.annotations.Test;
+import org.testng.annotations.DataProvider;
 import org.opencds.cqf.tooling.measure.MeasureRefreshProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,6 +94,24 @@ public class ECQMCreatorTest {
         }
 
     }
+
+    @DataProvider(name="matMeasureLoader")
+    public static Object[][] matMeasures(){
+        return new Object [][] {
+            {"CMS125FHIR-v0-0-004-FHIR-4-0-1.json", "BreastCancerScreeningsFHIR"},
+            {"CMS104-v2-0-004-FHIR-4-0-1.json", "DischargedonAntithromboticTherapyFHIR"},
+            {"CMS104-v2-0-004-FHIR-4-0-1_bad.json", "DischargedonAntithromboticTherapyFHIR"}
+
+        };
+    }
+
+
+    @Test(dataProvider = "matMeasureLoader")
+    public void TestMatOutputCasesParamaterized(String matBundleName, String measureLibraryName){
+        TestMatOutputCase(matBundleName, measureLibraryName);
+    }
+
+
 
     @Test
     public void TestCMS125FHIR() {
