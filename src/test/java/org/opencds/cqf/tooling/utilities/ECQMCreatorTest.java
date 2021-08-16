@@ -100,8 +100,6 @@ public class ECQMCreatorTest {
         return new Object [][] {
             {"CMS125FHIR-v0-0-004-FHIR-4-0-1.json", "BreastCancerScreeningsFHIR"},
             {"CMS104-v2-0-004-FHIR-4-0-1.json", "DischargedonAntithromboticTherapyFHIR"},
-            {"CMS104-v2-0-004-FHIR-4-0-1_bad.json", "DischargedonAntithromboticTherapyFHIR"}
-
         };
     }
 
@@ -109,18 +107,6 @@ public class ECQMCreatorTest {
     @Test(dataProvider = "matMeasureLoader")
     public void TestMatOutputCasesParamaterized(String matBundleName, String measureLibraryName){
         TestMatOutputCase(matBundleName, measureLibraryName);
-    }
-
-
-
-    @Test
-    public void TestCMS125FHIR() {
-        TestMatOutputCase("CMS125FHIR-v0-0-004-FHIR-4-0-1.json", "BreastCancerScreeningsFHIR");
-    }
-   
-    @Test
-    public void TestCMS104FHIR() {
-        TestMatOutputCase("CMS104-v2-0-004-FHIR-4-0-1.json", "DischargedonAntithromboticTherapyFHIR");
     }
 
     @Test
