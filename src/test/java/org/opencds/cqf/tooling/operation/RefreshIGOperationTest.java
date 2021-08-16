@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +12,6 @@ import java.util.Scanner;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.IniFile;
-import org.junit.Before;
 import org.junit.Test;
 import org.opencds.cqf.tooling.processor.IGProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
