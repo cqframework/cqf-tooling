@@ -67,15 +67,15 @@ public class ECQMCreatorTest {
         return measureResourceContent;
     }
 
-    @Test
-    public void TestCMS125FHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test to use as the template to add the rest of the content for testing
+    private void TestMatOutputCase(String matBundleName, String measureLibraryName){
+
+        System.out.println("Testing " + matBundleName + " " + measureLibraryName);
+
         ExtractMatBundleOperation o = new ExtractMatBundleOperation();
-        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS125FHIR-v0-0-004-FHIR-4-0-1.json").getFile() });
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/" + matBundleName).getFile() });
 
         try {
-            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/BreastCancerScreeningsFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/BreastCancerScreeningsFHIR.json");
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/" + measureLibraryName +".cql", "ecqm-content-r4-2021/input/resources/measure/"+ measureLibraryName +".json");
             assertTrue(null != measure);
             // Extract data requirements from the measure:
             List<DataRequirement> drs = new ArrayList<DataRequirement>();
@@ -91,32 +91,17 @@ public class ECQMCreatorTest {
         catch (IOException ioException) {
             ioException.printStackTrace();
         }
+
+    }
+
+    @Test
+    public void TestCMS125FHIR() {
+        TestMatOutputCase("CMS125FHIR-v0-0-004-FHIR-4-0-1.json", "BreastCancerScreeningsFHIR");
     }
    
     @Test
     public void TestCMS104FHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
-        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS104-v2-0-004-FHIR-4-0-1.json").getFile() });
-
-        try {
-            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/DischargedonAntithromboticTherapyFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/DischargedonAntithromboticTherapyFHIR.json");
-            assertTrue(null != measure);
-            // Extract data requirements from the measure:
-            List<DataRequirement> drs = new ArrayList<DataRequirement>();
-            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
-                if (e.hasValue()) {
-                    drs.add(e.getValueDataRequirement());
-                }
-            }
-            assertTrue(!drs.isEmpty());
-            // TODO: Measure-specific validation of data requirements content
-            logger.debug(measureToString(measure));
-        }
-        catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
+        TestMatOutputCase("CMS104-v2-0-004-FHIR-4-0-1.json", "DischargedonAntithromboticTherapyFHIR");
     }
 
     @Test
