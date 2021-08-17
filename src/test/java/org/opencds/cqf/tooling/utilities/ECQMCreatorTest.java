@@ -97,9 +97,11 @@ public class ECQMCreatorTest {
 
     @DataProvider(name="matMeasureLoader")
     public static Object[][] matMeasures(){
+        // TODO: should we be getting the measure name from the json?
         return new Object [][] {
             {"CMS125FHIR-v0-0-004-FHIR-4-0-1.json", "BreastCancerScreeningsFHIR"},
             {"CMS104-v2-0-004-FHIR-4-0-1.json", "DischargedonAntithromboticTherapyFHIR"},
+            {"CMS122FHIR-v0-0-004-FHIR-4-0-1.json", "DiabetesHemoglobinA1cHbA1cPoorControl9FHIR"},
         };
     }
 
