@@ -105,7 +105,8 @@ public class ECQMCreatorTest {
             {"CMS130FHIR-v0-0-002-FHIR-4-0-1.json", "ColorectalCancerScreeningsFHIR"},
             {"CMS347FHIR-v0-1-013-FHIR-4-0-1.json", "FHIR347"},
             {"HybridHWMFHIR-v0-101-021-FHIR-4-0-1.json", "HybridHWMFHIR"},
-            {"SafeUseofOpioidsFHIR-v0-0-009-FHIR-4-0-1.json", "SafeUseofOpioidsConcurrentPrescribingFHIR"}
+            {"SafeUseofOpioidsFHIR-v0-0-009-FHIR-4-0-1.json", "SafeUseofOpioidsConcurrentPrescribingFHIR"},
+            {"IPSSwithBPHdxFHIR-v0-0-004-FHIR-4-0-1.json", "UrinarySymptomScoreChange6to12MonthsAfterDiagnosisofBenignProstaticHyperplasiaFHIR"}
         };
     }
 
