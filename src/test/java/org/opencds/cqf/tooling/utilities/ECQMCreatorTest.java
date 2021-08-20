@@ -107,7 +107,9 @@ public class ECQMCreatorTest {
             {"HybridHWRFHIR-v1-3-001-FHIR-4-0-1.json", "HybridHWRFHIR"},
             {"HybridHWMFHIR-v0-101-021-FHIR-4-0-1.json", "HybridHWMFHIR"},
             {"Safe Use of OpioidsFHIR-v0-0-009-FHIR-4-0-1.json", "SafeUseofOpioidsConcurrentPrescribingFHIR"},
-            {"IPSS with BPH dxFHIR-v0-0-004-FHIR-4-0-1.json", "UrinarySymptomScoreChange6to12MonthsAfterDiagnosisofBenignProstaticHyperplasiaFHIR"}
+            {"IPSS with BPH dxFHIR-v0-0-004-FHIR-4-0-1.json", "UrinarySymptomScoreChange6to12MonthsAfterDiagnosisofBenignProstaticHyperplasiaFHIR"},
+            {"HIV ScreeningFHIR-v0-0-003-FHIR-4-0-1.json", "HIVScreeningFHIR"},
+            {"DEXA screen prostateFHIR-v0-0-005-FHIR-4-0-1.json", "BoneDensityProstateCancerAndrogenDeprivationTherapyFHIR"}
         };
     }
 
