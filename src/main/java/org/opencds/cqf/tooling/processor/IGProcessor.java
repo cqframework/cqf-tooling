@@ -119,7 +119,9 @@ public class IGProcessor extends BaseProcessor {
 
         IGProcessor.ensure(rootDir, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
 
-        libraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
+        List<String> refreshedLibraryNames;
+        refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
+        refreshedResourcesNames.addAll(refreshedLibraryNames);
 
         List<String> refreshedMeasureNames;
         refreshedMeasureNames = measureProcessor.refreshIgMeasureContent(this, encoding, versioned, fhirContext, measureToRefreshPath);

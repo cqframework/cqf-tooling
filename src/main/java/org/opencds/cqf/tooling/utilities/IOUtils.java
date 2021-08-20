@@ -242,6 +242,13 @@ public class IOUtils
         return resource;
     }
 
+    public static void updateCachedResource(IBaseResource updatedResource, String path){
+        if(null != cachedResources.get(path)){
+            cachedResources.put(path, updatedResource);
+        }
+
+    }
+
     public static List<IBaseResource> readResources(List<String> paths, FhirContext fhirContext) 
     {
         List<IBaseResource> resources = new ArrayList<>();

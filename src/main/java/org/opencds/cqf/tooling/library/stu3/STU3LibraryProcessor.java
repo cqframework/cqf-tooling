@@ -43,19 +43,23 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         List<org.hl7.fhir.r5.model.Library> refreshedLibraries = super.refreshGeneratedContent(libraries);
         for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
             String filePath = fileMap.get(refreshedLibrary.getId());
-            org.hl7.fhir.dstu3.model.Library library = (org.hl7.fhir.dstu3.model.Library) VersionConvertor_30_50.convertResource(refreshedLibrary);
+            if(null != filePath) {
+                org.hl7.fhir.dstu3.model.Library library = (org.hl7.fhir.dstu3.model.Library) VersionConvertor_30_50.convertResource(refreshedLibrary);
 
-            cleanseRelatedArtifactReferences(library);
+                cleanseRelatedArtifactReferences(library);
 
-            cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
-            IOUtils.writeResource(library, filePath, IOUtils.getEncoding(filePath), fhirContext);
-            String refreshedLibraryName;
-            if (this.versioned && refreshedLibrary.getVersion() != null) {
-                refreshedLibraryName = refreshedLibrary.getName() + "-" + refreshedLibrary.getVersion();
-            } else {
-                refreshedLibraryName = refreshedLibrary.getName();
+                cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
+                IOUtils.writeResource(library, filePath, IOUtils.getEncoding(filePath), fhirContext);
+                IOUtils.updateCachedResource(library, filePath);
+
+                String refreshedLibraryName;
+                if (this.versioned && refreshedLibrary.getVersion() != null) {
+                    refreshedLibraryName = refreshedLibrary.getName() + "-" + refreshedLibrary.getVersion();
+                } else {
+                    refreshedLibraryName = refreshedLibrary.getName();
+                }
+                refreshedLibraryNames.add(refreshedLibraryName);
             }
-            refreshedLibraryNames.add(refreshedLibraryName);
         }
 
         return refreshedLibraryNames;
