@@ -78,6 +78,8 @@ public class R4LibraryProcessor extends LibraryProcessor {
                 // It would be nice for the tooling to generate library shells, we have enough information to,
                 // but the tooling gets confused about the ID and the filename and what gets written is garbage
                 IOUtils.writeResource(library, filePath, fileEncoding, fhirContext, this.versioned);
+                IOUtils.updateCachedResource(library, filePath);
+
                 String refreshedLibraryName;
                 if (this.versioned && refreshedLibrary.getVersion() != null) {
                     refreshedLibraryName = refreshedLibrary.getName() + "-" + refreshedLibrary.getVersion();
