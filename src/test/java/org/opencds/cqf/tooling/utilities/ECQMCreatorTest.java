@@ -111,6 +111,7 @@ public class ECQMCreatorTest {
             {"HIV ScreeningFHIR-v0-0-003-FHIR-4-0-1.json", "HIVScreeningFHIR"},
             {"DEXA screen prostateFHIR-v0-0-005-FHIR-4-0-1.json", "BoneDensityProstateCancerAndrogenDeprivationTherapyFHIR"},
             {"CMS249FHIR-v0-0-001-FHIR-4-0-1.json", "AppropriateDXAScansForWomenUnder65FHIR"},
+            {"CMS190-v0-0-003-FHIR-4-0-1.json", "IntensiveCareUnitVenousThromboembolismProphylaxisFHIR"},
             {"CMS177FHIR-v0-0-002-FHIR-4-0-1.json", "ChildandAdolescentMajorDepressiveDisorderMDDSuicideRiskAssessmentFHIR"},
             {"CMS165FHIR-v0-0-003-FHIR-4-0-1.json", "ControllingHighBloodPressureFHIR"}
         };
