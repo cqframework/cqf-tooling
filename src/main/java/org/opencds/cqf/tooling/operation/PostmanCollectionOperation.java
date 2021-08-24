@@ -4,10 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -77,11 +75,9 @@ public class PostmanCollectionOperation extends Operation {
         generateUrlPathTokens();
         validateCollectionName();
 
-        System.out.println("Host:" + hostNames.toString());
 
         // Expect the path directory will contain directories each of that will contain bundle json
         File[] bundleDirectories = getListOfActionableDirectories(bundleDirectory);
-        System.out.println(bundleDirectories.length);
 
         PostmanCollection postmanCollection = createPostmanCollection();
         BaseItem versionItem = populateVersionItem(postmanCollection, version);
@@ -93,7 +89,6 @@ public class PostmanCollectionOperation extends Operation {
                 continue;
             }
             for (File file : bundleFiles) {
-                System.out.println("Filename:" + file.getName());
                 IBaseResource resource = parseBundle(file);
                 if (resource != null) {
                     String fileContent = IOUtils.getFileContent(file);
@@ -104,8 +99,6 @@ public class PostmanCollectionOperation extends Operation {
 
         }
         printPostmanCollection(postmanCollection);
-
-        // testJson();
     }
 
     private void validateCollectionName() {
@@ -123,8 +116,6 @@ public class PostmanCollectionOperation extends Operation {
             if(!StringUtils.isEmpty(urlBase)) {
                 hostTokens.addAll(Arrays.asList(urlBase.split("\\.")));
             }
-
-
             if(StringUtils.isNotBlank(protocol)) {
                 hostNames.append(protocol);
                 hostNames.append("://");
@@ -400,7 +391,7 @@ public class PostmanCollectionOperation extends Operation {
         RequestBody requestBody = new RequestBody();
         requestBody.setMode("raw");
         if(body != null) {
-            requestBody.setBody(body);
+            requestBody.setRaw(body);
         }
         return requestBody;
     }
@@ -424,7 +415,6 @@ public class PostmanCollectionOperation extends Operation {
         IBaseResource theResource = null;
         try {
             theResource = context.newJsonParser().parseResource(new FileReader(resource));
-            System.out.println("Type:"+context.getResourceType(theResource));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
@@ -446,8 +436,6 @@ public class PostmanCollectionOperation extends Operation {
 
         try {
             String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(postmanCollection);
-            //mapper.writeValue(new File(getOutputPath()+"/PostmanColl.json"),postmanCollection);
-            //System.out.println(jsonString);
             FileWriter writer = new FileWriter(getOutputPath()+"/PostmanColl.json");
             writer.write(jsonString);
             writer.flush();
@@ -641,7 +629,7 @@ public class PostmanCollectionOperation extends Operation {
 
     class RequestBody {
         private String mode;
-        private String body;
+        private String raw;
 
         public String getMode() {
             return mode;
@@ -651,12 +639,12 @@ public class PostmanCollectionOperation extends Operation {
             this.mode = mode;
         }
 
-        public String getBody() {
-            return body;
+        public String getRaw() {
+            return raw;
         }
 
-        public void setBody(String body) {
-            this.body = body;
+        public void setRaw(String raw) {
+            this.raw = raw;
         }
     }
 
