@@ -114,7 +114,11 @@ public class ECQMCreatorTest {
             /*{"CMS190-v0-0-003-FHIR-4-0-1.json", "IntensiveCareUnitVenousThromboembolismProphylaxisFHIR"},*/
             {"CMS177FHIR-v0-0-002-FHIR-4-0-1.json", "ChildandAdolescentMajorDepressiveDisorderMDDSuicideRiskAssessmentFHIR"},
             {"CMS165FHIR-v0-0-003-FHIR-4-0-1.json", "ControllingHighBloodPressureFHIR"},
-            {"CMS161FHIR-v0-0-002-FHIR-4-0-1.json", "AdultMajorDepressiveDisorderMDDSuicideRiskAssessmentFHIR"}
+            {"CMS161FHIR-v0-0-002-FHIR-4-0-1.json", "AdultMajorDepressiveDisorderMDDSuicideRiskAssessmentFHIR"},
+            {"CMS56FHIR-v0-0-003-FHIR-4-0-1.json", "FunctionalStatusAssessmentforTotalHipReplacementFHIR"},
+            {"CMS22FHIR-v0-0-007-FHIR-4-0-1.json", "PreventiveBPScreeningFollowUpFHIR"},
+            {"CMS2FHIR-v0-0-002-FHIR-4-0-1.json", "PCSDepressionScreenAndFollowUpFHIR"},
+            {"BCG 4 nonmuscle invasive BCaFHIR-v0-0-006-FHIR-4-0-1.json", "IntravesicalBacillusCalmetteGuerinForNonmuscleInvasiveBladderCancerFHIR"}
         };
     }
     
