@@ -55,7 +55,7 @@ public class PostmanCollectionOperation extends Operation {
                 case "protocol":
                     protocol = value;
                     break;
-                case "base":
+                case "host":
                     urlBase = value;
                     break;
                 case "path":
@@ -74,6 +74,7 @@ public class PostmanCollectionOperation extends Operation {
         generateUrlHostTokens();
         generateUrlPathTokens();
         validateCollectionName();
+        validateProtocol();
 
 
         // Expect the path directory will contain directories each of that will contain bundle json
@@ -93,17 +94,22 @@ public class PostmanCollectionOperation extends Operation {
                 if (resource != null) {
                     String fileContent = IOUtils.getFileContent(file);
                     populatePostmanCollection(resource, versionItem, fileContent, version);
-
                 }
             }
 
         }
-        printPostmanCollection(postmanCollection);
+        writePostmanCollection(postmanCollection);
     }
 
     private void validateCollectionName() {
         if(StringUtils.isEmpty(collectionName)) {
             collectionName = String.format("Postman Collection-%s", new Date());
+        }
+    }
+
+    private void validateProtocol() {
+        if(StringUtils.isEmpty(protocol)) {
+            protocol = "http";
         }
     }
 
@@ -154,7 +160,9 @@ public class PostmanCollectionOperation extends Operation {
     private List<String> generatePathTokensForMeasure(String measureName) {
         List<String> list = new ArrayList<>(pathTokens);
         list.add("Measure");
-        list.add(measureName);
+        if (StringUtils.isNotBlank(measureName)) {
+            list.add(measureName);
+        }
         list.add("$evaluate-measure");
         return list;
     }
@@ -209,14 +217,11 @@ public class PostmanCollectionOperation extends Operation {
 
     private FhirContext setContext(String version) {
         FhirContext context;
-        if (version == null) {
-            context = FhirContext.forDstu3();
+        if (StringUtils.isEmpty(version)) {
+            context = FhirContext.forR4();
         } else {
             switch (version.toLowerCase()) {
-                case "dstu2":
-                    context = FhirContext.forDstu2();
-                    break;
-                case "stu3":
+                case "dstu3":
                     context = FhirContext.forDstu3();
                     break;
                 case "r4":
@@ -285,67 +290,104 @@ public class PostmanCollectionOperation extends Operation {
         versionItem.getItem().add(itemSubFolder);
 
 
-        if(version.equals("r4")) {
+        if (version.equals("r4")) {
 
-            Bundle bundle = (Bundle)resourceBundle;
-            itemSubFolder.setName(bundle.getId().split("-")[0]);  //EXM104-FHIR4-8.1.000-bundle  -> EXM104
-            itemSubFolder.setItem(generateEmptyBaseItemList());
+            Bundle bundle = (Bundle) resourceBundle;
+            generateSubfolderItem(itemSubFolder, bundle.getId(), content);
+            List<Map<String, String>> requestMapList;
 
-            List<Map<String,String>> requestMapList;
-            populateItemWithRequestItem("POST","Post Bundle", content, "", generatePostUrl(), itemSubFolder, null);
-
-            for(Bundle.BundleEntryComponent component : bundle.getEntry()) {
+            for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
                 Resource resource = component.getResource();
 
-                if(resource.getResourceType().compareTo(ResourceType.MeasureReport) == 0) {
+                if (resource.getResourceType().compareTo(ResourceType.MeasureReport) == 0) {
                     MeasureReport measureReport = (MeasureReport) resource;
 
                     String measureName = R4FHIRUtils.parseId(measureReport.getMeasure());
-                    SimpleDateFormat sdf =  new SimpleDateFormat("yyyy-MM-dd");
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                     String patient = R4FHIRUtils.parseId(measureReport.getSubject().getReference());
                     String start = sdf.format(measureReport.getPeriod().getStart());
                     String end = sdf.format(measureReport.getPeriod().getEnd());
-                    String measureUrl  = generateMeasureUrl(measureName, patient, start, end);
+                    String measureUrl = generateMeasureUrl(measureName, patient, start, end);
                     String requestName = "measure";
 
-                    if(measureReport.hasId()) {
-                        if (measureReport.getId().contains("numer")) {
-                            requestName = "numer";
-                        } else if (measureReport.getId().contains("denom")) {
-                            requestName = "denom";
-                        }
+                    if (measureReport.hasId()) {
+                        requestName = setRequestName(measureReport.getId());
                     }
-
-                    requestMapList = new ArrayList<>();
-                    addItemToQueryList(requestMapList,"patient", patient);
-                    addItemToQueryList(requestMapList,"periodStart", start);
-                    addItemToQueryList(requestMapList,"periodEnd",end);
-
-                    populateItemWithRequestItem("GET",requestName, "", measureName, measureUrl, itemSubFolder, requestMapList);
+                    populateRequestItems(itemSubFolder, measureName, requestName, measureUrl, patient, start, end);
                 }
             }
         } else if (version.equals("dstu3")) {
-            org.hl7.fhir.dstu3.model.Bundle bundle = (org.hl7.fhir.dstu3.model.Bundle)resourceBundle;
-            for(org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent component : bundle.getEntry()) {
-                org.hl7.fhir.dstu3.model.Resource resource =  component.getResource();
+            org.hl7.fhir.dstu3.model.Bundle bundle = (org.hl7.fhir.dstu3.model.Bundle) resourceBundle;
+            generateSubfolderItem(itemSubFolder, bundle.getId(), content);
 
-                if(resource.getResourceType().compareTo(org.hl7.fhir.dstu3.model.ResourceType.MeasureReport) == 0) {
+
+            for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent component : bundle.getEntry()) {
+                org.hl7.fhir.dstu3.model.Resource resource = component.getResource();
+
+                if (resource.getResourceType().compareTo(org.hl7.fhir.dstu3.model.ResourceType.MeasureReport) == 0) {
                     org.hl7.fhir.dstu3.model.MeasureReport measureReport = (org.hl7.fhir.dstu3.model.MeasureReport) resource;
-                    measureReport.getPatient();
-                    measureReport.getPeriod().getStart();
+
+                    String measureName = R4FHIRUtils.parseId(measureReport.getMeasure().getReference());
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    String patient = R4FHIRUtils.parseId(measureReport.getPatient().getReference());
+                    String start = sdf.format(measureReport.getPeriod().getStart());
+                    String end = sdf.format(measureReport.getPeriod().getEnd());
+                    String measureUrl = generateMeasureUrl(measureName, patient, start, end);
+
+                    String requestName = "measure";
+
+                    if (measureReport.hasId()) {
+                        requestName = setRequestName(measureReport.getId());
+                    }
+                    populateRequestItems(itemSubFolder, measureName, requestName, measureUrl, patient, start, end);
                 }
             }
         }
     }
 
-    private void populateItemWithRequestItem(String method, String name, String body,  String measureName, String measureUrl, BaseItem itemEXM104, List<Map<String, String>> requestMapList) {
+    private String setRequestName(String id) {
+            if (id.contains("numer")) {
+                return "numer";
+            } else if (id.contains("denom")) {
+                return  "denom";
+            } else if(id.contains("denomexcl")) {
+                return "denomexcl";
+            }
+            return "measure";
+    }
+
+    private void populateRequestItems( BaseItem itemSubFolder,String measureName,String requestName, String measureUrl, String patient, String start, String end) {
+
+        List<Map<String,String>> requestMapList;
+
+        requestMapList = new ArrayList<>();
+        addItemToQueryList(requestMapList,"patient", patient);
+        addItemToQueryList(requestMapList,"periodStart", start);
+        addItemToQueryList(requestMapList,"periodEnd",end);
+
+        populateItemWithRequestItem("GET",requestName, "", measureName, measureUrl, itemSubFolder, requestMapList);
+
+    }
+
+    private void generateSubfolderItem(BaseItem itemSubFolder, String id, String content) {
+        itemSubFolder.setName(id.split("-")[0]);  //EXM104-FHIR4-8.1.000-bundle  -> EXM104
+        itemSubFolder.setItem(generateEmptyBaseItemList());
+        populateItemWithRequestItem("POST","Post Bundle", content, "", generatePostUrl(), itemSubFolder, null);
+    }
+
+    private void populateItemWithRequestItem(String method, String name, String body,  String measureName, String measureUrl, BaseItem itemSubFolder, List<Map<String, String>> requestMapList) {
         RequestItem requestItem = new RequestItem();
-        itemEXM104.getItem().add(requestItem);
+        if (itemSubFolder.getItem() != null) {
+            itemSubFolder.getItem().add(requestItem);
+        }
         populateRequestItem(requestItem, name, method, body, measureName, measureUrl, requestMapList);
     }
 
     private void populateRequestItem(RequestItem requestItem, String name, String method, String body, String measureName, String measureUrl, List<Map<String, String>> requestMapList) {
-        requestItem.setName(name);
+
+        if(StringUtils.isNotBlank(name)) {
+            requestItem.setName(name);
+        }
         ProtocolProfileBehavior behavior = new ProtocolProfileBehavior();
         behavior.setDisableBodyPruning(true);
         if(StringUtils.isEmpty(body) ) {
@@ -363,8 +405,12 @@ public class PostmanCollectionOperation extends Operation {
 
     private void populateRequestInfo(RequestInfo requestInfo, String method, String body, String measureName, String measureUrl, List<Map<String, String>> requestMapList) {
 
-        requestInfo.setMethod(method);
-        requestInfo.setBody(populateRequestBody(body));
+        if (StringUtils.isNotBlank(method)) {
+            requestInfo.setMethod(method);
+        }
+        if (StringUtils.isNotBlank(body)) {
+            requestInfo.setBody(populateRequestBody(body));
+        }
         requestInfo.setHeader(generateRequestHeaderMap());
 
         RequestUrl requestUrl = new RequestUrl();
@@ -375,11 +421,15 @@ public class PostmanCollectionOperation extends Operation {
 
 
     private void populateRequestUrl(RequestUrl requestUrl, String measureUrl, String measureName, List<Map<String, String>> requestMapList) {
-        requestUrl.setRaw(measureUrl);
+        if (StringUtils.isNotBlank(measureUrl)) {
+            requestUrl.setRaw(measureUrl);
+        }
         requestUrl.setProtocol(protocol);
         if (requestMapList != null) {
             requestUrl.setQuery(requestMapList);
-            requestUrl.setPath(generatePathTokensForMeasure(measureName));
+            if (StringUtils.isNotBlank(measureName)) {
+                requestUrl.setPath(generatePathTokensForMeasure(measureName));
+            }
         } else {
             requestUrl.setPath(generateUrlPathTokens());
         }
@@ -427,7 +477,7 @@ public class PostmanCollectionOperation extends Operation {
         return theResource;
     }
 
-    private void printPostmanCollection(PostmanCollection postmanCollection) {
+    private void writePostmanCollection(PostmanCollection postmanCollection) {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -448,8 +498,10 @@ public class PostmanCollectionOperation extends Operation {
 
     private void addItemToQueryList(List<Map<String, String>> list, String key, String value) {
         Map<String, String> map = new HashMap<>();
-        map.put("key", key);
-        map.put("value", value);
+        if (StringUtils.isNotBlank(key) && StringUtils.isNotBlank(value)) {
+            map.put("key", key);
+            map.put("value", value);
+        }
         list.add(map);
     }
 

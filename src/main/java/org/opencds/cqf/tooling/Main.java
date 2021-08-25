@@ -196,7 +196,7 @@ package org.opencds.cqf.tooling;
             - The operation expects -ptbd is a directory containing one or more directories each of them contains measure output bundle
             - The -op is the output directory for collection
             - The -v expects values like r4 or dstu3
-            - The -base is the FHIR Restful server base ex, "-base=cqm-sandbox.alphora.com"
+            - The -host is the FHIR Restful server base ex, "-host=cqm-sandbox.alphora.com"
             - The -path is the server path after base ex, "-path=cqf-ruler-r4/fhir/"
             - The -protocol can be http or https
             - the -name is the name for the postman collection

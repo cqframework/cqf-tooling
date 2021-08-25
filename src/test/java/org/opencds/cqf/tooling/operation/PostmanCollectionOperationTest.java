@@ -19,7 +19,7 @@ public class PostmanCollectionOperationTest {
         String urlPath = "cqf-ruler-r4/fhir/";
         String protocol = "http";
         String name = "Postman Collection";
-        String[] args = { "-" + operation, "-ptbd=" + inputFilePath, "-op=" + outputPath, "-v=" + version, "-base=" + urlBase, "-path=" + urlPath, "-protocol=" + protocol, "-name=" + name };
+        String[] args = { "-" + operation, "-ptbd=" + inputFilePath, "-op=" + outputPath, "-v=" + version, "-host=" + urlBase, "-path=" + urlPath, "-protocol=" + protocol, "-name=" + name };
         Operation postmanCollectionOperation = new PostmanCollectionOperation();
         postmanCollectionOperation.execute(args);
     }
