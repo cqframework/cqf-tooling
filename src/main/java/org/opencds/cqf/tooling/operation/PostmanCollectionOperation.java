@@ -32,7 +32,7 @@ public class PostmanCollectionOperation extends Operation {
     @Override
     public void execute(String[] args) {
         for (String arg : args) {
-            if (arg.equals("-GeneratePostmanCollection")) continue;
+            if (arg.equals("-PostmanCollection")) continue;
             String[] flagAndValue = arg.split("=");
             if (flagAndValue.length < 2) {
                 throw new IllegalArgumentException("Invalid argument: " + arg);
@@ -306,13 +306,13 @@ public class PostmanCollectionOperation extends Operation {
                     String start = sdf.format(measureReport.getPeriod().getStart());
                     String end = sdf.format(measureReport.getPeriod().getEnd());
                     String measureUrl  = generateMeasureUrl(measureName, patient, start, end);
-                    String numerOrDenom = "";
+                    String requestName = "measure";
 
                     if(measureReport.hasId()) {
                         if (measureReport.getId().contains("numer")) {
-                            numerOrDenom = "numer";
+                            requestName = "numer";
                         } else if (measureReport.getId().contains("denom")) {
-                            numerOrDenom = "denom";
+                            requestName = "denom";
                         }
                     }
 
@@ -321,7 +321,7 @@ public class PostmanCollectionOperation extends Operation {
                     addItemToQueryList(requestMapList,"periodStart", start);
                     addItemToQueryList(requestMapList,"periodEnd",end);
 
-                    populateItemWithRequestItem("GET",numerOrDenom, "", measureName, measureUrl, itemSubFolder, requestMapList);
+                    populateItemWithRequestItem("GET",requestName, "", measureName, measureUrl, itemSubFolder, requestMapList);
                 }
             }
         } else if (version.equals("dstu3")) {

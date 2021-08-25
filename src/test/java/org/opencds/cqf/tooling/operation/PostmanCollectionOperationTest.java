@@ -10,7 +10,7 @@ public class PostmanCollectionOperationTest {
     @Test
     public void test_worked() throws URISyntaxException {
         String dataInputPath = "postman-collection.resources";
-        String operation = "GeneratePostmanCollection";
+        String operation = "PostmanCollection";
         String inputFilePath = PostmanCollectionOperationTest.class.getResource(dataInputPath).toURI().getPath();
         String outputPath = "target/test-output/create-postman-collection";
         String encoding = "json";
