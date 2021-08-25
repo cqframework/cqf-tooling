@@ -21,6 +21,7 @@ import java.util.*;
 
 public class PostmanCollectionOperation extends Operation {
 
+    private static final String POSTMAN_COLLECTION_SCHEMA = "https://schema.getpostman.com/json/collection/v2.1.0/collection.json";
     private String pathToBundlesDir;
     private FhirContext context;
     String version;
@@ -131,7 +132,6 @@ public class PostmanCollectionOperation extends Operation {
     private static StringBuffer hostNames;
 
     private static List<String> generateUrlHostTokens() {
-        System.out.println("Inside generateUrlHostTokens");
         try {
             if (hostTokens == null) {
                 hostTokens = new ArrayList<>();
@@ -276,7 +276,6 @@ public class PostmanCollectionOperation extends Operation {
         return versionLebel;
     }
 
-    private static final String POSTMAN_COLLECTION_SCHEMA = "https://schema.getpostman.com/json/collection/v2.1.0/collection.json";
     private PostmanCollection createPostmanCollection() {
         PostmanCollection postmanCollection = new PostmanCollection();
         PostmanCollectionInfo info = new PostmanCollectionInfo();
