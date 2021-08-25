@@ -199,7 +199,7 @@ package org.opencds.cqf.tooling;
             - The -host is the FHIR Restful server base ex, "-host=cqm-sandbox.alphora.com"
             - The -path is the server path after base ex, "-path=cqf-ruler-r4/fhir/"
             - The -protocol can be http or https
-            - the -name is the name for the postman collection
+            - The -name is the name for the postman collection
 
         */
 
