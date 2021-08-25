@@ -71,39 +71,53 @@ public class PostmanCollectionOperation extends Operation {
 
         File bundleDirectory = validateDirectory(pathToBundlesDir);
         this.context = setContext(version);
-        generateUrlHostTokens();
-        generateUrlPathTokens();
+        validateHostAndPath();
         validateCollectionName();
         validateProtocol();
+        generateUrlHostTokens();
+        generateUrlPathTokens();
 
+        try {
+            // Expect the path directory will contain directories each of that will contain bundle json
+            File[] bundleDirectories = getListOfActionableDirectories(bundleDirectory);
 
-        // Expect the path directory will contain directories each of that will contain bundle json
-        File[] bundleDirectories = getListOfActionableDirectories(bundleDirectory);
+            PostmanCollection postmanCollection = createPostmanCollection();
+            BaseItem versionItem = populateVersionItem(postmanCollection, version);
 
-        PostmanCollection postmanCollection = createPostmanCollection();
-        BaseItem versionItem = populateVersionItem(postmanCollection, version);
+            for (File bundleDir : bundleDirectories) {
 
-        for (File bundleDir : bundleDirectories) {
-
-            File[] bundleFiles = bundleDir.listFiles(pathname -> pathname.isFile() && pathname.getName().endsWith(".json"));
-            if (bundleFiles == null) {
-                continue;
-            }
-            for (File file : bundleFiles) {
-                IBaseResource resource = parseBundle(file);
-                if (resource != null) {
-                    String fileContent = IOUtils.getFileContent(file);
-                    populatePostmanCollection(resource, versionItem, fileContent, version);
+                File[] bundleFiles = bundleDir.listFiles(pathname -> pathname.isFile() && pathname.getName().endsWith(".json"));
+                if (bundleFiles == null) {
+                    continue;
                 }
-            }
+                for (File file : bundleFiles) {
+                    IBaseResource resource = parseBundle(file);
+                    if (resource != null) {
+                        String fileContent = IOUtils.getFileContent(file);
+                        populatePostmanCollection(resource, versionItem, fileContent, version);
+                    }
+                }
 
+            }
+            writePostmanCollection(postmanCollection);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        writePostmanCollection(postmanCollection);
+    }
+
+    private void validateHostAndPath(){
+        if(StringUtils.isEmpty(urlBase)) {
+            urlBase = "{server-base}";
+        }
+        if(StringUtils.isEmpty(urlPath)) {
+            urlPath = "{path}";
+        }
     }
 
     private void validateCollectionName() {
-        if(StringUtils.isEmpty(collectionName)) {
-            collectionName = String.format("Postman Collection-%s", new Date());
+        if (StringUtils.isEmpty(collectionName)) {
+            collectionName = String.format("Postman Collection-%s",
+                    new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss").format(new Date()));
         }
     }
 
@@ -115,44 +129,57 @@ public class PostmanCollectionOperation extends Operation {
 
     private static List<String> hostTokens;
     private static StringBuffer hostNames;
-    private static List<String> generateUrlHostTokens() {
-        if(hostTokens == null) {
-            hostTokens = new ArrayList<>();
-            hostNames = new StringBuffer();
-            if(!StringUtils.isEmpty(urlBase)) {
-                hostTokens.addAll(Arrays.asList(urlBase.split("\\.")));
-            }
-            if(StringUtils.isNotBlank(protocol)) {
-                hostNames.append(protocol);
-                hostNames.append("://");
-            }
 
-            for(String token: hostTokens) {
-                hostNames.append(token);
-                hostNames.append(".");
+    private static List<String> generateUrlHostTokens() {
+        System.out.println("Inside generateUrlHostTokens");
+        try {
+            if (hostTokens == null) {
+                hostTokens = new ArrayList<>();
+                hostNames = new StringBuffer();
+                if (!StringUtils.isEmpty(urlBase)) {
+                    hostTokens.addAll(Arrays.asList(urlBase.split("\\.")));
+                }
+                if (StringUtils.isNotBlank(protocol)) {
+                    hostNames.append(protocol);
+                    hostNames.append("://");
+                }
+
+                for (String token : hostTokens) {
+                    hostNames.append(token);
+                    hostNames.append(".");
+                }
+                if (!StringUtils.isEmpty(urlBase)) {
+                    hostNames.delete(hostNames.length() - 1, hostNames.length());
+                    hostNames.append("/");
+                }
             }
-            hostNames.delete(hostNames.length()-1, hostNames.length());
-            hostNames.append("/");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return hostTokens;
     }
 
     private static List<String> pathTokens;
     private static StringBuffer pathNames;
+
     private static List<String> generateUrlPathTokens() {
-        if(pathTokens == null) {
-            pathTokens = new ArrayList<>();
-            pathNames = new StringBuffer();
-            pathNames.append(hostNames);
-            if(!StringUtils.isEmpty(urlPath)) {
-                pathTokens.addAll(Arrays.asList(urlPath.split("/")));
-            }
+        try {
+            if (pathTokens == null) {
+                pathTokens = new ArrayList<>();
+                pathNames = new StringBuffer();
+                pathNames.append(hostNames);
+                if (!StringUtils.isEmpty(urlPath)) {
+                    pathTokens.addAll(Arrays.asList(urlPath.split("/")));
+                }
 
-            for(String token : pathTokens) {
-                pathNames.append(token);
-                pathNames.append("/");
-            }
+                for (String token : pathTokens) {
+                    pathNames.append(token);
+                    pathNames.append("/");
+                }
 
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return pathTokens;
     }

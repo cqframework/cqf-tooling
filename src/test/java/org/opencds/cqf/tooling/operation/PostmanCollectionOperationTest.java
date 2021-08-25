@@ -13,7 +13,6 @@ public class PostmanCollectionOperationTest {
         String operation = "PostmanCollection";
         String inputFilePath = PostmanCollectionOperationTest.class.getResource(dataInputPath).toURI().getPath();
         String outputPath = "target/test-output/create-postman-collection";
-        String encoding = "json";
         String version = "r4";
         String urlBase = "cqm-sandbox.alphora.com";
         String urlPath = "cqf-ruler-r4/fhir/";
