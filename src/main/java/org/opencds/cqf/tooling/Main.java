@@ -191,7 +191,7 @@ package org.opencds.cqf.tooling;
             - The -skipversion flag indicates that code system versions that are present in the expansion should not be expressed in the inferred compose
 
         - PostmanCollection
-            - command: mvn exec: java -Dexec.args="-PostmanCollection (-pathtobundledir | -ptbd) (-outputpath | -op) (-version | -v) (-base) (-path) [-protocol] [-name]"
+            - command: mvn exec: java -Dexec.args="-PostmanCollection (-pathtobundledir | -ptbd) (-outputpath | -op) (-version | -v) (-host) (-path) [-protocol] [-name]"
             - This tooling generates a postman collection based on the measure transaction bundle
             - The operation expects -ptbd is a directory containing one or more directories each of them contains measure output bundle
             - The -op is the output directory for collection
