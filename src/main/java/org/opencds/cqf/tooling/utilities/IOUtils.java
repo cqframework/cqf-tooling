@@ -275,7 +275,7 @@ public class IOUtils
         return filePaths;
     }
 
-    public static String getResourceFileName(String resourcePath, IBaseResource resource, Encoding encoding, FhirContext fhirContext, boolean versioned) {
+    public static String getResourceFileName(String resourcePath, IBaseResource resource, Encoding encoding, FhirContext fhirContext, boolean versioned, boolean prefixed) {
         String resourceVersion = IOUtils.getCanonicalResourceVersion(resource, fhirContext);
         String filename = resource.getIdElement().getIdPart();
         // Issue 96
@@ -291,8 +291,10 @@ public class IOUtils
                 filename = filename + "-" + resourceVersion;
             }
         }
+
+        String resourceType = resource.getIdElement().getResourceType().toLowerCase();
         
-        String result = Paths.get(resourcePath, resource.getIdElement().getResourceType().toLowerCase(), filename) + getFileExtension(encoding);
+        String result = Paths.get(resourcePath, resourceType, (prefixed ? (resourceType + "-") : "") + filename) + getFileExtension(encoding);
         return result;
     }
 

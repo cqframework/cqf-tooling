@@ -80,6 +80,14 @@ public class DictionaryCode {
         this.code = code.replace((char)160, (char)32).trim();
     }
 
+    private String equivalence;
+    public String getEquivalence() {
+        return this.equivalence;
+    }
+    public void setEquivalence(String equivalence) {
+        this.equivalence = equivalence;
+    }
+
     private List<DictionaryCode> mappings = new ArrayList<DictionaryCode>();
     public List<DictionaryCode> getMappings() {
         return mappings;

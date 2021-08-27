@@ -153,6 +153,8 @@ public class ResourceUtils
     private static List<String> getStu3DepLibraryPaths(String path, FhirContext fhirContext, Encoding encoding, Boolean versioned) {
       List<String> paths = new ArrayList<String>();
       String directoryPath = FilenameUtils.getFullPath(path);
+      String fileName = FilenameUtils.getName(path);
+      String prefix = fileName.toLowerCase().startsWith("library-") ? fileName.substring(0, 8) : "";
       List<org.hl7.fhir.dstu3.model.RelatedArtifact> relatedArtifacts = getStu3RelatedArtifacts(path, fhirContext);
       for (org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
         if (relatedArtifact.getType() == org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.DEPENDSON) {
@@ -165,7 +167,7 @@ public class ResourceUtils
               	  String name = relatedArtifact.getResource().getReference().split("Library/")[1];
               	  dependencyLibraryName = IOUtils.formatFileName(name.split("\\|")[0], encoding, fhirContext);
                 }
-                String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
+                String dependencyLibraryPath = FilenameUtils.concat(directoryPath, prefix + dependencyLibraryName);
                 IOUtils.putAllInListIfAbsent(getStu3DepLibraryPaths(dependencyLibraryPath, fhirContext, encoding, versioned), paths);
                 IOUtils.putInListIfAbsent(dependencyLibraryPath, paths);
             }
@@ -190,6 +192,8 @@ public class ResourceUtils
     private static List<String> getR4DepLibraryPaths(String path, FhirContext fhirContext, Encoding encoding, Boolean versioned) {
       List<String> paths = new ArrayList<String>();
       String directoryPath = FilenameUtils.getFullPath(path);
+      String fileName = FilenameUtils.getName(path);
+      String prefix = fileName.toLowerCase().startsWith("library-") ? fileName.substring(0, 8) : "";
       List<org.hl7.fhir.r4.model.RelatedArtifact> relatedArtifacts = getR4RelatedArtifacts(path, fhirContext);
       for (org.hl7.fhir.r4.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
           if (relatedArtifact.getType() == org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.DEPENDSON) {
@@ -202,7 +206,7 @@ public class ResourceUtils
                 	  String name = relatedArtifact.getResource().split("Library/")[1];
                 	  dependencyLibraryName = IOUtils.formatFileName(name.split("\\|")[0], encoding, fhirContext);
                   }
-                  String dependencyLibraryPath = FilenameUtils.concat(directoryPath, dependencyLibraryName);
+                  String dependencyLibraryPath = FilenameUtils.concat(directoryPath, prefix + dependencyLibraryName);
                   IOUtils.putInListIfAbsent(dependencyLibraryPath, paths);
               }
           }

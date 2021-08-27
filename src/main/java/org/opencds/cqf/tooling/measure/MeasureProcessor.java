@@ -188,6 +188,9 @@ public class MeasureProcessor extends BaseProcessor {
         IOUtils.copyFile(librarySourcePath, FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(librarySourcePath)));
 
         String cqlFileName = IOUtils.formatFileName(FilenameUtils.getBaseName(librarySourcePath), Encoding.CQL, fhirContext);
+        if (cqlFileName.toLowerCase().startsWith("library-")) {
+            cqlFileName = cqlFileName.substring(8);
+        }
         String cqlLibrarySourcePath = IOUtils.getCqlLibrarySourcePath(libraryName, cqlFileName, binaryPaths);
         String cqlDestPath = FilenameUtils.concat(bundleDestFilesPath, cqlFileName);
         IOUtils.copyFile(cqlLibrarySourcePath, cqlDestPath);

@@ -62,6 +62,8 @@ public class LibraryProcessor extends BaseProcessor {
 
     public Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
             Encoding encoding, boolean versioned) {
+        String fileName = FilenameUtils.getName(path);
+        boolean prefixed = fileName.toLowerCase().startsWith("library-");
         Boolean shouldPersist = true;
         try {
             Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding, versioned, logger);
@@ -70,7 +72,7 @@ public class LibraryProcessor extends BaseProcessor {
                 resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
 
                 // NOTE: Assuming dependency library will be in directory of dependent.
-                String dependencyPath = IOUtils.getResourceFileName(IOUtils.getResourceDirectory(path), resource, encoding, fhirContext, versioned);
+                String dependencyPath = IOUtils.getResourceFileName(IOUtils.getResourceDirectory(path), resource, encoding, fhirContext, versioned, prefixed);
                 bundleLibraryDependencies(dependencyPath, fhirContext, resources, encoding, versioned);
             }
         } catch (Exception e) {
