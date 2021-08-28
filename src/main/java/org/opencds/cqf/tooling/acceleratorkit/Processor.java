@@ -16,6 +16,7 @@ import org.hl7.fhir.Code;
 import org.hl7.fhir.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.modelinfo.Atlas;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -31,6 +32,9 @@ public class Processor extends Operation {
     // Data Elements
     private String dataElementPages; // -dataelementpages (-dep) comma-separated list of the names of pages in the
                                      // workbook to be processed
+
+    // Test Cases
+    private String testCaseInput; // -testcases (-tc) path to a spreadsheet containing test case data
 
     // TODO: These need to be per scope
     private String dataElementIdentifierSystem = "http://fhir.org/guides/who/anc-cds/Identifier/anc-data-elements";
@@ -62,6 +66,7 @@ public class Processor extends Operation {
     private List<StructureDefinition> extensions = new ArrayList<StructureDefinition>();
     private List<StructureDefinition> profiles = new ArrayList<StructureDefinition>();
     private Map<String, Resource> examples = new HashMap<String, Resource>();
+    private Map<String, List<Resource>> testCases = new LinkedHashMap<String, List<Resource>>();
     private Map<String, StructureDefinition> profilesByElementId = new HashMap<String, StructureDefinition>();
     private Map<String, List<DictionaryElement>> elementsByProfileId = new LinkedHashMap<String, List<DictionaryElement>>();
     private Map<String, List<StructureDefinition>> profilesByActivityId = new LinkedHashMap<String, List<StructureDefinition>>();
@@ -76,6 +81,7 @@ public class Processor extends Operation {
     private List<RetrieveInfo> retrieves = new ArrayList<RetrieveInfo>();
     private List<String> igJsonFragments = new ArrayList<String>();
     private List<String> igResourceFragments = new ArrayList<String>();
+    private CanonicalResourceAtlas atlas;
 
     private Row currentInputOptionParentRow;
 
@@ -133,6 +139,10 @@ public class Processor extends Operation {
                 case "dep":
                     dataElementPages = value;
                     break; // -dataelementpages (-dep)
+                case "testcases":
+                case "tc":
+                    testCaseInput = value;
+                    break; // -testcases (-tc)
                 default:
                     throw new IllegalArgumentException("Unknown flag: " + flag);
             }
@@ -245,6 +255,9 @@ public class Processor extends Operation {
         writeQuestionnaires(outputPath);
         writeExamples(outputPath);
 
+        processTestCases();
+        writeTestCases(outputPath);
+
         // write concepts CQL
         writeConcepts(scope, outputPath);
 
@@ -347,6 +360,24 @@ public class Processor extends Operation {
 
     private String getExamplesPath(String scopePath) {
         return scopePath + "/input/examples";
+    }
+
+    private void ensureTestsPath(String scopePath) {
+        String testsPath = getTestsPath(scopePath);
+        ensurePath(testsPath);
+    }
+
+    private String getTestsPath(String scopePath) {
+        return scopePath + "/input/tests";
+    }
+
+    private void ensureTestPath(String scopePath, String testId) {
+        String testPath = getTestPath(scopePath, testId);
+        ensurePath(testPath);
+    }
+
+    private String getTestPath(String scopePath, String testId) {
+        return scopePath + "/input/tests/" + testId;
     }
 
     private void ensureProfilesPath(String scopePath) {
@@ -2485,14 +2516,30 @@ public class Processor extends Operation {
         return codeSystem;
     }
 
+    private CanonicalResourceAtlas getAtlas() {
+        if (atlas == null) {
+            atlas =
+                    new CanonicalResourceAtlas()
+                            .setValueSets(new InMemoryCanonicalResourceProvider<ValueSet>(this.valueSets))
+                            .setCodeSystems(new InMemoryCanonicalResourceProvider<CodeSystem>(this.codeSystems))
+                            .setConceptMaps(new InMemoryCanonicalResourceProvider<ConceptMap>(this.conceptMaps.values()));
+        }
+        return atlas;
+    }
+
+    public void processTestCases() {
+        if (testCaseInput != null && !testCaseInput.isEmpty()) {
+            TestCaseProcessor tcp = new TestCaseProcessor();
+            tcp.setAtlas(getAtlas());
+            tcp.setProfilesByElementId(profilesByElementId);
+            testCases = tcp.process(testCaseInput);
+        }
+    }
+
     // Generate example resources for each profile
     public void processExamples() {
         ExampleBuilder eb = new ExampleBuilder();
-        eb.setAtlas(
-                new CanonicalResourceAtlas()
-                        .setValueSets(new InMemoryCanonicalResourceProvider<ValueSet>(this.valueSets))
-                        .setCodeSystems(new InMemoryCanonicalResourceProvider<CodeSystem>(this.codeSystems))
-                        .setConceptMaps(new InMemoryCanonicalResourceProvider<ConceptMap>(this.conceptMaps.values())));
+        eb.setAtlas(getAtlas());
         eb.setPatientContext("anc-patient-example");
         eb.setEncounterContext("anc-encounter-example");
         eb.setLocationContext("anc-location-example");
@@ -2600,6 +2647,20 @@ public class Processor extends Operation {
         }
     }
 
+    public void writeTestCases(String scopePath) {
+        if (testCases != null && testCases.size() > 0) {
+            String testsPath = getTestsPath(scopePath);
+            ensureTestsPath(scopePath);
+            for (Map.Entry<String, List<Resource>> entry : testCases.entrySet()) {
+                String testPath = getTestPath(scopePath, entry.getKey());
+                ensureTestPath(scopePath, entry.getKey());
+                for (Resource r : entry.getValue()) {
+                    writeResource(testPath, r);
+                }
+            }
+        }
+    }
+
     public void writeProfiles(String scopePath) {
         if (profiles != null && profiles.size() > 0) {
             String profilesPath = getProfilesPath(scopePath);
@@ -2679,7 +2740,7 @@ public class Processor extends Operation {
                         StructureDefinition sd = profilesByElementId.get(de.getId());
                         if (sd != null) {
                             if (de.getFhirElementPath() != null && de.getFhirElementPath().getResourcePath() != null) {
-                                item.setDefinition(String.format("%s#%s", sd.getUrl(), de.getFhirElementPath().getResourcePath()));
+                                item.setDefinition(String.format("%s#%s", sd.getUrl(), de.getFhirElementPath().getResourceTypeAndPath()));
                             }
                             else {
                                 item.setDefinition(sd.getUrl());

@@ -3,10 +3,14 @@ package org.opencds.cqf.tooling.acceleratorkit;
 import ca.uhn.fhir.context.*;
 import org.hl7.fhir.r4.model.*;
 
+import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ExampleBuilder {
@@ -20,11 +24,24 @@ public class ExampleBuilder {
         return this;
     }
 
+    private String idScope = "example";
+    public String getIdScope() {
+        return idScope;
+    }
+    public ExampleBuilder setIdScope(String idScope) {
+        this.idScope = idScope;
+        return this;
+    }
+
     public ExampleBuilder() {
         fc = FhirContext.forCached(FhirVersionEnum.R4);
     }
 
     public Resource build(StructureDefinition sd) {
+        return build(sd, null);
+    }
+
+    public Resource build(StructureDefinition sd, Map<String, Object> elementValues) {
         if (sd == null) {
             throw new IllegalArgumentException("sd required");
         }
@@ -34,8 +51,9 @@ public class ExampleBuilder {
         }
 
         Resource r = (Resource)fc.getResourceDefinition(sd.getType()).newInstance();
-        r.setId(sd.getId() + "-example");
-        buildElements(sd, r);
+        r.setId(sd.getId() + "-" + idScope);
+        r.setMeta(new Meta().addProfile(sd.getUrl()));
+        buildElements(sd, r, elementValues);
         includeContext(sd, r);
         return r;
     }
@@ -312,7 +330,7 @@ public class ExampleBuilder {
         return null;
     }
 
-    private void visitElement(StructureDefinition sd, List<ElementDefinition> eds, AtomicReference<Integer> index, Base value, BaseRuntimeElementDefinition<?> parentDefinition) {
+    private void visitElement(StructureDefinition sd, List<ElementDefinition> eds, AtomicReference<Integer> index, Base value, Map<String, Object> elementValues, BaseRuntimeElementDefinition<?> parentDefinition) {
         // if the element has children
             // construct a target and call visit on the children
         // otherwise
@@ -352,7 +370,8 @@ public class ExampleBuilder {
 
 
         Element elementValue = (Element)bred.newInstance();
-        generateValue(sd, ed, elementValue);
+        Object givenElementValue = elementValues != null ? elementValues.get(ed.getId()) : null;
+        generateValue(sd, ed, elementValue, givenElementValue);
         if (elementName.equals("extension")) {
             Extension extension = new Extension();
             extension.setUrl(typeProfile);
@@ -365,7 +384,7 @@ public class ExampleBuilder {
         while (index.get() < eds.size()) {
             ElementDefinition e = eds.get(index.get());
             if (isContinuation(ed.getId(), e.getId())) {
-                visitElement(sd, eds, index, elementValue, bred);
+                visitElement(sd, eds, index, elementValue, elementValues, bred);
             }
             else {
                 break;
@@ -373,31 +392,36 @@ public class ExampleBuilder {
         }
     }
 
-    private CodeableConcept getFirstConcept(ValueSet vs) {
+    private CodeableConcept getFirstConcept(ValueSet vs, String givenValue) {
         CodeableConcept concept = null;
 
         // If the value set has an expansion, get the first code in the expansion
         if (vs.hasExpansion() && vs.getExpansion().hasContains()) {
-            ValueSet.ValueSetExpansionContainsComponent c = vs.getExpansion().getContainsFirstRep();
-            if (c != null) {
-                concept = new CodeableConcept().addCoding(new Coding()
-                        .setCode(c.getCode())
-                        .setDisplay(c.getDisplay())
-                        .setSystem(c.getSystem())
-                        .setVersion(c.getVersion()));
+            for (ValueSet.ValueSetExpansionContainsComponent c : vs.getExpansion().getContains()) {
+                if (givenValue == null || givenValue.equalsIgnoreCase(c.getCode()) || givenValue.equalsIgnoreCase(c.getDisplay())) {
+                    concept = new CodeableConcept().addCoding(new Coding()
+                            .setCode(c.getCode())
+                            .setDisplay(c.getDisplay())
+                            .setSystem(c.getSystem())
+                            .setVersion(c.getVersion()));
+                }
             }
         }
 
         // If it has a compose, get the first code in any include
         if (concept == null && vs.hasCompose()) {
             for (ValueSet.ConceptSetComponent c : vs.getCompose().getInclude()) {
-                ValueSet.ConceptReferenceComponent r = c.getConceptFirstRep();
-                if (r != null) {
-                    concept = new CodeableConcept().addCoding(new Coding()
-                    .setCode(r.getCode())
-                    .setDisplay(r.getDisplay())
-                    .setSystem(c.getSystem())
-                    .setVersion(c.getVersion()));
+                for (ValueSet.ConceptReferenceComponent r : c.getConcept()) {
+                    if (givenValue == null || givenValue.equalsIgnoreCase(r.getCode()) || givenValue.equalsIgnoreCase(r.getDisplay())) {
+                        concept = new CodeableConcept().addCoding(new Coding()
+                                .setCode(r.getCode())
+                                .setDisplay(r.getDisplay())
+                                .setSystem(c.getSystem())
+                                .setVersion(c.getVersion()));
+                        break;
+                    }
+                }
+                if (concept != null) {
                     break;
                 }
             }
@@ -409,7 +433,7 @@ public class ExampleBuilder {
                 for (CanonicalType r : c.getValueSet()) {
                     ValueSet svs = atlas.getValueSets().getByCanonicalUrlWithVersion(r.getValue());
                     if (svs != null) {
-                        concept = getFirstConcept(svs);
+                        concept = getFirstConcept(svs, givenValue);
                         if (concept != null) {
                             break;
                         }
@@ -429,16 +453,21 @@ public class ExampleBuilder {
                     // TODO: Handle code system version
                     CodeSystem cs = atlas.getCodeSystems().getByCanonicalUrlWithVersion(c.getSystem());
                     if (cs != null && cs.hasConcept()) {
-                        CodeSystem.ConceptDefinitionComponent cd = cs.getConceptFirstRep();
-                        if (cs != null) {
-                            concept = new CodeableConcept().addCoding(new Coding()
-                                    .setCode(cd.getCode())
-                                    .setDisplay(cd.getDisplay())
-                                    .setSystem(c.getSystem())
-                                    .setVersion(c.getVersion()));
-                            break;
+                        for (CodeSystem.ConceptDefinitionComponent cd : cs.getConcept()) {
+                            if (givenValue == null || givenValue.equalsIgnoreCase(cd.getCode()) || givenValue.equalsIgnoreCase(cd.getDisplay())) {
+                                concept = new CodeableConcept().addCoding(new Coding()
+                                        .setCode(cd.getCode())
+                                        .setDisplay(cd.getDisplay())
+                                        .setSystem(c.getSystem())
+                                        .setVersion(c.getVersion()));
+                                break;
+                            }
                         }
                     }
+                }
+
+                if (concept != null) {
+                    break;
                 }
             }
         }
@@ -472,30 +501,148 @@ public class ExampleBuilder {
         return concept;
     }
 
-    private void generateValue(StructureDefinition sd, ElementDefinition ed, Element value) {
+    private String toString(Object value) {
+        if (value instanceof String) {
+            return (String)value;
+        }
+        if (value != null) {
+            return value.toString();
+        }
+        return null;
+    }
+
+    private Boolean toBoolean(Object value) {
+        if (value instanceof Boolean) {
+            return (Boolean)value;
+        }
+        else if (value instanceof String) {
+            return Boolean.parseBoolean((String)value);
+        }
+        return null;
+    }
+
+    private Integer toInteger(Object value) {
+        if (value instanceof Integer) {
+            return (Integer)value;
+        }
+        else if (value instanceof String) {
+            return Integer.parseInt((String)value);
+        }
+        return null;
+    }
+
+    private BigDecimal toDecimal(Object value) {
+        if (value instanceof BigDecimal) {
+            return (BigDecimal)value;
+        }
+        else if (value instanceof Double) {
+            return new BigDecimal((Double)value);
+        }
+        else if (value instanceof String) {
+            return new BigDecimal((String)value);
+        }
+        return null;
+    }
+
+    private Instant toInstant(Object value) {
+        if (value instanceof Instant) {
+            return (Instant)value;
+        }
+        else if (value instanceof LocalDateTime) {
+            return Instant.from((LocalDateTime)value);
+        }
+        else if (value instanceof LocalDate) {
+            return Instant.from((LocalDate)value);
+        }
+        else if (value instanceof String) {
+            return Instant.parse((String)value);
+        }
+        return null;
+    }
+
+    private BigDecimal toQuantityValue(Object value) {
+        if (value instanceof String) {
+            return parseQuantityValue((String)value);
+        }
+        else if (value instanceof BigDecimal) {
+            return (BigDecimal)value;
+        }
+        else if (value instanceof Double) {
+            return new BigDecimal((Double)value);
+        }
+        else if (value instanceof Integer) {
+            return new BigDecimal((Integer)value);
+        }
+        return null;
+    }
+
+    private String toQuantityUnit(Object value) {
+        if (value instanceof String) {
+            return parseQuantityUnit((String)value);
+        }
+        return null;
+    }
+
+    private BigDecimal parseQuantityValue(String value) {
+        int spaceIndex = value.indexOf(' ');
+        if (spaceIndex > 0) {
+            return new BigDecimal(value.substring(0, spaceIndex - 1));
+        }
+        return new BigDecimal(value);
+    }
+
+    private String parseQuantityUnit(String value) {
+        int spaceIndex = value.indexOf(' ');
+        if (spaceIndex > 0) {
+            return value.substring(spaceIndex + 1);
+        }
+        return null;
+    }
+
+    private void generateValue(StructureDefinition sd, ElementDefinition ed, Element value, Object givenValue) {
         if (value instanceof StringType) {
-            ((StringType)value).setValue("Asdf");
+            ((StringType)value).setValue(givenValue != null ? toString(givenValue) : "Asdf");
         }
         else if (value instanceof BooleanType) {
-            ((BooleanType)value).setValue(true);
+            ((BooleanType)value).setValue(givenValue != null ? toBoolean(givenValue) : true);
         }
         else if (value instanceof IntegerType) {
-            ((IntegerType)value).setValue(1);
+            ((IntegerType)value).setValue(givenValue != null ? toInteger(givenValue) : 1);
         }
         else if (value instanceof DecimalType) {
-            ((DecimalType)value).setValue(12.5);
+            ((DecimalType)value).setValue(givenValue != null ? toDecimal(givenValue) : new BigDecimal(12.5));
         }
         else if (value instanceof DateType) {
-            ((DateType)value).setValue(Date.from(Instant.now()));
+            if (givenValue instanceof Date) {
+                ((DateType)value).setValue((Date)givenValue);
+            }
+            else if (givenValue instanceof String) {
+                ((DateType)value).setValueAsString((String)givenValue);
+            }
+            else {
+                ((DateType)value).setValue(Date.from(givenValue != null ? toInstant(givenValue) : Instant.now()));
+            }
         }
         else if (value instanceof DateTimeType) {
-            ((DateTimeType)value).setValue(Date.from(Instant.now()));
+            if (givenValue instanceof Date) {
+                ((DateTimeType)value).setValue((Date)givenValue);
+            }
+            else if (givenValue instanceof String) {
+                ((DateTimeType)value).setValueAsString((String)givenValue);
+            }
+            else {
+                ((DateTimeType)value).setValue(Date.from(givenValue != null ? toInstant(givenValue) : Instant.now()));
+            }
         }
         else if (value instanceof Quantity) {
-            ((Quantity)value).setValue(12.5);
-            ((Quantity)value).setUnit("g");
+            ((Quantity)value).setValue(givenValue != null ? toQuantityValue(givenValue) : new BigDecimal(12.5));
+            ((Quantity)value).setUnit(givenValue != null ? toQuantityUnit(givenValue) : "g");
         }
         else if (value instanceof Period) {
+            // TODO: GivenValue as a period
+            if (givenValue != null) {
+                throw new IllegalArgumentException("Not implemented: Given value cannot be a period");
+            }
             ((Period)value).setStart(Date.from(Instant.now()));
             ((Period)value).setEnd(Date.from(Instant.now()));
         }
@@ -504,7 +651,7 @@ public class ExampleBuilder {
             if ((ed.getBinding() != null) && atlas != null && atlas.getValueSets() != null) {
                 ValueSet vs = atlas.getValueSets().getByCanonicalUrlWithVersion(ed.getBinding().getValueSet());
                 if (vs != null) {
-                    CodeableConcept concept = getFirstConcept(vs);
+                    CodeableConcept concept = getFirstConcept(vs, toString(givenValue));
                     if (concept != null) {
                         ((CodeableConcept)value).setText(concept.getText());
                         ((CodeableConcept)value).setCoding(concept.getCoding());
@@ -532,7 +679,7 @@ public class ExampleBuilder {
         }
     }
 
-    private void buildElements(StructureDefinition sd, Resource r) {
+    private void buildElements(StructureDefinition sd, Resource r, Map<String, Object> elementValues) {
         if (sd.getDifferential() == null) {
             throw new IllegalArgumentException("StructureDefinition must have a differential");
         }
@@ -542,7 +689,7 @@ public class ExampleBuilder {
         while (index.get() < eds.size()) {
             ElementDefinition ed = eds.get(index.get());
             if (isContinuation(sd.getType(), ed.getId())) {
-                visitElement(sd, eds, index, r, fc.getResourceDefinition(sd.getType()));
+                visitElement(sd, eds, index, r, elementValues, fc.getResourceDefinition(sd.getType()));
             }
             else {
                 break;
