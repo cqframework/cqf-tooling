@@ -142,7 +142,7 @@ public class IGTestProcessor extends BaseProcessor {
                 }
 
                 if (softwareVersion != null && !softwareVersion.isEmpty()) {
-                    softwareSystem = new CqfmSoftwareSystem(BaseCqfmSoftwareSystemHelper.cqfRulerDeviceName, softwareVersion);
+                    softwareSystem = new CqfmSoftwareSystem(BaseCqfmSoftwareSystemHelper.cqfRulerDeviceName, softwareVersion, "CQFramework");
                 }
             }
         }

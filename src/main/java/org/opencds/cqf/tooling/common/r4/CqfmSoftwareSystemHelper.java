@@ -59,7 +59,8 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
         if (this.getSystemIsValid(system)) {
             // NOTE: No longer adding as contained as Publisher doesn't extract/respect them so the publishing fails.
             //String systemReferenceID = "#" + system.getName();
-            String systemReferenceID = system.getName();
+            String systemDeviceId = system.getName();
+            String systemReference = "Device/" + systemDeviceId;
 
             // Is a device defined in devicePaths? If so, get it.
             Device device = null;
@@ -85,7 +86,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
                 // NOTE: Takes the first device that matches on ID.
                 if (resourceInPath.getResourceType().toString().toLowerCase().equals("device")) {
                     Device prospectDevice = (Device)resourceInPath;
-                    if (prospectDevice.getIdElement().getIdPart().equals(systemReferenceID)) {
+                    if (prospectDevice.getIdElement().getIdPart().equals(systemDeviceId)) {
                         device = (Device)resourceInPath;
                         deviceOutputPath = path;
                         break;
@@ -104,6 +105,16 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
             proposedVersionList.add(proposedVersion);
             device.setVersion(proposedVersionList);
 
+            /* Ensure that device has a name */
+            Device.DeviceDeviceNameComponent proposedName = new Device.DeviceDeviceNameComponent();
+            proposedName.setName(system.getName());
+            proposedName.setType(Device.DeviceNameType.MANUFACTURERNAME);
+            device.getDeviceName().clear();
+            device.addDeviceName(proposedName);
+
+            /* Ensure that device has a manufacturer */
+            device.setManufacturer(system.getManufacturer());
+
             /* Persist the new/updated Device */
             EnsureDevicePath();
             IOUtils.writeResource(device, deviceOutputPath, deviceOutputEncoding, fhirContext);
@@ -116,7 +127,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
                     && ext.getValue().fhirType() != null
                     && ext.getValue().fhirType().equals("Reference")
                     && ((Reference)ext.getValue()).getReference() != null
-                    && ((Reference) ext.getValue()).getReference().equals(systemReferenceID)){
+                    && ((Reference) ext.getValue()).getReference().endsWith(systemDeviceId)) {
                         softwareSystemExtension = ext;
                         ((Reference) softwareSystemExtension.getValue()).setResource(null);
                 }
@@ -126,10 +137,13 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
                 softwareSystemExtension = new Extension();
                 softwareSystemExtension.setUrl(this.getCqfmSoftwareSystemExtensionUrl());
                 final Reference reference = new Reference();
-                reference.setReference(systemReferenceID);
+                reference.setReference(systemReference);
                 softwareSystemExtension.setValue(reference);
 
                 resource.addExtension(softwareSystemExtension);
+            }
+            else if (softwareSystemExtension != null && !systemReference.equals(((Reference)softwareSystemExtension.getValue()).getReference())) {
+                ((Reference)softwareSystemExtension.getValue()).setReference(systemReference);
             }
             else if (device == null) {
                 if (resource.hasExtension(this.getCqfmSoftwareSystemExtensionUrl())) {
@@ -144,7 +158,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
             // entries that it contained. i.e. remove any Contained entries for the proposed device/system
             if (resource.hasContained()) {
                 List<Resource> containedWithoutDevice = resource.getContained().stream()
-                    .filter(containedResource -> !(containedResource.getId().equals(systemReferenceID)
+                    .filter(containedResource -> !(containedResource.getId().equals(systemDeviceId)
                         && containedResource.getResourceType() == ResourceType.Device))
                     .collect(Collectors.toList());
 
@@ -188,6 +202,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
             meta.addProfile("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/device-softwaresystem-cqfm");
             device.setMeta(meta);
 
+            device.addDeviceName().setName(system.getName()).setType(Device.DeviceNameType.MANUFACTURERNAME);
             device.setManufacturer(system.getName());
 
             /* type */
@@ -218,7 +233,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 //    }
 
     public <T extends DomainResource> void ensureCQFToolingExtensionAndDevice(T resource, FhirContext fhirContext) {
-        CqfmSoftwareSystem cqfToolingSoftwareSystem = new CqfmSoftwareSystem(this.getCqfToolingDeviceName(), Main.class.getPackage().getImplementationVersion());
+        CqfmSoftwareSystem cqfToolingSoftwareSystem = new CqfmSoftwareSystem(this.getCqfToolingDeviceName(), Main.class.getPackage().getImplementationVersion(), Main.class.getPackage().getImplementationVendor());
         ensureSoftwareSystemExtensionAndDevice(resource, cqfToolingSoftwareSystem, fhirContext);
     }
 

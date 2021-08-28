@@ -62,7 +62,7 @@ public class ScaffoldArgumentProcessor {
 		for (String system : softwareSystems) {
 			String name = system.split("=")[0];
 			String version = system.split("=")[1];
-			CqfmSoftwareSystem softwareSystem = new CqfmSoftwareSystem(name, version);
+			CqfmSoftwareSystem softwareSystem = new CqfmSoftwareSystem(name, version, "CQFramework");
 			softwareSystemsList.add(softwareSystem);
 		}
 

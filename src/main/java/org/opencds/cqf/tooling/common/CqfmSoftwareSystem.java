@@ -8,8 +8,20 @@ public class CqfmSoftwareSystem {
     protected String version;
     public String getVersion() { return this.version; }
 
-    public CqfmSoftwareSystem(String name, String version) {
+    protected String manufacturer;
+    public String getManufacturer() { return this.manufacturer; }
+
+    public CqfmSoftwareSystem(String name, String version, String manufacturer) {
         this.name = name;
         this.version = version;
+        this.manufacturer = manufacturer;
+
+        if (this.version == null) {
+            this.version = "1.3.1-SNAPSHOT";
+        }
+
+        if (this.manufacturer == null) {
+            this.manufacturer = "CQFramework";
+        }
     }
 }
