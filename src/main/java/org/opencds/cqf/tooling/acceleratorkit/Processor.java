@@ -16,6 +16,7 @@ import org.hl7.fhir.Code;
 import org.hl7.fhir.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.modelinfo.Atlas;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -32,9 +33,12 @@ public class Processor extends Operation {
     private String dataElementPages; // -dataelementpages (-dep) comma-separated list of the names of pages in the
                                      // workbook to be processed
 
+    // Test Cases
+    private String testCaseInput; // -testcases (-tc) path to a spreadsheet containing test case data
+
     // TODO: These need to be per scope
-    private String dataElementIdentifierSystem = "http://fhir.org/guides/who/anc-cds/Identifier/data-elements";
-    private String activityCodeSystem = "http://fhir.org/guides/who/anc-cds/CodeSystem/activity-codes";
+    private String dataElementIdentifierSystem = "http://fhir.org/guides/who/anc-cds/Identifier/anc-data-elements";
+    private String activityCodeSystem = "http://fhir.org/guides/who/anc-cds/CodeSystem/anc-activity-codes";
     private String projectCodeSystemBase;
 
     private int questionnaireItemLinkIdCounter = 1;
@@ -61,6 +65,8 @@ public class Processor extends Operation {
     private List<DictionaryProfileElementExtension> profileExtensions = new ArrayList<>();
     private List<StructureDefinition> extensions = new ArrayList<StructureDefinition>();
     private List<StructureDefinition> profiles = new ArrayList<StructureDefinition>();
+    private Map<String, Resource> examples = new HashMap<String, Resource>();
+    private Map<String, List<Resource>> testCases = new LinkedHashMap<String, List<Resource>>();
     private Map<String, StructureDefinition> profilesByElementId = new HashMap<String, StructureDefinition>();
     private Map<String, List<DictionaryElement>> elementsByProfileId = new LinkedHashMap<String, List<DictionaryElement>>();
     private Map<String, List<StructureDefinition>> profilesByActivityId = new LinkedHashMap<String, List<StructureDefinition>>();
@@ -75,6 +81,7 @@ public class Processor extends Operation {
     private List<RetrieveInfo> retrieves = new ArrayList<RetrieveInfo>();
     private List<String> igJsonFragments = new ArrayList<String>();
     private List<String> igResourceFragments = new ArrayList<String>();
+    private CanonicalResourceAtlas atlas;
 
     private Row currentInputOptionParentRow;
 
@@ -132,6 +139,10 @@ public class Processor extends Operation {
                 case "dep":
                     dataElementPages = value;
                     break; // -dataelementpages (-dep)
+                case "testcases":
+                case "tc":
+                    testCaseInput = value;
+                    break; // -testcases (-tc)
                 default:
                     throw new IllegalArgumentException("Unknown flag: " + flag);
             }
@@ -232,6 +243,9 @@ public class Processor extends Operation {
         // process questionnaires
         processQuestionnaires();
 
+        // process example resources
+        processExamples();
+
         // write all resources
         writeExtensions(outputPath);
         writeProfiles(outputPath);
@@ -239,6 +253,10 @@ public class Processor extends Operation {
         writeValueSets(outputPath);
         writeConceptMaps(outputPath);
         writeQuestionnaires(outputPath);
+        writeExamples(outputPath);
+
+        processTestCases();
+        writeTestCases(outputPath);
 
         // write concepts CQL
         writeConcepts(scope, outputPath);
@@ -335,6 +353,33 @@ public class Processor extends Operation {
         return scopePath + "/input/extensions";
     }
 
+    private void ensureExamplesPath(String scopePath) {
+        String examplesPath = getExamplesPath(scopePath);
+        ensurePath(examplesPath);
+    }
+
+    private String getExamplesPath(String scopePath) {
+        return scopePath + "/input/examples";
+    }
+
+    private void ensureTestsPath(String scopePath) {
+        String testsPath = getTestsPath(scopePath);
+        ensurePath(testsPath);
+    }
+
+    private String getTestsPath(String scopePath) {
+        return scopePath + "/input/tests";
+    }
+
+    private void ensureTestPath(String scopePath, String testId) {
+        String testPath = getTestPath(scopePath, testId);
+        ensurePath(testPath);
+    }
+
+    private String getTestPath(String scopePath, String testId) {
+        return scopePath + "/input/tests/" + testId;
+    }
+
     private void ensureProfilesPath(String scopePath) {
         String profilesPath = getProfilesPath(scopePath);
         ensurePath(profilesPath);
@@ -404,6 +449,10 @@ public class Processor extends Operation {
 
         if (activityCode.isEmpty() || activityDisplay.isEmpty()) {
             return null;
+        }
+
+        if (activityCode.endsWith(".")) {
+            activityCode = activityCode.substring(0, activityCode.length() - 1);
         }
 
         Coding activity = activityMap.get(activityCode);
@@ -491,64 +540,27 @@ public class Processor extends Operation {
 
         return result;
     }
-    private String getICD10Comments(Row row, HashMap<String, Integer> colIds) {
-        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ICD-10Comments"));
+
+    private String getCodeComments(Row row, HashMap<String, Integer> colIds, String colName) {
+        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, colName));
         comments = cleanseCodeComments(comments);
         return comments;
     }
 
-    private String getICD11Comments(Row row, HashMap<String, Integer> colIds) {
-        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ICD-11Comments"));
-        comments = cleanseCodeComments(comments);
-        return comments;
-    }
-
-    private String getLOINCComments(Row row, HashMap<String, Integer> colIds) {
-        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "LOINCComments"));
-        comments = cleanseCodeComments(comments);
-        return comments;
-    }
-
-    private String getICFComments(Row row, HashMap<String, Integer> colIds) {
-        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ICFComments"));
-        comments = cleanseCodeComments(comments);
-        return comments;
-    }
-
-    private String getICHIComments(Row row, HashMap<String, Integer> colIds) {
-        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ICHIComments"));
-        comments = cleanseCodeComments(comments);
-        return comments;
-    }
-
-    private String getSNOMEDComments(Row row, HashMap<String, Integer> colIds) {
-        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "SNOMEDComments"));
-        comments = cleanseCodeComments(comments);
-        return comments;
-    }
-
-    private String getRXNormComments(Row row, HashMap<String, Integer> colIds) {
-        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "RXNormComments"));
-        comments = cleanseCodeComments(comments);
-        return comments;
-    }
-
-    private String getCPTComments(Row row, HashMap<String, Integer> colIds) {
-        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "CPTComments"));
-        comments = cleanseCodeComments(comments);
-        return comments;
-    }
-
-    private String getHCPCSComments(Row row, HashMap<String, Integer> colIds) {
-        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "HCPCSComments"));
-        comments = cleanseCodeComments(comments);
-        return comments;
-    }
-
-    private String getNDCComments(Row row, HashMap<String, Integer> colIds) {
-        String comments = SpreadsheetHelper.getCellAsString(row, getColId(colIds, "NDCComments"));
-        comments = cleanseCodeComments(comments);
-        return comments;
+    private String getCodeSystemCommentColName(String codeSystem) {
+        switch (codeSystem) {
+            case "ICD-10": return "ICD-10Comments";
+            case "ICD-11": return "ICD-11Comments";
+            case "ICHI": return "ICHIComments";
+            case "ICF": return "ICFComments";
+            case "SNOMED-CT": return "SNOMEDComments";
+            case "LOINC": return "LOINCComments";
+            case "RXNorm": return "RXNormComments";
+            case "CPT": return "CPTComments";
+            case "HCPCS": return "HCPCSComments";
+            case "NDC": return "NDCComments";
+        }
+        throw new IllegalArgumentException(String.format("Unknown code system key %s", codeSystem));
     }
 
     private List<DictionaryCode> cleanseCodes(List<DictionaryCode> codes) {
@@ -565,40 +577,17 @@ public class Processor extends Operation {
             List<String> codesList = Arrays.asList(codeListString.split(";"));
             String display = null;
             for (String c : codesList) {
-                switch (codeSystemKey) {
-                    case "ICD-10":
-                        display = getICD10Comments(row, colIds);
-                        break;
-                    case "ICD-11":
-                        display = getICD11Comments(row, colIds);
-                        break;
-                    case "ICHI":
-                        display = getICHIComments(row, colIds);
-                        break;
-                    case "ICF":
-                        display = getICFComments(row, colIds);
-                        break;
-                    case "SNOMED-CT":
-                        display = getSNOMEDComments(row, colIds);
-                        break;
-                    case "LOINC":
-                        display = getLOINCComments(row, colIds);
-                        break;
-                    case "RXNorm":
-                        display = getRXNormComments(row, colIds);
-                        break;
-                    case "CPT":
-                        display = getCPTComments(row, colIds);
-                        break;
-                    case "HCPCS":
-                        display = getHCPCSComments(row, colIds);
-                        break;
-                    case "NDC":
-                        display = getNDCComments(row, colIds);
-                        break;
+                display = getCodeComments(row, colIds, getCodeSystemCommentColName(codeSystemKey));
+                int bestFitIndex = display != null ? display.toLowerCase().indexOf("?best fit") : -1;
+                if (bestFitIndex < 0) {
+                    bestFitIndex = display != null ? display.toLowerCase().indexOf("??note: best fit") : -1;
                 }
-
-                codes.add(getCode(system, id, label, display, c, null));
+                String equivalence = "equivalent";
+                if (bestFitIndex > 0) {
+                    display = display.substring(0, bestFitIndex);
+                    equivalence = "relatedto";
+                }
+                codes.add(getCode(system, id, label, display, c, null, equivalence));
             }
         }
 
@@ -638,14 +627,14 @@ public class Processor extends Operation {
             if (codeListString != null && !codeListString.isEmpty()) {
                 List<String> codesList = Arrays.asList(codeListString.split(";"));
                 for (String c : codesList) {
-                    codes.add(getCode(system, id, label, display, c, null));
+                    codes.add(getCode(system, id, label, display, c, null, null));
                 }
             }
 
             if (system.startsWith(projectCodeSystemBase)) {
                 CodeSystem codeSystem = null;
                 for (CodeSystem cs : codeSystems) {
-                    if (cs.getUrl().equals(system + "-codes")) {
+                    if (cs.getUrl().equals(system)) {
                         codeSystem = cs;
                     }
                 }
@@ -653,7 +642,7 @@ public class Processor extends Operation {
                 if (codeSystem == null) {
                     String codeSystemName = system.substring(system.indexOf("CodeSystem/") + "CodeSystem/".length());
                     codeSystem = createCodeSystem(codeSystemName, projectCodeSystemBase, "Extended Codes CodeSystem",
-                            "Set of codes identified as being needed but not found in existing Code Systems");
+                            "Set of codes representing all concepts used in the implementation guide");
                 }
 
                 for (DictionaryCode code : codes) {
@@ -681,7 +670,7 @@ public class Processor extends Operation {
             List<String> codesList = Arrays.asList(codeListString.split(";"));
 
             for (String c : codesList) {
-                codes.add(getCode(system, elementId, elementLabel, display, c, parent));
+                codes.add(getCode(system, elementId, elementLabel, display, c, parent, "equivalent"));
             }
         }
         return cleanseCodes(codes);
@@ -693,7 +682,7 @@ public class Processor extends Operation {
         return codes;
     }
 
-    private DictionaryCode getCode(String system, String id, String label, String display, String codeValue, String parent) {
+    private DictionaryCode getCode(String system, String id, String label, String display, String codeValue, String parent, String equivalence) {
         DictionaryCode code = new DictionaryCode();
         code.setId(id);
         code.setLabel(label);
@@ -701,6 +690,7 @@ public class Processor extends Operation {
         code.setDisplay(display);
         code.setCode(codeValue);
         code.setParent(parent);
+        code.setEquivalence(equivalence);
         return code;
     }
 
@@ -1274,6 +1264,17 @@ public class Processor extends Operation {
                 .replace("<", "");
     }
 
+    private String toName(String name) {
+        String result = toUpperId(name);
+        if (result.isEmpty()) {
+            return result;
+        }
+        if (Character.isDigit(result.charAt(0))) {
+            return "_" + result;
+        }
+        return result;
+    }
+
     private String toId(String name) {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Name cannot be null or empty");
@@ -1575,7 +1576,7 @@ public class Processor extends Operation {
         sd.setId(customProfileId);
         sd.setUrl(String.format("%s/StructureDefinition/%s", canonicalBase, customProfileId));
         // TODO: version (I think this needs to come from the IG version, we don't need to set that here)
-        sd.setName(hasCustomProfileIdRaw ? customProfileIdRaw : element.getName());
+        sd.setName(toName(hasCustomProfileIdRaw ? customProfileIdRaw : element.getName()));
         sd.setTitle(hasCustomProfileIdRaw ? customProfileIdRaw : element.getLabel());
 
         //if (element.getId() != null) {
@@ -1653,6 +1654,56 @@ public class Processor extends Operation {
         return sd;
     }
 
+    private int getElementIndex(StructureDefinition sd, String path) {
+        for (int i = 0; i < sd.getDifferential().getElement().size(); i++) {
+            if (sd.getDifferential().getElement().get(i).getPath().equals(path)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private void addAfter(StructureDefinition sd, ElementDefinition ed, String afterPath) {
+        int targetIndex = getElementIndex(sd, afterPath);
+        if (targetIndex >= 0) {
+            sd.getDifferential().getElement().add(targetIndex + 1, ed);
+        }
+        else {
+            sd.getDifferential().getElement().add(ed);
+        }
+    }
+
+    private void addElementToStructureDefinition(StructureDefinition sd, ElementDefinition ed) {
+        if (sd == null) {
+            throw new IllegalArgumentException("sd is null");
+        }
+        if (ed == null) {
+            throw new IllegalArgumentException("ed is null");
+        }
+        if (sd.getDifferential() == null) {
+            throw new IllegalArgumentException("sd.differential is null");
+        }
+        // Add the element at the appropriate place based on the path
+        // Ideally this code would be informed by the base StructureDefinition(s), but in the absence of that,
+        // hard-coding some orders here based on current content patterns:
+        switch (ed.getPath()) {
+            case "MedicationRequest.dosageInstruction.timing": addAfter(sd, ed, "MedicationRequest.dosageInstruction"); break;
+            case "MedicationRequest.dosageInstruction.timing.repeat": addAfter(sd, ed, "MedicationRequest.dosageInstruction.timing"); break;
+            case "MedicationRequest.dosageInstruction.timing.repeat.periodUnit": addAfter(sd, ed, "MedicationRequest.dosageInstruction.timing.repeat"); break;
+            case "MedicationRequest.statusReason": addAfter(sd, ed, "MedicationRequest"); break;
+            case "Immunization.vaccineCode": addAfter(sd, ed, "Immunization"); break;
+            case "Immunization.statusReason": addAfter(sd, ed, "Immunization"); break;
+            case "ServiceRequest.code": addAfter(sd, ed, "ServiceRequest"); break;
+            case "ServiceRequest.occurrence[x]": addAfter(sd, ed, "ServiceRequest.code"); break;
+            case "ServiceRequest.requester": addAfter(sd, ed, "ServiceRequest.authoredOn"); break;
+            case "ServiceRequest.locationReference": addAfter(sd, ed, "ServiceRequest.authoredOn"); break;
+            case "Procedure.code": addAfter(sd, ed, "Procedure"); break;
+            case "Procedure.statusReason": addAfter(sd, ed, "Procedure"); break;
+            default: sd.getDifferential().addElement(ed); break;
+        }
+    }
+
     private void applyDataElementToElementDefinition(DictionaryElement element, StructureDefinition sd, ElementDefinition ed) {
         ed.setShort(element.getDataElementLabel());
         ed.setLabel(element.getDataElementName());
@@ -1714,6 +1765,27 @@ public class Processor extends Operation {
         if (!profiles.contains(sd)) {
             profiles.add(sd);
         }
+    }
+
+    private boolean isRequiredElement(DictionaryElement element) {
+        if (element != null && element.getFhirElementPath() != null && element.getFhirElementPath().getResourceTypeAndPath() != null) {
+            switch (element.getFhirElementPath().getResourceTypeAndPath()) {
+                case "MedicationRequest.medication": return true;
+                case "MedicationRequest.medication[x]": return true;
+                case "Condition.code": return true;
+                case "Procedure.code": return true;
+                case "Immunization.statusReason": return true;
+                case "ServiceRequest.code": return true;
+                case "Immunization.vaccineCode": return true;
+                case "Patient.contact.name": return true;
+                case "Procedure.performed": return true;
+                case "Procedure.performed[x]": return true;
+                case "MedicationRequest.dosageInstruction.doseAndRate": return true;
+                case "Immunization.occurrence": return true;
+                case "Immunization.occurrence[x]": return true;
+            }
+        }
+        return false;
     }
 
     private void ensureElement(DictionaryElement element, StructureDefinition sd) {
@@ -1794,7 +1866,7 @@ public class Processor extends Operation {
                         primaryCodePathElementAdded = true;
                     }
 
-                    sd.getDifferential().addElement(ed);
+                    addElementToStructureDefinition(sd, ed);
                     applyDataElementToElementDefinition(element, sd, ed);
                 } else {
                     Type existingCode = existingPrimaryCodePathElement.getFixed();
@@ -1859,7 +1931,7 @@ public class Processor extends Operation {
 
                             ElementDefinition existing = getDifferentialElement(sd, id);
                             if (existing == null) {
-                                sd.getDifferential().addElement(pathElement);
+                                addElementToStructureDefinition(sd, pathElement);
                             }
                         }
                     }
@@ -1867,8 +1939,10 @@ public class Processor extends Operation {
                     ElementDefinition ed = new ElementDefinition();
                     ed.setId(elementId);
                     ed.setPath(elementId);
-                    ed.setMin(toBoolean(element.getRequired()) ? 1 : 0);
-                    ed.setMax(isMultipleChoiceElement(element) ? "*" : "1");
+                    ed.setMin((toBoolean(element.getRequired()) || isRequiredElement(element)) ? 1 : 0);
+                    // BTR-> This will almost always be 1, and I don't think we currently have any where it wouldn't, because a
+                    // multiple choice element would actually be multiple observations, rather than a single observation with multiple values
+                    ed.setMax("1"); //isMultipleChoiceElement(element) ? "*" : "1");
                     ed.setMustSupport(true);
 
                     ElementDefinition.TypeRefComponent edtr = new ElementDefinition.TypeRefComponent();
@@ -1882,7 +1956,7 @@ public class Processor extends Operation {
                     if (!primaryCodePathElementAdded) {// && codePath != null) {
                         ensureTerminologyAndBindToElement(element, sd, ed, null, null, true);
                     }
-                    sd.getDifferential().addElement(ed);
+                    addElementToStructureDefinition(sd, ed);
                     applyDataElementToElementDefinition(element, sd, ed);
 
                     // UnitOfMeasure-specific block
@@ -1904,7 +1978,7 @@ public class Processor extends Operation {
                         }
                         unitElement.setFixed(new StringType(unitOfMeasure));
 
-                        sd.getDifferential().addElement(unitElement);
+                        addElementToStructureDefinition(sd, unitElement);
                     }
                 }
             } else {
@@ -2011,7 +2085,9 @@ public class Processor extends Operation {
 
                 ed.setPath(choicesElementPath);
                 ed.setMin(1);
-                ed.setMax(isMultipleChoiceElement(dictionaryElement) ? "*" : "1");
+                // BTR-> This will almost always be 1, and I don't think we currently have any where it wouldn't, because a
+                // multiple choice element would actually be multiple observations, rather than a single observation with multiple values
+                ed.setMax("1"); //isMultipleChoiceElement(dictionaryElement) ? "*" : "1");
                 ed.setMustSupport(true);
 
                 String elementFhirType = getFhirTypeOfTargetElement(dictionaryElement.getFhirElementPath());
@@ -2024,7 +2100,7 @@ public class Processor extends Operation {
                 bindQuestionnaireItemAnswerValueSet(dictionaryElement, valueSetToBind);
 
                 bindValueSetToElement(ed, valueSetToBind, dictionaryElement.getBindingStrength());
-                sd.getDifferential().addElement(ed);
+                addElementToStructureDefinition(sd, ed);
                 applyDataElementToElementDefinition(dictionaryElement, sd, ed);
             }
         }
@@ -2057,7 +2133,7 @@ public class Processor extends Operation {
             ElementDefinition ed = new ElementDefinition();
             ed.setId(baseElementId);
             ed.setPath(elementPath.getResourceTypeAndPath());
-            ed.setMin(toBoolean(dictionaryElement.getRequired()) ? 1 : 0);
+            ed.setMin((toBoolean(dictionaryElement.getRequired()) || isRequiredElement(dictionaryElement)) ? 1 : 0);
             //ed.setMax(isMultipleChoiceElement(dictionaryElement) ? "*" : "1");
             ed.setMax("*");
             ed.setMustSupport(true);
@@ -2071,7 +2147,7 @@ public class Processor extends Operation {
 
             ensureElementHasSlicingWithDiscriminator(ed, discriminatorType, discriminatorPath);
 
-            sd.getDifferential().addElement(ed);
+            addElementToStructureDefinition(sd, ed);
         }
 
         /* Add the actual Slice (e.g., telecom:Telephone1) */
@@ -2086,7 +2162,7 @@ public class Processor extends Operation {
         sliceElement.setMin(toBoolean(dictionaryElement.getRequired()) ? 1 : 0);
         sliceElement.setMax(isMultipleChoiceElement(dictionaryElement) ? "*" : "1");
 
-        sd.getDifferential().addElement(sliceElement);
+        addElementToStructureDefinition(sd, sliceElement);
         applyDataElementToElementDefinition(dictionaryElement, sd, sliceElement);
     }
 
@@ -2211,7 +2287,7 @@ public class Processor extends Operation {
             valueSet = new ValueSet();
             valueSet.setId(valueSetId);
             valueSet.setUrl(String.format("%s/ValueSet/%s", canonicalBase, valueSetId));
-            valueSet.setName(valueSetId);
+            valueSet.setName(toName(valueSetLabel));
             valueSet.setTitle(String.format("%s", valueSetLabel));
             valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
             valueSet.setExperimental(false);
@@ -2326,7 +2402,12 @@ public class Processor extends Operation {
 
                 ConceptMap.SourceElementComponent sec = cmg.addElement().setCode(code.getCode()).setDisplay(code.getDisplay());
                 for (DictionaryCode systemCode : systemCodes) {
-                    sec.addTarget().setCode(systemCode.getCode()).setDisplay(systemCode.getDisplay()).setEquivalence(Enumerations.ConceptMapEquivalence.EQUIVALENT);
+                    sec.addTarget()
+                            .setCode(systemCode.getCode())
+                            .setDisplay(systemCode.getDisplay())
+                            .setEquivalence(systemCode.getEquivalence() != null
+                                    ? Enumerations.ConceptMapEquivalence.fromCode(systemCode.getEquivalence())
+                                    : null);
                 }
             }
         }
@@ -2348,7 +2429,7 @@ public class Processor extends Operation {
             valueSet = new ValueSet();
             valueSet.setId(valueSetId);
             valueSet.setUrl(String.format("%s/ValueSet/%s", canonicalBase, valueSetId));
-            valueSet.setName(valueSetLabel);
+            valueSet.setName(toName(valueSetLabel));
             valueSet.setTitle(valueSetLabel);
             valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
             valueSet.setExperimental(false);
@@ -2416,11 +2497,11 @@ public class Processor extends Operation {
     private CodeSystem createCodeSystem(String name, String canonicalBase, String title, String description) {
         CodeSystem codeSystem = new CodeSystem();
 
-        codeSystem.setId(toId(name) + "-codes");
+        codeSystem.setId(toId(name));
         codeSystem.setUrl(String.format("%s/CodeSystem/%s", canonicalBase, codeSystem.getId()));
         // TODO: version
-        codeSystem.setName(name + "_codes");
-        codeSystem.setTitle(String.format("%s codes", title != null ? title : name));
+        codeSystem.setName(toName(name));
+        codeSystem.setTitle(String.format("%s", title != null ? title : name));
         codeSystem.setStatus(Enumerations.PublicationStatus.DRAFT);
         codeSystem.setExperimental(false);
         // TODO: date
@@ -2433,6 +2514,40 @@ public class Processor extends Operation {
         codeSystems.add(codeSystem);
 
         return codeSystem;
+    }
+
+    private CanonicalResourceAtlas getAtlas() {
+        if (atlas == null) {
+            atlas =
+                    new CanonicalResourceAtlas()
+                            .setValueSets(new InMemoryCanonicalResourceProvider<ValueSet>(this.valueSets))
+                            .setCodeSystems(new InMemoryCanonicalResourceProvider<CodeSystem>(this.codeSystems))
+                            .setConceptMaps(new InMemoryCanonicalResourceProvider<ConceptMap>(this.conceptMaps.values()));
+        }
+        return atlas;
+    }
+
+    public void processTestCases() {
+        if (testCaseInput != null && !testCaseInput.isEmpty()) {
+            TestCaseProcessor tcp = new TestCaseProcessor();
+            tcp.setAtlas(getAtlas());
+            tcp.setProfilesByElementId(profilesByElementId);
+            testCases = tcp.process(testCaseInput);
+        }
+    }
+
+    // Generate example resources for each profile
+    public void processExamples() {
+        ExampleBuilder eb = new ExampleBuilder();
+        eb.setAtlas(getAtlas());
+        eb.setPatientContext("anc-patient-example");
+        eb.setEncounterContext("anc-encounter-example");
+        eb.setLocationContext("anc-location-example");
+        eb.setPractitionerContext("anc-practitioner-example");
+        eb.setPractitionerRoleContext("anc-practitionerrole-example");
+        for (StructureDefinition sd : profiles) {
+            examples.put(sd.getUrl(), eb.build(sd));
+        }
     }
 
     /* Write Methods */
@@ -2522,6 +2637,30 @@ public class Processor extends Operation {
         }
     }
 
+    public void writeExamples(String scopePath) {
+        if (examples != null && examples.size() > 0) {
+            String examplesPath = getExamplesPath(scopePath);
+            ensureExamplesPath(scopePath);
+            for (Map.Entry<String, Resource> entry : examples.entrySet()) {
+                writeResource(examplesPath, entry.getValue());
+            }
+        }
+    }
+
+    public void writeTestCases(String scopePath) {
+        if (testCases != null && testCases.size() > 0) {
+            String testsPath = getTestsPath(scopePath);
+            ensureTestsPath(scopePath);
+            for (Map.Entry<String, List<Resource>> entry : testCases.entrySet()) {
+                String testPath = getTestPath(scopePath, entry.getKey());
+                ensureTestPath(scopePath, entry.getKey());
+                for (Resource r : entry.getValue()) {
+                    writeResource(testPath, r);
+                }
+            }
+        }
+    }
+
     public void writeProfiles(String scopePath) {
         if (profiles != null && profiles.size() > 0) {
             String profilesPath = getProfilesPath(scopePath);
@@ -2530,7 +2669,7 @@ public class Processor extends Operation {
             Comparator<ElementDefinition> compareById = Comparator.comparing(Element::getId);
 
             for (StructureDefinition sd : profiles) {
-                sd.getDifferential().getElement().sort(compareById);
+                //sd.getDifferential().getElement().sort(compareById);
                 indexProfile(sd);
                 writeResource(profilesPath, sd);
 
@@ -2601,7 +2740,7 @@ public class Processor extends Operation {
                         StructureDefinition sd = profilesByElementId.get(de.getId());
                         if (sd != null) {
                             if (de.getFhirElementPath() != null && de.getFhirElementPath().getResourcePath() != null) {
-                                item.setDefinition(String.format("%s#%s", sd.getUrl(), de.getFhirElementPath().getResourcePath()));
+                                item.setDefinition(String.format("%s#%s", sd.getUrl(), de.getFhirElementPath().getResourceTypeAndPath()));
                             }
                             else {
                                 item.setDefinition(sd.getUrl());
