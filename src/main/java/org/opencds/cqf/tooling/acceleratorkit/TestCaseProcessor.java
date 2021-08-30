@@ -88,11 +88,11 @@ public class TestCaseProcessor {
             Patient p = generatePatient(eb, testCaseProfiles);
             if (p != null) {
                 eb.setIdScope(p.getId());
-                eb.setPatientContext("Patient/" + p.getId());
+                eb.setPatientContext(p.getId());
 
                 Encounter e = generateEncounter(eb, testCaseProfiles);
                 if (e != null) {
-                    eb.setEncounterContext("Encounter/" + e.getId());
+                    eb.setEncounterContext(e.getId());
 
                     List<Resource> resources = generateResources(eb, testCaseProfiles);
                     resources.add(0, p);
