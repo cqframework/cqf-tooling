@@ -17,7 +17,11 @@ public class CqfmSoftwareSystem {
         this.manufacturer = manufacturer;
 
         if (this.version == null) {
-            this.version = "1.3.1-SNAPSHOT";
+            this.version = CqfmSoftwareSystem.class.getPackage().getSpecificationVersion();
+        }
+
+        if (this.version == null) {
+            this.version = "unspecified";
         }
 
         if (this.manufacturer == null) {
