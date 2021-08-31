@@ -303,7 +303,7 @@ public class IOUtils
             }
         }
 
-        String resourceType = resource.getClass().getSimpleName().toLowerCase();
+        String resourceType = resource.fhirType().toLowerCase();
         // Cannot read from here it isn't always set
         //String resourceType = resource.getIdElement().getResourceType().toLowerCase();
         
