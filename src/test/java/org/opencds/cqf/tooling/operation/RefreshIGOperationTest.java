@@ -8,7 +8,6 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.IniFile;
@@ -20,9 +19,8 @@ import com.google.gson.Gson;
 
 import ca.uhn.fhir.context.FhirContext;
 
-
 public class RefreshIGOperationTest {
-	
+
 	private final String ID = "id";
 	private final String ENTRY = "entry";
 	private final String RESOURCE = "resource";
@@ -30,6 +28,8 @@ public class RefreshIGOperationTest {
 	private final String BUNDLE_TYPE = "Bundle";
 	private final String LIB_TYPE = "Library";
 	private final String MEASURE_TYPE = "Measure";
+
+	private final String INI_LOC = "testfiles/refreshIG/ig.ini";
 
 	private Map<?, ?> jsonMap(File file) {
 		Map<?, ?> map = null;
@@ -46,18 +46,19 @@ public class RefreshIGOperationTest {
 	}
 
 	private boolean mapsAreEqual(Map<String, String> map1, Map<String, String> map2) {
-		System.out.println ("#TEST INFO: COMPARING " + map1.getClass() + "(" + map1.size() + ") AND " + map2.getClass() + "(" + map2.size() + ")");
-		
+		System.out.println("#TEST INFO: COMPARING " + map1.getClass() + "(" + map1.size() + ") AND " + map2.getClass()
+				+ "(" + map2.size() + ")");
+
 		if (map1.size() != map2.size()) {
 			return false;
 		}
 		boolean comparison = map1.entrySet().stream().allMatch(e -> e.getValue().equals(map2.get(e.getKey())));
-		System.out.println ("#TEST INFO: MATCH: " + comparison);
+		System.out.println("#TEST INFO: MATCH: " + comparison);
 		return comparison;
 	}
 
 	private String getFhirVersion(IniFile ini) {
-		String specifiedFhirVersion = ini.getStringProperty("IG", "fhir-version"); 
+		String specifiedFhirVersion = ini.getStringProperty("IG", "fhir-version");
 		if (specifiedFhirVersion == null || specifiedFhirVersion == "") {
 
 			// TODO: Should point to global constant:
@@ -73,20 +74,16 @@ public class RefreshIGOperationTest {
 	@Test
 	public void testBundledFiles() {
 		RefreshIGOperation refreshIGOp = new RefreshIGOperation();
-		
-		System.out.println("Enter location of INI file:");
-	    
-		String iniLocation = new Scanner(System.in).nextLine();
 
 		// build ini object
-		File iniFile = new File(iniLocation);
+		File iniFile = new File(INI_LOC);
 		String iniFileLocation = iniFile.getAbsolutePath();
 		IniFile ini = new IniFile(iniFileLocation);
-		
-		String bundledFilesLocation = iniFile.getParent() + "\\bundles\\measure\\";		
-		
-		String args[] = { "-RefreshIG", "-ini=" + iniLocation, "-t", "-d", "-p" };
-		
+
+		String bundledFilesLocation = iniFile.getParent() + "\\bundles\\measure\\";
+
+		String args[] = { "-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p" };
+
 		// execute refresh using ARGS
 		refreshIGOp.execute(args);
 
@@ -100,12 +97,10 @@ public class RefreshIGOperationTest {
 		// bundled into single file using id/resourceType as lookup:
 		for (String measureName : measures.keySet()) {
 			// location of single bundled file:
-			final String bundledFileResult = bundledFilesLocation + measureName
-					+ "\\" + measureName + "-bundle.json";
+			final String bundledFileResult = bundledFilesLocation + measureName + "\\" + measureName + "-bundle.json";
 			System.out.println(bundledFileResult);
 			// multiple individual files in sub directory to loop through:
-			File bundledFiles = new File(bundledFilesLocation + "\\" + measureName
-					+ "\\" + measureName + "-files");
+			File bundledFiles = new File(bundledFilesLocation + "\\" + measureName + "\\" + measureName + "-files");
 			System.out.println(bundledFiles);
 			// verify files even exist:
 			assertTrue(bundledFiles.listFiles().length > 0);
@@ -162,4 +157,3 @@ public class RefreshIGOperationTest {
 
 	}
 }
- 
