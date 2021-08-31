@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.R4FHIRUtils;
 
@@ -188,22 +189,22 @@ public class PostmanCollectionOperation extends Operation {
         return pathTokens;
     }
 
-    private List<String> generatePathTokensForMeasure(String measureName) {
+    private List<String> generatePathTokensForMeasure(String measureId) {
         List<String> list = new ArrayList<>(pathTokens);
         list.add("Measure");
-        if (StringUtils.isNotBlank(measureName)) {
-            list.add(measureName);
+        if (StringUtils.isNotBlank(measureId)) {
+            list.add(measureId);
         }
         list.add("$evaluate-measure");
         return list;
     }
 
-    private String  generateMeasureUrl(String measureName, String patient, String start, String end) {
+    private String  generateMeasureUrl(String measureId, String patient, String start, String end) {
         StringBuilder sb = new StringBuilder();
         sb.append(pathNames);
-        if(StringUtils.isNotBlank(measureName)) {
+        if(StringUtils.isNotBlank(measureId)) {
             sb.append("Measure/");
-            sb.append(measureName);
+            sb.append(measureId);
             sb.append("/$evaluate-measure?");
         }
         if (StringUtils.isNotBlank(patient)) {
@@ -332,18 +333,18 @@ public class PostmanCollectionOperation extends Operation {
                 if (resource.getResourceType().compareTo(ResourceType.MeasureReport) == 0) {
                     MeasureReport measureReport = (MeasureReport) resource;
 
-                    String measureName = R4FHIRUtils.parseId(measureReport.getMeasure());
+                    String measureId = getMeasureId(measureReport);
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                     String patient = R4FHIRUtils.parseId(measureReport.getSubject().getReference());
                     String start = sdf.format(measureReport.getPeriod().getStart());
                     String end = sdf.format(measureReport.getPeriod().getEnd());
-                    String measureUrl = generateMeasureUrl(measureName, patient, start, end);
+                    String measureUrl = generateMeasureUrl(measureId, patient, start, end);
                     String requestName = "measure";
 
                     if (StringUtils.isNotBlank(patient)) {
                         requestName = patient;
                     }
-                    populateRequestItems(itemSubFolder, measureName, requestName, measureUrl, patient, start, end);
+                    populateRequestItems(itemSubFolder, measureId, requestName, measureUrl, patient, start, end);
                 }
             }
         } else if (version.equals("dstu3")) {
@@ -357,18 +358,18 @@ public class PostmanCollectionOperation extends Operation {
                 if (resource.getResourceType().compareTo(org.hl7.fhir.dstu3.model.ResourceType.MeasureReport) == 0) {
                     org.hl7.fhir.dstu3.model.MeasureReport measureReport = (org.hl7.fhir.dstu3.model.MeasureReport) resource;
 
-                    String measureName = R4FHIRUtils.parseId(measureReport.getMeasure().getReference());
+                    String measureId = R4FHIRUtils.parseId(measureReport.getMeasure().getReference());
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                     String patient = R4FHIRUtils.parseId(measureReport.getPatient().getReference());
                     String start = sdf.format(measureReport.getPeriod().getStart());
                     String end = sdf.format(measureReport.getPeriod().getEnd());
-                    String measureUrl = generateMeasureUrl(measureName, patient, start, end);
+                    String measureUrl = generateMeasureUrl(measureId, patient, start, end);
 
                     String requestName = "measure";
                     if (StringUtils.isNotBlank(patient)) {
                         requestName = patient;
                     }
-                    populateRequestItems(itemSubFolder, measureName, requestName, measureUrl, patient, start, end);
+                    populateRequestItems(itemSubFolder, measureId, requestName, measureUrl, patient, start, end);
                 }
             }
         }
@@ -385,7 +386,15 @@ public class PostmanCollectionOperation extends Operation {
             return "measure";
     }
 
-    private void populateRequestItems( BaseItem itemSubFolder,String measureName,String requestName, String measureUrl, String patient, String start, String end) {
+    private String getMeasureId(MeasureReport measureReport) {
+        String id = R4FHIRUtils.parseId(measureReport.getMeasure());
+        if (StringUtils.isEmpty(id)) {
+            id = CanonicalUtils.getId(measureReport.getMeasure());
+        }
+        return id;
+    }
+
+    private void populateRequestItems( BaseItem itemSubFolder,String measureId,String requestName, String measureUrl, String patient, String start, String end) {
 
         List<Map<String,String>> requestMapList;
 
@@ -394,7 +403,7 @@ public class PostmanCollectionOperation extends Operation {
         addItemToQueryList(requestMapList,"periodStart", start);
         addItemToQueryList(requestMapList,"periodEnd",end);
 
-        populateItemWithRequestItem("GET",requestName, "", measureName, measureUrl, itemSubFolder, requestMapList);
+        populateItemWithRequestItem("GET",requestName, "", measureId, measureUrl, itemSubFolder, requestMapList);
 
     }
 
@@ -404,15 +413,15 @@ public class PostmanCollectionOperation extends Operation {
         populateItemWithRequestItem("POST","Post Bundle", content, "", generatePostUrl(), itemSubFolder, null);
     }
 
-    private void populateItemWithRequestItem(String method, String name, String body,  String measureName, String measureUrl, BaseItem itemSubFolder, List<Map<String, String>> requestMapList) {
+    private void populateItemWithRequestItem(String method, String name, String body,  String measureId, String measureUrl, BaseItem itemSubFolder, List<Map<String, String>> requestMapList) {
         RequestItem requestItem = new RequestItem();
         if (itemSubFolder.getItem() != null) {
             itemSubFolder.getItem().add(requestItem);
         }
-        populateRequestItem(requestItem, name, method, body, measureName, measureUrl, requestMapList);
+        populateRequestItem(requestItem, name, method, body, measureId, measureUrl, requestMapList);
     }
 
-    private void populateRequestItem(RequestItem requestItem, String name, String method, String body, String measureName, String measureUrl, List<Map<String, String>> requestMapList) {
+    private void populateRequestItem(RequestItem requestItem, String name, String method, String body, String measureId, String measureUrl, List<Map<String, String>> requestMapList) {
 
         if(StringUtils.isNotBlank(name)) {
             requestItem.setName(name);
@@ -429,10 +438,10 @@ public class PostmanCollectionOperation extends Operation {
             requestItem.setResponse(new ArrayList<>());
         }
 
-        populateRequestInfo(requestInfo, method, body,  measureName,measureUrl, requestMapList);
+        populateRequestInfo(requestInfo, method, body, measureId, measureUrl, requestMapList);
     }
 
-    private void populateRequestInfo(RequestInfo requestInfo, String method, String body, String measureName, String measureUrl, List<Map<String, String>> requestMapList) {
+    private void populateRequestInfo(RequestInfo requestInfo, String method, String body, String measureId, String measureUrl, List<Map<String, String>> requestMapList) {
 
         if (StringUtils.isNotBlank(method)) {
             requestInfo.setMethod(method);
@@ -445,19 +454,19 @@ public class PostmanCollectionOperation extends Operation {
         RequestUrl requestUrl = new RequestUrl();
         requestInfo.setUrl(requestUrl);
 
-        populateRequestUrl(requestUrl, measureUrl, measureName, requestMapList);
+        populateRequestUrl(requestUrl, measureUrl, measureId, requestMapList);
     }
 
 
-    private void populateRequestUrl(RequestUrl requestUrl, String measureUrl, String measureName, List<Map<String, String>> requestMapList) {
+    private void populateRequestUrl(RequestUrl requestUrl, String measureUrl, String measureId, List<Map<String, String>> requestMapList) {
         if (StringUtils.isNotBlank(measureUrl)) {
             requestUrl.setRaw(measureUrl);
         }
         requestUrl.setProtocol(protocol);
         if (requestMapList != null) {
             requestUrl.setQuery(requestMapList);
-            if (StringUtils.isNotBlank(measureName)) {
-                requestUrl.setPath(generatePathTokensForMeasure(measureName));
+            if (StringUtils.isNotBlank(measureId)) {
+                requestUrl.setPath(generatePathTokensForMeasure(measureId));
             }
         } else {
             requestUrl.setPath(generateUrlPathTokens());
