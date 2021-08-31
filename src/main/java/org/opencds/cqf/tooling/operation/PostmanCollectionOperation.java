@@ -117,9 +117,13 @@ public class PostmanCollectionOperation extends Operation {
 
     private void validateCollectionName() {
         if (StringUtils.isEmpty(collectionName)) {
-            collectionName = String.format("Postman Collection-%s",
-                    new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss").format(new Date()));
+            collectionName = createDefaultName();
         }
+    }
+
+    private String createDefaultName() {
+        return String.format("Postman-Collection-%s",
+                new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss").format(new Date()));
     }
 
     private void validateProtocol() {
@@ -336,8 +340,8 @@ public class PostmanCollectionOperation extends Operation {
                     String measureUrl = generateMeasureUrl(measureName, patient, start, end);
                     String requestName = "measure";
 
-                    if (measureReport.hasId()) {
-                        requestName = setRequestName(measureReport.getId());
+                    if (StringUtils.isNotBlank(patient)) {
+                        requestName = patient;
                     }
                     populateRequestItems(itemSubFolder, measureName, requestName, measureUrl, patient, start, end);
                 }
@@ -361,9 +365,8 @@ public class PostmanCollectionOperation extends Operation {
                     String measureUrl = generateMeasureUrl(measureName, patient, start, end);
 
                     String requestName = "measure";
-
-                    if (measureReport.hasId()) {
-                        requestName = setRequestName(measureReport.getId());
+                    if (StringUtils.isNotBlank(patient)) {
+                        requestName = patient;
                     }
                     populateRequestItems(itemSubFolder, measureName, requestName, measureUrl, patient, start, end);
                 }
@@ -512,11 +515,13 @@ public class PostmanCollectionOperation extends Operation {
 
         try {
             String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(postmanCollection);
-            FileWriter writer = new FileWriter(getOutputPath()+"/PostmanColl.json");
+            BufferedWriter writer = new BufferedWriter(
+                    new FileWriter(String.format("%s/%s.json", getOutputPath(), createDefaultName())));
             writer.write(jsonString);
             writer.flush();
+            writer.close();
 
-        } catch (IOException e ) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
