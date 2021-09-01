@@ -1,7 +1,8 @@
 package org.opencds.cqf.tooling.operation;
 
 
-import static org.junit.Assert.assertTrue;
+
+import static org.testng.Assert.*;
 
 import java.io.BufferedReader;
 import java.io.File;
