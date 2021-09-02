@@ -92,7 +92,7 @@ public class ECQMCreatorTest {
             ioException.printStackTrace();
         }
     }
-   
+
     @Test
     public void TestCMS104FHIR() {
         // Extract the bundle
@@ -882,6 +882,31 @@ public class ECQMCreatorTest {
 
         try {
             Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/IntravesicalBacillusCalmetteGuerinForNonmuscleInvasiveBladderCancerFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/IntravesicalBacillusCalmetteGuerinForNonmuscleInvasiveBladderCancerFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
+    @Test
+    public void TestCMS122FHIR() {
+
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS122FHIR-v0-0-004-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR.cql", "ecqm-content-r4-2021/input/resources/measure/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR.json");
             assertTrue(null != measure);
             // Extract data requirements from the measure:
             List<DataRequirement> drs = new ArrayList<DataRequirement>();
