@@ -14,6 +14,7 @@ class USCoreClassInfoSettings extends ClassInfoSettings {
         this.modelPrefix = "USCore";
         this.helpersLibraryName = "FHIRHelpers";
         this.useCQLPrimitives = true;
+        this.createSliceElements = true;
 
         this.codeableTypes = new HashSet<String>() {
             {
