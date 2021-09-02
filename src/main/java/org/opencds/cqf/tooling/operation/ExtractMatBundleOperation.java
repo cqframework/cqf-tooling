@@ -32,9 +32,10 @@ public class ExtractMatBundleOperation extends Operation {
 		for (int i = 0; i < args.length;i++) {
 			if(i == 0 && args[i].equalsIgnoreCase("-ExtractMatBundle")){
 				continue;		//
-			}
+			} 
 			if(i == 1){
 				inputFile = args[i];
+                                inputFile = inputFile.replace("%20", " "); // TODO: use URI instead?
 				if (inputFile == null) {
 					throw new IllegalArgumentException("The path to a bundle file is required");
 				}

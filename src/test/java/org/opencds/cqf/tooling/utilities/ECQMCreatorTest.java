@@ -118,6 +118,786 @@ public class ECQMCreatorTest {
             ioException.printStackTrace();
         }
     }
+    
+    @Test
+    public void TestCMS122FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS122FHIR-v0-0-004-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR.cql", "ecqm-content-r4-2021/input/resources/measure/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS130FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS130FHIR-v0-0-002-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/ColorectalCancerScreeningsFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/ColorectalCancerScreeningsFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS347FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS347FHIR-v0-1-013-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/FHIR347.cql", "ecqm-content-r4-2021/input/resources/measure/FHIR347.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestHybridHWRFHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/HybridHWRFHIR-v1-3-001-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/HybridHWRFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/HybridHWRFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestHybridHWMFHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/HybridHWMFHIR-v0-101-021-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/HybridHWMFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/HybridHWMFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestSafeUseofOpioidsFHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/Safe Use of OpioidsFHIR-v0-0-009-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/SafeUseofOpioidsConcurrentPrescribingFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/SafeUseofOpioidsConcurrentPrescribingFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestIPSSwithBPHdxFHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/IPSS with BPH dxFHIR-v0-0-004-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/UrinarySymptomScoreChange6to12MonthsAfterDiagnosisofBenignProstaticHyperplasiaFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/UrinarySymptomScoreChange6to12MonthsAfterDiagnosisofBenignProstaticHyperplasiaFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestHIVScreeningFHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/HIV ScreeningFHIR-v0-0-003-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/HIVScreeningFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/HIVScreeningFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestDEXAScreenProstateFHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/DEXA screen prostateFHIR-v0-0-005-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/BoneDensityProstateCancerAndrogenDeprivationTherapyFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/BoneDensityProstateCancerAndrogenDeprivationTherapyFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS249FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS249FHIR-v0-0-001-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/AppropriateDXAScansForWomenUnder65FHIR.cql", "ecqm-content-r4-2021/input/resources/measure/AppropriateDXAScansForWomenUnder65FHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS177FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS177FHIR-v0-0-002-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/ChildandAdolescentMajorDepressiveDisorderMDDSuicideRiskAssessmentFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/ChildandAdolescentMajorDepressiveDisorderMDDSuicideRiskAssessmentFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS165FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS165FHIR-v0-0-003-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/ControllingHighBloodPressureFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/ControllingHighBloodPressureFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS161FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS161FHIR-v0-0-002-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/AdultMajorDepressiveDisorderMDDSuicideRiskAssessmentFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/AdultMajorDepressiveDisorderMDDSuicideRiskAssessmentFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS149FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS149FHIR-v0-0-002-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/DementiaCognitiveAssessmentFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/DementiaCognitiveAssessmentFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS146FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS146FHIR-v0-0-001-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/AppropriateTestingforPharyngitisFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/AppropriateTestingforPharyngitisFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS145FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS145FHIR-v0-0-007-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/CADBetaBlockerTherapyPriorMIorLVSDFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/CADBetaBlockerTherapyPriorMIorLVSDFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS144FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS144FHIR-v0-0-005-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/HFBetaBlockerTherapyforLVSDFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/HFBetaBlockerTherapyforLVSDFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS143FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS143FHIR-v0-0-001-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/POAGOpticNerveEvaluationFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/POAGOpticNerveEvaluationFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS129FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS129FHIR-v0-0-005-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/ProstateCaAvoidanceBoneScanOveruseFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/ProstateCaAvoidanceBoneScanOveruseFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS128FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS128FHIR-v0-0-001-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/AntidepressantMedicationManagementFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/AntidepressantMedicationManagementFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS127FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS127FHIR-v0-0-001-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/PneumococcalVaccinationStatusforOlderAdultsFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/PneumococcalVaccinationStatusforOlderAdultsFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS124FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS124FHIR-v0-0-003-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/CervicalCancerScreeningFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/CervicalCancerScreeningFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS74FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS74FHIR-v0-0-004-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS72FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS72FHIR-v0-0-003-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/AntithromboticTherapyByEndofHospitalDay2FHIR.cql", "ecqm-content-r4-2021/input/resources/measure/AntithromboticTherapyByEndofHospitalDay2FHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS69FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS69FHIR-v0-0-004-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/PCSBMIScreenAndFollowUpFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/PCSBMIScreenAndFollowUpFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS68FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS68FHIR-v0-0-004-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/DocumentationofCurrentMedicationsFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/DocumentationofCurrentMedicationsFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS56FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS56FHIR-v0-0-003-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/FunctionalStatusAssessmentforTotalHipReplacementFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/FunctionalStatusAssessmentforTotalHipReplacementFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS22FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS22FHIR-v0-0-007-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/PreventiveBPScreeningFollowUpFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/PreventiveBPScreeningFollowUpFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestCMS2FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS2FHIR-v0-0-002-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/PCSDepressionScreenAndFollowUpFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/PCSDepressionScreenAndFollowUpFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+    
+    @Test
+    public void TestBCG4NonmuscleInvasiveBCaFHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/BCG 4 nonmuscle invasive BCaFHIR-v0-0-006-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/IntravesicalBacillusCalmetteGuerinForNonmuscleInvasiveBladderCancerFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/IntravesicalBacillusCalmetteGuerinForNonmuscleInvasiveBladderCancerFHIR.json");
+            assertTrue(null != measure);
+            // Extract data requirements from the measure:
+            List<DataRequirement> drs = new ArrayList<DataRequirement>();
+            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
+                if (e.hasValue()) {
+                    drs.add(e.getValueDataRequirement());
+                }
+            }
+            assertTrue(!drs.isEmpty());
+            // TODO: Measure-specific validation of data requirements content
+            logger.debug(measureToString(measure));
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
 
     @Test
     public void TestBCSComponent() {
