@@ -46,13 +46,12 @@ public class QICoreClassInfoBuilder extends ClassInfoBuilder {
         this.buildFor("QICore", "qicore-medicationadministration");
         this.buildFor("QICore", "qicore-mednotadministered");
         this.buildFor("QICore", "qicore-medicationdispense");
-        this.buildFor("QICore", "qicore-medicationnotdispensed");
-        this.buildFor("QICore", "qicore-medicationnotrequested");
+        this.buildFor("QICore", "qicore-mednotdispensed");
+        this.buildFor("QICore", "qicore-mednotrequested");
         this.buildFor("QICore", "qicore-medicationrequest");
         this.buildFor("QICore", "qicore-medicationstatement");
         this.buildFor("QICore", "qicore-observation");
         this.buildFor("QICore", "qicore-observationnotdone");
-        this.buildFor("QICore", "qicore-patient");
         this.buildFor("QICore", "vitalspanel");
         this.buildFor("QICore", "resprate");
         this.buildFor("QICore", "heartrate");
@@ -80,6 +79,7 @@ public class QICoreClassInfoBuilder extends ClassInfoBuilder {
         this.buildFor("QICore", "qicore-specimen");
         this.buildFor("QICore", "qicore-substance");
         this.buildFor("QICore", "qicore-task");
+        this.buildFor("QICore", "qicore-tasknotdone");
         this.buildFor("QICore", "Questionnaire");
         this.buildFor("QICore", "QuestionnaireResponse");
     }
