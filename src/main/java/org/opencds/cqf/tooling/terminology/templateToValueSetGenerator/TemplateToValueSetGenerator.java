@@ -25,7 +25,7 @@ public class TemplateToValueSetGenerator extends Operation {
     private String pathToSpreadsheet;           // -pathtospreadsheet (-pts)
     private String encoding      = "json";      // -encoding (-e)
     private String outputPrefix  = "valueset-"; // -outputPrefix (-opp)
-    private String outputVersion = "r4";        // -fhirv (-fhv)
+    private String outputVersion = "r4";        // -opv
 
     @Override
     public void execute(String[] args) {
@@ -293,12 +293,14 @@ public class TemplateToValueSetGenerator extends Operation {
             Cell secondCell = thisRow.getCell(1);
             if(firstCell.getStringCellValue() != null &&
                 firstCell.getStringCellValue().equalsIgnoreCase("rules-text") &&
+                secondCell != null &&
                 secondCell.getStringCellValue() != null &&
                 secondCell.getStringCellValue().length() > 0){
                 return true;
             }
             if(firstCell.getStringCellValue() != null &&
                 firstCell.getStringCellValue().equalsIgnoreCase("expression") &&
+                secondCell != null &&
                 secondCell.getStringCellValue() != null &&
                 secondCell.getStringCellValue().length() > 0){
                 return true;
@@ -357,6 +359,7 @@ public class TemplateToValueSetGenerator extends Operation {
                 }
 
                 // Expansion
+                expansion.setIdentifier(UUID.randomUUID().toString());
                 expansion.addContains()
                         .setCode(code)
                         .setSystem(system)
