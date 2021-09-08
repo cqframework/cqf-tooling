@@ -48,6 +48,14 @@ public class R4FHIRUtils {
         return valueSetDef.getId() + (valueSetDef.getVersion() != null ? ("|" + valueSetDef.getVersion()) : "");
     }
 
+    public static String parseId(String reference) {
+        String[] tokens = reference.split("[/]");
+        if (tokens.length > 1) {
+            return tokens[1];
+        }
+        return reference;
+    }
+
     // TODO: Move to the CQL-to-ELM translator
 
     public static Concept toConcept(ConceptDef conceptDef, TranslatedLibrary library, LibraryManager libraryManager) {
