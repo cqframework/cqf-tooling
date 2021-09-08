@@ -103,7 +103,11 @@ public class RefreshIGOperationTest {
 			System.out.println(bundledFileResult);
 			// multiple individual files in sub directory to loop through:
 			File bundledFiles = new File(bundledFilesLocation + "\\" + measureName + "\\" + measureName + "-files");
-			System.out.println(bundledFiles);
+			
+			if (bundledFiles.listFiles() == null) {
+				continue;
+			}
+			
 			// verify files even exist:
 			assertTrue(bundledFiles.listFiles().length > 0);
 
