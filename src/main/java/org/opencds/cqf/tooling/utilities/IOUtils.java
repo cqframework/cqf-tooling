@@ -299,10 +299,6 @@ public class IOUtils
     // Returns the parent directory if it is named resources, otherwise, the parent of that
     public static String getResourceDirectory(String path) {
         String result = getParentDirectoryPath(path);
-        
-        if (result == null) {
-        	System.out.println ("IOUtils getResourceDirectory RESULT IS NULL FOR: " + path);
-        }
         if (!result.toLowerCase().endsWith("resources")) {
             result = getParentDirectoryPath(result);
         }
