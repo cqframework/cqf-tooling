@@ -79,7 +79,7 @@ public class RefreshIGOperationTest {
 
 		// build ini object
 		File iniFile = new File(INI_LOC);
-		String iniFileLocation = iniFile.getAbsolutePath();
+		String iniFileLocation = iniFile.getPath();
 		IniFile ini = new IniFile(iniFileLocation);
 
 		String bundledFilesLocation = iniFile.getParent() + "\\bundles\\measure\\";
