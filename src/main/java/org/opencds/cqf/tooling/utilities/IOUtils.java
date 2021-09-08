@@ -298,7 +298,12 @@ public class IOUtils
 
     // Returns the parent directory if it is named resources, otherwise, the parent of that
     public static String getResourceDirectory(String path) {
+    	
+    	System.out.println("IOUtils getResourceDirectory: " + path);
+    	
         String result = getParentDirectoryPath(path);
+        
+        
         if (!result.toLowerCase().endsWith("resources")) {
             result = getParentDirectoryPath(result);
         }
@@ -308,6 +313,9 @@ public class IOUtils
 
     public static String getParentDirectoryPath(String path) {
         File file = new File(path);
+        
+        System.out.println("IOUtils getParentDirectoryPath: " + file.getParent());
+        
         return file.getParent();
     }
 
