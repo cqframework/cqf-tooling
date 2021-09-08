@@ -375,17 +375,6 @@ public class PostmanCollectionOperation extends Operation {
         }
     }
 
-    private String setRequestName(String id) {
-            if (id.contains("numer")) {
-                return "numer";
-            } else if (id.contains("denom")) {
-                return  "denom";
-            } else if(id.contains("denomexcl")) {
-                return "denomexcl";
-            }
-            return "measure";
-    }
-
     private String getMeasureId(MeasureReport measureReport) {
         String id = R4FHIRUtils.parseId(measureReport.getMeasure());
         if (StringUtils.isEmpty(id)) {
