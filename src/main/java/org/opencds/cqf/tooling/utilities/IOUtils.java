@@ -299,12 +299,16 @@ public class IOUtils
     // Returns the parent directory if it is named resources, otherwise, the parent of that
     public static String getResourceDirectory(String path) {
     	
-    	System.out.println("IOUtils getResourceDirectory: " + path);
-    	
         String result = getParentDirectoryPath(path);
         
+        //getParentDirectoryPath is not working.  Attempt manual trimming of directory:
+        if ((result == null || result.length() == 0) && (path != null && path.length() > 0)) {
+        	if (path.contains("/")) {
+        		result = path.substring(0, path.lastIndexOf("/"));
+        	}
+        }
         
-        if (!result.toLowerCase().endsWith("resources")) {
+        if (result != null && !result.toLowerCase().endsWith("resources")) {
             result = getParentDirectoryPath(result);
         }
 
@@ -314,10 +318,9 @@ public class IOUtils
     public static String getParentDirectoryPath(String path) {
         File file = new File(path);
         
-        System.out.println("IOUtils getParentDirectoryPath: " + file.getParent());
-        
         return file.getParent();
     }
+    
 
     public static List<String> getDirectoryPaths(String path, Boolean recursive)
     {
