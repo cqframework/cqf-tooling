@@ -27,6 +27,14 @@ public class CanonicalUtils {
         }
     }
 
+    public static String stripVersion(String url) {
+        int index = url.lastIndexOf("|");
+        if (index == -1) {
+            return url;
+        }
+        return url.substring(0, index - 1);
+    }
+
     public static String getVersion(String url) {
         int index = url.lastIndexOf("|");
         if (index == -1) {
