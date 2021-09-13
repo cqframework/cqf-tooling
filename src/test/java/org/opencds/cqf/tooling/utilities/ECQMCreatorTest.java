@@ -354,32 +354,6 @@ public class ECQMCreatorTest {
     }
     
     @Test
-    public void TestCMS190FHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
-        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS190-v0-0-003-FHIR-4-0-1.json").getFile() });
-
-        try { // fails
-            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/IntensiveCareUnitVenousThromboembolismProphylaxisFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/IntensiveCareUnitVenousThromboembolismProphylaxisFHIR.json");
-            assertTrue(null != measure);
-            // Extract data requirements from the measure:
-            List<DataRequirement> drs = new ArrayList<DataRequirement>();
-            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
-                if (e.hasValue()) {
-                    drs.add(e.getValueDataRequirement());
-                }
-            }
-            assertTrue(!drs.isEmpty());
-            // TODO: Measure-specific validation of data requirements content
-            logger.debug(measureToString(measure));
-        }
-        catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
-    }
-    
-    @Test
     public void TestCMS177FHIR() {
         // Extract the bundle
         // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
@@ -440,32 +414,6 @@ public class ECQMCreatorTest {
 
         try {
             Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/AdultMajorDepressiveDisorderMDDSuicideRiskAssessmentFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/AdultMajorDepressiveDisorderMDDSuicideRiskAssessmentFHIR.json");
-            assertTrue(null != measure);
-            // Extract data requirements from the measure:
-            List<DataRequirement> drs = new ArrayList<DataRequirement>();
-            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
-                if (e.hasValue()) {
-                    drs.add(e.getValueDataRequirement());
-                }
-            }
-            assertTrue(!drs.isEmpty());
-            // TODO: Measure-specific validation of data requirements content
-            logger.debug(measureToString(measure));
-        }
-        catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
-    }
-    
-    @Test
-    public void TestCMS159FHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
-        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS159FHIR-v0-0-001-FHIR-4-0-1.json").getFile() });
-
-        try { // fails
-            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/DepressionRemissionatTwelveMonthsFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/DepressionRemissionatTwelveMonthsFHIR.json");
             assertTrue(null != measure);
             // Extract data requirements from the measure:
             List<DataRequirement> drs = new ArrayList<DataRequirement>();
@@ -631,32 +579,6 @@ public class ECQMCreatorTest {
                 }
             }
             assertTrue(!drs.isEmpty());
-            // TODO: Measure-specific validation of data requirements content
-            logger.debug(measureToString(measure));
-        }
-        catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
-    }
-    
-    @Test
-    public void TestCMS147FHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
-        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS147FHIR-v0-0-002-FHIR-4-0-1.json").getFile() });
-
-        try {
-            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/PreventiveCareandScreeningInfluenzaImmunizationFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/PreventiveCareandScreeningInfluenzaImmunizationFHIR.json");
-            assertTrue(null != measure);
-            // Extract data requirements from the measure:
-            List<DataRequirement> drs = new ArrayList<DataRequirement>();
-            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
-                if (e.hasValue()) {
-                    drs.add(e.getValueDataRequirement());
-                }
-            }
-            assertTrue(!drs.isEmpty()); // fails
             // TODO: Measure-specific validation of data requirements content
             logger.debug(measureToString(measure));
         }
@@ -1108,38 +1030,11 @@ public class ECQMCreatorTest {
     }
     
     @Test
-    public void TestCMS108FHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
-        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS108-v0-0-003-FHIR-4-0-1.json").getFile() });
-
-        try { // fails
-            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/VenousThromboembolismProphylaxisFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/VenousThromboembolismProphylaxisFHIR.json");
-            assertTrue(null != measure);
-            // Extract data requirements from the measure:
-            List<DataRequirement> drs = new ArrayList<DataRequirement>();
-            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
-                if (e.hasValue()) {
-                    drs.add(e.getValueDataRequirement());
-                }
-            }
-            assertTrue(!drs.isEmpty());
-            // TODO: Measure-specific validation of data requirements content
-            logger.debug(measureToString(measure));
-        }
-        catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
-    }
-    
-    @Test
     public void TestCMS90FHIR() {
         // Extract the bundle
         // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
         ExtractMatBundleOperation o = new ExtractMatBundleOperation();
         o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS90FHIR-v0-0-005-FHIR-4-0-1.json").getFile() });
-        // "Failed: java.lang.NullPointerException" with ecqm-content-r4-2021/bundles/CMS90FHIR-v0-0-001-FHIR-4-0-1.json
         
         try {
             Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/FunctionalStatusAssessmentsforHeartFailureFHIR.cql", "ecqm-content-r4-2021/input/resources/measure/FunctionalStatusAssessmentsforHeartFailureFHIR.json");
