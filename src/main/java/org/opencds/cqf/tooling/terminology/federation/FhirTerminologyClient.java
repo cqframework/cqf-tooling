@@ -3,6 +3,7 @@ package org.opencds.cqf.tooling.terminology.federation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.IOperation;
 import ca.uhn.fhir.rest.gclient.IOperationUntyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
@@ -39,6 +40,7 @@ public class FhirTerminologyClient implements TerminologyService {
         // TODO: BasicAuthInterceptor...
 
         this.client = context.newRestfulGenericClient(endpoint.getAddress());
+        client.registerInterceptor(new LoggingInterceptor());
         if (endpoint.hasHeader()) {
             AdditionalRequestHeadersInterceptor interceptor = new AdditionalRequestHeadersInterceptor();
             for (StringType header : endpoint.getHeader()) {
@@ -88,7 +90,7 @@ public class FhirTerminologyClient implements TerminologyService {
             operation = this.client.operation()
                     .onType(ValueSet.class)
                     .named("expand");
-            operationWithInput = operation.withParameter(Parameters.class, "url", new StringType().setValue(canonical));
+            operationWithInput = operation.withParameter(Parameters.class, "url", new UriType().setValue(canonical));
             if (version != null) {
                 operationWithInput = operationWithInput.andParameter("valueSetVersion", new StringType().setValue(version));
             }
@@ -96,7 +98,7 @@ public class FhirTerminologyClient implements TerminologyService {
         return operationWithInput != null ? operationWithInput : operation;
     }
 
-    private ValueSet processResultAsValueSet(Object result) {
+    private ValueSet processResultAsValueSet(Object result, String operation) {
         if (result instanceof ValueSet) {
             return (ValueSet)result;
         }
@@ -104,10 +106,10 @@ public class FhirTerminologyClient implements TerminologyService {
             throw toException((OperationOutcome)result);
         }
         else if (result == null) {
-            throw new RuntimeException("No result returned when invoking expand");
+            throw new RuntimeException(String.format("No result returned when invoking %s", operation));
         }
         else {
-            throw new RuntimeException(String.format("Unexpected result type %s when invoking expand", result.getClass().getName()));
+            throw new RuntimeException(String.format("Unexpected result type %s when invoking %s", result.getClass().getName(), operation));
         }
     }
 
@@ -120,7 +122,7 @@ public class FhirTerminologyClient implements TerminologyService {
                 ? (IOperationUntypedWithInputAndPartialOutput<Parameters>)operationObject : null;
 
         Object result = operationWithInput != null ? operationWithInput.execute() : operation.withNoParameters(Parameters.class).execute();
-        return processResultAsValueSet(result);
+        return processResultAsValueSet(result, "expand");
     }
 
     @Override
@@ -142,7 +144,7 @@ public class FhirTerminologyClient implements TerminologyService {
         }
 
         Object result = operationWithInput != null ? operationWithInput.execute() : operation.withNoParameters(Parameters.class).execute();
-        return processResultAsValueSet(result);
+        return processResultAsValueSet(result, "expand");
     }
 
     @Override

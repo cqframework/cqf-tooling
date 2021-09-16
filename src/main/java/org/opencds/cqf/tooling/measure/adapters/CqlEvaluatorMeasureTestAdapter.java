@@ -1,6 +1,6 @@
 package org.opencds.cqf.tooling.measure.adapters;
 
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -28,11 +28,11 @@ public class CqlEvaluatorMeasureTestAdapter extends MeasureTestAdapter {
         // 1. Get Measure and Patient Ids from Expected
         // 2. Run evaluator with Measure, Patient, Content context
         // 3. Parse the result
-        throw new NotImplementedException();
+        throw new NotImplementedException("IMeasureReportAdapter.getActualMeasureReportAdapter");
     }
 
     @Override
     protected IMeasureReportAdapter evaluate() {
-        throw new NotImplementedException();
+        throw new NotImplementedException("IMeasureReportAdapter.evaluate()");
     }
 }

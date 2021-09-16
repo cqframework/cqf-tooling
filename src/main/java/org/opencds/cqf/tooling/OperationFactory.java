@@ -1,7 +1,7 @@
 package org.opencds.cqf.tooling;
 
 //import org.opencds.cqf.tooling.jsonschema.SchemaGenerator;
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.TemplateToValueSetGenerator;
 import org.opencds.cqf.tooling.acceleratorkit.DTProcessor;
 import org.opencds.cqf.tooling.acceleratorkit.Processor;
