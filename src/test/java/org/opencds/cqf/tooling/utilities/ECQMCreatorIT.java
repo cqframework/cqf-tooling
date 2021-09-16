@@ -33,12 +33,12 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
-public class ECQMCreatorTest {
+public class ECQMCreatorIT {
     private static ModelManager modelManager;
     private static LibraryManager libraryManager;
     private static UcumService ucumService;
 
-    private static Logger logger = LoggerFactory.getLogger(ECQMCreatorTest.class);
+    private static Logger logger = LoggerFactory.getLogger(ECQMCreatorIT.class);
 
     private static FhirContext context = FhirContext.forR5();
 
@@ -1071,7 +1071,7 @@ public class ECQMCreatorTest {
     }
 
     public static CqlTranslator createTranslator(NamespaceInfo namespaceInfo, String libraryName, CqlTranslatorOptions options) throws IOException {
-        File translationTestFile = new File(ECQMCreatorTest.class.getResource(libraryName).getFile());
+        File translationTestFile = new File(ECQMCreatorIT.class.getResource(libraryName).getFile());
         reset();
         setup(translationTestFile.getParent());
         CqlTranslator translator = CqlTranslator.fromFile(namespaceInfo, translationTestFile, getModelManager(), getLibraryManager(), getUcumService(), options);

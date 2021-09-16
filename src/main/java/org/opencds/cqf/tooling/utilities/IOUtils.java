@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +16,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
@@ -82,6 +84,16 @@ public class IOUtils
         IParser parser = getParser(encoding, fhirContext);    
         return parser.setPrettyPrint(true).encodeResourceToString(resource).getBytes();
     }
+
+    public static String getFileContent(File file) {
+        try {
+            return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading file: " + e.getMessage());
+        }
+    }
+
 
     public static String encodeResourceAsString(IBaseResource resource, Encoding encoding, FhirContext fhirContext) 
     {
