@@ -218,8 +218,7 @@ public class DistributableValueSetGenerator extends Operation {
             }
             distributableValueSetMeta = resolveDistributableValueSetMeta(workbook.getSheet(entrySet.getValue().getMetaPageName()));
             vs = distributableValueSetMeta.populate(fhirContext);
-            // baustin 9/17/2021 - note this is hard coded to r4, If this gets used by stu3 this will need to be changed so the version is passed
-            meta.getOrganizationalMetaData().populate(vs, "r4");
+            meta.getOrganizationalMetaData().populate(vs, fhirContext.getVersion().toString());
 
             resolveCodeList(meta, workbook.getSheet(entrySet.getValue().getCodeListPageName()), vs);
 
