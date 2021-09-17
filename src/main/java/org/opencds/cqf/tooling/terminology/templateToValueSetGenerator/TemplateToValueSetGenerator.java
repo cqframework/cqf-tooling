@@ -26,6 +26,10 @@ public class TemplateToValueSetGenerator extends Operation {
     private String encoding      = "json";      // -encoding (-e)
     private String outputPrefix  = "valueset-"; // -outputPrefix (-opp)
     private String outputVersion = "r4";        // -opv
+    private final static String SNOMEDCT = "http://snomed.info/sct";
+    private final static String LOINC = "http://loinc.org";
+    private final static String SNOMEDCT_BAD_URL = "SNOMED CT";
+    private final static String LOINC_BAD_URL = "LOINC";
 
     @Override
     public void execute(String[] args) {
@@ -258,20 +262,23 @@ public class TemplateToValueSetGenerator extends Operation {
                 }
 
                 vs = cpgMeta.populate(fhirContext, outputVersion);
-                meta.populate(vs);
+                meta.populate(vs, outputVersion);
                 resolveCodeList(workbook.getSheet(entrySet.getKey().split("-")[0] + "-cl"), vs, meta.getSnomedVersion());
 
+                if (outputVersion.equalsIgnoreCase("r4")) {
 
-                if (shouldAddCompose(vs, sheet)) {
-                    vs.getMeta().addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-computablevalueset");
-                    vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability").setValue(new CodeType("computable"));
-                    vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel").setValue(new CodeType("structured"));
-                }
-                if (vs.hasExpansion() && outputVersion.equalsIgnoreCase("r4")) {
-                    vs.getMeta().addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-executablevalueset");
-                    vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability").setValue(new CodeType("executable"));
-                    vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel").setValue(new CodeType("executable"));
-                    vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-usageWarning").setValue(new StringType("This value set contains a point-in-time expansion enumerating the codes that meet the value set intent. As new versions of the code systems used by the value set are released, the contents of this expansion will need to be updated to incorporate newly defined codes that meet the value set intent. Before, and periodically during production use, the value set expansion contents SHOULD be updated. The value set expansion specifies the timestamp when the expansion was produced, SHOULD contain the parameters used for the expansion, and SHALL contain the codes that are obtained by evaluating the value set definition. If this is ONLY an executable value set, a distributable definition of the value set must be obtained to compute the updated expansion."));
+                        // bausstin 9/17/2021 cannot separate the 2 extensions. Note that they havedifferent values.
+                    if (shouldAddCompose(vs, sheet)) {
+                        vs.getMeta().addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-computablevalueset");
+                        vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability").setValue(new CodeType("computable"));
+                        vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel").setValue(new CodeType("structured"));
+                    }
+                    if (vs.hasExpansion()) {
+                        vs.getMeta().addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-executablevalueset");
+                        vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability").setValue(new CodeType("executable"));
+                        vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel").setValue(new CodeType("executable"));
+                        vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-usageWarning").setValue(new StringType("This value set contains a point-in-time expansion enumerating the codes that meet the value set intent. As new versions of the code systems used by the value set are released, the contents of this expansion will need to be updated to incorporate newly defined codes that meet the value set intent. Before, and periodically during production use, the value set expansion contents SHOULD be updated. The value set expansion specifies the timestamp when the expansion was produced, SHOULD contain the parameters used for the expansion, and SHALL contain the codes that are obtained by evaluating the value set definition. If this is ONLY an executable value set, a distributable definition of the value set must be obtained to compute the updated expansion."));
+                    }
                 }
                 valueSets.add(vs);
             }
@@ -309,6 +316,17 @@ public class TemplateToValueSetGenerator extends Operation {
         return false;
     }
 
+    //this is ONLY to catch bad data in the spreadsheet where bad systems were inserted
+    private String replaceBadSystem(String system){
+        if (system.equalsIgnoreCase(LOINC_BAD_URL)){
+            return LOINC;
+        }
+        if(system.equalsIgnoreCase(SNOMEDCT_BAD_URL)){
+            return SNOMEDCT;
+        }
+        return system;
+    }
+
     /**
      * Iterates over -cl sheet adding an expansion and compose when appropriate.
      * @param sheet
@@ -343,7 +361,7 @@ public class TemplateToValueSetGenerator extends Operation {
 
                 if (system == null)
                     throw new RuntimeException("A system must be specified in the code list");
-
+                system = replaceBadSystem(system);
                 version = SpreadsheetHelper.getCellAsString(
                         row.getCell(4)) == null
                         ? version : SpreadsheetHelper.getCellAsString(row.getCell(4));

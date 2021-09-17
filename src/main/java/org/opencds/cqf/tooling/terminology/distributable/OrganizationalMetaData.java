@@ -30,7 +30,7 @@ public class OrganizationalMetaData {
     private final String LAST_REVIEW_DATE_URL = "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate";
     private final String AUTHOR_URL = "http://hl7.org/fhir/StructureDefinition/valueset-author";
 
-    public void populate(ValueSet valueSet) {
+    public void populate(ValueSet valueSet, String outputVersion) {
         if (!valueSet.hasId()) {
             throw new RuntimeException("Metadata template must include an id");
         }
@@ -41,14 +41,16 @@ public class OrganizationalMetaData {
         );
         valueSet.setPublisher(publisher);
 
-        if (approvalDate != null) {
-            valueSet.addExtension(new Extension().setUrl(APPROVAL_DATE_URL).setValue(new DateType(approvalDate)));
-        }
-        if (effectiveDate != null) {
-            valueSet.addExtension(new Extension().setUrl(EFFECTIVE_DATE_URL).setValue(new DateType(effectiveDate)));
-        }
-        if (lastReviewDate != null) {
-            valueSet.addExtension(new Extension().setUrl(LAST_REVIEW_DATE_URL).setValue(new DateType(lastReviewDate)));
+        if (outputVersion.equalsIgnoreCase("r4")) {
+           if (approvalDate != null) {
+                valueSet.addExtension(new Extension().setUrl(APPROVAL_DATE_URL).setValue(new DateType(approvalDate)));
+            }
+            if (effectiveDate != null) {
+                valueSet.addExtension(new Extension().setUrl(EFFECTIVE_DATE_URL).setValue(new DateType(effectiveDate)));
+            }
+            if (lastReviewDate != null) {
+                valueSet.addExtension(new Extension().setUrl(LAST_REVIEW_DATE_URL).setValue(new DateType(lastReviewDate)));
+            }
         }
         if (authorName != null || authorTelecomSystem != null || authorTelecomValue != null) {
             ContactDetail authorDetail =
@@ -59,8 +61,12 @@ public class OrganizationalMetaData {
                                             .setSystem(ContactPoint.ContactPointSystem.fromCode(authorTelecomSystem))
                                             .setValue(authorTelecomValue)
                             );
-
-            valueSet.addExtension(new Extension().setUrl(AUTHOR_URL).setValue(authorDetail));
+            if (outputVersion.equalsIgnoreCase("r4")) {
+                valueSet.addExtension(new Extension().setUrl(AUTHOR_URL).setValue(authorDetail));
+            }
+            if (outputVersion.equalsIgnoreCase("stu3")) {
+                valueSet.addContact(authorDetail);
+            }
         }
     }
 
