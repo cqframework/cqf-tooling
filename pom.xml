@@ -401,7 +401,6 @@
                 <version>3.11.2</version>
                 <scope>test</scope>
             </dependency>
-
             <!-- https://mvnrepository.com/artifact/net.sf.jopt-simple/jopt-simple -->
             <dependency>
                 <groupId>net.sf.jopt-simple</groupId>
