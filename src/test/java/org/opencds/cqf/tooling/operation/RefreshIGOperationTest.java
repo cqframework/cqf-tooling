@@ -36,7 +36,9 @@ public class RefreshIGOperationTest {
 	private final String LIB_TYPE = "Library";
 	private final String MEASURE_TYPE = "Measure";
 
-	private final String INI_LOC = "testfiles/refreshIG/ig.ini";
+	private final static String separator = System.getProperty("file.separator");
+
+	private final String INI_LOC = "testfiles" + separator + "refreshIG" + separator + "ig.ini";
 
 	private Map<?, ?> jsonMap(File file) {
 		Map<?, ?> map = null;
@@ -87,7 +89,7 @@ public class RefreshIGOperationTest {
 		String iniFileLocation = iniFile.getAbsolutePath();
 		IniFile ini = new IniFile(iniFileLocation);
 
-		String bundledFilesLocation = iniFile.getParent() + "\\bundles\\measure\\";
+		String bundledFilesLocation = iniFile.getParent() + separator + "bundles" + separator + "measure" + separator;
 
 		String args[] = { "-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p" };
 
@@ -104,9 +106,11 @@ public class RefreshIGOperationTest {
 		// bundled into single file using id/resourceType as lookup:
 		for (String measureName : measures.keySet()) {
 			// location of single bundled file:
-			final String bundledFileResult = bundledFilesLocation + measureName + "\\" + measureName + "-bundle.json";
+			final String bundledFileResult = bundledFilesLocation + measureName + separator + measureName
+					+ "-bundle.json";
 			// multiple individual files in sub directory to loop through:
-			final Path dir = Paths.get(bundledFilesLocation + "\\" + measureName  + "\\" + measureName + "-files");
+			final Path dir = Paths
+					.get(bundledFilesLocation + separator + measureName + separator + measureName + "-files");
 
 			// loop through each file, determine resourceType and treat accordingly
 			Map<String, String> resourceTypeMap = new HashMap<>();
@@ -173,12 +177,14 @@ public class RefreshIGOperationTest {
 	 * @param args
 	 */
 	public static void main(String args[]) {
-		boolean deleteExcess = true;
+		
+		//switch this to true to clean up excess valueset files.
+		boolean deleteExcess = false;
 
 		List<String> listOfValueSets = new ArrayList<>();
 
-		try (final DirectoryStream<Path> dirStream = Files
-				.newDirectoryStream(Paths.get("testfiles/refreshIG/input/cql"))) {
+		try (final DirectoryStream<Path> dirStream = Files.newDirectoryStream(
+				Paths.get("testfiles" + separator + "refreshIG" + separator + "input" + separator + "cql"))) {
 			dirStream.forEach(path -> {
 				File file = new File(path.toString());
 
@@ -218,7 +224,8 @@ public class RefreshIGOperationTest {
 		Map<String, String> valueSetsPresent = new HashMap<>();
 
 		try (final DirectoryStream<Path> dirStream = Files
-				.newDirectoryStream(Paths.get("testfiles/refreshIG/input/vocabulary/valueset/external"))) {
+				.newDirectoryStream(Paths.get("testfiles" + separator + "refreshIG" + separator + "input" + separator
+						+ "vocabulary" + separator + "valueset" + separator + "external"))) {
 			dirStream.forEach(path -> {
 				File file = new File(path.toString());
 				String vs = file.getName().replace("valueset-", "").replace(".json", "");
@@ -244,11 +251,11 @@ public class RefreshIGOperationTest {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		if (valueSetsPresent.keySet().size() < listOfValueSets.size()) {
 			for (String valueSet : listOfValueSets) {
 				if (!valueSetsPresent.containsKey(valueSet)) {
-					System.out.println ("Missing valueset: " + valueSet);
+					System.out.println("Missing valueset: " + valueSet);
 				}
 			}
 		}
