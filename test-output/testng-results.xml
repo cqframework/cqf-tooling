@@ -2,12 +2,12 @@
 <testng-results ignored="0" total="1" passed="1" failed="0" skipped="0">
   <reporter-output>
   </reporter-output>
-  <suite started-at="2021-09-20T12:14:20 EDT" name="Default suite" finished-at="2021-09-20T12:14:27 EDT" duration-ms="6647">
+  <suite started-at="2021-09-20T12:26:42 EDT" name="Default suite" finished-at="2021-09-20T12:26:48 EDT" duration-ms="6125">
     <groups>
     </groups>
-    <test started-at="2021-09-20T12:14:20 EDT" name="Default test" finished-at="2021-09-20T12:14:27 EDT" duration-ms="6647">
+    <test started-at="2021-09-20T12:26:42 EDT" name="Default test" finished-at="2021-09-20T12:26:48 EDT" duration-ms="6125">
       <class name="org.opencds.cqf.tooling.operation.RefreshIGOperationTest">
-        <test-method signature="testBundledFiles()[pri:0, instance:org.opencds.cqf.tooling.operation.RefreshIGOperationTest@7f0eb4b4]" started-at="2021-09-20T12:14:20 EDT" name="testBundledFiles" finished-at="2021-09-20T12:14:27 EDT" duration-ms="6626" status="PASS">
+        <test-method signature="testBundledFiles()[pri:0, instance:org.opencds.cqf.tooling.operation.RefreshIGOperationTest@7f0eb4b4]" started-at="2021-09-20T12:26:42 EDT" name="testBundledFiles" finished-at="2021-09-20T12:26:48 EDT" duration-ms="6100" status="PASS">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- testBundledFiles -->

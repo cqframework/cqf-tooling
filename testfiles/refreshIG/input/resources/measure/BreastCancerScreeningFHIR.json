@@ -627,7 +627,7 @@
   "title": "Breast Cancer Screening FHIR",
   "status": "draft",
   "experimental": false,
-  "date": "2021-09-20T10:14:24-06:00",
+  "date": "2021-09-20T10:26:46-06:00",
   "publisher": "National Committee for Quality Assurance",
   "contact": [ {
     "telecom": [ {
