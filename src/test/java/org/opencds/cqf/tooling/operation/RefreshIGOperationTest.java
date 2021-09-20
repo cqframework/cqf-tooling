@@ -36,7 +36,7 @@ public class RefreshIGOperationTest {
 	private final String LIB_TYPE = "Library";
 	private final String MEASURE_TYPE = "Measure";
 
-	private final String INI_LOC = "testfiles\\refreshIG\\ig.ini";
+	private final String INI_LOC = "testfiles/refreshIG/ig.ini";
 
 	private Map<?, ?> jsonMap(File file) {
 		Map<?, ?> map = null;
