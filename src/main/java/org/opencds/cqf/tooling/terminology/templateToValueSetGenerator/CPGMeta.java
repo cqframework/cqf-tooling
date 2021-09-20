@@ -61,7 +61,7 @@ public class CPGMeta {
         }
         if (outputVersion.equalsIgnoreCase("r4")) {
             if (rulesText != null) {
-                vs = setExtension(vs, RULES_TEXT_URL, rulesText);
+                vs.addExtension(new Extension().setUrl(RULES_TEXT_URL).setValue(new MarkdownType(rulesText)));
             }
             if (purposeClinicalFocus != null) {
                 vs = setExtension(vs, CLINICAL_FOCUS_URL, purposeClinicalFocus);
