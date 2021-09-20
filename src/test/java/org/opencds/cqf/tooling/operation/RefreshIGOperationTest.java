@@ -36,7 +36,7 @@ public class RefreshIGOperationTest {
 	private final String LIB_TYPE = "Library";
 	private final String MEASURE_TYPE = "Measure";
 
-	private final String INI_LOC = "testfiles/refreshIG/ig.ini";
+	private final String INI_LOC = "testfiles\\refreshIG\\ig.ini";
 
 	private Map<?, ?> jsonMap(File file) {
 		Map<?, ?> map = null;
@@ -104,9 +104,9 @@ public class RefreshIGOperationTest {
 		// bundled into single file using id/resourceType as lookup:
 		for (String measureName : measures.keySet()) {
 			// location of single bundled file:
-			final String bundledFileResult = bundledFilesLocation + measureName + "/" + measureName + "-bundle.json";
+			final String bundledFileResult = bundledFilesLocation + measureName + "\\" + measureName + "-bundle.json";
 			// multiple individual files in sub directory to loop through:
-			final Path dir = Paths.get(bundledFilesLocation + "/" + measureName  + "/" + measureName + "-files");
+			final Path dir = Paths.get(bundledFilesLocation + "\\" + measureName  + "\\" + measureName + "-files");
 
 			// loop through each file, determine resourceType and treat accordingly
 			Map<String, String> resourceTypeMap = new HashMap<>();
