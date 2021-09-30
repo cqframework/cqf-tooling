@@ -7,6 +7,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
+import org.opencds.cqf.tooling.terminology.distributable.CommonMetaData;
 import org.opencds.cqf.tooling.terminology.distributable.OrganizationalMetaData;
 
 import java.io.FileOutputStream;
@@ -23,13 +24,15 @@ public class TemplateToValueSetGenerator extends Operation {
     }
 
     private String pathToSpreadsheet;           // -pathtospreadsheet (-pts)
-    private String encoding      = "json";      // -encoding (-e)
-    private String outputPrefix  = "valueset-"; // -outputPrefix (-opp)
+    private String encoding = "json";      // -encoding (-e)
+    private String outputPrefix = "valueset-"; // -outputPrefix (-opp)
     private String outputVersion = "r4";        // -opv
     private final static String SNOMEDCT = "http://snomed.info/sct";
     private final static String LOINC = "http://loinc.org";
     private final static String SNOMEDCT_BAD_URL = "SNOMED CT";
     private final static String LOINC_BAD_URL = "LOINC";
+
+    private Map<String, String> codeSystemDataVersionMap = new HashMap<>();
 
     @Override
     public void execute(String[] args) {
@@ -45,12 +48,28 @@ public class TemplateToValueSetGenerator extends Operation {
             String value = flagAndValue[1];
 
             switch (flag.replace("-", "").toLowerCase()) {
-                case "outputpath":        case "op": setOutputPath(value);          break; // -outputpath (-op)
-                case "outputprefix":      case "opp": outputPrefix = value;         break;
-                case "outputversion":     case "opv": setOutputVersion(value);      break;
-                case "pathtospreadsheet": case "pts": pathToSpreadsheet = value;    break;
-                case "encoding":          case "e": encoding = value.toLowerCase(); break;
-                default: throw new IllegalArgumentException("Unknown flag: " + flag);
+                case "outputpath":
+                case "op":
+                    setOutputPath(value);
+                    break; // -outputpath (-op)
+                case "outputprefix":
+                case "opp":
+                    outputPrefix = value;
+                    break;
+                case "outputversion":
+                case "opv":
+                    setOutputVersion(value);
+                    break;
+                case "pathtospreadsheet":
+                case "pts":
+                    pathToSpreadsheet = value;
+                    break;
+                case "encoding":
+                case "e":
+                    encoding = value.toLowerCase();
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown flag: " + flag);
             }
 
             if (pathToSpreadsheet == null) {
@@ -76,6 +95,7 @@ public class TemplateToValueSetGenerator extends Operation {
 
     /**
      * Iterates over each row in sheet params, builds OrganizationalMeta obj with pre-defined strs.
+     *
      * @param sheet
      * @return OrganizationalMeta object with properties parsed from given sheet.
      */
@@ -116,8 +136,15 @@ public class TemplateToValueSetGenerator extends Operation {
                 case "author.telecom.value":
                     organizationalMetaData.setAuthorTelecomValue(SpreadsheetHelper.getCellAsString(row.getCell(1)));
                     break;
-                case "SNOMED CT":
-                    organizationalMetaData.setSnomedVersion(SpreadsheetHelper.getCellAsString(row.getCell(1)));
+                case "CodeSystems":
+                    while (rowIterator.hasNext()) {
+                        row = rowIterator.next();
+                        String urlCell = SpreadsheetHelper.getCellAsString(row.getCell(1));
+                        if (null != urlCell && urlCell.length() > 0) {
+                            codeSystemDataVersionMap.put(SpreadsheetHelper.getCellAsString(row.getCell(1)), SpreadsheetHelper.getCellAsString(row.getCell(2)));
+                        }
+
+                    }
                     break;
                 default:
                     break;
@@ -128,6 +155,7 @@ public class TemplateToValueSetGenerator extends Operation {
 
     /**
      * Iterates over each row in sheet params, builds CPGMeta obj with pre-defined strs.
+     *
      * @param sheet
      * @return CPGMeta object with properties parsed from given sheet.
      */
@@ -179,7 +207,7 @@ public class TemplateToValueSetGenerator extends Operation {
                 case "title":
                     String title = SpreadsheetHelper.getCellAsString(row.getCell(1));
                     meta.setTitle(title);
-                    if((null != title && title.length() > 0) && (null == meta.getId() || meta.getId().length() < 1)){
+                    if ((null != title && title.length() > 0) && (null == meta.getId() || meta.getId().length() < 1)) {
                         meta.setId(title.toLowerCase(Locale.ROOT).replace(" ", "-"));
                     }
                     break;
@@ -240,6 +268,7 @@ public class TemplateToValueSetGenerator extends Operation {
 
     /**
      * Iterates over vsMap.entrySet() to resolve & populate CPGMeta objects.
+     *
      * @param meta
      * @param vsMap
      * @param workbook
@@ -267,7 +296,7 @@ public class TemplateToValueSetGenerator extends Operation {
 
                 if (outputVersion.equalsIgnoreCase("r4")) {
 
-                        // bausstin 9/17/2021 cannot separate the 2 extensions. Note that they havedifferent values.
+                    // bausstin 9/17/2021 cannot separate the 2 extensions. Note that they havedifferent values.
                     if (shouldAddCompose(vs, sheet)) {
                         vs.getMeta().addProfile("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-computablevalueset");
                         vs.addExtension().setUrl("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability").setValue(new CodeType("computable"));
@@ -281,35 +310,34 @@ public class TemplateToValueSetGenerator extends Operation {
                     }
                 }
                 valueSets.add(vs);
-            }
-            else{
+            } else {
                 System.out.println("Workbook does NOT contain a sheet named " + entrySet.getKey());
             }
         }
         return valueSets;
     }
 
-    private boolean shouldAddCompose(ValueSet vs, Sheet sheet){
-        if (vs.hasCompose()&& outputVersion.equalsIgnoreCase("r4")){
+    private boolean shouldAddCompose(ValueSet vs, Sheet sheet) {
+        if (vs.hasCompose() && outputVersion.equalsIgnoreCase("r4")) {
             return true;
         }
         Iterator<Row> rowIterator = sheet.rowIterator();
-        while(rowIterator.hasNext()){
+        while (rowIterator.hasNext()) {
             Row thisRow = rowIterator.next();
             Cell firstCell = thisRow.getCell(0);
             Cell secondCell = thisRow.getCell(1);
-            if(firstCell.getStringCellValue() != null &&
-                firstCell.getStringCellValue().equalsIgnoreCase("rules-text") &&
-                secondCell != null &&
-                secondCell.getStringCellValue() != null &&
-                secondCell.getStringCellValue().length() > 0){
+            if (firstCell.getStringCellValue() != null &&
+                    firstCell.getStringCellValue().equalsIgnoreCase("rules-text") &&
+                    secondCell != null &&
+                    secondCell.getStringCellValue() != null &&
+                    secondCell.getStringCellValue().length() > 0) {
                 return true;
             }
-            if(firstCell.getStringCellValue() != null &&
-                firstCell.getStringCellValue().equalsIgnoreCase("expression") &&
-                secondCell != null &&
-                secondCell.getStringCellValue() != null &&
-                secondCell.getStringCellValue().length() > 0){
+            if (firstCell.getStringCellValue() != null &&
+                    firstCell.getStringCellValue().equalsIgnoreCase("expression") &&
+                    secondCell != null &&
+                    secondCell.getStringCellValue() != null &&
+                    secondCell.getStringCellValue().length() > 0) {
                 return true;
             }
         }
@@ -317,11 +345,11 @@ public class TemplateToValueSetGenerator extends Operation {
     }
 
     //this is ONLY to catch bad data in the spreadsheet where bad systems were inserted
-    private String replaceBadSystem(String system){
-        if (system.equalsIgnoreCase(LOINC_BAD_URL)){
+    private String replaceBadSystem(String system) {
+        if (system.equalsIgnoreCase(LOINC_BAD_URL)) {
             return LOINC;
         }
-        if(system.equalsIgnoreCase(SNOMEDCT_BAD_URL)){
+        if (system.equalsIgnoreCase(SNOMEDCT_BAD_URL)) {
             return SNOMEDCT;
         }
         return system;
@@ -329,6 +357,7 @@ public class TemplateToValueSetGenerator extends Operation {
 
     /**
      * Iterates over -cl sheet adding an expansion and compose when appropriate.
+     *
      * @param sheet
      * @param vs
      * @param snomedVersion
@@ -365,7 +394,9 @@ public class TemplateToValueSetGenerator extends Operation {
                 version = SpreadsheetHelper.getCellAsString(
                         row.getCell(4)) == null
                         ? version : SpreadsheetHelper.getCellAsString(row.getCell(4));
-
+                if (null == version || version.equalsIgnoreCase("")) {
+                    version = this.codeSystemDataVersionMap.get(system);
+                }
                 // Compose
                 if (!vs.hasCompose()) {
                     ValueSet.ValueSetComposeComponent vscc = new ValueSet.ValueSetComposeComponent();
@@ -390,6 +421,7 @@ public class TemplateToValueSetGenerator extends Operation {
 
     /**
      * Writes constructed ValuSets to disk in user-defined format (default being json).
+     *
      * @param valueSets
      */
     private void output(List<ValueSet> valueSets) {
@@ -397,7 +429,7 @@ public class TemplateToValueSetGenerator extends Operation {
             String prefixedOutputPath = String.format(
                     "%s/%s%s.%s", getOutputPath(), outputPrefix, valueSet.getName(), encoding);
 
-            if(null != valueSet.getName()) {
+            if (null != valueSet.getName()) {
                 valueSet.setName(valueSet.getName().replace('-', '_'));
             }
 
