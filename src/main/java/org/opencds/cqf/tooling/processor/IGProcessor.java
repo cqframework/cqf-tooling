@@ -18,7 +18,8 @@ import org.opencds.cqf.tooling.utilities.LogUtils;
 import ca.uhn.fhir.context.FhirContext;
 
 public class IGProcessor extends BaseProcessor {
-    protected IGBundleProcessor igBundleProcessor;
+    public static final String IG_VERSION_REQUIRED = "igVersion required";
+	protected IGBundleProcessor igBundleProcessor;
     protected LibraryProcessor libraryProcessor;
     protected MeasureProcessor measureProcessor;
 
@@ -139,7 +140,7 @@ public class IGProcessor extends BaseProcessor {
     public static FhirContext getIgFhirContext(String igVersion)
     {
         if (igVersion == null) {
-            throw new IllegalArgumentException("igVersion required");
+            throw new IllegalArgumentException(IG_VERSION_REQUIRED);
         }
 
         switch (igVersion) {
