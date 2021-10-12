@@ -44,7 +44,7 @@ import ca.uhn.fhir.context.FhirContext;
 public class RefreshIGOperationTest {
 
 	private static final String EXCEPTIONS_OCCURRED_LOADING_IG_FILE = "Exceptions occurred loading IG file";
-	private static final String SOURCE_IG_IS_NULL = "Cannot invoke \"org.hl7.fhir.r5.model.ImplementationGuide.getFhirVersion()\" because \"this.sourceIg\" is null";
+	private static final String CANNOT_INVOKE = "Cannot invoke";
 	private static final String EXCEPTIONS_OCCURRED_INITIALIZING_REFRESH_FROM_INI_FILE = "Exceptions occurred initializing refresh from ini file";
 	private final String ID = "id";
 	private final String ENTRY = "entry";
@@ -174,7 +174,7 @@ public class RefreshIGOperationTest {
 		} catch (IllegalArgumentException e) {
 			assertEquals(e.getMessage(), IGProcessor.IG_VERSION_REQUIRED);
 			assertTrue(this.console.toString().indexOf("fhir-version was not specified in the ini file.") != -1);
-			assertTrue(this.console.toString().indexOf("Cannot invoke \"String.replace(java.lang.CharSequence, java.lang.CharSequence)\" because \"a\" is null") != -1);
+			assertTrue(this.console.toString().indexOf(CANNOT_INVOKE) != -1);
 		}
 	}
 	
@@ -226,7 +226,7 @@ public class RefreshIGOperationTest {
 				
 				assertTrue(this.console.toString().indexOf(EXCEPTIONS_OCCURRED_LOADING_IG_FILE) != -1);
 				assertTrue(this.console.toString().indexOf(EXCEPTIONS_OCCURRED_INITIALIZING_REFRESH_FROM_INI_FILE) != -1);
-				assertTrue(this.console.toString().indexOf(SOURCE_IG_IS_NULL) != -1);
+				assertTrue(this.console.toString().indexOf(CANNOT_INVOKE) != -1);
 				
 			}
 			deleteTempINI();
@@ -269,7 +269,7 @@ public class RefreshIGOperationTest {
 			processor.publishIG(params);
 		} catch (Exception e) {
 			assertEquals(e.getClass(), NullPointerException.class);
-			assertEquals(e.getMessage(), SOURCE_IG_IS_NULL);
+			assertEquals(e.getMessage(), CANNOT_INVOKE);
 		}
         
         deleteTempINI();
