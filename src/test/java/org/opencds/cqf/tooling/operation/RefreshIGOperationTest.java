@@ -44,7 +44,6 @@ import ca.uhn.fhir.context.FhirContext;
 public class RefreshIGOperationTest {
 
 	private static final String EXCEPTIONS_OCCURRED_LOADING_IG_FILE = "Exceptions occurred loading IG file";
-	private static final String CANNOT_INVOKE = "Cannot invoke";
 	private static final String EXCEPTIONS_OCCURRED_INITIALIZING_REFRESH_FROM_INI_FILE = "Exceptions occurred initializing refresh from ini file";
 	private final String ID = "id";
 	private final String ENTRY = "entry";
@@ -174,7 +173,6 @@ public class RefreshIGOperationTest {
 		} catch (IllegalArgumentException e) {
 			assertEquals(e.getMessage(), IGProcessor.IG_VERSION_REQUIRED);
 			assertTrue(this.console.toString().indexOf("fhir-version was not specified in the ini file.") != -1);
-			assertTrue(this.console.toString().indexOf(CANNOT_INVOKE) != -1);
 		}
 	}
 	
@@ -226,8 +224,6 @@ public class RefreshIGOperationTest {
 				
 				assertTrue(this.console.toString().indexOf(EXCEPTIONS_OCCURRED_LOADING_IG_FILE) != -1);
 				assertTrue(this.console.toString().indexOf(EXCEPTIONS_OCCURRED_INITIALIZING_REFRESH_FROM_INI_FILE) != -1);
-				assertTrue(this.console.toString().indexOf(CANNOT_INVOKE) != -1);
-				
 			}
 			deleteTempINI();
 		}
@@ -269,7 +265,6 @@ public class RefreshIGOperationTest {
 			processor.publishIG(params);
 		} catch (Exception e) {
 			assertEquals(e.getClass(), NullPointerException.class);
-			assertEquals(e.getMessage(), CANNOT_INVOKE);
 		}
         
         deleteTempINI();
