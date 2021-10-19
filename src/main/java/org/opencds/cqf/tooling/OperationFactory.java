@@ -97,6 +97,8 @@ class OperationFactory {
                 return new ExecuteMeasureTestOperation();
             case "SpreadsheetToCQL":
                 return new SpreadsheetToCQLOperation();
+            case "PostmanCollection":
+                return new PostmanCollectionOperation();
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operationName);
         }

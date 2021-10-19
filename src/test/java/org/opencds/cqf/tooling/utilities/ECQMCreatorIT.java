@@ -33,12 +33,12 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
-public class ECQMCreatorTest {
+public class ECQMCreatorIT {
     private static ModelManager modelManager;
     private static LibraryManager libraryManager;
     private static UcumService ucumService;
 
-    private static Logger logger = LoggerFactory.getLogger(ECQMCreatorTest.class);
+    private static Logger logger = LoggerFactory.getLogger(ECQMCreatorIT.class);
 
     private static FhirContext context = FhirContext.forR5();
 
@@ -1342,31 +1342,6 @@ public class ECQMCreatorTest {
     }
 
     @Test
-    public void TestCMS122FHIR() {
-
-        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
-        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/CMS122FHIR-v0-0-004-FHIR-4-0-1.json").getFile() });
-
-        try {
-            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR.cql", "ecqm-content-r4-2021/input/resources/measure/DiabetesHemoglobinA1cHbA1cPoorControl9FHIR.json");
-            assertTrue(null != measure);
-            // Extract data requirements from the measure:
-            List<DataRequirement> drs = new ArrayList<DataRequirement>();
-            for (Extension e : measure.getExtensionsByUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement")) {
-                if (e.hasValue()) {
-                    drs.add(e.getValueDataRequirement());
-                }
-            }
-            assertTrue(!drs.isEmpty());
-            // TODO: Measure-specific validation of data requirements content
-            logger.debug(measureToString(measure));
-        }
-        catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
-    }
-
-    @Test
     public void TestBCSComponent() {
         try {
             Measure measure = refreshMeasure("CompositeMeasures/cql/BCSComponent.cql", "CompositeMeasures/resources/BCSComponent-v0-0-001-FHIR-4-0-1.xml");
@@ -1538,7 +1513,7 @@ public class ECQMCreatorTest {
     }
 
     public static CqlTranslator createTranslator(NamespaceInfo namespaceInfo, String libraryName, CqlTranslatorOptions options) throws IOException {
-        File translationTestFile = new File(ECQMCreatorTest.class.getResource(libraryName).getFile());
+        File translationTestFile = new File(ECQMCreatorIT.class.getResource(libraryName).getFile());
         reset();
         setup(translationTestFile.getParent());
         CqlTranslator translator = CqlTranslator.fromFile(namespaceInfo, translationTestFile, getModelManager(), getLibraryManager(), getUcumService(), options);

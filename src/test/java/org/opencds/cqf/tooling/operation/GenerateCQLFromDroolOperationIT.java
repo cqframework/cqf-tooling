@@ -6,12 +6,12 @@ import java.net.URISyntaxException;
 
 import org.opencds.cqf.tooling.Operation;
 
-public class GenerateCQLFromDroolOperationTest {
+public class GenerateCQLFromDroolOperationIT {
     @Test
     public void test_worked() throws URISyntaxException {
         String dataInputPath = "default.json";
         String operation = "GenerateCQLFromDrool";
-        String inputFilePath = GenerateCQLFromDroolOperationTest.class.getResource(dataInputPath).toURI().getPath();
+        String inputFilePath = GenerateCQLFromDroolOperationIT.class.getResource(dataInputPath).toURI().getPath();
         String outputPath = "target/test-output/cql-from-drool";
         String encoding = "json";
         String[] args = { "-" + operation, "-ifp=" + inputFilePath, "-op=" + outputPath, "-e=" + encoding };

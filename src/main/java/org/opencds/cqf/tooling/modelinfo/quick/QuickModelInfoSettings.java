@@ -9,7 +9,7 @@ import org.opencds.cqf.tooling.modelinfo.ModelInfoSettings;
 public class QuickModelInfoSettings extends ModelInfoSettings {
 
     public QuickModelInfoSettings(String version) {
-        super("QUICK", version, "http://hl7.org/fhir/us/qicore", "QUICK.Patient", "birthDate", "quick");
+        super("QUICK", version, "http://hl7.org/fhir/us/qicore", "QUICK.Patient", "birthDate", "quick", null);
         //super("QUICK", version, "http://hl7.org/fhir", "QUICK.Patient", "birthDate", "quick");
         this.conversionInfos = new ArrayList<ConversionInfo>() {
             {

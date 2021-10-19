@@ -6,10 +6,9 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.nio.file.Paths;
 
-public class CMSFlatMultiValueSetGeneratorTests {
+public class CMSFlatMultiValueSetGeneratorIT {
 
     @Test
-    @Ignore("Needs smaller sample spreadsheet")
     public void testValueSetGenerator() {
         VSACBatchValueSetGenerator generator = new VSACBatchValueSetGenerator();
         generator.execute(new String[] {

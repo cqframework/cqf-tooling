@@ -1,0 +1,505 @@
+<div>
+    <table class="grid dict">
+        {% if Measure.id = "Comment => {percent comment percent}comment{percent endcomment percent} Does NOT work in current version of FHIR liquid" %}{% endif %}
+        {% if Measure.id = "Comment => In addition: from liquid profile (https://confluence.hl7.org/display/FHIR/FHIR+Liquid+Profile) Use a small subset of the liquid language (the syntax, and none of the functions)" %}{% endif %}
+        {% if Measure.id.exists() %}
+        <tr>
+            <th scope="row"><b>Id: </b></th>
+            <td style="padding-left: 4px;">{{Measure.id}}</td>
+        </tr>
+        {% endif %}
+        {% if Measure.url.exists() %}
+        <tr>
+            <th scope="row"><b>Url: </b></th>
+            <td style="padding-left: 4px;"><a href="{{Measure.url}}">{{Measure.url}}</a></td>
+        </tr>
+        {% endif %}
+        {% if Measure.version.exists() %}
+        <tr>
+            <th scope="row"><b>Version: </b></th>
+            <td style="padding-left: 4px;">{{Measure.version}}</td>
+        </tr>
+        {% endif %}
+        {% for identifier in Measure.identifier %}
+        <tr>
+            <th scope="row"><b>Identifier: </b></th>
+            <td style="padding-left: 4px;">
+                {% if identifier.type.exists() %}
+                <p style="margin-bottom: 5px;">
+                    <b>type: </b> <span>{{identifier.type.value}}</span>
+                </p>
+                {% endif %}
+                {% if identifier.value.exists() %}
+                <p style="margin-bottom: 5px;">
+                    <b>value: </b> <span>{{identifier.value}}</span>
+                </p>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        {% if Measure.name.exists() %}
+        <tr>
+            <th scope="row"><b>Name: </b></th>
+            <td style="padding-left: 4px;">{{Measure.name}}</td>
+        </tr>
+        {% endif %}
+        {% if Measure.title.exists() %}
+        <tr>
+            <th scope="row"><b>Title: </b></th>
+            <td style="padding-left: 4px;">{{Measure.title}}</td>
+        </tr>
+        {% endif %}
+        {% if Measure.subtitle.exists() %}
+        <tr>
+            <th scope="row"><b>Subtitle: </b></th>
+            <td style="padding-left: 4px;">{{Measure.subtitle}}</td>
+        </tr>
+        {% endif %}
+        {% if Measure.status.exists() %}
+        <tr>
+            <th scope="row"><b>Status: </b></th>
+            <td style="padding-left: 4px;">{{Measure.status.value}}</td>
+        </tr>
+        {% endif %}
+        {% if Measure.experimental.exists() %}
+        <tr>
+            <th scope="row"><b>Experimental: </b></th>
+            <td style="padding-left: 4px;">{{Measure.experimental.value}}</td>
+        </tr>
+        {% endif %}
+        {% if Measure.scoring.exists() %}
+        <tr>
+            <th scope="row"><b>Scoring: </b></th>
+            <td style="padding-left: 4px;">
+                {% if Measure.scoring.coding.exists() %}
+                    {% for coding in Measure.scoring.coding %}
+                        {% if coding.system.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>system: </b> <span><a href="{{coding.system}}">{{coding.system}}</a></span>
+                        </p>
+                        {% endif %}
+                        {% if coding.code.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>code: </b> <span>{{coding.code}}</span>
+                        </p>
+                        {% endif %}
+                        {% if coding.display.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>display: </b> <span>{{coding.display}}</span>
+                        </p>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if Measure.scoring.coding.exists().not and Measure.scoring.text.exists() %}
+                    {{Measure.scoring.text}}
+                {% endif %}
+            </td>
+        </tr>
+        {% endif %}
+        {% if Measure.improvementNotation.exists() %}
+        <tr>
+            <th scope="row"><b>Improvement Notation: </b></th>
+            <td style="padding-left: 4px;">
+                {% if Measure.improvementNotation.coding.exists() %}
+                    {% for coding in Measure.improvementNotation.coding %}
+                        {% if coding.system.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>system: </b> <span><a href="{{coding.system}}">{{coding.system}}</a></span>
+                        </p>
+                        {% endif %}
+                        {% if coding.code.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>code: </b> <span>{{coding.code}}</span>
+                        </p>
+                        {% endif %}
+                        {% if coding.display.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>display: </b> <span>{{coding.display}}</span>
+                        </p>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if Measure.improvementNotation.coding.exists().not and Measure.improvementNotation.text.exists() %}
+                    {{Measure.improvementNotation.text}}
+                {% endif %}
+            </td>
+        </tr>
+        {% endif %}
+        {% if Measure.type.exists() %}
+        <tr>
+            <th scope="row"><b>Type: </b></th>
+            <td style="padding-left: 4px;">
+                {% if Measure.type.coding.exists() %}
+                    {% for coding in Measure.type.coding %}
+                        {% if coding.system.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>system: </b> <span><a href="{{coding.system}}">{{coding.system}}</a></span>
+                        </p>
+                        {% endif %}
+                        {% if coding.code.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>code: </b> <span>{{coding.code}}</span>
+                        </p>
+                        {% endif %}
+                        {% if coding.display.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>display: </b> <span>{{coding.display}}</span>
+                        </p>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if Measure.type.coding.exists().not and Measure.type.text.exists() %}
+                    {{Measure.type.text}}
+                {% endif %}
+            </td>
+        </tr>
+        {% endif %}
+        {% if Measure.subject.exists() %}
+        <tr>
+            <th scope="row"><b>Subject: </b></th>
+            {%if Measure.subject is CodeableConcept %}
+            <td style="padding-left: 4px;">
+                {% if Measure.subject.coding.exists() %}
+                    {% for coding in Measure.subject.coding %}
+                        {% if coding.system.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>system: </b> <span><a href="{{coding.system}}">{{coding.system}}</a></span>
+                        </p>
+                        {% endif %}
+                        {% if coding.code.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>code: </b> <span>{{coding.code}}</span>
+                        </p>
+                        {% endif %}
+                        {% if coding.display.exists() %}
+                        <p style="margin-bottom: 5px;">
+                            <b>display: </b> <span>{{coding.display}}</span>
+                        </p>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if Measure.subject.coding.exists().not and Measure.subject.text.exists() %}
+                    {{Measure.subject.text}}
+                {% endif %}
+            </td>
+            {% endif %}
+            {% if Measure.subject is Reference %}
+            <td style="padding-left: 4px;">
+                {% if Measure.subject.reference.exists() %}
+                <p style="margin-bottom: 5px;">
+                    <b>reference: </b> <span>{{Measure.subject.reference}}</span>
+                </p>
+                {% endif %}
+                {% if Measure.subject.type.exists() %}
+                <p style="margin-bottom: 5px;">
+                    <b>type: </b> <span>{{Measure.subject.type}}</span>
+                </p>
+                {% endif %}
+                {% if Measure.subject.display.exists() %}
+                <p style="margin-bottom: 5px;">
+                    <b>code: </b> <span>{{Measure.subject.display}}</span>
+                </p>
+                {% endif %}
+            </td>
+            {% endif %}
+        </tr>
+        {% endif %}
+        {% if Measure.date.exists() %}
+        <tr>
+            <th scope="row"><b>Date: </b></th>
+            <td style="padding-left: 4px;">{{Measure.date}}</td>
+        </tr>
+        {% endif %}
+        {% if Measure.publisher.exists() %}
+        <tr>
+            <th scope="row"><b>Publisher: </b></th>
+            <td style="padding-left: 4px;">{{Measure.publisher}}</td>
+        </tr>
+        {% endif %}
+        {% if Measure.description.exists() %}
+        <tr>
+            <th scope="row"><b>Description: </b></th>
+            <td style="padding-left: 4px;">{{Measure.description}}</td>
+        </tr>
+        {% endif %}
+        {% if Measure.extension.where(url = 'http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability').exists() %}
+        <tr>
+          <th scope="row"><b>Knowledge Capability: </b></th>
+          <td style="padding-left: 4px;">
+            {% for extension in Measure.extension.where(url = 'http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability') %}{{extension.value}} {% endfor %}
+          </td>
+        </tr>
+        {% endif %}
+        {% if Measure.extension.where(url = 'http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel').exists() %}
+        <tr>
+          <th scope="row"><b>Knowledge Representation Level: </b></th>
+          <td style="padding-left: 4px;">
+            {% for extension in Measure.extension.where(url = 'http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel') %}{{extension.value}}{% endfor %}
+          </td>
+        </tr>
+        {% endif %}
+        {% if Measure.extension.where(url = 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter').exists() %}
+        <tr>
+            <th scope="row"><b>Parameters: </b></th>
+            <td style="padding-left: 4px;">
+                <table class="grid-dict">
+                    <tr><th><b>name</b></th><th><b>use</b></th><th><b>min</b></th><th><b>max</b></th><th><b>type</b></th></tr>
+                    {% for extension in Measure.extension.where(url = 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter') %}
+                    <tr>
+                        <td>{{extension.valueParameterDefinition.name}}</td>
+                        <td>{{extension.valueParameterDefinition.use}}</td>
+                        <td>{{extension.valueParameterDefinition.min}}</td>
+                        <td>{{extension.valueParameterDefinition.max}}</td>
+                        <td>{{extension.valueParameterDefinition.type}}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </td>
+        </tr>
+        {% endif %}
+        {% if Measure.useContext.exists() %}
+        <tr>
+            <th scope="row"><b>Use Context: </b></th>
+            <td style="padding-left: 4px;">
+                <table class="grid-dict">
+                    <tr><th><b>code</b></th><th><b>value</b></th></tr>
+                    {% for useContext in Measure.useContext %}
+                      <tr>
+                        <td>{{useContext.code.code}}</td>
+                        <td>{{(useContext.valueCodeableConcept).text}}</td>
+                      </tr>
+                    {% endfor %}
+                </table>
+            </td>
+        </tr>
+        {% endif %}
+        {% if Measure.jurisdiction.exists() %}
+        <tr>
+            <th scope="row"><b>Jurisdiction: </b></th>
+            <td style="padding-left: 25px;">{{Measure.jurisdiction.first().coding.first().code}}</td>
+        </tr>
+        {% endif %}
+        {% if Measure.topic.exists() %}
+        <tr>
+            <th scope="row"><b>Topic: </b></th>
+            <td style="padding-left: 25px;">{{Measure.topic.first().coding.first().code}}</td>
+        </tr>
+        {% endif %}
+        {% if Measure.purpose.exists() %}
+        <tr>
+            <th scope="row"><b>Purpose: </b></th>
+            <td style="padding-left: 4px;">{{Measure.purpose}}</td>
+        </tr>
+        {% endif %}
+        {% if Measure.usage.exists() %}
+        <tr>
+            <th scope="row"><b>Usage: </b></th>
+            <td style="padding-left: 4px;">{{Measure.usage}}</td>
+        </tr>
+        {% endif %}
+        {% if Measure.copyright.exists() %}
+        <tr>
+            <th scope="row"><b>Copyright: </b></th>
+            <td style="padding-left: 25px;">{{Measure.copyright}}</td>
+        </tr>
+        {% endif %}
+        {% if Measure.disclaimer.exists() %}
+        <tr>
+            <th scope="row"><b>Disclaimer: </b></th>
+            <td style="padding-left: 25px;">{{Measure.disclaimer}}</td>
+        </tr>
+        {% endif %}
+        {% if Measure.approvalDate.exists() %}
+        <tr>
+            <th scope="row"><b>Approval Date: </b></th>
+            <td style="padding-left: 4px;">{{Measure.approvalDate}}</td>
+        </tr>
+        {% endif %}
+        {% if Measure.lastReviewDate.exists() %}
+        <tr>
+            <th scope="row"><b>Last Review Date: </b></th>
+            <td style="padding-left: 4px;">{{Measure.lastReviewDate}}</td>
+        </tr>
+        {% endif %}
+        {% if Measure.effectivePeriod.exists() %}
+        <tr>
+            <th scope="row"><b>Effective Period: </b></th>
+            <td style="padding-left: 4px;">{{Measure.effectivePeriod.start}}..{{Measure.effectivePeriod.end}}</td>
+        </tr>
+        {% endif %}
+        {% if Measure.parameter.exists() %}
+        <tr>
+          <th scope="row"><b>Parameters: </b></th>
+          <td style="padding-left: 4px;">
+            <table class="grid-dict">
+              <tr><th><b>Name</b></th><th><b>Type</b></th><th><b>Min</b></th><th><b>Max</b></th><th><b>In/Out</b></th></tr>
+              {% for param in Measure.parameter %}
+                <tr><th>{{param.name}}</th><th>{{param.type}}</th><th>{{param.min}}</th><th>{{param.max}}</th><th>{{param.use}}</th></tr>
+              {% endfor %}
+            </table>
+          </td>
+        </tr>
+        {% endif %}
+        {% for c in Measure.content %}
+        {% if c.contentType = 'text/cql' %}
+        <tr>
+          <td colspan="2">
+            <table>
+              <tr><th><a id="cql-content"><b>Content: </b></a> {{c.contentType}}</th></tr>
+              <tr><td><pre><code class="language-cql">{{c.data.decode('base64').escape('html')}}</code></pre></td></tr>
+            </table>
+          </td>
+        </tr>
+        {% endif %}
+        {% if c.contentType != 'text/cql' %}
+        <tr>
+          <td colspan="2">
+            <table>
+              <tr><th><b>Content: </b> {{c.contentType}}</th></tr>
+              <tr><td><pre><code>{{'Encoded data (' + c.data.length().toString() + ' characters)'}}</code></pre></td></tr>
+            </table>
+          </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+    </table>
+    <p style="color:blue;font-size:18px;">Population Criteria</p>
+    {% for group in Measure.group %}
+        <p style="font-size:16px;margin-left:2%;">{{group.description.value}}</p>
+        {% for population in Measure.group.population %}
+            <p style="font-size:14px;margin-left:4%;">{{population.code.coding.first().display.value}}</p>
+            {% for extension in Measure.extension.where(url = 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition') %}
+                {% for nameExt in extension.extension.where(url = 'name') %}
+                    {% if nameExt.valueString = population.criteria.expression.value %}
+                        <pre><code class="language-cql">{{extension.extension.where(url = 'statement').value.escape('html')}}</code></pre>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        {% endfor %}
+    {% endfor %}
+    <p style="color:blue;font-size:18px;">Libraries</p>
+    <p style="margin-left:2%;font-size:16px>{{Measure.name.value}}</p>
+        {% if extension in Measure.extension = "Comment => for the definitions and functions in the main library" %}
+        {% endif %}
+        <p style="margin-left:4%;font-size:14px">Definitions
+            {% for extension in Measure.extension.where(url = 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition') %}
+                {% if extension.extension.where(url = 'libraryName').value = Measure.name.value %}
+                    <p style="margin-left:6%;font-size:12px">
+                    {{extension.extension.where(url = 'name').value}}<br/>
+                    <pre><code class="language-cql">{{extension.extension.where(url = 'statement').value.escape('html')}}</code></pre>
+                    </p>
+                {% endif %}
+            {% endfor %}
+        </p>
+        <p style="margin-left:4%;font-size:14px">Functions
+            <p style="margin-left:6%;font-size:12px">
+            </p>
+        </p>
+        {% for relArtifact in Measure.relatedArtifact.where(resource.value.contains('Library')) %}
+            {% if extension in Measure.extension = "Comment => for the definitions and functions in the included libraries" %}
+            {% endif %}
+            <p style="margin-left:2%;font-size:16px>{{relArtifact.resource.value}}</p>
+            <p style="margin-left:4%;font-size:14px">Definitions</p>
+            {% for extension in Measure.extension.where(url = 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition') %}
+                {% for lNameExtension in extension.extension.where(url = 'libraryName') %}
+                    {% if relArtifact.resource.value.contains(lNameExtension.value)%}
+                        <p style="margin-left:6%;font-size:12px">
+                            {{extension.extension.where(url = 'name').value}}<br/>
+                            <pre><code class="language-cql">{{extension.extension.where(url = 'statement').value.escape('html')}}</code></pre>
+                        </p>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+            <p style="margin-left:4%;font-size:14px">Functions</p>
+        {% endfor %}
+    <p style="color:blue;font-size:18px;">Codes</p>
+    <table class="grid dict">
+        <tr>
+            <td style="padding-left: 4px;">
+                <table class="grid-dict">
+                    <tr><th><b>Name</b></th><th><b>Code</b></th><th><b>System</b></th></tr>
+                    {% for extension in Measure.extension.where(url = 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode') %}
+                        <tr>
+                            <td>{{extension.valueCoding.display}}</td>
+                            <td>{{extension.valueCoding.code}}</td>
+                            <td><a href="{{extension.valueCoding.system}}">{{extension.valueCoding.system}}</a></td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </td>
+        </tr>
+    </table>
+    <p style="color:blue;font-size:18px;">ValueSets</p>
+    {% if Measure.id = "Comment => todo - these should have a better categorization that comes out of data requirements tell by related artifact" %}
+    {% endif %}
+    <table class="grid dict">
+        <tr>
+            <td style="padding-left: 4px;">
+                <table class="grid-dict">
+                    <tr><th><b>Type</b></th><th><b>Name</b></th><th><b>Link</b></th></tr>
+                    {% for relatedArtifact in Measure.relatedArtifact %}
+                        {% if relatedArtifact.resource.value.contains('ValueSet')%}
+                          <tr>
+                            <td>ValueSet</td>
+                            <td>{{relatedArtifact.display.value.substring(10)}}</td>
+                            <td><a href="{{relatedArtifact.resource.value}}">{{relatedArtifact.resource.value}}</a></td>
+                          </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table>
+            </td>
+        </tr>
+    </table>
+    <p style="color:blue;font-size:18px;">Data Criteria</p>
+        <table class="grid dict">
+            {% if Measure.extension.where(url = 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement').exists() %}
+            <tr>
+              <td style="padding-left: 4px;">
+                    <table class="grid-dict">
+                        <tr><th><b>Type</b></th><th><b>OID</b></th></tr>
+                        {% for extension in Measure.extension.where(url = 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement') %}
+                            <tr>
+                                <td>{{extension.valueDataRequirement.type}}</td>
+                                {% if extension.valueDataRequirement.codeFilter.first().valueSet.exists() %}
+                                    {% if extension.valueDataRequirement.codeFilter.first().valueSet.contains("http")%}
+                                        <td><a href="{{extension.valueDataRequirement.codeFilter.first().valueSet}}">{{extension.valueDataRequirement.codeFilter.first().valueSet}}</a></td>
+                                    {% else %}
+                                        <td>{{extension.valueDataRequirement.codeFilter.first().valueSet}}</td>
+                                    {%endif%}
+                                {% else %}
+                                    {% if  extension.valueDataRequirement.profile.contains("http")%}
+                                        <td><a href="{{extension.valueDataRequirement.profile}}">{{extension.valueDataRequirement.profile}}</a></td>
+                                    {% else %}
+                                        <td>{{extension.valueDataRequirement.profile}}</td>
+                                    {% endif %}
+                                {% endif%}
+                            </tr>
+                        {% endfor %}
+                    </table>
+              </td>
+            </tr>
+            {% else %}
+                None
+            {% endif %}
+        </table>
+    <p style="color:blue;font-size:18px;">Supplemental Data Elements</p>
+        <p style="margin-left:4%;font-size:12px">
+            {% for supplementalData in Measure.supplementalData %}
+                {{supplementalData.criteria.expression}}<br/>
+               {% for extension in Measure.extension.where(url = 'http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition') %}
+                    {% for nameExtension in extension.extension.where(url = 'name') %}
+                        {% if supplementalData.criteria.expression.value.contains(nameExtension.value)%}
+                            <p style="margin-left:6%;font-size:12px">
+                                <pre><code class="language-cql">{{extension.extension.where(url = 'statement').value.escape('html')}}</code></pre>
+                            </p>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+
+            {% endfor %}
+        </p>
+    <p style="color:blue;font-size:18px;">Risk Adjustment Variables</p>
+        <p style="margin-left:4%;font-size:14px">
+            None
+        </p>
+</div>
