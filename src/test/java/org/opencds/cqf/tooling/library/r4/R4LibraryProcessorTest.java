@@ -8,8 +8,6 @@ import org.testng.annotations.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 public class R4LibraryProcessorTest extends LibraryProcessorTest {
@@ -42,18 +40,17 @@ public class R4LibraryProcessorTest extends LibraryProcessorTest {
             targetDirectory.mkdirs();
         }
         String resourceDirPath = LibraryProcessorTest.class.getResource(resourceDirectory).getPath();
-        assertNull(targetDirectory.listFiles());
+        assertTrue(targetDirectory.listFiles().length == 0);
 
         String libraryPath = "/input/resources/library/library-EXM124_FHIR4-8.2.000.json";
         runRefresh(
-            targetDirectory.getAbsolutePath(),
+            resourceDirPath,
             resourceDirPath + libraryPath,
             targetDirectory.getAbsolutePath(),
-            targetDirectory + "/input/pagecontent/cql/EXM124_FHIR4-8.2.000.cql",
+            resourceDirPath + "/input/pagecontent/cql/EXM124_FHIR4-8.2.000.cql",
             false
         );
 
-        assertNotNull(targetDirectory.listFiles());
         assertTrue(targetDirectory.listFiles().length > 0);
     }
 }

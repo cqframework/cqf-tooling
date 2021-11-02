@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.Library;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
+import org.testng.annotations.BeforeMethod;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -20,6 +21,14 @@ public abstract class LibraryProcessorTest {
     private String cqfmSoftwareSystemExtensionUrl = "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem";
     private LibraryProcessor libraryProcessor;
     private FhirContext fhirContext;
+
+    @BeforeMethod
+    public void setUp() throws Exception {
+        File dir  = new File("target/refreshLibraries");
+        if (dir.exists()) {
+            FileUtils.deleteDirectory(dir);
+        }
+    }
 
     public LibraryProcessorTest(LibraryProcessor libraryProcessor, FhirContext fhirContext) {
         this.libraryProcessor = libraryProcessor;
