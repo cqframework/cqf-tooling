@@ -22,13 +22,14 @@ public abstract class LibraryProcessorTest {
     private LibraryProcessor libraryProcessor;
     private FhirContext fhirContext;
 
-    @BeforeMethod
-    public void setUp() throws Exception {
-        File dir  = new File("target/refreshLibraries");
-        if (dir.exists()) {
-            FileUtils.deleteDirectory(dir);
-        }
-    }
+    // When running mvn package there is some collisions between tests running while trying to delete this directory
+    // @BeforeMethod
+    // public void setUp() throws Exception {
+    //     File dir  = new File("target/refreshLibraries");
+    //     if (dir.exists()) {
+    //         FileUtils.deleteDirectory(dir);
+    //     }
+    // }
 
     public LibraryProcessorTest(LibraryProcessor libraryProcessor, FhirContext fhirContext) {
         this.libraryProcessor = libraryProcessor;

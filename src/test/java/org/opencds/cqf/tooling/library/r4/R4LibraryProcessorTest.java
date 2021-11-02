@@ -2,7 +2,9 @@ package org.opencds.cqf.tooling.library.r4;
 
 import java.io.File;
 
+import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.library.LibraryProcessorTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -14,6 +16,14 @@ public class R4LibraryProcessorTest extends LibraryProcessorTest {
     private String resourceDirectory = "r4";
     public R4LibraryProcessorTest() {
         super(new R4LibraryProcessor(), FhirContext.forCached(FhirVersionEnum.R4));
+    }
+
+    @BeforeMethod
+    public void setUp() throws Exception {
+        File dir  = new File("target/refreshLibraries/r4");
+        if (dir.exists()) {
+            FileUtils.deleteDirectory(dir);
+        }
     }
     
     @Test

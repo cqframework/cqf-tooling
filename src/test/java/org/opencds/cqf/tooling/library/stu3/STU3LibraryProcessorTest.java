@@ -2,7 +2,9 @@ package org.opencds.cqf.tooling.library.stu3;
 
 import java.io.File;
 
+import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.library.LibraryProcessorTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -15,6 +17,14 @@ public class STU3LibraryProcessorTest extends LibraryProcessorTest {
     private String resourceDirectory = "stu3";
     public STU3LibraryProcessorTest() {
         super(new STU3LibraryProcessor(), FhirContext.forCached(FhirVersionEnum.DSTU3));
+    }
+
+    @BeforeMethod
+    public void setUp() throws Exception {
+        File dir  = new File("target/refreshLibraries/stu3");
+        if (dir.exists()) {
+            FileUtils.deleteDirectory(dir);
+        }
     }
     
     @Test
