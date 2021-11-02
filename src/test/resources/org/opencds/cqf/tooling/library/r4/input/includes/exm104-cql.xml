@@ -1,1 +1,0 @@
-{% highlight sql %}{% include_relative cql/EXM104_FHIR4-8.1.000.cql %}{% endhighlight %}

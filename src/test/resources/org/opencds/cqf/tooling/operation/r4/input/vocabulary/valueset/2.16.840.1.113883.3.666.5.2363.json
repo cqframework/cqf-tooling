@@ -1,0 +1,47 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.666.5.2363",
+  "meta": {
+    "versionId": "21",
+    "lastUpdated": "2020-03-07T01:00:21.000-05:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2>Creatinine lab test</h2><p>This value set includes codes from the following code systems:</p><ul><li>Include these codes as defined in <a href=\"http://loinc.org\"><code>http://loinc.org</code></a><table class=\"none\"><tr><td><b>Code</b></td><td><b>Display</b></td></tr><tr><td><a href=\"http://details.loinc.org/LOINC/14682-9.html\">14682-9</a></td><td>Creatinine [Moles/volume] in Serum or Plasma</td><td/></tr><tr><td><a href=\"http://details.loinc.org/LOINC/21232-4.html\">21232-4</a></td><td>Creatinine [Mass/volume] in Arterial blood</td><td/></tr><tr><td><a href=\"http://details.loinc.org/LOINC/2160-0.html\">2160-0</a></td><td>Creatinine [Mass/volume] in Serum or Plasma</td><td/></tr><tr><td><a href=\"http://details.loinc.org/LOINC/38483-4.html\">38483-4</a></td><td>Creatinine [Mass/volume] in Blood</td><td/></tr><tr><td><a href=\"http://details.loinc.org/LOINC/59826-8.html\">59826-8</a></td><td>Creatinine [Moles/volume] in Blood</td><td/></tr></table></li></ul></div>"
+  },
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.2363",
+  "version": "20200307",
+  "name": "Creatinine lab test",
+  "status": "active",
+  "date": "2020-03-07T01:00:21-05:00",
+  "publisher": "Yale",
+  "compose": {
+    "include": [
+      {
+        "system": "http://loinc.org",
+        "concept": [
+          {
+            "code": "14682-9",
+            "display": "Creatinine [Moles/volume] in Serum or Plasma"
+          },
+          {
+            "code": "21232-4",
+            "display": "Creatinine [Mass/volume] in Arterial blood"
+          },
+          {
+            "code": "2160-0",
+            "display": "Creatinine [Mass/volume] in Serum or Plasma"
+          },
+          {
+            "code": "38483-4",
+            "display": "Creatinine [Mass/volume] in Blood"
+          },
+          {
+            "code": "59826-8",
+            "display": "Creatinine [Moles/volume] in Blood"
+          }
+        ]
+      }
+    ]
+  }
+}
