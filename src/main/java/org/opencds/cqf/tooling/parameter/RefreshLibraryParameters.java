@@ -45,4 +45,9 @@ public class RefreshLibraryParameters {
     An initialized processor context that can provide the IG context directly
      */
     public IProcessorContext parentContext;
+
+    /*
+    Path to write updated Libraries to
+    */
+    public String libraryOutputDirectory;
 }
