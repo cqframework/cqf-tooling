@@ -20,6 +20,7 @@ public class RefreshLibraryArgumentProcessor {
     public static final String[] IG_CANONICAL_BASE = {"igcb", "igCanonicalBase"};
     public static final String[] CQL_PATH_OPTIONS = {"cql", "content", "cqlPath", "cqlContentPath", "contentPath", "cp"};
     public static final String[] Library_PATH_OPTIONS = {"library", "libraryPath", "resourcePath", "lp", "cp"};
+    public static final String[] Library_Output_DIRECTORY_OPTIONS = {"libraryOutput", "libraryOutputPath", "resourceOutputPath", "lop"};
     public static final String[] FHIR_VERSION_OPTIONS = {"fv", "fhir-version"};
     public static final String[] OUTPUT_ENCODING = {"e", "encoding"};
     public static final String[] VERSIONED_OPTIONS = {"v", "versioned"};
@@ -32,6 +33,7 @@ public class RefreshLibraryArgumentProcessor {
         OptionSpecBuilder igCanonicalBaseBuilder = parser.acceptsAll(asList(IG_CANONICAL_BASE),"resource canonical base");
         OptionSpecBuilder cqlPathBuilder = parser.acceptsAll(asList(CQL_PATH_OPTIONS),"Library will be created in the same folder as the cql");
         OptionSpecBuilder libraryPathBuilder = parser.acceptsAll(asList(Library_PATH_OPTIONS),"If omitted, the library will be created in the same folder as the cql");
+        OptionSpecBuilder libraryOutputDirectoryBuilder = parser.acceptsAll(asList(Library_Output_DIRECTORY_OPTIONS),"If omitted, the libraries will overwrite any existing libraries");
         OptionSpecBuilder fhirVersionBuilder = parser.acceptsAll(asList(FHIR_VERSION_OPTIONS),"Limited to a single version of FHIR.");
         OptionSpecBuilder outputEncodingBuilder = parser.acceptsAll(asList(OUTPUT_ENCODING), "If omitted, output will be generated using JSON encoding.");
 
@@ -39,6 +41,7 @@ public class RefreshLibraryArgumentProcessor {
         OptionSpec<String> igCanonicalBasePath = igCanonicalBaseBuilder.withOptionalArg().describedAs("resource canonical base");
         OptionSpec<String> cqlPath = cqlPathBuilder.withOptionalArg().describedAs("path to the cql content");
         OptionSpec<String> libraryPath = libraryPathBuilder.withRequiredArg().describedAs("path to the library");
+        OptionSpec<String> libraryOutputDirectoryPath = libraryOutputDirectoryBuilder.withOptionalArg().describedAs("path to the output directory for updated libraries");
         OptionSpec<String> fhirVersion = fhirVersionBuilder.withOptionalArg().describedAs("fhir version");
         OptionSpec<String> outputEncoding = outputEncodingBuilder.withOptionalArg().describedAs("desired output encoding for resources");
 
@@ -65,6 +68,10 @@ public class RefreshLibraryArgumentProcessor {
         if (libraryPath == null) {
             libraryPath = "";
         }
+        String libraryOutputDirectory = (String)options.valueOf(Library_Output_DIRECTORY_OPTIONS[0]);
+        if (libraryOutputDirectory == null) {
+            libraryOutputDirectory = "";
+        }
         Encoding outputEncodingEnum = Encoding.JSON;
         if (encoding != null) {
             outputEncodingEnum = Encoding.parse(encoding.toLowerCase());
@@ -79,6 +86,7 @@ public class RefreshLibraryArgumentProcessor {
         lp.encoding = outputEncodingEnum;
         lp.versioned = versioned;
         lp.libraryPath = libraryPath;
+        lp.libraryOutputDirectory = libraryOutputDirectory;
        
         return lp;
     }

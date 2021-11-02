@@ -1,0 +1,47 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1045.117",
+  "meta": {
+    "versionId": "25",
+    "lastUpdated": "2020-03-07T01:00:21.000-05:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2>Potassium lab test</h2><p>This value set includes codes from the following code systems:</p><ul><li>Include these codes as defined in <a href=\"http://loinc.org\"><code>http://loinc.org</code></a><table class=\"none\"><tr><td><b>Code</b></td><td><b>Display</b></td></tr><tr><td><a href=\"http://details.loinc.org/LOINC/2823-3.html\">2823-3</a></td><td>Potassium [Moles/volume] in Serum or Plasma</td><td/></tr><tr><td><a href=\"http://details.loinc.org/LOINC/32713-0.html\">32713-0</a></td><td>Potassium [Moles/volume] in Arterial blood</td><td/></tr><tr><td><a href=\"http://details.loinc.org/LOINC/39789-3.html\">39789-3</a></td><td>Potassium [Moles/volume] in Venous blood</td><td/></tr><tr><td><a href=\"http://details.loinc.org/LOINC/41656-0.html\">41656-0</a></td><td>Potassium [Moles/volume] in Mixed venous blood</td><td/></tr><tr><td><a href=\"http://details.loinc.org/LOINC/6298-4.html\">6298-4</a></td><td>Potassium [Moles/volume] in Blood</td><td/></tr></table></li></ul></div>"
+  },
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1045.117",
+  "version": "20200307",
+  "name": "Potassium lab test",
+  "status": "active",
+  "date": "2020-03-07T01:00:21-05:00",
+  "publisher": "Yale",
+  "compose": {
+    "include": [
+      {
+        "system": "http://loinc.org",
+        "concept": [
+          {
+            "code": "2823-3",
+            "display": "Potassium [Moles/volume] in Serum or Plasma"
+          },
+          {
+            "code": "32713-0",
+            "display": "Potassium [Moles/volume] in Arterial blood"
+          },
+          {
+            "code": "39789-3",
+            "display": "Potassium [Moles/volume] in Venous blood"
+          },
+          {
+            "code": "41656-0",
+            "display": "Potassium [Moles/volume] in Mixed venous blood"
+          },
+          {
+            "code": "6298-4",
+            "display": "Potassium [Moles/volume] in Blood"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1045.159",
+  "meta": {
+    "versionId": "17",
+    "lastUpdated": "2020-03-07T01:00:21.000-05:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2>Body weight</h2><p>This value set includes codes from the following code systems:</p><ul><li>Include these codes as defined in <a href=\"http://loinc.org\"><code>http://loinc.org</code></a><table class=\"none\"><tr><td><b>Code</b></td><td><b>Display</b></td></tr><tr><td><a href=\"http://details.loinc.org/LOINC/29463-7.html\">29463-7</a></td><td>Body weight</td><td/></tr><tr><td><a href=\"http://details.loinc.org/LOINC/3141-9.html\">3141-9</a></td><td>Body weight Measured</td><td/></tr><tr><td><a href=\"http://details.loinc.org/LOINC/3142-7.html\">3142-7</a></td><td>Body weight Stated</td><td/></tr><tr><td><a href=\"http://details.loinc.org/LOINC/8341-0.html\">8341-0</a></td><td>Dry body weight Measured</td><td/></tr><tr><td><a href=\"http://details.loinc.org/LOINC/8350-1.html\">8350-1</a></td><td>Body weight Measured --with clothes</td><td/></tr><tr><td><a href=\"http://details.loinc.org/LOINC/8351-9.html\">8351-9</a></td><td>Body weight Measured --without clothes</td><td/></tr></table></li></ul></div>"
+  },
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1045.159",
+  "version": "20200307",
+  "name": "Body weight",
+  "status": "active",
+  "date": "2020-03-07T01:00:21-05:00",
+  "publisher": "Yale",
+  "compose": {
+    "include": [
+      {
+        "system": "http://loinc.org",
+        "concept": [
+          {
+            "code": "29463-7",
+            "display": "Body weight"
+          },
+          {
+            "code": "3141-9",
+            "display": "Body weight Measured"
+          },
+          {
+            "code": "3142-7",
+            "display": "Body weight Stated"
+          },
+          {
+            "code": "8341-0",
+            "display": "Dry body weight Measured"
+          },
+          {
+            "code": "8350-1",
+            "display": "Body weight Measured --with clothes"
+          },
+          {
+            "code": "8351-9",
+            "display": "Body weight Measured --without clothes"
+          }
+        ]
+      }
+    ]
+  }
+}
