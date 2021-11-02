@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Strings;
+
 import org.hl7.fhir.convertors.VersionConvertor_30_50;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
@@ -27,6 +29,13 @@ public class STU3LibraryProcessor extends LibraryProcessor {
     Refresh all library resources in the given libraryPath
      */
     protected List<String> refreshLibraries(String libraryPath) {
+        return refreshLibraries(libraryPath, null);
+    }
+    
+    /*
+    Refresh all library resources in the given libraryPath and write to the given outputDirectory
+     */
+    protected List<String> refreshLibraries(String libraryPath, String libraryOutputDirectory) {
         File file = new File(libraryPath);
         Map<String, String> fileMap = new HashMap<String, String>();
         List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
@@ -49,8 +58,17 @@ public class STU3LibraryProcessor extends LibraryProcessor {
                 cleanseRelatedArtifactReferences(library);
 
                 cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
-                IOUtils.writeResource(library, filePath, IOUtils.getEncoding(filePath), fhirContext);
-                IOUtils.updateCachedResource(library, filePath);
+                String outputPath = filePath;
+                if (libraryOutputDirectory != null) {
+                    File libraryDirectory = new File(libraryOutputDirectory);
+                    if (!libraryDirectory.exists()) {
+                        //TODO: add logger and log non existant directory for writing
+                    } else {
+                        outputPath = libraryDirectory.getAbsolutePath();
+                    }
+                }
+                IOUtils.writeResource(library, outputPath, IOUtils.getEncoding(outputPath), fhirContext);
+                IOUtils.updateCachedResource(library, outputPath);
 
                 String refreshedLibraryName;
                 if (this.versioned && refreshedLibrary.getVersion() != null) {
@@ -119,6 +137,10 @@ public class STU3LibraryProcessor extends LibraryProcessor {
 
         STU3LibraryProcessor.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
 
-        return refreshLibraries(libraryPath);
+        if (!Strings.isNullOrEmpty(params.libraryOutputDirectory)) {
+            return refreshLibraries(libraryPath, params.libraryOutputDirectory);
+        } else {
+            return refreshLibraries(libraryPath);
+        }
     }
 }

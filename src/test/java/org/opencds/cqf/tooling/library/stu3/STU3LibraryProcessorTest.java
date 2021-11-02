@@ -14,7 +14,7 @@ public class STU3LibraryProcessorTest extends LibraryProcessorTest {
 
     private String resourceDirectory = "stu3";
     public STU3LibraryProcessorTest() {
-        super(new STU3LibraryProcessor(), FhirContext.forCached(FhirVersionEnum.R4));
+        super(new STU3LibraryProcessor(), FhirContext.forCached(FhirVersionEnum.DSTU3));
     }
     
     @Test

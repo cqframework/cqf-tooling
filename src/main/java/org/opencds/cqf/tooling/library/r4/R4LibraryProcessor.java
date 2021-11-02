@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Strings;
+
 import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.r4.formats.FormatUtilities;
 import org.hl7.fhir.r4.model.Library;
@@ -38,6 +40,16 @@ public class R4LibraryProcessor extends LibraryProcessor {
         all known library resources
     */
     protected List<String> refreshLibraries(String libraryPath, Encoding encoding) {
+        return refreshLibraries(libraryPath, null, encoding);
+    }
+
+    /*
+        Refresh all library resources in the given libraryPath
+        If the path is not specified, or is not a known directory, process
+        all known library resources, if no libraryOutputDirectory is specified,
+        overwrite all known library resources
+    */
+    protected List<String> refreshLibraries(String libraryPath, String libraryOutputDirectory, Encoding encoding) {
         File file = libraryPath != null ? new File(libraryPath) : null;
         Map<String, String> fileMap = new HashMap<String, String>();
         List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
@@ -77,8 +89,18 @@ public class R4LibraryProcessor extends LibraryProcessor {
                 // TODO: This prevents mangled names from being output
                 // It would be nice for the tooling to generate library shells, we have enough information to,
                 // but the tooling gets confused about the ID and the filename and what gets written is garbage
-                IOUtils.writeResource(library, filePath, fileEncoding, fhirContext, this.versioned);
-                IOUtils.updateCachedResource(library, filePath);
+                //TODO: needs outputPathParameter
+                String outputPath = filePath;
+                if (libraryOutputDirectory != null) {
+                    File libraryDirectory = new File(libraryOutputDirectory);
+                    if (!libraryDirectory.exists()) {
+                        //TODO: add logger and log non existant directory for writing
+                    } else {
+                        outputPath = libraryDirectory.getAbsolutePath();
+                    }
+                }
+                IOUtils.writeResource(library, outputPath, fileEncoding, fhirContext, this.versioned);
+                IOUtils.updateCachedResource(library, outputPath);
 
                 String refreshedLibraryName;
                 if (this.versioned && refreshedLibrary.getVersion() != null) {
@@ -120,6 +142,10 @@ public class R4LibraryProcessor extends LibraryProcessor {
 
         R4LibraryProcessor.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
 
-        return refreshLibraries(libraryPath, encoding);
+        if (!Strings.isNullOrEmpty(params.libraryOutputDirectory)) {
+            return refreshLibraries(libraryPath, params.libraryOutputDirectory, encoding);
+        } else {
+            return refreshLibraries(libraryPath, encoding);
+        }
     }
 }
