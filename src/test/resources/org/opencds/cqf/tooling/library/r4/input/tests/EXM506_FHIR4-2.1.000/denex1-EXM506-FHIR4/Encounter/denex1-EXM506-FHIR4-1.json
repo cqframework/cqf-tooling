@@ -1,0 +1,33 @@
+{
+  "resourceType": "Encounter",
+  "id": "denex1-EXM506-FHIR4-1",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+    ]
+  },
+  "status": "finished",
+  "class": {
+    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+    "code": "IMP",
+    "display": "inpatient encounter"
+  },
+  "type": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "32485007",
+          "display": "Hospital admission (procedure)"
+        }
+      ]
+    }
+  ],
+  "subject": {
+    "reference": "Patient/denex1-EXM506-FHIR4"
+  },
+  "period": {
+    "start": "2019-01-16T08:30:00-07:00",
+    "end": "2019-01-20T08:30:00-07:00"
+  }
+}

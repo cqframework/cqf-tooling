@@ -1,0 +1,24 @@
+{
+  "resourceType": "Observation",
+  "id": "denom_excl-EXM349-FHIR4-3",
+  "meta": {
+    "profile": [
+        "http://hl7.org/fhir/observation"
+    ]
+  },
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "11082-5",
+        "display": "HIV 2 p68 Ab [Presence] in Serum by Immunoblot"
+      }
+    ]
+  },
+  "valueBoolean": "true",
+  "subject": {
+    "reference": "Patient/denom_excl-EXM349-FHIR4"
+  },
+  "effectiveDateTime": "2019-11-01T00:00:00"
+}

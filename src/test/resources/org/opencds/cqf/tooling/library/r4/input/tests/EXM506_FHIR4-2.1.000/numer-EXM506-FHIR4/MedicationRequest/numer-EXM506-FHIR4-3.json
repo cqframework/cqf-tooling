@@ -1,0 +1,33 @@
+{
+    "resourceType": "MedicationRequest",
+    "id": "numer-EXM506-FHIR4-3",
+    "status": "completed",
+    "intent": "plan",
+    "category": [
+      {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
+            "code": "discharge",
+            "display": "Discharge"
+          }
+        ]
+      }
+    ],
+    "medicationCodeableConcept": {
+      "coding": [
+        {
+          "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+          "code": "1298088",
+          "display": "Flurazepam Hydrochloride 15 MG Oral Capsule"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/numer-EXM506-FHIR4"
+    },
+    "encounter": {
+      "reference": "Encounter/numer-EXM506-FHIR4-1"
+    },
+    "authoredOn": "2019-01-17T08:00:00"
+  }

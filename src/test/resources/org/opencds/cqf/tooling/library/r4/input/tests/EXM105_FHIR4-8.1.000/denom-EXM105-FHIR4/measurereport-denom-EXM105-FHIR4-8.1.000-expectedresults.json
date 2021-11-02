@@ -1,0 +1,333 @@
+{
+  "resourceType": "MeasureReport",
+  "contained": [
+    {
+      "resourceType": "Bundle",
+      "id": "a3cb4e0c-0461-4844-b2f6-3f461e77ac97",
+      "type": "collection",
+      "entry": [
+        {
+          "fullUrl": "Condition/denom-EXM105-FHIR4-1",
+          "resource": {
+            "resourceType": "Condition",
+            "id": "denom-EXM105-FHIR4-1",
+            "meta": {
+              "versionId": "1",
+              "lastUpdated": "2020-01-31T08:59:31.508-07:00",
+              "profile": [
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+              ]
+            },
+            "verificationStatus": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                  "code": "confirmed",
+                  "display": "Confirmed"
+                }
+              ]
+            },
+            "category": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                    "code": "encounter-diagnosis",
+                    "display": "Encounter Diagnosis"
+                  }
+                ]
+              }
+            ],
+            "code": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "116288000",
+                  "display": "Paralytic stroke (disorder)"
+                }
+              ]
+            },
+            "subject": {
+              "reference": "Patient/denom-EXM105-FHIR4"
+            }
+          }
+        },
+        {
+          "fullUrl": "816a0916-3319-491a-9e11-72b207d5c2df",
+          "resource": {
+            "resourceType": "List",
+            "id": "816a0916-3319-491a-9e11-72b207d5c2df",
+            "title": "initial-population",
+            "entry": [
+              {
+                "item": {
+                  "reference": "denom-EXM105-FHIR4-1"
+                }
+              },
+              {
+                "item": {
+                  "reference": "denom-EXM105-FHIR4-2"
+                }
+              },
+              {
+                "item": {
+                  "reference": "denom-EXM105-FHIR4"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "fullUrl": "1f132549-947b-41cf-97a0-381cbb32a97a",
+          "resource": {
+            "resourceType": "List",
+            "id": "1f132549-947b-41cf-97a0-381cbb32a97a",
+            "title": "denominator",
+            "entry": [
+              {
+                "item": {
+                  "reference": "denom-EXM105-FHIR4-1"
+                }
+              },
+              {
+                "item": {
+                  "reference": "denom-EXM105-FHIR4-2"
+                }
+              },
+              {
+                "item": {
+                  "reference": "denom-EXM105-FHIR4"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "fullUrl": "fb2b8cc9-5734-4b5d-908c-c12e24dd29e7",
+          "resource": {
+            "resourceType": "List",
+            "id": "fb2b8cc9-5734-4b5d-908c-c12e24dd29e7",
+            "title": "numerator",
+            "entry": [
+              {
+                "item": {
+                  "reference": "denom-EXM105-FHIR4-1"
+                }
+              },
+              {
+                "item": {
+                  "reference": "denom-EXM105-FHIR4-2"
+                }
+              },
+              {
+                "item": {
+                  "reference": "denom-EXM105-FHIR4"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "fullUrl": "Encounter/denom-EXM105-FHIR4-2",
+          "resource": {
+            "resourceType": "Encounter",
+            "id": "denom-EXM105-FHIR4-2",
+            "meta": {
+              "versionId": "1",
+              "lastUpdated": "2020-01-31T08:59:31.508-07:00",
+              "profile": [
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+              ]
+            },
+            "status": "finished",
+            "class": {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "IMP",
+              "display": "inpatient encounter"
+            },
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "32485007",
+                    "display": "Hospital admission (procedure)"
+                  }
+                ]
+              }
+            ],
+            "subject": {
+              "reference": "Patient/denom-EXM105-FHIR4"
+            },
+            "period": {
+              "start": "2019-08-21T00:00:00-06:00",
+              "end": "2019-12-19T08:15:00-07:00"
+            },
+            "diagnosis": [
+              {
+                "condition": {
+                  "reference": "Condition/denom-EXM105-FHIR4-1"
+                },
+                "use": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/diagnosis-role",
+                      "code": "billing",
+                      "display": "Billing"
+                    }
+                  ]
+                },
+                "rank": 1
+              }
+            ]
+          }
+        },
+        {
+          "fullUrl": "Patient/denom-EXM105-FHIR4",
+          "resource": {
+            "resourceType": "Patient",
+            "id": "denom-EXM105-FHIR4",
+            "meta": {
+              "versionId": "1",
+              "lastUpdated": "2020-01-31T08:59:31.508-07:00",
+              "profile": [
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\">Rick <b>JONES </b></div><table class=\"hapiPropertyTable\"><tbody><tr><td>Identifier</td><td>9999999910</td></tr><tr><td>Date of birth</td><td><span>05 November 1955</span></td></tr></tbody></table></div>"
+            },
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+                "extension": [
+                  {
+                    "url": "ombCategory",
+                    "valueCoding": {
+                      "system": "urn:oid:2.16.840.1.113883.6.238",
+                      "code": "2054-5",
+                      "display": "Black or African American"
+                    }
+                  }
+                ]
+              },
+              {
+                "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+                "extension": [
+                  {
+                    "url": "ombCategory",
+                    "valueCoding": {
+                      "system": "urn:oid:2.16.840.1.113883.6.238",
+                      "code": "2135-2",
+                      "display": "Hispanic or Latino"
+                    }
+                  }
+                ]
+              }
+            ],
+            "identifier": [
+              {
+                "use": "usual",
+                "type": {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                      "code": "MR",
+                      "display": "Medical Record Number"
+                    }
+                  ]
+                },
+                "system": "http://hospital.smarthealthit.org",
+                "value": "9999999910"
+              }
+            ],
+            "name": [
+              {
+                "family": "Jones",
+                "given": [
+                  "Rick"
+                ]
+              }
+            ],
+            "gender": "male",
+            "birthDate": "1955-11-05"
+          }
+        }
+      ]
+    }
+  ],
+  "status": "complete",
+  "type": "individual",
+  "measure": "Measure/measure-EXM105-FHIR4-8.1.000",
+  "subject": {
+    "reference": "Patient/denom-EXM105-FHIR4"
+  },
+  "period": {
+    "start": "2018-12-31T17:00:00-07:00",
+    "end": "2019-12-30T17:00:00-07:00"
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "population": [
+        {
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "count": 1
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "numerator",
+                "display": "Numerator"
+              }
+            ]
+          },
+          "count": 0
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator",
+                "display": "Denominator"
+              }
+            ]
+          },
+          "count": 1
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator-exclusion",
+                "display": "Denominator Exclusion"
+              }
+            ]
+          },
+          "count": 0
+        }
+      ],
+      "measureScore": {
+        "value": 0.0
+      }
+    }
+  ],
+  "evaluatedResource": [
+    {
+      "reference": "#a3cb4e0c-0461-4844-b2f6-3f461e77ac97"
+    }
+  ]
+}

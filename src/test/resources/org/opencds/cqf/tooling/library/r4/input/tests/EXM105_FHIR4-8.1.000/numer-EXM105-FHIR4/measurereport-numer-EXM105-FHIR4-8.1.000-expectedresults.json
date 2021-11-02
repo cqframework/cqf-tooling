@@ -1,0 +1,375 @@
+{
+  "resourceType": "MeasureReport",
+  "contained": [
+    {
+      "resourceType": "Bundle",
+      "id": "cf4d3cb0-f977-4409-b5b9-a0f4dd4789b8",
+      "type": "collection",
+      "entry": [
+        {
+          "fullUrl": "77237446-0411-4e88-bd20-a0f4407997af",
+          "resource": {
+            "resourceType": "List",
+            "id": "77237446-0411-4e88-bd20-a0f4407997af",
+            "title": "initial-population",
+            "entry": [
+              {
+                "item": {
+                  "reference": "numer-EXM105-FHIR4"
+                }
+              },
+              {
+                "item": {
+                  "reference": "numer-EXM105-FHIR4-1"
+                }
+              },
+              {
+                "item": {
+                  "reference": "numer-EXM105-FHIR4-2"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "fullUrl": "Patient/numer-EXM105-FHIR4",
+          "resource": {
+            "resourceType": "Patient",
+            "id": "numer-EXM105-FHIR4",
+            "meta": {
+              "versionId": "1",
+              "lastUpdated": "2020-01-31T08:59:31.508-07:00",
+              "profile": [
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\">Louise <b>JONES </b></div><table class=\"hapiPropertyTable\"><tbody><tr><td>Identifier</td><td>9999999911</td></tr><tr><td>Date of birth</td><td><span>21 November 1971</span></td></tr></tbody></table></div>"
+            },
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+                "extension": [
+                  {
+                    "url": "ombCategory",
+                    "valueCoding": {
+                      "system": "urn:oid:2.16.840.1.113883.6.238",
+                      "code": "2106-3",
+                      "display": "White"
+                    }
+                  }
+                ]
+              },
+              {
+                "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+                "extension": [
+                  {
+                    "url": "ombCategory",
+                    "valueCoding": {
+                      "system": "urn:oid:2.16.840.1.113883.6.238",
+                      "code": "2186-5",
+                      "display": "Not Hispanic or Latino"
+                    }
+                  }
+                ]
+              }
+            ],
+            "identifier": [
+              {
+                "use": "usual",
+                "type": {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                      "code": "MR",
+                      "display": "Medical Record Number"
+                    }
+                  ]
+                },
+                "system": "http://hospital.smarthealthit.org",
+                "value": "9999999911"
+              }
+            ],
+            "name": [
+              {
+                "family": "Jones",
+                "given": [
+                  "Louise"
+                ]
+              }
+            ],
+            "gender": "female",
+            "birthDate": "1971-11-21"
+          }
+        },
+        {
+          "fullUrl": "b97ea6e7-5bf7-4a18-89eb-4c246c0ee3ef",
+          "resource": {
+            "resourceType": "List",
+            "id": "b97ea6e7-5bf7-4a18-89eb-4c246c0ee3ef",
+            "title": "denominator",
+            "entry": [
+              {
+                "item": {
+                  "reference": "numer-EXM105-FHIR4"
+                }
+              },
+              {
+                "item": {
+                  "reference": "numer-EXM105-FHIR4-1"
+                }
+              },
+              {
+                "item": {
+                  "reference": "numer-EXM105-FHIR4-2"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "fullUrl": "Condition/numer-EXM105-FHIR4-1",
+          "resource": {
+            "resourceType": "Condition",
+            "id": "numer-EXM105-FHIR4-1",
+            "meta": {
+              "versionId": "1",
+              "lastUpdated": "2020-01-31T08:59:31.508-07:00",
+              "profile": [
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+              ]
+            },
+            "verificationStatus": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                  "code": "confirmed",
+                  "display": "Confirmed"
+                }
+              ]
+            },
+            "category": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                    "code": "encounter-diagnosis",
+                    "display": "Encounter Diagnosis"
+                  }
+                ]
+              }
+            ],
+            "code": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "116288000",
+                  "display": "Paralytic stroke (disorder)"
+                }
+              ]
+            },
+            "subject": {
+              "reference": "Patient/numer-EXM105-FHIR4"
+            }
+          }
+        },
+        {
+          "fullUrl": "Encounter/numer-EXM105-FHIR4-2",
+          "resource": {
+            "resourceType": "Encounter",
+            "id": "numer-EXM105-FHIR4-2",
+            "meta": {
+              "versionId": "1",
+              "lastUpdated": "2020-01-31T08:59:31.508-07:00",
+              "profile": [
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+              ]
+            },
+            "status": "finished",
+            "class": {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "IMP",
+              "display": "inpatient encounter"
+            },
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "32485007",
+                    "display": "Hospital admission (procedure)"
+                  }
+                ]
+              }
+            ],
+            "subject": {
+              "reference": "Patient/numer-EXM105-FHIR4"
+            },
+            "period": {
+              "start": "2019-08-21T00:00:00-06:00",
+              "end": "2019-12-19T08:15:00-07:00"
+            },
+            "diagnosis": [
+              {
+                "condition": {
+                  "reference": "Condition/numer-EXM105-FHIR4-1"
+                },
+                "use": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/diagnosis-role",
+                      "code": "billing",
+                      "display": "Billing"
+                    }
+                  ]
+                },
+                "rank": 1
+              }
+            ]
+          }
+        },
+        {
+          "fullUrl": "MedicationRequest/numer-EXM105-FHIR4-5",
+          "resource": {
+            "resourceType": "MedicationRequest",
+            "id": "numer-EXM105-FHIR4-5",
+            "meta": {
+              "versionId": "1",
+              "lastUpdated": "2020-01-31T08:59:31.508-07:00"
+            },
+            "status": "completed",
+            "intent": "order",
+            "category": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
+                    "code": "discharge",
+                    "display": "Discharge"
+                  }
+                ]
+              }
+            ],
+            "medicationCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "197903",
+                  "display": "Lovastatin 10 MG Oral Tablet"
+                }
+              ]
+            },
+            "subject": {
+              "reference": "Patient/numer-EXM105-FHIR4"
+            },
+            "authoredOn": "2019-12-17T08:00:00"
+          }
+        },
+        {
+          "fullUrl": "c38281db-540e-478d-9b20-685a2de0ac19",
+          "resource": {
+            "resourceType": "List",
+            "id": "c38281db-540e-478d-9b20-685a2de0ac19",
+            "title": "numerator",
+            "entry": [
+              {
+                "item": {
+                  "reference": "numer-EXM105-FHIR4"
+                }
+              },
+              {
+                "item": {
+                  "reference": "numer-EXM105-FHIR4-1"
+                }
+              },
+              {
+                "item": {
+                  "reference": "numer-EXM105-FHIR4-2"
+                }
+              },
+              {
+                "item": {
+                  "reference": "numer-EXM105-FHIR4-5"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "status": "complete",
+  "type": "individual",
+  "measure": "Measure/measure-EXM105-FHIR4-8.1.000",
+  "subject": {
+    "reference": "Patient/numer-EXM105-FHIR4"
+  },
+  "period": {
+    "start": "2018-12-31T17:00:00-07:00",
+    "end": "2019-12-30T17:00:00-07:00"
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "population": [
+        {
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "count": 1
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "numerator",
+                "display": "Numerator"
+              }
+            ]
+          },
+          "count": 1
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator",
+                "display": "Denominator"
+              }
+            ]
+          },
+          "count": 1
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator-exclusion",
+                "display": "Denominator Exclusion"
+              }
+            ]
+          },
+          "count": 0
+        }
+      ],
+      "measureScore": {
+        "value": 1.0
+      }
+    }
+  ],
+  "evaluatedResource": [
+    {
+      "reference": "#cf4d3cb0-f977-4409-b5b9-a0f4dd4789b8"
+    }
+  ]
+}

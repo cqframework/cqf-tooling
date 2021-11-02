@@ -1,0 +1,202 @@
+{
+  "resourceType": "Bundle",
+  "id": "tests-denex1-EXM506-FHIR4-bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "denex1-EXM506-FHIR4-2",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed",
+              "display": "Confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10",
+              "code": "C00.0",
+              "display": "Malignant neoplasm of external upper lip"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/denex1-EXM506-FHIR4"
+        },
+        "onsetDateTime": "2019-01-17T08:00:00"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Condition/denex1-EXM506-FHIR4-2"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "denex1-EXM506-FHIR4-1",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "IMP",
+          "display": "inpatient encounter"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "32485007",
+                "display": "Hospital admission (procedure)"
+              }
+            ]
+          }
+        ],
+        "subject": {
+          "reference": "Patient/denex1-EXM506-FHIR4"
+        },
+        "period": {
+          "start": "2019-01-16T08:30:00-07:00",
+          "end": "2019-01-20T08:30:00-07:00"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Encounter/denex1-EXM506-FHIR4-1"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "denex1-EXM506-FHIR4-3",
+        "status": "completed",
+        "intent": "plan",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
+                "code": "discharge",
+                "display": "Discharge"
+              }
+            ]
+          }
+        ],
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "1010600",
+              "display": "Buprenorphine 2 MG / Naloxone 0.5 MG Oral Strip"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/denex1-EXM506-FHIR4"
+        },
+        "encounter": {
+          "reference": "Encounter/denex1-EXM506-FHIR4-1"
+        },
+        "authoredOn": "2019-01-17T08:00:00"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "MedicationRequest/denex1-EXM506-FHIR4-3"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "denex1-EXM506-FHIR4",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+          ]
+        },
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+            "extension": [
+              {
+                "url": "ombCategory",
+                "valueCoding": {
+                  "system": "urn:oid:2.16.840.1.113883.6.238",
+                  "code": "2106-3",
+                  "display": "White"
+                }
+              }
+            ]
+          },
+          {
+            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+            "extension": [
+              {
+                "url": "ombCategory",
+                "valueCoding": {
+                  "system": "urn:oid:2.16.840.1.113883.6.238",
+                  "code": "2186-5",
+                  "display": "Not Hispanic or Latino"
+                }
+              }
+            ]
+          }
+        ],
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR",
+                  "display": "Medical Record Number"
+                }
+              ]
+            },
+            "system": "http://hospital.smarthealthit.org",
+            "value": "999999996"
+          }
+        ],
+        "name": [
+          {
+            "family": "Jones",
+            "given": [
+              "Lily"
+            ]
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1953-08-01"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Patient/denex1-EXM506-FHIR4"
+      }
+    }
+  ]
+}

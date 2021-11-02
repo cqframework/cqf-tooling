@@ -1,0 +1,18 @@
+<div xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir ../../input-cache/schemas-r5/fhir-single.xsd">
+  <p><strong>EXM105 Measure</strong></p>
+
+
+  <a name="content"> </a>
+  <h3>Content</h3>
+
+  <p>The following artifacts formalize the description of the logic and behavior defined by this measure.</p>
+  <table class="list">
+      <thead>
+      <tr><th>Resource</th><th>Type</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><a href="Library-library-EXM105-FHIR4-8.1.000.html">EXM105</a></td><td><a href="{{site.data.fhir.path}}library.html">Library</a></td><td>Defines the Library associated with this Measure</td></tr>
+        <tr><td><a href="exm105-cql.html">EXM105</a></td><td>CQL Source</td><td>For reference, the complete CQL content for the Library</td></tr>
+      </tbody>
+  </table>
+</div>
