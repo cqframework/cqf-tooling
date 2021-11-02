@@ -56,14 +56,13 @@ public class DTProcessor extends Operation {
             switch (flag.replace("-", "").toLowerCase()) {
                 case "outputpath": case "op": setOutputPath(value); break; // -outputpath (-op)
                 case "pathtospreadsheet": case "pts": pathToSpreadsheet = value; break; // -pathtospreadsheet (-pts)
+                case "canonicalbase":case "cab": canonicalBase = value; break; // -canonicalbase (-cab)             
                 case "encoding": case "e": encoding = value.toLowerCase(); break; // -encoding (-e)
                 case "decisiontablepages": case "dtp": decisionTablePages = value; break; // -decisiontablepages (-dtp)
                 case "decisiontablepageprefix": case "dtpf": decisionTablePagePrefix = value; break; // -decisiontablepageprefix (-dtpf)
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
-
-        canonicalBase = "http://fhir.org/guides/who/anc-cds";
 
         if (pathToSpreadsheet == null) {
             throw new IllegalArgumentException("The path to the spreadsheet is required");
