@@ -1,0 +1,587 @@
+{
+  "resourceType": "Bundle",
+  "id": "tests-numer-EXM161-FHIR3-bundle",
+  "type": "transaction",
+  "entry": [ {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-Encounter-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "numer-EXM161-FHIR3-2",
+          "meta": {
+            "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+          },
+          "status": "finished",
+          "type": [ {
+            "coding": [ {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "90791",
+              "display": "Psychiatric diagnostic evaluation"
+            } ]
+          } ],
+          "subject": {
+            "reference": "Patient/numer-EXM161-FHIR3"
+          },
+          "period": {
+            "start": "2019-08-21T00:00:00-06:00",
+            "end": "2019-12-19T08:15:00-07:00"
+          },
+          "diagnosis": [ {
+            "condition": {
+              "reference": "Condition/numer-EXM161-FHIR3-8"
+            },
+            "role": {
+              "coding": [ {
+                "system": "http://hl7.org/fhir/diagnosis-role",
+                "code": "billing",
+                "display": "Billing"
+              } ]
+            },
+            "rank": 1
+          } ]
+        },
+        "request": {
+          "method": "PUT",
+          "url": "Encounter/numer-EXM161-FHIR3-2"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-Encounter-bundle"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-Procedure-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "Procedure",
+          "id": "numer-EXM161-FHIR3-5",
+          "meta": {
+            "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure" ]
+          },
+          "status": "completed",
+          "code": {
+            "coding": [ {
+              "system": "https://snomed.info/sct",
+              "code": "225337009",
+              "display": "Suicide risk assessment (procedure)"
+            } ]
+          },
+          "subject": {
+            "reference": "Patient/numer-EXM161-FHIR3"
+          },
+          "performedPeriod": {
+            "start": "2019-08-24T00:00:00-06:00",
+            "end": "2019-10-19T08:15:00-07:00"
+          }
+        },
+        "request": {
+          "method": "PUT",
+          "url": "Procedure/numer-EXM161-FHIR3-5"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-Procedure-bundle"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-Condition-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "Condition",
+          "id": "numer-EXM161-FHIR3-8",
+          "meta": {
+            "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+          },
+          "verificationStatus": "confirmed",
+          "category": [ {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+              "code": "encounter-diagnosis",
+              "display": "Encounter Diagnosis"
+            } ]
+          } ],
+          "code": {
+            "coding": [ {
+              "system": "http://hl7.org/fhir/sid/icd-10",
+              "code": "F32.0",
+              "display": "Major depressive disorder, single episode, mild"
+            } ]
+          },
+          "subject": {
+            "reference": "Patient/numer-EXM161-FHIR3"
+          }
+        },
+        "request": {
+          "method": "PUT",
+          "url": "Condition/numer-EXM161-FHIR3-8"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-Condition-bundle"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Encounter",
+      "id": "numer-EXM161-FHIR3-2",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+      },
+      "status": "finished",
+      "type": [ {
+        "coding": [ {
+          "system": "http://www.ama-assn.org/go/cpt",
+          "code": "90791",
+          "display": "Psychiatric diagnostic evaluation"
+        } ]
+      } ],
+      "subject": {
+        "reference": "Patient/numer-EXM161-FHIR3"
+      },
+      "period": {
+        "start": "2019-08-21T00:00:00-06:00",
+        "end": "2019-12-19T08:15:00-07:00"
+      },
+      "diagnosis": [ {
+        "condition": {
+          "reference": "Condition/numer-EXM161-FHIR3-8"
+        },
+        "role": {
+          "coding": [ {
+            "system": "http://hl7.org/fhir/diagnosis-role",
+            "code": "billing",
+            "display": "Billing"
+          } ]
+        },
+        "rank": 1
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Encounter/numer-EXM161-FHIR3-2"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Procedure",
+      "id": "numer-EXM161-FHIR3-5",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure" ]
+      },
+      "status": "completed",
+      "code": {
+        "coding": [ {
+          "system": "https://snomed.info/sct",
+          "code": "225337009",
+          "display": "Suicide risk assessment (procedure)"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/numer-EXM161-FHIR3"
+      },
+      "performedPeriod": {
+        "start": "2019-08-24T00:00:00-06:00",
+        "end": "2019-10-19T08:15:00-07:00"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Procedure/numer-EXM161-FHIR3-5"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Condition",
+      "id": "numer-EXM161-FHIR3-8",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+      },
+      "verificationStatus": "confirmed",
+      "category": [ {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+          "code": "encounter-diagnosis",
+          "display": "Encounter Diagnosis"
+        } ]
+      } ],
+      "code": {
+        "coding": [ {
+          "system": "http://hl7.org/fhir/sid/icd-10",
+          "code": "F32.0",
+          "display": "Major depressive disorder, single episode, mild"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/numer-EXM161-FHIR3"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Condition/numer-EXM161-FHIR3-8"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "numer-EXM161-FHIR3",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2106-3",
+            "display": "White"
+          }
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2186-5",
+            "display": "Not Hispanic or Latino"
+          }
+        } ]
+      } ],
+      "identifier": [ {
+        "use": "usual",
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MR",
+            "display": "Medical Record Number"
+          } ]
+        },
+        "system": "http://hospital.smarthealthit.org",
+        "value": "9999999911"
+      } ],
+      "name": [ {
+        "family": "Jones",
+        "given": [ "Louise" ]
+      } ],
+      "gender": "female",
+      "birthDate": "1971-11-21"
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Patient/numer-EXM161-FHIR3"
+    }
+  }, {
+    "resource": {
+      "resourceType": "MeasureReport",
+      "id": "measurereport-numer-EXM161-FHIR3",
+      "contained": [ {
+        "resourceType": "Bundle",
+        "id": "e6738364-93ea-401f-91fc-2a57f1e9ba3b",
+        "type": "collection",
+        "entry": [ {
+          "fullUrl": "Encounter/numer-EXM161-FHIR3-2",
+          "resource": {
+            "resourceType": "Encounter",
+            "id": "numer-EXM161-FHIR3-2",
+            "meta": {
+              "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+            },
+            "status": "finished",
+            "type": [ {
+              "coding": [ {
+                "system": "http://www.ama-assn.org/go/cpt",
+                "code": "90791",
+                "display": "Psychiatric diagnostic evaluation"
+              } ]
+            } ],
+            "subject": {
+              "reference": "Patient/numer-EXM161-FHIR3"
+            },
+            "period": {
+              "start": "2019-08-21T00:00:00-06:00",
+              "end": "2019-12-19T08:15:00-07:00"
+            },
+            "diagnosis": [ {
+              "condition": {
+                "reference": "Condition/numer-EXM161-FHIR3-8"
+              },
+              "role": {
+                "coding": [ {
+                  "system": "http://hl7.org/fhir/diagnosis-role",
+                  "code": "billing",
+                  "display": "Billing"
+                } ]
+              },
+              "rank": 1
+            } ]
+          }
+        }, {
+          "fullUrl": "Patient/numer-EXM161-FHIR3",
+          "resource": {
+            "resourceType": "Patient",
+            "id": "numer-EXM161-FHIR3",
+            "meta": {
+              "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+            },
+            "extension": [ {
+              "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+              "extension": [ {
+                "url": "ombCategory",
+                "valueCoding": {
+                  "system": "urn:oid:2.16.840.1.113883.6.238",
+                  "code": "2106-3",
+                  "display": "White"
+                }
+              } ]
+            }, {
+              "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+              "extension": [ {
+                "url": "ombCategory",
+                "valueCoding": {
+                  "system": "urn:oid:2.16.840.1.113883.6.238",
+                  "code": "2186-5",
+                  "display": "Not Hispanic or Latino"
+                }
+              } ]
+            } ],
+            "identifier": [ {
+              "use": "usual",
+              "type": {
+                "coding": [ {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR",
+                  "display": "Medical Record Number"
+                } ]
+              },
+              "system": "http://hospital.smarthealthit.org",
+              "value": "9999999911"
+            } ],
+            "name": [ {
+              "family": "Jones",
+              "given": [ "Louise" ]
+            } ],
+            "gender": "female",
+            "birthDate": "1971-11-21"
+          }
+        }, {
+          "fullUrl": "b4811b32-2ec5-4249-8026-bbe453ee009b",
+          "resource": {
+            "resourceType": "List",
+            "id": "b4811b32-2ec5-4249-8026-bbe453ee009b",
+            "title": "initial-population",
+            "entry": [ {
+              "item": {
+                "reference": "numer-EXM161-FHIR3-2"
+              }
+            }, {
+              "item": {
+                "reference": "numer-EXM161-FHIR3"
+              }
+            }, {
+              "item": {
+                "reference": "numer-EXM161-FHIR3-8"
+              }
+            } ]
+          }
+        }, {
+          "fullUrl": "b8688655-aa48-4805-afbc-bc6f2e5b3105",
+          "resource": {
+            "resourceType": "List",
+            "id": "b8688655-aa48-4805-afbc-bc6f2e5b3105",
+            "title": "numerator",
+            "entry": [ {
+              "item": {
+                "reference": "numer-EXM161-FHIR3-5"
+              }
+            } ]
+          }
+        }, {
+          "fullUrl": "Procedure/numer-EXM161-FHIR3-5",
+          "resource": {
+            "resourceType": "Procedure",
+            "id": "numer-EXM161-FHIR3-5",
+            "meta": {
+              "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure" ]
+            },
+            "status": "completed",
+            "code": {
+              "coding": [ {
+                "system": "https://snomed.info/sct",
+                "code": "225337009",
+                "display": "Suicide risk assessment (procedure)"
+              } ]
+            },
+            "subject": {
+              "reference": "Patient/numer-EXM161-FHIR3"
+            },
+            "performedPeriod": {
+              "start": "2019-08-24T00:00:00-06:00",
+              "end": "2019-10-19T08:15:00-07:00"
+            }
+          }
+        }, {
+          "fullUrl": "Condition/numer-EXM161-FHIR3-8",
+          "resource": {
+            "resourceType": "Condition",
+            "id": "numer-EXM161-FHIR3-8",
+            "meta": {
+              "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+            },
+            "verificationStatus": "confirmed",
+            "category": [ {
+              "coding": [ {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              } ]
+            } ],
+            "code": {
+              "coding": [ {
+                "system": "http://hl7.org/fhir/sid/icd-10",
+                "code": "F32.0",
+                "display": "Major depressive disorder, single episode, mild"
+              } ]
+            },
+            "subject": {
+              "reference": "Patient/numer-EXM161-FHIR3"
+            }
+          }
+        } ]
+      } ],
+      "status": "complete",
+      "type": "individual",
+      "measure": {
+        "reference": "Measure/measure-EXM161-FHIR3-8.0.0"
+      },
+      "patient": {
+        "reference": "Patient/numer-EXM161-FHIR3"
+      },
+      "period": {
+        "start": "2019-01-01T00:00:00-07:00",
+        "end": "2019-12-31T00:00:00-07:00"
+      },
+      "group": [ {
+        "identifier": {
+          "value": "group-1"
+        },
+        "population": [ {
+          "identifier": {
+            "value": "initial-population-identifier"
+          },
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "initial-population",
+              "display": "Initial Population"
+            } ]
+          },
+          "count": 1
+        }, {
+          "identifier": {
+            "value": "numerator-identifier"
+          },
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "numerator",
+              "display": "Numerator"
+            } ]
+          },
+          "count": 1
+        }, {
+          "identifier": {
+            "value": "denominator-identifier"
+          },
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "denominator",
+              "display": "Denominator"
+            } ]
+          },
+          "count": 1
+        } ],
+        "measureScore": 1.0
+      } ],
+      "evaluatedResources": {
+        "reference": "#e6738364-93ea-401f-91fc-2a57f1e9ba3b"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "MeasureReport/measurereport-numer-EXM161-FHIR3"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-Patient-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "Patient",
+          "id": "numer-EXM161-FHIR3",
+          "meta": {
+            "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+          },
+          "extension": [ {
+            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+            "extension": [ {
+              "url": "ombCategory",
+              "valueCoding": {
+                "system": "urn:oid:2.16.840.1.113883.6.238",
+                "code": "2106-3",
+                "display": "White"
+              }
+            } ]
+          }, {
+            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+            "extension": [ {
+              "url": "ombCategory",
+              "valueCoding": {
+                "system": "urn:oid:2.16.840.1.113883.6.238",
+                "code": "2186-5",
+                "display": "Not Hispanic or Latino"
+              }
+            } ]
+          } ],
+          "identifier": [ {
+            "use": "usual",
+            "type": {
+              "coding": [ {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                "code": "MR",
+                "display": "Medical Record Number"
+              } ]
+            },
+            "system": "http://hospital.smarthealthit.org",
+            "value": "9999999911"
+          } ],
+          "name": [ {
+            "family": "Jones",
+            "given": [ "Louise" ]
+          } ],
+          "gender": "female",
+          "birthDate": "1971-11-21"
+        },
+        "request": {
+          "method": "PUT",
+          "url": "Patient/numer-EXM161-FHIR3"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-Patient-bundle"
+    }
+  } ]
+}

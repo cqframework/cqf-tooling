@@ -1,0 +1,562 @@
+{
+  "resourceType": "Bundle",
+  "id": "tests-denom-EXM506-FHIR3-bundle",
+  "type": "transaction",
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "denom-EXM506-FHIR3",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2054-5",
+            "display": "Black or African American"
+          }
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2135-2",
+            "display": "Hispanic or Latino"
+          }
+        } ]
+      } ],
+      "identifier": [ {
+        "use": "usual",
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MR",
+            "display": "Medical Record Number"
+          } ]
+        },
+        "system": "http://hospital.smarthealthit.org",
+        "value": "9999999910"
+      } ],
+      "name": [ {
+        "family": "Jones",
+        "given": [ "Rick" ]
+      } ],
+      "gender": "male",
+      "birthDate": "1955-11-05"
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Patient/denom-EXM506-FHIR3"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Encounter",
+      "id": "denom-EXM506-FHIR3-2",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+      },
+      "status": "finished",
+      "class": {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "IMP",
+        "display": "inpatient encounter"
+      },
+      "type": [ {
+        "coding": [ {
+          "system": "http://snomed.info/sct",
+          "code": "32485007",
+          "display": "Hospital admission (procedure)"
+        } ]
+      } ],
+      "subject": {
+        "reference": "Patient/denom-EXM506-FHIR3"
+      },
+      "period": {
+        "start": "2019-08-21T00:00:00-06:00",
+        "end": "2019-12-18T08:15:00-07:00"
+      },
+      "diagnosis": [ {
+        "condition": {
+          "reference": "Condition/denom-EXM506-FHIR3-1"
+        },
+        "role": {
+          "coding": [ {
+            "system": "http://hl7.org/fhir/diagnosis-role",
+            "code": "billing",
+            "display": "Billing"
+          } ]
+        },
+        "rank": 1
+      } ],
+      "hospitalization": {
+        "dischargeDisposition": {
+          "coding": [ {
+            "system": "http://snomed.info/sct",
+            "code": "306701001",
+            "display": "Discharge to community hospital (procedure)"
+          } ]
+        }
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Encounter/denom-EXM506-FHIR3-2"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-MedicationRequest-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "denom-EXM506-FHIR3-6",
+          "status": "completed",
+          "intent": "order",
+          "category": {
+            "coding": [ {
+              "system": "http://hl7.org/fhir/medication-request-category",
+              "code": "community",
+              "display": "Community"
+            } ]
+          },
+          "medicationCodeableConcept": {
+            "coding": [ {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "1665326",
+              "display": "1 ML Lorazepam 4 MG/ML Injection"
+            } ]
+          },
+          "subject": {
+            "reference": "Patient/denom-EXM506-FHIR3"
+          },
+          "authoredOn": "2019-12-17T08:14:00-07:00"
+        },
+        "request": {
+          "method": "PUT",
+          "url": "MedicationRequest/denom-EXM506-FHIR3-6"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-MedicationRequest-bundle"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-Encounter-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "denom-EXM506-FHIR3-2",
+          "meta": {
+            "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+          },
+          "status": "finished",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "IMP",
+            "display": "inpatient encounter"
+          },
+          "type": [ {
+            "coding": [ {
+              "system": "http://snomed.info/sct",
+              "code": "32485007",
+              "display": "Hospital admission (procedure)"
+            } ]
+          } ],
+          "subject": {
+            "reference": "Patient/denom-EXM506-FHIR3"
+          },
+          "period": {
+            "start": "2019-08-21T00:00:00-06:00",
+            "end": "2019-12-18T08:15:00-07:00"
+          },
+          "diagnosis": [ {
+            "condition": {
+              "reference": "Condition/denom-EXM506-FHIR3-1"
+            },
+            "role": {
+              "coding": [ {
+                "system": "http://hl7.org/fhir/diagnosis-role",
+                "code": "billing",
+                "display": "Billing"
+              } ]
+            },
+            "rank": 1
+          } ],
+          "hospitalization": {
+            "dischargeDisposition": {
+              "coding": [ {
+                "system": "http://snomed.info/sct",
+                "code": "306701001",
+                "display": "Discharge to community hospital (procedure)"
+              } ]
+            }
+          }
+        },
+        "request": {
+          "method": "PUT",
+          "url": "Encounter/denom-EXM506-FHIR3-2"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-Encounter-bundle"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-Patient-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "Patient",
+          "id": "denom-EXM506-FHIR3",
+          "meta": {
+            "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+          },
+          "extension": [ {
+            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+            "extension": [ {
+              "url": "ombCategory",
+              "valueCoding": {
+                "system": "urn:oid:2.16.840.1.113883.6.238",
+                "code": "2054-5",
+                "display": "Black or African American"
+              }
+            } ]
+          }, {
+            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+            "extension": [ {
+              "url": "ombCategory",
+              "valueCoding": {
+                "system": "urn:oid:2.16.840.1.113883.6.238",
+                "code": "2135-2",
+                "display": "Hispanic or Latino"
+              }
+            } ]
+          } ],
+          "identifier": [ {
+            "use": "usual",
+            "type": {
+              "coding": [ {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                "code": "MR",
+                "display": "Medical Record Number"
+              } ]
+            },
+            "system": "http://hospital.smarthealthit.org",
+            "value": "9999999910"
+          } ],
+          "name": [ {
+            "family": "Jones",
+            "given": [ "Rick" ]
+          } ],
+          "gender": "male",
+          "birthDate": "1955-11-05"
+        },
+        "request": {
+          "method": "PUT",
+          "url": "Patient/denom-EXM506-FHIR3"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-Patient-bundle"
+    }
+  }, {
+    "resource": {
+      "resourceType": "MeasureReport",
+      "id": "measurereport-denom-EXM506-FHIR3",
+      "contained": [ {
+        "resourceType": "Bundle",
+        "id": "d3c58181-2827-492f-8768-967d2faa6b6a",
+        "type": "collection",
+        "entry": [ {
+          "fullUrl": "74f41273-919f-46c2-87d3-afcfbfc7f167",
+          "resource": {
+            "resourceType": "List",
+            "id": "74f41273-919f-46c2-87d3-afcfbfc7f167",
+            "title": "denominator",
+            "entry": [ {
+              "item": {
+                "reference": "denom-EXM506-FHIR3-2"
+              }
+            }, {
+              "item": {
+                "reference": "denom-EXM506-FHIR3-6"
+              }
+            }, {
+              "item": {
+                "reference": "denom-EXM506-FHIR3"
+              }
+            } ]
+          }
+        }, {
+          "fullUrl": "Encounter/denom-EXM506-FHIR3-2",
+          "resource": {
+            "resourceType": "Encounter",
+            "id": "denom-EXM506-FHIR3-2",
+            "meta": {
+              "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+            },
+            "status": "finished",
+            "class": {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "IMP",
+              "display": "inpatient encounter"
+            },
+            "type": [ {
+              "coding": [ {
+                "system": "http://snomed.info/sct",
+                "code": "32485007",
+                "display": "Hospital admission (procedure)"
+              } ]
+            } ],
+            "subject": {
+              "reference": "Patient/denom-EXM506-FHIR3"
+            },
+            "period": {
+              "start": "2019-08-21T00:00:00-06:00",
+              "end": "2019-12-18T08:15:00-07:00"
+            },
+            "diagnosis": [ {
+              "condition": {
+                "reference": "Condition/denom-EXM506-FHIR3-1"
+              },
+              "role": {
+                "coding": [ {
+                  "system": "http://hl7.org/fhir/diagnosis-role",
+                  "code": "billing",
+                  "display": "Billing"
+                } ]
+              },
+              "rank": 1
+            } ],
+            "hospitalization": {
+              "dischargeDisposition": {
+                "coding": [ {
+                  "system": "http://snomed.info/sct",
+                  "code": "306701001",
+                  "display": "Discharge to community hospital (procedure)"
+                } ]
+              }
+            }
+          }
+        }, {
+          "fullUrl": "c500bf0b-9d26-47ba-acad-0a4e93a830b9",
+          "resource": {
+            "resourceType": "List",
+            "id": "c500bf0b-9d26-47ba-acad-0a4e93a830b9",
+            "title": "initial-population",
+            "entry": [ {
+              "item": {
+                "reference": "denom-EXM506-FHIR3-2"
+              }
+            }, {
+              "item": {
+                "reference": "denom-EXM506-FHIR3-6"
+              }
+            }, {
+              "item": {
+                "reference": "denom-EXM506-FHIR3"
+              }
+            } ]
+          }
+        }, {
+          "fullUrl": "MedicationRequest/denom-EXM506-FHIR3-6",
+          "resource": {
+            "resourceType": "MedicationRequest",
+            "id": "denom-EXM506-FHIR3-6",
+            "meta": { },
+            "status": "completed",
+            "intent": "order",
+            "category": {
+              "coding": [ {
+                "system": "http://hl7.org/fhir/medication-request-category",
+                "code": "community",
+                "display": "Community"
+              } ]
+            },
+            "medicationCodeableConcept": {
+              "coding": [ {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "1665326",
+                "display": "1 ML Lorazepam 4 MG/ML Injection"
+              } ]
+            },
+            "subject": {
+              "reference": "Patient/denom-EXM506-FHIR3"
+            },
+            "authoredOn": "2019-12-17T08:14:00-07:00"
+          }
+        }, {
+          "fullUrl": "3050f9f3-b0dd-4f34-9051-762538e455f1",
+          "resource": {
+            "resourceType": "List",
+            "id": "3050f9f3-b0dd-4f34-9051-762538e455f1",
+            "title": "numerator",
+            "entry": [ {
+              "item": {
+                "reference": "denom-EXM506-FHIR3-2"
+              }
+            }, {
+              "item": {
+                "reference": "denom-EXM506-FHIR3"
+              }
+            } ]
+          }
+        }, {
+          "fullUrl": "Patient/denom-EXM506-FHIR3",
+          "resource": {
+            "resourceType": "Patient",
+            "id": "denom-EXM506-FHIR3",
+            "meta": {
+              "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+            },
+            "extension": [ {
+              "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+              "extension": [ {
+                "url": "ombCategory",
+                "valueCoding": {
+                  "system": "urn:oid:2.16.840.1.113883.6.238",
+                  "code": "2054-5",
+                  "display": "Black or African American"
+                }
+              } ]
+            }, {
+              "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+              "extension": [ {
+                "url": "ombCategory",
+                "valueCoding": {
+                  "system": "urn:oid:2.16.840.1.113883.6.238",
+                  "code": "2135-2",
+                  "display": "Hispanic or Latino"
+                }
+              } ]
+            } ],
+            "identifier": [ {
+              "use": "usual",
+              "type": {
+                "coding": [ {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR",
+                  "display": "Medical Record Number"
+                } ]
+              },
+              "system": "http://hospital.smarthealthit.org",
+              "value": "9999999910"
+            } ],
+            "name": [ {
+              "family": "Jones",
+              "given": [ "Rick" ]
+            } ],
+            "gender": "male",
+            "birthDate": "1955-11-05"
+          }
+        } ]
+      } ],
+      "status": "complete",
+      "type": "individual",
+      "measure": {
+        "reference": "Measure/measure-EXM506-FHIR3-2.0.000"
+      },
+      "patient": {
+        "reference": "Patient/denom-EXM506-FHIR3"
+      },
+      "period": {
+        "start": "2018-12-31T17:00:00-07:00",
+        "end": "2019-12-30T17:00:00-07:00"
+      },
+      "group": [ {
+        "identifier": {
+          "value": "group-1"
+        },
+        "population": [ {
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "initial-population",
+              "display": "Initial Population"
+            } ]
+          },
+          "count": 1
+        }, {
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "numerator",
+              "display": "Numerator"
+            } ]
+          },
+          "count": 0
+        }, {
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "denominator",
+              "display": "Denominator"
+            } ]
+          },
+          "count": 1
+        }, {
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "denominator-exclusion",
+              "display": "Denominator Exclusion"
+            } ]
+          },
+          "count": 0
+        } ],
+        "measureScore": 0.0
+      } ],
+      "evaluatedResources": {
+        "reference": "#d3c58181-2827-492f-8768-967d2faa6b6a"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "MeasureReport/measurereport-denom-EXM506-FHIR3"
+    }
+  }, {
+    "resource": {
+      "resourceType": "MedicationRequest",
+      "id": "denom-EXM506-FHIR3-6",
+      "status": "completed",
+      "intent": "order",
+      "category": {
+        "coding": [ {
+          "system": "http://hl7.org/fhir/medication-request-category",
+          "code": "community",
+          "display": "Community"
+        } ]
+      },
+      "medicationCodeableConcept": {
+        "coding": [ {
+          "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+          "code": "1665326",
+          "display": "1 ML Lorazepam 4 MG/ML Injection"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/denom-EXM506-FHIR3"
+      },
+      "authoredOn": "2019-12-17T08:14:00-07:00"
+    },
+    "request": {
+      "method": "PUT",
+      "url": "MedicationRequest/denom-EXM506-FHIR3-6"
+    }
+  } ]
+}

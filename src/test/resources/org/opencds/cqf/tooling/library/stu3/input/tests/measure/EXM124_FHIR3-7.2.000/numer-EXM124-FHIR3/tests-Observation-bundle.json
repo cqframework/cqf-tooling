@@ -1,0 +1,31 @@
+{
+  "resourceType": "Bundle",
+  "id": "tests-Observation-bundle",
+  "type": "transaction",
+  "entry": [ {
+    "resource": {
+      "resourceType": "Observation",
+      "id": "numer-EXM124-FHIR3-2",
+      "meta": {
+        "profile": [ "http://www.http://hl7.org/fhir/FHIR3/observation" ]
+      },
+      "status": "final",
+      "code": {
+        "coding": [ {
+          "system": "http://loinc.org",
+          "code": "10524-7",
+          "display": "Microscopic observation [Identifier] in Cervix by Cyto stain"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/numer-EXM124-FHIR3"
+      },
+      "effectiveDateTime": "2019-11-01T00:00:00",
+      "valueBoolean": true
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Observation/numer-EXM124-FHIR3-2"
+    }
+  } ]
+}

@@ -1,0 +1,38 @@
+{
+    "resourceType": "Observation",
+    "id": "numer-EXM165-FHIR3-4",
+    "meta": {
+        "profile": [
+          "http://www.http://hl7.org/fhir/FHIR3/observation"
+        ]
+      },
+    "status": "final",
+    "code": {
+        "coding": [
+            {
+                "system": "http://loinc.org",
+                "code": "85354-9",
+                "display": "blood pressure"
+            }
+        ]
+    },
+    "component" : [{
+      "code" : {
+          "coding": [
+              {
+                  "system": "http://loinc.org",
+                  "code": "8480-6",
+                  "display": "Systolic blood pressure"
+              }
+          ]
+      },
+      "valueQuantity" : {
+        "value" : 139,
+        "unit" : "mm[Hg]"
+       }
+    }],
+    "subject": {
+        "reference": "Patient/numer-EXM165-FHIR3"
+    },
+    "effectiveDateTime": "2019-11-01T00:00:00"
+}

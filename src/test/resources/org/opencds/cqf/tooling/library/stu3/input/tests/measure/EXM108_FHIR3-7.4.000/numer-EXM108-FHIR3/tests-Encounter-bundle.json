@@ -1,0 +1,60 @@
+{
+  "resourceType": "Bundle",
+  "id": "tests-Encounter-bundle",
+  "type": "transaction",
+  "entry": [ {
+    "resource": {
+      "resourceType": "Encounter",
+      "id": "numer-EXM108-FHIR3-3",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+      },
+      "status": "finished",
+      "class": {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "IMP",
+        "display": "inpatient encounter"
+      },
+      "type": [ {
+        "coding": [ {
+          "system": "http://snomed.info/sct",
+          "code": "32485007",
+          "display": "Hospital admission (procedure)"
+        } ]
+      } ],
+      "subject": {
+        "reference": "Patient/numer-EXM108-FHIR3"
+      },
+      "period": {
+        "start": "2019-01-16T08:30:00-07:00",
+        "end": "2019-01-20T08:30:00-07:00"
+      },
+      "diagnosis": [ {
+        "condition": {
+          "reference": "Condition/numer-EXM108-FHIR3-2"
+        },
+        "role": {
+          "coding": [ {
+            "system": "http://hl7.org/fhir/diagnosis-role",
+            "code": "billing",
+            "display": "Billing"
+          } ]
+        },
+        "rank": 1
+      } ],
+      "hospitalization": {
+        "dischargeDisposition": {
+          "coding": [ {
+            "system": "http://snomed.info/sct",
+            "code": "306701001",
+            "display": "Discharge to community hospital (procedure)"
+          } ]
+        }
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Encounter/numer-EXM108-FHIR3-3"
+    }
+  } ]
+}

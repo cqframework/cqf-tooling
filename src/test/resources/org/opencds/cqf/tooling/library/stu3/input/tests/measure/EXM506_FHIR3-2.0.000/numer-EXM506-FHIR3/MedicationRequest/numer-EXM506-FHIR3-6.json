@@ -1,0 +1,28 @@
+{
+    "resourceType": "MedicationRequest",
+    "id": "numer-EXM506-FHIR3-6",
+    "status": "completed",
+    "intent": "order",
+    "category": {
+      "coding": [
+        {
+          "system": "http://hl7.org/fhir/medication-request-category",
+          "code": "community",
+          "display": "Community"
+        }
+      ]
+    },
+    "medicationCodeableConcept": {
+      "coding": [
+        {
+          "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+          "code": "1666777",
+          "display": "2 ML Midazolam 1 MG/ML Cartridge"
+        }
+      ]
+    },
+    "subject": {
+      "reference": "Patient/numer-EXM506-FHIR3"
+    },
+    "authoredOn": "2019-12-18T08:14:00-07:00"
+}

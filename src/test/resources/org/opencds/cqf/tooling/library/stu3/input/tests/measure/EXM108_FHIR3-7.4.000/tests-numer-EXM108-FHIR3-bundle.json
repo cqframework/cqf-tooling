@@ -1,0 +1,695 @@
+{
+  "resourceType": "Bundle",
+  "id": "tests-numer-EXM108-FHIR3-bundle",
+  "type": "transaction",
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "numer-EXM108-FHIR3",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2106-3",
+            "display": "White"
+          }
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2186-5",
+            "display": "Not Hispanic or Latino"
+          }
+        } ]
+      } ],
+      "identifier": [ {
+        "use": "usual",
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MR",
+            "display": "Medical Record Number"
+          } ]
+        },
+        "system": "http://hospital.smarthealthit.org",
+        "value": "999999997"
+      } ],
+      "name": [ {
+        "family": "Smith",
+        "given": [ "Jill" ]
+      } ],
+      "gender": "female",
+      "birthDate": "1963-09-13"
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Patient/numer-EXM108-FHIR3"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-Device-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "Device",
+          "id": "numer-EXM108-FHIR3-5",
+          "type": {
+            "coding": [ {
+              "system": "http://snomed.info/sct",
+              "code": "442023007",
+              "display": "Venous foot pump, device (physical object)"
+            } ]
+          },
+          "patient": {
+            "reference": "Patient/numer-EXM108-FHIR3"
+          }
+        },
+        "request": {
+          "method": "PUT",
+          "url": "Device/numer-EXM108-FHIR3-5"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-Device-bundle"
+    }
+  }, {
+    "resource": {
+      "resourceType": "DeviceUseStatement",
+      "id": "numer-EXM108-FHIR3-4",
+      "status": "completed",
+      "subject": {
+        "reference": "Patient/numer-EXM108-FHIR3"
+      },
+      "whenUsed": {
+        "start": "2019-01-17T12:30:00-07:00",
+        "end": "2019-01-17T12:45:00-07:00"
+      },
+      "device": {
+        "reference": "Device/numer-EXM108-FHIR3-5"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "DeviceUseStatement/numer-EXM108-FHIR3-4"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Encounter",
+      "id": "numer-EXM108-FHIR3-3",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+      },
+      "status": "finished",
+      "class": {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "IMP",
+        "display": "inpatient encounter"
+      },
+      "type": [ {
+        "coding": [ {
+          "system": "http://snomed.info/sct",
+          "code": "32485007",
+          "display": "Hospital admission (procedure)"
+        } ]
+      } ],
+      "subject": {
+        "reference": "Patient/numer-EXM108-FHIR3"
+      },
+      "period": {
+        "start": "2019-01-16T08:30:00-07:00",
+        "end": "2019-01-20T08:30:00-07:00"
+      },
+      "diagnosis": [ {
+        "condition": {
+          "reference": "Condition/numer-EXM108-FHIR3-2"
+        },
+        "role": {
+          "coding": [ {
+            "system": "http://hl7.org/fhir/diagnosis-role",
+            "code": "billing",
+            "display": "Billing"
+          } ]
+        },
+        "rank": 1
+      } ],
+      "hospitalization": {
+        "dischargeDisposition": {
+          "coding": [ {
+            "system": "http://snomed.info/sct",
+            "code": "306701001",
+            "display": "Discharge to community hospital (procedure)"
+          } ]
+        }
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Encounter/numer-EXM108-FHIR3-3"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Condition",
+      "id": "numer-EXM108-FHIR3-2",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+      },
+      "verificationStatus": "confirmed",
+      "category": [ {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+          "code": "encounter-diagnosis",
+          "display": "Encounter Diagnosis"
+        } ]
+      } ],
+      "code": {
+        "coding": [ {
+          "system": "http://snomed.info/sct",
+          "code": "213213007",
+          "display": "Cardiac arrest as a complication of care (disorder)"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/numer-EXM108-FHIR3"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Condition/numer-EXM108-FHIR3-2"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-Encounter-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "numer-EXM108-FHIR3-3",
+          "meta": {
+            "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+          },
+          "status": "finished",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "IMP",
+            "display": "inpatient encounter"
+          },
+          "type": [ {
+            "coding": [ {
+              "system": "http://snomed.info/sct",
+              "code": "32485007",
+              "display": "Hospital admission (procedure)"
+            } ]
+          } ],
+          "subject": {
+            "reference": "Patient/numer-EXM108-FHIR3"
+          },
+          "period": {
+            "start": "2019-01-16T08:30:00-07:00",
+            "end": "2019-01-20T08:30:00-07:00"
+          },
+          "diagnosis": [ {
+            "condition": {
+              "reference": "Condition/numer-EXM108-FHIR3-2"
+            },
+            "role": {
+              "coding": [ {
+                "system": "http://hl7.org/fhir/diagnosis-role",
+                "code": "billing",
+                "display": "Billing"
+              } ]
+            },
+            "rank": 1
+          } ],
+          "hospitalization": {
+            "dischargeDisposition": {
+              "coding": [ {
+                "system": "http://snomed.info/sct",
+                "code": "306701001",
+                "display": "Discharge to community hospital (procedure)"
+              } ]
+            }
+          }
+        },
+        "request": {
+          "method": "PUT",
+          "url": "Encounter/numer-EXM108-FHIR3-3"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-Encounter-bundle"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-Condition-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "Condition",
+          "id": "numer-EXM108-FHIR3-2",
+          "meta": {
+            "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+          },
+          "verificationStatus": "confirmed",
+          "category": [ {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+              "code": "encounter-diagnosis",
+              "display": "Encounter Diagnosis"
+            } ]
+          } ],
+          "code": {
+            "coding": [ {
+              "system": "http://snomed.info/sct",
+              "code": "213213007",
+              "display": "Cardiac arrest as a complication of care (disorder)"
+            } ]
+          },
+          "subject": {
+            "reference": "Patient/numer-EXM108-FHIR3"
+          }
+        },
+        "request": {
+          "method": "PUT",
+          "url": "Condition/numer-EXM108-FHIR3-2"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-Condition-bundle"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-Patient-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "Patient",
+          "id": "numer-EXM108-FHIR3",
+          "meta": {
+            "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+          },
+          "extension": [ {
+            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+            "extension": [ {
+              "url": "ombCategory",
+              "valueCoding": {
+                "system": "urn:oid:2.16.840.1.113883.6.238",
+                "code": "2106-3",
+                "display": "White"
+              }
+            } ]
+          }, {
+            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+            "extension": [ {
+              "url": "ombCategory",
+              "valueCoding": {
+                "system": "urn:oid:2.16.840.1.113883.6.238",
+                "code": "2186-5",
+                "display": "Not Hispanic or Latino"
+              }
+            } ]
+          } ],
+          "identifier": [ {
+            "use": "usual",
+            "type": {
+              "coding": [ {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                "code": "MR",
+                "display": "Medical Record Number"
+              } ]
+            },
+            "system": "http://hospital.smarthealthit.org",
+            "value": "999999997"
+          } ],
+          "name": [ {
+            "family": "Smith",
+            "given": [ "Jill" ]
+          } ],
+          "gender": "female",
+          "birthDate": "1963-09-13"
+        },
+        "request": {
+          "method": "PUT",
+          "url": "Patient/numer-EXM108-FHIR3"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-Patient-bundle"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-DeviceUseStatement-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "DeviceUseStatement",
+          "id": "numer-EXM108-FHIR3-4",
+          "status": "completed",
+          "subject": {
+            "reference": "Patient/numer-EXM108-FHIR3"
+          },
+          "whenUsed": {
+            "start": "2019-01-17T12:30:00-07:00",
+            "end": "2019-01-17T12:45:00-07:00"
+          },
+          "device": {
+            "reference": "Device/numer-EXM108-FHIR3-5"
+          }
+        },
+        "request": {
+          "method": "PUT",
+          "url": "DeviceUseStatement/numer-EXM108-FHIR3-4"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-DeviceUseStatement-bundle"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Device",
+      "id": "numer-EXM108-FHIR3-5",
+      "type": {
+        "coding": [ {
+          "system": "http://snomed.info/sct",
+          "code": "442023007",
+          "display": "Venous foot pump, device (physical object)"
+        } ]
+      },
+      "patient": {
+        "reference": "Patient/numer-EXM108-FHIR3"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Device/numer-EXM108-FHIR3-5"
+    }
+  }, {
+    "resource": {
+      "resourceType": "MeasureReport",
+      "id": "measurereport-numer-EXM108-FHIR3",
+      "contained": [ {
+        "resourceType": "Bundle",
+        "id": "13687040-a0ad-4346-b7c8-174e53903241",
+        "type": "collection",
+        "entry": [ {
+          "fullUrl": "DeviceUseStatement/numer-EXM108-FHIR3-4",
+          "resource": {
+            "resourceType": "DeviceUseStatement",
+            "id": "numer-EXM108-FHIR3-4",
+            "meta": { },
+            "status": "completed",
+            "subject": {
+              "reference": "Patient/numer-EXM108-FHIR3"
+            },
+            "whenUsed": {
+              "start": "2019-01-17T12:30:00-07:00",
+              "end": "2019-01-17T12:45:00-07:00"
+            },
+            "device": {
+              "reference": "Device/numer-EXM108-FHIR3-5"
+            }
+          }
+        }, {
+          "fullUrl": "3be57d89-c27f-4923-8ecb-8ba7405d0413",
+          "resource": {
+            "resourceType": "List",
+            "id": "3be57d89-c27f-4923-8ecb-8ba7405d0413",
+            "title": "initial-population",
+            "entry": [ {
+              "item": {
+                "reference": "numer-EXM108-FHIR3-2"
+              }
+            }, {
+              "item": {
+                "reference": "numer-EXM108-FHIR3-3"
+              }
+            }, {
+              "item": {
+                "reference": "numer-EXM108-FHIR3"
+              }
+            } ]
+          }
+        }, {
+          "fullUrl": "Condition/numer-EXM108-FHIR3-2",
+          "resource": {
+            "resourceType": "Condition",
+            "id": "numer-EXM108-FHIR3-2",
+            "meta": {
+              "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+            },
+            "verificationStatus": "confirmed",
+            "category": [ {
+              "coding": [ {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              } ]
+            } ],
+            "code": {
+              "coding": [ {
+                "system": "http://snomed.info/sct",
+                "code": "213213007",
+                "display": "Cardiac arrest as a complication of care (disorder)"
+              } ]
+            },
+            "subject": {
+              "reference": "Patient/numer-EXM108-FHIR3"
+            }
+          }
+        }, {
+          "fullUrl": "e789a14e-d0f0-4851-b66a-4c3e52d97cfd",
+          "resource": {
+            "resourceType": "List",
+            "id": "e789a14e-d0f0-4851-b66a-4c3e52d97cfd",
+            "title": "numerator",
+            "entry": [ {
+              "item": {
+                "reference": "numer-EXM108-FHIR3-4"
+              }
+            }, {
+              "item": {
+                "reference": "numer-EXM108-FHIR3-2"
+              }
+            }, {
+              "item": {
+                "reference": "numer-EXM108-FHIR3-5"
+              }
+            } ]
+          }
+        }, {
+          "fullUrl": "Encounter/numer-EXM108-FHIR3-3",
+          "resource": {
+            "resourceType": "Encounter",
+            "id": "numer-EXM108-FHIR3-3",
+            "meta": {
+              "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+            },
+            "status": "finished",
+            "class": {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "IMP",
+              "display": "inpatient encounter"
+            },
+            "type": [ {
+              "coding": [ {
+                "system": "http://snomed.info/sct",
+                "code": "32485007",
+                "display": "Hospital admission (procedure)"
+              } ]
+            } ],
+            "subject": {
+              "reference": "Patient/numer-EXM108-FHIR3"
+            },
+            "period": {
+              "start": "2019-01-16T08:30:00-07:00",
+              "end": "2019-01-20T08:30:00-07:00"
+            },
+            "diagnosis": [ {
+              "condition": {
+                "reference": "Condition/numer-EXM108-FHIR3-2"
+              },
+              "role": {
+                "coding": [ {
+                  "system": "http://hl7.org/fhir/diagnosis-role",
+                  "code": "billing",
+                  "display": "Billing"
+                } ]
+              },
+              "rank": 1
+            } ],
+            "hospitalization": {
+              "dischargeDisposition": {
+                "coding": [ {
+                  "system": "http://snomed.info/sct",
+                  "code": "306701001",
+                  "display": "Discharge to community hospital (procedure)"
+                } ]
+              }
+            }
+          }
+        }, {
+          "fullUrl": "Device/numer-EXM108-FHIR3-5",
+          "resource": {
+            "resourceType": "Device",
+            "id": "numer-EXM108-FHIR3-5",
+            "meta": { },
+            "type": {
+              "coding": [ {
+                "system": "http://snomed.info/sct",
+                "code": "442023007",
+                "display": "Venous foot pump, device (physical object)"
+              } ]
+            },
+            "patient": {
+              "reference": "Patient/numer-EXM108-FHIR3"
+            }
+          }
+        }, {
+          "fullUrl": "57551388-2811-461a-9d7e-a927d001e4ef",
+          "resource": {
+            "resourceType": "List",
+            "id": "57551388-2811-461a-9d7e-a927d001e4ef",
+            "title": "denominator",
+            "entry": [ {
+              "item": {
+                "reference": "numer-EXM108-FHIR3-2"
+              }
+            } ]
+          }
+        }, {
+          "fullUrl": "Patient/numer-EXM108-FHIR3",
+          "resource": {
+            "resourceType": "Patient",
+            "id": "numer-EXM108-FHIR3",
+            "meta": {
+              "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+            },
+            "extension": [ {
+              "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+              "extension": [ {
+                "url": "ombCategory",
+                "valueCoding": {
+                  "system": "urn:oid:2.16.840.1.113883.6.238",
+                  "code": "2106-3",
+                  "display": "White"
+                }
+              } ]
+            }, {
+              "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+              "extension": [ {
+                "url": "ombCategory",
+                "valueCoding": {
+                  "system": "urn:oid:2.16.840.1.113883.6.238",
+                  "code": "2186-5",
+                  "display": "Not Hispanic or Latino"
+                }
+              } ]
+            } ],
+            "identifier": [ {
+              "use": "usual",
+              "type": {
+                "coding": [ {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR",
+                  "display": "Medical Record Number"
+                } ]
+              },
+              "system": "http://hospital.smarthealthit.org",
+              "value": "999999997"
+            } ],
+            "name": [ {
+              "family": "Smith",
+              "given": [ "Jill" ]
+            } ],
+            "gender": "female",
+            "birthDate": "1963-09-13"
+          }
+        } ]
+      } ],
+      "status": "complete",
+      "type": "individual",
+      "measure": {
+        "reference": "Measure/measure-EXM108-FHIR3-7.4.000"
+      },
+      "patient": {
+        "reference": "Patient/numer-EXM108-FHIR3"
+      },
+      "period": {
+        "start": "2019-01-01T00:00:00-07:00",
+        "end": "2019-12-31T00:00:00-07:00"
+      },
+      "group": [ {
+        "identifier": {
+          "value": "group-1"
+        },
+        "population": [ {
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "initial-population",
+              "display": "Initial Population"
+            } ]
+          },
+          "count": 1
+        }, {
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "numerator",
+              "display": "Numerator"
+            } ]
+          },
+          "count": 1
+        }, {
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "denominator",
+              "display": "Denominator"
+            } ]
+          },
+          "count": 1
+        }, {
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "denominator-exclusion",
+              "display": "Denominator Exclusion"
+            } ]
+          },
+          "count": 0
+        } ],
+        "measureScore": 1.0
+      } ],
+      "evaluatedResources": {
+        "reference": "#13687040-a0ad-4346-b7c8-174e53903241"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "MeasureReport/measurereport-numer-EXM108-FHIR3"
+    }
+  } ]
+}

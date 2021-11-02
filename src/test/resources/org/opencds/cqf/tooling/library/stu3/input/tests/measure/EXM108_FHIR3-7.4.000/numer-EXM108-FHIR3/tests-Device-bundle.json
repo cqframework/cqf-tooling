@@ -1,0 +1,25 @@
+{
+  "resourceType": "Bundle",
+  "id": "tests-Device-bundle",
+  "type": "transaction",
+  "entry": [ {
+    "resource": {
+      "resourceType": "Device",
+      "id": "numer-EXM108-FHIR3-5",
+      "type": {
+        "coding": [ {
+          "system": "http://snomed.info/sct",
+          "code": "442023007",
+          "display": "Venous foot pump, device (physical object)"
+        } ]
+      },
+      "patient": {
+        "reference": "Patient/numer-EXM108-FHIR3"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Device/numer-EXM108-FHIR3-5"
+    }
+  } ]
+}

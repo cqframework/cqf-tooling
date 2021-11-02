@@ -1,0 +1,35 @@
+{
+  "resourceType": "Bundle",
+  "id": "tests-MedicationRequest-bundle",
+  "type": "transaction",
+  "entry": [ {
+    "resource": {
+      "resourceType": "MedicationRequest",
+      "id": "denom-EXM506-FHIR3-6",
+      "status": "completed",
+      "intent": "order",
+      "category": {
+        "coding": [ {
+          "system": "http://hl7.org/fhir/medication-request-category",
+          "code": "community",
+          "display": "Community"
+        } ]
+      },
+      "medicationCodeableConcept": {
+        "coding": [ {
+          "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+          "code": "1665326",
+          "display": "1 ML Lorazepam 4 MG/ML Injection"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/denom-EXM506-FHIR3"
+      },
+      "authoredOn": "2019-12-17T08:14:00-07:00"
+    },
+    "request": {
+      "method": "PUT",
+      "url": "MedicationRequest/denom-EXM506-FHIR3-6"
+    }
+  } ]
+}

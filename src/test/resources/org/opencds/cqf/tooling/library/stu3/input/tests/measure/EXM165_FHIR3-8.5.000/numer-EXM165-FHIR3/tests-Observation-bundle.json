@@ -1,0 +1,80 @@
+{
+  "resourceType": "Bundle",
+  "id": "tests-Observation-bundle",
+  "type": "transaction",
+  "entry": [ {
+    "resource": {
+      "resourceType": "Observation",
+      "id": "numer-EXM165-FHIR3-5",
+      "meta": {
+        "profile": [ "http://www.http://hl7.org/fhir/FHIR3/observation" ]
+      },
+      "status": "final",
+      "code": {
+        "coding": [ {
+          "system": "http://loinc.org",
+          "code": "85354-9",
+          "display": "blood pressure"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/numer-EXM165-FHIR3"
+      },
+      "effectiveDateTime": "2019-11-01T05:00:00",
+      "component": [ {
+        "code": {
+          "coding": [ {
+            "system": "http://loinc.org",
+            "code": "8462-4",
+            "display": "Diastolic blood pressure"
+          } ]
+        },
+        "valueQuantity": {
+          "value": 89,
+          "unit": "mm[Hg]"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Observation/numer-EXM165-FHIR3-5"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Observation",
+      "id": "numer-EXM165-FHIR3-4",
+      "meta": {
+        "profile": [ "http://www.http://hl7.org/fhir/FHIR3/observation" ]
+      },
+      "status": "final",
+      "code": {
+        "coding": [ {
+          "system": "http://loinc.org",
+          "code": "85354-9",
+          "display": "blood pressure"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/numer-EXM165-FHIR3"
+      },
+      "effectiveDateTime": "2019-11-01T00:00:00",
+      "component": [ {
+        "code": {
+          "coding": [ {
+            "system": "http://loinc.org",
+            "code": "8480-6",
+            "display": "Systolic blood pressure"
+          } ]
+        },
+        "valueQuantity": {
+          "value": 139,
+          "unit": "mm[Hg]"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Observation/numer-EXM165-FHIR3-4"
+    }
+  } ]
+}

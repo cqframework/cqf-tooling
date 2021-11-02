@@ -1,0 +1,93 @@
+{
+  "resourceType": "Bundle",
+  "id": "tests-MedicationRequest-bundle",
+  "type": "transaction",
+  "entry": [ {
+    "resource": {
+      "resourceType": "MedicationRequest",
+      "id": "numer-EXM506-FHIR3-5",
+      "status": "completed",
+      "intent": "order",
+      "category": {
+        "coding": [ {
+          "system": "http://hl7.org/fhir/medication-request-category",
+          "code": "community",
+          "display": "Community"
+        } ]
+      },
+      "medicationCodeableConcept": {
+        "coding": [ {
+          "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+          "code": "892516",
+          "display": "Morphine Sulfate 10 MG Rectal Suppository"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/numer-EXM506-FHIR3"
+      },
+      "authoredOn": "2019-08-21T00:00:00-07:00"
+    },
+    "request": {
+      "method": "PUT",
+      "url": "MedicationRequest/numer-EXM506-FHIR3-5"
+    }
+  }, {
+    "resource": {
+      "resourceType": "MedicationRequest",
+      "id": "numer-EXM506-FHIR3-7",
+      "status": "completed",
+      "intent": "order",
+      "category": {
+        "coding": [ {
+          "system": "http://hl7.org/fhir/medication-request-category",
+          "code": "community",
+          "display": "Community"
+        } ]
+      },
+      "medicationCodeableConcept": {
+        "coding": [ {
+          "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+          "code": "1010600",
+          "display": "Buprenorphine 2 MG / Naloxone 0.5 MG Oral Strip"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/numer-EXM506-FHIR3"
+      },
+      "authoredOn": "2019-08-21T00:00:00-08:00"
+    },
+    "request": {
+      "method": "PUT",
+      "url": "MedicationRequest/numer-EXM506-FHIR3-7"
+    }
+  }, {
+    "resource": {
+      "resourceType": "MedicationRequest",
+      "id": "numer-EXM506-FHIR3-6",
+      "status": "completed",
+      "intent": "order",
+      "category": {
+        "coding": [ {
+          "system": "http://hl7.org/fhir/medication-request-category",
+          "code": "community",
+          "display": "Community"
+        } ]
+      },
+      "medicationCodeableConcept": {
+        "coding": [ {
+          "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+          "code": "1666777",
+          "display": "2 ML Midazolam 1 MG/ML Cartridge"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/numer-EXM506-FHIR3"
+      },
+      "authoredOn": "2019-12-18T08:14:00-07:00"
+    },
+    "request": {
+      "method": "PUT",
+      "url": "MedicationRequest/numer-EXM506-FHIR3-6"
+    }
+  } ]
+}

@@ -1,0 +1,453 @@
+{
+  "resourceType": "Bundle",
+  "id": "tests-numer-EXM124-FHIR3-bundle",
+  "type": "transaction",
+  "entry": [ {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "numer-EXM124-FHIR3",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2106-3",
+            "display": "White"
+          }
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2186-5",
+            "display": "Not Hispanic or Latino"
+          }
+        } ]
+      } ],
+      "identifier": [ {
+        "use": "usual",
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MR",
+            "display": "Medical Record Number"
+          } ]
+        },
+        "system": "http://hospital.smarthealthit.org",
+        "value": "999999993"
+      } ],
+      "name": [ {
+        "family": "Dally",
+        "given": [ "Dilly" ]
+      } ],
+      "gender": "female",
+      "birthDate": "1995-01-01"
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Patient/numer-EXM124-FHIR3"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Observation",
+      "id": "numer-EXM124-FHIR3-2",
+      "meta": {
+        "profile": [ "http://www.http://hl7.org/fhir/FHIR3/observation" ]
+      },
+      "status": "final",
+      "code": {
+        "coding": [ {
+          "system": "http://loinc.org",
+          "code": "10524-7",
+          "display": "Microscopic observation [Identifier] in Cervix by Cyto stain"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/numer-EXM124-FHIR3"
+      },
+      "effectiveDateTime": "2019-11-01T00:00:00",
+      "valueBoolean": true
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Observation/numer-EXM124-FHIR3-2"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Encounter",
+      "id": "numer-EXM124-FHIR3-1",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+      },
+      "status": "finished",
+      "class": {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "AMB",
+        "display": "ambulatory"
+      },
+      "type": [ {
+        "coding": [ {
+          "system": "http://www.ama-assn.org/go/cpt",
+          "code": "99201",
+          "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A problem focused history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 10 minutes are spent face-to-face with the patient and/or family."
+        } ]
+      } ],
+      "subject": {
+        "reference": "Patient/numer-EXM124-FHIR3"
+      },
+      "period": {
+        "start": "2019-01-02T00:00:00-00:00",
+        "end": "2019-01-03T00:00:00-00:00"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Encounter/numer-EXM124-FHIR3-1"
+    }
+  }, {
+    "resource": {
+      "resourceType": "MeasureReport",
+      "id": "measurereport-numer-EXM124-FHIR3",
+      "contained": [ {
+        "resourceType": "Bundle",
+        "id": "46f7e60a-5308-4cab-8b52-2a4a7d1e6e2a",
+        "type": "collection",
+        "entry": [ {
+          "fullUrl": "Encounter/numer-EXM124-FHIR3-1",
+          "resource": {
+            "resourceType": "Encounter",
+            "id": "numer-EXM124-FHIR3-1",
+            "meta": {
+              "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+            },
+            "status": "finished",
+            "class": {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "AMB",
+              "display": "ambulatory"
+            },
+            "type": [ {
+              "coding": [ {
+                "system": "http://www.ama-assn.org/go/cpt",
+                "code": "99201",
+                "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A problem focused history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 10 minutes are spent face-to-face with the patient and/or family."
+              } ]
+            } ],
+            "subject": {
+              "reference": "Patient/numer-EXM124-FHIR3"
+            },
+            "period": {
+              "start": "2019-01-02T00:00:00-00:00",
+              "end": "2019-01-03T00:00:00-00:00"
+            }
+          }
+        }, {
+          "fullUrl": "Observation/numer-EXM124-FHIR3-2",
+          "resource": {
+            "resourceType": "Observation",
+            "id": "numer-EXM124-FHIR3-2",
+            "meta": { },
+            "status": "final",
+            "code": {
+              "coding": [ {
+                "system": "http://loinc.org",
+                "code": "10524-7",
+                "display": "Microscopic observation [Identifier] in Cervix by Cyto stain"
+              } ]
+            },
+            "subject": {
+              "reference": "Patient/numer-EXM124-FHIR3"
+            },
+            "effectiveDateTime": "2019-11-01T00:00:00",
+            "valueBoolean": true
+          }
+        }, {
+          "fullUrl": "33d9b753-d1ea-4b7a-9d36-8bf4cce72aff",
+          "resource": {
+            "resourceType": "List",
+            "id": "33d9b753-d1ea-4b7a-9d36-8bf4cce72aff",
+            "title": "initial-population",
+            "entry": [ {
+              "item": {
+                "reference": "numer-EXM124-FHIR3-1"
+              }
+            }, {
+              "item": {
+                "reference": "numer-EXM124-FHIR3"
+              }
+            } ]
+          }
+        }, {
+          "fullUrl": "Patient/numer-EXM124-FHIR3",
+          "resource": {
+            "resourceType": "Patient",
+            "id": "numer-EXM124-FHIR3",
+            "meta": {
+              "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+            },
+            "extension": [ {
+              "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+              "extension": [ {
+                "url": "ombCategory",
+                "valueCoding": {
+                  "system": "urn:oid:2.16.840.1.113883.6.238",
+                  "code": "2106-3",
+                  "display": "White"
+                }
+              } ]
+            }, {
+              "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+              "extension": [ {
+                "url": "ombCategory",
+                "valueCoding": {
+                  "system": "urn:oid:2.16.840.1.113883.6.238",
+                  "code": "2186-5",
+                  "display": "Not Hispanic or Latino"
+                }
+              } ]
+            } ],
+            "identifier": [ {
+              "use": "usual",
+              "type": {
+                "coding": [ {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR",
+                  "display": "Medical Record Number"
+                } ]
+              },
+              "system": "http://hospital.smarthealthit.org",
+              "value": "999999993"
+            } ],
+            "name": [ {
+              "family": "Dally",
+              "given": [ "Dilly" ]
+            } ],
+            "gender": "female",
+            "birthDate": "1995-01-01"
+          }
+        }, {
+          "fullUrl": "9b3d6bc8-b8fe-483c-bdbf-184cae087ac8",
+          "resource": {
+            "resourceType": "List",
+            "id": "9b3d6bc8-b8fe-483c-bdbf-184cae087ac8",
+            "title": "numerator",
+            "entry": [ {
+              "item": {
+                "reference": "numer-EXM124-FHIR3-2"
+              }
+            } ]
+          }
+        } ]
+      } ],
+      "status": "complete",
+      "type": "individual",
+      "measure": {
+        "reference": "Measure/measure-EXM124-FHIR3-7.2.000"
+      },
+      "patient": {
+        "reference": "Patient/numer-EXM124-FHIR3"
+      },
+      "period": {
+        "start": "2019-01-01T00:00:00-07:00",
+        "end": "2019-12-31T00:00:00-07:00"
+      },
+      "group": [ {
+        "identifier": {
+          "value": "group-1"
+        },
+        "population": [ {
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "initial-population",
+              "display": "Initial Population"
+            } ]
+          },
+          "count": 1
+        }, {
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "numerator",
+              "display": "Numerator"
+            } ]
+          },
+          "count": 1
+        }, {
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "denominator",
+              "display": "Denominator"
+            } ]
+          },
+          "count": 1
+        }, {
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "denominator-exclusion",
+              "display": "Denominator Exclusion"
+            } ]
+          },
+          "count": 0
+        } ],
+        "measureScore": 1.0
+      } ],
+      "evaluatedResources": {
+        "reference": "#46f7e60a-5308-4cab-8b52-2a4a7d1e6e2a"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "MeasureReport/measurereport-numer-EXM124-FHIR3"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-Encounter-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "numer-EXM124-FHIR3-1",
+          "meta": {
+            "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+          },
+          "status": "finished",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "AMB",
+            "display": "ambulatory"
+          },
+          "type": [ {
+            "coding": [ {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "99201",
+              "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A problem focused history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 10 minutes are spent face-to-face with the patient and/or family."
+            } ]
+          } ],
+          "subject": {
+            "reference": "Patient/numer-EXM124-FHIR3"
+          },
+          "period": {
+            "start": "2019-01-02T00:00:00-00:00",
+            "end": "2019-01-03T00:00:00-00:00"
+          }
+        },
+        "request": {
+          "method": "PUT",
+          "url": "Encounter/numer-EXM124-FHIR3-1"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-Encounter-bundle"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-Observation-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "Observation",
+          "id": "numer-EXM124-FHIR3-2",
+          "meta": {
+            "profile": [ "http://www.http://hl7.org/fhir/FHIR3/observation" ]
+          },
+          "status": "final",
+          "code": {
+            "coding": [ {
+              "system": "http://loinc.org",
+              "code": "10524-7",
+              "display": "Microscopic observation [Identifier] in Cervix by Cyto stain"
+            } ]
+          },
+          "subject": {
+            "reference": "Patient/numer-EXM124-FHIR3"
+          },
+          "effectiveDateTime": "2019-11-01T00:00:00",
+          "valueBoolean": true
+        },
+        "request": {
+          "method": "PUT",
+          "url": "Observation/numer-EXM124-FHIR3-2"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-Observation-bundle"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-Patient-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "Patient",
+          "id": "numer-EXM124-FHIR3",
+          "meta": {
+            "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+          },
+          "extension": [ {
+            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+            "extension": [ {
+              "url": "ombCategory",
+              "valueCoding": {
+                "system": "urn:oid:2.16.840.1.113883.6.238",
+                "code": "2106-3",
+                "display": "White"
+              }
+            } ]
+          }, {
+            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+            "extension": [ {
+              "url": "ombCategory",
+              "valueCoding": {
+                "system": "urn:oid:2.16.840.1.113883.6.238",
+                "code": "2186-5",
+                "display": "Not Hispanic or Latino"
+              }
+            } ]
+          } ],
+          "identifier": [ {
+            "use": "usual",
+            "type": {
+              "coding": [ {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                "code": "MR",
+                "display": "Medical Record Number"
+              } ]
+            },
+            "system": "http://hospital.smarthealthit.org",
+            "value": "999999993"
+          } ],
+          "name": [ {
+            "family": "Dally",
+            "given": [ "Dilly" ]
+          } ],
+          "gender": "female",
+          "birthDate": "1995-01-01"
+        },
+        "request": {
+          "method": "PUT",
+          "url": "Patient/numer-EXM124-FHIR3"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-Patient-bundle"
+    }
+  } ]
+}

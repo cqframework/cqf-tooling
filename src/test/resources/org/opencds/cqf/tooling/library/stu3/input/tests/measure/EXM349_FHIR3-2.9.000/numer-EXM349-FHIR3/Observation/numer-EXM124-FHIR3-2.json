@@ -1,0 +1,24 @@
+{
+  "resourceType": "Observation",
+  "id": "numer-EXM349-FHIR3-4",
+  "meta": {
+    "profile": [
+      "http://www.http://hl7.org/fhir/FHIR3/observation"
+    ]
+  },
+  "status": "final",
+  "code": {
+      "coding": [
+          {
+              "system": "http://loinc.org",
+              "code": "10901-7",
+              "display": "HIV 2 gp125 Ab [Presence] in Serum by Immunoblot"
+          }
+      ]
+  },
+  "valueBoolean": "true",
+  "subject": {
+      "reference": "Patient/numer-EXM349-FHIR3"
+  },
+  "effectiveDateTime": "2019-10-21T00:00:00-06:00"
+}

@@ -1,0 +1,706 @@
+{
+  "resourceType": "Bundle",
+  "id": "tests-denom-EXM108-FHIR3-bundle",
+  "type": "transaction",
+  "entry": [ {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-Encounter-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "Encounter",
+          "id": "denom-EXM108-FHIR3-1",
+          "meta": {
+            "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+          },
+          "status": "finished",
+          "class": {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "IMP",
+            "display": "inpatient encounter"
+          },
+          "type": [ {
+            "coding": [ {
+              "system": "http://snomed.info/sct",
+              "code": "32485007",
+              "display": "Hospital admission (procedure)"
+            } ]
+          } ],
+          "subject": {
+            "reference": "Patient/denom-EXM108-FHIR3"
+          },
+          "period": {
+            "start": "2019-01-16T08:30:00-07:00",
+            "end": "2019-01-20T08:30:00-07:00"
+          },
+          "diagnosis": [ {
+            "condition": {
+              "reference": "Condition/denom-EXM108-FHIR3-2"
+            }
+          } ],
+          "hospitalization": {
+            "dischargeDisposition": {
+              "coding": [ {
+                "system": "http://snomed.info/sct",
+                "code": "306701001",
+                "display": "Discharge to community hospital (procedure)"
+              } ]
+            }
+          }
+        },
+        "request": {
+          "method": "PUT",
+          "url": "Encounter/denom-EXM108-FHIR3-1"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-Encounter-bundle"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-Procedure-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "Procedure",
+          "id": "denom-EXM108-FHIR3-4",
+          "meta": {
+            "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure" ]
+          },
+          "status": "completed",
+          "code": {
+            "coding": [ {
+              "system": "http://snomed.info/sct",
+              "code": "112943005",
+              "display": "Epidural injection of anesthetic substance"
+            } ]
+          },
+          "subject": {
+            "reference": "Patient/denom-EXM108-FHIR3"
+          },
+          "performedPeriod": {
+            "start": "2019-01-17T08:30:00-07:00",
+            "end": "2019-01-17T10:30:00-07:00"
+          }
+        },
+        "request": {
+          "method": "PUT",
+          "url": "Procedure/denom-EXM108-FHIR3-4"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-Procedure-bundle"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-Condition-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "Condition",
+          "id": "denom-EXM108-FHIR3-2",
+          "meta": {
+            "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+          },
+          "verificationStatus": "confirmed",
+          "category": [ {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+              "code": "encounter-diagnosis",
+              "display": "Encounter Diagnosis"
+            } ]
+          } ],
+          "code": {
+            "coding": [ {
+              "system": "http://snomed.info/sct",
+              "code": "10327003",
+              "display": "Cocaine-induced mood disorder (disorder)"
+            } ]
+          },
+          "subject": {
+            "reference": "Patient/denom-EXM108-FHIR3"
+          }
+        },
+        "request": {
+          "method": "PUT",
+          "url": "Condition/denom-EXM108-FHIR3-2"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-Condition-bundle"
+    }
+  }, {
+    "resource": {
+      "resourceType": "MedicationAdministration",
+      "id": "denom-EXM108-FHIR3-5",
+      "status": "completed",
+      "medicationCodeableConcept": {
+        "coding": [ {
+          "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+          "code": "854228",
+          "display": "0.3 ML Enoxaparin sodium 100 MG/ML Prefilled Syringe"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/denom-EXM108-FHIR3"
+      },
+      "effectivePeriod": {
+        "start": "2019-01-19T12:30:00-07:00",
+        "end": "2019-01-19T13:00:00-07:00"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "MedicationAdministration/denom-EXM108-FHIR3-5"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Encounter",
+      "id": "denom-EXM108-FHIR3-1",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+      },
+      "status": "finished",
+      "class": {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "IMP",
+        "display": "inpatient encounter"
+      },
+      "type": [ {
+        "coding": [ {
+          "system": "http://snomed.info/sct",
+          "code": "32485007",
+          "display": "Hospital admission (procedure)"
+        } ]
+      } ],
+      "subject": {
+        "reference": "Patient/denom-EXM108-FHIR3"
+      },
+      "period": {
+        "start": "2019-01-16T08:30:00-07:00",
+        "end": "2019-01-20T08:30:00-07:00"
+      },
+      "diagnosis": [ {
+        "condition": {
+          "reference": "Condition/denom-EXM108-FHIR3-2"
+        }
+      } ],
+      "hospitalization": {
+        "dischargeDisposition": {
+          "coding": [ {
+            "system": "http://snomed.info/sct",
+            "code": "306701001",
+            "display": "Discharge to community hospital (procedure)"
+          } ]
+        }
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Encounter/denom-EXM108-FHIR3-1"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Procedure",
+      "id": "denom-EXM108-FHIR3-4",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure" ]
+      },
+      "status": "completed",
+      "code": {
+        "coding": [ {
+          "system": "http://snomed.info/sct",
+          "code": "112943005",
+          "display": "Epidural injection of anesthetic substance"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/denom-EXM108-FHIR3"
+      },
+      "performedPeriod": {
+        "start": "2019-01-17T08:30:00-07:00",
+        "end": "2019-01-17T10:30:00-07:00"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Procedure/denom-EXM108-FHIR3-4"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Condition",
+      "id": "denom-EXM108-FHIR3-2",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+      },
+      "verificationStatus": "confirmed",
+      "category": [ {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+          "code": "encounter-diagnosis",
+          "display": "Encounter Diagnosis"
+        } ]
+      } ],
+      "code": {
+        "coding": [ {
+          "system": "http://snomed.info/sct",
+          "code": "10327003",
+          "display": "Cocaine-induced mood disorder (disorder)"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/denom-EXM108-FHIR3"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Condition/denom-EXM108-FHIR3-2"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Patient",
+      "id": "denom-EXM108-FHIR3",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2106-3",
+            "display": "White"
+          }
+        } ]
+      }, {
+        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+        "extension": [ {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2186-5",
+            "display": "Not Hispanic or Latino"
+          }
+        } ]
+      } ],
+      "identifier": [ {
+        "use": "usual",
+        "type": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MR",
+            "display": "Medical Record Number"
+          } ]
+        },
+        "system": "http://hospital.smarthealthit.org",
+        "value": "999999996"
+      } ],
+      "name": [ {
+        "family": "Jones",
+        "given": [ "Frank" ]
+      } ],
+      "gender": "male",
+      "birthDate": "1951-05-01"
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Patient/denom-EXM108-FHIR3"
+    }
+  }, {
+    "resource": {
+      "resourceType": "MeasureReport",
+      "id": "measurereport-denom-EXM108-FHIR3",
+      "contained": [ {
+        "resourceType": "Bundle",
+        "id": "e1a37198-69ec-41c5-9fcf-4929c231bc44",
+        "type": "collection",
+        "entry": [ {
+          "fullUrl": "30efef19-7b8e-48a9-b2f5-b3eaa313b6a7",
+          "resource": {
+            "resourceType": "List",
+            "id": "30efef19-7b8e-48a9-b2f5-b3eaa313b6a7",
+            "title": "initial-population",
+            "entry": [ {
+              "item": {
+                "reference": "denom-EXM108-FHIR3"
+              }
+            }, {
+              "item": {
+                "reference": "denom-EXM108-FHIR3-2"
+              }
+            }, {
+              "item": {
+                "reference": "denom-EXM108-FHIR3-1"
+              }
+            } ]
+          }
+        }, {
+          "fullUrl": "Patient/denom-EXM108-FHIR3",
+          "resource": {
+            "resourceType": "Patient",
+            "id": "denom-EXM108-FHIR3",
+            "meta": {
+              "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+            },
+            "extension": [ {
+              "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+              "extension": [ {
+                "url": "ombCategory",
+                "valueCoding": {
+                  "system": "urn:oid:2.16.840.1.113883.6.238",
+                  "code": "2106-3",
+                  "display": "White"
+                }
+              } ]
+            }, {
+              "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+              "extension": [ {
+                "url": "ombCategory",
+                "valueCoding": {
+                  "system": "urn:oid:2.16.840.1.113883.6.238",
+                  "code": "2186-5",
+                  "display": "Not Hispanic or Latino"
+                }
+              } ]
+            } ],
+            "identifier": [ {
+              "use": "usual",
+              "type": {
+                "coding": [ {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR",
+                  "display": "Medical Record Number"
+                } ]
+              },
+              "system": "http://hospital.smarthealthit.org",
+              "value": "999999996"
+            } ],
+            "name": [ {
+              "family": "Jones",
+              "given": [ "Frank" ]
+            } ],
+            "gender": "male",
+            "birthDate": "1951-05-01"
+          }
+        }, {
+          "fullUrl": "45e42bd6-3157-4777-9e1c-d7c13465d7fa",
+          "resource": {
+            "resourceType": "List",
+            "id": "45e42bd6-3157-4777-9e1c-d7c13465d7fa",
+            "title": "denominator",
+            "entry": [ {
+              "item": {
+                "reference": "denom-EXM108-FHIR3-4"
+              }
+            } ]
+          }
+        }, {
+          "fullUrl": "9681b25d-c100-4626-9510-4f0e48385a24",
+          "resource": {
+            "resourceType": "List",
+            "id": "9681b25d-c100-4626-9510-4f0e48385a24",
+            "title": "numerator",
+            "entry": [ {
+              "item": {
+                "reference": "denom-EXM108-FHIR3-4"
+              }
+            }, {
+              "item": {
+                "reference": "denom-EXM108-FHIR3-2"
+              }
+            }, {
+              "item": {
+                "reference": "denom-EXM108-FHIR3-5"
+              }
+            } ]
+          }
+        }, {
+          "fullUrl": "Condition/denom-EXM108-FHIR3-2",
+          "resource": {
+            "resourceType": "Condition",
+            "id": "denom-EXM108-FHIR3-2",
+            "meta": {
+              "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+            },
+            "verificationStatus": "confirmed",
+            "category": [ {
+              "coding": [ {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "encounter-diagnosis",
+                "display": "Encounter Diagnosis"
+              } ]
+            } ],
+            "code": {
+              "coding": [ {
+                "system": "http://snomed.info/sct",
+                "code": "10327003",
+                "display": "Cocaine-induced mood disorder (disorder)"
+              } ]
+            },
+            "subject": {
+              "reference": "Patient/denom-EXM108-FHIR3"
+            }
+          }
+        }, {
+          "fullUrl": "Procedure/denom-EXM108-FHIR3-4",
+          "resource": {
+            "resourceType": "Procedure",
+            "id": "denom-EXM108-FHIR3-4",
+            "meta": {
+              "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure" ]
+            },
+            "status": "completed",
+            "code": {
+              "coding": [ {
+                "system": "http://snomed.info/sct",
+                "code": "112943005",
+                "display": "Epidural injection of anesthetic substance"
+              } ]
+            },
+            "subject": {
+              "reference": "Patient/denom-EXM108-FHIR3"
+            },
+            "performedPeriod": {
+              "start": "2019-01-17T08:30:00-07:00",
+              "end": "2019-01-17T10:30:00-07:00"
+            }
+          }
+        }, {
+          "fullUrl": "Encounter/denom-EXM108-FHIR3-1",
+          "resource": {
+            "resourceType": "Encounter",
+            "id": "denom-EXM108-FHIR3-1",
+            "meta": {
+              "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+            },
+            "status": "finished",
+            "class": {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "IMP",
+              "display": "inpatient encounter"
+            },
+            "type": [ {
+              "coding": [ {
+                "system": "http://snomed.info/sct",
+                "code": "32485007",
+                "display": "Hospital admission (procedure)"
+              } ]
+            } ],
+            "subject": {
+              "reference": "Patient/denom-EXM108-FHIR3"
+            },
+            "period": {
+              "start": "2019-01-16T08:30:00-07:00",
+              "end": "2019-01-20T08:30:00-07:00"
+            },
+            "diagnosis": [ {
+              "condition": {
+                "reference": "Condition/denom-EXM108-FHIR3-2"
+              }
+            } ],
+            "hospitalization": {
+              "dischargeDisposition": {
+                "coding": [ {
+                  "system": "http://snomed.info/sct",
+                  "code": "306701001",
+                  "display": "Discharge to community hospital (procedure)"
+                } ]
+              }
+            }
+          }
+        }, {
+          "fullUrl": "MedicationAdministration/denom-EXM108-FHIR3-5",
+          "resource": {
+            "resourceType": "MedicationAdministration",
+            "id": "denom-EXM108-FHIR3-5",
+            "meta": { },
+            "status": "completed",
+            "medicationCodeableConcept": {
+              "coding": [ {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "854228",
+                "display": "0.3 ML Enoxaparin sodium 100 MG/ML Prefilled Syringe"
+              } ]
+            },
+            "subject": {
+              "reference": "Patient/denom-EXM108-FHIR3"
+            },
+            "effectivePeriod": {
+              "start": "2019-01-19T12:30:00-07:00",
+              "end": "2019-01-19T13:00:00-07:00"
+            }
+          }
+        } ]
+      } ],
+      "status": "complete",
+      "type": "individual",
+      "measure": {
+        "reference": "Measure/measure-EXM108-FHIR3-7.4.000"
+      },
+      "patient": {
+        "reference": "Patient/denom-EXM108-FHIR3"
+      },
+      "period": {
+        "start": "2019-01-01T00:00:00-07:00",
+        "end": "2019-12-31T00:00:00-07:00"
+      },
+      "group": [ {
+        "identifier": {
+          "value": "group-1"
+        },
+        "population": [ {
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "initial-population",
+              "display": "Initial Population"
+            } ]
+          },
+          "count": 1
+        }, {
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "numerator",
+              "display": "Numerator"
+            } ]
+          },
+          "count": 0
+        }, {
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "denominator",
+              "display": "Denominator"
+            } ]
+          },
+          "count": 1
+        }, {
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "denominator-exclusion",
+              "display": "Denominator Exclusion"
+            } ]
+          },
+          "count": 0
+        } ],
+        "measureScore": 0.0
+      } ],
+      "evaluatedResources": {
+        "reference": "#e1a37198-69ec-41c5-9fcf-4929c231bc44"
+      }
+    },
+    "request": {
+      "method": "PUT",
+      "url": "MeasureReport/measurereport-denom-EXM108-FHIR3"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-MedicationAdministration-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "MedicationAdministration",
+          "id": "denom-EXM108-FHIR3-5",
+          "status": "completed",
+          "medicationCodeableConcept": {
+            "coding": [ {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "854228",
+              "display": "0.3 ML Enoxaparin sodium 100 MG/ML Prefilled Syringe"
+            } ]
+          },
+          "subject": {
+            "reference": "Patient/denom-EXM108-FHIR3"
+          },
+          "effectivePeriod": {
+            "start": "2019-01-19T12:30:00-07:00",
+            "end": "2019-01-19T13:00:00-07:00"
+          }
+        },
+        "request": {
+          "method": "PUT",
+          "url": "MedicationAdministration/denom-EXM108-FHIR3-5"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-MedicationAdministration-bundle"
+    }
+  }, {
+    "resource": {
+      "resourceType": "Bundle",
+      "id": "tests-Patient-bundle",
+      "type": "transaction",
+      "entry": [ {
+        "resource": {
+          "resourceType": "Patient",
+          "id": "denom-EXM108-FHIR3",
+          "meta": {
+            "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+          },
+          "extension": [ {
+            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+            "extension": [ {
+              "url": "ombCategory",
+              "valueCoding": {
+                "system": "urn:oid:2.16.840.1.113883.6.238",
+                "code": "2106-3",
+                "display": "White"
+              }
+            } ]
+          }, {
+            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+            "extension": [ {
+              "url": "ombCategory",
+              "valueCoding": {
+                "system": "urn:oid:2.16.840.1.113883.6.238",
+                "code": "2186-5",
+                "display": "Not Hispanic or Latino"
+              }
+            } ]
+          } ],
+          "identifier": [ {
+            "use": "usual",
+            "type": {
+              "coding": [ {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                "code": "MR",
+                "display": "Medical Record Number"
+              } ]
+            },
+            "system": "http://hospital.smarthealthit.org",
+            "value": "999999996"
+          } ],
+          "name": [ {
+            "family": "Jones",
+            "given": [ "Frank" ]
+          } ],
+          "gender": "male",
+          "birthDate": "1951-05-01"
+        },
+        "request": {
+          "method": "PUT",
+          "url": "Patient/denom-EXM108-FHIR3"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "tests-Patient-bundle"
+    }
+  } ]
+}

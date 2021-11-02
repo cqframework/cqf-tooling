@@ -1,0 +1,35 @@
+{
+  "resourceType": "Bundle",
+  "id": "tests-MedicationRequest-bundle",
+  "type": "transaction",
+  "entry": [ {
+    "resource": {
+      "resourceType": "MedicationRequest",
+      "id": "numer-EXM117-FHIR3-5",
+      "status": "completed",
+      "intent": "order",
+      "category": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
+          "code": "discharge",
+          "display": "Discharge"
+        } ]
+      },
+      "medicationCodeableConcept": {
+        "coding": [ {
+          "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+          "code": "1037045",
+          "display": "dabigatran etexilate 150 MG Oral Capsule"
+        } ]
+      },
+      "subject": {
+        "reference": "Patient/numer-EXM117-FHIR3"
+      },
+      "authoredOn": "2019-12-19T08:00:00-07:00"
+    },
+    "request": {
+      "method": "PUT",
+      "url": "MedicationRequest/numer-EXM117-FHIR3-5"
+    }
+  } ]
+}

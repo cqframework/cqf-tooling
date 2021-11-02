@@ -1,0 +1,263 @@
+{
+  "resourceType": "MeasureReport",
+  "contained": [
+    {
+      "resourceType": "Bundle",
+      "id": "b1b72ea5-3e10-43fc-965c-07368ee754db",
+      "type": "collection",
+      "entry": [
+        {
+          "fullUrl": "1ee9e753-0358-49d4-a1f4-18bcf7d4e987",
+          "resource": {
+            "resourceType": "List",
+            "id": "1ee9e753-0358-49d4-a1f4-18bcf7d4e987",
+            "title": "numerator",
+            "entry": [
+              {
+                "item": {
+                  "reference": "numer-EXM349-FHIR3-4"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "fullUrl": "Encounter/numer-EXM349-FHIR3-2",
+          "resource": {
+            "resourceType": "Encounter",
+            "id": "numer-EXM349-FHIR3-2",
+            "meta": {
+              "versionId": "1",
+              "lastUpdated": "2019-12-18T11:39:28.423-07:00",
+              "profile": [
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+              ]
+            },
+            "status": "finished",
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://www.ama-assn.org/go/cpt",
+                    "code": "99386",
+                    "display": "Initial comprehensive preventive medicine evaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, new patient; 40-64 years"
+                  }
+                ]
+              }
+            ],
+            "subject": {
+              "reference": "Patient/numer-EXM349-FHIR3"
+            },
+            "period": {
+              "start": "2019-08-21T00:00:00-06:00",
+              "end": "2019-12-19T08:15:00-07:00"
+            }
+          }
+        },
+        {
+          "fullUrl": "Observation/numer-EXM349-FHIR3-4",
+          "resource": {
+            "resourceType": "Observation",
+            "id": "numer-EXM349-FHIR3-4",
+            "meta": {
+              "versionId": "1",
+              "lastUpdated": "2019-12-18T11:39:28.423-07:00"
+            },
+            "status": "final",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "10901-7",
+                  "display": "HIV 2 gp125 Ab [Presence] in Serum by Immunoblot"
+                }
+              ]
+            },
+            "subject": {
+              "reference": "Patient/numer-EXM349-FHIR3"
+            },
+            "effectiveDateTime": "2019-10-21T00:00:00-06:00",
+            "valueBoolean": true
+          }
+        },
+        {
+          "fullUrl": "Patient/numer-EXM349-FHIR3",
+          "resource": {
+            "resourceType": "Patient",
+            "id": "numer-EXM349-FHIR3",
+            "meta": {
+              "versionId": "1",
+              "lastUpdated": "2019-12-18T11:39:28.423-07:00",
+              "profile": [
+                "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\">Louise <b>JONES </b></div><table class=\"hapiPropertyTable\"><tbody><tr><td>Identifier</td><td>9999999911</td></tr><tr><td>Date of birth</td><td><span>21 November 1995</span></td></tr></tbody></table></div>"
+            },
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+                "extension": [
+                  {
+                    "url": "ombCategory",
+                    "valueCoding": {
+                      "system": "urn:oid:2.16.840.1.113883.6.238",
+                      "code": "2106-3",
+                      "display": "White"
+                    }
+                  }
+                ]
+              },
+              {
+                "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+                "extension": [
+                  {
+                    "url": "ombCategory",
+                    "valueCoding": {
+                      "system": "urn:oid:2.16.840.1.113883.6.238",
+                      "code": "2186-5",
+                      "display": "Not Hispanic or Latino"
+                    }
+                  }
+                ]
+              }
+            ],
+            "identifier": [
+              {
+                "use": "usual",
+                "type": {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                      "code": "MR",
+                      "display": "Medical Record Number"
+                    }
+                  ]
+                },
+                "system": "http://hospital.smarthealthit.org",
+                "value": "9999999911"
+              }
+            ],
+            "name": [
+              {
+                "family": "Jones",
+                "given": [
+                  "Louise"
+                ]
+              }
+            ],
+            "gender": "female",
+            "birthDate": "1995-11-21"
+          }
+        },
+        {
+          "fullUrl": "e6178a0d-40d9-4b85-9651-8b119acffc96",
+          "resource": {
+            "resourceType": "List",
+            "id": "e6178a0d-40d9-4b85-9651-8b119acffc96",
+            "title": "initial-population",
+            "entry": [
+              {
+                "item": {
+                  "reference": "numer-EXM349-FHIR3-2"
+                }
+              },
+              {
+                "item": {
+                  "reference": "numer-EXM349-FHIR3"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "status": "complete",
+  "type": "individual",
+  "measure": {
+    "reference": "Measure/measure-EXM349-FHIR3-2.9.000"
+  },
+  "patient": {
+    "reference": "Patient/numer-EXM349-FHIR3"
+  },
+  "period": {
+    "start": "2019-01-01T00:00:00-07:00",
+    "end": "2019-12-31T00:00:00-07:00"
+  },
+  "group": [
+    {
+      "identifier": {
+        "value": "group-1"
+      },
+      "population": [
+        {
+          "identifier": {
+            "value": "initial-population-identifier"
+          },
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "count": 1
+        },
+        {
+          "identifier": {
+            "value": "numerator-identifier"
+          },
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "numerator",
+                "display": "Numerator"
+              }
+            ]
+          },
+          "count": 1
+        },
+        {
+          "identifier": {
+            "value": "denominator-identifier"
+          },
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator",
+                "display": "Denominator"
+              }
+            ]
+          },
+          "count": 1
+        },
+        {
+          "identifier": {
+            "value": "denominator-exclusions-identifier"
+          },
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator-exclusion",
+                "display": "Denominator Exclusion"
+              }
+            ]
+          },
+          "count": 0
+        }
+      ],
+      "measureScore": 1.0
+    }
+  ],
+  "evaluatedResources": {
+    "reference": "#b1b72ea5-3e10-43fc-965c-07368ee754db"
+  }
+}
