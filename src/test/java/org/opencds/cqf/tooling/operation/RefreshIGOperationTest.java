@@ -13,6 +13,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.IniFile;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
@@ -55,7 +57,7 @@ public class RefreshIGOperationTest {
 
 	private final static String separator = System.getProperty("file.separator");
 
-	private final String INI_LOC = "testfiles" + separator + "refreshIG" + separator + "ig.ini";
+	private final String INI_LOC = "." + separator + "target" + separator + "refreshIG" + separator + "ig.ini";
 	
 	
     // Store the original standard out before changing it.
@@ -63,8 +65,13 @@ public class RefreshIGOperationTest {
     private ByteArrayOutputStream console = new ByteArrayOutputStream();
  
     @BeforeMethod
-    public void beforeTest() {
+    public void beforeTest() throws IOException {
         System.setOut(new PrintStream(this.console));
+        File dir  = new File("target/refreshIG");
+        if (dir.exists()) {
+            FileUtils.deleteDirectory(dir);
+        }
+		copyRefreshIGToTarget();
     }
  
 	/**
@@ -72,7 +79,7 @@ public class RefreshIGOperationTest {
 	 */
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testBundledFiles() {
+	public void testBundledFiles() throws IOException {
 		// build ini object
 		File iniFile = new File(INI_LOC);
 		String iniFileLocation = iniFile.getAbsolutePath();
@@ -447,6 +454,15 @@ public class RefreshIGOperationTest {
 			}
 		}
 
+	}
+
+	private void copyRefreshIGToTarget() throws IOException {
+		File outputDirectory = new File("./target/refreshIG");
+        outputDirectory.mkdirs();
+        URL url = RefreshLibraryOperationIT.class.getResource("testfiles/refreshIG");
+        String urlPath = url.getPath();
+        File refreshIGDirectory = new File(urlPath);
+        FileUtils.copyDirectory(refreshIGDirectory, outputDirectory);
 	}
 
 }
