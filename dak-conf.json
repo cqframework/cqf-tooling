@@ -1,0 +1,6 @@
+{
+	"dataElementIdentifierSystem": "http://fhir.org/guides/who/emc-cds/Identifier/data-elements",
+	"activityCodeSystem":"http://fhir.org/guides/who/emc-cds/CodeSystem/activity-codes",
+	"canonicalBase":"http://fhir.org/guides/who/emc-cds",
+	"headerRow":1
+}
