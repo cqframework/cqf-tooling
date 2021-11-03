@@ -1208,6 +1208,8 @@ public class Processor extends Operation {
             case "coding (select all that apply":
             case "coding - select all that apply":
             case "coding - select one":
+            case "select one":
+            
                 type = Questionnaire.QuestionnaireItemType.CHOICE;
                 break;
             case "int":
