@@ -10,7 +10,6 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Measure;
-import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.r4.R4MeasureProcessor;
 import org.opencds.cqf.tooling.measure.stu3.STU3MeasureProcessor;
@@ -21,10 +20,7 @@ import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class MeasureProcessor extends BaseProcessor {
     public static final String ResourcePrefix = "measure-";
@@ -148,6 +144,7 @@ public class MeasureProcessor extends BaseProcessor {
                 LogUtils.warn(measureName);
             }
         }
+        TestCaseProcessor.removeTestBundleFiles(igPath);
         String message = "\r\n" + bundledMeasures.size() + " Measures successfully bundled:";
         for (String bundledMeasure : bundledMeasures) {
             message += "\r\n     " + bundledMeasure + " BUNDLED";
@@ -219,7 +216,7 @@ public class MeasureProcessor extends BaseProcessor {
 
          if (includePatientScenarios) {
             TestCaseProcessor.bundleTestCaseFiles(igPath, "measure", libraryName, bundleDestFilesPath, fhirContext);
-        }        
+        }
     }
 
     protected boolean versioned;

@@ -3,7 +3,7 @@
   "id": "BreastCancerScreeningFHIR",
   "meta": {
     "versionId": "2",
-    "lastUpdated": "2021-01-15T11:56:41.000-05:00",
+    "lastUpdated": "2021-01-15T09:56:41.000-07:00",
     "source": "#6C52w7dhFJuyuCDD",
     "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/proportion-measure-cqfm", "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-measure-cqfm" ]
   },
@@ -14,7 +14,7 @@
   }, {
     "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
     "valueReference": {
-      "reference": "cqf-tooling"
+      "reference": "Device/cqf-tooling"
     }
   }, {
     "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter",
@@ -627,7 +627,7 @@
   "title": "Breast Cancer Screening FHIR",
   "status": "draft",
   "experimental": false,
-  "date": "2021-09-26T04:40:08-06:00",
+  "date": "2021-11-02T12:22:04-06:00",
   "publisher": "National Committee for Quality Assurance",
   "contact": [ {
     "telecom": [ {

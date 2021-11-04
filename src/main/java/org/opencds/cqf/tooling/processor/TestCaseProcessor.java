@@ -1,5 +1,6 @@
 package org.opencds.cqf.tooling.processor;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,14 +17,13 @@ import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class TestCaseProcessor
-{
-    public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext) {
-        refreshTestCases(path, encoding, fhirContext, null);
+public class TestCaseProcessor {
+    private final static String separator = System.getProperty("file.separator");
+    public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, String rootDir) {
+        refreshTestCases(path, encoding, fhirContext, null, rootDir);
     }
 
-    public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, @Nullable List<String> refreshedResourcesNames)
-    {
+    public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, @Nullable List<String> refreshedResourcesNames, String rootDir) {
         System.out.println("Refreshing tests");
         List<String> resourceTypeTestGroups = IOUtils.getDirectoryPaths(path, false);
 
@@ -37,11 +37,11 @@ public class TestCaseProcessor
                         List<IBaseResource> resources = IOUtils.readResources(paths, fhirContext);
                         ensureIds(testCasePath, resources);
                         Object bundle = BundleUtils.bundleArtifacts(getId(FilenameUtils.getName(testCasePath)), resources, fhirContext);
-                        IOUtils.writeBundle(bundle, testArtifactPath, encoding, fhirContext);
+                        String outputPath = getOutputPath(rootDir, testArtifactPath, group);
+                        IOUtils.writeBundle(bundle, outputPath, encoding, fhirContext);
                     } catch (Exception e) {
                         LogUtils.putException(testCasePath, e);
-                    }
-                    finally {
+                    } finally {
                         LogUtils.warn(testCasePath);
                     }
                 }
@@ -49,15 +49,31 @@ public class TestCaseProcessor
         }
     }
 
-    public static List<IBaseResource> getTestCaseResources(String path, FhirContext fhirContext)
-    {
+    private String getOutputPath(String rootDir, String testArtifactPath, String group) {
+        String outputPath = FilenameUtils.normalize(rootDir) +
+                separator + "bundles" + separator + "tests" + separator + FilenameUtils.getName(group) + separator +
+                FilenameUtils.getName(testArtifactPath);
+        return outputPath;
+    }
+
+    public static void removeTestBundleFiles(String rootDir){
+        String testBundleDir = FilenameUtils.normalize(rootDir) + FilenameUtils.normalize("/bundles/tests");
+        try {
+            IOUtils.deleteDirectory(testBundleDir);
+        } catch (IOException e) {
+            System.out.println("Unable to delete the directory" + testBundleDir);
+            e.printStackTrace();
+        }
+    }
+
+    public static List<IBaseResource> getTestCaseResources(String path, FhirContext fhirContext) {
         List<IBaseResource> resources = new ArrayList<IBaseResource>();
-        List<String> testCasePaths = IOUtils.getDirectoryPaths(path, false); 
+        List<String> testCasePaths = IOUtils.getDirectoryPaths(path, false);
         for (String testCasePath : testCasePaths) {
             List<String> paths = IOUtils.getFilePaths(testCasePath, true);
             resources.addAll(ensureIds(testCasePath, IOUtils.readResources(paths, fhirContext)));
-        }         
-        return resources; 
+        }
+        return resources;
     }
 
     private static List<IBaseResource> ensureIds(String baseId, List<IBaseResource> resources) {
@@ -75,7 +91,7 @@ public class TestCaseProcessor
     }
 
     public static Boolean bundleTestCases(String igPath, String contextResourceType, String libraryName, FhirContext fhirContext,
-            Map<String, IBaseResource> resources) {
+                                          Map<String, IBaseResource> resources) {
         Boolean shouldPersist = true;
         String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), contextResourceType), libraryName);
 
@@ -91,9 +107,9 @@ public class TestCaseProcessor
         try {
             List<IBaseResource> testCaseResources = TestCaseProcessor.getTestCaseResources(igTestCasePath, fhirContext);
             for (IBaseResource resource : testCaseResources) {
-            	if ((!(resource instanceof org.hl7.fhir.dstu3.model.Bundle)) && (!(resource instanceof org.hl7.fhir.r4.model.Bundle))) {
-            		resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
-            	}
+                if ((!(resource instanceof org.hl7.fhir.dstu3.model.Bundle)) && (!(resource instanceof org.hl7.fhir.r4.model.Bundle))) {
+                    resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
+                }
             }
         } catch (Exception e) {
             shouldPersist = false;
@@ -115,8 +131,8 @@ public class TestCaseProcessor
                 List<String> testContentPaths = IOUtils.getFilePaths(testCaseDirectory, false);
                 for (String testContentPath : testContentPaths) {
                     Optional<String> matchingMeasureReportPath = IOUtils.getMeasureReportPaths(fhirContext).stream()
-                        .filter(path -> path.equals(testContentPath))
-                        .findFirst();
+                            .filter(path -> path.equals(testContentPath))
+                            .findFirst();
                     if (matchingMeasureReportPath.isPresent()) {
                         IBaseResource measureReport = IOUtils.readResource(testContentPath, fhirContext);
                         if (!measureReport.getIdElement().getIdPart().startsWith("measurereport") || !measureReport.getIdElement().getIdPart().endsWith("-expectedresults")) {
@@ -128,13 +144,28 @@ public class TestCaseProcessor
                             }
                         }
                         IOUtils.writeResource(measureReport, destPath, IOUtils.Encoding.JSON, fhirContext);
-                    }
-                    else {
+                    } else {
                         String bundleTestContentDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testContentPath));
                         IOUtils.copyFile(testContentPath, bundleTestContentDestPath);
                     }
                 }
-            }            
+            }
+        }
+        String bundledTestsDir = FilenameUtils.normalize(igPath) + separator +
+                "bundles" + separator +
+                "tests" + separator +
+                contextResourceType + separator +
+                libraryName;
+        List<String> testContentPaths = IOUtils.getFilePaths(bundledTestsDir, false);
+        for (String testContentPath : testContentPaths) {
+            String bundleTestContentDestPath = new StringBuilder().append(FilenameUtils.normalize(igPath)).append(separator)
+                    .append("bundles").append(separator)
+                    .append(contextResourceType).append(separator)
+                    .append(libraryName).append(separator)
+                    .append(libraryName).append("-").append(IGBundleProcessor.bundleFilesPathElement)
+                    .append(FilenameUtils.getName(testContentPath)).toString();
+            IOUtils.copyFile(testContentPath, bundleTestContentDestPath);
+
         }
     }
 }

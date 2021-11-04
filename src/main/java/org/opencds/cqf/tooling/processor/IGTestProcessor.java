@@ -178,7 +178,7 @@ public class IGTestProcessor extends BaseProcessor {
         // refresh/generate test bundles
         System.out.println("Refreshing test cases...");
         TestCaseProcessor testCaseProcessor = new TestCaseProcessor();
-        testCaseProcessor.refreshTestCases(params.testCasesPath, IOUtils.Encoding.JSON, fhirContext);
+        testCaseProcessor.refreshTestCases(params.testCasesPath, IOUtils.Encoding.JSON, fhirContext, params.rootDir);
 
         List<TestCaseResultSummary> TestResults = new ArrayList<TestCaseResultSummary>();
 

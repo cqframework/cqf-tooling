@@ -28,7 +28,7 @@ public class BundleTestCasesOperation extends Operation {
  
         FhirContext fhirContext = ResourceUtils.getFhirContext(ResourceUtils.FhirVersion.parse(params.igVersion.toString()));
         TestCaseProcessor testCaseProcessor = new TestCaseProcessor();
-        testCaseProcessor.refreshTestCases(params.path, Encoding.JSON, fhirContext);
+        testCaseProcessor.refreshTestCases(params.path, Encoding.JSON, fhirContext, null);
     }
 }
 
