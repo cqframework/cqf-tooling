@@ -156,6 +156,30 @@ public class RefreshIGOperationTest {
 			// compare mappings of <id, resourceType> to ensure all bundled correctly:
 			assertTrue(mapsAreEqual(resourceTypeMap, bundledJsonResourceTypes));
 
+            String testMeasureLocation = iniFile.getParent() + separator + "input" + separator + "tests" + separator + "measure" + separator + measureName;
+            final Path testMeasurePaths = Paths.get(testMeasureLocation);
+            try (final DirectoryStream<Path> measureDirStream = Files.newDirectoryStream(testMeasurePaths)) {
+                measureDirStream.forEach(path -> {
+                    File file = new File(path.toString());
+
+                    if (file.getName().toLowerCase().endsWith(".json")) {
+                        Map<?, ?> map = this.jsonMap(file);
+                        if (map == null) {
+                            System.out.println("# Unable to parse " + file.getName() + " as json");
+                        } else {
+
+                            // ensure "resourceType" exists
+                            if (map.containsKey(RESOURCE_TYPE)) {
+                                String parentResourceType = (String) map.get(RESOURCE_TYPE);
+                                assertTrue(!parentResourceType.equalsIgnoreCase("bundle"));
+                            }
+                        }
+                    }
+                });
+            } catch(IOException ex){
+                ex.printStackTrace();
+            }
+
 		}
 	}
 
