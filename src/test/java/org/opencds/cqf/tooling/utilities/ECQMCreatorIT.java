@@ -73,6 +73,7 @@ public class ECQMCreatorIT {
         System.out.println("Testing " + matBundleName + " " + measureLibraryName);
 
         Boolean outputMeasure2File = true; 
+        String outputDirectory = "src/test/resources/org/opencds/cqf/tooling/utilities/ecqm-content-r4-2021/output/";
 
         ExtractMatBundleOperation o = new ExtractMatBundleOperation();
         o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles/" + matBundleName).getFile() });
@@ -91,7 +92,7 @@ public class ECQMCreatorIT {
             String measString = measureToString(measure);
 
             if (outputMeasure2File){
-                try (PrintWriter measWriter = new PrintWriter("./src/test/java/org/opencds/cqf/tooling/output/"+"post_processed_" + matBundleName);) {
+                try (PrintWriter measWriter = new PrintWriter(outputDirectory+"post_processed_" + matBundleName);) {
                     measWriter.println(measString);
                 }
             }
