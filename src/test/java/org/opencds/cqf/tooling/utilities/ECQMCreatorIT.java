@@ -108,6 +108,24 @@ public class ECQMCreatorIT {
         return drs;
     }
 
+    private void checkExpectedResourcesPresent(List<DataRequirement> drs, List<String> edrs){
+        boolean dataRequirementFound;
+        for (String edr : edrs){
+            dataRequirementFound = false;
+            for (DataRequirement dr : drs){
+                if (edr.equalsIgnoreCase(dr.getType().toString())){
+                    dataRequirementFound=true;
+                }
+            }
+            if (dataRequirementFound){
+                System.out.println("found expected data requirement " + edr );
+            }else{
+                System.out.println("unable to find expected data requirement " + edr );
+                assertTrue(false);
+            }
+        }
+    }
+
 
     @Test
     public void TestCMS125FHIR() {
@@ -119,6 +137,10 @@ public class ECQMCreatorIT {
     public void TestCMS104FHIR() {
         List<DataRequirement> drs = StartMatOutputTest("CMS104-v2-0-004-FHIR-4-0-1.json", "DischargedonAntithromboticTherapyFHIR");
         // TODO: Measure-specific validation of data requirements content
+
+        List<String> edrs = List.of("ServiceRequest","Procedure","Encounter");
+        checkExpectedResourcesPresent(drs, edrs);
+
     }
     
     @Test
