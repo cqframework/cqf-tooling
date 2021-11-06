@@ -41,6 +41,7 @@ public class CodeSystemLookupDictionary {
         LivingArrangement           2.16.840.1.113883.5.63          ->      http://terminology.hl7.org/CodeSystem-v3-LivingArrangement.html
         MaritalStatus               2.16.840.1.113883.5.2           ->      http://terminology.hl7.org/CodeSystem-v3-MaritalStatus.html
         NCI                         2.16.840.1.113883.3.26.1.1      ->      http://terminology.hl7.org/CodeSystem-v3-nciThesaurus.html
+        NDC                         2.16.840.1.113883.6.69          ->      https://terminology.hl7.org/CodeSystem-v3-ndc.html
         NDFRT                       2.16.840.1.113883.3.26.1.5      ->      http://terminology.hl7.org/CodeSystem-nciVersionOfNDF-RT.html
         NUCCPT                      2.16.840.1.113883.6.101         ->      http://terminology.hl7.org/CodeSystem-v3-nuccProviderCodes.html
         Provider Taxonomy           2.16.840.1.113883.6.101         ->      http://terminology.hl7.org/CodeSystem-v3-nuccProviderCodes.html
@@ -59,6 +60,7 @@ public class CodeSystemLookupDictionary {
         UBREV                       2.16.840.1.113883.6.21          ->      http://terminology.hl7.org/CodeSystem-nubc-UB92.html
         UBTOB                       2.16.840.1.113883.6.21          ->      http://terminology.hl7.org/CodeSystem-nubc-UB92.html
         POS                         2.16.840.1.113883.6.50          ->      http://terminology.hl7.org/CodeSystem-POS.html
+        PYXIS                       ???                             ->      ???
         CDCREC                      2.16.840.1.113883.6.238         ->      http://terminology.hl7.org/CodeSystem-PHRaceAndEthnicityCDC.html
         CDT                         2.16.840.1.113883.6.13          ->      http://terminology.hl7.org/CodeSystem-CD2.html
         mediaType                   2.16.840.1.113883.5.79          ->      http://terminology.hl7.org/CodeSystem-v3-mediatypes.html
@@ -101,6 +103,7 @@ public class CodeSystemLookupDictionary {
             case "2.16.840.1.113883.5.61": return "http://terminology.hl7.org/CodeSystem/v3-LanguageAbilityProficiency";
             case "2.16.840.1.113883.5.63": return "http://terminology.hl7.org/CodeSystem/v3-LivingArrangement";
             case "2.16.840.1.113883.5.2": return "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus";
+            case "2.16.840.1.113883.6.69": return "http://hl7.org/fhir/sid/ndc";
             case "2.16.840.1.113883.3.26.1.1": return "http://ncithesaurus-stage.nci.nih.gov";
             case "2.16.840.1.113883.3.26.1.5": return "http://terminology.hl7.org/CodeSystem/nciVersionOfNDF-RT";
             case "2.16.840.1.113883.6.101": return "http://nucc.org/provider-taxonomy";
@@ -164,6 +167,7 @@ public class CodeSystemLookupDictionary {
             case "LivingArrangement": return "http://terminology.hl7.org/CodeSystem/v3-LivingArrangement";
             case "MaritalStatus": return "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus";
             case "NCI": return "http://ncithesaurus-stage.nci.nih.gov";
+            case "NDC": return "http://hl7.org/fhir/sid/ndc";
             case "NDFRT": return "http://terminology.hl7.org/CodeSystem/nciVersionOfNDF-RT";
             case "NUCCPT": return "http://nucc.org/provider-taxonomy";
             case "Provider Taxonomy": return "http://nucc.org/provider-taxonomy";
@@ -183,6 +187,7 @@ public class CodeSystemLookupDictionary {
             case "UBREV": return "http://terminology.hl7.org/CodeSystem/nubc-UB92";
             case "UBTOB": return "http://terminology.hl7.org/CodeSystem/nubc-UB92";
             case "POS": return "http://terminology.hl7.org/CodeSystem/POS";
+            case "PYXIS": return "http://content.alphora.com/fhir/dqm/CodeSystem/Pyxis";
             case "CDCREC": return "http://terminology.hl7.org/CodeSystem/PHRaceAndEthnicityCDC";
             case "Modifier": return "http://www.ama-assn.org/go/cpt";
             case "CDT": return "http://terminology.hl7.org/CodeSystem/CD2";
