@@ -75,7 +75,6 @@ public class RefreshIGOperationTest extends RefreshTest {
             FileUtils.deleteDirectory(dir);
         }
 
-		deleteNullFolder();
 		deleteTempINI();
     }
  
@@ -286,7 +285,6 @@ public class RefreshIGOperationTest extends RefreshTest {
  
     @AfterMethod
     public void afterTest() {
-		deleteNullFolder();
 		deleteTempINI();
         System.setOut(this.originalStdOut);
         System.out.println(this.console.toString());
@@ -332,20 +330,6 @@ public class RefreshIGOperationTest extends RefreshTest {
 		}
 		
 		return true;
-	}
-
-	private boolean deleteNullFolder() {
-		try {
-			File dir  = new File("null");
-			if (dir.exists()) {
-				FileUtils.deleteDirectory(dir);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-		
-		return true;		
 	}
 
 	private Map<?, ?> jsonMap(File file) {
