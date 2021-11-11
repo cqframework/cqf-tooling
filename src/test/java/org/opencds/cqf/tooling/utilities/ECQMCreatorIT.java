@@ -138,7 +138,10 @@ public class ECQMCreatorIT {
         List<DataRequirement> drs = StartMatOutputTest("CMS104-v2-0-004-FHIR-4-0-1.json", "DischargedonAntithromboticTherapyFHIR");
         // TODO: Measure-specific validation of data requirements content
 
-        List<String> edrs = List.of("ServiceRequest","Procedure","Encounter");
+        List<String> edrs = new ArrayList<String>();
+        edrs.add("ServiceRequest");
+        edrs.add("Procedure");
+        edrs.add("Encounter");
         checkExpectedResourcesPresent(drs, edrs);
 
     }
@@ -281,15 +284,6 @@ public class ECQMCreatorIT {
         // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
 
         List<DataRequirement> drs = StartMatOutputTest("CMS149FHIR-v0-0-002-FHIR-4-0-1.json", "DementiaCognitiveAssessmentFHIR");
-        // TODO: Measure-specific validation of data requirements content
-    }
-    
-    @Test
-    public void TestCMS147FHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-
-        List<DataRequirement> drs = StartMatOutputTest("CMS147FHIR-v0-0-002-FHIR-4-0-1.json", "PreventiveCareandScreeningInfluenzaImmunizationFHIR");
         // TODO: Measure-specific validation of data requirements content
     }
     
