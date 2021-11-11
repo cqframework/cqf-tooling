@@ -25,7 +25,7 @@ public class RefreshStu3MeasureOperationTest extends RefreshTest {
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
         }
-        File bundleDir = new File(targetDirectoryPath + "" + separator + "output" + separator + "refreshedMeasureBundles" + separator + "stu3");
+        File bundleDir = new File(targetDirectoryPath + separator + "output" + separator + "refreshedMeasureBundles" + separator + "stu3");
         if (bundleDir.exists()) {
             FileUtils.deleteDirectory(dir);
         }
@@ -35,12 +35,12 @@ public class RefreshStu3MeasureOperationTest extends RefreshTest {
     private void testRefreshOverwriteLibraries() throws Exception {
         copyResourcesToTargetDir(targetDirectoryPath, "stu3");
         
-        String measureDirectoryPath = "" + separator + "input" + separator + "resources" + separator + "measure";
-        String libraryDirectoryPath = "" + separator + "input" + separator + "resources" + separator + "library";
+        String measureDirectoryPath = separator + "input" + separator + "resources" + separator + "measure";
+        String libraryDirectoryPath = separator + "input" + separator + "resources" + separator + "library";
 
 		String args[] = {
             "-RefreshStu3Measure",
-            "-op=" + targetDirectoryPath + "" + separator + "output" + separator + "refreshedMeasureBundles" + separator + "stu3",
+            "-op=" + targetDirectoryPath + separator + "output" + separator + "refreshedMeasureBundles" + separator + "stu3",
             "-ptm=" + targetDirectoryPath + measureDirectoryPath,
             "-ptl=" + targetDirectoryPath + libraryDirectoryPath,
         };
@@ -48,8 +48,8 @@ public class RefreshStu3MeasureOperationTest extends RefreshTest {
         RefreshStu3MeasureOperation refreshMeasureOperation = new RefreshStu3MeasureOperation(targetDirectoryPath);
         refreshMeasureOperation.execute(args);
 
-        String measureValidationPath = "" + separator + "input" + separator + "resources" + separator + "measure" + separator + "measure-EXM105-FHIR3-8.0.000.json";
-        String libraryValidationPath = "" + separator + "input" + separator + "resources" + separator + "library" + separator + "library-EXM105-FHIR3-8.0.000.json";
+        String measureValidationPath = separator + "input" + separator + "resources" + separator + "measure" + separator + "measure-EXM105-FHIR3-8.0.000.json";
+        String libraryValidationPath = separator + "input" + separator + "resources" + separator + "library" + separator + "library-EXM105-FHIR3-8.0.000.json";
 
         validateCqfmSofwareSystemExtension(targetDirectoryPath + measureValidationPath);
         validateCqfmSofwareSystemExtension(targetDirectoryPath + libraryValidationPath);
@@ -65,20 +65,20 @@ public class RefreshStu3MeasureOperationTest extends RefreshTest {
         String resourceDirPath = RefreshTest.class.getResource("stu3").getPath();
         assertTrue(targetDirectory.listFiles().length == 0);
         
-        String measureDirectoryPath = "" + separator + "input" + separator + "resources" + separator + "measure";
-        String libraryDirectoryPath = "" + separator + "input" + separator + "resources" + separator + "library";
+        String measureDirectoryPath = separator + "input" + separator + "resources" + separator + "measure";
+        String libraryDirectoryPath = separator + "input" + separator + "resources" + separator + "library";
 
 		String args[] = {
             "-RefreshStu3Measure",
-            "-op=" + targetDirectory.getAbsolutePath() + "" + separator + "output" + separator + "refreshedMeasureBundles" + separator + "stu3",
+            "-op=" + targetDirectory.getAbsolutePath() + separator + "output" + separator + "refreshedMeasureBundles" + separator + "stu3",
             "-ptm=" + resourceDirPath + measureDirectoryPath,
             "-ptl=" + resourceDirPath + libraryDirectoryPath,
         };
 
-        RefreshStu3MeasureOperation refreshMeasureOperation = new RefreshStu3MeasureOperation(targetDirectory.getAbsolutePath() + "" + separator + "output" + separator + "refreshedMeasureBundles" + separator + "stu3");
+        RefreshStu3MeasureOperation refreshMeasureOperation = new RefreshStu3MeasureOperation(targetDirectory.getAbsolutePath() + separator + "output" + separator + "refreshedMeasureBundles" + separator + "stu3");
         refreshMeasureOperation.execute(args);
 
-        File validationFile = new File(targetDirectory.getAbsolutePath() + "" + separator + "output" + separator + "refreshedMeasureBundles" + separator + "stu3");
+        File validationFile = new File(targetDirectory.getAbsolutePath() + separator + "output" + separator + "refreshedMeasureBundles" + separator + "stu3");
         
         assertTrue(validationFile.exists());
         assertTrue(validationFile.listFiles().length > 0);
