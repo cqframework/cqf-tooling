@@ -66,6 +66,9 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
             Device device = null;
             String deviceOutputPath = getRootDir() + devicePath;
             IOUtils.Encoding deviceOutputEncoding = IOUtils.Encoding.JSON;
+            if (IOUtils.resourceDirectories == null || IOUtils.resourceDirectories.isEmpty()) {
+                IOUtils.resourceDirectories.add(deviceOutputPath);
+            }
             for (String path : IOUtils.getDevicePaths(fhirContext)) {
                 DomainResource resourceInPath;
                 try {

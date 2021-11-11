@@ -25,7 +25,7 @@ public class RefreshR4MeasureOperationTest extends RefreshTest {
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
         }
-        File bundleDir = new File(targetDirectoryPath + "" + separator + "output" + separator + "refreshedMeasureBundles" + separator + "r4");
+        File bundleDir = new File(targetDirectoryPath + separator + "output" + separator + "refreshedMeasureBundles" + separator + "r4");
         if (bundleDir.exists()) {
             FileUtils.deleteDirectory(dir);
         }
@@ -35,12 +35,12 @@ public class RefreshR4MeasureOperationTest extends RefreshTest {
     private void testRefreshOverwriteMeasures() throws Exception {
         copyResourcesToTargetDir(targetDirectoryPath, "r4");
         
-        String measureDirectoryPath = "" + separator + "input" + separator + "resources" + separator + "measure";
-        String libraryDirectoryPath = "" + separator + "input" + separator + "resources" + separator + "library";
+        String measureDirectoryPath = separator + "input" + separator + "resources" + separator + "measure";
+        String libraryDirectoryPath = separator + "input" + separator + "resources" + separator + "library";
 
 		String args[] = {
             "-RefreshR4Measure",
-            "-op=" + targetDirectoryPath + "" + separator + "output" + separator + "refreshedMeasureBundles" + separator + "r4",
+            "-op=" + targetDirectoryPath + separator + "output" + separator + "refreshedMeasureBundles" + separator + "r4",
             "-ptm=" + targetDirectoryPath + measureDirectoryPath,
             "-ptl=" + targetDirectoryPath + libraryDirectoryPath,
         };
@@ -49,7 +49,7 @@ public class RefreshR4MeasureOperationTest extends RefreshTest {
         refreshMeasureOperation.execute(args);
 
         //Currently tooling writes output file with a "-" rather than an "_" for "measure-EXM124_FHIR4-8.2.000.json" vs "measure-EXM124-FHIR4-8.2.000.json"
-        String measureValidationPath = "" + separator + "output" + separator + "refreshedMeasureBundles" + separator + "r4" + separator + "measure-EXM124-FHIR4-8.2.000.json";
+        String measureValidationPath = separator + "output" + separator + "refreshedMeasureBundles" + separator + "r4" + separator + "measure-EXM124-FHIR4-8.2.000.json";
 
         validateCqfmSofwareSystemExtension(targetDirectoryPath + measureValidationPath);
     }
@@ -64,12 +64,12 @@ public class RefreshR4MeasureOperationTest extends RefreshTest {
         String resourceDirPath = RefreshTest.class.getResource("r4").getPath();
         assertTrue(targetDirectory.listFiles().length == 0);
         
-        String measureDirectoryPath = "" + separator + "input" + separator + "resources" + separator + "measure";
-        String libraryDirectoryPath = "" + separator + "input" + separator + "resources" + separator + "library";
+        String measureDirectoryPath = separator + "input" + separator + "resources" + separator + "measure";
+        String libraryDirectoryPath = separator + "input" + separator + "resources" + separator + "library";
 
 		String args[] = {
             "-RefreshR4Measure",
-            "-op=" + targetDirectory.getAbsolutePath() + "" + separator + "output" + separator + "refreshedMeasureBundles" + separator + "r4",
+            "-op=" + targetDirectory.getAbsolutePath() + separator + "output" + separator + "refreshedMeasureBundles" + separator + "r4",
             "-ptm=" + resourceDirPath + measureDirectoryPath,
             "-ptl=" + resourceDirPath + libraryDirectoryPath,
         };
@@ -77,7 +77,7 @@ public class RefreshR4MeasureOperationTest extends RefreshTest {
         RefreshR4MeasureOperation refreshMeasureOperation = new RefreshR4MeasureOperation(targetDirectory.getAbsolutePath() + "" + separator + "output" + separator + "refreshedMeasureBundles" + separator + "r4");
         refreshMeasureOperation.execute(args);
 
-        File validationFile = new File(targetDirectory.getAbsolutePath() + "" + separator + "output" + separator + "refreshedMeasureBundles" + separator + "r4");
+        File validationFile = new File(targetDirectory.getAbsolutePath() + separator + "output" + separator + "refreshedMeasureBundles" + separator + "r4");
 
         assertTrue(validationFile.exists());
         assertTrue(validationFile.listFiles().length > 0);
