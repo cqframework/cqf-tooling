@@ -1,6 +1,7 @@
 package org.opencds.cqf.tooling.measure.stu3;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.XmlParser;
 
@@ -24,13 +25,13 @@ public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperatio
 
     //NOTE: Only consumed from OperationFactory - that call should come through a proper Operation that calls a processor.
     public RefreshStu3MeasureOperation() {
-        super("src/main/resources/org/opencds/cqf/tooling/measure/output/stu3", "-RefreshStu3Measure", FhirContext.forDstu3());
+        super("src/main/resources/org/opencds/cqf/tooling/measure/output/stu3", "-RefreshStu3Measure", FhirContext.forCached(FhirVersionEnum.DSTU3));
         jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
         xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
     }
 
     public RefreshStu3MeasureOperation(String pathToMeasures) {
-        super(FilenameUtils.getPath(pathToMeasures), "-RefreshStu3Measure", FhirContext.forDstu3(), null, pathToMeasures);
+        super(FilenameUtils.getPath(pathToMeasures), "-RefreshStu3Measure", FhirContext.forCached(FhirVersionEnum.DSTU3), null, pathToMeasures);
         jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
         xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
     }

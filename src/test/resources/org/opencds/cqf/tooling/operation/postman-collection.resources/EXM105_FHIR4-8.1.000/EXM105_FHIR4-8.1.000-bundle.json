@@ -4209,7 +4209,7 @@
           }
         ],
         "library": [
-          "Library/library-EXM105-FHIR4-8.1.000"
+          "http://hl7.org/fhir/us/cqfmeasures/Library/library-EXM105-FHIR4-8.1.000"
         ],
         "disclaimer": "These performance measures are not clinical guidelines and do not establish a standard of medical care, and have not been tested for all potential applications. The measures and specifications are provided without warranty.",
         "scoring": {

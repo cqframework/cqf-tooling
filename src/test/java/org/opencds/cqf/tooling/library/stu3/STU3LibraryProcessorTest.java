@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.library.LibraryProcessorTest;
+import org.opencds.cqf.tooling.RefreshTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -30,7 +31,7 @@ public class STU3LibraryProcessorTest extends LibraryProcessorTest {
     @Test
     private void testRefreshOverwriteLibraries() throws Exception {
         String targetDirectory = "./target/refreshLibraries/" + this.resourceDirectory;
-        copyResourcesToTargetRefreshLibrariesDir(targetDirectory, this.resourceDirectory);
+        copyResourcesToTargetDir(targetDirectory, this.resourceDirectory);
         
         String libraryPath = "/input/resources/library/library-EXM105-FHIR3-8.0.000.json";
         runRefresh(
@@ -50,7 +51,7 @@ public class STU3LibraryProcessorTest extends LibraryProcessorTest {
         if (!targetDirectory.exists()) {
             targetDirectory.mkdirs();
         }
-        String resourceDirPath = LibraryProcessorTest.class.getResource(resourceDirectory).getPath();
+        String resourceDirPath = RefreshTest.class.getResource(resourceDirectory).getPath();
         assertTrue(targetDirectory.listFiles().length == 0);
 
         String libraryPath = "/input/resources/library/library-EXM105-FHIR3-8.0.000.json";

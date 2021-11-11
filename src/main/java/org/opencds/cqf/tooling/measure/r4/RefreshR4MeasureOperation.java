@@ -1,6 +1,7 @@
 package org.opencds.cqf.tooling.measure.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.XmlParser;
 
@@ -23,13 +24,13 @@ public class RefreshR4MeasureOperation extends RefreshGeneratedContentOperation 
     private CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
 
     public RefreshR4MeasureOperation() {
-        super("src/main/resources/org/opencds/cqf/tooling/measure/output/r4", "-RefreshR4Measure", FhirContext.forR4());
+        super("src/main/resources/org/opencds/cqf/tooling/measure/output/r4", "-RefreshR4Measure", FhirContext.forCached(FhirVersionEnum.R4));
         jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
         xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
     }
 
     public RefreshR4MeasureOperation(String pathToMeasures) {
-        super(FilenameUtils.getPath(pathToMeasures), "-RefreshR4Measure", FhirContext.forR4(), null, pathToMeasures);
+        super(FilenameUtils.getPath(pathToMeasures), "-RefreshR4Measure", FhirContext.forCached(FhirVersionEnum.R4), null, pathToMeasures);
         jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
         xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
         xmlParser = (XmlParser)this.getFhirContext().newXmlParser();

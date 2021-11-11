@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.base.Strings;
+
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
@@ -101,6 +103,8 @@ public class IGProcessor extends BaseProcessor {
         Encoding encoding = params.outputEncoding;
         // Boolean includeELM = params.includeELM;
         // Boolean includeDependencies = params.includeDependencies;
+        String libraryOutputPath = params.libraryOutputPath;
+        String measureOutputPath = params.measureOutputPath;
         Boolean includeTerminology = params.includeTerminology;
         Boolean includePatientScenarios = params.includePatientScenarios;
         Boolean versioned = params.versioned;
@@ -121,11 +125,19 @@ public class IGProcessor extends BaseProcessor {
         IGProcessor.ensure(rootDir, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
 
         List<String> refreshedLibraryNames;
-        refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
+        if (Strings.isNullOrEmpty(libraryOutputPath)) {
+            refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
+        } else {
+            refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, libraryOutputPath, versioned, fhirContext);
+        }
         refreshedResourcesNames.addAll(refreshedLibraryNames);
 
         List<String> refreshedMeasureNames;
-        refreshedMeasureNames = measureProcessor.refreshIgMeasureContent(this, encoding, versioned, fhirContext, measureToRefreshPath);
+        if (Strings.isNullOrEmpty(measureOutputPath)) {
+            refreshedMeasureNames = measureProcessor.refreshIgMeasureContent(this, encoding, versioned, fhirContext, measureToRefreshPath);
+        } else {
+            refreshedMeasureNames = measureProcessor.refreshIgMeasureContent(this, encoding, measureOutputPath, versioned, fhirContext, measureToRefreshPath);
+        }
         refreshedResourcesNames.addAll(refreshedMeasureNames);
 
         if (refreshedResourcesNames.isEmpty()) {
