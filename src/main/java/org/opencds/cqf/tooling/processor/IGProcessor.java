@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling.processor;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,6 +34,14 @@ public class IGProcessor extends BaseProcessor {
     }
     //mega ig method
     public void publishIG(RefreshIGParameters params) {
+        requireNonNull(params.includeDependencies, "includeDependencies can not be null");
+        requireNonNull(params.includeELM, "includeELM can not be null");
+        requireNonNull(params.includePatientScenarios, "includePatientScenarios can not be null");
+        requireNonNull(params.includeTerminology, "includeTerminology can not be null");
+        requireNonNull(params.versioned, "versioned can not be null");
+        requireNonNull(params.resourceDirs, "resourceDirs can not be null");
+        requireNonNull(params.outputEncoding, "outputEncoding can not be null");
+        requireNonNull(params.ini, "ini can not be null");
         if (params.ini != null) {
             initializeFromIni(params.ini);
         }
