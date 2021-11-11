@@ -1,10 +1,5 @@
 package org.opencds.cqf.tooling.library;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-
-import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
@@ -45,7 +40,7 @@ public abstract class LibraryProcessorTest extends RefreshTest {
         params.libraryPath = libraryResourcePath;
         params.libraryOutputDirectory = libraryOutputDirectoryPath;
         params.cqlContentPath = cqlResourcePath;
-        params.ini = targetDirectory + "/ig.ini";
+        params.ini = targetDirectory + separator + "ig.ini";
         params.versioned = versioned;
         getLibraryProcessor().refreshLibraryContent(params);
     }

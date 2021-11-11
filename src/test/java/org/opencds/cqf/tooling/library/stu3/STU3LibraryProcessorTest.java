@@ -22,7 +22,7 @@ public class STU3LibraryProcessorTest extends LibraryProcessorTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        File dir  = new File("target/refreshLibraries/stu3");
+        File dir  = new File("target" + separator + "refreshLibraries" + separator + "stu3");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
         }
@@ -30,14 +30,14 @@ public class STU3LibraryProcessorTest extends LibraryProcessorTest {
     
     @Test
     private void testRefreshOverwriteLibraries() throws Exception {
-        String targetDirectory = "target/refreshLibraries/" + this.resourceDirectory;
+        String targetDirectory = "target" + separator + "refreshLibraries" + separator + this.resourceDirectory;
         copyResourcesToTargetDir(targetDirectory, this.resourceDirectory);
         
-        String libraryPath = "/input/resources/library/library-EXM105-FHIR3-8.0.000.json";
+        String libraryPath = separator + "input" + separator + "resources" + separator + "library" + separator + "library-EXM105-FHIR3-8.0.000.json";
         runRefresh(
             targetDirectory,
             targetDirectory + libraryPath,
-            targetDirectory + "/input/pagecontent/cql/EXM105_FHIR3-8.0.000.cql",
+            targetDirectory + separator + "input" + separator + "pagecontent" + separator + "cql" + separator + "EXM105_FHIR3-8.0.000.cql",
             false
         );
 
@@ -47,19 +47,19 @@ public class STU3LibraryProcessorTest extends LibraryProcessorTest {
     @Test
     private void testRefreshOutputDirectory() throws Exception {
         // create a output directory under target directory
-        File targetDirectory = new File("target/refreshLibraries/" + resourceDirectory);
+        File targetDirectory = new File("target" + separator + "refreshLibraries" + separator + resourceDirectory);
         if (!targetDirectory.exists()) {
             targetDirectory.mkdirs();
         }
         String resourceDirPath = RefreshTest.class.getResource(resourceDirectory).getPath();
         assertTrue(targetDirectory.listFiles().length == 0);
 
-        String libraryPath = "/input/resources/library/library-EXM105-FHIR3-8.0.000.json";
+        String libraryPath = separator + "input" + separator + "resources" + separator + "library" + separator + "library-EXM105-FHIR3-8.0.000.json";
         runRefresh(
             resourceDirPath,
             resourceDirPath + libraryPath,
             targetDirectory.getAbsolutePath(),
-            resourceDirPath + "/input/pagecontent/cql/EXM105_FHIR3-8.0.000.cql",
+            resourceDirPath + separator + "input" + separator + "pagecontent" + separator + "cql" + separator + "EXM105_FHIR3-8.0.000.cql",
             false
         );
 
