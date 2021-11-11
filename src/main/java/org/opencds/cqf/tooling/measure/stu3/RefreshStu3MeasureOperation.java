@@ -17,21 +17,29 @@ import java.io.FileNotFoundException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import com.google.common.base.Strings;
+
 public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperation {
 
     private JsonParser jsonParser;
     private XmlParser xmlParser;
-    private CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
+    private CqfmSoftwareSystemHelper cqfmHelper;
 
     //NOTE: Only consumed from OperationFactory - that call should come through a proper Operation that calls a processor.
     public RefreshStu3MeasureOperation() {
         super("src/main/resources/org/opencds/cqf/tooling/measure/output/stu3", "-RefreshStu3Measure", FhirContext.forCached(FhirVersionEnum.DSTU3));
+        cqfmHelper = new CqfmSoftwareSystemHelper("src/main/resources/org/opencds/cqf/tooling/measure/output/r4");
         jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
         xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
     }
 
     public RefreshStu3MeasureOperation(String pathToMeasures) {
         super(FilenameUtils.getPath(pathToMeasures), "-RefreshStu3Measure", FhirContext.forCached(FhirVersionEnum.DSTU3), null, pathToMeasures);
+        if (!Strings.isNullOrEmpty(getOutputPath())) {
+            cqfmHelper = new CqfmSoftwareSystemHelper(getOutputPath());
+        } else {
+            cqfmHelper = new CqfmSoftwareSystemHelper();
+        }
         jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
         xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
     }
