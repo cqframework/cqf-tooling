@@ -26,14 +26,14 @@ public class R4MeasureProcessorTest extends MeasureProcessorTest {
 
     @Test
     public void testRefreshMeasures() throws Exception {
-        // String targetDirectory = "." + separator + "target" + separator + "refreshMeasures" + separator + "" + this.resourceDirectory;
+        // String targetDirectory = "target" + separator + "refreshMeasures" + separator + "" + this.resourceDirectory;
         // copyResourcesToTargetDir(targetDirectory, this.resourceDirectory);
         
-        // String measurePath = "" + separator + "input" + separator + "resources" + separator + "measure" + separator + "measure-EXM124_FHIR4-8.2.000.json";
+        // String measurePath = separator + "input" + separator + "resources" + separator + "measure" + separator + "measure-EXM124_FHIR4-8.2.000.json";
         // runRefresh(
         //     targetDirectory,
         //     targetDirectory + measurePath,
-        //     targetDirectory + "" + separator + "input" + separator + "pagecontent" + separator + "cql" + separator + "EXM124_FHIR4-8.2.000.cql",
+        //     targetDirectory + separator + "input" + separator + "pagecontent" + separator + "cql" + separator + "EXM124_FHIR4-8.2.000.cql",
         //     false
         // );
 
@@ -43,14 +43,14 @@ public class R4MeasureProcessorTest extends MeasureProcessorTest {
 
     @Test
     public void testRefreshMeasureContent() throws Exception {
-        // String targetDirectory = "." + separator + "target" + separator + "refreshMeasures" + separator + "" + this.resourceDirectory;
+        // String targetDirectory = "target" + separator + "refreshMeasures" + separator + "" + this.resourceDirectory;
         // copyResourcesToTargetDir(targetDirectory, this.resourceDirectory);
         
-        // String measurePath = "" + separator + "input" + separator + "resources" + separator + "measure" + separator + "measure-EXM124_FHIR4-8.2.000.json";
+        // String measurePath = separator + "input" + separator + "resources" + separator + "measure" + separator + "measure-EXM124_FHIR4-8.2.000.json";
         // runRefresh(
         //     targetDirectory,
         //     targetDirectory + measurePath,
-        //     targetDirectory + "" + separator + "input" + separator + "pagecontent" + separator + "cql" + separator + "EXM124_FHIR4-8.2.000.cql",
+        //     targetDirectory + separator + "input" + separator + "pagecontent" + separator + "cql" + separator + "EXM124_FHIR4-8.2.000.cql",
         //     false
         // );
 

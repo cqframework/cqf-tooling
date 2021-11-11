@@ -44,7 +44,7 @@ public abstract class MeasureProcessorTest extends RefreshTest {
         params.measurePath = measurePath;
         params.measureOutputDirectory = measureOutputDirectory;
         params.cqlContentPath = cqlResourcePath;
-        params.ini = targetDirectory + "" + separator + "ig.ini";
+        params.ini = targetDirectory + separator + "ig.ini";
         params.versioned = versioned;
         getMeasureProcessor().refreshMeasureContent(params);
     }

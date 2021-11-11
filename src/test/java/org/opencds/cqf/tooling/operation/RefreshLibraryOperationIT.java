@@ -28,16 +28,16 @@ public class RefreshLibraryOperationIT extends RefreshTest {
     
     @Test
     private void testRefreshOverwriteLibraries() throws Exception {
-        String targetDirectory = "." + separator + "target" + separator + "refreshLibraries" + separator + "r4";
+        String targetDirectory = "target" + separator + "refreshLibraries" + separator + "r4";
         copyResourcesToTargetDir(targetDirectory, "r4");
         
-        String libraryPath = "" + separator + "input" + separator + "resources" + separator + "library" + separator + "library-EXM124_FHIR4-8.2.000.json";
+        String libraryPath = separator + "input" + separator + "resources" + separator + "library" + separator + "library-EXM124_FHIR4-8.2.000.json";
 
 		String args[] = {
             "-RefreshLibrary",
-            "-ini=" + targetDirectory + "" + separator + "ig.ini",
+            "-ini=" + targetDirectory + separator + "ig.ini",
             "-lp=" + targetDirectory + libraryPath,
-            "-cql=" + targetDirectory + "" + separator + "input" + separator + "pagecontent" + separator + "cql" + separator + "EXM124_FHIR4-8.2.000.cql",
+            "-cql=" + targetDirectory + separator + "input" + separator + "pagecontent" + separator + "cql" + separator + "EXM124_FHIR4-8.2.000.cql",
             "-e=json",
             "-fv=4.0.1" 
         };
@@ -51,21 +51,21 @@ public class RefreshLibraryOperationIT extends RefreshTest {
     @Test
     private void testRefreshOutputDirectory() throws Exception {
         // create a output directory under target directory
-        File targetDirectory = new File("." + separator + "target" + separator + "refreshLibraries" + separator + "" + "r4");
+        File targetDirectory = new File("target" + separator + "refreshLibraries" + separator + "r4");
         if (!targetDirectory.exists()) {
             targetDirectory.mkdirs();
         }
         String resourceDirPath = RefreshTest.class.getResource("r4").getPath();
         assertTrue(targetDirectory.listFiles().length == 0);
 
-        String libraryPath = "" + separator + "input" + separator + "resources" + separator + "library" + separator + "library-EXM124_FHIR4-8.2.000.json";
+        String libraryPath = separator + "input" + separator + "resources" + separator + "library" + separator + "library-EXM124_FHIR4-8.2.000.json";
 
 		String args[] = {
             "-RefreshLibrary",
-            "-ini=" + resourceDirPath + "" + separator + "ig.ini",
+            "-ini=" + resourceDirPath + separator + "ig.ini",
             "-lp=" + resourceDirPath + libraryPath,
             "-lop=" + targetDirectory.getAbsolutePath(),
-            "-cql=" + resourceDirPath + "" + separator + "input" + separator + "pagecontent" + separator + "cql" + separator + "EXM124_FHIR4-8.2.000.cql",
+            "-cql=" + resourceDirPath + separator + "input" + separator + "pagecontent" + separator + "cql" + separator + "EXM124_FHIR4-8.2.000.cql",
             "-e=json",
             "-fv=4.0.1" 
         };

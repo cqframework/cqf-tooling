@@ -60,7 +60,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 	private final String LIB_TYPE = "Library";
 	private final String MEASURE_TYPE = "Measure";
 
-	private final String INI_LOC = "." + separator + "target" + separator + "refreshIG" + separator + "ig.ini";
+	private final String INI_LOC = "target" + separator + "refreshIG" + separator + "ig.ini";
 	
 	
     // Store the original standard out before changing it.
@@ -70,7 +70,7 @@ public class RefreshIGOperationTest extends RefreshTest {
     @BeforeMethod
     public void beforeTest() throws IOException {
         System.setOut(new PrintStream(this.console));
-        File dir  = new File("target/refreshIG");
+        File dir  = new File("target" + separator + "refreshIG");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
         }
@@ -84,7 +84,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testBundledFiles() throws IOException {
-		copyResourcesToTargetDir("target/refreshIG", "testfiles/refreshIG");
+		copyResourcesToTargetDir("target" + separator + "refreshIG", "testfiles/refreshIG");
 		// build ini object
 		File iniFile = new File(INI_LOC);
 		String iniFileLocation = iniFile.getAbsolutePath();

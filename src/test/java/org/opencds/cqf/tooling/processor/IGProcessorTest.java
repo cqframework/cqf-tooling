@@ -45,7 +45,7 @@ public class IGProcessorTest extends RefreshTest {
 	private final String LIB_TYPE = "Library";
 	private final String MEASURE_TYPE = "Measure";
 
-	private final String INI_LOC = "." + separator + "target" + separator + "refreshIG" + separator + "ig.ini";
+	private final String INI_LOC = "target" + separator + "refreshIG" + separator + "ig.ini";
 
     public IGProcessorTest() {
         super(FhirContext.forCached(FhirVersionEnum.R4));
@@ -60,7 +60,7 @@ public class IGProcessorTest extends RefreshTest {
     @BeforeMethod
     public void beforeTest() throws IOException {
         System.setOut(new PrintStream(this.console));
-        File dir  = new File("target/refreshIG");
+        File dir  = new File("target" + separator + "refreshIG");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
         }
@@ -69,7 +69,7 @@ public class IGProcessorTest extends RefreshTest {
     @Test
 	@SuppressWarnings("unchecked")
     public void testRefreshIG() throws Exception {
-        String targetDirectory = "target/refreshIG";
+        String targetDirectory = "target" + separator + "refreshIG";
 		copyResourcesToTargetDir(targetDirectory, "testfiles/refreshIG");
         
         File iniFile = new File(INI_LOC);

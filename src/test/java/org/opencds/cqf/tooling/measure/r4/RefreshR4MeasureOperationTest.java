@@ -74,7 +74,7 @@ public class RefreshR4MeasureOperationTest extends RefreshTest {
             "-ptl=" + resourceDirPath + libraryDirectoryPath,
         };
 
-        String operationOutputPath = targetDirectory.getAbsolutePath() + "" + separator + "output" + separator + "refreshedMeasureBundles" + separator;
+        String operationOutputPath = targetDirectory.getAbsolutePath() + separator + "output" + separator + "refreshedMeasureBundles" + separator;
         RefreshR4MeasureOperation refreshMeasureOperation = new RefreshR4MeasureOperation(operationOutputPath);
         refreshMeasureOperation.execute(args);
 
