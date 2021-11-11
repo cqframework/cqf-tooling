@@ -13,7 +13,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import static org.testng.Assert.assertTrue;
 
 public class RefreshR4MeasureOperationTest extends RefreshTest {
-    private String targetDirectoryPath = separator + "target" + separator + "refreshMeasures" + separator + "r4";
+    private String targetDirectoryPath = "target" + separator + "refreshMeasures" + separator + "r4";
 
     public RefreshR4MeasureOperationTest() {
         super(FhirContext.forCached(FhirVersionEnum.R4));
@@ -21,7 +21,7 @@ public class RefreshR4MeasureOperationTest extends RefreshTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        File dir  = new File(separator + "target" + separator + "refreshMeasures" + separator + "r4");
+        File dir  = new File("target" + separator + "refreshMeasures" + separator + "r4");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
         }
