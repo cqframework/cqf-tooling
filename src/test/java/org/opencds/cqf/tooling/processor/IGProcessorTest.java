@@ -79,6 +79,7 @@ public class IGProcessorTest extends RefreshTest {
         String bundledFilesLocation = iniFile.getParent() + separator + "bundles" + separator + "measure" + separator;
         RefreshIGParameters params = new RefreshIGParameters();
         params.ini = INI_LOC;
+		params.outputEncoding = IOUtils.Encoding.JSON;
 		params.resourceDirs = new ArrayList<String>();
 		params.includeELM = false;
         params.includeTerminology = true;

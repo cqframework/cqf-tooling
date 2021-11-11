@@ -92,7 +92,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 		String bundledFilesLocation = iniFile.getParent() + separator + "bundles" + separator + "measure" + separator;
 
-		String args[] = { "-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p" };
+		String args[] = { "-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json" };
 
 		// execute refresh using ARGS
 		new RefreshIGOperation().execute(args);
