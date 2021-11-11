@@ -74,6 +74,8 @@ public class RefreshIGOperationTest extends RefreshTest {
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
         }
+
+		deleteTempINI();
     }
  
 	/**
@@ -283,6 +285,7 @@ public class RefreshIGOperationTest extends RefreshTest {
  
     @AfterMethod
     public void afterTest() {
+		deleteTempINI();
         System.setOut(this.originalStdOut);
         System.out.println(this.console.toString());
         this.console = new ByteArrayOutputStream();
@@ -317,8 +320,10 @@ public class RefreshIGOperationTest extends RefreshTest {
 	
 	private boolean deleteTempINI() {
 		try {
-			File iniFile = new File("temp.ini");
-			iniFile.delete();
+			File iniFile  = new File("temp.ini");
+			if (iniFile.exists()) {
+				iniFile.delete();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;

@@ -1,8 +1,12 @@
 package org.opencds.cqf.tooling.measure;
 
+import java.io.File;
+
+import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.parameter.RefreshMeasureParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
+import org.testng.annotations.BeforeMethod;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -10,14 +14,13 @@ public abstract class MeasureProcessorTest extends RefreshTest {
 
     private MeasureProcessor measureProcessor;
 
-    // When running mvn package there is some collisions between tests running while trying to delete this directory
-    // @BeforeMethod
-    // public void setUp() throws Exception {
-    //     File dir  = new File("target" + separator + "refreshMeasures");
-    //     if (dir.exists()) {
-    //         FileUtils.deleteDirectory(dir);
-    //     }
-    // }
+     @BeforeMethod
+    public void setUp() throws Exception {
+        File dir  = new File("target" + separator + "refreshMeasures");
+        if (dir.exists()) {
+            FileUtils.deleteDirectory(dir);
+        }
+    }
 
     public MeasureProcessorTest(MeasureProcessor measureProcessor, FhirContext fhirContext) {
         super(fhirContext);
