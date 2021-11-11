@@ -29,7 +29,7 @@ public abstract class LibraryProcessorTest extends RefreshTest {
     }
 
     protected LibraryProcessor getLibraryProcessor() {
-        return libraryProcessor;
+        return this.libraryProcessor;
     }
 
     protected void runRefresh(String targetDirectory, String libraryResourcePath, String cqlResourcePath,
