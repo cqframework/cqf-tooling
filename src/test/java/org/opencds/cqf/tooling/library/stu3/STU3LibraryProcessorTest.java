@@ -30,7 +30,7 @@ public class STU3LibraryProcessorTest extends LibraryProcessorTest {
     
     @Test
     private void testRefreshOverwriteLibraries() throws Exception {
-        String targetDirectory = "./target/refreshLibraries/" + this.resourceDirectory;
+        String targetDirectory = "target/refreshLibraries/" + this.resourceDirectory;
         copyResourcesToTargetDir(targetDirectory, this.resourceDirectory);
         
         String libraryPath = "/input/resources/library/library-EXM105-FHIR3-8.0.000.json";
@@ -47,7 +47,7 @@ public class STU3LibraryProcessorTest extends LibraryProcessorTest {
     @Test
     private void testRefreshOutputDirectory() throws Exception {
         // create a output directory under target directory
-        File targetDirectory = new File("./target/refreshLibraries/" + resourceDirectory);
+        File targetDirectory = new File("target/refreshLibraries/" + resourceDirectory);
         if (!targetDirectory.exists()) {
             targetDirectory.mkdirs();
         }

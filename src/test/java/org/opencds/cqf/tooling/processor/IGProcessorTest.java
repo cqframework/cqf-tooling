@@ -69,7 +69,7 @@ public class IGProcessorTest extends RefreshTest {
     @Test
 	@SuppressWarnings("unchecked")
     public void testRefreshIG() throws Exception {
-        String targetDirectory = "./target/refreshIG";
+        String targetDirectory = "target/refreshIG";
 		copyResourcesToTargetDir(targetDirectory, "testfiles/refreshIG");
         
         File iniFile = new File(INI_LOC);

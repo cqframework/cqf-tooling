@@ -84,7 +84,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testBundledFiles() throws IOException {
-		copyResourcesToTargetDir("./target/refreshIG", "testfiles/refreshIG");
+		copyResourcesToTargetDir("target/refreshIG", "testfiles/refreshIG");
 		// build ini object
 		File iniFile = new File(INI_LOC);
 		String iniFileLocation = iniFile.getAbsolutePath();
