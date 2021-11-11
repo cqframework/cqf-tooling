@@ -34,7 +34,7 @@ public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperatio
     }
 
     public RefreshStu3MeasureOperation(String pathToMeasures) {
-        super(FilenameUtils.getPath(pathToMeasures), "-RefreshStu3Measure", FhirContext.forCached(FhirVersionEnum.DSTU3), null, pathToMeasures);
+        super(pathToMeasures, "-RefreshStu3Measure", FhirContext.forCached(FhirVersionEnum.DSTU3), null, pathToMeasures);
         if (!Strings.isNullOrEmpty(getOutputPath())) {
             cqfmHelper = new CqfmSoftwareSystemHelper(getOutputPath());
         } else {

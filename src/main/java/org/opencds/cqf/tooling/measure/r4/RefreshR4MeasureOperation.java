@@ -33,7 +33,7 @@ public class RefreshR4MeasureOperation extends RefreshGeneratedContentOperation 
     }
 
     public RefreshR4MeasureOperation(String pathToMeasures) {
-        super(FilenameUtils.getPath(pathToMeasures), "-RefreshR4Measure", FhirContext.forCached(FhirVersionEnum.R4), null, pathToMeasures);
+        super(pathToMeasures, "-RefreshR4Measure", FhirContext.forCached(FhirVersionEnum.R4), null, pathToMeasures);
         if (!Strings.isNullOrEmpty(getOutputPath())) {
             cqfmHelper = new CqfmSoftwareSystemHelper(getOutputPath());
         } else {
