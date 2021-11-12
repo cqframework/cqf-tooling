@@ -23,6 +23,7 @@ public class RefreshLibraryOperationIT extends RefreshTest {
     @BeforeMethod
     public void setUp() throws Exception {
         IOUtils.resourceDirectories = new ArrayList<String>();
+        IOUtils.clearDevicePaths();
         File dir  = new File("target" + separator + "refreshLibraries");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);

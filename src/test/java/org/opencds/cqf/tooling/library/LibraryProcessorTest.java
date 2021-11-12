@@ -17,6 +17,7 @@ public abstract class LibraryProcessorTest extends RefreshTest {
     @BeforeMethod
     public void setUp() throws Exception {
         IOUtils.resourceDirectories = new ArrayList<String>();
+        IOUtils.clearDevicePaths();
         // File dir  = new File("target/refreshLibraries");
         // if (dir.exists()) {
         //     FileUtils.deleteDirectory(dir);

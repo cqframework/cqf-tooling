@@ -899,6 +899,11 @@ public class IOUtils
         return devicePaths;
     }
 
+    // TODO: This should not be necessary this is awful... For now it is needed for passing tests in Travis
+    public static void clearDevicePaths() {
+        devicePaths = new HashSet<String>();
+    }
+
     public static void printDevicePathsForDebug() {
         devicePaths.forEach(devicePath -> System.out.println("DevicePath: " + devicePath));
     }

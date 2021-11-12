@@ -18,6 +18,7 @@ public abstract class MeasureProcessorTest extends RefreshTest {
     @BeforeMethod
     public void setUp() throws Exception {
         IOUtils.resourceDirectories = new ArrayList<String>();
+        IOUtils.clearDevicePaths();
         File dir  = new File("target" + separator + "refreshMeasures");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
