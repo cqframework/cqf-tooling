@@ -68,7 +68,8 @@ public class RefreshIGOperationTest extends RefreshTest {
     private ByteArrayOutputStream console = new ByteArrayOutputStream();
  
     @BeforeMethod
-    public void beforeTest() throws IOException {
+    public void setUp() throws Exception {
+        IOUtils.resourceDirectories = new ArrayList<String>();
         System.setOut(new PrintStream(this.console));
         File dir  = new File("target" + separator + "refreshIG");
         if (dir.exists()) {
@@ -95,6 +96,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 		String args[] = { "-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json" };
 
 		// execute refresh using ARGS
+        IOUtils.resourceDirectories.forEach(directory -> System.out.println("Should not have any resourceDirectories: " + directory));
 		new RefreshIGOperation().execute(args);
 
 		// determine fhireContext for measure lookup

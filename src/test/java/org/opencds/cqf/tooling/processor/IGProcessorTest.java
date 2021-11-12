@@ -48,7 +48,7 @@ public class IGProcessorTest extends RefreshTest {
 	private final String INI_LOC = "target" + separator + "refreshIG" + separator + "ig.ini";
 
     public IGProcessorTest() {
-        super(FhirContext.forCached(FhirVersionEnum.R4));
+        super(FhirContext.forCached(FhirVersionEnum.R4), "IGProcessorTest");
         LibraryProcessor libraryProcessor = new LibraryProcessor();
         MeasureProcessor measureProcessor = new MeasureProcessor();
         CDSHooksProcessor cdsHooksProcessor = new CDSHooksProcessor();
@@ -58,7 +58,8 @@ public class IGProcessorTest extends RefreshTest {
     }
  
     @BeforeMethod
-    public void beforeTest() throws IOException {
+    public void setUp() throws Exception {
+        IOUtils.resourceDirectories = new ArrayList<String>();
         System.setOut(new PrintStream(this.console));
         File dir  = new File("target" + separator + "refreshIG");
         if (dir.exists()) {
@@ -86,6 +87,7 @@ public class IGProcessorTest extends RefreshTest {
         params.includeDependencies = true;
         params.includePatientScenarios = true;
 		params.versioned = false;
+        IOUtils.resourceDirectories.forEach(directory -> System.out.println("Should not have any resourceDirectories: " + directory));
         processor.publishIG(params);
 
 		// determine fhireContext for measure lookup

@@ -1,10 +1,12 @@
 package org.opencds.cqf.tooling.measure;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.parameter.RefreshMeasureParameters;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.testng.annotations.BeforeMethod;
 
@@ -13,9 +15,9 @@ import ca.uhn.fhir.context.FhirContext;
 public abstract class MeasureProcessorTest extends RefreshTest {
 
     private MeasureProcessor measureProcessor;
-
-     @BeforeMethod
+    @BeforeMethod
     public void setUp() throws Exception {
+        IOUtils.resourceDirectories = new ArrayList<String>();
         File dir  = new File("target" + separator + "refreshMeasures");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
@@ -46,6 +48,7 @@ public abstract class MeasureProcessorTest extends RefreshTest {
         params.cqlContentPath = cqlResourcePath;
         params.ini = targetDirectory + separator + "ig.ini";
         params.versioned = versioned;
+        IOUtils.resourceDirectories.forEach(directory -> System.out.println("Should not have any resourceDirectories: " + directory));
         getMeasureProcessor().refreshMeasureContent(params);
     }
 }

@@ -6,6 +6,8 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Library;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -17,9 +19,25 @@ import java.net.URL;
 
 public abstract class RefreshTest implements CqfmSoftwareSystemTest {
     private FhirContext fhirContext;
+    private String testName;
+
+    public RefreshTest(FhirContext fhirContext, String testName) {
+        this.fhirContext = fhirContext;
+        this.testName = testName;
+    }
 
     public RefreshTest(FhirContext fhirContext) {
         this.fhirContext = fhirContext;
+    }
+
+    @BeforeMethod
+    public void setUp() throws Exception {
+        System.out.println("Beginning Test: " + testName);
+    }
+
+    @AfterMethod
+    public void tearDown() throws Exception {
+        System.out.println("Finished Test: " + testName);
     }
     
     protected void validateCqfmSofwareSystemExtension(String domainResourcePath) {
