@@ -69,7 +69,7 @@ public class RefreshIGOperationTest extends RefreshTest {
  
     @BeforeMethod
     public void setUp() throws Exception {
-        IOUtils.resourceDirectories.clear();
+        IOUtils.resourceDirectories = new ArrayList<String>();
         System.setOut(new PrintStream(this.console));
         File dir  = new File("target" + separator + "refreshIG");
         if (dir.exists()) {

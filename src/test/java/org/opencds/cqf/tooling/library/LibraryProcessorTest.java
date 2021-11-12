@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling.library;
 
+import java.util.ArrayList;
+
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -14,7 +16,7 @@ public abstract class LibraryProcessorTest extends RefreshTest {
     // When running mvn package there is some collisions between tests running while trying to delete this directory
     @BeforeMethod
     public void setUp() throws Exception {
-        IOUtils.resourceDirectories.clear();
+        IOUtils.resourceDirectories = new ArrayList<String>();
         // File dir  = new File("target/refreshLibraries");
         // if (dir.exists()) {
         //     FileUtils.deleteDirectory(dir);

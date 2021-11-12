@@ -1,6 +1,7 @@
 package org.opencds.cqf.tooling.measure;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.RefreshTest;
@@ -16,7 +17,7 @@ public abstract class MeasureProcessorTest extends RefreshTest {
     private MeasureProcessor measureProcessor;
     @BeforeMethod
     public void setUp() throws Exception {
-        IOUtils.resourceDirectories.clear();
+        IOUtils.resourceDirectories = new ArrayList<String>();
         File dir  = new File("target" + separator + "refreshMeasures");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
