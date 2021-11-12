@@ -71,11 +71,13 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
                 DomainResource resourceInPath;
                 try {
                     if (path.endsWith("xml")) {
+                        System.out.println("Parsing Device XML...");
                         deviceOutputEncoding = IOUtils.Encoding.XML;
                         XmlParser xmlParser = (XmlParser)fhirContext.newXmlParser();
                         resourceInPath = (DomainResource) xmlParser.parseResource(new FileReader(new File(path)));
                     }
                     else {
+                        System.out.println("Parsing Device XML...");
                         JsonParser jsonParser = (JsonParser)fhirContext.newJsonParser();
                         resourceInPath = (DomainResource) jsonParser.parseResource(new FileReader(new File(path)));
                     }
