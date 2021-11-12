@@ -5,6 +5,7 @@ import java.io.File;
 import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.parameter.RefreshMeasureParameters;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.testng.annotations.BeforeMethod;
 
@@ -13,9 +14,9 @@ import ca.uhn.fhir.context.FhirContext;
 public abstract class MeasureProcessorTest extends RefreshTest {
 
     private MeasureProcessor measureProcessor;
-
-     @BeforeMethod
+    @BeforeMethod
     public void setUp() throws Exception {
+        IOUtils.resourceDirectories.clear();
         File dir  = new File("target" + separator + "refreshMeasures");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);

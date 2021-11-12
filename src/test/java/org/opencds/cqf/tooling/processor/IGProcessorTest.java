@@ -58,7 +58,8 @@ public class IGProcessorTest extends RefreshTest {
     }
  
     @BeforeMethod
-    public void beforeTest() throws IOException {
+    public void setUp() throws Exception {
+        IOUtils.resourceDirectories.clear();
         System.setOut(new PrintStream(this.console));
         File dir  = new File("target" + separator + "refreshIG");
         if (dir.exists()) {

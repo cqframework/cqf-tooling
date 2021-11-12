@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.RefreshTest;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -20,6 +21,7 @@ public class RefreshLibraryOperationIT extends RefreshTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
+        IOUtils.resourceDirectories.clear();
         File dir  = new File("target" + separator + "refreshLibraries");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
