@@ -53,6 +53,9 @@ public abstract class BaseCqfmSoftwareSystemHelper {
     protected void EnsureDevicePath() {
         try {
             IOUtils.ensurePath(rootDir + devicePath);
+            if (!IOUtils.resourceDirectories.contains(rootDir + devicePath)) {
+                IOUtils.resourceDirectories.add(rootDir + devicePath);
+            }
         }
         catch (IOException ex) {
             LogUtils.putException("EnsureDevicePath", ex.getMessage());
