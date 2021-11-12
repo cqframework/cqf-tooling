@@ -77,9 +77,13 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
                         resourceInPath = (DomainResource) xmlParser.parseResource(new FileReader(new File(path)));
                     }
                     else {
-                        System.out.println("Parsing Device XML...");
-                        JsonParser jsonParser = (JsonParser)fhirContext.newJsonParser();
-                        resourceInPath = (DomainResource) jsonParser.parseResource(new FileReader(new File(path)));
+                        System.out.println("Parsing Device JSON...");
+                        JsonParser jsonParser = (JsonParser)fhirContext.newJsonParser();              
+                        System.out.println("path: " + path.toString());
+                        File deviceFile = new File(path);
+                        System.out.println("exists: " + Boolean.toString(deviceFile.exists()));
+                        FileReader deviceFileReader = new FileReader(deviceFile);
+                        resourceInPath = (DomainResource) jsonParser.parseResource(deviceFileReader);
                     }
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
@@ -99,6 +103,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 
             /* Create the device if one doesn't already exist */
             if (device == null) {
+                System.out.println("Creating Device");
                 device = createSoftwareSystemDevice(system);
             }
 
