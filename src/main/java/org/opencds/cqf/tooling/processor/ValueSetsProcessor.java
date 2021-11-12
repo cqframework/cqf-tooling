@@ -130,28 +130,6 @@ public class ValueSetsProcessor extends BaseProcessor {
             }
         }
 
-//        if (file == null || !file.exists()) {
-//            for (String path : IOUtils.getTerminologyPaths(this.fhirContext)) {
-//                loadValueSet(fileMap, valueSets, new File(path));
-//            }
-//        }
-//        else if (file.isDirectory()) {
-//            for (File valueSetDirectory : file.listFiles()) {
-//                if (!valueSetDirectory.isHidden()){
-//                    for (File valueSetFile : valueSetDirectory.listFiles()) {
-//                        if (!valueSetFile.isHidden()) {
-//                            loadValueSet(fileMap, valueSets, valueSetFile);
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        else {
-//            if (!file.isHidden()) {
-//                loadValueSet(fileMap, valueSets, file);
-//            }
-//        }
-
         List<String> refreshedValueSetNames = new ArrayList<String>();
         List<ValueSet> refreshedValueSets = refreshGeneratedContent(valueSets);
         for (ValueSet refreshedValueSet : refreshedValueSets) {
