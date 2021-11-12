@@ -30,7 +30,7 @@ mvn exec:java \
 
 Executable jars are produced by the CI system on Maven Central: [Download executable jar](https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=org.opencds.cqf&a=tooling&c=jar-with-dependencies&v=LATEST)
 
-This can be run with `java -jar tooling-1.3.0-jar-with-dependencies.jar -VsacXlsxToValueSetBatch`
+This can be run with `java -jar tooling-1.3.1-jar-with-dependencies.jar -VsacXlsxToValueSetBatch`
 
 Documentation of the various operations is provided in the [Main](src/main/java/org/opencds/cqf/tooling/Main.java) class.
 
