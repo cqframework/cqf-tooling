@@ -904,10 +904,6 @@ public class IOUtils
         devicePaths = new HashSet<String>();
     }
 
-    public static void printDevicePathsForDebug() {
-        devicePaths.forEach(devicePath -> System.out.println("DevicePath: " + devicePath));
-    }
-
     private static void setupDevicePaths(FhirContext fhirContext) {
         HashMap<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {

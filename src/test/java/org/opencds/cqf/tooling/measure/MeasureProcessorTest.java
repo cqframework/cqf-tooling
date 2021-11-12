@@ -49,7 +49,6 @@ public abstract class MeasureProcessorTest extends RefreshTest {
         params.cqlContentPath = cqlResourcePath;
         params.ini = targetDirectory + separator + "ig.ini";
         params.versioned = versioned;
-        IOUtils.resourceDirectories.forEach(directory -> System.out.println("Should not have any resourceDirectories: " + directory));
         getMeasureProcessor().refreshMeasureContent(params);
     }
 }

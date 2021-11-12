@@ -47,7 +47,6 @@ public class RefreshLibraryOperationIT extends RefreshTest {
         };
 
         RefreshLibraryOperation refreshLibraryOperation = new RefreshLibraryOperation();
-        IOUtils.resourceDirectories.forEach(directory -> System.out.println("Should not have any resourceDirectories: " + directory));
         refreshLibraryOperation.execute(args);
 
         validateCqfmSofwareSystemExtension(targetDirectory + libraryPath);
@@ -76,7 +75,6 @@ public class RefreshLibraryOperationIT extends RefreshTest {
         };
 
         RefreshLibraryOperation refreshLibraryOperation = new RefreshLibraryOperation();
-        IOUtils.resourceDirectories.forEach(directory -> System.out.println("Should not have any resourceDirectories: " + directory));
         refreshLibraryOperation.execute(args);
 
         assertTrue(targetDirectory.listFiles().length > 0);
