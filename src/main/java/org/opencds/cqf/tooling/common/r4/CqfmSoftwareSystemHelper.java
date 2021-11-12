@@ -81,13 +81,8 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
                         resourceInPath = (DomainResource) xmlParser.parseResource(new FileReader(new File(path)));
                     }
                     else {
-                        System.out.println("Parsing Device JSON...");
-                        JsonParser jsonParser = (JsonParser)fhirContext.newJsonParser();              
-                        System.out.println("path: " + path.toString());
-                        File deviceFile = new File(path);
-                        System.out.println("exists: " + Boolean.toString(deviceFile.exists()));
-                        FileReader deviceFileReader = new FileReader(deviceFile);
-                        resourceInPath = (DomainResource) jsonParser.parseResource(deviceFileReader);
+                        JsonParser jsonParser = (JsonParser)fhirContext.newJsonParser();
+                        resourceInPath = (DomainResource) jsonParser.parseResource(new FileReader(new File(path)));
                     }
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
