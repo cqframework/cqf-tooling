@@ -96,6 +96,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 		String args[] = { "-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json" };
 
 		// execute refresh using ARGS
+        IOUtils.resourceDirectories.forEach(directory -> System.out.println("Should not have any resourceDirectories: " + directory));
 		new RefreshIGOperation().execute(args);
 
 		// determine fhireContext for measure lookup

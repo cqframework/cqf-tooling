@@ -87,6 +87,7 @@ public class IGProcessorTest extends RefreshTest {
         params.includeDependencies = true;
         params.includePatientScenarios = true;
 		params.versioned = false;
+        IOUtils.resourceDirectories.forEach(directory -> System.out.println("Should not have any resourceDirectories: " + directory));
         processor.publishIG(params);
 
 		// determine fhireContext for measure lookup
