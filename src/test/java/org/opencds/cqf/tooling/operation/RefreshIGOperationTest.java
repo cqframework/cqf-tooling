@@ -13,7 +13,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
-import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,6 +25,7 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.IniFile;
+import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.MeasureProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
@@ -42,8 +42,13 @@ import org.testng.annotations.Test;
 import com.google.gson.Gson;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 
-public class RefreshIGOperationTest {
+public class RefreshIGOperationTest extends RefreshTest {
+
+	public RefreshIGOperationTest() {
+		super(FhirContext.forCached(FhirVersionEnum.R4));
+	}
 
 	private static final String EXCEPTIONS_OCCURRED_LOADING_IG_FILE = "Exceptions occurred loading IG file";
 	private static final String EXCEPTIONS_OCCURRED_INITIALIZING_REFRESH_FROM_INI_FILE = "Exceptions occurred initializing refresh from ini file";
@@ -55,9 +60,7 @@ public class RefreshIGOperationTest {
 	private final String LIB_TYPE = "Library";
 	private final String MEASURE_TYPE = "Measure";
 
-	private final static String separator = System.getProperty("file.separator");
-
-	private final String INI_LOC = "." + separator + "target" + separator + "refreshIG" + separator + "ig.ini";
+	private final String INI_LOC = "target" + separator + "refreshIG" + separator + "ig.ini";
 	
 	
     // Store the original standard out before changing it.
@@ -65,13 +68,16 @@ public class RefreshIGOperationTest {
     private ByteArrayOutputStream console = new ByteArrayOutputStream();
  
     @BeforeMethod
-    public void beforeTest() throws IOException {
+    public void setUp() throws Exception {
+        IOUtils.resourceDirectories = new ArrayList<String>();
+        IOUtils.clearDevicePaths();
         System.setOut(new PrintStream(this.console));
-        File dir  = new File("target/refreshIG");
+        File dir  = new File("target" + separator + "refreshIG");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
         }
-		copyRefreshIGToTarget();
+
+		deleteTempINI();
     }
  
 	/**
@@ -80,6 +86,7 @@ public class RefreshIGOperationTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testBundledFiles() throws IOException {
+		copyResourcesToTargetDir("target" + separator + "refreshIG", "testfiles/refreshIG");
 		// build ini object
 		File iniFile = new File(INI_LOC);
 		String iniFileLocation = iniFile.getAbsolutePath();
@@ -87,10 +94,10 @@ public class RefreshIGOperationTest {
 
 		String bundledFilesLocation = iniFile.getParent() + separator + "bundles" + separator + "measure" + separator;
 
-		String args[] = { "-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p" };
+		String args[] = { "-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json" };
 
 		// execute refresh using ARGS
-		new RefreshIGOperation().execute(args);
+        new RefreshIGOperation().execute(args);
 
 		// determine fhireContext for measure lookup
 		FhirContext fhirContext = IGProcessor.getIgFhirContext(getFhirVersion(ini));
@@ -280,6 +287,7 @@ public class RefreshIGOperationTest {
  
     @AfterMethod
     public void afterTest() {
+		deleteTempINI();
         System.setOut(this.originalStdOut);
         System.out.println(this.console.toString());
         this.console = new ByteArrayOutputStream();
@@ -314,8 +322,10 @@ public class RefreshIGOperationTest {
 	
 	private boolean deleteTempINI() {
 		try {
-			File iniFile = new File("temp.ini");
-			iniFile.delete();
+			File iniFile  = new File("temp.ini");
+			if (iniFile.exists()) {
+				iniFile.delete();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
@@ -455,14 +465,4 @@ public class RefreshIGOperationTest {
 		}
 
 	}
-
-	private void copyRefreshIGToTarget() throws IOException {
-		File outputDirectory = new File("./target/refreshIG");
-        outputDirectory.mkdirs();
-        URL url = RefreshLibraryOperationIT.class.getResource("testfiles/refreshIG");
-        String urlPath = url.getPath();
-        File refreshIGDirectory = new File(urlPath);
-        FileUtils.copyDirectory(refreshIGDirectory, outputDirectory);
-	}
-
 }

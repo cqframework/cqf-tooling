@@ -13,6 +13,7 @@ import java.util.*;
 public class R4MeasureProcessor extends MeasureProcessor {
 
     private String measurePath;
+    private String measureOutputDirectory;
     private IOUtils.Encoding encoding;
     private static CqfmSoftwareSystemHelper cqfmHelper;
 
@@ -23,13 +24,21 @@ public class R4MeasureProcessor extends MeasureProcessor {
         }
         return measurePath;
     }
+    /*
+        Refresh all measure resources in the given measurePath
+        If the path is not specified, or is not a known directory, process
+        all known measure resources overriding any currently existing files.
+    */
+    protected List<String> refreshMeasures(String measurePath, IOUtils.Encoding encoding) {
+        return refreshMeasures(measurePath, null, encoding);
+    }
 
     /*
         Refresh all measure resources in the given measurePath
         If the path is not specified, or is not a known directory, process
         all known measure resources
     */
-    protected List<String> refreshMeasures(String measurePath, IOUtils.Encoding encoding) {
+    protected List<String> refreshMeasures(String measurePath, String measureOutputDirectory, IOUtils.Encoding encoding) {
         File file = measurePath != null ? new File(measurePath) : null;
         Map<String, String> fileMap = new HashMap<String, String>();
         List<org.hl7.fhir.r5.model.Measure> measures = new ArrayList<>();
@@ -69,7 +78,16 @@ public class R4MeasureProcessor extends MeasureProcessor {
                 // TODO: This prevents mangled names from being output
                 // It would be nice for the tooling to generate library shells, we have enough information to,
                 // but the tooling gets confused about the ID and the filename and what gets written is garbage
-                IOUtils.writeResource(measure, filePath, fileEncoding, fhirContext, this.versioned);
+                String outputPath = filePath;
+                if (measureOutputDirectory != null) {
+                    File measureDirectory = new File(measureOutputDirectory);
+                    if (!measureDirectory.exists()) {
+                        //TODO: add logger and log non existant directory for writing
+                    } else {
+                        outputPath = measureDirectory.getAbsolutePath();
+                    }
+                }
+                IOUtils.writeResource(measure, outputPath, fileEncoding, fhirContext, this.versioned);
                 String refreshedMeasureName;
                 if (this.versioned && refreshedMeasure.getVersion() != null) {
                     refreshedMeasureName = refreshedMeasure.getName() + "-" + refreshedMeasure.getVersion();
@@ -104,12 +122,17 @@ public class R4MeasureProcessor extends MeasureProcessor {
         }
 
         measurePath = params.measurePath;
+        measureOutputDirectory = params.measureOutputDirectory;
         fhirContext = params.fhirContext;
         encoding = params.encoding;
         versioned = params.versioned;
 
         R4MeasureProcessor.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
 
-        return refreshMeasures(measurePath, encoding);
+        if (measureOutputDirectory != null) {
+            return refreshMeasures(measurePath, measureOutputDirectory, encoding);
+        } else {
+            return refreshMeasures(measurePath, encoding);
+        }
     }
 }

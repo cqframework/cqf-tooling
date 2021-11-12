@@ -1,6 +1,7 @@
 package org.opencds.cqf.tooling.measure.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.XmlParser;
 
@@ -16,20 +17,28 @@ import java.io.FileNotFoundException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import com.google.common.base.Strings;
+
 public class RefreshR4MeasureOperation extends RefreshGeneratedContentOperation {
 
     private JsonParser jsonParser;
     private XmlParser xmlParser;
-    private CqfmSoftwareSystemHelper cqfmHelper = new CqfmSoftwareSystemHelper();
+    private CqfmSoftwareSystemHelper cqfmHelper;
 
     public RefreshR4MeasureOperation() {
-        super("src/main/resources/org/opencds/cqf/tooling/measure/output/r4", "-RefreshR4Measure", FhirContext.forR4());
+        super("src/main/resources/org/opencds/cqf/tooling/measure/output/r4", "-RefreshR4Measure", FhirContext.forCached(FhirVersionEnum.R4));
+        cqfmHelper = new CqfmSoftwareSystemHelper("src/main/resources/org/opencds/cqf/tooling/measure/output/r4");
         jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
         xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
     }
 
     public RefreshR4MeasureOperation(String pathToMeasures) {
-        super(FilenameUtils.getPath(pathToMeasures), "-RefreshR4Measure", FhirContext.forR4(), null, pathToMeasures);
+        super(pathToMeasures, "-RefreshR4Measure", FhirContext.forCached(FhirVersionEnum.R4), null, pathToMeasures);
+        if (!Strings.isNullOrEmpty(getOutputPath())) {
+            cqfmHelper = new CqfmSoftwareSystemHelper(getOutputPath());
+        } else {
+            cqfmHelper = new CqfmSoftwareSystemHelper();
+        }
         jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
         xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
         xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
