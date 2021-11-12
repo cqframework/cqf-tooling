@@ -46,12 +46,14 @@ Merges to `master` trigger a deployment to the Maven Snapshots repositories. Onc
 
 To release a new version of the tooling:
 1. Update master to be a release version (and all the reviews, bug fixes, etc. that that requires)
+   1. Regression test against IGs known to use CQF Tooling
 2. Passed Travis Build = ready for release
 3. Create a Github Release (which creates a tag at the current commit of master)
+   1. Choose the "Auto-generate release notes" option
 4. Travis does the release to Maven
-5. Travis updates the release Notes
-6. Update master to vNext-SNAPSHOT
-7. Close all issues included in the release
+   1. Ensure binaries are published to https://oss.sonatype.org/#view-repositories;public~browsestorage~org/opencds/cqf/tooling 
+5. Update master to vNext-SNAPSHOT
+6. Close all issues included in the release
 
 ## Getting Help
 
