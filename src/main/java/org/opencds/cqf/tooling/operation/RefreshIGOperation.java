@@ -4,10 +4,7 @@ import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.MeasureProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
-import org.opencds.cqf.tooling.processor.CDSHooksProcessor;
-import org.opencds.cqf.tooling.processor.IGBundleProcessor;
-import org.opencds.cqf.tooling.processor.IGProcessor;
-import org.opencds.cqf.tooling.processor.PlanDefinitionProcessor;
+import org.opencds.cqf.tooling.processor.*;
 import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
 
 public class RefreshIGOperation extends Operation {
@@ -27,10 +24,11 @@ public class RefreshIGOperation extends Operation {
         }
         MeasureProcessor measureProcessor = new MeasureProcessor();
         LibraryProcessor libraryProcessor = new LibraryProcessor();
+        ValueSetsProcessor valueSetsProcessor = new ValueSetsProcessor();
         CDSHooksProcessor cdsHooksProcessor = new CDSHooksProcessor();
         PlanDefinitionProcessor planDefinitionProcessor = new PlanDefinitionProcessor(libraryProcessor, cdsHooksProcessor);
         IGBundleProcessor igBundleProcessor = new IGBundleProcessor(measureProcessor, planDefinitionProcessor);
-        IGProcessor processor = new IGProcessor(igBundleProcessor, libraryProcessor, measureProcessor);
+        IGProcessor processor = new IGProcessor(igBundleProcessor, libraryProcessor, measureProcessor, valueSetsProcessor);
         processor.publishIG(params);
     }
 }

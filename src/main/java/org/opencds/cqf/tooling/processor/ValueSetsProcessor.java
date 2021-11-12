@@ -1,11 +1,15 @@
 package org.opencds.cqf.tooling.processor;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.util.*;
 import java.util.stream.Collectors;
-
+import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.formats.FormatUtilities;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper;
+import org.opencds.cqf.tooling.terminology.Copyrights;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.LogUtils;
@@ -13,7 +17,12 @@ import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class ValueSetsProcessor {
+public class ValueSetsProcessor extends BaseProcessor {
+    private String valueSetPath;
+    private FhirContext fhirContext;
+    private Encoding encoding;
+    private static CqfmSoftwareSystemHelper cqfmHelper;
+
     private static Map<String, IBaseResource> copyToUrls(List<IBaseResource> valueSets, FhirContext fhirContext) {
         switch (fhirContext.getVersion().getVersion()) {
         case DSTU3:
@@ -91,4 +100,90 @@ public class ValueSetsProcessor {
         }
         return shouldPersist;
     }
+
+    public List<String> refreshValueSetsContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext){
+        initialize(parentContext);
+
+
+        this.valueSetPath = FilenameUtils.concat(parentContext.getRootDir(), IGProcessor.valuesetsPathElement);
+        this.fhirContext = fhirContext;
+        this.encoding = encoding;
+
+        ValueSetsProcessor.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
+
+        return refreshValueSets(valueSetPath, encoding);
+    }
+
+    protected List<String> refreshValueSets(String valueSetPath, Encoding encoding){
+        System.out.println("Refreshing ValueSets...");
+        File terminologyPath = valueSetPath != null ? new File(valueSetPath) : null;
+        Map<String, String> fileMap = new HashMap<String, String>();
+        List<ValueSet> valueSets = new ArrayList<>();
+
+        for (File valueSetDirectory : terminologyPath.listFiles()){
+            if (!valueSetDirectory.isHidden() && valueSetDirectory.isDirectory()){
+                for (File file : valueSetDirectory.listFiles()){
+                    if (!file.isHidden()){
+                        loadValueSet(fileMap, valueSets, file);
+                    }
+                }
+            }
+        }
+
+//        if (file == null || !file.exists()) {
+//            for (String path : IOUtils.getTerminologyPaths(this.fhirContext)) {
+//                loadValueSet(fileMap, valueSets, new File(path));
+//            }
+//        }
+//        else if (file.isDirectory()) {
+//            for (File valueSetDirectory : file.listFiles()) {
+//                if (!valueSetDirectory.isHidden()){
+//                    for (File valueSetFile : valueSetDirectory.listFiles()) {
+//                        if (!valueSetFile.isHidden()) {
+//                            loadValueSet(fileMap, valueSets, valueSetFile);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        else {
+//            if (!file.isHidden()) {
+//                loadValueSet(fileMap, valueSets, file);
+//            }
+//        }
+
+        List<String> refreshedValueSetNames = new ArrayList<String>();
+        List<ValueSet> refreshedValueSets = refreshGeneratedContent(valueSets);
+        for (ValueSet refreshedValueSet : refreshedValueSets) {
+            String filePath = fileMap.get(refreshedValueSet.getId());
+            encoding = IOUtils.getEncoding(filePath);
+
+            IOUtils.writeResource(refreshedValueSet, filePath, encoding, fhirContext);
+            IOUtils.updateCachedResource(refreshedValueSet, filePath);
+            refreshedValueSetNames.add(refreshedValueSet.getName());
+        }
+
+        return refreshedValueSetNames;
+    }
+
+    public void loadValueSet(Map<String, String> fileMap, List<ValueSet> valueSets, File valueSetFile) {
+        try {
+            Resource resource = FormatUtilities.loadFile(valueSetFile.getAbsolutePath());
+            ValueSet valueSet = (ValueSet) resource;
+            fileMap.put(valueSet.getId(), valueSetFile.getAbsolutePath());
+            valueSets.add(valueSet);
+        } catch (Exception ex) {
+            logMessage(String.format("Error reading valueset: %s. Error: %s", valueSetFile.getAbsolutePath(), ex.getMessage()));
+        }
+    }
+
+    private List<ValueSet> refreshGeneratedContent( List<ValueSet> valueSets) {
+        Copyrights copyrights = new Copyrights();
+        for (ValueSet valueSet : valueSets){
+            valueSet.setCopyright(copyrights.getCopyrightsText(valueSet));
+        }
+
+        return valueSets;
+    }
+
 }

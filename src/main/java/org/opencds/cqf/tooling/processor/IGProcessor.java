@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.processor;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.MeasureProcessor;
+import org.opencds.cqf.tooling.processor.ValueSetsProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.utilities.IGUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -21,11 +23,13 @@ public class IGProcessor extends BaseProcessor {
     protected IGBundleProcessor igBundleProcessor;
     protected LibraryProcessor libraryProcessor;
     protected MeasureProcessor measureProcessor;
+    protected ValueSetsProcessor valueSetsProcessor;
 
-    public IGProcessor(IGBundleProcessor igBundleProcessor, LibraryProcessor libraryProcessor, MeasureProcessor measureProcessor) {
+    public IGProcessor(IGBundleProcessor igBundleProcessor, LibraryProcessor libraryProcessor, MeasureProcessor measureProcessor, ValueSetsProcessor valueSetsProcessor) {
         this.igBundleProcessor = igBundleProcessor;
         this.libraryProcessor = libraryProcessor;
         this.measureProcessor = measureProcessor;
+        this.valueSetsProcessor = valueSetsProcessor;
     }
     //mega ig method
     public void publishIG(RefreshIGParameters params) {
@@ -54,8 +58,19 @@ public class IGProcessor extends BaseProcessor {
                 }
             }
         }
-
         IOUtils.resourceDirectories.addAll(resourceDirs);
+
+        ArrayList<String> dataDirs = new ArrayList<String>();
+        for (String dataDir : params.dataDirs) {
+            if (!Utilities.isAbsoluteFileName(dataDir)) {
+                try {
+                    dataDirs.add(Utilities.path(rootDir, dataDir));
+                } catch (IOException e) {
+                    LogUtils.putException("ig", e);
+                }
+            }
+        }
+        IOUtils.dataDirectories.addAll(dataDirs);
 
         FhirContext fhirContext = IGProcessor.getIgFhirContext(this.getFhirVersion());
 
@@ -115,9 +130,23 @@ public class IGProcessor extends BaseProcessor {
         }
         IOUtils.resourceDirectories.addAll(resourceDirs);
 
+        ArrayList<String> dataDirs = params.dataDirs;
+        if (dataDirs.size() == 0) {
+            try {
+                dataDirs = IGUtils.extractDataPaths(this.rootDir, this.sourceIg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        IOUtils.dataDirectories.addAll(dataDirs);
+
         FhirContext fhirContext = IGProcessor.getIgFhirContext(fhirVersion);
 
-        IGProcessor.ensure(rootDir, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
+        IGProcessor.ensure(rootDir, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories, IOUtils.dataDirectories);
+
+        List<String> refreshedValuesetNames;
+        refreshedValuesetNames = valueSetsProcessor.refreshValueSetsContent(this, encoding, versioned, fhirContext);
+        refreshedResourcesNames.addAll(refreshedValuesetNames);
 
         List<String> refreshedLibraryNames;
         refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
@@ -170,8 +199,9 @@ public class IGProcessor extends BaseProcessor {
     public static final String valuesetsPathElement = "input/vocabulary/valueset/";
     public static final String testCasePathElement = "input/tests/";
     public static final String devicePathElement = "input/resources/device/";
+    public static final String copyrightsPathElement = "input/data/copyrights";
     
-    public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, ArrayList<String> resourcePaths) {                
+    public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, ArrayList<String> resourcePaths, ArrayList<String> dataPaths) {
         File directory = new File(getBundlesPath(igPath));
         if (!directory.exists()) {
             directory.mkdir();
@@ -193,6 +223,12 @@ public class IGProcessor extends BaseProcessor {
             checkForDirectory(igPath, IGProcessor.testCasePathElement);
         }
         checkForDirectory(igPath, IGProcessor.devicePathElement);
+
+        if (dataPaths.isEmpty()){
+            ensureDirectory(igPath, IGProcessor.copyrightsPathElement);
+        } else {
+            checkForDirectory(igPath, IGProcessor.copyrightsPathElement);
+        }
 
         // HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
     }

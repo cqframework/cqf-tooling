@@ -72,6 +72,8 @@ public class IOUtils
 
     public static ArrayList<String> resourceDirectories = new ArrayList<String>();
 
+    public static ArrayList<String> dataDirectories = new ArrayList<String>();
+
     public static String getIdFromFileName(String fileName) {
         return fileName.replaceAll("_", "-");
     }
@@ -659,6 +661,24 @@ public class IOUtils
                 )
                 .forEach(entry -> terminologyPaths.add(entry.getKey()));
         }
+    }
+
+    public static String getCopyrightsPath(){
+        String copyrightsPath = "";
+        search: {
+            for (String dir : dataDirectories) {
+                for (String path : IOUtils.getFilePaths(dir, true)){
+                    if (path.contains("codesystem-copyrights.json")) {
+                        copyrightsPath = path;
+                        break search;
+                    }
+                }
+            }
+        }
+        if (copyrightsPath == ""){
+            LogUtils.info("Could not find codesystem-copyrights.json");
+        }
+        return copyrightsPath;
     }
 
     public static IBaseResource getLibraryByUrl(FhirContext fhirContext, String url) {

@@ -31,6 +31,7 @@ public class RefreshIGArgumentProcessor {
     public static final String[] FHIR_URI_OPTIONS = {"fs", "fhir-uri"};
     public static final String[] MEASURE_TO_REFRESH_PATH = {"mtrp", "measure-to-refresh-path"};
     public static final String[] RESOURCE_PATH_OPTIONS = {"rp", "resourcepath"};
+    public static final String[] DATA_PATH_OPTIONS = {"dp", "datapath"};
 
     @SuppressWarnings("unused")
     public OptionParser build() {
@@ -40,6 +41,7 @@ public class RefreshIGArgumentProcessor {
         OptionSpecBuilder rootDirBuilder = parser.acceptsAll(asList(ROOT_DIR_OPTIONS), "Root directory of the ig");
         OptionSpecBuilder igPathBuilder = parser.acceptsAll(asList(IG_PATH_OPTIONS),"Path to the IG, relative to the root directory");
         OptionSpecBuilder resourcePathBuilder = parser.acceptsAll(asList(RESOURCE_PATH_OPTIONS),"Use multiple times to define multiple resource directories.");
+        OptionSpecBuilder dataPathBuilder = parser.acceptsAll(asList(DATA_PATH_OPTIONS), "Use multiple times to define multiple data directories");
         OptionSpecBuilder igOutputEncodingBuilder = parser.acceptsAll(asList(IG_OUTPUT_ENCODING), "If omitted, output will be generated using JSON encoding.");
         OptionSpecBuilder fhirUriBuilder = parser.acceptsAll(asList(FHIR_URI_OPTIONS),"If omitted the final bundle will not be loaded to a FHIR server.");
         OptionSpecBuilder measureToRefreshPathBuilder = parser.acceptsAll(asList(MEASURE_TO_REFRESH_PATH), "Path to Measure to refresh.");
@@ -48,6 +50,7 @@ public class RefreshIGArgumentProcessor {
         OptionSpec<String> rootDir = rootDirBuilder.withOptionalArg().describedAs("Root directory of the IG");
         OptionSpec<String> igPath = igPathBuilder.withRequiredArg().describedAs("Path to the IG, relative to the root directory");
         OptionSpec<String> resourcePath = resourcePathBuilder.withOptionalArg().describedAs("directory of resources");
+        OptionSpec<String> dataPath = dataPathBuilder.withOptionalArg().describedAs("directory of supplemental data");
         OptionSpec<String> igOutputEncoding = igOutputEncodingBuilder.withOptionalArg().describedAs("desired output encoding for resources");
         OptionSpec<String> measureToRefreshPath = measureToRefreshPathBuilder.withOptionalArg().describedAs("Path to Measure to refresh.");
 
@@ -77,6 +80,7 @@ public class RefreshIGArgumentProcessor {
         String igPath = (String)options.valueOf(IG_PATH_OPTIONS[0]);
 
         List<String> resourcePaths = ArgUtils.getOptionValues(options, RESOURCE_PATH_OPTIONS[0]);
+        List<String> dataPaths = ArgUtils.getOptionValues(options, DATA_PATH_OPTIONS[0]);
             
         //could not easily use the built-in default here because it is based on the value of the igPath argument.
         String igEncoding = (String)options.valueOf(IG_OUTPUT_ENCODING[0]);
@@ -92,9 +96,14 @@ public class RefreshIGArgumentProcessor {
         String fhirUri = (String)options.valueOf(FHIR_URI_OPTIONS[0]);
         String measureToRefreshPath = (String)options.valueOf(MEASURE_TO_REFRESH_PATH[0]);
 
-        ArrayList<String> paths = new ArrayList<String>();
+        ArrayList<String> rPaths = new ArrayList<String>();
         if (resourcePaths != null && !resourcePaths.isEmpty()) {
-            paths.addAll(resourcePaths);
+            rPaths.addAll(resourcePaths);
+        }
+
+        ArrayList<String> dPaths = new ArrayList<String>();
+        if (dataPaths != null && !dataPaths.isEmpty()) {
+            dPaths.addAll(dataPaths);
         }
     
         RefreshIGParameters ip = new RefreshIGParameters();
@@ -107,7 +116,8 @@ public class RefreshIGArgumentProcessor {
         ip.includeTerminology = includeTerminology;
         ip.includePatientScenarios = includePatientScenarios;
         ip.versioned = versioned;
-        ip.resourceDirs = paths;
+        ip.resourceDirs = rPaths;
+        ip.dataDirs = dPaths;
         ip.fhirUri = fhirUri;
         ip.measureToRefreshPath = measureToRefreshPath;
        

@@ -16,6 +16,7 @@ public class RefreshIGParameters {
     public Boolean versioned;
     public String fhirUri;
     public ArrayList<String> resourceDirs;
+    public ArrayList<String> dataDirs;
     public Boolean conformant;
     public String measureToRefreshPath;
 }

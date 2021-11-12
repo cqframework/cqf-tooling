@@ -35,6 +35,22 @@ public class IGUtils {
         return result;
     }
 
+    public static ArrayList<String> extractDataPaths(String rootDir, ImplementationGuide sourceIg) throws IOException {
+        ArrayList<String> result = new ArrayList<>();
+        for (ImplementationGuide.ImplementationGuideDefinitionParameterComponent p : sourceIg.getDefinition().getParameter()) {
+            if (p.getCode().equals("path-data")) {
+                result.add(Utilities.path(rootDir, p.getValue()));
+            }
+        }
+
+        File data = new File(Utilities.path(rootDir, "input/data"));
+        if (data.exists() && data.isDirectory()) {
+            result.add(data.getAbsolutePath());
+        }
+
+        return result;
+    }
+
     /*
     Determines the CQL content path for the given implementation guide
     @rootDir: The root directory of the implementation guide source

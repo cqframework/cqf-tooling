@@ -15,8 +15,10 @@ import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.r4.R4LibraryProcessor;
 import org.opencds.cqf.tooling.library.stu3.STU3LibraryProcessor;
+import org.opencds.cqf.tooling.processor.ValueSetsProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.processor.*;
+import org.opencds.cqf.tooling.terminology.Copyrights;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.slf4j.Logger;
@@ -117,6 +119,8 @@ public class LibraryProcessor extends BaseProcessor {
             sourceLibrary.getContent().clear();
             sourceLibrary.getContent().add(attachment);
             CqlProcessor.CqlSourceFileInformation info = getCqlProcessor().getFileInformation(attachment.getUrl());
+            List<RelatedArtifact> relatedArtifacts = info.getRelatedArtifacts();
+            Copyrights copyrights = new Copyrights();
             attachment.setUrlElement(null);
             if (info != null) {
                 //f.getErrors().addAll(info.getErrors());
@@ -129,7 +133,9 @@ public class LibraryProcessor extends BaseProcessor {
                 sourceLibrary.getDataRequirement().clear();
                 sourceLibrary.getDataRequirement().addAll(info.getDataRequirements());
                 sourceLibrary.getRelatedArtifact().removeIf(n -> n.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON);
-                sourceLibrary.getRelatedArtifact().addAll(info.getRelatedArtifacts());
+                sourceLibrary.getRelatedArtifact().addAll(relatedArtifacts);
+                sourceLibrary.setCopyright("");
+                sourceLibrary.setCopyright(copyrights.getCopyrightsText(relatedArtifacts));
                 sourceLibrary.getParameter().clear();
                 sourceLibrary.getParameter().addAll(info.getParameters());
             } else {
