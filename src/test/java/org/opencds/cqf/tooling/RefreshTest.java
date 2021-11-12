@@ -17,6 +17,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
+import com.google.common.base.Strings;
+
 public abstract class RefreshTest implements CqfmSoftwareSystemTest {
     private FhirContext fhirContext;
     private String testName;
@@ -32,12 +34,16 @@ public abstract class RefreshTest implements CqfmSoftwareSystemTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        System.out.println("Beginning Test: " + testName);
+        if (!Strings.isNullOrEmpty(testName)) {
+            System.out.println("Beginning Test: " + testName);
+        }
     }
 
     @AfterMethod
     public void tearDown() throws Exception {
-        System.out.println("Finished Test: " + testName);
+        if (!Strings.isNullOrEmpty(testName)) {
+            System.out.println("Finished Test: " + testName);
+        }
     }
     
     protected void validateCqfmSofwareSystemExtension(String domainResourcePath) {
