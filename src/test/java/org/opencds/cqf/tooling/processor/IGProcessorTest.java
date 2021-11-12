@@ -48,7 +48,7 @@ public class IGProcessorTest extends RefreshTest {
 	private final String INI_LOC = "target" + separator + "refreshIG" + separator + "ig.ini";
 
     public IGProcessorTest() {
-        super(FhirContext.forCached(FhirVersionEnum.R4));
+        super(FhirContext.forCached(FhirVersionEnum.R4), "IGProcessorTest");
         LibraryProcessor libraryProcessor = new LibraryProcessor();
         MeasureProcessor measureProcessor = new MeasureProcessor();
         CDSHooksProcessor cdsHooksProcessor = new CDSHooksProcessor();

@@ -23,8 +23,8 @@ public abstract class LibraryProcessorTest extends RefreshTest {
         // }
     }
 
-    public LibraryProcessorTest(LibraryProcessor libraryProcessor, FhirContext fhirContext) {
-        super(fhirContext);
+    public LibraryProcessorTest(LibraryProcessor libraryProcessor, FhirContext fhirContext, String testName) {
+        super(fhirContext, testName);
         this.libraryProcessor = libraryProcessor;
     }
 

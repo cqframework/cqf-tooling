@@ -16,7 +16,7 @@ public class RefreshStu3MeasureOperationTest extends RefreshTest {
     private String targetDirectoryPath = "target" + separator + "refreshMeasures" + separator + "stu3";
 
     public RefreshStu3MeasureOperationTest() {
-        super(FhirContext.forCached(FhirVersionEnum.DSTU3));
+        super(FhirContext.forCached(FhirVersionEnum.DSTU3), "RefreshStu3MeasureOperationTest");
     }
 
     @BeforeMethod

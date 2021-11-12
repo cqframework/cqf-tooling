@@ -16,7 +16,7 @@ import static org.testng.Assert.assertTrue;
 public class R4LibraryProcessorTest extends LibraryProcessorTest {
     private String resourceDirectory = "r4";
     public R4LibraryProcessorTest() {
-        super(new R4LibraryProcessor(), FhirContext.forCached(FhirVersionEnum.R4));
+        super(new R4LibraryProcessor(), FhirContext.forCached(FhirVersionEnum.R4), "R4LibraryProcessorTest");
     }
 
     @BeforeMethod

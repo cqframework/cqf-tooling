@@ -16,7 +16,7 @@ public class RefreshR4MeasureOperationTest extends RefreshTest {
     private String targetDirectoryPath = "target" + separator + "refreshMeasures" + separator + "r4";
 
     public RefreshR4MeasureOperationTest() {
-        super(FhirContext.forCached(FhirVersionEnum.R4));
+        super(FhirContext.forCached(FhirVersionEnum.R4), "RefreshR4MeasureOperationTest");
     }
 
     @BeforeMethod
