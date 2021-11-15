@@ -96,6 +96,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 
             /* Create the device if one doesn't already exist */
             if (device == null) {
+                System.out.println("Creating Device");
                 device = createSoftwareSystemDevice(system);
             }
 

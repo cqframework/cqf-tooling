@@ -45,4 +45,9 @@ public class RefreshMeasureParameters {
     An initialized processor context that can provide the IG context directly
      */
     public IProcessorContext parentContext;
+
+    /*
+    Directory target for writing output
+     */
+    public String measureOutputDirectory;
 }
