@@ -24,6 +24,25 @@ public class Copyrights {
     private String useContext;
     private List<CodesystemInfo> codesystems;
 
+    /*
+        This class imports a file for codesystem copyright information in this example format:
+        {
+            "name": "codesystemCopyrights",
+            "title": "Codesystem Copyrights",
+            "description": "Copyright information for codesystems utilized by resources",
+            "useContext": "This is how the codesystems are used in compliance with their creators",
+            "codesystems": [
+                {
+                    "name": "snomed",
+                    "title": "SNOMED International",
+                    "systemUrl": "http://snomed.info/sct",
+                    "copyrightText": "UMLS Metathesaurus® Source Vocabularies and SNOMED CT®"
+                }
+                ...
+            ]
+        }
+     */
+
     public Copyrights(){
         try {
             String path = IOUtils.getCopyrightsPath();
