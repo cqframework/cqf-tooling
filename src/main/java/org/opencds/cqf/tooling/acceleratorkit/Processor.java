@@ -37,8 +37,8 @@ public class Processor extends Operation {
     private String testCaseInput; // -testcases (-tc) path to a spreadsheet containing test case data
 
     // TODO: These need to be per scope
-    private String dataElementIdentifierSystem = "http://fhir.org/guides/who/anc-cds/Identifier/anc-data-elements";
-    private String activityCodeSystem = "http://fhir.org/guides/who/anc-cds/CodeSystem/anc-activity-codes";
+    private String dataElementIdentifierSystem = "http://fhir.org/guides/nachc/hiv-cds/Identifier/data-elements";
+    private String activityCodeSystem = "http://fhir.org/guides/nachc/hiv-cds/CodeSystem/activity-codes";
     private String projectCodeSystemBase;
 
     private int questionnaireItemLinkIdCounter = 1;
@@ -1589,8 +1589,8 @@ public class Processor extends Operation {
         StructureDefinition.StructureDefinitionMappingComponent mapping = new StructureDefinition.StructureDefinitionMappingComponent();
         mapping.setIdentity(element.getScope());
         // TODO: Data Element mapping...
-        mapping.setUri("https://www.who.int/publications/i/item/9789240020306");
-        mapping.setName("Digital Adaptation Kit for Antenatal Care");
+//        mapping.setUri("https://www.who.int/publications/i/item/9789240020306");
+//        mapping.setName("Digital Adaptation Kit for Antenatal Care");
         sd.addMapping(mapping);
 
         sd.setStatus(Enumerations.PublicationStatus.DRAFT);
@@ -3352,7 +3352,7 @@ public class Processor extends Operation {
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
 
-        sb.append("include WHOCommon called WC");
+        sb.append("include NACHCCommon called NC");
         sb.append(System.lineSeparator());
         sb.append(String.format("include %sCommon called AC", scope));
         sb.append(System.lineSeparator());
