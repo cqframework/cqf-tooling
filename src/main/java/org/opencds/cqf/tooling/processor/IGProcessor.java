@@ -141,7 +141,7 @@ public class IGProcessor extends BaseProcessor {
 
         FhirContext fhirContext = IGProcessor.getIgFhirContext(fhirVersion);
 
-        IGProcessor.ensure(rootDir, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories, IOUtils.dataDirectories);
+        IGProcessor.ensure(rootDir, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
 
         List<String> refreshedValuesetNames;
         refreshedValuesetNames = valueSetsProcessor.refreshValueSetsContent(this, encoding, versioned, fhirContext);
@@ -191,7 +191,7 @@ public class IGProcessor extends BaseProcessor {
     public static String getBundlesPath(String igPath) {
         return FilenameUtils.concat(igPath, bundlePathElement);
     }
-    public static final String cqlLibraryPathElement = "input/pagecontent/cql/";
+    public static final String cqlLibraryPathElement = "input/cql/";
     public static final String libraryPathElement = "input/resources/library/";
     public static final String measurePathElement = "input/resources/measure/";
     public static final String planDefinitionPathElement = "input/resources/plandefinition/";
@@ -200,7 +200,7 @@ public class IGProcessor extends BaseProcessor {
     public static final String devicePathElement = "input/resources/device/";
     public static final String copyrightsPathElement = "input/data/copyrights";
     
-    public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, ArrayList<String> resourcePaths, ArrayList<String> dataPaths) {
+    public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, ArrayList<String> resourcePaths) {
         File directory = new File(getBundlesPath(igPath));
         if (!directory.exists()) {
             directory.mkdir();
@@ -222,12 +222,6 @@ public class IGProcessor extends BaseProcessor {
             checkForDirectory(igPath, IGProcessor.testCasePathElement);
         }
         checkForDirectory(igPath, IGProcessor.devicePathElement);
-
-        if (dataPaths.isEmpty()){
-            ensureDirectory(igPath, IGProcessor.copyrightsPathElement);
-        } else {
-            checkForDirectory(igPath, IGProcessor.copyrightsPathElement);
-        }
 
         // HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
     }

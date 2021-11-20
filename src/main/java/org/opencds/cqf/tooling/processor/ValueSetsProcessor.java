@@ -108,7 +108,6 @@ public class ValueSetsProcessor extends BaseProcessor {
         this.valueSetPath = FilenameUtils.concat(parentContext.getRootDir(), IGProcessor.valuesetsPathElement);
         this.fhirContext = fhirContext;
         this.encoding = encoding;
-
         ValueSetsProcessor.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
 
         return refreshValueSets(valueSetPath, encoding);
@@ -157,10 +156,11 @@ public class ValueSetsProcessor extends BaseProcessor {
 
     private List<ValueSet> refreshGeneratedContent( List<ValueSet> valueSets) {
         Copyrights copyrights = new Copyrights();
-        for (ValueSet valueSet : valueSets){
-            valueSet.setCopyright(copyrights.getCopyrightsText(valueSet));
+        if (copyrights.getName() != null){
+            for (ValueSet valueSet : valueSets){
+                valueSet.setCopyright(copyrights.getCopyrightsText(valueSet));
+            }
         }
-
         return valueSets;
     }
 

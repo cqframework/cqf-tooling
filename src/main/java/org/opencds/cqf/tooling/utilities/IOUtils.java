@@ -25,6 +25,7 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 
@@ -73,6 +74,8 @@ public class IOUtils
     public static ArrayList<String> resourceDirectories = new ArrayList<String>();
 
     public static ArrayList<String> dataDirectories = new ArrayList<String>();
+
+    public static ImplementationGuide sourceIg;
 
     public static String getIdFromFileName(String fileName) {
         return fileName.replaceAll("_", "-");
@@ -674,9 +677,6 @@ public class IOUtils
                     }
                 }
             }
-        }
-        if (copyrightsPath == ""){
-            LogUtils.info("Could not find codesystem-copyrights.json");
         }
         return copyrightsPath;
     }

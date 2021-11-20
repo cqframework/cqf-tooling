@@ -25,12 +25,12 @@ public class Copyrights {
     private List<CodesystemInfo> codesystems;
 
     /*
-        This class imports a file for codesystem copyright information in this example format:
+        This class imports a file in a data folder at input/data/copyrights for codesystem copyright information in this example format:
         {
             "name": "codesystemCopyrights",
             "title": "Codesystem Copyrights",
             "description": "Copyright information for codesystems utilized by resources",
-            "useContext": "This is how the codesystems are used in compliance with their creators",
+            "useContext": "How the codesystems are to be used",
             "codesystems": [
                 {
                     "name": "snomed",
@@ -46,6 +46,9 @@ public class Copyrights {
     public Copyrights(){
         try {
             String path = IOUtils.getCopyrightsPath();
+            if (path == ""){
+                throw new IOException("No copyrights file");
+            }
             String copyrightJsonString = FileUtils.readFileToString(new File(path), StandardCharsets.UTF_8);
 
             JsonObject copyrightObj = JsonParser.parseString(copyrightJsonString).getAsJsonObject();
@@ -66,7 +69,9 @@ public class Copyrights {
             }
             this.codesystems = codesystemsList;
         } catch (IOException e){
-            System.out.println(e.getMessage());
+            if (e.getMessage() != "No copyrights file") {
+                System.out.println(e.getMessage());
+            }
         }
     }
 
@@ -86,22 +91,10 @@ public class Copyrights {
         return this.useContext;
     }
 
-    private String alphoraCopyright(){
-        CodesystemInfo alphora = this.codesystems.stream()
-                .filter(c -> c.getName().equals("alphora"))
-                .findFirst()
-                .orElse(null);
-        if (alphora != null) {
-            return alphora.getCopyrightText();
-        } else {
-            return null;
-        }
-    }
-
     public String getCopyrightsText(ValueSet valueSet){
         ArrayList<String> copyrightsTextList = new ArrayList<>();
 
-        copyrightsTextList.add(alphoraCopyright());
+        copyrightsTextList.add(IOUtils.sourceIg.getCopyright());
 
         if (valueSet.hasCopyright()) {
             valueSet.setCopyright("");
@@ -161,6 +154,8 @@ public class Copyrights {
         }
 
         List<String> copyrightsTextList = new ArrayList<>();
+        copyrightsTextList.add(IOUtils.sourceIg.getCopyright());
+
         for (ValueSet valueSet : valueSets){
             String[] splitCopyrightText = valueSet.getCopyright().split(", ");
             for (String copyrightText : splitCopyrightText){

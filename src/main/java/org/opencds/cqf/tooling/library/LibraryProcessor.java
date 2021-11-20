@@ -134,10 +134,11 @@ public class LibraryProcessor extends BaseProcessor {
                 sourceLibrary.getDataRequirement().addAll(info.getDataRequirements());
                 sourceLibrary.getRelatedArtifact().removeIf(n -> n.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON);
                 sourceLibrary.getRelatedArtifact().addAll(relatedArtifacts);
-                sourceLibrary.setCopyright("");
-                sourceLibrary.setCopyright(copyrights.getCopyrightsText(relatedArtifacts));
                 sourceLibrary.getParameter().clear();
                 sourceLibrary.getParameter().addAll(info.getParameters());
+                if (copyrights.getName() != null){
+                    sourceLibrary.setCopyright(copyrights.getCopyrightsText(relatedArtifacts));
+                }
             } else {
                 logMessage(String.format("No cql info found for ", fileName));
                 //f.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, ValidationMessage.IssueType.NOTFOUND, "Library", "No cql info found for "+f.getName(), ValidationMessage.IssueSeverity.ERROR));

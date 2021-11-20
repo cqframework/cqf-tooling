@@ -20,6 +20,7 @@ import org.hl7.fhir.utilities.VersionUtilities;
 import org.opencds.cqf.tooling.npm.LibraryLoader;
 import org.opencds.cqf.tooling.npm.NpmPackageManager;
 import org.opencds.cqf.tooling.utilities.IGUtils;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 public class BaseProcessor implements IProcessorContext, IWorkerContext.ILoggingService {
 
@@ -185,7 +186,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
         } catch (Exception e) {
             throw new Exception("Error Parsing File " + igPath + ": " + e.getMessage(), e);
         }
-
+        IOUtils.sourceIg = sourceIg;
         return sourceIg;
     }
 
@@ -208,7 +209,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
         catch (IOException e) {
             logMessage(String.format("Exceptions occurred loading IG file", e.getMessage()));
         }
-
+        IOUtils.sourceIg = sourceIg;
         return sourceIg;
     }
 
