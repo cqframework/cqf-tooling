@@ -185,6 +185,7 @@ public class Processor extends Operation {
         supportedCodeSystems.put("ICHI", "https://mitel.dimi.uniud.it/ichi/#http://id.who.int/ichi");
         supportedCodeSystems.put("ICF", "http://hl7.org/fhir/sid/icf-nl");
         supportedCodeSystems.put("NDC", "http://hl7.org/fhir/sid/ndc");
+        supportedCodeSystems.put("NIDA", "https://cde.drugabuse.gov");
     }
 
     private void registerScopes() {
@@ -559,6 +560,7 @@ public class Processor extends Operation {
             case "CPT": return "CPTComments";
             case "HCPCS": return "HCPCSComments";
             case "NDC": return "NDCComments";
+            case "NIDA": return "NIDAComments";
         }
         throw new IllegalArgumentException(String.format("Unknown code system key %s", codeSystem));
     }
@@ -1037,6 +1039,10 @@ public class Processor extends Operation {
                         case "ndc code":
                         case "ndc?code": colIds.put("NDC", cell.getColumnIndex()); break;
                         case "ndc?comments / considerations": colIds.put("NDCComments", cell.getColumnIndex()); break;
+                        case "nida":
+                        case "nida code":
+                        case "nida?code": colIds.put("NIDA", cell.getColumnIndex()); break;
+                        case "nida?comments / considerations": colIds.put("NIDAComments", cell.getColumnIndex()); break;
                     }
                 }
                 continue;
@@ -2540,11 +2546,11 @@ public class Processor extends Operation {
     public void processExamples() {
         ExampleBuilder eb = new ExampleBuilder();
         eb.setAtlas(getAtlas());
-        eb.setPatientContext("anc-patient-example");
-        eb.setEncounterContext("anc-encounter-example");
-        eb.setLocationContext("anc-location-example");
-        eb.setPractitionerContext("anc-practitioner-example");
-        eb.setPractitionerRoleContext("anc-practitionerrole-example");
+        eb.setPatientContext("hiv-patient-example");
+        eb.setEncounterContext("hiv-encounter-example");
+        eb.setLocationContext("hiv-location-example");
+        eb.setPractitionerContext("hiv-practitioner-example");
+        eb.setPractitionerRoleContext("hiv-practitionerrole-example");
         for (StructureDefinition sd : profiles) {
             examples.put(sd.getUrl(), eb.build(sd));
         }
