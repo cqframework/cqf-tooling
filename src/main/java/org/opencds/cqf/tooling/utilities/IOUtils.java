@@ -918,6 +918,12 @@ public class IOUtils
         }
         return devicePaths;
     }
+
+    // TODO: This should not be necessary this is awful... For now it is needed for passing tests in Travis
+    public static void clearDevicePaths() {
+        devicePaths = new HashSet<String>();
+    }
+
     private static void setupDevicePaths(FhirContext fhirContext) {
         HashMap<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {

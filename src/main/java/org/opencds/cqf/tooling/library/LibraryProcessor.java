@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Strings;
+
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Attachment;
@@ -36,6 +38,9 @@ public class LibraryProcessor extends BaseProcessor {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext) {
+        return refreshIgLibraryContent(parentContext, outputEncoding, null, versioned, fhirContext);
+    }
+    public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext) {
         System.out.println("Refreshing libraries...");
         // ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
 
@@ -54,6 +59,11 @@ public class LibraryProcessor extends BaseProcessor {
 
         String libraryPath = FilenameUtils.concat(parentContext.getRootDir(), IGProcessor.libraryPathElement);
         RefreshLibraryParameters params = new RefreshLibraryParameters();
+        if (Strings.isNullOrEmpty(libraryOutputDirectory)) {
+            logger.info("No output directory found for libraries.  Any existing libraries will be overwritten.");
+        } else {
+            params.libraryOutputDirectory = libraryOutputDirectory;
+        }
         params.libraryPath = libraryPath;
         params.parentContext = parentContext;
         params.fhirContext = fhirContext;

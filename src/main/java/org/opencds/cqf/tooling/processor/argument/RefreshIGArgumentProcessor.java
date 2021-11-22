@@ -31,6 +31,8 @@ public class RefreshIGArgumentProcessor {
     public static final String[] FHIR_URI_OPTIONS = {"fs", "fhir-uri"};
     public static final String[] MEASURE_TO_REFRESH_PATH = {"mtrp", "measure-to-refresh-path"};
     public static final String[] RESOURCE_PATH_OPTIONS = {"rp", "resourcepath"};
+    public static final String[] LIBRARY_OUTPUT_PATH_OPTIONS = {"libraryOutput", "libraryOutputPath", "lop"};
+    public static final String[] MEASURE_OUTPUT_PATH_OPTIONS = {"measureOutput", "measureOutputPath", "mop"};
     public static final String[] DATA_PATH_OPTIONS = {"dp", "datapath"};
 
     @SuppressWarnings("unused")
@@ -45,6 +47,8 @@ public class RefreshIGArgumentProcessor {
         OptionSpecBuilder igOutputEncodingBuilder = parser.acceptsAll(asList(IG_OUTPUT_ENCODING), "If omitted, output will be generated using JSON encoding.");
         OptionSpecBuilder fhirUriBuilder = parser.acceptsAll(asList(FHIR_URI_OPTIONS),"If omitted the final bundle will not be loaded to a FHIR server.");
         OptionSpecBuilder measureToRefreshPathBuilder = parser.acceptsAll(asList(MEASURE_TO_REFRESH_PATH), "Path to Measure to refresh.");
+        OptionSpecBuilder libraryOutputPathBuilder = parser.acceptsAll(asList(LIBRARY_OUTPUT_PATH_OPTIONS),"If omitted, the libraries will overwrite any existing libraries");
+        OptionSpecBuilder measureOutputPathBuilder = parser.acceptsAll(asList(MEASURE_OUTPUT_PATH_OPTIONS),"If omitted, the measures will overwrite any existing measures");
 
         OptionSpec<String> ini = iniBuilder.withRequiredArg().describedAs("Path to the IG ini file");
         OptionSpec<String> rootDir = rootDirBuilder.withOptionalArg().describedAs("Root directory of the IG");
@@ -53,6 +57,8 @@ public class RefreshIGArgumentProcessor {
         OptionSpec<String> dataPath = dataPathBuilder.withOptionalArg().describedAs("directory of supplemental data");
         OptionSpec<String> igOutputEncoding = igOutputEncodingBuilder.withOptionalArg().describedAs("desired output encoding for resources");
         OptionSpec<String> measureToRefreshPath = measureToRefreshPathBuilder.withOptionalArg().describedAs("Path to Measure to refresh.");
+        OptionSpec<String> libraryOutputPath = libraryOutputPathBuilder.withOptionalArg().describedAs("path to the output directory for updated libraries");
+        OptionSpec<String> measureOutputPath = measureOutputPathBuilder.withOptionalArg().describedAs("path to the output directory for updated measures");
 
         //TODO: FHIR user / password (and other auth options)
         OptionSpec<String> fhirUri = fhirUriBuilder.withOptionalArg().describedAs("uri of fhir server");  
@@ -81,7 +87,7 @@ public class RefreshIGArgumentProcessor {
 
         List<String> resourcePaths = ArgUtils.getOptionValues(options, RESOURCE_PATH_OPTIONS[0]);
         List<String> dataPaths = ArgUtils.getOptionValues(options, DATA_PATH_OPTIONS[0]);
-            
+
         //could not easily use the built-in default here because it is based on the value of the igPath argument.
         String igEncoding = (String)options.valueOf(IG_OUTPUT_ENCODING[0]);
         Encoding outputEncodingEnum = Encoding.JSON;
@@ -95,6 +101,16 @@ public class RefreshIGArgumentProcessor {
         Boolean versioned = options.has(VERSIONED_OPTIONS[0]);
         String fhirUri = (String)options.valueOf(FHIR_URI_OPTIONS[0]);
         String measureToRefreshPath = (String)options.valueOf(MEASURE_TO_REFRESH_PATH[0]);
+
+        String libraryOutputPath = (String)options.valueOf(LIBRARY_OUTPUT_PATH_OPTIONS[0]);
+        if (libraryOutputPath == null) {
+            libraryOutputPath = "";
+        }
+
+        String measureOutputPath = (String)options.valueOf(MEASURE_OUTPUT_PATH_OPTIONS[0]);
+        if (measureOutputPath == null) {
+            measureOutputPath = "";
+        }
 
         ArrayList<String> rPaths = new ArrayList<String>();
         if (resourcePaths != null && !resourcePaths.isEmpty()) {
@@ -120,7 +136,9 @@ public class RefreshIGArgumentProcessor {
         ip.dataDirs = dPaths;
         ip.fhirUri = fhirUri;
         ip.measureToRefreshPath = measureToRefreshPath;
-       
+        ip.libraryOutputPath = libraryOutputPath;
+        ip.measureOutputPath = measureOutputPath;
+
         return ip;
     }
 }

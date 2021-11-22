@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ImplementationGuide xmlns="http://hl7.org/fhir">
+    <id value="fhir.dbcg.connectathon-r4"/>
+    <url value="http://fhir.org/guides/dbcg/connectathon/ImplementationGuide/fhir.dbcg.connectathon-r4"/>
+    <version value="4.0.0"/>
+    <name value="Connectathon_DBCG"/>
+    <title value="DBCG Connectathon Implementation Guide"/>
+    <status value="draft"/>
+    <experimental value="false"/>
+    <date value="2020-04-24"/>
+    <publisher value="DBCG"/>
+    <contact>
+      <telecom>
+        <system value="url"/>
+        <value value="http://www.dynamiccontentgroup.com"/>
+      </telecom>
+    </contact>
+    <description value="Connectathon Implementation Guide"/>
+    <packageId value="fhir.dbcg.connectathon-r4"/>
+	  <fhirVersion value="4.0.1"/>
+    <definition>
+        <page>
+          <nameUrl value="toc.html" />
+          <title value="Table of Contents" />
+          <generation value="html" />
+          <page>
+            <nameUrl value="index.html" />
+            <title value="Home" />
+            <generation value="markdown" />
+          </page>
+          <page>
+            <nameUrl value="measures.html" />
+            <title value="Measures" />
+            <generation value="html" />
+          </page>
+          <page>
+            <nameUrl value="EXM104_FHIR4_8.1.000.html" />
+            <title value="Measure - EXM104" />
+            <generation value="html" />
+            <page>
+              <nameUrl value="exm104-cql.html" />
+              <title value="EXM104 - CQL Source" />
+              <generation value="html" />
+            </page>
+          </page>
+          <page>
+            <nameUrl value="EXM105_FHIR4_8.1.000.html" />
+            <title value="Measure - EXM105" />
+            <generation value="html" />
+            <page>
+              <nameUrl value="exm105-cql.html" />
+              <title value="EXM105 - CQL Source" />
+              <generation value="html" />
+            </page>
+          </page>
+          <page>
+            <nameUrl value="EXM108_FHIR4_8.2.000.html" />
+            <title value="Measure - EXM108" />
+            <generation value="html" />
+            <page>
+              <nameUrl value="exm108-cql.html" />
+              <title value="EXM108 - CQL Source" />
+              <generation value="html" />
+            </page>
+          </page>
+        </page>
+
+        <!-- copyright year is a mandatory parameter -->
+        <parameter>
+          <code value="copyrightyear" />
+          <value value="2019+" />
+        </parameter>
+        <!-- releaselabel should be the ballot status for HL7-published IGs. -->
+        <parameter>
+          <code value="releaselabel" />
+          <value value="CI Build" />
+        </parameter>
+        <parameter>
+          <code value="find-other-resources" />
+          <value value="true" />
+        </parameter>
+
+        <parameter>
+          <code value="path-pages" />
+          <value value="input/pagecontent"/>
+        </parameter>
+        <parameter>
+          <code value="path-resource" />
+          <value value="input/resources/library"/>
+        </parameter>
+        <parameter>
+          <code value="path-resource" />
+          <value value="input/resources/measure"/>
+        </parameter>
+        <parameter>
+          <code value="path-resource" />
+          <value value="input/vocabulary/codesystem"/>
+        </parameter>
+        <!-- <parameter>
+          <code value="path-resource" />
+          <value value="input/vocabulary/valueset"/>
+        </parameter> -->
+        <!-- Uncomment one or more of these if you want to limit which syntaxes are supported or want to disable the display of mappings
+         <parameter>
+           <code value="excludexml"/>
+           <value value="true"/>
+         </parameter>
+         <parameter>
+           <code value="excludejson"/>
+           <value value="true"/>
+         </parameter>
+         <parameter>
+           <code value="excludettl"/>
+           <value value="true"/>
+         </parameter>
+         <parameter>
+           <code value="excludemap"/>
+           <value value="true"/>
+         </parameter>-->
+    </definition>
+</ImplementationGuide>
