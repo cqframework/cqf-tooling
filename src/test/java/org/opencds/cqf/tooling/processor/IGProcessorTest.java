@@ -51,10 +51,11 @@ public class IGProcessorTest extends RefreshTest {
         super(FhirContext.forCached(FhirVersionEnum.R4), "IGProcessorTest");
         LibraryProcessor libraryProcessor = new LibraryProcessor();
         MeasureProcessor measureProcessor = new MeasureProcessor();
+		ValueSetsProcessor valueSetsProcessor = new ValueSetsProcessor();
         CDSHooksProcessor cdsHooksProcessor = new CDSHooksProcessor();
         PlanDefinitionProcessor planDefinitionProcessor = new PlanDefinitionProcessor(libraryProcessor, cdsHooksProcessor);
         IGBundleProcessor igBundleProcessor = new IGBundleProcessor(measureProcessor, planDefinitionProcessor);
-        processor = new IGProcessor(igBundleProcessor, libraryProcessor, measureProcessor);
+        processor = new IGProcessor(igBundleProcessor, libraryProcessor, measureProcessor, valueSetsProcessor);
     }
  
     @BeforeMethod
