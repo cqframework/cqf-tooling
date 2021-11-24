@@ -8,7 +8,8 @@ import java.util.Map;
 
 import com.google.common.base.Strings;
 
-import org.hl7.fhir.convertors.VersionConvertor_40_50;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
+import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.r4.formats.FormatUtilities;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Resource;
@@ -70,8 +71,9 @@ public class R4LibraryProcessor extends LibraryProcessor {
 
         List<String> refreshedLibraryNames = new ArrayList<String>();
         List<org.hl7.fhir.r5.model.Library> refreshedLibraries = super.refreshGeneratedContent(libraries);
+        VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
         for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
-            Library library = (Library) VersionConvertor_40_50.convertResource(refreshedLibrary);
+            Library library = (Library) versionConvertor_40_50.convertResource(refreshedLibrary);
             String filePath = null;
             Encoding fileEncoding = null;            
             if (fileMap.containsKey(refreshedLibrary.getId()))
@@ -118,7 +120,8 @@ public class R4LibraryProcessor extends LibraryProcessor {
     private void loadLibrary(Map<String, String> fileMap, List<org.hl7.fhir.r5.model.Library> libraries, File libraryFile) {
         try {
             Resource resource = FormatUtilities.loadFile(libraryFile.getAbsolutePath());
-            org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) VersionConvertor_40_50.convertResource(resource);
+            VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
+            org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) versionConvertor_40_50.convertResource(resource);
             fileMap.put(library.getId(), libraryFile.getAbsolutePath());
             libraries.add(library);
         } catch (Exception ex) {
