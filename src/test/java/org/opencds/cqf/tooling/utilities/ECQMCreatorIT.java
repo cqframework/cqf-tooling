@@ -135,13 +135,14 @@ public class ECQMCreatorIT {
 
     @Test
     public void TestCMS104FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS104-v2-0-004-FHIR-4-0-1.json", "DischargedonAntithromboticTherapyFHIR");
+        List<DataRequirement> drs = StartMatOutputTest("CMS104FHIR-v0-0-001-FHIR-4-0-1.json", "DischargedonAntithromboticTherapyFHIR");
         // TODO: Measure-specific validation of data requirements content
 
         List<String> edrs = new ArrayList<String>();
         edrs.add("ServiceRequest");
         edrs.add("Procedure");
         edrs.add("Encounter");
+        edrs.add("MedicationRequest");
         checkExpectedResourcesPresent(drs, edrs);
 
     }
