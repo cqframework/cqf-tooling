@@ -49,7 +49,8 @@ public class ExampleBuilder {
         if (sd.getType() == null) {
             throw new IllegalArgumentException("type required");
         }
-
+StructureDefinitionBaseVisitor sdbv = new StructureDefinitionBaseVisitor(this.atlas);
+sdbv.visitStructureDefinition(sd);
         Resource r = (Resource)fc.getResourceDefinition(sd.getType()).newInstance();
         r.setId(sd.getId() + "-" + idScope);
         r.setMeta(new Meta().addProfile(sd.getUrl()));
