@@ -11,9 +11,9 @@ import java.util.Map;
 
 public class StructureDefinitionBaseVisitorTest {
     private CanonicalResourceAtlas atlas;
-    private List<ValueSet> valueSets = new ArrayList<ValueSet>();
-    private List<CodeSystem> codeSystems = new ArrayList<CodeSystem>();
-    private Map<String, ConceptMap> conceptMaps = new LinkedHashMap<String, ConceptMap>();
+    private List<ValueSet> valueSets = new ArrayList<>();
+    private List<CodeSystem> codeSystems = new ArrayList<>();
+    private Map<String, ConceptMap> conceptMaps = new LinkedHashMap<>();
 
 
     /*
@@ -29,9 +29,9 @@ public class StructureDefinitionBaseVisitorTest {
         if (atlas == null) {
             atlas =
                     new CanonicalResourceAtlas()
-                            .setValueSets(new InMemoryCanonicalResourceProvider<ValueSet>(this.valueSets))
-                            .setCodeSystems(new InMemoryCanonicalResourceProvider<CodeSystem>(this.codeSystems))
-                            .setConceptMaps(new InMemoryCanonicalResourceProvider<ConceptMap>(this.conceptMaps.values()));
+                            .setValueSets(new InMemoryCanonicalResourceProvider<>(this.valueSets))
+                            .setCodeSystems(new InMemoryCanonicalResourceProvider<>(this.codeSystems))
+                            .setConceptMaps(new InMemoryCanonicalResourceProvider<>(this.conceptMaps.values()));
         }
         return atlas;
     }
