@@ -2549,7 +2549,8 @@ public class Processor extends Operation {
                     new CanonicalResourceAtlas()
                             .setValueSets(new InMemoryCanonicalResourceProvider<ValueSet>(this.valueSets))
                             .setCodeSystems(new InMemoryCanonicalResourceProvider<CodeSystem>(this.codeSystems))
-                            .setConceptMaps(new InMemoryCanonicalResourceProvider<ConceptMap>(this.conceptMaps.values()));
+                            .setConceptMaps(new InMemoryCanonicalResourceProvider<ConceptMap>(this.conceptMaps.values()))
+                            .setExtensions(new InMemoryCanonicalResourceProvider<StructureDefinition>(this.extensions));
         }
         return atlas;
     }
