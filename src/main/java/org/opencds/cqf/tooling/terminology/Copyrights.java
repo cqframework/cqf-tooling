@@ -12,6 +12,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.opencds.cqf.tooling.processor.ValueSetsProcessor;
 import org.opencds.cqf.tooling.utilities.*;
@@ -46,7 +47,7 @@ public class Copyrights {
     public Copyrights(){
         try {
             String path = IOUtils.getCopyrightsPath();
-            if (path == ""){
+            if (path.equals("")){
                 throw new IOException("No copyrights file");
             }
             String copyrightJsonString = FileUtils.readFileToString(new File(path), StandardCharsets.UTF_8);
@@ -69,7 +70,7 @@ public class Copyrights {
             }
             this.codesystems = codesystemsList;
         } catch (IOException e){
-            if (e.getMessage() != "No copyrights file") {
+            if (!e.getMessage().equals("No copyrights file")) {
                 System.out.println(e.getMessage());
             }
         }
@@ -94,11 +95,7 @@ public class Copyrights {
     public String getCopyrightsText(ValueSet valueSet){
         ArrayList<String> copyrightsTextList = new ArrayList<>();
 
-        copyrightsTextList.add(IOUtils.sourceIg.getCopyright());
-
-        if (valueSet.hasCopyright()) {
-            valueSet.setCopyright("");
-        }
+        valueSet.setCopyright("");
 
         ArrayList<String> valueSetSystemUrls = new ArrayList<>();
         if (valueSet.getExpansion().hasContains()){
@@ -130,6 +127,12 @@ public class Copyrights {
                 LogUtils.info("No copyright info for system: " + url + " from ValueSet: " + valueSet.getId());
             }
         }
+        Collections.sort(copyrightsTextList);
+
+        if (IOUtils.sourceIg.getCopyright() != null){
+            copyrightsTextList.add(0, IOUtils.sourceIg.getCopyright());
+        }
+
         return String.join(", ", copyrightsTextList);
     }
 
@@ -144,25 +147,33 @@ public class Copyrights {
                 .collect(Collectors.toList());
 
         for (RelatedArtifact artifact : valueSetArtifacts){
-            List<String> splitResource = Arrays.asList(artifact.getResource().split("/"));
-            String id = splitResource.get(splitResource.size() -1);
+            String id = FilenameUtils.getName(artifact.getResource()) + ".json";
             for (String path : filePaths){
-                if (path.contains(id)){
+                String fileName = FilenameUtils.getName(path);
+                fileName = fileName.replace("valueset-", "");
+                if (id.equals(fileName)){
                     processor.loadValueSet(fileMap, valueSets, new File(path));
+                    break;
                 }
             }
         }
 
         List<String> copyrightsTextList = new ArrayList<>();
-        copyrightsTextList.add(IOUtils.sourceIg.getCopyright());
 
         for (ValueSet valueSet : valueSets){
-            String[] splitCopyrightText = valueSet.getCopyright().split(", ");
-            for (String copyrightText : splitCopyrightText){
-                if (!copyrightsTextList.contains(copyrightText)){
-                    copyrightsTextList.add(copyrightText);
+            if (valueSet.hasCopyright()) {
+                String[] splitCopyrightText = valueSet.getCopyright().split(", ");
+                for (String copyrightText : splitCopyrightText) {
+                    if (!copyrightsTextList.contains(copyrightText)) {
+                        copyrightsTextList.add(copyrightText);
+                    }
                 }
             }
+        }
+        Collections.sort(copyrightsTextList);
+
+        if (IOUtils.sourceIg.getCopyright() != null) {
+            copyrightsTextList.add(0, IOUtils.sourceIg.getCopyright());
         }
 
         return String.join(", ", copyrightsTextList);
