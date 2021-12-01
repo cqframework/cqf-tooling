@@ -205,15 +205,15 @@ public class CopyrightsTest extends RefreshTest {
     private boolean DSTU3LibrariesCopyrightsRefreshed(ArrayList<Library> libraries) throws Exception{
         try {
             for (Library library : libraries) {
-                if (library.getId().equals("Library/AdultOutpatientEncountersFHIR4")) {
+                if (library.getId().equals("AdultOutpatientEncountersFHIR4")) {
                     if (!library.getCopyright().equals(cpt + ", " + umls)) {
                         throw new Exception(library.getId());
                     }
-                } else if (library.getId().equals("Library/AdvancedIllnessandFrailtyExclusionECQMFHIR4")) {
+                } else if (library.getId().equals("AdvancedIllnessandFrailtyExclusionECQMFHIR4")) {
                     if (!library.getCopyright().equals(cpt + ", " + umls)) {
                         throw new Exception(library.getId());
                     }
-                } else if (library.getId().equals("Library/BreastCancerScreeningFHIR")) {
+                } else if (library.getId().equals("BreastCancerScreeningFHIR")) {
                     if (!library.getCopyright().equals(cpt + ", " + umls)) {
                         throw new Exception(library.getId());
                     }
