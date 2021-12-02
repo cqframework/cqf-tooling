@@ -147,7 +147,7 @@ public class LibraryProcessor extends BaseProcessor {
                 sourceLibrary.getParameter().clear();
                 sourceLibrary.getParameter().addAll(info.getParameters());
                 if (copyrights.getName() != null){
-                    sourceLibrary.setCopyright("");
+                    sourceLibrary.setCopyright("not null");
                     sourceLibrary.setCopyright(copyrights.getCopyrightsText(relatedArtifacts));
                 }
             } else {
