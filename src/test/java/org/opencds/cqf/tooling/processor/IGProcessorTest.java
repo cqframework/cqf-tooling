@@ -60,7 +60,7 @@ public class IGProcessorTest extends RefreshTest {
  
     @BeforeMethod
     public void setUp() throws Exception {
-        IOUtils.resourceDirectories = new ArrayList<String>();
+        IOUtils.resourceDirectories = new ArrayList<>();
         IOUtils.clearDevicePaths();
         System.setOut(new PrintStream(this.console));
         File dir  = new File("target" + separator + "refreshIG");
@@ -83,7 +83,8 @@ public class IGProcessorTest extends RefreshTest {
         RefreshIGParameters params = new RefreshIGParameters();
         params.ini = INI_LOC;
 		params.outputEncoding = IOUtils.Encoding.JSON;
-		params.resourceDirs = new ArrayList<String>();
+		params.resourceDirs = new ArrayList<>();
+		params.dataDirs = new ArrayList<>();
 		params.includeELM = false;
         params.includeTerminology = true;
         params.includeDependencies = true;
@@ -193,7 +194,7 @@ public class IGProcessorTest extends RefreshTest {
 
 	private String getFhirVersion(IniFile ini) {
 		String specifiedFhirVersion = ini.getStringProperty("IG", "fhir-version");
-		if (specifiedFhirVersion == null || specifiedFhirVersion == "") {
+		if (specifiedFhirVersion == null || specifiedFhirVersion.equals("")) {
 
 			// TODO: Should point to global constant:
 			specifiedFhirVersion = "4.0.1";
