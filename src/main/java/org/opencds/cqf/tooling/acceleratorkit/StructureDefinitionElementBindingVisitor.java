@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class StructureDefinitionElementBindingVisitor extends StructureDefinitionVisitor{
+public class StructureDefinitionElementBindingVisitor extends StructureDefinitionBaseVisitor {
     private FhirContext fc;
     private CanonicalResourceAtlas canonicalResourceAtlas;
 
