@@ -27,7 +27,7 @@ public class StructureDefinitionElementBindingVisitorTest {
     @Test
     public void createAtlas(){
         String inputPath = "/Users/bryantaustin/Projects/FHIR-Spec";
-        String resourcePaths = "FHIR-4.0.1/4.0.1;US-Core/3.1.0;QI-Core/4.0.0";
+        String resourcePaths = "4.0.1;US-Core/3.1.0;QI-Core/4.0.0";
         Atlas atlas = new Atlas();
         atlas.loadPaths(inputPath, resourcePaths);
         this.codeSystems = new ArrayList<>();

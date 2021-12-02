@@ -54,7 +54,7 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
                 String bindingValueSet = ed.getBinding().getValueSet();
                 String pipeVersion = "";
                 if(bindingValueSet.contains("|")){
-                    pipeVersion = bindingValueSet.substring(bindingValueSet.indexOf("|"));
+                    pipeVersion = bindingValueSet.substring(bindingValueSet.indexOf("|") + 1);
                     bindingValueSet = bindingValueSet.substring(0, bindingValueSet.indexOf("|"));
                 }
                 sdbo.bindingValueSetURL = bindingValueSet;
@@ -63,7 +63,7 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
                 if (null != this.canonicalResourceAtlas.getValueSets().getByCanonicalUrlWithVersion(sdbo.bindingValueSetURL)){
                     valueSetVersion = this.canonicalResourceAtlas.getValueSets().getByCanonicalUrlWithVersion(sdbo.bindingValueSetURL).getVersion();
                 } else if(valueSetVersion.length() < 1 && bindingValueSet.contains("|")){
-                    valueSetVersion = bindingValueSet.substring(bindingValueSet.indexOf("|"));
+                    valueSetVersion = pipeVersion;
                 }
                 sdbo.bindingValueSetVersion = valueSetVersion;
                 bindingObjects.put(sdbo.elementPath, sdbo);
@@ -72,5 +72,4 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
         }
 
     }
-    protected void visitDifferential(){}
 }
