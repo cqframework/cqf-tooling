@@ -128,9 +128,95 @@ public class ECQMCreatorIT {
 
 
     @Test
+    public void TestCMS816HIR() {
+
+        List<DataRequirement> drs = StartMatOutputTest("HH-01FHIR-v0-0-010-FHIR-4-0-1.json", "HospitalHarmSevereHypoglycemiaFHIR");
+        // TODO: Measure-specific validation of data requirements content
+        List<String> edrs = new ArrayList<String>();
+        edrs.add("ServiceRequest");
+        edrs.add("Procedure");
+        edrs.add("Encounter");
+
+        edrs.add("MedicationRequest");
+
+        edrs.add("Condition");
+
+        checkExpectedResourcesPresent(drs, edrs);
+
+    }
+    @Test
+    public void TestCMS190FHIR() {
+
+        List<DataRequirement> drs = StartMatOutputTest("CMS190-v0-0-003-FHIR-4-0-1.json", "IntensiveCareUnitVenousThromboembolismProphylaxisFHIR");
+        // TODO: Measure-specific validation of data requirements content
+        List<String> edrs = new ArrayList<String>();
+        edrs.add("ServiceRequest");
+        edrs.add("Procedure");
+        edrs.add("Encounter");
+
+       
+
+        checkExpectedResourcesPresent(drs, edrs);
+
+    }
+    @Test
+    public void TestCMS108FHIR() {
+
+        List<DataRequirement> drs = StartMatOutputTest("CMS108-v0-0-003-FHIR-4-0-1.json", "VenousThromboembolismProphylaxisFHIR");
+        // TODO: Measure-specific validation of data requirements content
+        List<String> edrs = new ArrayList<String>();
+        edrs.add("ServiceRequest");
+        edrs.add("Procedure");
+        edrs.add("Encounter");
+
+       
+
+        checkExpectedResourcesPresent(drs, edrs);
+    }
+    
+    @Test
+    public void TestCMS147FHIR() {
+
+        List<DataRequirement> drs = StartMatOutputTest("CMS147FHIR-v0-0-001-FHIR-4-0-1.json", "PreventiveCareandScreeningInfluenzaImmunizationFHIR");
+        // TODO: Measure-specific validation of data requirements content
+        List<String> edrs = new ArrayList<String>();
+        edrs.add("ServiceRequest");
+        edrs.add("Procedure");
+        edrs.add("Encounter");
+
+        
+
+        checkExpectedResourcesPresent(drs, edrs);
+        
+
+    }
+    @Test
+    public void TestCMS159FHIR() {
+
+        List<DataRequirement> drs = StartMatOutputTest("CMS159FHIR-v0-0-001-FHIR-4-0-1.json", "DepressionRemissionatTwelveMonthsFHIR");
+        // TODO: Measure-specific validation of data requirements content
+        List<String> edrs = new ArrayList<String>();
+        edrs.add("ServiceRequest");
+        edrs.add("Procedure");
+        edrs.add("Encounter");
+       
+
+        checkExpectedResourcesPresent(drs, edrs);
+
+    }
+    
+    @Test
     public void TestCMS125FHIR() {
         List<DataRequirement> drs = StartMatOutputTest("CMS125FHIR-v0-0-004-FHIR-4-0-1.json", "BreastCancerScreeningsFHIR");
         // TODO: Measure-specific validation of data requirements content
+        List<String> edrs = new ArrayList<String>();
+        edrs.add("ServiceRequest");
+        edrs.add("Procedure");
+        edrs.add("Encounter");
+        edrs.add("MedicationRequest");
+        edrs.add("Condition");
+
+        checkExpectedResourcesPresent(drs, edrs);
     }
 
     @Test
@@ -142,7 +228,11 @@ public class ECQMCreatorIT {
         edrs.add("ServiceRequest");
         edrs.add("Procedure");
         edrs.add("Encounter");
+
         edrs.add("MedicationRequest");
+
+        edrs.add("Condition");
+
         checkExpectedResourcesPresent(drs, edrs);
 
     }
@@ -325,6 +415,13 @@ public class ECQMCreatorIT {
 
     }
     
+    @Test
+    public void TestCMS142FHIR() {
+
+        List<DataRequirement> drs = StartMatOutputTest("CMS142FHIR-v0-0-004-FHIR-4-0-1.json", "DRCommunicationWithPhysicianManagingDiabetesFHIR");
+        // TODO: Measure-specific validation of data requirements content
+
+    }
     @Test
     public void TestCMS139FHIR() {
         
