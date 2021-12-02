@@ -99,6 +99,8 @@ class OperationFactory {
                 return new SpreadsheetToCQLOperation();
             case "PostmanCollection":
                 return new PostmanCollectionOperation();
+            case "ProfilesToSpreadsheet":
+                return new ProfilesToSpreadsheet();
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operationName);
         }
