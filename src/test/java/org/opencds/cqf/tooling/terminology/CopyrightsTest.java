@@ -95,7 +95,7 @@ public class CopyrightsTest extends RefreshTest {
 
         processor.publishIG(params);
 
-        assertFalse(IOUtils.dataDirectories.isEmpty() || IOUtils.dataDirectories == null, "No data directory");
+        assertFalse(IOUtils.getCopyrightsPath() == null || IOUtils.getCopyrightsPath() == "");
 
         Copyrights copyrights = new Copyrights();
         assertFalse(copyrights.getName() == null, "No copyrights file");
