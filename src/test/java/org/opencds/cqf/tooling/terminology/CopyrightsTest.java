@@ -1,5 +1,6 @@
 package org.opencds.cqf.tooling.terminology;
 
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -103,6 +104,8 @@ public class CopyrightsTest extends RefreshTest {
             valueSets.add((ValueSet) IOUtils.readResource(path, fhirContext, true));
         }
 
+        assertFalse(valueSets.isEmpty(), "No valuesets collected");
+
         assertTrue(ValuesetsCopyrightsRefreshed(valueSets));
 
         ArrayList<org.hl7.fhir.dstu3.model.Library> DSTU3Libraries = new ArrayList<>();
@@ -113,6 +116,8 @@ public class CopyrightsTest extends RefreshTest {
                     DSTU3Libraries.add((org.hl7.fhir.dstu3.model.Library) IOUtils.readResource(path, fhirContext, true));
                 }
 
+                assertFalse(DSTU3Libraries.isEmpty(), "No DSTU3 libraries collected");
+
                 assertTrue(DSTU3LibrariesCopyrightsRefreshed(DSTU3Libraries));
 
                 break;
@@ -120,6 +125,8 @@ public class CopyrightsTest extends RefreshTest {
                 for (String path : libraryPaths) {
                     R4Libraries.add((org.hl7.fhir.r4.model.Library) IOUtils.readResource(path, fhirContext, true));
                 }
+
+                assertFalse(R4Libraries.isEmpty(), "No R4 libraries collected");
 
                 assertTrue(R4LibrariesCopyrightsRefreshed(R4Libraries));
 
