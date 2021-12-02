@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import org.apache.commons.io.FileUtils;
+import org.checkerframework.checker.units.qual.C;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.IniFile;
@@ -93,6 +94,9 @@ public class CopyrightsTest extends RefreshTest {
         IniFile ini = new IniFile(iniFileLocation);
 
         processor.publishIG(params);
+
+        Copyrights copyrights = new Copyrights();
+        assertFalse(copyrights.getName() == null, "No copyrights file");
 
         FhirContext fhirContext = IGProcessor.getIgFhirContext(getFhirVersion(ini));
 
