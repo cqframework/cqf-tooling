@@ -2,12 +2,13 @@ package org.opencds.cqf.tooling.acceleratorkit;
 
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.opencds.cqf.tooling.modelinfo.Atlas;
+import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiConsumer;
 
 public class StructureDefinitionBaseVisitorTest {
     private CanonicalResourceAtlas atlas;
@@ -23,6 +24,25 @@ public class StructureDefinitionBaseVisitorTest {
     then call visitStructureDefinition(StructureDefinition sd)
     on return
      */
+    @Test
+    public void createAtlas(){
+        String inputPath = "/Users/bryantaustin/Projects/FHIR-Spec";
+        String resourcePaths = "FHIR-4.0.1/4.0.1;US-Core/3.1.0;QI-Core/4.0.0";
+        Atlas atlas = new Atlas();
+        atlas.loadPaths(inputPath, resourcePaths);
+        CanonicalResourceAtlas canonicalResourceAtlas = new CanonicalResourceAtlas();
+
+
+        StructureDefinitionElementBindingVisitor sdbv = new StructureDefinitionElementBindingVisitor(canonicalResourceAtlas);
+        Map<String, StructureDefinitionBindingObject> bindingObjects = new HashMap<>();
+        Map<String, StructureDefinition>scMap = atlas.getStructureDefinitions();
+        scMap.forEach((key, sd)->{
+            bindingObjects.putAll(sdbv.visitStructureDefinition(sd));
+        });
+
+
+
+    }
 
 
     private CanonicalResourceAtlas getAtlas() {

@@ -11,36 +11,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class StructureDefinitionBaseVisitor {
+public class StructureDefinitionElementBindingVisitor extends StructureDefinitionVisitor{
     private FhirContext fc;
-    private CanonicalResourceAtlas atlas;
+    private CanonicalResourceAtlas canonicalResourceAtlas;
 
 
-    public StructureDefinitionBaseVisitor(CanonicalResourceAtlas atlas){
+    public StructureDefinitionElementBindingVisitor(CanonicalResourceAtlas atlas){
         fc = FhirContext.forCached(FhirVersionEnum.R4);
-        this.atlas = atlas;
+        this.canonicalResourceAtlas = atlas;
     }
     public Map<String, StructureDefinitionBindingObject>  visitStructureDefinition(StructureDefinition sd){
         if (sd == null) {
             throw new IllegalArgumentException("sd required");
         }
-
         if (sd.getType() == null) {
             throw new IllegalArgumentException("type required");
         }
-
         Resource r = (Resource)fc.getResourceDefinition(sd.getType()).newInstance();
         String sdURL = sd.getUrl();
         String sdVersion = sd.getVersion();
         Map<String, StructureDefinitionBindingObject> bindingObjects = new HashMap<>();
-        StructureDefinition.StructureDefinitionSnapshotComponent snapshot = sd.getSnapshot();
-        if(snapshot != null && snapshot.hasElement()){
-            List<ElementDefinition> eds = snapshot.getElement();
+        List<ElementDefinition> eds = super.visitSnapshot(sd);
+        if(eds != null && !eds.isEmpty()){
             getBindings(eds, sdURL, sdVersion, bindingObjects);
          }
-        StructureDefinition.StructureDefinitionDifferentialComponent sddc = sd.getDifferential();
-        if(sddc != null && sddc.hasElement()){
-            List<ElementDefinition> eds = sddc.getElement();
+        eds = super.visitDifferential(sd);
+        if(eds != null && !eds.isEmpty()){
             getBindings(eds, sdURL, sdVersion, bindingObjects);
         }
         return bindingObjects;
@@ -57,11 +53,12 @@ public class StructureDefinitionBaseVisitor {
                 sdbo.bindingStrength= ed.getBinding().getStrength().toString();
                 sdbo.bindingValueSetURL = ed.getBinding().getValueSet();
                 sdbo.elementPath = ed.getPath();
-                sdbo.bindingValueSetVersion = this.atlas.getValueSets().getByCanonicalUrlWithVersion(sdbo.bindingValueSetURL).getVersion();
+                sdbo.bindingValueSetVersion = this.canonicalResourceAtlas.getValueSets().getByCanonicalUrlWithVersion(sdbo.bindingValueSetURL).getVersion();
                 bindingObjects.put(sdURL, sdbo);
             }
             index.set(index.get() + 1);
         }
 
     }
+    protected void visitDifferential(){}
 }
