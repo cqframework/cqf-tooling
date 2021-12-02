@@ -19,7 +19,6 @@ import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.processor.*;
 import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -43,7 +42,7 @@ public class CopyrightsTest extends RefreshTest {
 
     //copyright text
     private final String cpt = "American Medical Association CPT®";
-    private final String umls = "UMLS Metathesaurus® Source Vocabularies and SNOMED CT®";
+    private final String snomed = "UMLS Metathesaurus® Source Vocabularies and SNOMED CT®";
 
     private String[] args = {operation, rootDir, ip, ini, rp, dp, t, d, p};
 
@@ -104,11 +103,7 @@ public class CopyrightsTest extends RefreshTest {
             valueSets.add((ValueSet) IOUtils.readResource(path, fhirContext, true));
         }
 
-        try {
-            assertTrue(ValuesetsCopyrightsRefreshed(valueSets));
-        } catch (Exception e){
-            throw new Exception(e.getMessage());
-        }
+        assertTrue(ValuesetsCopyrightsRefreshed(valueSets));
 
         ArrayList<org.hl7.fhir.dstu3.model.Library> DSTU3Libraries = new ArrayList<>();
         ArrayList<org.hl7.fhir.r4.model.Library> R4Libraries = new ArrayList<>();
@@ -118,11 +113,7 @@ public class CopyrightsTest extends RefreshTest {
                     DSTU3Libraries.add((org.hl7.fhir.dstu3.model.Library) IOUtils.readResource(path, fhirContext, true));
                 }
 
-                try {
-                    assertTrue(DSTU3LibrariesCopyrightsRefreshed(DSTU3Libraries));
-                } catch (Exception e){
-                    throw new Exception(e.getMessage());
-                }
+                assertTrue(DSTU3LibrariesCopyrightsRefreshed(DSTU3Libraries));
 
                 break;
             case R4:
@@ -130,11 +121,7 @@ public class CopyrightsTest extends RefreshTest {
                     R4Libraries.add((org.hl7.fhir.r4.model.Library) IOUtils.readResource(path, fhirContext, true));
                 }
 
-                try {
-                    assertTrue(R4LibrariesCopyrightsRefreshed(R4Libraries));
-                } catch (Exception e){
-                    throw new Exception(e.getMessage());
-                }
+                assertTrue(R4LibrariesCopyrightsRefreshed(R4Libraries));
 
                 break;
             default:
@@ -143,107 +130,110 @@ public class CopyrightsTest extends RefreshTest {
         }
     }
 
-    private boolean ValuesetsCopyrightsRefreshed(ArrayList<ValueSet> valuesets) throws Exception {
+    private boolean ValuesetsCopyrightsRefreshed(ArrayList<ValueSet> valuesets) {
         try {
             for (ValueSet valueset : valuesets) {
                 if (valueset.getId().equals("ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023")) {
                     if (!valueset.getCopyright().equals(cpt)) {
-                        throw new Exception(valueset.getId());
+                        throw new Exception("wrong copyright text for valueset: " + valueset.getId());
                     }
                 } else if (valueset.getId().equals("ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025")) {
                     if (!valueset.getCopyright().equals(cpt)) {
-                        throw new Exception(valueset.getId());
+                        throw new Exception("wrong copyright text for valueset: " + valueset.getId());
                     }
                 } else if (valueset.getId().equals("ValueSet/2.16.840.1.113883.3.464.1003.101.12.1086")) {
                     if (!valueset.getCopyright().equals(cpt)) {
-                        throw new Exception(valueset.getId());
+                        throw new Exception("wrong copyright text for valueset: " + valueset.getId());
                     }
                 } else if (valueset.getId().equals("ValueSet/2.16.840.1.113762.1.4.1108.15")) {
-                    if (!valueset.getCopyright().equals(umls)) {
-                        throw new Exception(valueset.getId());
+                    if (!valueset.getCopyright().equals(snomed)) {
+                        throw new Exception("wrong copyright text for valueset: " + valueset.getId());
                     }
                 } else if (valueset.getId().equals("ValueSet/2.16.840.1.113883.3.464.1003.110.12.1082")) {
-                    if (!valueset.getCopyright().equals(umls)) {
-                        throw new Exception(valueset.getId());
+                    if (!valueset.getCopyright().equals(snomed)) {
+                        throw new Exception("wrong copyright text for valueset: " + valueset.getId());
                     }
                 } else if (valueset.getId().equals("ValueSet/2.16.840.1.113883.3.464.1003.198.12.1068")) {
-                    if (!valueset.getCopyright().equals(umls)) {
-                        throw new Exception(valueset.getId());
+                    if (!valueset.getCopyright().equals(snomed)) {
+                        throw new Exception("wrong copyright text for valueset: " + valueset.getId());
                     }
                 } else if (valueset.getId().equals("ValueSet/2.16.840.1.113883.3.464.1003.101.12.1014")) {
-                    if (!valueset.getCopyright().equals(cpt + ", " + umls)) {
-                        throw new Exception(valueset.getId());
+                    if (!valueset.getCopyright().equals(cpt + ", " + snomed)) {
+                        throw new Exception("wrong copyright text for valueset: " + valueset.getId());
                     }
                 } else if (valueset.getId().equals("ValueSet/2.16.840.1.113883.3.464.1003.101.12.1085")) {
-                    if (!valueset.getCopyright().equals(cpt + ", " + umls)) {
-                        throw new Exception(valueset.getId());
+                    if (!valueset.getCopyright().equals(cpt + ", " + snomed)) {
+                        throw new Exception("wrong copyright text for valueset: " + valueset.getId());
                     }
                 } else if (valueset.getId().equals("ValueSet/2.16.840.1.113883.3.464.1003.101.12.1088")) {
-                    if (!valueset.getCopyright().equals(cpt + ", " + umls)) {
-                        throw new Exception(valueset.getId());
+                    if (!valueset.getCopyright().equals(cpt + ", " + snomed)) {
+                        throw new Exception("wrong copyright text for valueset: " + valueset.getId());
                     }
                 } else if (valueset.getId().equals("ValueSet/2.16.840.1.113762.1.4.1")) {
                     if (valueset.hasCopyright()) {
-                        throw new Exception(valueset.getId());
+                        throw new Exception("wrong copyright text for valueset: " + valueset.getId());
                     }
                 } else if (valueset.getId().equals("ValueSet/2.16.840.1.113883.3.464.1003.108.12.1018")) {
                     if (valueset.hasCopyright()) {
-                        throw new Exception(valueset.getId());
+                        throw new Exception("wrong copyright text for valueset: " + valueset.getId());
                     }
                 } else if (valueset.getId().equals("ValueSet/2.16.840.1.113883.3.464.1003.196.12.1510")) {
                     if (valueset.hasCopyright()) {
-                        throw new Exception(valueset.getId());
+                        throw new Exception("wrong copyright text for valueset: " + valueset.getId());
                     }
                 }
             }
-        } catch (Exception e) {
-            throw new Exception("Wrong copyright text for valueset: " + e.getMessage());
+        } catch (Throwable e) {
+            System.out.println(e.getMessage());
+            return false;
         }
         return true;
     }
 
-    private boolean DSTU3LibrariesCopyrightsRefreshed(ArrayList<Library> libraries) throws Exception{
+    private boolean DSTU3LibrariesCopyrightsRefreshed(ArrayList<Library> libraries){
         try {
             for (Library library : libraries) {
                 if (library.getId().equals("AdultOutpatientEncountersFHIR4")) {
-                    if (!library.getCopyright().equals(cpt + ", " + umls)) {
-                        throw new Exception(library.getId());
+                    if (!library.getCopyright().equals(cpt + ", " + snomed)) {
+                        throw new Exception("DSTU3: Wrong copyright text for library: " + library.getId());
                     }
                 } else if (library.getId().equals("AdvancedIllnessandFrailtyExclusionECQMFHIR4")) {
-                    if (!library.getCopyright().equals(cpt + ", " + umls)) {
-                        throw new Exception(library.getId());
+                    if (!library.getCopyright().equals(cpt + ", " + snomed)) {
+                        throw new Exception("DSTU3: Wrong copyright text for library: " + library.getId());
                     }
                 } else if (library.getId().equals("BreastCancerScreeningFHIR")) {
-                    if (!library.getCopyright().equals(cpt + ", " + umls)) {
-                        throw new Exception(library.getId());
+                    if (!library.getCopyright().equals(cpt + ", " + snomed)) {
+                        throw new Exception("DSTU3: Wrong copyright text for library: " + library.getId());
                     }
                 }
             }
-        } catch (Exception e) {
-            throw new Exception("DSTU3: Wrong copyright text for library: " + e.getMessage());
+        } catch (Throwable e) {
+            System.out.println(e.getMessage());
+            return false;
         }
         return true;
     }
 
-    private boolean R4LibrariesCopyrightsRefreshed(ArrayList<org.hl7.fhir.r4.model.Library> libraries) throws Exception{
+    private boolean R4LibrariesCopyrightsRefreshed(ArrayList<org.hl7.fhir.r4.model.Library> libraries) {
         try {
             for (org.hl7.fhir.r4.model.Library library : libraries) {
                 if (library.getId().equals("AdultOutpatientEncountersFHIR4")) {
-                    if (!library.getCopyright().equals(cpt + ", " + umls)) {
-                        throw new Exception(library.getId());
+                    if (!library.getCopyright().equals(cpt + ", " + snomed)) {
+                        throw new Exception("DSTU3: Wrong copyright text for library: " + library.getId());
                     }
                 } else if (library.getId().equals("AdvancedIllnessandFrailtyExclusionECQMFHIR4")) {
-                    if (!library.getCopyright().equals(cpt + ", " + umls)) {
-                        throw new Exception(library.getId());
+                    if (!library.getCopyright().equals(cpt + ", " + snomed)) {
+                        throw new Exception("DSTU3: Wrong copyright text for library: " + library.getId());
                     }
                 } else if (library.getId().equals("BreastCancerScreeningFHIR")) {
-                    if (!library.getCopyright().equals(cpt + ", " + umls)) {
-                        throw new Exception(library.getId());
+                    if (!library.getCopyright().equals(cpt + ", " + snomed)) {
+                        throw new Exception("DSTU3: Wrong copyright text for library: " + library.getId());
                     }
                 }
             }
         } catch (Exception e) {
-            throw new Exception("R4: Wrong copyright text for library: " + e.getMessage());
+            System.out.println(e.getMessage());
+            return false;
         }
         return true;
     }
