@@ -7,7 +7,7 @@ import java.util.List;
 
 public class StructureDefinitionBaseVisitor {
 
-    public void visitContactDetail(StructureDefinition sd) {
+    public void visitContact(StructureDefinition sd) {
     }
 
     public void visitUseContext(StructureDefinition sd) {

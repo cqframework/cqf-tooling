@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 import java.util.*;
 import java.util.function.BiConsumer;
 
-public class StructureDefinitionBaseVisitorTest {
+public class StructureDefinitionElementBindingVisitorTest {
     private CanonicalResourceAtlas atlas;
     private List<ValueSet> valueSets = new ArrayList<>();
     private List<CodeSystem> codeSystems = new ArrayList<>();
@@ -30,18 +30,27 @@ public class StructureDefinitionBaseVisitorTest {
         String resourcePaths = "FHIR-4.0.1/4.0.1;US-Core/3.1.0;QI-Core/4.0.0";
         Atlas atlas = new Atlas();
         atlas.loadPaths(inputPath, resourcePaths);
-        CanonicalResourceAtlas canonicalResourceAtlas = new CanonicalResourceAtlas();
+        this.codeSystems = new ArrayList<>();
+        atlas.getCodeSystems().forEach((key, codeSystem)->{
+            this.codeSystems.add(codeSystem);
+        });
+        this.conceptMaps = atlas.getConceptMaps();
+        this.valueSets = new ArrayList<>();
+        atlas.getValueSets().forEach((key, valueSet)->{
+            this.valueSets.add(valueSet);
+        });
 
+        CanonicalResourceAtlas canonicalResourceAtlas = getAtlas();
 
         StructureDefinitionElementBindingVisitor sdbv = new StructureDefinitionElementBindingVisitor(canonicalResourceAtlas);
         Map<String, StructureDefinitionBindingObject> bindingObjects = new HashMap<>();
         Map<String, StructureDefinition>scMap = atlas.getStructureDefinitions();
         scMap.forEach((key, sd)->{
-            bindingObjects.putAll(sdbv.visitStructureDefinition(sd));
+            Map<String, StructureDefinitionBindingObject> newBindingObjects = sdbv.visitStructureDefinition(sd);
+            if(null != newBindingObjects){
+                bindingObjects.putAll(newBindingObjects);
+            }
         });
-
-
-
     }
 
 
