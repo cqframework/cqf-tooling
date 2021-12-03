@@ -3,9 +3,7 @@ package org.opencds.cqf.tooling.acceleratorkit;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.r4.model.ElementDefinition;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,43 +28,47 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
         }
         String sdURL = sd.getUrl();
         String sdVersion = sd.getVersion();
+        String sdName = sd.getName();
         Map<String, StructureDefinitionBindingObject> bindingObjects = new HashMap<>();
         List<ElementDefinition> eds = super.visitSnapshot(sd);
         if(eds != null && !eds.isEmpty()){
-            getBindings(eds, sdURL, sdVersion, bindingObjects);
+            getBindings(sdName, eds, sdURL, sdVersion, bindingObjects);
          }
         eds = super.visitDifferential(sd);
         if(eds != null && !eds.isEmpty()){
-            getBindings(eds, sdURL, sdVersion, bindingObjects);
+            getBindings(sdName, eds, sdURL, sdVersion, bindingObjects);
         }
         return bindingObjects;
     }
 
-    private void getBindings(List<ElementDefinition> eds, String sdURL, String sdVersion, Map<String, StructureDefinitionBindingObject> bindingObjects){
+    private void getBindings(String sdName, List<ElementDefinition> eds, String sdURL, String sdVersion, Map<String, StructureDefinitionBindingObject> bindingObjects){
         AtomicReference<Integer> index = new AtomicReference<Integer>(1);
         while(index.get() < eds.size()){
             ElementDefinition ed = eds.get(index.get());
             if(ed.hasBinding() && null != ed.getBinding().getValueSet()){
                 StructureDefinitionBindingObject sdbo = new StructureDefinitionBindingObject();
-                sdbo.sdURL = sdURL;
-                sdbo.sdVersion = sdVersion;
-                sdbo.bindingStrength= ed.getBinding().getStrength().toString();
+                sdbo.setSdName(sdName);
+                sdbo.setSdURL(sdURL);
+                sdbo.setSdVersion(sdVersion);
+                sdbo.setBindingStrength(ed.getBinding().getStrength().toString());
                 String bindingValueSet = ed.getBinding().getValueSet();
                 String pipeVersion = "";
                 if(bindingValueSet.contains("|")){
                     pipeVersion = bindingValueSet.substring(bindingValueSet.indexOf("|") + 1);
                     bindingValueSet = bindingValueSet.substring(0, bindingValueSet.indexOf("|"));
                 }
-                sdbo.bindingValueSetURL = bindingValueSet;
-                sdbo.elementPath = ed.getPath();
+                sdbo.setBindingValueSetURL(bindingValueSet);
+                sdbo.setElementPath(ed.getPath());
                 String valueSetVersion = "";
-                if (null != this.canonicalResourceAtlas.getValueSets().getByCanonicalUrlWithVersion(sdbo.bindingValueSetURL)){
-                    valueSetVersion = this.canonicalResourceAtlas.getValueSets().getByCanonicalUrlWithVersion(sdbo.bindingValueSetURL).getVersion();
+                if (null != this.canonicalResourceAtlas.getValueSets().getByCanonicalUrlWithVersion(sdbo.getBindingValueSetURL())){
+                    valueSetVersion = this.canonicalResourceAtlas.getValueSets().getByCanonicalUrlWithVersion(sdbo.getBindingValueSetURL()).getVersion();
+                    sdbo.setBindingValueSetName(this.canonicalResourceAtlas.getValueSets().getByCanonicalUrlWithVersion(sdbo.getBindingValueSetURL()).getName());
                 } else if(valueSetVersion.length() < 1 && bindingValueSet.contains("|")){
                     valueSetVersion = pipeVersion;
                 }
-                sdbo.bindingValueSetVersion = valueSetVersion;
-                bindingObjects.put(sdbo.elementPath, sdbo);
+                if(ed.getMustSupport()){sdbo.setMustSupport("Y");}else{sdbo.setMustSupport("N");}
+                sdbo.setBindingValueSetVersion(valueSetVersion);
+                bindingObjects.put(sdbo.getElementPath(), sdbo);
             }
             index.set(index.get() + 1);
         }
