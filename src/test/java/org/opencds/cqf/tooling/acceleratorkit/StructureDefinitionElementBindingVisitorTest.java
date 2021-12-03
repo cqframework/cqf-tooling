@@ -25,7 +25,7 @@ public class StructureDefinitionElementBindingVisitorTest {
     on return
      */
     @Test
-    public void createAtlas(){
+    public void testGettingBindingObjects(){
         String inputPath = "/Users/bryantaustin/Projects/FHIR-Spec";
         String resourcePaths = "4.0.1;US-Core/3.1.0;QI-Core/4.0.0";
         Atlas atlas = new Atlas();
@@ -43,14 +43,8 @@ public class StructureDefinitionElementBindingVisitorTest {
         CanonicalResourceAtlas canonicalResourceAtlas = getAtlas();
 
         StructureDefinitionElementBindingVisitor sdbv = new StructureDefinitionElementBindingVisitor(canonicalResourceAtlas);
-        Map<String, StructureDefinitionBindingObject> bindingObjects = new HashMap<>();
-        Map<String, StructureDefinition>scMap = atlas.getStructureDefinitions();
-        scMap.forEach((key, sd)->{
-            Map<String, StructureDefinitionBindingObject> newBindingObjects = sdbv.visitStructureDefinition(sd);
-            if(null != newBindingObjects){
-                bindingObjects.putAll(newBindingObjects);
-            }
-        });
+        List<StructureDefinitionBindingObject> bindingObjects = sdbv.visitAtlasStructureDefinitions();
+        System.out.println("binding definitions found: " + bindingObjects.size());
     }
 
 
