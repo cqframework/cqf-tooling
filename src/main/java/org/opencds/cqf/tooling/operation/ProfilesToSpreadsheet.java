@@ -1,5 +1,10 @@
 package org.opencds.cqf.tooling.operation;
 
+import org.apache.poi.ss.util.WorkbookUtil;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -10,8 +15,13 @@ import org.opencds.cqf.tooling.acceleratorkit.InMemoryCanonicalResourceProvider;
 import org.opencds.cqf.tooling.acceleratorkit.StructureDefinitionBindingObject;
 import org.opencds.cqf.tooling.acceleratorkit.StructureDefinitionElementBindingVisitor;
 import org.opencds.cqf.tooling.modelinfo.Atlas;
+import org.opencds.cqf.tooling.terminology.SpreadsheetCreatorHelper;
 
+import java.io.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.IntBinaryOperator;
 
 public class ProfilesToSpreadsheet extends Operation {
     private String inputPath;
@@ -41,8 +51,8 @@ public class ProfilesToSpreadsheet extends Operation {
                 case "op":
                     setOutputPath(value);
                     break;
-                case "resourcePaths":
-                case "rp=":
+                case "resourcepaths":
+                case "rp":
                     resourcePaths = value;
                     break;
                 case "modelName":
@@ -60,30 +70,104 @@ public class ProfilesToSpreadsheet extends Operation {
         if (!isParameterListComplete()) {
             return;
         }
-        createAtlas();
-        if (null != canonicalResourceAtlas) {
-            Map<String, StructureDefinitionBindingObject> bindingObjects = new HashMap<>();
-            bindingObjects = getBindingObjects();
-            if(null != bindingObjects && !bindingObjects.isEmpty()){
-                //write these puppies out to the spreadsheet
-            }
+
+        Map<String, StructureDefinitionBindingObject> bindingObjects;
+        bindingObjects = getBindingObjects();
+        if (null != bindingObjects && !bindingObjects.isEmpty()) {
+            createOutput(bindingObjects);
+//                writeOutput();
+            //write these puppies out to the spreadsheet
         }
+    }
 
+    private void createOutput(Map<String, StructureDefinitionBindingObject> bindingObjects) {
+        XSSFWorkbook workBook = SpreadsheetCreatorHelper.createWorkbook();
+        XSSFSheet firstSheet = workBook.createSheet(WorkbookUtil.createSafeSheetName("Profile Attribute List"));
+        AtomicInteger rowCount = new AtomicInteger(0);
+        IntBinaryOperator ibo = (x, y)->(x + y);
+        XSSFRow currentRow = firstSheet.createRow(rowCount.getAndAccumulate(1, ibo));
+        createHeaderRow(currentRow);
+        bindingObjects.forEach((key, bindingObject) -> {
+            addRowDataToCurrentSheet(firstSheet, rowCount.getAndAccumulate(1, ibo), bindingObject);
+        });
+        writeSpreadSheet(workBook);
+    }
 
+    private void writeSpreadSheet(XSSFWorkbook workBook) {
+        File outputFile = new File(getOutputPath() + ".xlsx");
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
+            workBook.write(fileOutputStream);
+            fileOutputStream.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void createHeaderRow(XSSFRow currentRow) {
+        int cellCount = 0;
+        XSSFCell currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue("QI Core Profile");
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue("Path");
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue("Conformance");
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue("ValueSet");
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue("ValueSetURL");
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue("Version");
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue("Must Support Y/N");
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue("Review Notes");
+    }
+
+    private void addRowDataToCurrentSheet(XSSFSheet currentSheet, int rowCount, StructureDefinitionBindingObject bo) {
+        XSSFRow currentRow = currentSheet.createRow(rowCount++);
+        int cellCount = 0;
+        XSSFCell currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue(bo.getSdName());
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue(bo.getElementPath());
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue(bo.getBindingStrength());
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue(bo.getBindingValueSetName());
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue(bo.getBindingValueSetURL());
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue(bo.getBindingValueSetVersion());
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue(bo.getMustSupport());
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue("Needed");
     }
 
     private Map<String, StructureDefinitionBindingObject> getBindingObjects() {
-        Map<String, StructureDefinitionBindingObject> bindingObjects = new HashMap<>();
-        StructureDefinitionElementBindingVisitor sdbv = new StructureDefinitionElementBindingVisitor(canonicalResourceAtlas);
-        Iterable structureDefinitions = canonicalResourceAtlas.getStructureDefinitions().get();
-        structureDefinitions.forEach((structDefn) -> {
-            StructureDefinition sd = (StructureDefinition) structDefn;
-            Map<String, StructureDefinitionBindingObject> newBindingObjects = sdbv.visitStructureDefinition(sd);
-            if (null != newBindingObjects) {
-                bindingObjects.putAll(newBindingObjects);
+        canonicalResourceAtlas = createAtlas();
+        if (null != canonicalResourceAtlas) {
+
+            Map<String, StructureDefinitionBindingObject> bindingObjects = new HashMap<>();
+            StructureDefinitionElementBindingVisitor sdbv = new StructureDefinitionElementBindingVisitor(canonicalResourceAtlas);
+            Iterable<StructureDefinition> structureDefinitions = canonicalResourceAtlas.getStructureDefinitions().get();
+            try {
+                structureDefinitions.forEach((structDefn) -> {
+                    StructureDefinition sd = structDefn;
+                    Map<String, StructureDefinitionBindingObject> newBindingObjects = sdbv.visitStructureDefinition(sd);
+                    if (null != newBindingObjects) {
+                        bindingObjects.putAll(newBindingObjects);
+                    }
+                });
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-        });
-        return bindingObjects;
+            return bindingObjects;
+        }
+        return null;
     }
 
     private CanonicalResourceAtlas createAtlas() {
@@ -117,13 +201,13 @@ public class ProfilesToSpreadsheet extends Operation {
 
     private boolean isParameterListComplete() {
         if (null == inputPath || inputPath.length() < 1 ||
-                null == resourcePaths || resourcePaths.length() < 1 ||
-                null == modelName || modelName.length() < 1 ||
-                null == modelVersion || modelName.length() < 1) {
+//                null == modelName || modelName.length() < 1 ||
+//                null == modelVersion || modelName.length() < 1
+                null == resourcePaths || resourcePaths.length() < 1) {
             System.out.println("These parameters are required: ");
-            System.out.println("-modelName/-mn");
+//            System.out.println("-modelName/-mn");
+//            System.out.println("-modelVersion/-mv");
             System.out.println("-outputpath/-op");
-            System.out.println("-modelVersion/-mv");
             System.out.println("-resourcePaths/-rp");
             return false;
         }
