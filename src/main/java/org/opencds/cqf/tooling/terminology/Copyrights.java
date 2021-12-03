@@ -36,7 +36,7 @@ public class Copyrights {
                 {
                     "name": "snomed",
                     "title": "SNOMED International",
-                    "systemUrl": "http://snomed.info/sct",
+                    "systemUrls": [ "http://snomed.info/sct" ],
                     "copyrightText": "UMLS Metathesaurus® Source Vocabularies and SNOMED CT®"
                 }
                 ...
@@ -61,12 +61,16 @@ public class Copyrights {
             JsonArray codesystemsArray = copyrightObj.getAsJsonArray("codesystems");
             ArrayList<CodesystemInfo> codesystemsList = new ArrayList<>();
             for (JsonElement codesystem : codesystemsArray) {
+                ArrayList<String> systemUrls = new ArrayList<>();
                 JsonObject codesystemObj = codesystem.getAsJsonObject();
                 String name = codesystemObj.get("name").getAsString();
                 String title = codesystemObj.get("title").getAsString();
-                String systemUrl = codesystemObj.get("systemUrl").getAsString();
+                JsonArray jsonSystemUrls = codesystemObj.getAsJsonArray("systemUrls");
+                for (JsonElement url : jsonSystemUrls) {
+                    systemUrls.add(url.getAsString());
+                }
                 String copyrightText = codesystemObj.get("copyrightText").getAsString();
-                codesystemsList.add(new CodesystemInfo(name, title, systemUrl, copyrightText));
+                codesystemsList.add(new CodesystemInfo(name, title, systemUrls, copyrightText));
             }
             this.codesystems = codesystemsList;
         } catch (IOException e){
@@ -116,10 +120,10 @@ public class Copyrights {
 
         for (String url : valueSetSystemUrls){
             CodesystemInfo codesystem = this.codesystems.stream()
-                    .filter(c -> url.equals(c.getSystemUrl()))
-                    .findFirst()
-                    .orElse(null);
-            if (codesystem != null){
+                .filter(c -> c.getSystemUrls().contains(url))
+                .findFirst()
+                .orElse(null);
+            if (codesystem != null) {
                 if (!copyrightsTextList.contains(codesystem.getCopyrightText())) {
                     copyrightsTextList.add(codesystem.getCopyrightText());
                 }
@@ -173,6 +177,7 @@ public class Copyrights {
         Collections.sort(copyrightsTextList);
 
         if (IOUtils.sourceIg.getCopyright() != null) {
+            copyrightsTextList.remove(IOUtils.sourceIg.getCopyright());
             copyrightsTextList.add(0, IOUtils.sourceIg.getCopyright());
         }
 
@@ -182,10 +187,10 @@ public class Copyrights {
     public static class CodesystemInfo {
         private final String name;
         private final String title;
-        private final String systemUrl;
+        private final List<String> systemUrl;
         private final String copyrightText;
 
-        public CodesystemInfo(String name, String title, String systemUrl, String copyrightText){
+        public CodesystemInfo(String name, String title, List<String> systemUrl, String copyrightText){
             this.name = name;
             this.title = title;
             this.systemUrl = systemUrl;
@@ -200,9 +205,7 @@ public class Copyrights {
             return this.title;
         }
 
-        public String getSystemUrl(){
-            return this.systemUrl;
-        }
+        public List<String> getSystemUrls() { return this.systemUrl; }
 
         public String getCopyrightText(){
             return this.copyrightText;
