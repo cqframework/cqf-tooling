@@ -168,7 +168,8 @@ public class ProfilesToSpreadsheet extends Operation {
             }
             List<StructureDefinitionBindingObject> sortedList = bindingObjects
                     .stream()
-                    .sorted(Comparator.comparing(StructureDefinitionBindingObject::getElementPath))
+                    .sorted(Comparator.comparing(StructureDefinitionBindingObject::getSdName)
+                            .thenComparing(StructureDefinitionBindingObject::getElementPath))
                     .collect(Collectors.toList());
             return sortedList;
         }
