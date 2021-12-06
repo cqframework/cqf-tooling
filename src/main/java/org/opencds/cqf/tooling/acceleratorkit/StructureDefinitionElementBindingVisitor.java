@@ -2,8 +2,6 @@ package org.opencds.cqf.tooling.acceleratorkit;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.elm_modelinfo.r1.ClassInfo;
-import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition;
 
@@ -43,11 +41,12 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
         return bindingObjectsList;
     }
 
-    public List<StructureDefinitionBindingObject> visitAtlasStructureDefinitions() {
-        Map<String, StructureDefinition> sdMap = canonicalResourceAtlas.getStructureDefinitions().get();
+    public List<StructureDefinitionBindingObject> visitCanonicalAtlasStructureDefinitions() {
+        Iterable<StructureDefinition> iterableStructureDefinitions = canonicalResourceAtlas.getStructureDefinitions().get();
+        Map<String, StructureDefinition> sdMap = new HashMap<>();
         List<StructureDefinitionBindingObject> bindingObjects = new ArrayList<>();
-        sdMap.forEach((key, sd) -> {
-            List<StructureDefinitionBindingObject> newBindingObjects = visitStructureDefinition(sd);
+        iterableStructureDefinitions.forEach((structureDefinition)->{
+            List<StructureDefinitionBindingObject> newBindingObjects = visitStructureDefinition(structureDefinition);
             if (null != newBindingObjects) {
                 bindingObjects.addAll(newBindingObjects);
             }

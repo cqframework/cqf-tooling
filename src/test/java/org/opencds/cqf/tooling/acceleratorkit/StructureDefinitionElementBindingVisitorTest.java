@@ -8,13 +8,13 @@ import org.opencds.cqf.tooling.modelinfo.Atlas;
 import org.testng.annotations.Test;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 
 public class StructureDefinitionElementBindingVisitorTest {
     private CanonicalResourceAtlas atlas;
     private List<ValueSet> valueSets = new ArrayList<>();
     private List<CodeSystem> codeSystems = new ArrayList<>();
     private Map<String, ConceptMap> conceptMaps = new LinkedHashMap<>();
+    private List<StructureDefinition> structureDefinitions = new ArrayList<>();
 
 
     /*
@@ -39,11 +39,15 @@ public class StructureDefinitionElementBindingVisitorTest {
         atlas.getValueSets().forEach((key, valueSet)->{
             this.valueSets.add(valueSet);
         });
+        this.structureDefinitions = new ArrayList<>();
+        atlas.getStructureDefinitions().forEach((key, structureDefinition)->{
+            this.structureDefinitions.add(structureDefinition);
+        });
 
         CanonicalResourceAtlas canonicalResourceAtlas = getAtlas();
 
         StructureDefinitionElementBindingVisitor sdbv = new StructureDefinitionElementBindingVisitor(canonicalResourceAtlas);
-        List<StructureDefinitionBindingObject> bindingObjects = sdbv.visitAtlasStructureDefinitions();
+        List<StructureDefinitionBindingObject> bindingObjects = sdbv.visitCanonicalAtlasStructureDefinitions();
         System.out.println("binding definitions found: " + bindingObjects.size());
     }
 
@@ -54,6 +58,7 @@ public class StructureDefinitionElementBindingVisitorTest {
                     new CanonicalResourceAtlas()
                             .setValueSets(new InMemoryCanonicalResourceProvider<>(this.valueSets))
                             .setCodeSystems(new InMemoryCanonicalResourceProvider<>(this.codeSystems))
+                            .setStructureDefinitions(new InMemoryCanonicalResourceProvider<>(this.structureDefinitions))
                             .setConceptMaps(new InMemoryCanonicalResourceProvider<>(this.conceptMaps.values()));
         }
         return atlas;
