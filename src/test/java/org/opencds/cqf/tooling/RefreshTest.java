@@ -35,8 +35,6 @@ public abstract class RefreshTest implements CqfmSoftwareSystemTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        IOUtils.resourceDirectories = new ArrayList<String>();
-        IOUtils.clearDevicePaths();
         if (!Strings.isNullOrEmpty(testName)) {
             System.out.println("Beginning Test: " + testName);
         }
