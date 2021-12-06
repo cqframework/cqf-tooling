@@ -16,6 +16,7 @@ import static org.testng.Assert.assertNotNull;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 
 import com.google.common.base.Strings;
 
@@ -34,6 +35,8 @@ public abstract class RefreshTest implements CqfmSoftwareSystemTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
+        IOUtils.resourceDirectories = new ArrayList<String>();
+        IOUtils.clearDevicePaths();
         if (!Strings.isNullOrEmpty(testName)) {
             System.out.println("Beginning Test: " + testName);
         }
