@@ -152,29 +152,46 @@ public class ProfilesToSpreadsheet extends Operation {
         canonicalResourceAtlas = createAtlas();
         if (null != canonicalResourceAtlas) {
 
-            List<StructureDefinitionBindingObject> bindingObjects = new ArrayList<>();
+            Map <String, StructureDefinitionBindingObject> bindingObjects = new HashMap<>();
             StructureDefinitionElementBindingVisitor sdbv = new StructureDefinitionElementBindingVisitor(canonicalResourceAtlas);
             Iterable<StructureDefinition> structureDefinitions = canonicalResourceAtlas.getStructureDefinitions().get();
             try {
                 structureDefinitions.forEach((structDefn) -> {
                     StructureDefinition sd = structDefn;
-                    List<StructureDefinitionBindingObject> newBindingObjects = sdbv.visitStructureDefinition(sd);
+                    Map <String, StructureDefinitionBindingObject> newBindingObjects = sdbv.visitStructureDefinition(sd);
                     if (null != newBindingObjects) {
-                        bindingObjects.addAll(newBindingObjects);
+                        bindingObjects.putAll(newBindingObjects);
                     }
                 });
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-            List<StructureDefinitionBindingObject> sortedList = bindingObjects
+            List<StructureDefinitionBindingObject> bindingObjectsList = bindingObjects
+                    .values()
+                    .stream()
+                    .collect(Collectors.toList());
+            return bindingObjectsList
                     .stream()
                     .sorted(Comparator.comparing(StructureDefinitionBindingObject::getSdName)
                             .thenComparing(StructureDefinitionBindingObject::getElementPath))
                     .collect(Collectors.toList());
-            return sortedList;
         }
         return null;
     }
+
+
+    /**
+     *    private List<StructureDefinitionBindingObject> createSortedBindingList(Map<String, StructureDefinitionBindingObject> bindingObjects) {
+     *         List<StructureDefinitionBindingObject> bindingObjectsList = new ArrayList<>(bindingObjects.values());
+     *
+     *         List<StructureDefinitionBindingObject> sortedBindingObjectsList = bindingObjectsList.stream()
+     * //                .map(x -> (x))
+     *                 .sorted(Comparator.comparing(StructureDefinitionBindingObject::getElementPath))
+     *                 .collect(Collectors.toList());
+     *         return sortedBindingObjectsList;
+     *     }
+     * @return
+     */
 
     private CanonicalResourceAtlas createAtlas() {
         List<ValueSet> valueSets = new ArrayList<>();

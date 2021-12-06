@@ -18,8 +18,7 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
         fc = FhirContext.forCached(FhirVersionEnum.R4);
         this.canonicalResourceAtlas = atlas;
     }
-
-    public List<StructureDefinitionBindingObject> visitStructureDefinition(StructureDefinition sd) {
+    public Map <String, StructureDefinitionBindingObject>  visitStructureDefinition(StructureDefinition sd){
         if (sd == null) {
             throw new IllegalArgumentException("sd required");
         }
@@ -29,33 +28,32 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
         String sdURL = sd.getUrl();
         String sdVersion = sd.getVersion();
         String sdName = sd.getName();
+        Map<String, StructureDefinitionBindingObject> bindingObjects = new HashMap<>();
         List<ElementDefinition> eds = super.visitSnapshot(sd);
-        List<StructureDefinitionBindingObject> bindingObjectsList = null;
-        if (eds != null && !eds.isEmpty()) {
-            bindingObjectsList = getBindings(sdName, eds, sdURL, sdVersion);
-        }
+        if(eds != null && !eds.isEmpty()){
+            getBindings(sdName, eds, sdURL, sdVersion, bindingObjects);
+         }
         eds = super.visitDifferential(sd);
-        if (eds != null && !eds.isEmpty()) {
-            bindingObjectsList = getBindings(sdName, eds, sdURL, sdVersion);
+        if(eds != null && !eds.isEmpty()){
+            getBindings(sdName, eds, sdURL, sdVersion, bindingObjects);
         }
-        return bindingObjectsList;
+        return bindingObjects;
     }
 
-    public List<StructureDefinitionBindingObject> visitCanonicalAtlasStructureDefinitions() {
+    public Map <String, StructureDefinitionBindingObject> visitCanonicalAtlasStructureDefinitions() {
         Iterable<StructureDefinition> iterableStructureDefinitions = canonicalResourceAtlas.getStructureDefinitions().get();
         Map<String, StructureDefinition> sdMap = new HashMap<>();
-        List<StructureDefinitionBindingObject> bindingObjects = new ArrayList<>();
+        Map <String, StructureDefinitionBindingObject> bindingObjects = new HashMap<>();
         iterableStructureDefinitions.forEach((structureDefinition)->{
-            List<StructureDefinitionBindingObject> newBindingObjects = visitStructureDefinition(structureDefinition);
+            Map <String, StructureDefinitionBindingObject> newBindingObjects = visitStructureDefinition(structureDefinition);
             if (null != newBindingObjects) {
-                bindingObjects.addAll(newBindingObjects);
+                bindingObjects.putAll(newBindingObjects);
             }
         });
         return bindingObjects;
     }
 
-    private List<StructureDefinitionBindingObject> getBindings(String sdName, List<ElementDefinition> eds, String sdURL, String sdVersion) {
-        Map<String, StructureDefinitionBindingObject> bindingObjects = new HashMap<>();
+    private void getBindings(String sdName, List<ElementDefinition> eds, String sdURL, String sdVersion, Map<String, StructureDefinitionBindingObject> bindingObjects) {
         AtomicReference<Integer> index = new AtomicReference<Integer>(0);
         while (index.get() < eds.size()) {
             ElementDefinition ed = eds.get(index.get());
@@ -90,17 +88,5 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
             }
             index.set(index.get() + 1);
         }
-
-        return createSortedBindingList(bindingObjects);
-    }
-
-    private List<StructureDefinitionBindingObject> createSortedBindingList(Map<String, StructureDefinitionBindingObject> bindingObjects) {
-        List<StructureDefinitionBindingObject> bindingObjectsList = new ArrayList<>(bindingObjects.values());
-
-        List<StructureDefinitionBindingObject> sortedBindingObjectsList = bindingObjectsList.stream()
-//                .map(x -> (x))
-                .sorted(Comparator.comparing(StructureDefinitionBindingObject::getElementPath))
-                .collect(Collectors.toList());
-        return sortedBindingObjectsList;
     }
 }

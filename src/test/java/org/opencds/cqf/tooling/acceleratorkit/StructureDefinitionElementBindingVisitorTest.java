@@ -47,7 +47,7 @@ public class StructureDefinitionElementBindingVisitorTest {
         CanonicalResourceAtlas canonicalResourceAtlas = getAtlas();
 
         StructureDefinitionElementBindingVisitor sdbv = new StructureDefinitionElementBindingVisitor(canonicalResourceAtlas);
-        List<StructureDefinitionBindingObject> bindingObjects = sdbv.visitCanonicalAtlasStructureDefinitions();
+        Map <String, StructureDefinitionBindingObject> bindingObjects = sdbv.visitCanonicalAtlasStructureDefinitions();
         System.out.println("binding definitions found: " + bindingObjects.size());
     }
 
