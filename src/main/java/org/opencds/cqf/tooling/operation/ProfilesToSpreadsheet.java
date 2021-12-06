@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.IntBinaryOperator;
+import java.util.stream.Collectors;
 
 public class ProfilesToSpreadsheet extends Operation {
     private String inputPath;
@@ -71,7 +72,7 @@ public class ProfilesToSpreadsheet extends Operation {
             return;
         }
 
-        Map<String, StructureDefinitionBindingObject> bindingObjects;
+        List <StructureDefinitionBindingObject> bindingObjects;
         bindingObjects = getBindingObjects();
         if (null != bindingObjects && !bindingObjects.isEmpty()) {
             createOutput(bindingObjects);
@@ -80,14 +81,14 @@ public class ProfilesToSpreadsheet extends Operation {
         }
     }
 
-    private void createOutput(Map<String, StructureDefinitionBindingObject> bindingObjects) {
+    private void createOutput(List <StructureDefinitionBindingObject> bindingObjects) {
         XSSFWorkbook workBook = SpreadsheetCreatorHelper.createWorkbook();
         XSSFSheet firstSheet = workBook.createSheet(WorkbookUtil.createSafeSheetName("Profile Attribute List"));
         AtomicInteger rowCount = new AtomicInteger(0);
         IntBinaryOperator ibo = (x, y)->(x + y);
         XSSFRow currentRow = firstSheet.createRow(rowCount.getAndAccumulate(1, ibo));
         createHeaderRow(currentRow);
-        bindingObjects.forEach((key, bindingObject) -> {
+        bindingObjects.forEach((bindingObject)->{
             addRowDataToCurrentSheet(firstSheet, rowCount.getAndAccumulate(1, ibo), bindingObject);
         });
         writeSpreadSheet(workBook);
@@ -147,25 +148,29 @@ public class ProfilesToSpreadsheet extends Operation {
         currentCell.setCellValue("Needed");
     }
 
-    private Map<String, StructureDefinitionBindingObject> getBindingObjects() {
+    private List <StructureDefinitionBindingObject> getBindingObjects() {
         canonicalResourceAtlas = createAtlas();
         if (null != canonicalResourceAtlas) {
 
-            Map<String, StructureDefinitionBindingObject> bindingObjects = new HashMap<>();
+            List<StructureDefinitionBindingObject> bindingObjects = new ArrayList<>();
             StructureDefinitionElementBindingVisitor sdbv = new StructureDefinitionElementBindingVisitor(canonicalResourceAtlas);
             Iterable<StructureDefinition> structureDefinitions = canonicalResourceAtlas.getStructureDefinitions().get();
             try {
                 structureDefinitions.forEach((structDefn) -> {
                     StructureDefinition sd = structDefn;
-                    Map<String, StructureDefinitionBindingObject> newBindingObjects = sdbv.visitStructureDefinition(sd);
+                    List<StructureDefinitionBindingObject> newBindingObjects = sdbv.visitStructureDefinition(sd);
                     if (null != newBindingObjects) {
-                        bindingObjects.putAll(newBindingObjects);
+                        bindingObjects.addAll(newBindingObjects);
                     }
                 });
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-            return bindingObjects;
+            List<StructureDefinitionBindingObject> sortedList = bindingObjects
+                    .stream()
+                    .sorted(Comparator.comparing(StructureDefinitionBindingObject::getElementPath))
+                    .collect(Collectors.toList());
+            return sortedList;
         }
         return null;
     }
