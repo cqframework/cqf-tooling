@@ -1,9 +1,11 @@
 package org.opencds.cqf.tooling.measure.stu3;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.RefreshTest;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -21,6 +23,8 @@ public class RefreshStu3MeasureOperationTest extends RefreshTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
+        IOUtils.resourceDirectories = new ArrayList<String>();
+        IOUtils.clearDevicePaths();
         File dir  = new File("target" + separator + "refreshMeasures" + separator + "stu3");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
