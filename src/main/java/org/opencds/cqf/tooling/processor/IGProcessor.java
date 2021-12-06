@@ -41,7 +41,15 @@ public class IGProcessor extends BaseProcessor {
         requireNonNull(params.versioned, "versioned can not be null");
         requireNonNull(params.resourceDirs, "resourceDirs can not be null");
         requireNonNull(params.outputEncoding, "outputEncoding can not be null");
-        requireNonNull(params.ini, "ini can not be null");
+
+        boolean iniProvided = params.ini != null && !params.ini.isEmpty();
+        boolean rootDirProvided = params.rootDir != null && !params.rootDir.isEmpty();
+        boolean igPathProvided = params.igPath != null && !params.igPath.isEmpty();
+
+        if (!iniProvided && (!rootDirProvided || !igPathProvided)) {
+            throw new IllegalArgumentException("Either the ini argument or both igPath and rootDir must be provided");
+        }
+
         if (params.ini != null) {
             initializeFromIni(params.ini);
         }
