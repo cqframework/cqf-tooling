@@ -9,6 +9,7 @@ import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r5.model.Measure;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.r4.R4MeasureProcessor;
@@ -68,13 +69,13 @@ public class MeasureProcessor extends BaseProcessor {
         Map<String, IBaseResource> measures = IOUtils.getMeasures(fhirContext);
         //Map<String, IBaseResource> libraries = IOUtils.getLibraries(fhirContext);
 
-        List<String> bundledMeasures = new ArrayList<String>();
+        List<String> bundledMeasures = new ArrayList<>();
         for (Map.Entry<String, IBaseResource> measureEntry : measures.entrySet()) {
             String measureSourcePath = IOUtils.getMeasurePathMap(fhirContext).get(measureEntry.getKey());
             // Assumption - File name matches measure.name
             String measureName = FilenameUtils.getBaseName(measureSourcePath).replace(MeasureProcessor.ResourcePrefix, "");
             try {
-                Map<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
+                Map<String, IBaseResource> resources = new HashMap<>();
 
                 Boolean shouldPersist = ResourceUtils.safeAddResource(measureSourcePath, resources, fhirContext);
                 if (!resources.containsKey("Measure/" + measureEntry.getKey())) {
@@ -97,7 +98,7 @@ public class MeasureProcessor extends BaseProcessor {
                 String primaryLibraryName = ResourceUtils.getName(primaryLibrary, fhirContext);
                 if (includeVersion) {
                     primaryLibraryName = primaryLibraryName + "-" + 
-                        fhirContext.newFhirPath().evaluateFirst(primaryLibrary, "version", IBase.class).get().toString();
+                        fhirContext.newFhirPath().evaluateFirst(primaryLibrary, "version", IBase.class).get();
                 }
 
                 shouldPersist = shouldPersist
@@ -138,7 +139,7 @@ public class MeasureProcessor extends BaseProcessor {
 
                 if (shouldPersist) {
                     String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), MeasureTestGroupName), measureName);
-                    persistBundle(igPath, bundleDestPath, measureName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri);
+                    persistBundle(igPath, bundleDestPath, measureName, encoding, fhirContext, new ArrayList<>(resources.values()), fhirUri);
                     bundleFiles(igPath, bundleDestPath, measureName, binaryPaths, measureSourcePath, primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion);
                     bundledMeasures.add(measureSourcePath);
                 }
@@ -150,7 +151,7 @@ public class MeasureProcessor extends BaseProcessor {
         }
         String message = "\r\n" + bundledMeasures.size() + " Measures successfully bundled:";
         for (String bundledMeasure : bundledMeasures) {
-            message += "\r\n     " + bundledMeasure + " BUNDLED";
+            message = message.concat(message + "\r\n     " + bundledMeasure + " BUNDLED");
         }
 
         List<String> measurePathLibraryNames = new ArrayList<>(IOUtils.getMeasurePaths(fhirContext));
@@ -159,14 +160,14 @@ public class MeasureProcessor extends BaseProcessor {
         measurePathLibraryNames.retainAll(refreshedLibraryNames);
         message += "\r\n" + measurePathLibraryNames.size() + " Measures refreshed, but not bundled (due to issues):";
         for (String notBundled : measurePathLibraryNames) {
-            message += "\r\n     " + notBundled + " REFRESHED";
+            message = message.concat(message + "\r\n     " + notBundled + " REFRESHED");
         }
 
         failedMeasures.removeAll(bundledMeasures);
         failedMeasures.removeAll(measurePathLibraryNames);
         message += "\r\n" + failedMeasures.size() + " Measures failed refresh:";
         for (String failed : failedMeasures) {
-            message += "\r\n     " + failed + " FAILED";
+            message = message.concat(message + "\r\n     " + failed + " FAILED");
         }
 
         LogUtils.info(message);
@@ -199,7 +200,7 @@ public class MeasureProcessor extends BaseProcessor {
             try {     
                 Map<String, IBaseResource> valuesets = ResourceUtils.getDepValueSetResources(cqlLibrarySourcePath, igPath, fhirContext, includeDependencies, includeVersion);      
                 if (!valuesets.isEmpty()) {
-                    Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<IBaseResource>(valuesets.values()), fhirContext);
+                    Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<>(valuesets.values()), fhirContext);
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  
                 }  
             }  catch (Exception e) {
@@ -212,9 +213,9 @@ public class MeasureProcessor extends BaseProcessor {
             Map<String, IBaseResource> depLibraries = ResourceUtils.getDepLibraryResources(librarySourcePath, fhirContext, encoding, includeVersion, logger);
             if (!depLibraries.isEmpty()) {
                 String depLibrariesID = "library-deps-" + libraryName;
-                Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<IBaseResource>(depLibraries.values()), fhirContext);            
+                Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<>(depLibraries.values()), fhirContext);
                 IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  
-            }        
+            }
         }
 
          if (includePatientScenarios) {
@@ -226,7 +227,7 @@ public class MeasureProcessor extends BaseProcessor {
     protected FhirContext fhirContext;
 
     public List<String> refreshMeasureContent(RefreshMeasureParameters params) {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
     protected List<Measure> refreshGeneratedContent(List<Measure> sourceMeasures) {
@@ -235,7 +236,7 @@ public class MeasureProcessor extends BaseProcessor {
 
     private List<Measure> internalRefreshGeneratedContent(List<Measure> sourceMeasures) {
         // for each Measure, refresh the measure based on the primary measure library
-        List<Measure> resources = new ArrayList<Measure>();
+        List<Measure> resources = new ArrayList<>();
         for (Measure measure : sourceMeasures) {
             resources.add(refreshGeneratedContent(measure));
         }
@@ -250,7 +251,7 @@ public class MeasureProcessor extends BaseProcessor {
         if (measure.hasLibrary()) {
             String libraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
             VersionedIdentifier primaryLibraryIdentifier = CanonicalUtils.toVersionedIdentifier(libraryUrl);
-            List<CqlTranslatorException> errors = new ArrayList<CqlTranslatorException>();
+            List<CqlTranslatorException> errors = new ArrayList<>();
             TranslatedLibrary translatedLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, cqlTranslatorOptions, errors);
             boolean hasErrors = false;
             if (errors.size() > 0) {
@@ -262,9 +263,19 @@ public class MeasureProcessor extends BaseProcessor {
                 }
             }
             if (!hasErrors) {
-                return processor.refreshMeasure(measure, libraryManager, translatedLibrary, cqlTranslatorOptions);
+                measure = processor.refreshMeasure(measure, libraryManager, translatedLibrary, cqlTranslatorOptions);
             }
+            String libraryPath = IOUtils.getLibraryPaths(fhirContext).stream()
+                    .filter(p -> p.contains(primaryLibraryIdentifier.getId()))
+                    .findFirst()
+                    .orElse(null);
+            Library library = (Library) IOUtils.readResource(libraryPath, fhirContext);
+            if (library.hasCopyright()){
+                measure.setCopyright(library.getCopyright());
+            }
+            return measure;
         }
+
         return measure;
     }
 }
