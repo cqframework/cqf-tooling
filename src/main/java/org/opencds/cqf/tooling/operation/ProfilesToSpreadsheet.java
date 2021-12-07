@@ -20,7 +20,6 @@ import org.opencds.cqf.tooling.terminology.SpreadsheetCreatorHelper;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.IntBinaryOperator;
 import java.util.stream.Collectors;
 
@@ -145,7 +144,10 @@ public class ProfilesToSpreadsheet extends Operation {
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue(bo.getMustSupport());
         currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue("Needed");
+        if((null != bo.getBindingStrength() && bo.getBindingStrength().equalsIgnoreCase("required")) ||
+                null != bo.getMustSupport() && bo.getMustSupport().equalsIgnoreCase("Y")){
+            currentCell.setCellValue("Needed");
+        }
     }
 
     private List <StructureDefinitionBindingObject> getBindingObjects() {
@@ -166,10 +168,11 @@ public class ProfilesToSpreadsheet extends Operation {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-            List<StructureDefinitionBindingObject> bindingObjectsList = bindingObjects
+            List <StructureDefinitionBindingObject> bindingObjectsList = bindingObjects
                     .values()
                     .stream()
                     .collect(Collectors.toList());
+
             return bindingObjectsList
                     .stream()
                     .sorted(Comparator.comparing(StructureDefinitionBindingObject::getSdName)
@@ -179,39 +182,25 @@ public class ProfilesToSpreadsheet extends Operation {
         return null;
     }
 
-
-    /**
-     *    private List<StructureDefinitionBindingObject> createSortedBindingList(Map<String, StructureDefinitionBindingObject> bindingObjects) {
-     *         List<StructureDefinitionBindingObject> bindingObjectsList = new ArrayList<>(bindingObjects.values());
-     *
-     *         List<StructureDefinitionBindingObject> sortedBindingObjectsList = bindingObjectsList.stream()
-     * //                .map(x -> (x))
-     *                 .sorted(Comparator.comparing(StructureDefinitionBindingObject::getElementPath))
-     *                 .collect(Collectors.toList());
-     *         return sortedBindingObjectsList;
-     *     }
-     * @return
-     */
-
     private CanonicalResourceAtlas createAtlas() {
-        List<ValueSet> valueSets = new ArrayList<>();
-        List<CodeSystem> codeSystems = new ArrayList<>();
-        List<StructureDefinition> structureDefinitions = new ArrayList<>();
-        Map<String, ConceptMap> conceptMaps;
+        List <ValueSet> valueSets = new ArrayList<>();
+        List <CodeSystem> codeSystems = new ArrayList<>();
+        List <StructureDefinition> structureDefinitions = new ArrayList<>();
+        Map <String, ConceptMap> conceptMaps;
 
         Atlas atlas = new Atlas();
         atlas.loadPaths(inputPath, resourcePaths);
-        List<StructureDefinition> finalStructureDefinitions = structureDefinitions;
+        List <StructureDefinition> finalStructureDefinitions = structureDefinitions;
         atlas.getStructureDefinitions().forEach((key, structureDefinition) -> {
             finalStructureDefinitions.add(structureDefinition);
         });
 
-        List<CodeSystem> finalCodeSystems = codeSystems;
+        List <CodeSystem> finalCodeSystems = codeSystems;
         atlas.getCodeSystems().forEach((key, codeSystem) -> {
             finalCodeSystems.add(codeSystem);
         });
         conceptMaps = atlas.getConceptMaps();
-        List<ValueSet> finalValueSets = valueSets;
+        List <ValueSet> finalValueSets = valueSets;
         atlas.getValueSets().forEach((key, valueSet) -> {
             finalValueSets.add(valueSet);
         });
