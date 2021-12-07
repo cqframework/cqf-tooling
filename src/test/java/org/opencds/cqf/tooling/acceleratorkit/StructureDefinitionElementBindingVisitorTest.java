@@ -5,6 +5,7 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.modelinfo.Atlas;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.*;
@@ -26,8 +27,8 @@ public class StructureDefinitionElementBindingVisitorTest {
      */
     @Test
     public void testGettingBindingObjects(){
-        String inputPath = "/Users/bryantaustin/Projects/FHIR-Spec";
-        String resourcePaths = "4.0.1;US-Core/3.1.0;QI-Core/4.0.0";
+        String inputPath = System.getenv("PWD") + "/src/test/resources/org/opencds/cqf/tooling/operation/profiles/FHIR-Spec";
+        String resourcePaths = "QI-Core/4.0.0";         //"4.0.1;US-Core/3.1.0;QI-Core/4.0.0";
         Atlas atlas = new Atlas();
         atlas.loadPaths(inputPath, resourcePaths);
         this.codeSystems = new ArrayList<>();
@@ -49,6 +50,7 @@ public class StructureDefinitionElementBindingVisitorTest {
         StructureDefinitionElementBindingVisitor sdbv = new StructureDefinitionElementBindingVisitor(canonicalResourceAtlas);
         Map <String, StructureDefinitionBindingObject> bindingObjects = sdbv.visitCanonicalAtlasStructureDefinitions();
         System.out.println("binding definitions found: " + bindingObjects.size());
+        Assert.assertTrue(!bindingObjects.isEmpty());
     }
 
 
