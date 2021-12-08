@@ -15,7 +15,7 @@ public class StructureDefinitionElementBindingVisitorTest {
     public void testGettingBindingObjects () {
         String inputPath = System.getenv ("PWD") + "/src/test/resources/org/opencds/cqf/tooling/operation/profiles/FHIR-Spec";
         String resourcePaths = "4.0.1;US-Core/3.1.0;QI-Core/4.0.0";
-        String modelName = "QI-Core";
+        String modelName = "QICore";
         String modelVersion = "4.0.0";
         CanonicalResourceAtlas canonicalResourceAtlas = ModelCanonicalAtlasCreator.createMainCanonicalAtlas (resourcePaths, modelName, modelVersion, inputPath);
         CanonicalResourceAtlas canonicalResourceDependenciesAtlas = ModelCanonicalAtlasCreator.createDependenciesCanonicalAtlas (resourcePaths, modelName, modelVersion, inputPath);

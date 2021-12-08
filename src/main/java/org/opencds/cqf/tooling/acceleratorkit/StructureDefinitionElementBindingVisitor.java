@@ -42,7 +42,6 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
         }
         if (sd.hasBaseDefinition()) {
             bindingObjects.putAll(visitStructureDefinition(this.canonicalResourceDependenciesAtlas.getStructureDefinitions().getByCanonicalUrlWithVersion(sd.getBaseDefinition())));
-            System.out.println();
         }
         return bindingObjects;
     }
