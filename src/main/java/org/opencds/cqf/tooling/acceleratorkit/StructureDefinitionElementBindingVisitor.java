@@ -12,13 +12,16 @@ import java.util.stream.Collectors;
 public class StructureDefinitionElementBindingVisitor extends StructureDefinitionBaseVisitor {
     private FhirContext fc;
     private CanonicalResourceAtlas canonicalResourceAtlas;
+    private CanonicalResourceAtlas canonicalResourceDependenciesAtlas;
 
 
-    public StructureDefinitionElementBindingVisitor(CanonicalResourceAtlas atlas) {
+    public StructureDefinitionElementBindingVisitor(CanonicalResourceAtlas atlas, CanonicalResourceAtlas dependencyAtlas) {
         fc = FhirContext.forCached(FhirVersionEnum.R4);
         this.canonicalResourceAtlas = atlas;
+        this.canonicalResourceDependenciesAtlas = dependencyAtlas;
     }
-    public Map <String, StructureDefinitionBindingObject>  visitStructureDefinition(StructureDefinition sd){
+
+    public Map<String, StructureDefinitionBindingObject> visitStructureDefinition(StructureDefinition sd) {
         if (sd == null) {
             throw new IllegalArgumentException("sd required");
         }
@@ -30,22 +33,26 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
         String sdName = sd.getName();
         Map<String, StructureDefinitionBindingObject> bindingObjects = new HashMap<>();
         List<ElementDefinition> eds = super.visitSnapshot(sd);
-        if(eds != null && !eds.isEmpty()){
+        if (eds != null && !eds.isEmpty()) {
             getBindings(sdName, eds, sdURL, sdVersion, bindingObjects);
-         }
+        }
         eds = super.visitDifferential(sd);
-        if(eds != null && !eds.isEmpty()){
+        if (eds != null && !eds.isEmpty()) {
             getBindings(sdName, eds, sdURL, sdVersion, bindingObjects);
+        }
+        if (sd.hasBaseDefinition()) {
+            bindingObjects.putAll(visitStructureDefinition(this.canonicalResourceDependenciesAtlas.getStructureDefinitions().getByCanonicalUrlWithVersion(sd.getBaseDefinition())));
+            System.out.println();
         }
         return bindingObjects;
     }
 
-    public Map <String, StructureDefinitionBindingObject> visitCanonicalAtlasStructureDefinitions() {
+    public Map<String, StructureDefinitionBindingObject> visitCanonicalAtlasStructureDefinitions() {
         Iterable<StructureDefinition> iterableStructureDefinitions = canonicalResourceAtlas.getStructureDefinitions().get();
         Map<String, StructureDefinition> sdMap = new HashMap<>();
-        Map <String, StructureDefinitionBindingObject> bindingObjects = new HashMap<>();
-        iterableStructureDefinitions.forEach((structureDefinition)->{
-            Map <String, StructureDefinitionBindingObject> newBindingObjects = visitStructureDefinition(structureDefinition);
+        Map<String, StructureDefinitionBindingObject> bindingObjects = new HashMap<>();
+        iterableStructureDefinitions.forEach((structureDefinition) -> {
+            Map<String, StructureDefinitionBindingObject> newBindingObjects = visitStructureDefinition(structureDefinition);
             if (null != newBindingObjects) {
                 bindingObjects.putAll(newBindingObjects);
             }
@@ -62,7 +69,7 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
                 sdbo.setSdName(sdName);
                 sdbo.setSdURL(sdURL);
                 sdbo.setSdVersion(sdVersion);
-                sdbo.setBindingStrength(ed.getBinding().getStrength().toString());
+                sdbo.setBindingStrength(ed.getBinding().getStrength().toString().toLowerCase());
                 String bindingValueSet = ed.getBinding().getValueSet();
                 String pipeVersion = "";
                 if (bindingValueSet.contains("|")) {
@@ -75,6 +82,9 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
                 if (null != this.canonicalResourceAtlas.getValueSets().getByCanonicalUrlWithVersion(sdbo.getBindingValueSetURL())) {
                     valueSetVersion = this.canonicalResourceAtlas.getValueSets().getByCanonicalUrlWithVersion(sdbo.getBindingValueSetURL()).getVersion();
                     sdbo.setBindingValueSetName(this.canonicalResourceAtlas.getValueSets().getByCanonicalUrlWithVersion(sdbo.getBindingValueSetURL()).getName());
+                } else if (null != this.canonicalResourceDependenciesAtlas.getValueSets().getByCanonicalUrlWithVersion(sdbo.getBindingValueSetURL())) {
+                    valueSetVersion = this.canonicalResourceDependenciesAtlas.getValueSets().getByCanonicalUrlWithVersion(sdbo.getBindingValueSetURL()).getVersion();
+                    sdbo.setBindingValueSetName(this.canonicalResourceDependenciesAtlas.getValueSets().getByCanonicalUrlWithVersion(sdbo.getBindingValueSetURL()).getName());
                 } else if (valueSetVersion.length() < 1 && bindingValueSet.contains("|")) {
                     valueSetVersion = pipeVersion;
                 }
@@ -84,7 +94,7 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
                     sdbo.setMustSupport("N");
                 }
                 sdbo.setBindingValueSetVersion(valueSetVersion);
-                bindingObjects.put(sdbo.getElementPath(), sdbo);
+                bindingObjects.put(sdName + "." + sdbo.getElementPath(), sdbo);
             }
             index.set(index.get() + 1);
         }

@@ -1,21 +1,18 @@
 package org.opencds.cqf.tooling.operation;
 
+import org.apache.poi.common.usermodel.Hyperlink;
+import org.apache.poi.common.usermodel.HyperlinkType;
+import org.apache.poi.hssf.util.HSSFColor.HSSFColorPredefined;
 import org.apache.poi.ss.util.WorkbookUtil;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.apache.poi.xssf.usermodel.*;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.acceleratorkit.CanonicalResourceAtlas;
-import org.opencds.cqf.tooling.acceleratorkit.InMemoryCanonicalResourceProvider;
 import org.opencds.cqf.tooling.acceleratorkit.StructureDefinitionBindingObject;
 import org.opencds.cqf.tooling.acceleratorkit.StructureDefinitionElementBindingVisitor;
-import org.opencds.cqf.tooling.modelinfo.Atlas;
 import org.opencds.cqf.tooling.terminology.SpreadsheetCreatorHelper;
+import org.opencds.cqf.tooling.utilities.ModelCanonicalAtlasCreator;
+
 
 import java.io.*;
 import java.util.*;
@@ -29,6 +26,12 @@ public class ProfilesToSpreadsheet extends Operation {
     private String modelName;
     private String modelVersion;
     private CanonicalResourceAtlas canonicalResourceAtlas;
+    private CanonicalResourceAtlas canonicalResourceDependenciesAtlas;
+
+    private CreationHelper helper;
+    private XSSFCellStyle linkStyle;
+    private XSSFFont linkFont;
+
 
     @Override
     public void execute(String[] args) {
@@ -71,7 +74,7 @@ public class ProfilesToSpreadsheet extends Operation {
             return;
         }
 
-        List <StructureDefinitionBindingObject> bindingObjects;
+        List<StructureDefinitionBindingObject> bindingObjects;
         bindingObjects = getBindingObjects();
         if (null != bindingObjects && !bindingObjects.isEmpty()) {
             createOutput(bindingObjects);
@@ -80,14 +83,21 @@ public class ProfilesToSpreadsheet extends Operation {
         }
     }
 
-    private void createOutput(List <StructureDefinitionBindingObject> bindingObjects) {
+    private void createOutput(List<StructureDefinitionBindingObject> bindingObjects) {
         XSSFWorkbook workBook = SpreadsheetCreatorHelper.createWorkbook();
         XSSFSheet firstSheet = workBook.createSheet(WorkbookUtil.createSafeSheetName("Profile Attribute List"));
+        helper = workBook.getCreationHelper();
+        linkStyle = workBook.createCellStyle();
+        linkFont = workBook.createFont();
+        linkFont.setUnderline(XSSFFont.U_SINGLE);
+        linkFont.setColor(HSSFColorPredefined.BLUE.getIndex());
+        linkStyle.setFont(linkFont);
+
         AtomicInteger rowCount = new AtomicInteger(0);
-        IntBinaryOperator ibo = (x, y)->(x + y);
+        IntBinaryOperator ibo = (x, y) -> (x + y);
         XSSFRow currentRow = firstSheet.createRow(rowCount.getAndAccumulate(1, ibo));
         createHeaderRow(currentRow);
-        bindingObjects.forEach((bindingObject)->{
+        bindingObjects.forEach((bindingObject) -> {
             addRowDataToCurrentSheet(firstSheet, rowCount.getAndAccumulate(1, ibo), bindingObject);
         });
         writeSpreadSheet(workBook);
@@ -128,47 +138,52 @@ public class ProfilesToSpreadsheet extends Operation {
 
     private void addRowDataToCurrentSheet(XSSFSheet currentSheet, int rowCount, StructureDefinitionBindingObject bo) {
         XSSFRow currentRow = currentSheet.createRow(rowCount++);
+        XSSFHyperlink link = (XSSFHyperlink)helper.createHyperlink(HyperlinkType.URL);
         int cellCount = 0;
+
         XSSFCell currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue(bo.getSdName());
+        link.setAddress(bo.getSdURL());
+        currentCell.setHyperlink(link);
+        currentCell.setCellStyle(linkStyle);
+
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue(bo.getElementPath());
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue(bo.getBindingStrength());
+        link = (XSSFHyperlink)helper.createHyperlink(HyperlinkType.URL);
+        link.setAddress("http://hl7.org/fhir/R4/terminologies.html#" + bo.getBindingStrength());
+        currentCell.setHyperlink(link);
+        currentCell.setCellStyle(linkStyle);
+
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue(bo.getBindingValueSetName());
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue(bo.getBindingValueSetURL());
+        link = (XSSFHyperlink)helper.createHyperlink(HyperlinkType.URL);
+        link.setAddress(bo.getBindingValueSetURL());
+        currentCell.setHyperlink(link);
+        currentCell.setCellStyle(linkStyle);
+
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue(bo.getBindingValueSetVersion());
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue(bo.getMustSupport());
         currentCell = currentRow.createCell(cellCount++);
-        if((null != bo.getBindingStrength() && bo.getBindingStrength().equalsIgnoreCase("required")) ||
-                null != bo.getMustSupport() && bo.getMustSupport().equalsIgnoreCase("Y")){
+        if ((null != bo.getBindingStrength() && bo.getBindingStrength().equalsIgnoreCase("required")) ||
+                null != bo.getMustSupport() && bo.getMustSupport().equalsIgnoreCase("Y")) {
             currentCell.setCellValue("Needed");
         }
     }
 
-    private List <StructureDefinitionBindingObject> getBindingObjects() {
-        canonicalResourceAtlas = createAtlas();
-        if (null != canonicalResourceAtlas) {
+    private List<StructureDefinitionBindingObject> getBindingObjects() {
+        CanonicalResourceAtlas canonicalResourceAtlas = ModelCanonicalAtlasCreator.createMainCanonicalAtlas(resourcePaths, modelName, modelVersion, inputPath);
+        CanonicalResourceAtlas canonicalResourceDependenciesAtlas = ModelCanonicalAtlasCreator.createDependenciesCanonicalAtlas(resourcePaths, modelName, modelVersion, inputPath);
 
-            Map <String, StructureDefinitionBindingObject> bindingObjects = new HashMap<>();
-            StructureDefinitionElementBindingVisitor sdbv = new StructureDefinitionElementBindingVisitor(canonicalResourceAtlas);
-            Iterable<StructureDefinition> structureDefinitions = canonicalResourceAtlas.getStructureDefinitions().get();
-            try {
-                structureDefinitions.forEach((structDefn) -> {
-                    StructureDefinition sd = structDefn;
-                    Map <String, StructureDefinitionBindingObject> newBindingObjects = sdbv.visitStructureDefinition(sd);
-                    if (null != newBindingObjects) {
-                        bindingObjects.putAll(newBindingObjects);
-                    }
-                });
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            List <StructureDefinitionBindingObject> bindingObjectsList = bindingObjects
+        if (null != canonicalResourceAtlas && null != canonicalResourceDependenciesAtlas) {
+            StructureDefinitionElementBindingVisitor sdbv = new StructureDefinitionElementBindingVisitor(canonicalResourceAtlas, canonicalResourceDependenciesAtlas);
+            Map<String, StructureDefinitionBindingObject> bindingObjects = sdbv.visitCanonicalAtlasStructureDefinitions();
+            List<StructureDefinitionBindingObject> bindingObjectsList = bindingObjects
                     .values()
                     .stream()
                     .collect(Collectors.toList());
@@ -182,43 +197,14 @@ public class ProfilesToSpreadsheet extends Operation {
         return null;
     }
 
-    private CanonicalResourceAtlas createAtlas() {
-        List <ValueSet> valueSets = new ArrayList<>();
-        List <CodeSystem> codeSystems = new ArrayList<>();
-        List <StructureDefinition> structureDefinitions = new ArrayList<>();
-        Map <String, ConceptMap> conceptMaps;
-
-        Atlas atlas = new Atlas();
-        atlas.loadPaths(inputPath, resourcePaths);
-        List <StructureDefinition> finalStructureDefinitions = structureDefinitions;
-        atlas.getStructureDefinitions().forEach((key, structureDefinition) -> {
-            finalStructureDefinitions.add(structureDefinition);
-        });
-
-        List <CodeSystem> finalCodeSystems = codeSystems;
-        atlas.getCodeSystems().forEach((key, codeSystem) -> {
-            finalCodeSystems.add(codeSystem);
-        });
-        conceptMaps = atlas.getConceptMaps();
-        List <ValueSet> finalValueSets = valueSets;
-        atlas.getValueSets().forEach((key, valueSet) -> {
-            finalValueSets.add(valueSet);
-        });
-        return new CanonicalResourceAtlas()
-                .setStructureDefinitions(new InMemoryCanonicalResourceProvider<StructureDefinition>(finalStructureDefinitions))
-                .setValueSets(new InMemoryCanonicalResourceProvider<>(finalValueSets))
-                .setConceptMaps(new InMemoryCanonicalResourceProvider<ConceptMap>(conceptMaps.values()))
-                .setCodeSystems(new InMemoryCanonicalResourceProvider<>(finalCodeSystems));
-    }
-
     private boolean isParameterListComplete() {
         if (null == inputPath || inputPath.length() < 1 ||
-//                null == modelName || modelName.length() < 1 ||
-//                null == modelVersion || modelName.length() < 1
+                null == modelName || modelName.length() < 1 ||
+                null == modelVersion || modelName.length() < 1 ||
                 null == resourcePaths || resourcePaths.length() < 1) {
             System.out.println("These parameters are required: ");
-//            System.out.println("-modelName/-mn");
-//            System.out.println("-modelVersion/-mv");
+            System.out.println("-modelName/-mn");
+            System.out.println("-modelVersion/-mv");
             System.out.println("-outputpath/-op");
             System.out.println("-resourcePaths/-rp");
             return false;

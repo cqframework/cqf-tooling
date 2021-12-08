@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><CodeSystem xmlns="http://hl7.org/fhir"><id value="qicore-appropriateness-score"/><text><status value="generated"/><div xmlns="http://www.w3.org/1999/xhtml">
+            <h2>QICoreAppropriatenessScore</h2>
+            <p>The RAND scoring for appropriateness of the procedure.</p>
+            <p>This code system http://hl7.org/fhir/appropriateness-score defines the following codes:</p>
+            <table class="codes">
+                <tr>
+                    <td>
+                        <strong>Code</strong>
+                    </td>
+                    <td>
+                        <strong>Display</strong>
+                    </td>
+                    <td>
+                        <strong>Definition</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td>extremely-inappropriate
+                        <a name="extremely-inappropriate"> </a>
+                    </td>
+                    <td>Extremely Inappropriate</td>
+                    <td>The procedure is extremely inappropriate</td>
+                </tr>
+                <tr>
+                    <td>inappropriate
+                        <a name="inappropriate"> </a>
+                    </td>
+                    <td>Inappropriate</td>
+                    <td>The procedure is inappropriate</td>
+                </tr>
+                <tr>
+                    <td>probably-inappropriate
+                        <a name="probably-inappropriate"> </a>
+                    </td>
+                    <td>Probably Inappropriate</td>
+                    <td>The procedure is probably inappropriate</td>
+                </tr>
+                <tr>
+                    <td>uncertain-inappropriate
+                        <a name="uncertain-inappropriate"> </a>
+                    </td>
+                    <td>Uncertain Inappropriate</td>
+                    <td>The appropriateness of the procedure is uncertain, leaning towards inappropriate</td>
+                </tr>
+                <tr>
+                    <td>uncertain
+                        <a name="uncertain"> </a>
+                    </td>
+                    <td>Uncertain</td>
+                    <td>The appropriateness of the procedure is uncertain</td>
+                </tr>
+                <tr>
+                    <td>uncertain-appropriate
+                        <a name="uncertain-appropriate"> </a>
+                    </td>
+                    <td>Uncertain Appropriate</td>
+                    <td>The appropriateness of the procedure is uncertain, leaning towards appropriate</td>
+                </tr>
+                <tr>
+                    <td>probably-appropriate
+                        <a name="probably-appropriate"> </a>
+                    </td>
+                    <td>Probably Appropriate</td>
+                    <td>The procedure is probably appropriate</td>
+                </tr>
+                <tr>
+                    <td>appropriate
+                        <a name="appropriate"> </a>
+                    </td>
+                    <td>Appropriate</td>
+                    <td>The procedure is appropriate</td>
+                </tr>
+                <tr>
+                    <td>extremely-appropriate
+                        <a name="extremely-appropriate"> </a>
+                    </td>
+                    <td>Extremely Appropriate</td>
+                    <td>The procedure is extremely appropriate</td>
+                </tr>
+            </table>
+        </div></text><url value="http://hl7.org/fhir/us/qicore/CodeSystem/qicore-appropriateness-score"/><version value="3.1.0"/><name value="QICoreAppropriatenessScore"/><status value="draft"/><experimental value="false"/><date value="2016-03-31T08:01:25+11:00"/><publisher value="HL7 (FHIR Project)"/><contact><telecom><system value="other"/><value value="http://hl7.org/fhir"/></telecom><telecom><system value="email"/><value value="fhir@lists.hl7.org"/></telecom></contact><description value="The RAND scoring for appropriateness of the procedure."/><caseSensitive value="true"/><valueSet value="http://hl7.org/fhir/us/qicore/ValueSet/qicore-appropriateness-score"/><content value="complete"/><concept><code value="extremely-inappropriate"/><display value="Extremely Inappropriate"/><definition value="The procedure is extremely inappropriate"/></concept><concept><code value="inappropriate"/><display value="Inappropriate"/><definition value="The procedure is inappropriate"/></concept><concept><code value="probably-inappropriate"/><display value="Probably Inappropriate"/><definition value="The procedure is probably inappropriate"/></concept><concept><code value="uncertain-inappropriate"/><display value="Uncertain Inappropriate"/><definition value="The appropriateness of the procedure is uncertain, leaning towards inappropriate"/></concept><concept><code value="uncertain"/><display value="Uncertain"/><definition value="The appropriateness of the procedure is uncertain"/></concept><concept><code value="uncertain-appropriate"/><display value="Uncertain Appropriate"/><definition value="The appropriateness of the procedure is uncertain, leaning towards appropriate"/></concept><concept><code value="probably-appropriate"/><display value="Probably Appropriate"/><definition value="The procedure is probably appropriate"/></concept><concept><code value="appropriate"/><display value="Appropriate"/><definition value="The procedure is appropriate"/></concept><concept><code value="extremely-appropriate"/><display value="Extremely Appropriate"/><definition value="The procedure is extremely appropriate"/></concept></CodeSystem>
