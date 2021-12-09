@@ -21,7 +21,7 @@ public class StructureDefinitionElementBindingVisitorTest {
         CanonicalResourceAtlas canonicalResourceDependenciesAtlas = ModelCanonicalAtlasCreator.createDependenciesCanonicalAtlas (resourcePaths, modelName, modelVersion, inputPath);
 
         StructureDefinitionElementBindingVisitor sdbv = new StructureDefinitionElementBindingVisitor (canonicalResourceAtlas, canonicalResourceDependenciesAtlas);
-        Map <String, StructureDefinitionBindingObject> bindingObjects = sdbv.visitCanonicalAtlasStructureDefinitions();
+        Map <String, StructureDefinitionBindingObject> bindingObjects = sdbv.visitCanonicalAtlasStructureDefinitions(false);
         System.out.println ("binding definitions found: " + bindingObjects.size());
         Assert.assertTrue(!bindingObjects.isEmpty());
     }

@@ -3,6 +3,9 @@ package org.opencds.cqf.tooling.operation;
 import org.apache.poi.common.usermodel.Hyperlink;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.hssf.util.HSSFColor.HSSFColorPredefined;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.*;
 import org.apache.poi.ss.usermodel.CreationHelper;
@@ -131,9 +134,12 @@ public class ProfilesToSpreadsheet extends Operation {
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue("Version");
         currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue("Code System URLs");
+        currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue("Must Support Y/N");
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue("Review Notes");
+
     }
 
     private void addRowDataToCurrentSheet(XSSFSheet currentSheet, int rowCount, StructureDefinitionBindingObject bo) {
@@ -149,6 +155,7 @@ public class ProfilesToSpreadsheet extends Operation {
 
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue(bo.getElementPath());
+
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue(bo.getBindingStrength());
         link = (XSSFHyperlink)helper.createHyperlink(HyperlinkType.URL);
@@ -158,6 +165,7 @@ public class ProfilesToSpreadsheet extends Operation {
 
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue(bo.getBindingValueSetName());
+
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue(bo.getBindingValueSetURL());
         link = (XSSFHyperlink)helper.createHyperlink(HyperlinkType.URL);
@@ -167,8 +175,13 @@ public class ProfilesToSpreadsheet extends Operation {
 
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue(bo.getBindingValueSetVersion());
+
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue(bo.getCodeSystemsURLs());
+
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue(bo.getMustSupport());
+
         currentCell = currentRow.createCell(cellCount++);
         if ((null != bo.getBindingStrength() && bo.getBindingStrength().equalsIgnoreCase("required")) ||
                 null != bo.getMustSupport() && bo.getMustSupport().equalsIgnoreCase("Y")) {
@@ -177,12 +190,12 @@ public class ProfilesToSpreadsheet extends Operation {
     }
 
     private List<StructureDefinitionBindingObject> getBindingObjects() {
-        CanonicalResourceAtlas canonicalResourceAtlas = ModelCanonicalAtlasCreator.createMainCanonicalAtlas(resourcePaths, modelName, modelVersion, inputPath);
-        CanonicalResourceAtlas canonicalResourceDependenciesAtlas = ModelCanonicalAtlasCreator.createDependenciesCanonicalAtlas(resourcePaths, modelName, modelVersion, inputPath);
+        canonicalResourceAtlas = ModelCanonicalAtlasCreator.createMainCanonicalAtlas(resourcePaths, modelName, modelVersion, inputPath);
+        canonicalResourceDependenciesAtlas = ModelCanonicalAtlasCreator.createDependenciesCanonicalAtlas(resourcePaths, modelName, modelVersion, inputPath);
 
         if (null != canonicalResourceAtlas && null != canonicalResourceDependenciesAtlas) {
             StructureDefinitionElementBindingVisitor sdbv = new StructureDefinitionElementBindingVisitor(canonicalResourceAtlas, canonicalResourceDependenciesAtlas);
-            Map<String, StructureDefinitionBindingObject> bindingObjects = sdbv.visitCanonicalAtlasStructureDefinitions();
+            Map<String, StructureDefinitionBindingObject> bindingObjects = sdbv.visitCanonicalAtlasStructureDefinitions(true);
             List<StructureDefinitionBindingObject> bindingObjectsList = bindingObjects
                     .values()
                     .stream()

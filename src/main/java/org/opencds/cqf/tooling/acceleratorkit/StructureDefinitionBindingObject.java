@@ -11,6 +11,7 @@ public class StructureDefinitionBindingObject {
     String bindingValueSetVersion;
     String bindingValueSetName;
     String mustSupport;
+    String codeSystemsURLs;
 
     public String getSdName() {return sdName;}
     public void setSdName(String sdName) {this.sdName = sdName;}
@@ -30,4 +31,6 @@ public class StructureDefinitionBindingObject {
     public void setBindingValueSetName(String bindingValueSetName) {this.bindingValueSetName = bindingValueSetName;}
     public String getMustSupport() {return mustSupport;}
     public void setMustSupport(String mustSupport) {this.mustSupport = mustSupport;}
+    public String getCodeSystemsURLs() {return codeSystemsURLs;}
+    public void setCodeSystemsURLs(String codeSystemsURLs) {this.codeSystemsURLs = codeSystemsURLs;}
 }
