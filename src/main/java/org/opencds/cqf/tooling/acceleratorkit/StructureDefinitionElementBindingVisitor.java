@@ -97,8 +97,14 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
                     Map<String, String> codeSystemsMap = new HashMap<>();
                     getValueSetCodeSystems(elementValueSet, codeSystemsMap);
                     if(null != codeSystemsMap && !codeSystemsMap.isEmpty()) {
+                        AtomicReference <Integer> valueCount = new AtomicReference<>(0);
                         codeSystemsMap.values().forEach((url)->{
-                            codeSystemURLs.append(url + ";");
+                            codeSystemURLs.append(url);
+                            valueCount.set(valueCount.get() + 1);
+                            if(valueCount.get() > 0 &&
+                                valueCount.get() < codeSystemsMap.size()) {
+                                codeSystemURLs.append(";");
+                            }
                         });
                         sdbo.setCodeSystemsURLs(codeSystemURLs.toString());
                     }
@@ -127,7 +133,6 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
                     if (null == svs) {
                         svs = this.canonicalResourceDependenciesAtlas.getValueSets().getByCanonicalUrlWithVersion(r.getValue());
                     }
-                    codeSystemsMap.put(r.getValue(), r.getValue());
                     if (null != svs) {
                         getValueSetCodeSystems(svs, codeSystemsMap);
                     }
