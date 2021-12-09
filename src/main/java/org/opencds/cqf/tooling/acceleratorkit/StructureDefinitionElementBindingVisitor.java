@@ -9,7 +9,6 @@ import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 public class StructureDefinitionElementBindingVisitor extends StructureDefinitionBaseVisitor {
     private FhirContext fc;
@@ -44,7 +43,6 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
                 getBindings(sdName, eds, sdURL, sdVersion, bindingObjects);
             }
             if (sd.hasBaseDefinition()) {
-//                bindingObjects.putAll(visitStructureDefinition(this.canonicalResourceDependenciesAtlas.getStructureDefinitions().getByCanonicalUrlWithVersion(sd.getBaseDefinition()), snapshotOnly));
                 bindingObjects.putAll(visitStructureDefinition(this.canonicalResourceDependenciesAtlas.getStructureDefinitions().getByCanonicalUrlWithVersion(sd.getBaseDefinition()), snapshotOnly));            }
         }
         return bindingObjects;
@@ -137,31 +135,4 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
             }
         }
     }
-    /*
-        private void getValueSetCodeSystems(ValueSet elementValueSet, StringBuilder codeSystemURLs) {
-//        StringBuilder codeSystemUrls = new StringBuilder();
-        ValueSet.ValueSetComposeComponent compose = elementValueSet.getCompose();
-//        compose.getInclude().forEach((includeItem)->{
-//            codeSystemUrls.append(includeItem.getSystem() + ";");
-//        });
-        if (null != compose) {
-            for (ValueSet.ConceptSetComponent include : compose.getInclude()) {
-                if(include.hasSystem()){
-                    System.out.println(include.getSystem());
-                }
-                for (CanonicalType r : include.getValueSet()) {
-                    ValueSet svs = this.canonicalResourceAtlas.getValueSets().getByCanonicalUrlWithVersion(r.getValue());
-                    if (null == svs) {
-                        svs = this.canonicalResourceDependenciesAtlas.getValueSets().getByCanonicalUrlWithVersion(r.getValue());
-                    }
-                    codeSystemURLs.append(r.getValue() + ";");
-                    if (null != svs) {
-                        getValueSetCodeSystems(svs, codeSystemURLs);
-                    }
-                }
-            }
-        }
-    }
-
-    * */
 }

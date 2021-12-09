@@ -1,11 +1,7 @@
 package org.opencds.cqf.tooling.operation;
 
-import org.apache.poi.common.usermodel.Hyperlink;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.hssf.util.HSSFColor.HSSFColorPredefined;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.*;
 import org.apache.poi.ss.usermodel.CreationHelper;
@@ -81,8 +77,6 @@ public class ProfilesToSpreadsheet extends Operation {
         bindingObjects = getBindingObjects();
         if (null != bindingObjects && !bindingObjects.isEmpty()) {
             createOutput(bindingObjects);
-//                writeOutput();
-            //write these puppies out to the spreadsheet
         }
     }
 
