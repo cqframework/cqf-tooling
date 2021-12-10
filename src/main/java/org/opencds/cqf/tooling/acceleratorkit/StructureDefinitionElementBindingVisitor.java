@@ -78,7 +78,7 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
                     bindingValueSet = bindingValueSet.substring(0, bindingValueSet.indexOf("|"));
                 }
                 sdbo.setBindingValueSetURL(bindingValueSet);
-                sdbo.setElementPath(ed.getPath());
+                sdbo.setElementId(ed.getId());
                 String valueSetVersion = "";
                 ValueSet elementValueSet = null;
                 if (null != this.canonicalResourceAtlas.getValueSets().getByCanonicalUrlWithVersion(sdbo.getBindingValueSetURL())) {
@@ -115,7 +115,7 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
                     sdbo.setMustSupport("N");
                 }
                 sdbo.setBindingValueSetVersion(valueSetVersion);
-                bindingObjects.put(sdName + "." + sdbo.getElementPath(), sdbo);
+                bindingObjects.put(sdName + "." + sdbo.getElementId(), sdbo);
             }
             index.set(index.get() + 1);
         }

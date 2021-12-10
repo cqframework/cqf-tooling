@@ -148,7 +148,7 @@ public class ProfilesToSpreadsheet extends Operation {
         currentCell.setCellStyle(linkStyle);
 
         currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue(bo.getElementPath());
+        currentCell.setCellValue(bo.getElementId());
 
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue(bo.getBindingStrength());
@@ -198,7 +198,7 @@ public class ProfilesToSpreadsheet extends Operation {
             return bindingObjectsList
                     .stream()
                     .sorted(Comparator.comparing(StructureDefinitionBindingObject::getSdName)
-                            .thenComparing(StructureDefinitionBindingObject::getElementPath))
+                            .thenComparing(StructureDefinitionBindingObject::getElementId))
                     .collect(Collectors.toList());
         }
         return null;

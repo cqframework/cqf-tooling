@@ -5,7 +5,7 @@ public class StructureDefinitionBindingObject {
     String sdName;
     String sdURL;
     String sdVersion;
-    String elementPath;
+    String elementId;
     String bindingStrength;
     String bindingValueSetURL;
     String bindingValueSetVersion;
@@ -19,8 +19,8 @@ public class StructureDefinitionBindingObject {
     public void setSdURL(String sdURL) {this.sdURL = sdURL;}
     public String getSdVersion() {return sdVersion;}
     public void setSdVersion(String sdVersion) {this.sdVersion = sdVersion;}
-    public String getElementPath() {return elementPath;}
-    public void setElementPath(String elementPath) {this.elementPath = elementPath;}
+    public String getElementId() {return elementId;}
+    public void setElementId(String elementId) {this.elementId = elementId;}
     public String getBindingStrength() {return bindingStrength;}
     public void setBindingStrength(String bindingStrength) {this.bindingStrength = bindingStrength;}
     public String getBindingValueSetURL() {return bindingValueSetURL;}

@@ -15,7 +15,7 @@ public class ProfilesToSpreadsheetTest {
         String operation = "ProfilesToSpreadsheet";
         String modelName="QICore";
         String modelVersion="4.0.0";
-        String outputPath = "target" + separator + "test-output" + separator + "profileToSpreadsheet" + separator + "QI Core Valueset Analysis 9";//"/Users/bryantaustin/Projects/QI Core Valueset Analysis4";
+        String outputPath = "target" + separator + "test-output" + separator + "profileToSpreadsheet" + separator + "QI Core Valueset Analysis 10";//"/Users/bryantaustin/Projects/QI Core Valueset Analysis4";
         String[] args = { "-" + operation, "-ip=" + inputPath, "-op=" + outputPath, "-resourcepaths=" + resourcePaths, "-mn=" + modelName, "-mv=" + modelVersion};
         Operation profilesToSpreadsheet = new ProfilesToSpreadsheet();
         profilesToSpreadsheet.execute(args);
