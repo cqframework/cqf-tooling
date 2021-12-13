@@ -118,7 +118,7 @@ public class ProfilesToSpreadsheet extends Operation {
         XSSFCell currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue("QI Core Profile");
         currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue("Path");
+        currentCell.setCellValue("Id");
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue("Conformance");
         currentCell = currentRow.createCell(cellCount++);
