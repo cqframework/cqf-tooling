@@ -652,48 +652,68 @@ public class ResourceUtils
         Map<String, IBaseResource> activityDefinitions = new HashMap<String, IBaseResource>();
         IBaseResource planDefinition = IOUtils.readResource(planDefinitionPath, fhirContext, true);
         Object actionChild = resolveProperty(planDefinition, "action", fhirContext);
-
         if (actionChild != null) {
-          if (actionChild instanceof Iterable)
-          {
-            for (Object action : (Iterable<?>)actionChild) {
-              Object definitionChild = resolveProperty(action, "definition", fhirContext);
-              if (definitionChild != null) {
-                Object referenceChild = resolveProperty(definitionChild, "reference", fhirContext);
+            activityDefinitions = aggregateActivityDefinitions(actionChild, activityDefinitions, fhirContext);
+        }
+        return activityDefinitions;
+    }
 
-                String activityDefinitionId = null;
-                // NOTE: A bit of a hack. This whole method probably needs to be refactored to consider different FHIR
-                // versions and the respective ActivityDefinition differences between them.
-                if (fhirContext.getVersion().getVersion().isEquivalentTo(FhirVersionEnum.R4)) {
-                    activityDefinitionId = CanonicalUtils.getId((CanonicalType)referenceChild);
-                } else {
-                  String activityDefinitionReference = referenceChild.toString();
-                  activityDefinitionId = activityDefinitionReference.replaceAll("ActivityDefinition/", "activitydefinition-").replaceAll("_", "-");
-                }
+    public static Map<String, IBaseResource> aggregateActivityDefinitions(Object actionChild, Map<String, IBaseResource> activityDefinitions, FhirContext fhirContext){
+        Object subAction;
+        if (actionChild instanceof Iterable) {
+            for (Object action : (Iterable<?>) actionChild) {
+                Object definitionChild = resolveProperty(action, "definition", fhirContext);
+                if (definitionChild != null) {
+                    Object referenceChild = resolveProperty(definitionChild, "reference", fhirContext);
 
-                for (String path : IOUtils.getActivityDefinitionPaths(fhirContext)) {
-                  if (path.contains(activityDefinitionId)) {
-                    activityDefinitions.put(path, IOUtils.readResource(path, fhirContext));
-                    break;
-                  }
+                    String activityDefinitionId = null;
+                    // NOTE: A bit of a hack. This whole method probably needs to be refactored to consider different FHIR
+                    // versions and the respective ActivityDefinition differences between them.
+                    if (fhirContext.getVersion().getVersion().isEquivalentTo(FhirVersionEnum.R4)) {
+                        activityDefinitionId = CanonicalUtils.getId((CanonicalType) referenceChild);
+                    } else {
+                        String activityDefinitionReference = referenceChild.toString();
+                        activityDefinitionId = activityDefinitionReference.replaceAll("ActivityDefinition/", "activitydefinition-").replaceAll("_", "-");
+                    }
+
+                    for (String path : IOUtils.getActivityDefinitionPaths(fhirContext)) {
+                        if (path.contains(activityDefinitionId)) {
+                            activityDefinitions.put(path, IOUtils.readResource(path, fhirContext));
+                            break;
+                        }
+                    }
                 }
-              }
+                subAction = resolveProperty(action, "action", fhirContext);
+                if (subAction != null){
+                    activityDefinitions = aggregateActivityDefinitions(subAction, activityDefinitions, fhirContext);
+                }
             }
-          }
-          else {
+        } else {
             Object definitionChild = resolveProperty(actionChild, "definition", fhirContext);
             if (definitionChild != null) {
-              Object referenceChild = resolveProperty(definitionChild, "reference", fhirContext);
+                Object referenceChild = resolveProperty(definitionChild, "reference", fhirContext);
 
-              String activityDefinitionReference = (String)referenceChild;
+                String activityDefinitionReference = (String) referenceChild;
 
-              for (String path : IOUtils.getActivityDefinitionPaths(fhirContext)) {
-                if (path.contains(activityDefinitionReference)) {
-                  activityDefinitions.put(path, IOUtils.readResource(path, fhirContext));
+                for (String path : IOUtils.getActivityDefinitionPaths(fhirContext)) {
+                    if (path.contains(activityDefinitionReference)) {
+                        activityDefinitions.put(path, IOUtils.readResource(path, fhirContext));
+                    }
                 }
-              }
             }
-          }
+        }
+        if (actionChild instanceof Iterable) {
+            for (Object action : (Iterable<?>) actionChild){
+                subAction = resolveProperty(action, "action", fhirContext);
+                if (subAction != null){
+                    activityDefinitions = aggregateActivityDefinitions(subAction, activityDefinitions, fhirContext);
+                }
+            }
+        } else {
+            subAction = resolveProperty(actionChild, "action", fhirContext);
+            if (subAction != null){
+                activityDefinitions = aggregateActivityDefinitions(subAction, activityDefinitions, fhirContext);
+            }
         }
         return activityDefinitions;
     }
