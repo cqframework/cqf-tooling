@@ -8,12 +8,12 @@
       "name": "snomed",
       "title": "SNOMED International",
       "systemUrls": [ "http://snomed.info/sct" ],
-      "copyrightText": "SNOMED CT®"
+      "copyrightText": ["SNOMED CT®", "UMLS Metathesaurus"]
     }, {
       "name": "cpt",
       "title": "American Medical Association Current Procedural Terminology",
       "systemUrls": [ "http://www.ama-assn.org/go/cpt" ],
-      "copyrightText": "American Medical Association CPT®"
+      "copyrightText": ["American Medical Association CPT®"]
     }
   ]
 }
