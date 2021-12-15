@@ -1,6 +1,7 @@
 package org.opencds.cqf.tooling.measure.r4;
 
-import org.hl7.fhir.convertors.VersionConvertor_40_50;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
+import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.r4.formats.FormatUtilities;
 import org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper;
 import org.opencds.cqf.tooling.measure.MeasureProcessor;
@@ -40,7 +41,7 @@ public class R4MeasureProcessor extends MeasureProcessor {
     */
     protected List<String> refreshMeasures(String measurePath, String measureOutputDirectory, IOUtils.Encoding encoding) {
         File file = measurePath != null ? new File(measurePath) : null;
-        Map<String, String> fileMap = new HashMap<>();
+        Map<String, String> fileMap = new HashMap<String, String>();
         List<org.hl7.fhir.r5.model.Measure> measures = new ArrayList<>();
 
         if (file == null || !file.exists()) {
@@ -57,12 +58,13 @@ public class R4MeasureProcessor extends MeasureProcessor {
             loadMeasure(fileMap, measures, file);
         }
 
-        List<String> refreshedMeasureNames = new ArrayList<>();
+        List<String> refreshedMeasureNames = new ArrayList<String>();
         List<org.hl7.fhir.r5.model.Measure> refreshedMeasures = super.refreshGeneratedContent(measures);
+        VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
         for (org.hl7.fhir.r5.model.Measure refreshedMeasure : refreshedMeasures) {
-            org.hl7.fhir.r4.model.Measure measure = (org.hl7.fhir.r4.model.Measure) VersionConvertor_40_50.convertResource(refreshedMeasure);
-            String filePath;
-            IOUtils.Encoding fileEncoding;
+            org.hl7.fhir.r4.model.Measure measure = (org.hl7.fhir.r4.model.Measure) versionConvertor_40_50.convertResource(refreshedMeasure);
+            String filePath = null;
+            IOUtils.Encoding fileEncoding = null;
             if (fileMap.containsKey(refreshedMeasure.getId()))
             {
                 filePath = fileMap.get(refreshedMeasure.getId());
@@ -88,7 +90,6 @@ public class R4MeasureProcessor extends MeasureProcessor {
                     }
                 }
                 IOUtils.writeResource(measure, outputPath, fileEncoding, fhirContext, this.versioned);
-                IOUtils.updateCachedResource(measure, outputPath);
                 String refreshedMeasureName;
                 if (this.versioned && refreshedMeasure.getVersion() != null) {
                     refreshedMeasureName = refreshedMeasure.getName() + "-" + refreshedMeasure.getVersion();
@@ -105,7 +106,8 @@ public class R4MeasureProcessor extends MeasureProcessor {
     private void loadMeasure(Map<String, String> fileMap, List<org.hl7.fhir.r5.model.Measure> measures, File measureFile) {
         try {
             org.hl7.fhir.r4.model.Resource resource = FormatUtilities.loadFile(measureFile.getAbsolutePath());
-            org.hl7.fhir.r5.model.Measure measure = (org.hl7.fhir.r5.model.Measure) VersionConvertor_40_50.convertResource(resource);
+            VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
+            org.hl7.fhir.r5.model.Measure measure = (org.hl7.fhir.r5.model.Measure) versionConvertor_40_50.convertResource(resource);
             fileMap.put(measure.getId(), measureFile.getAbsolutePath());
             measures.add(measure);
         } catch (Exception ex) {
