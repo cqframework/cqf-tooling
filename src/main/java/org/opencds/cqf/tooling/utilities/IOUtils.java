@@ -248,7 +248,9 @@ public class IOUtils
                     return null;
                 }
             }
-            resource = parser.parseResource(new FileReader(file));
+            try (FileReader reader = new FileReader(file)){
+                resource = parser.parseResource(reader);
+            }
             cachedResources.put(path, resource);
         }
         catch (Exception e)
