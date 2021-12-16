@@ -24,8 +24,8 @@ public class STU3LibraryProcessorTest extends LibraryProcessorTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        IOUtils.resourceDirectories = new ArrayList<String>();
-        IOUtils.clearDevicePaths();
+        //IOUtils.resourceDirectories = new ArrayList<String>();
+        //IOUtils.clearDevicePaths();
         File dir  = new File("target" + separator + "refreshLibraries" + separator + "stu3");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);

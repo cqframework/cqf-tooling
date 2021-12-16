@@ -21,10 +21,10 @@ public class RefreshR4MeasureOperationTest extends RefreshTest {
         super(FhirContext.forCached(FhirVersionEnum.R4), "RefreshR4MeasureOperationTest");
     }
 
-    //@BeforeMethod
+    @BeforeMethod
     public void setUp() throws Exception {
-        IOUtils.resourceDirectories = new ArrayList<String>();
-        IOUtils.clearDevicePaths();
+        //IOUtils.resourceDirectories = new ArrayList<String>();
+        //IOUtils.clearDevicePaths();
         File dir  = new File("target" + separator + "refreshMeasures" + separator + "r4");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
@@ -35,8 +35,7 @@ public class RefreshR4MeasureOperationTest extends RefreshTest {
         }
     }
 
-    //@Test
-    //TODO: Fix separately, this is blocking a bunch of other higher priority things
+    @Test
     private void testRefreshOverwriteMeasures() throws Exception {
         setUp();
         copyResourcesToTargetDir(targetDirectoryPath, "r4");
