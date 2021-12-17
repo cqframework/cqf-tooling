@@ -23,8 +23,8 @@ public class RefreshR4MeasureOperationTest extends RefreshTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        //IOUtils.resourceDirectories = new ArrayList<String>();
-        //IOUtils.clearDevicePaths();
+        IOUtils.resourceDirectories = new ArrayList<String>();
+        IOUtils.clearDevicePaths();
         File dir  = new File("target" + separator + "refreshMeasures" + separator + "r4");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
