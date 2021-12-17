@@ -90,6 +90,9 @@ public class NpmPackageManager implements IWorkerContext.ILoggingService {
 
         System.out.println("Core Package "+ VersionUtilities.packageForVersion(v)+"#"+v);
         pi = pcm.loadPackage(VersionUtilities.packageForVersion(v), v);
+        if (pi == null) {
+            throw new IllegalArgumentException("Could not load core package");
+        }
         if (v.equals("current")) {
             throw new IllegalArgumentException("Current core package not supported");
         }
