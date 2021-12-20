@@ -7,11 +7,13 @@ import java.util.List;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_50;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.elementmodel.Manager;
 import org.hl7.fhir.r5.model.ImplementationGuide;
-import org.hl7.fhir.convertors.VersionConvertor_30_50;
-import org.hl7.fhir.convertors.VersionConvertor_40_50;
+import org.hl7.fhir.convertors.conv30_50.VersionConvertor_30_50;
+import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.utilities.IniFile;
 import org.hl7.fhir.utilities.TextFile;
@@ -174,13 +176,15 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
                 sourceIg = (ImplementationGuide) org.hl7.fhir.r5.formats.FormatUtilities.loadFile(igPath);
             } catch (Exception e) {
                 try {
-                    sourceIg = (ImplementationGuide) VersionConvertor_40_50.convertResource(org.hl7.fhir.r4.formats.FormatUtilities.loadFile(igPath));
+                    VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
+                    sourceIg = (ImplementationGuide) versionConvertor_40_50.convertResource(org.hl7.fhir.r4.formats.FormatUtilities.loadFile(igPath));
                 } catch (Exception ex) {
                     byte[] src = TextFile.fileToBytes(igPath);
                     Manager.FhirFormat fmt = org.hl7.fhir.r5.formats.FormatUtilities.determineFormat(src);
 
                     org.hl7.fhir.dstu3.formats.ParserBase parser = org.hl7.fhir.dstu3.formats.FormatUtilities.makeParser(fmt.toString());
-                    sourceIg = (ImplementationGuide) VersionConvertor_30_50.convertResource(parser.parse(src));
+                    VersionConvertor_30_50 versionConvertor_30_50 = new VersionConvertor_30_50(new BaseAdvisor_30_50());
+                    sourceIg = (ImplementationGuide) versionConvertor_30_50.convertResource(parser.parse(src));
                 }
             }
         } catch (Exception e) {
@@ -196,10 +200,12 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
                 byte[] src = TextFile.fileToBytes(igPath);
                 Manager.FhirFormat fmt = org.hl7.fhir.r5.formats.FormatUtilities.determineFormat(src);
                 org.hl7.fhir.dstu3.formats.ParserBase parser = org.hl7.fhir.dstu3.formats.FormatUtilities.makeParser(fmt.toString());
-                sourceIg = (ImplementationGuide) VersionConvertor_30_50.convertResource(parser.parse(src));
+                VersionConvertor_30_50 versionConvertor_30_50 = new VersionConvertor_30_50(new BaseAdvisor_30_50());
+                sourceIg = (ImplementationGuide) versionConvertor_30_50.convertResource(parser.parse(src));
             } else if (VersionUtilities.isR4Ver(specifiedFhirVersion)) {
                 org.hl7.fhir.r4.model.Resource res = org.hl7.fhir.r4.formats.FormatUtilities.loadFile(igPath);
-                sourceIg = (ImplementationGuide) VersionConvertor_40_50.convertResource(res);
+                VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
+                sourceIg = (ImplementationGuide) versionConvertor_40_50.convertResource(res);
             } else if (VersionUtilities.isR5Ver(specifiedFhirVersion)) {
                 sourceIg = (ImplementationGuide) org.hl7.fhir.r5.formats.FormatUtilities.loadFile(igPath);
             } else {

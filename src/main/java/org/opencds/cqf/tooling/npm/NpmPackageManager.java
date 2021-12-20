@@ -11,7 +11,8 @@ import java.util.List;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import org.hl7.fhir.convertors.VersionConvertor_40_50;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
+import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.formats.FormatUtilities;
 import org.hl7.fhir.r5.context.IWorkerContext;
@@ -48,12 +49,13 @@ public class NpmPackageManager implements IWorkerContext.ILoggingService {
         if (igPath == null || igPath.equals("")) {
             throw new IllegalArgumentException("igPath is required");
         }
-
-        return new NpmPackageManager((ImplementationGuide) VersionConvertor_40_50.convertResource(FormatUtilities.loadFile(igPath)), version);
+        VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
+        return new NpmPackageManager((ImplementationGuide) versionConvertor_40_50.convertResource(FormatUtilities.loadFile(igPath)), version);
     }
 
     public static NpmPackageManager fromStream(InputStream is, String version) throws IOException {
-        return new NpmPackageManager((ImplementationGuide) VersionConvertor_40_50.convertResource(FormatUtilities.loadFile(is)), version);
+        VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
+        return new NpmPackageManager((ImplementationGuide) versionConvertor_40_50.convertResource(FormatUtilities.loadFile(is)), version);
     }
 
     public NpmPackageManager(ImplementationGuide sourceIg, String version) throws IOException {
@@ -88,6 +90,9 @@ public class NpmPackageManager implements IWorkerContext.ILoggingService {
 
         System.out.println("Core Package "+ VersionUtilities.packageForVersion(v)+"#"+v);
         pi = pcm.loadPackage(VersionUtilities.packageForVersion(v), v);
+        if (pi == null) {
+            throw new IllegalArgumentException("Could not load core package");
+        }
         if (v.equals("current")) {
             throw new IllegalArgumentException("Current core package not supported");
         }
