@@ -62,7 +62,9 @@ public class R4LibraryProcessor extends LibraryProcessor {
         }
         else if (file.isDirectory()) {
             for (File libraryFile : file.listFiles()) {
-                loadLibrary(fileMap, libraries, libraryFile);
+                if(IOUtils.isXMLOrJson(libraryPath, libraryFile.getName())) {
+                    loadLibrary(fileMap, libraries, libraryFile);
+                }
             }
         }
         else {

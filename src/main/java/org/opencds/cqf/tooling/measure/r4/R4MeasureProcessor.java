@@ -51,7 +51,9 @@ public class R4MeasureProcessor extends MeasureProcessor {
         }
         else if (file.isDirectory()) {
             for (File libraryFile : file.listFiles()) {
-                loadMeasure(fileMap, measures, libraryFile);
+                if(IOUtils.isXMLOrJson(measurePath, libraryFile.getName())) {
+                    loadMeasure(fileMap, measures, libraryFile);
+                }
             }
         }
         else {
