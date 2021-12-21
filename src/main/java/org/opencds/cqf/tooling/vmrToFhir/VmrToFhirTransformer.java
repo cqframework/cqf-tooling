@@ -8,11 +8,15 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.UUID;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
+import java.time.format.SignStyle;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import org.opencds.cqf.cql.engine.runtime.DateTime;
+import java.util.Date;
 
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.*;
@@ -118,9 +122,9 @@ public class VmrToFhirTransformer {
         patient.setId(UUID.randomUUID().toString());
         patient.setDeceased(new BooleanType(demographics.getIsDeceased().isValue()));
         patient.setAddress(transform(demographics.getAddress()));
-        DateTime birthDateTime = transform(demographics.getBirthTime());
+        Date birthDateTime = transform(demographics.getBirthTime());
         if (birthDateTime != null) {
-            patient.setBirthDate(birthDateTime.toJavaDate());
+            patient.setBirthDate(birthDateTime);
         }
         patient.setGender(transform(demographics.getGender()));
         return patient;
@@ -407,16 +411,25 @@ public class VmrToFhirTransformer {
         return result;
     }
 
-    private DateTime transform(TS birthTime) {
+    private Date transform(TS birthTime) {
         logger.info("transforming BirthTime...");
         String operand = birthTime.getValue();
         if (operand == null) {
             return null;
         }
 
+
         if (operand instanceof String) {
             try {
-                return new DateTime(operand, null);
+                DateTimeFormatter dtf = new DateTimeFormatterBuilder()
+                    .appendValue(ChronoField.INSTANT_SECONDS, 1, 19, SignStyle.NEVER)
+                    .appendValue(ChronoField.MILLI_OF_SECOND, 3)
+                    .appendOffsetId()
+                    .toFormatter();
+ 
+                ZonedDateTime zdt = ZonedDateTime.parse(operand, dtf);
+                return Date.from(zdt.toInstant());
+
             } catch (DateTimeParseException dtpe) {
                 logger.debug("Unable to parse DateTime from: " + operand);
                 return null;
