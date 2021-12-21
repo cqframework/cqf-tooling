@@ -42,7 +42,9 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
         if (file.isDirectory()) {
             for (File libraryFile : file.listFiles()) {
-                loadLibrary(fileMap, libraries, libraryFile);
+                if(IOUtils.isXMLOrJson(libraryPath, libraryFile.getName())) {
+                    loadLibrary(fileMap, libraries, libraryFile);
+                }
             }
         }
         else {

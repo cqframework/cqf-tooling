@@ -949,4 +949,15 @@ public class IOUtils
                 .forEach(entry -> devicePaths.add(entry.getKey()));
         }
     }
+
+    public static boolean isXMLOrJson(String fileDirPath, String libraryName){
+        String fileExtension = libraryName.substring(libraryName.lastIndexOf(".") + 1);
+        if(fileExtension.equalsIgnoreCase("xml") ||
+                fileExtension.equalsIgnoreCase("json")){
+            return true;
+        }
+        System.out.println("The file " + fileDirPath + libraryName + " is not the right type of file.");
+        return false;
+    }
+
 }
