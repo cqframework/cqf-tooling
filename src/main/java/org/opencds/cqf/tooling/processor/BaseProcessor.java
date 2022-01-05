@@ -9,16 +9,17 @@ import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_50;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r5.elementmodel.Manager;
-import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.convertors.conv30_50.VersionConvertor_30_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.context.IWorkerContext;
+import org.hl7.fhir.r5.elementmodel.Manager;
+import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.utilities.IniFile;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.VersionUtilities;
+import org.opencds.cqf.tooling.exception.IGInitializationException;
 import org.opencds.cqf.tooling.npm.LibraryLoader;
 import org.opencds.cqf.tooling.npm.NpmPackageManager;
 import org.opencds.cqf.tooling.utilities.IGUtils;
@@ -26,36 +27,43 @@ import org.opencds.cqf.tooling.utilities.IGUtils;
 public class BaseProcessor implements IProcessorContext, IWorkerContext.ILoggingService {
 
     protected String rootDir;
+
     public String getRootDir() {
         return rootDir;
     }
 
     protected ImplementationGuide sourceIg;
+
     public ImplementationGuide getSourceIg() {
         return sourceIg;
     }
 
     protected String fhirVersion;
+
     public String getFhirVersion() {
         return fhirVersion;
     }
 
     protected String packageId;
+
     public String getPackageId() {
         return packageId;
     }
 
     protected String canonicalBase;
+
     public String getCanonicalBase() {
         return canonicalBase;
     }
 
     protected UcumService ucumService;
+
     public UcumService getUcumService() {
         return ucumService;
     }
 
     protected NpmPackageManager packageManager;
+
     public NpmPackageManager getPackageManager() {
         return packageManager;
     }
@@ -83,46 +91,40 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
 
         try {
             igPath = Utilities.path(rootDir, igPath);
-        }
-        catch (IOException e) {
-            logMessage(String.format("Exceptions occurred extracting path from ig", e.getMessage()));
+        } catch (IOException e) {
+            String message = String.format(
+                    "Exceptions occurred creating igPath from source rootDir: %s, and igPath: %s", rootDir, igPath);
+            logMessage(message);
+            throw new IGInitializationException(message, e);
         }
 
         if (fhirVersion != null) {
             loadSourceIG(igPath, fhirVersion);
         } else {
-            try {
-                loadSourceIG(igPath);
-            }
-            catch (Exception e) {
-                logMessage("Error Parsing File " + igPath + ": " + e.getMessage());
-            }
+            loadSourceIG(igPath);
         }
 
-        // TODO: Perhaps we should validate the passed in fhirVersion against the fhirVersion in the IG?
+        // TODO: Perhaps we should validate the passed in fhirVersion against the
+        // fhirVersion in the IG?
 
         this.fhirVersion = sourceIg.getFhirVersion().get(0).getCode();
         packageId = sourceIg.getPackageId();
         canonicalBase = determineCanonical(sourceIg.getUrl());
         try {
             packageManager = new NpmPackageManager(sourceIg, this.fhirVersion);
-        }
-        catch (IOException e) {
-            logMessage(String.format("Exceptions occurred loading npm package manager:", e.getMessage()));
+        } catch (IOException e) {
+            String message = String.format("Exceptions occurred loading npm package manager from source Ig: %s",
+                    sourceIg.getName());
+            logMessage(message);
+            throw new IGInitializationException(message, e);
         }
 
         // Setup binary paths (cql source directories)
-        try {
-            binaryPaths = IGUtils.extractBinaryPaths(rootDir, sourceIg);
-        }
-        catch (IOException e) {
-            logMessage(String.format("Errors occurred extracting binary path from IG: ", e.getMessage()));
-            throw new IllegalArgumentException("Could not obtain binary path from IG");
-        }
+        binaryPaths = IGUtils.extractBinaryPaths(rootDir, sourceIg);
     }
 
     /*
-    Initializes from an ig.ini file in the root directory
+     * Initializes from an ig.ini file in the root directory
      */
     public void initializeFromIni(String iniFile) {
         IniFile ini = new IniFile(new File(iniFile).getAbsolutePath());
@@ -135,32 +137,36 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
         }
         try {
             initializeFromIg(rootDir, igPath, specifiedFhirVersion);
-        }
-        catch (Exception e) {
-            logMessage(String.format("Exceptions occurred initializing refresh from ini file '%s':%s", iniFile, e.getMessage()));
+        } catch (Exception e) {
+            String message = String.format("Exceptions occurred initializing refresh from ini file '%s':%s", iniFile,
+                    e.getMessage());
+            logMessage(message);
+            throw new IGInitializationException(message, e);
         }
     }
 
     private List<String> binaryPaths;
+
     public List<String> getBinaryPaths() {
         return binaryPaths;
     }
+
     protected void setBinaryPaths(List<String> binaryPaths) {
         this.binaryPaths = binaryPaths;
     }
 
     private CqlProcessor cqlProcessor;
+
     public CqlProcessor getCqlProcessor() {
         if (cqlProcessor == null) {
             LibraryLoader reader = new LibraryLoader(fhirVersion);
             try {
                 ucumService = new UcumEssenceService(UcumEssenceService.class.getResourceAsStream("/ucum-essence.xml"));
             } catch (UcumException e) {
-                System.err.println("Could not create UCUM validation service:");
-                e.printStackTrace();
+                throw new IGInitializationException("Could not create UCUM validation service", e);
             }
             if (packageManager == null) {
-                throw new IllegalArgumentException("packageManager is null");
+                throw new IllegalStateException("packageManager is null. It should be initialized at this point.");
             }
             cqlProcessor = new CqlProcessor(packageManager.getNpmList(), binaryPaths, reader, this, ucumService,
                     packageId, canonicalBase);
@@ -169,25 +175,27 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
         return cqlProcessor;
     }
 
-    private ImplementationGuide loadSourceIG(String igPath) throws Exception {
+    private ImplementationGuide loadSourceIG(String igPath) {
         try {
             try {
                 sourceIg = (ImplementationGuide) org.hl7.fhir.r5.formats.FormatUtilities.loadFile(igPath);
-            } catch (Exception e) {
+            } catch (IOException | FHIRException e) {
                 try {
                     VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
-                    sourceIg = (ImplementationGuide) versionConvertor_40_50.convertResource(org.hl7.fhir.r4.formats.FormatUtilities.loadFile(igPath));
-                } catch (Exception ex) {
+                    sourceIg = (ImplementationGuide) versionConvertor_40_50
+                            .convertResource(org.hl7.fhir.r4.formats.FormatUtilities.loadFile(igPath));
+                } catch (IOException | FHIRException ex) {
                     byte[] src = TextFile.fileToBytes(igPath);
                     Manager.FhirFormat fmt = org.hl7.fhir.r5.formats.FormatUtilities.determineFormat(src);
 
-                    org.hl7.fhir.dstu3.formats.ParserBase parser = org.hl7.fhir.dstu3.formats.FormatUtilities.makeParser(fmt.toString());
+                    org.hl7.fhir.dstu3.formats.ParserBase parser = org.hl7.fhir.dstu3.formats.FormatUtilities
+                            .makeParser(fmt.toString());
                     VersionConvertor_30_50 versionConvertor_30_50 = new VersionConvertor_30_50(new BaseAdvisor_30_50());
                     sourceIg = (ImplementationGuide) versionConvertor_30_50.convertResource(parser.parse(src));
                 }
             }
-        } catch (Exception e) {
-            throw new Exception("Error Parsing File " + igPath + ": " + e.getMessage(), e);
+        } catch (IOException | FHIRException e) {
+            throw new IGInitializationException(String.format("error initializing IG from igPath: %s", igPath), e);
         }
 
         return sourceIg;
@@ -198,7 +206,8 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
             if (VersionUtilities.isR3Ver(specifiedFhirVersion)) {
                 byte[] src = TextFile.fileToBytes(igPath);
                 Manager.FhirFormat fmt = org.hl7.fhir.r5.formats.FormatUtilities.determineFormat(src);
-                org.hl7.fhir.dstu3.formats.ParserBase parser = org.hl7.fhir.dstu3.formats.FormatUtilities.makeParser(fmt.toString());
+                org.hl7.fhir.dstu3.formats.ParserBase parser = org.hl7.fhir.dstu3.formats.FormatUtilities
+                        .makeParser(fmt.toString());
                 VersionConvertor_30_50 versionConvertor_30_50 = new VersionConvertor_30_50(new BaseAdvisor_30_50());
                 sourceIg = (ImplementationGuide) versionConvertor_30_50.convertResource(parser.parse(src));
             } else if (VersionUtilities.isR4Ver(specifiedFhirVersion)) {
@@ -208,11 +217,12 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
             } else if (VersionUtilities.isR5Ver(specifiedFhirVersion)) {
                 sourceIg = (ImplementationGuide) org.hl7.fhir.r5.formats.FormatUtilities.loadFile(igPath);
             } else {
-                throw new FHIRException("Unknown Version '"+specifiedFhirVersion+"'");
+                throw new FHIRException("Unknown Version '" + specifiedFhirVersion + "'");
             }
-        }
-        catch (IOException e) {
-            logMessage(String.format("Exceptions occurred loading IG file", e.getMessage()));
+        } catch (IOException e) {
+            String message = String.format("Exceptions occurred loading IG path: %s", igPath);
+            logMessage(message);
+            throw new IGInitializationException(message, e);
         }
 
         return sourceIg;
