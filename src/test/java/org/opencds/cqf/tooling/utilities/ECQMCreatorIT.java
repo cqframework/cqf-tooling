@@ -38,7 +38,7 @@ public class ECQMCreatorIT {
 
     private static Logger logger = LoggerFactory.getLogger(ECQMCreatorIT.class);
 
-    private static FhirContext context = FhirContext.forR5();
+    private static FhirContext context = FhirContext.forR5Cached();
 
     private Measure refreshMeasure(String primaryLibraryPath, String measurePath) throws IOException {
         CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
@@ -1130,7 +1130,7 @@ public class ECQMCreatorIT {
             CqlTranslator translator = createTranslator(libraryPath, cqlTranslatorOptions);
             translator.toELM();
             cacheLibrary(translator.getTranslatedLibrary());
-            FhirContext context = FhirContext.forR5();
+            FhirContext context = FhirContext.forR5Cached();
             IParser parser = context.newJsonParser();
             IParser xmlParser = context.newXmlParser();
             InputStream inputStream = this.getClass()

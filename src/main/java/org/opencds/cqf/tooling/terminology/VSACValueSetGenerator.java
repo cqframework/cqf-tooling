@@ -12,7 +12,10 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.Enumerations;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
 
@@ -290,10 +293,10 @@ public class VSACValueSetGenerator extends Operation {
     private void writeValueSetToFile(String fileName, ValueSet vs) {
         IParser parser =
                 encoding == null
-                        ? FhirContext.forDstu3().newJsonParser()
+                        ? FhirContext.forDstu3Cached().newJsonParser()
                         : encoding.toLowerCase().startsWith("j")
-                                ? FhirContext.forDstu3().newJsonParser()
-                                : FhirContext.forDstu3().newXmlParser();
+                                ? FhirContext.forDstu3Cached().newJsonParser()
+                                : FhirContext.forDstu3Cached().newXmlParser();
         try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + fileName)) {
             writer.write(parser.setPrettyPrint(true).encodeResourceToString(vs).getBytes());
             writer.flush();

@@ -237,10 +237,10 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
     protected void writeValueSetToFile(String fileName, ValueSet vs) {
         IParser parser =
             encoding == null
-                ? FhirContext.forDstu3().newJsonParser()
+                ? FhirContext.forDstu3Cached().newJsonParser()
                 : encoding.toLowerCase().startsWith("j")
-                ? FhirContext.forDstu3().newJsonParser()
-                : FhirContext.forDstu3().newXmlParser();
+                ? FhirContext.forDstu3Cached().newJsonParser()
+                : FhirContext.forDstu3Cached().newXmlParser();
 
         try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + fileName)) {
             writer.write(parser.setPrettyPrint(true).encodeResourceToString(vs).getBytes());

@@ -20,10 +20,11 @@ import org.hl7.fhir.r5.model.Constants;
 import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.VersionUtilities;
+import org.hl7.fhir.utilities.json.JsonTrackingParser;
 import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.ToolsVersion;
-import org.hl7.fhir.utilities.json.JsonTrackingParser;
+import org.opencds.cqf.tooling.exception.NpmPackageManagerException;
 
 public class NpmPackageManager implements IWorkerContext.ILoggingService {
     private FilesystemPackageCacheManager pcm;
@@ -71,8 +72,15 @@ public class NpmPackageManager implements IWorkerContext.ILoggingService {
 
         this.sourceIg = sourceIg;
 
-        // userMode indicates whether the packageCache is within the working directory or in the user home
-        pcm = new FilesystemPackageCacheManager(true, ToolsVersion.TOOLS_VERSION);
+        try {
+            // userMode indicates whether the packageCache is within the working directory or in the user home
+            pcm = new FilesystemPackageCacheManager(true, ToolsVersion.TOOLS_VERSION);
+        }
+        catch(IOException e) {
+            String message = "error creating the FilesystemPackageCacheManager";
+            logMessage(message);
+            throw new NpmPackageManagerException(message, e);
+        }
 
         loadCorePackage();
 
@@ -83,15 +91,21 @@ public class NpmPackageManager implements IWorkerContext.ILoggingService {
         }
     }
 
-    private void loadCorePackage() throws IOException {
+    private void loadCorePackage() {
         NpmPackage pi = null;
 
         String v = version.equals(Constants.VERSION) ? "current" : version;
 
         System.out.println("Core Package "+ VersionUtilities.packageForVersion(v)+"#"+v);
-        pi = pcm.loadPackage(VersionUtilities.packageForVersion(v), v);
+        try {
+            pi = pcm.loadPackage(VersionUtilities.packageForVersion(v), v);       
+        }
+        catch(Exception e) {
+            throw new NpmPackageManagerException("Error loading core package", e);
+        }
+
         if (pi == null) {
-            throw new IllegalArgumentException("Could not load core package");
+            throw new NpmPackageManagerException("Could not load core package");
         }
         if (v.equals("current")) {
             throw new IllegalArgumentException("Current core package not supported");

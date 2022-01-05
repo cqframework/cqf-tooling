@@ -361,13 +361,6 @@
             <version>1.7.30</version>
         </dependency>
 
-        <!-- uses logback as slf4j implementation-->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
-        </dependency>
-
         <!-- test dependencies -->
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
@@ -391,11 +384,6 @@
             <version>${cql-engine.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>engine.jaxb</artifactId>
-            <scope>test</scope>
-        </dependency> -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
@@ -419,6 +407,14 @@
             <groupId>net.sf.jopt-simple</groupId>
             <artifactId>jopt-simple</artifactId>
             <version>5.0.4</version>
+        </dependency>
+
+        <!-- Capture logs from dependencies, but allow downstream users to pick their own loggers -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.30</version>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 

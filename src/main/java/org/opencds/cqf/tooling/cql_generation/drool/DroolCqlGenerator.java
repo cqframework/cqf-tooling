@@ -21,9 +21,9 @@ import org.opencds.cqf.tooling.cql_generation.drool.serialization.Serializer;
 import org.opencds.cqf.tooling.cql_generation.drool.traversal.DepthFirstDroolTraverser;
 import org.opencds.cqf.tooling.cql_generation.drool.traversal.DroolTraverser;
 import org.opencds.cqf.tooling.cql_generation.drool.visitor.DroolToElmVisitor;
+import org.opencds.cqf.tooling.cql_generation.drool.visitor.DroolToElmVisitor.CQLTYPES;
 import org.opencds.cqf.tooling.cql_generation.drool.visitor.ElmToCqlVisitor;
 import org.opencds.cqf.tooling.cql_generation.drool.visitor.Visitor;
-import org.opencds.cqf.tooling.cql_generation.drool.visitor.DroolToElmVisitor.CQLTYPES;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,7 +118,7 @@ public class DroolCqlGenerator implements CqlGenerator {
                 File outputFile = new File(outpuDirectory.getAbsolutePath() + "/" + vi.getId() + "-" + vi.getVersion() + ".cql");
                 IOUtil.writeToFile(outputFile, cql);
             } else {
-                logger.info("Output directory is not a directory: " + outpuDirectory.getAbsolutePath());
+                throw new IllegalArgumentException("Output directory is not a directory: " + outpuDirectory.getAbsolutePath());
             }
         });
     }

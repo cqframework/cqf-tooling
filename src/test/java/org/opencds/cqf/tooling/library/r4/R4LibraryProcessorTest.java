@@ -1,24 +1,45 @@
 package org.opencds.cqf.tooling.library.r4;
 
+import static org.testng.Assert.assertTrue;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
+import org.hl7.fhir.utilities.VersionUtilities;
+import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
+import org.hl7.fhir.utilities.npm.ToolsVersion;
+import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.library.LibraryProcessorTest;
 import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.opencds.cqf.tooling.RefreshTest;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 
-import static org.testng.Assert.assertTrue;
-
 public class R4LibraryProcessorTest extends LibraryProcessorTest {
     private String resourceDirectory = "r4";
+
+    private FilesystemPackageCacheManager pcm;
     public R4LibraryProcessorTest() {
         super(new R4LibraryProcessor(), FhirContext.forCached(FhirVersionEnum.R4), "R4LibraryProcessorTest");
+        try {
+            pcm = new FilesystemPackageCacheManager(true, ToolsVersion.TOOLS_VERSION);
+        }
+        catch(IOException e) {}
+    }
+
+    @BeforeClass
+    public void setup() {
+        try {
+            if (pcm != null) {
+                pcm.loadPackage(VersionUtilities.packageForVersion("4.0.1"), "4.0.1");
+            }
+        }
+        catch(IOException e) {}
     }
 
     @BeforeMethod

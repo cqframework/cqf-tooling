@@ -1,13 +1,5 @@
 package org.opencds.cqf.tooling.vmrToFhir;
 
-import org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements;
-import org.opencds.vmr.v1_0.schema.EvaluatedPerson.Demographics;
-import org.opencds.vmr.v1_0.schema.ObservationResult.ObservationValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.UUID;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -17,12 +9,47 @@ import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
-import org.opencds.vmr.v1_0.schema.*;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.MedicationAdministration;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ServiceRequest;
+import org.opencds.vmr.v1_0.schema.AD;
+import org.opencds.vmr.v1_0.schema.ADXP;
+import org.opencds.vmr.v1_0.schema.AddressPartType;
+import org.opencds.vmr.v1_0.schema.AdministrableSubstance;
 import org.opencds.vmr.v1_0.schema.AdverseEvent;
+import org.opencds.vmr.v1_0.schema.CD;
+import org.opencds.vmr.v1_0.schema.EncounterEvent;
+import org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements;
+import org.opencds.vmr.v1_0.schema.EvaluatedPerson.Demographics;
+import org.opencds.vmr.v1_0.schema.ObservationOrder;
+import org.opencds.vmr.v1_0.schema.ObservationResult;
+import org.opencds.vmr.v1_0.schema.ObservationResult.ObservationValue;
+import org.opencds.vmr.v1_0.schema.PQ;
+import org.opencds.vmr.v1_0.schema.Problem;
+import org.opencds.vmr.v1_0.schema.ProcedureEvent;
+import org.opencds.vmr.v1_0.schema.ProcedureOrder;
+import org.opencds.vmr.v1_0.schema.RelatedClinicalStatement;
+import org.opencds.vmr.v1_0.schema.SubstanceAdministrationEvent;
+import org.opencds.vmr.v1_0.schema.SubstanceAdministrationOrder;
+import org.opencds.vmr.v1_0.schema.TS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Transforms Vmr data to the FHIR equivalent.
@@ -41,7 +68,7 @@ public class VmrToFhirTransformer {
      * @return
      */
     public List<IAnyResource> transform(ClinicalStatements statements) {
-        logger.info("transforming statements...");
+        logger.debug("transforming statements...");
         List<IAnyResource> result = new ArrayList<IAnyResource>();
         if (statements.getAdverseEvents() != null) {
             statements.getAdverseEvents().getAdverseEvent().stream().forEach(adverseEvent -> {
@@ -118,7 +145,7 @@ public class VmrToFhirTransformer {
      * @return
      */
     public Patient transform(Demographics demographics) {
-        logger.info("transforming Demographics...");
+        logger.debug("transforming Demographics...");
         patient.setId(UUID.randomUUID().toString());
         patient.setDeceased(new BooleanType(demographics.getIsDeceased().isValue()));
         patient.setAddress(transform(demographics.getAddress()));
@@ -136,7 +163,7 @@ public class VmrToFhirTransformer {
      * @return
      */
     public List<IAnyResource> transform(AdverseEvent adverseEvent) {
-        logger.info("transforming AdverseEvent...");
+        logger.debug("transforming AdverseEvent...");
         throw new RuntimeException("AdverseEvent to FHIR transformation not yet implemented");
     }
 
@@ -146,7 +173,7 @@ public class VmrToFhirTransformer {
      * @return
      */
     public List<IAnyResource> transform(EncounterEvent encounterEvent) {
-        logger.info("transforming EncounterEvent...");
+        logger.debug("transforming EncounterEvent...");
         List<IAnyResource> result = new ArrayList<>();
         if (encounterEvent.getRelatedClinicalStatement() != null) {
             encounterEvent.getRelatedClinicalStatement().stream().forEach(clinicalStatement -> {
@@ -167,7 +194,7 @@ public class VmrToFhirTransformer {
      * @return
      */
     public IAnyResource transform(RelatedClinicalStatement clinicalStatement) {
-        logger.info("transforming RelatedClinicalStatement...");
+        logger.debug("transforming RelatedClinicalStatement...");
         if (clinicalStatement.getProblem() != null) {
             Problem problem = clinicalStatement.getProblem();
             return transform(problem);
@@ -184,7 +211,7 @@ public class VmrToFhirTransformer {
      * @return
      */
     public IAnyResource transform(ObservationOrder observationOrder) {
-        logger.info("transforming ObservationOrder...");
+        logger.debug("transforming ObservationOrder...");
         if (observationOrder.getObservationFocus() != null) {
             CD focusCoding = observationOrder.getObservationFocus();
             ServiceRequest serviceRequest = new ServiceRequest();
@@ -202,13 +229,13 @@ public class VmrToFhirTransformer {
      * @return
      */
     public IAnyResource transform(ObservationResult observationResult) {
-        logger.info("transforming ObservationResult...");
+        logger.debug("transforming ObservationResult...");
         if (observationResult.getObservationValue() != null) {
             ObservationValue observationValue = observationResult.getObservationValue();
             return transform(observationValue);
         }
         if (observationResult.getObservationFocus() != null) {
-            logger.info("transforming ObservationFocus...");
+            logger.debug("transforming ObservationFocus...");
             CD focusCoding = observationResult.getObservationFocus();
             Observation observation = new Observation();
             observation.setId(new IdType(UUID.randomUUID().toString()));
@@ -217,7 +244,7 @@ public class VmrToFhirTransformer {
             return observation;
         }
         if (observationResult.getInterpretation() != null && !observationResult.getInterpretation().isEmpty()) {
-            logger.info("transforming Interpretation...");
+            logger.debug("transforming Interpretation...");
             List<CodeableConcept> concepts = new ArrayList<CodeableConcept>();
             observationResult.getInterpretation().stream().forEach(concept -> concepts.add(new CodeableConcept(new Coding(concept.getCodeSystem(), concept.getCode(), concept.getDisplayName()))));
             Observation observation = new Observation();
@@ -235,9 +262,9 @@ public class VmrToFhirTransformer {
      * @return
      */
     public IAnyResource transform(ObservationValue observationValue) {
-        logger.info("transforming ObservationValue...");
+        logger.debug("transforming ObservationValue...");
         if (observationValue.getConcept() != null) {
-            logger.info("transforming Concept...");
+            logger.debug("transforming Concept...");
             CD problemCoding = observationValue.getConcept();
             Observation observation = new Observation();
             observation.setId(new IdType(UUID.randomUUID().toString()));
@@ -246,7 +273,7 @@ public class VmrToFhirTransformer {
             return observation;
         }
         if (observationValue.getPhysicalQuantity() != null) {
-            logger.info("transforming PhysicalQuantity...");
+            logger.debug("transforming PhysicalQuantity...");
             PQ physicalQuantity = observationValue.getPhysicalQuantity();
             Observation observation = new Observation();
             observation.setId(new IdType(UUID.randomUUID().toString()));
@@ -267,9 +294,9 @@ public class VmrToFhirTransformer {
      * @return
      */
     public IAnyResource transform(Problem problem) {
-        logger.info("transforming Problem...");
+        logger.debug("transforming Problem...");
         if (problem.getProblemCode() != null) {
-            logger.info("transforming ProblemCode...");
+            logger.debug("transforming ProblemCode...");
             CD problemCoding = problem.getProblemCode();
             Condition condition = new Condition();
             condition.setId(new IdType(UUID.randomUUID().toString()));
@@ -278,7 +305,7 @@ public class VmrToFhirTransformer {
             return condition;
         }
         if (problem.getProblemStatus() != null) {
-            logger.info("transforming ProblemStatus...");
+            logger.debug("transforming ProblemStatus...");
             CD problemCoding = problem.getProblemStatus();
             Condition condition = new Condition();
             condition.setId(new IdType(UUID.randomUUID().toString()));
@@ -297,7 +324,7 @@ public class VmrToFhirTransformer {
      * @return
      */
     public List<IAnyResource> transform(ProcedureEvent procedureEvent) {
-        logger.info("transforming ProcedureEvent...");
+        logger.debug("transforming ProcedureEvent...");
         throw new RuntimeException("ProcedureEvent FHIR transformation not yet implemented");
     }
 
@@ -307,7 +334,7 @@ public class VmrToFhirTransformer {
      * @return
      */
     public List<IAnyResource> transform(ProcedureOrder procedureOrder) {
-        logger.info("transforming ProcedureOrder...");
+        logger.debug("transforming ProcedureOrder...");
         throw new RuntimeException("ProcedureOrder FHIR transformation not yet implemented");
     }
 
@@ -317,7 +344,7 @@ public class VmrToFhirTransformer {
      * @return
      */
     public List<IAnyResource> transform(SubstanceAdministrationEvent substanceAdministrationEvent) {
-        logger.info("transforming SubstanceAdministrationEvent...");
+        logger.debug("transforming SubstanceAdministrationEvent...");
         List<IAnyResource> result = new ArrayList<>();
         if (substanceAdministrationEvent.getRelatedClinicalStatement() != null) {
             substanceAdministrationEvent.getRelatedClinicalStatement().stream().forEach(clinicalStatement -> {
@@ -349,7 +376,7 @@ public class VmrToFhirTransformer {
      * @return
      */
     public List<IAnyResource> transform(SubstanceAdministrationOrder substanceAdministrationOrder) {
-        logger.info("transforming SubstanceAdministrationOrder...");
+        logger.debug("transforming SubstanceAdministrationOrder...");
         List<IAnyResource> result = new ArrayList<IAnyResource>();
         if (substanceAdministrationOrder.getSubstance() != null) {
             CodeableConcept codeableConcept = transform(substanceAdministrationOrder.getSubstance());
@@ -375,7 +402,7 @@ public class VmrToFhirTransformer {
      * @return
      */
     public CodeableConcept transform(AdministrableSubstance substance) {
-        logger.info("transforming AdministrableSubstance...");
+        logger.debug("transforming AdministrableSubstance...");
         if (substance.getSubstanceCode() != null) {
             CD substanceCode = substance.getSubstanceCode();
             return new CodeableConcept(new Coding(substanceCode.getCodeSystem(), substanceCode.getCode(), substanceCode.getDisplayName()));
@@ -390,7 +417,7 @@ public class VmrToFhirTransformer {
      */
     public List<Address> transform(List<AD> addresses) {
         List<Address> result = new ArrayList<Address>();
-        logger.info("transforming Addresses...");
+        logger.debug("transforming Addresses...");
         for (AD address : addresses) {
             Address newAddress = new Address();
             for (ADXP type : address.getPart()) {
@@ -412,7 +439,7 @@ public class VmrToFhirTransformer {
     }
 
     private Date transform(TS birthTime) {
-        logger.info("transforming BirthTime...");
+        logger.debug("transforming BirthTime...");
         String operand = birthTime.getValue();
         if (operand == null) {
             return null;
@@ -439,7 +466,7 @@ public class VmrToFhirTransformer {
     }
 
     private AdministrativeGender transform(CD gender) {
-        logger.info("transforming Gender...");
+        logger.debug("transforming Gender...");
         switch (gender.getCode()) {
             case "M" : return AdministrativeGender.fromCode("male");
             case "F" : return AdministrativeGender.fromCode("female");
