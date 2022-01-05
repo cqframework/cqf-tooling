@@ -1,7 +1,7 @@
 language: java
 jdk: openjdk11
 os: linux
-dist: xenial
+dist: focal
 cache:
   timeout: 180
   directories:
