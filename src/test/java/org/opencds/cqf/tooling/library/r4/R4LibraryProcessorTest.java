@@ -44,7 +44,7 @@ public class R4LibraryProcessorTest extends LibraryProcessorTest {
             false
         );
 
-        validateCqfmSofwareSystemExtension(targetDirectory + libraryPath);
+        validateCqfmSoftwareSystemExtension(targetDirectory + libraryPath);
     }
 
     @Test

@@ -856,7 +856,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         } else {
             if (query.getLet() != null && !query.getLet().isEmpty()) {
                 enterClause();
-                output.append(String.format("let"));
+                output.append("let");
                 query.getLet().stream().forEach(let -> visitLetClause(let, context));
                 exitClause();
             }
@@ -969,6 +969,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
      * @param context the context passed to the visitor
      * @return the visitor result
      */
+    @Override
     public Void visitWhereClause(Expression where, ElmContext context) {
         try {
             enterClause();
@@ -1215,6 +1216,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
      * @param context the context passed to the visitor
      * @return the visitor result
      */
+    @Override
     public Void visitImplies(Implies implies, ElmContext context) {
         return null;
     }
@@ -1318,6 +1320,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
      * @param context the context passed to the visitor
      * @return the visitor result
      */
+    @Override
     public Void visitExpand(Expand expand, ElmContext context) {
         return null;
     }
@@ -1941,6 +1944,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
      * @param context the context passed to the visitor
      * @return the visitor result
      */
+    @Override
     public Void visitCodeRef(CodeRef codeRef, ElmContext context) {
         if (codeRef.getLibraryName() != null) {
             output.append(String.format("\"%s\".\"%s\"", codeRef.getLibraryName(), codeRef.getName()));

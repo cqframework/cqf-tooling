@@ -1,12 +1,10 @@
 package org.opencds.cqf.tooling.measure;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.parameter.RefreshMeasureParameters;
-import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.testng.annotations.BeforeMethod;
 

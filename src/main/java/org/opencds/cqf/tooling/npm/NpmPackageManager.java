@@ -96,12 +96,19 @@ public class NpmPackageManager implements IWorkerContext.ILoggingService {
 
         String v = version.equals(Constants.VERSION) ? "current" : version;
 
-        System.out.println("Core Package "+ VersionUtilities.packageForVersion(v)+"#"+v);
+        logMessage("Core Package "+ VersionUtilities.packageForVersion(v)+"#"+v);
         try {
             pi = pcm.loadPackage(VersionUtilities.packageForVersion(v), v);       
         }
         catch(Exception e) {
-            throw new NpmPackageManagerException("Error loading core package", e);
+            try {
+                // Appears to be race condition in FHIR core where they are
+                // loading a custom cert provider.
+                pi = pcm.loadPackage(VersionUtilities.packageForVersion(v), v);   
+            }
+            catch (Exception ex) {
+                throw new NpmPackageManagerException("Error loading core package", e);
+            }
         }
 
         if (pi == null) {

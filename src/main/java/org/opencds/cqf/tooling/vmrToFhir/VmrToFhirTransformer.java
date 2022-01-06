@@ -80,8 +80,8 @@ public class VmrToFhirTransformer {
             });
         }
         if (statements.getEncounterEvents() != null) {
-            statements.getEncounterEvents().getEncounterEvent().stream().forEach(enconterEvent -> {
-                result.addAll(transform(enconterEvent));
+            statements.getEncounterEvents().getEncounterEvent().stream().forEach(encounterEvent -> {
+                result.addAll(transform(encounterEvent));
             });
         }
         if (statements.getObservationOrders() != null) {

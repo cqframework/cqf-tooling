@@ -52,7 +52,7 @@ public class DroolCqlGenerator implements CqlGenerator {
             output.mkdirs();
         }
         this.cqlOutput = new File(output.getAbsolutePath() + "/cql");
-        cqlOutput.mkdir();
+        cqlOutput.mkdirs();
         VmrToModelElmBuilder modelBuilder = resolveModel(fhirVersion);
         ElmContext context = readAndGenerateCQL(input, modelBuilder);
         writeElm(context, modelBuilder, output);
@@ -71,7 +71,7 @@ public class DroolCqlGenerator implements CqlGenerator {
         File file = new File(inputURI.getPath());
         File output = new File(outputURI.getPath());
         this.cqlOutput = new File(output.getAbsolutePath() + "/cql");
-        cqlOutput.mkdir();
+        cqlOutput.mkdirs();
         VmrToModelElmBuilder modelBuilder = resolveModel(fhirVersion);
         ElmContext context = readAndGenerateCQL(file, modelBuilder);
         writeElm(context, modelBuilder, output);  
@@ -133,7 +133,7 @@ public class DroolCqlGenerator implements CqlGenerator {
                     File outputFile = new File(outpuDirectory.getAbsolutePath() + "/" + entry.getKey() + ".xml");
                     IOUtil.writeToFile(outputFile, elm);
                 } else {
-                    logger.info("Output directory is not a directory: " + outpuDirectory.getAbsolutePath());
+                    throw new IllegalArgumentException("Output directory is not a directory: " + outpuDirectory.getAbsolutePath());
                 }
             } catch (JAXBException e) {
                 e.printStackTrace();
