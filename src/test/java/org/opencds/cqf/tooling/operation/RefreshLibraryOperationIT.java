@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling.operation;
 
+import static org.testng.Assert.assertTrue;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -7,12 +9,9 @@ import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-
-import static org.testng.Assert.assertTrue;
 
 public class RefreshLibraryOperationIT extends RefreshTest {
 
@@ -50,7 +49,7 @@ public class RefreshLibraryOperationIT extends RefreshTest {
         RefreshLibraryOperation refreshLibraryOperation = new RefreshLibraryOperation();
         refreshLibraryOperation.execute(args);
 
-        validateCqfmSofwareSystemExtension(targetDirectory + libraryPath);
+        validateCqfmSoftwareSystemExtension(targetDirectory + libraryPath);
     }
 
     //@Test

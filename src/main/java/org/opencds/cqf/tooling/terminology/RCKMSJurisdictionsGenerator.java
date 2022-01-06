@@ -74,10 +74,10 @@ public class RCKMSJurisdictionsGenerator extends Operation {
         String fileName = ("CodeSystem-ersd-jurisdictions").concat("." + encoding);
         IParser parser =
                 encoding == null
-                        ? FhirContext.forDstu3().newJsonParser()
+                        ? FhirContext.forDstu3Cached().newJsonParser()
                         : encoding.toLowerCase().startsWith("j")
-                                ? FhirContext.forDstu3().newJsonParser()
-                                : FhirContext.forDstu3().newXmlParser();
+                                ? FhirContext.forDstu3Cached().newJsonParser()
+                                : FhirContext.forDstu3Cached().newXmlParser();
         try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + fileName)) {
             writer.write(parser.setPrettyPrint(true).encodeResourceToString(cs).getBytes());
             writer.flush();

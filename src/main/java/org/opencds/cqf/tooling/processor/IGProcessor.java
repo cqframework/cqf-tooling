@@ -171,11 +171,11 @@ public class IGProcessor extends BaseProcessor {
             case "3.0.0":
             case "3.0.1":
             case "3.0.2":
-                return FhirContext.forDstu3();
+                return FhirContext.forDstu3Cached();
 
             case "4.0.0":
             case "4.0.1":
-                return FhirContext.forR4();
+                return FhirContext.forR4Cached();
 
             default:
                 throw new IllegalArgumentException("Unknown IG version: " + igVersion);

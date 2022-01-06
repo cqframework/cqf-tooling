@@ -190,7 +190,7 @@ public class DroolPredicateToElmExpressionConverter {
             if (!Strings.isNullOrEmpty(text)) {
                 List<String> unitParts = Arrays.asList(text.split(" "));
                 if (unitParts.contains("mg/24") && unitParts.contains("hours")) {
-                    logger.info("Found units: {}, adapting to mg/(24.h)", unitParts);
+                    logger.debug("Found units: {}, adapting to mg/(24.h)", unitParts);
                     adaptQuantityOperand("mg/(24.h)", dataInputNumericValue, libraryBuilder);
                     return;
                 }
@@ -297,7 +297,7 @@ public class DroolPredicateToElmExpressionConverter {
     private void adaptQuantityOperand(String text, BigDecimal bigDecimal, LibraryBuilder libraryBuilder) {
         if (Strings.isNullOrEmpty(text) || text.toLowerCase().equals("null")) {
             logger.warn("No unit found");
-            logger.info("No Unit Provided");
+            logger.debug("No Unit Provided");
         }
         if (bigDecimal == null && (Strings.isNullOrEmpty(text) || text.toLowerCase().equals("null"))) {
             logger.warn("Data Input was null");

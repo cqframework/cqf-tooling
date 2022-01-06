@@ -1,26 +1,37 @@
 package org.opencds.cqf.tooling.terminology.templateToValueSetGenerator;
 
-import ca.uhn.fhir.context.FhirContext;
-import org.apache.poi.ss.usermodel.*;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
-import org.opencds.cqf.tooling.terminology.distributable.CommonMetaData;
 import org.opencds.cqf.tooling.terminology.distributable.OrganizationalMetaData;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.time.Instant;
-import java.util.*;
+import ca.uhn.fhir.context.FhirContext;
 
 public class TemplateToValueSetGenerator extends Operation {
 
     private FhirContext fhirContext;
 
     public TemplateToValueSetGenerator() {
-        this.fhirContext = FhirContext.forR4();
+        this.fhirContext = FhirContext.forR4Cached();
     }
 
     private String pathToSpreadsheet;           // -pathtospreadsheet (-pts)
