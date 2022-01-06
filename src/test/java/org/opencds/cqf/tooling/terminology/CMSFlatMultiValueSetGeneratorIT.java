@@ -1,13 +1,14 @@
 package org.opencds.cqf.tooling.terminology;
 
-import org.testng.annotations.Ignore;
-import org.testng.annotations.Test;
-
 import java.io.File;
 import java.nio.file.Paths;
 
+import org.testng.annotations.Ignore;
+import org.testng.annotations.Test;
+
 public class CMSFlatMultiValueSetGeneratorIT {
 
+    @Ignore("The test set here is too big. Even with 4Gb of memory it fails on the build server. Need a smaller set.")
     @Test
     public void testValueSetGenerator() {
         VSACBatchValueSetGenerator generator = new VSACBatchValueSetGenerator();
