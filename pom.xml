@@ -12,7 +12,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <cql-engine.version>1.5.3</cql-engine.version>
         <cql-evaluator.version>1.4.0</cql-evaluator.version>
-        <cqframework.version>1.5.6</cqframework.version>
+        <cqframework.version>1.5.7-SNAPSHOT</cqframework.version>
         <hapi.version>5.6.1</hapi.version>
         <core.version>5.6.15</core.version>
     </properties>
