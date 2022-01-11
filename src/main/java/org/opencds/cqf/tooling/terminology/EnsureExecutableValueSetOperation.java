@@ -33,7 +33,7 @@ public class EnsureExecutableValueSetOperation extends Operation {
 
     @Override
     public void execute(String[] args) {
-        setOutputPath("src/main/resources/org/opencds/cqf/tooling/terminology/output"); // default
+        //setOutputPath("src/main/resources/org/opencds/cqf/tooling/terminology/output"); //default
 
         for (String arg : args) {
             if (arg.equals("-EnsureExecutableValueSet")) {
@@ -61,6 +61,9 @@ public class EnsureExecutableValueSetOperation extends Operation {
                 case "skipversion": case "sv": skipVersion = value.toLowerCase().equals("true") ? true : false; break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
+            if (null == super.getOutputPath() || "" == getOutputPath()) {
+                setOutputPath(this.valueSetPath); //default to editing files in place
+            }
         }
 
         if (valueSetPath == null) {
@@ -73,7 +76,7 @@ public class EnsureExecutableValueSetOperation extends Operation {
                 if (resource instanceof ValueSet) {
                     ValueSet valueSet = (ValueSet)resource;
                     if ((ensureExecutable && refreshExpansion(valueSet)) || (ensureComputable && inferCompose(valueSet))) {
-                        IOUtils.writeResource(valueSet, file.getAbsolutePath(), IOUtils.Encoding.parse(encoding), getFhirContext());
+                        IOUtils.writeResource(valueSet, super.getOutputPath(), IOUtils.Encoding.parse(encoding), getFhirContext());
                     }
                 }
             }
