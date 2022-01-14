@@ -142,7 +142,7 @@ public class BundleUtils {
     }
     
     public static void extractStu3Resources(org.hl7.fhir.dstu3.model.Bundle bundle, String encoding, String outputPath, boolean suppressNarrative) {
-    	FhirContext context = FhirContext.forDstu3();
+    	FhirContext context = FhirContext.forDstu3Cached();
     	for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
             org.hl7.fhir.dstu3.model.Resource entryResource = entry.getResource();
             if (entryResource != null) {
@@ -155,7 +155,7 @@ public class BundleUtils {
     }
     
     public static void extractR4Resources(org.hl7.fhir.r4.model.Bundle bundle, String encoding, String outputPath, boolean suppressNarrative) {
-    	FhirContext context = FhirContext.forR4();
+    	FhirContext context = FhirContext.forR4Cached();
     	for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
             org.hl7.fhir.r4.model.Resource entryResource = entry.getResource();
     		if (entryResource != null) {

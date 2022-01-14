@@ -1,24 +1,40 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
-import ca.uhn.fhir.context.FhirContext;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.hl7.fhir.r4.model.*;
-import org.opencds.cqf.tooling.Operation;
-import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
-import org.opencds.cqf.tooling.utilities.IOUtils;
+import static org.opencds.cqf.tooling.utilities.IOUtils.ensurePath;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.opencds.cqf.tooling.utilities.IOUtils.ensurePath;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Expression;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.PlanDefinition;
+import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.TriggerDefinition;
+import org.hl7.fhir.r4.model.UsageContext;
+import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class DTProcessor extends Operation {
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
@@ -655,8 +671,8 @@ public class DTProcessor extends Operation {
         try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
             writer.write(
                     encoding.equals("json")
-                            ? FhirContext.forR4().newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-                            : FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                            ? FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                            : FhirContext.forR4Cached().newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
             );
             writer.flush();
         } catch (IOException e) {

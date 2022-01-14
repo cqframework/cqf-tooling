@@ -135,7 +135,7 @@ public class IgBundler extends Operation
         if (igControl.has("version") && igControl.get("version").isJsonPrimitive()) {
             final String version = igControl.get("version").getAsString();
             if (version.equals("3.0.0") || version.equals("3.0.1")) {
-                fhirContext = FhirContext.forDstu3();
+                fhirContext = FhirContext.forDstu3Cached();
             } else {
                 throw new UnsupportedOperationException("The BundleIg operation currently only supports FHIR STU3");
             }

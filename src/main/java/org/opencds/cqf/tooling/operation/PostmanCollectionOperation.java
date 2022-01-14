@@ -1,10 +1,25 @@
 package org.opencds.cqf.tooling.operation;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -16,9 +31,7 @@ import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.R4FHIRUtils;
 
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import ca.uhn.fhir.context.FhirContext;
 
 public class PostmanCollectionOperation extends Operation {
 
@@ -250,14 +263,14 @@ public class PostmanCollectionOperation extends Operation {
     private FhirContext setContext(String version) {
         FhirContext context;
         if (StringUtils.isEmpty(version)) {
-            context = FhirContext.forR4();
+            context = FhirContext.forR4Cached();
         } else {
             switch (version.toLowerCase()) {
                 case "dstu3":
-                    context = FhirContext.forDstu3();
+                    context = FhirContext.forDstu3Cached();
                     break;
                 case "r4":
-                    context = FhirContext.forR4();
+                    context = FhirContext.forR4Cached();
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown fhir version: " + version);

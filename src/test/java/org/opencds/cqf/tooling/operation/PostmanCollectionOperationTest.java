@@ -1,9 +1,9 @@
 package org.opencds.cqf.tooling.operation;
 
+import java.net.URISyntaxException;
+
 import org.opencds.cqf.tooling.Operation;
 import org.testng.annotations.Test;
-
-import java.net.URISyntaxException;
 
 public class PostmanCollectionOperationTest {
 

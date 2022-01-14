@@ -10,7 +10,6 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Measure;
-import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.r4.R4MeasureProcessor;
 import org.opencds.cqf.tooling.measure.stu3.STU3MeasureProcessor;
@@ -21,10 +20,7 @@ import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class MeasureProcessor extends BaseProcessor {
     public static final String ResourcePrefix = "measure-";
@@ -34,8 +30,11 @@ public class MeasureProcessor extends BaseProcessor {
         return ResourcePrefix + baseId;
     }
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-
     public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, String measureToRefreshPath) {
+        return refreshIgMeasureContent(parentContext, outputEncoding, null, versioned, fhirContext, measureToRefreshPath);
+    }
+
+    public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, String measureOutputDirectory, Boolean versioned, FhirContext fhirContext, String measureToRefreshPath) {
 
         System.out.println("Refreshing measures...");
 
@@ -59,6 +58,7 @@ public class MeasureProcessor extends BaseProcessor {
         params.fhirContext = fhirContext;
         params.encoding = outputEncoding;
         params.versioned = versioned;
+        params.measureOutputDirectory = measureOutputDirectory;
         return measureProcessor.refreshMeasureContent(params);
     }
 

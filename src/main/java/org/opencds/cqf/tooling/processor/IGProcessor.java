@@ -1,9 +1,13 @@
 package org.opencds.cqf.tooling.processor;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.google.common.base.Strings;
 
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.utilities.Utilities;
@@ -30,6 +34,14 @@ public class IGProcessor extends BaseProcessor {
     }
     //mega ig method
     public void publishIG(RefreshIGParameters params) {
+        requireNonNull(params.includeDependencies, "includeDependencies can not be null");
+        requireNonNull(params.includeELM, "includeELM can not be null");
+        requireNonNull(params.includePatientScenarios, "includePatientScenarios can not be null");
+        requireNonNull(params.includeTerminology, "includeTerminology can not be null");
+        requireNonNull(params.versioned, "versioned can not be null");
+        requireNonNull(params.resourceDirs, "resourceDirs can not be null");
+        requireNonNull(params.outputEncoding, "outputEncoding can not be null");
+        requireNonNull(params.ini, "ini can not be null");
         if (params.ini != null) {
             initializeFromIni(params.ini);
         }
@@ -101,6 +113,8 @@ public class IGProcessor extends BaseProcessor {
         Encoding encoding = params.outputEncoding;
         // Boolean includeELM = params.includeELM;
         // Boolean includeDependencies = params.includeDependencies;
+        String libraryOutputPath = params.libraryOutputPath;
+        String measureOutputPath = params.measureOutputPath;
         Boolean includeTerminology = params.includeTerminology;
         Boolean includePatientScenarios = params.includePatientScenarios;
         Boolean versioned = params.versioned;
@@ -121,11 +135,19 @@ public class IGProcessor extends BaseProcessor {
         IGProcessor.ensure(rootDir, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
 
         List<String> refreshedLibraryNames;
-        refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
+        if (Strings.isNullOrEmpty(libraryOutputPath)) {
+            refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
+        } else {
+            refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, libraryOutputPath, versioned, fhirContext);
+        }
         refreshedResourcesNames.addAll(refreshedLibraryNames);
 
         List<String> refreshedMeasureNames;
-        refreshedMeasureNames = measureProcessor.refreshIgMeasureContent(this, encoding, versioned, fhirContext, measureToRefreshPath);
+        if (Strings.isNullOrEmpty(measureOutputPath)) {
+            refreshedMeasureNames = measureProcessor.refreshIgMeasureContent(this, encoding, versioned, fhirContext, measureToRefreshPath);
+        } else {
+            refreshedMeasureNames = measureProcessor.refreshIgMeasureContent(this, encoding, measureOutputPath, versioned, fhirContext, measureToRefreshPath);
+        }
         refreshedResourcesNames.addAll(refreshedMeasureNames);
 
         if (refreshedResourcesNames.isEmpty()) {
@@ -149,11 +171,11 @@ public class IGProcessor extends BaseProcessor {
             case "3.0.0":
             case "3.0.1":
             case "3.0.2":
-                return FhirContext.forDstu3();
+                return FhirContext.forDstu3Cached();
 
             case "4.0.0":
             case "4.0.1":
-                return FhirContext.forR4();
+                return FhirContext.forR4Cached();
 
             default:
                 throw new IllegalArgumentException("Unknown IG version: " + igVersion);

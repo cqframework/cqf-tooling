@@ -25,7 +25,7 @@ public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativePro
 
     public LibraryGenerator() {
         setNarrativeProvider(new NarrativeProvider());
-        setFhirContext(FhirContext.forR4());
+        setFhirContext(FhirContext.forR4Cached());
         setOutputPath("src/main/resources/org/opencds/cqf/tooling/library/output/r4");
         setOperationName("-CqlToR4Library");
     }

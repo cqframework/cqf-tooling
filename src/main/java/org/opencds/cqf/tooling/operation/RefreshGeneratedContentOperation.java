@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling.operation;
 
+import com.google.common.base.Strings;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -61,7 +63,11 @@ public abstract class RefreshGeneratedContentOperation extends Operation {
     }
 
     public void output(IBaseResource resource, IOUtils.Encoding encoding) {
-        IOUtils.writeResource(resource, pathToMeasures, encoding, fhirContext);
+        if (Strings.isNullOrEmpty(getOutputPath())) {
+            IOUtils.writeResource(resource, pathToMeasures, encoding, fhirContext);
+        } else {
+            IOUtils.writeResource(resource, getOutputPath(), encoding, fhirContext);
+        }
     }
 
     public abstract void refreshGeneratedContent();

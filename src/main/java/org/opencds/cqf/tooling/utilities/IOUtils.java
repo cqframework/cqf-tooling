@@ -248,7 +248,9 @@ public class IOUtils
                     return null;
                 }
             }
-            resource = parser.parseResource(new FileReader(file));
+            try (FileReader reader = new FileReader(file)){
+                resource = parser.parseResource(reader);
+            }
             cachedResources.put(path, resource);
         }
         catch (Exception e)
@@ -891,14 +893,21 @@ public class IOUtils
         }
     }
 
-    private static HashSet<String> devicePaths = new LinkedHashSet<String>();
+    private static HashSet<String> devicePaths;
     public static HashSet<String> getDevicePaths(FhirContext fhirContext) {
-        if (devicePaths.isEmpty()) {
+        if (devicePaths == null) {
             setupDevicePaths(fhirContext);
         }
         return devicePaths;
     }
+
+    // TODO: This should not be necessary this is awful... For now it is needed for passing tests in Travis
+    public static void clearDevicePaths() {
+        devicePaths = null;
+    }
+
     private static void setupDevicePaths(FhirContext fhirContext) {
+        devicePaths = new LinkedHashSet<String>();
         HashMap<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
@@ -920,4 +929,15 @@ public class IOUtils
                 .forEach(entry -> devicePaths.add(entry.getKey()));
         }
     }
+
+    public static boolean isXMLOrJson(String fileDirPath, String libraryName){
+        String fileExtension = libraryName.substring(libraryName.lastIndexOf(".") + 1);
+        if(fileExtension.equalsIgnoreCase("xml") ||
+                fileExtension.equalsIgnoreCase("json")){
+            return true;
+        }
+        System.out.println("The file " + fileDirPath + libraryName + " is not the right type of file.");
+        return false;
+    }
+
 }

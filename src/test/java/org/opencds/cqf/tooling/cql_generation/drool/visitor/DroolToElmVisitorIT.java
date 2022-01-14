@@ -16,8 +16,9 @@ import org.cqframework.cql.elm.execution.Library;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Bundle;
-import org.testng.annotations.Test;
-
+import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
+import org.opencds.cqf.cql.engine.data.DataProvider;
+import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.cql.engine.execution.CqlLibraryReader;
 import org.opencds.cqf.cql.engine.execution.InMemoryLibraryLoader;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
@@ -29,9 +30,7 @@ import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.BundleTerminologyProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
-import org.opencds.cqf.cql.engine.data.DataProvider;
-import org.opencds.cqf.cql.engine.execution.Context;
+import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -161,7 +160,7 @@ public class DroolToElmVisitorIT {
             e.getCause().getCause().getMessage();
             throw new IllegalArgumentException("Error reading ELM: " + e.getMessage());
         }
-        FhirContext fhirContext = FhirContext.forR4();
+        FhirContext fhirContext = FhirContext.forR4Cached();
         this.context = new Context(library);
         IBaseBundle bundle = fhirContext.newJsonParser().parseResource(Bundle.class,
                 DroolToElmVisitorIT.class.getResourceAsStream("concepts_full.json"));

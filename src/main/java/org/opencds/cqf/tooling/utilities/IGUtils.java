@@ -9,6 +9,7 @@ import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.utilities.Utilities;
 
 public class IGUtils {
+    private IGUtils () {}
     public static String getImplementationGuideCanonicalBase(String url) {
         String canonicalBase = null;
 
@@ -40,8 +41,8 @@ public class IGUtils {
     @rootDir: The root directory of the implementation guide source
     @sourceIg: The implementationGuide (as an R5 resource)
      */
-    public static List<String> extractBinaryPaths(String rootDir, ImplementationGuide sourceIg) throws IOException {
-        List<String> result = new ArrayList<String>();
+    public static List<String> extractBinaryPaths(String rootDir, ImplementationGuide sourceIg) {
+        List<String> result = new ArrayList<>();
 
         // Although this is the correct way to read the cql path from an implementation guide,
         // the tooling cannot use this method, because if it's present in the IG, the publisher will
@@ -55,16 +56,35 @@ public class IGUtils {
         }
         */
 
-        File input = new File(Utilities.path(rootDir, "input/cql"));
-        if (input.exists() && input.isDirectory()) {
+        File input = tryDirectory(rootDir, "input/cql");
+        if (input != null && input.exists() && input.isDirectory()) {
             result.add(input.getAbsolutePath());
         }
 
-        input = new File(Utilities.path(rootDir, "input/pagecontent/cql"));
-        if (input.exists() && input.isDirectory()) {
+        input = tryDirectory(rootDir, "input/pagecontent/cql");
+        if (input != null && input.exists() && input.isDirectory()) {
             result.add(input.getAbsolutePath());
         }
 
         return result;
+    }
+
+    /**
+     * Tries to create a File for a path that may not exist.
+     * 
+     * @param rootDir base directory for path
+     * @param path child directories for path
+     * @return File if directory exists, null otherwise
+     */
+    protected static File tryDirectory(String rootDir, String path) {
+        String combinedPath = null;
+        try {
+            combinedPath = Utilities.path(rootDir, path);
+        }
+        catch (IOException e) {
+            return null;
+        }
+
+        return new File(combinedPath);
     }
 }

@@ -11,7 +11,8 @@ import java.util.List;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import org.hl7.fhir.convertors.VersionConvertor_40_50;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
+import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.formats.FormatUtilities;
 import org.hl7.fhir.r5.context.IWorkerContext;
@@ -19,10 +20,11 @@ import org.hl7.fhir.r5.model.Constants;
 import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.VersionUtilities;
+import org.hl7.fhir.utilities.json.JsonTrackingParser;
 import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.ToolsVersion;
-import org.hl7.fhir.utilities.json.JsonTrackingParser;
+import org.opencds.cqf.tooling.exception.NpmPackageManagerException;
 
 public class NpmPackageManager implements IWorkerContext.ILoggingService {
     private FilesystemPackageCacheManager pcm;
@@ -48,12 +50,13 @@ public class NpmPackageManager implements IWorkerContext.ILoggingService {
         if (igPath == null || igPath.equals("")) {
             throw new IllegalArgumentException("igPath is required");
         }
-
-        return new NpmPackageManager((ImplementationGuide) VersionConvertor_40_50.convertResource(FormatUtilities.loadFile(igPath)), version);
+        VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
+        return new NpmPackageManager((ImplementationGuide) versionConvertor_40_50.convertResource(FormatUtilities.loadFile(igPath)), version);
     }
 
     public static NpmPackageManager fromStream(InputStream is, String version) throws IOException {
-        return new NpmPackageManager((ImplementationGuide) VersionConvertor_40_50.convertResource(FormatUtilities.loadFile(is)), version);
+        VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
+        return new NpmPackageManager((ImplementationGuide) versionConvertor_40_50.convertResource(FormatUtilities.loadFile(is)), version);
     }
 
     public NpmPackageManager(ImplementationGuide sourceIg, String version) throws IOException {
@@ -69,8 +72,15 @@ public class NpmPackageManager implements IWorkerContext.ILoggingService {
 
         this.sourceIg = sourceIg;
 
-        // userMode indicates whether the packageCache is within the working directory or in the user home
-        pcm = new FilesystemPackageCacheManager(true, ToolsVersion.TOOLS_VERSION);
+        try {
+            // userMode indicates whether the packageCache is within the working directory or in the user home
+            pcm = new FilesystemPackageCacheManager(true, ToolsVersion.TOOLS_VERSION);
+        }
+        catch(IOException e) {
+            String message = "error creating the FilesystemPackageCacheManager";
+            logMessage(message);
+            throw new NpmPackageManagerException(message, e);
+        }
 
         loadCorePackage();
 
@@ -81,13 +91,29 @@ public class NpmPackageManager implements IWorkerContext.ILoggingService {
         }
     }
 
-    private void loadCorePackage() throws IOException {
+    private void loadCorePackage() {
         NpmPackage pi = null;
 
         String v = version.equals(Constants.VERSION) ? "current" : version;
 
-        System.out.println("Core Package "+ VersionUtilities.packageForVersion(v)+"#"+v);
-        pi = pcm.loadPackage(VersionUtilities.packageForVersion(v), v);
+        logMessage("Core Package "+ VersionUtilities.packageForVersion(v)+"#"+v);
+        try {
+            pi = pcm.loadPackage(VersionUtilities.packageForVersion(v), v);       
+        }
+        catch(Exception e) {
+            try {
+                // Appears to be race condition in FHIR core where they are
+                // loading a custom cert provider.
+                pi = pcm.loadPackage(VersionUtilities.packageForVersion(v), v);   
+            }
+            catch (Exception ex) {
+                throw new NpmPackageManagerException("Error loading core package", e);
+            }
+        }
+
+        if (pi == null) {
+            throw new NpmPackageManagerException("Could not load core package");
+        }
         if (v.equals("current")) {
             throw new IllegalArgumentException("Current core package not supported");
         }

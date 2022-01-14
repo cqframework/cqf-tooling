@@ -6,7 +6,15 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 
 import javax.annotation.Nonnull;
 
@@ -18,10 +26,25 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.fhir.ucum.Canonical;
-import org.hl7.fhir.Code;
-import org.hl7.fhir.QuestionnaireItemType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.Element;
+import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.UsageContext;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
 
@@ -2486,8 +2509,8 @@ public class Processor extends Operation {
         try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
             writer.write(
                 encoding.equals("json")
-                    ? FhirContext.forR4().newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-                    : FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                    ? FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                    : FhirContext.forR4Cached().newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
             );
             writer.flush();
         } catch (IOException e) {
