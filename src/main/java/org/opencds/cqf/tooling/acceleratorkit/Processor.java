@@ -1129,7 +1129,7 @@ public class Processor extends Operation {
                 if (masterDataType != null) {
                     switch (masterDataType) {
                         case "Data Element":
-                        case "Slice":
+                        case "Slice": // No possible getMasterDataType will never retrun it
                             currentInputOptionParentRow = row;
                             DictionaryElement e = createDataElement(page, currentGroup, row, colIds);
                             if (e != null) {
@@ -1141,8 +1141,8 @@ public class Processor extends Operation {
                         case "Input Option":
                             addInputOptionToParentElement(row, colIds);
                             break;
-                        case "Calculation":
-                        case "UI Element":
+                        case "Calculation":// No possible getMasterDataType will never retrun it
+                        case "UI Element":// No possible getMasterDataType will never retrun it
                             break;
                         default:
                             // Currently unsupported/undocumented
@@ -3278,7 +3278,7 @@ public class Processor extends Operation {
     public void writeDataElements(String scope, String scopePath, String context) {
         StringBuilder sb = new StringBuilder();
         StringBuilder activityIndex = new StringBuilder();
-
+        
         sb.append(String.format("library %s%sDataElements", scope, context.equals("Encounter") ? "Contact" : ""));
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
