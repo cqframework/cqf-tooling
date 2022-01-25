@@ -10,9 +10,9 @@ import org.hl7.elm_modelinfo.r1.ContextInfo;
 import org.hl7.elm_modelinfo.r1.NamedTypeSpecifier;
 import org.hl7.elm_modelinfo.r1.RelationshipInfo;
 import org.hl7.elm_modelinfo.r1.TypeInfo;
-import org.hl7.fhir.r4.model.CompartmentDefinition;
-import org.hl7.fhir.r4.model.SearchParameter;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r5.model.CompartmentDefinition;
+import org.hl7.fhir.r5.model.SearchParameter;
+import org.hl7.fhir.r5.model.StringType;
 
 public class ContextInfoBuilder {
     protected Atlas atlas;

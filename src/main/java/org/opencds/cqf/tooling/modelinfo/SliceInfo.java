@@ -5,8 +5,8 @@ import static org.opencds.cqf.tooling.modelinfo.ClassInfoBuilder.stripPath;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.r4.model.ElementDefinition;
-import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r5.model.ElementDefinition;
+import org.hl7.fhir.r5.model.DataType;
 
 /*
 Tracks slices at the root of the slice list
@@ -107,7 +107,7 @@ public class SliceInfo {
             if (ed.getFixed() == null) {
                 throw new IllegalArgumentException("getFixed() is null");
             }
-            Type type = ed.getFixed();
+            DataType type = ed.getFixed();
             if (!type.isPrimitive()) {
                 throw new IllegalArgumentException(String.format("Value slicing on type %s is not supported for slicing of %s",
                         type.fhirType(), this.sliceRoot.getId()));
