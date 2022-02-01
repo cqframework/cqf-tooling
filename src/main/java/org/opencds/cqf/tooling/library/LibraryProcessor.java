@@ -35,10 +35,10 @@ public class LibraryProcessor extends BaseProcessor {
     }
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     
-    public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext) {
-        return refreshIgLibraryContent(parentContext, outputEncoding, null, versioned, fhirContext);
+    public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
+        return refreshIgLibraryContent(parentContext, outputEncoding, null, versioned, fhirContext, shouldApplySoftwareSystemStamp);
     }
-    public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext) {
+    public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
         System.out.println("Refreshing libraries...");
         // ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
 
@@ -67,6 +67,7 @@ public class LibraryProcessor extends BaseProcessor {
         params.fhirContext = fhirContext;
         params.encoding = outputEncoding;
         params.versioned = versioned;
+        params.shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStamp;
         return libraryProcessor.refreshLibraryContent(params);
     }
 

@@ -33,6 +33,7 @@ public class RefreshIGArgumentProcessor {
     public static final String[] RESOURCE_PATH_OPTIONS = {"rp", "resourcepath"};
     public static final String[] LIBRARY_OUTPUT_PATH_OPTIONS = {"libraryOutput", "libraryOutputPath", "lop"};
     public static final String[] MEASURE_OUTPUT_PATH_OPTIONS = {"measureOutput", "measureOutputPath", "mop"};
+    public static final String[] SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS = { "ss", "stamp" };
 
     @SuppressWarnings("unused")
     public OptionParser build() {
@@ -47,6 +48,7 @@ public class RefreshIGArgumentProcessor {
         OptionSpecBuilder measureToRefreshPathBuilder = parser.acceptsAll(asList(MEASURE_TO_REFRESH_PATH), "Path to Measure to refresh.");
         OptionSpecBuilder libraryOutputPathBuilder = parser.acceptsAll(asList(LIBRARY_OUTPUT_PATH_OPTIONS),"If omitted, the libraries will overwrite any existing libraries");
         OptionSpecBuilder measureOutputPathBuilder = parser.acceptsAll(asList(MEASURE_OUTPUT_PATH_OPTIONS),"If omitted, the measures will overwrite any existing measures");
+        OptionSpecBuilder shouldApplySoftwareSystemStampBuilder = parser.acceptsAll(asList(SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS),"Indicates whether refreshed Measure and Library resources should be stamped with the 'cqf-tooling' stamp via the cqfm-softwaresystem Extension.");
 
         OptionSpec<String> ini = iniBuilder.withRequiredArg().describedAs("Path to the IG ini file");
         OptionSpec<String> rootDir = rootDirBuilder.withOptionalArg().describedAs("Root directory of the IG");
@@ -56,6 +58,7 @@ public class RefreshIGArgumentProcessor {
         OptionSpec<String> measureToRefreshPath = measureToRefreshPathBuilder.withOptionalArg().describedAs("Path to Measure to refresh.");
         OptionSpec<String> libraryOutputPath = libraryOutputPathBuilder.withOptionalArg().describedAs("path to the output directory for updated libraries");
         OptionSpec<String> measureOutputPath = measureOutputPathBuilder.withOptionalArg().describedAs("path to the output directory for updated measures");
+        OptionSpec<String> shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStampBuilder.withOptionalArg().describedAs("Indicates whether refreshed Measure and Library resources should be stamped with the 'cqf-tooling' stamp via the cqfm-softwaresystem Extension");
 
         //TODO: FHIR user / password (and other auth options)
         OptionSpec<String> fhirUri = fhirUriBuilder.withOptionalArg().describedAs("uri of fhir server");  
@@ -108,6 +111,13 @@ public class RefreshIGArgumentProcessor {
             measureOutputPath = "";
         }
 
+        Boolean shouldApplySoftwareSystemStamp = true;
+        String shouldApplySoftwareSystemStampValue = (String)options.valueOf(SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS[0]);
+
+        if ((shouldApplySoftwareSystemStampValue != null) && shouldApplySoftwareSystemStampValue.equalsIgnoreCase("false")) {
+            shouldApplySoftwareSystemStamp = false;
+        }
+
         ArrayList<String> paths = new ArrayList<String>();
         if (resourcePaths != null && !resourcePaths.isEmpty()) {
             paths.addAll(resourcePaths);
@@ -123,6 +133,7 @@ public class RefreshIGArgumentProcessor {
         ip.includeTerminology = includeTerminology;
         ip.includePatientScenarios = includePatientScenarios;
         ip.versioned = versioned;
+        ip.shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStamp;
         ip.resourceDirs = paths;
         ip.fhirUri = fhirUri;
         ip.measureToRefreshPath = measureToRefreshPath;

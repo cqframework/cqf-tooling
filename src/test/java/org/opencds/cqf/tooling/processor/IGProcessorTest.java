@@ -88,6 +88,7 @@ public class IGProcessorTest extends RefreshTest {
         params.includeDependencies = true;
         params.includePatientScenarios = true;
 		params.versioned = false;
+		params.shouldApplySoftwareSystemStamp = true;
         processor.publishIG(params);
 
 		// determine fhireContext for measure lookup

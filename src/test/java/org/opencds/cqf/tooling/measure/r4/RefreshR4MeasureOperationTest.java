@@ -46,6 +46,7 @@ public class RefreshR4MeasureOperationTest extends RefreshTest {
 		String args[] = {
             "-RefreshR4Measure",
             "-op=" + targetDirectoryPath + separator + "output" + separator + "refreshedMeasureBundles" + separator,
+            "-ss=true",
             "-ptm=" + targetDirectoryPath + measureDirectoryPath,
             "-ptl=" + targetDirectoryPath + libraryDirectoryPath,
         };

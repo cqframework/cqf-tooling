@@ -43,6 +43,7 @@ public abstract class LibraryProcessorTest extends RefreshTest {
         params.cqlContentPath = cqlResourcePath;
         params.ini = targetDirectory + separator + "ig.ini";
         params.versioned = versioned;
+        params.shouldApplySoftwareSystemStamp = true;
         getLibraryProcessor().refreshLibraryContent(params);
     }
 }

@@ -144,17 +144,17 @@ public class IGProcessor extends BaseProcessor {
 
         List<String> refreshedLibraryNames;
         if (Strings.isNullOrEmpty(libraryOutputPath)) {
-            refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext);
+            refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext, params.shouldApplySoftwareSystemStamp);
         } else {
-            refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, libraryOutputPath, versioned, fhirContext);
+            refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, libraryOutputPath, versioned, fhirContext, params.shouldApplySoftwareSystemStamp);
         }
         refreshedResourcesNames.addAll(refreshedLibraryNames);
 
         List<String> refreshedMeasureNames;
         if (Strings.isNullOrEmpty(measureOutputPath)) {
-            refreshedMeasureNames = measureProcessor.refreshIgMeasureContent(this, encoding, versioned, fhirContext, measureToRefreshPath);
+            refreshedMeasureNames = measureProcessor.refreshIgMeasureContent(this, encoding, versioned, fhirContext, measureToRefreshPath, params.shouldApplySoftwareSystemStamp);
         } else {
-            refreshedMeasureNames = measureProcessor.refreshIgMeasureContent(this, encoding, measureOutputPath, versioned, fhirContext, measureToRefreshPath);
+            refreshedMeasureNames = measureProcessor.refreshIgMeasureContent(this, encoding, measureOutputPath, versioned, fhirContext, measureToRefreshPath, params.shouldApplySoftwareSystemStamp);
         }
         refreshedResourcesNames.addAll(refreshedMeasureNames);
 
