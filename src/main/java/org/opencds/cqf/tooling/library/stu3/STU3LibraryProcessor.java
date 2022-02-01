@@ -9,7 +9,8 @@ import java.util.Map;
 
 import com.google.common.base.Strings;
 
-import org.hl7.fhir.convertors.VersionConvertor_30_50;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_50;
+import org.hl7.fhir.convertors.conv30_50.VersionConvertor_30_50;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -41,7 +42,9 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
         if (file.isDirectory()) {
             for (File libraryFile : file.listFiles()) {
-                loadLibrary(fileMap, libraries, libraryFile);
+                if(IOUtils.isXMLOrJson(libraryPath, libraryFile.getName())) {
+                    loadLibrary(fileMap, libraries, libraryFile);
+                }
             }
         }
         else {
@@ -50,10 +53,11 @@ public class STU3LibraryProcessor extends LibraryProcessor {
 
         List<String> refreshedLibraryNames = new ArrayList<String>();
         List<org.hl7.fhir.r5.model.Library> refreshedLibraries = super.refreshGeneratedContent(libraries);
+        VersionConvertor_30_50 versionConvertor_30_50 = new VersionConvertor_30_50(new BaseAdvisor_30_50());
         for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
             String filePath = fileMap.get(refreshedLibrary.getId());
             if(null != filePath) {
-                org.hl7.fhir.dstu3.model.Library library = (org.hl7.fhir.dstu3.model.Library) VersionConvertor_30_50.convertResource(refreshedLibrary);
+                org.hl7.fhir.dstu3.model.Library library = (org.hl7.fhir.dstu3.model.Library) versionConvertor_30_50.convertResource(refreshedLibrary);
 
                 cleanseRelatedArtifactReferences(library);
 
@@ -114,7 +118,8 @@ public class STU3LibraryProcessor extends LibraryProcessor {
     private void loadLibrary(Map<String, String> fileMap, List<org.hl7.fhir.r5.model.Library> libraries, File libraryFile) {
         try {
             Resource resource = (Resource) IOUtils.readResource(libraryFile.getAbsolutePath(), fhirContext);
-            org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) VersionConvertor_30_50.convertResource(resource);
+            VersionConvertor_30_50 versionConvertor_30_50 = new VersionConvertor_30_50(new BaseAdvisor_30_50());
+            org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) versionConvertor_30_50.convertResource(resource);
             fileMap.put(library.getId(), libraryFile.getAbsolutePath());
             libraries.add(library);
         } catch (Exception ex) {

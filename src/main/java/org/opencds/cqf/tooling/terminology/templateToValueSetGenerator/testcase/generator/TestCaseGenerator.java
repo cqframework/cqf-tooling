@@ -1,9 +1,16 @@
 package org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.testcase.generator;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -13,15 +20,14 @@ import org.hl7.fhir.r4.model.GuidanceResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
-import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.testcase.TestCase;
 import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.testcase.DataElement;
+import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.testcase.TestCase;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.*;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 
 public class TestCaseGenerator extends Operation {
-    private final FhirContext ctx = FhirContext.forR4();
+    private final FhirContext ctx = FhirContext.forR4Cached();
     private final IParser parser = ctx.newJsonParser();
     private final List<GuidanceResponse> guidanceResponses = new ArrayList<>();
 

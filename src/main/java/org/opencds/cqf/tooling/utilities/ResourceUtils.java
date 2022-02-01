@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling.utilities;
 
+import static org.opencds.cqf.tooling.utilities.CanonicalUtils.getTail;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -40,8 +42,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-
-import static org.opencds.cqf.tooling.utilities.CanonicalUtils.getTail;
 
 public class ResourceUtils 
 {
@@ -103,9 +103,9 @@ public class ResourceUtils
     public static FhirContext getFhirContext(FhirVersion fhirVersion) {
       switch (fhirVersion) {
         case DSTU3:
-          return FhirContext.forDstu3();
+          return FhirContext.forDstu3Cached();
         case R4:
-          return FhirContext.forR4();
+          return FhirContext.forR4Cached();
         default:
           throw new IllegalArgumentException("Unsupported FHIR version: " + fhirVersion);
       }

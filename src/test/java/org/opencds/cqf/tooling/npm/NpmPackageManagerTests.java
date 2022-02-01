@@ -18,7 +18,10 @@ public class NpmPackageManagerTests implements IWorkerContext.ILoggingService {
     /*
     NOTE: This test depends on the dev package cache for the [sample-ig](https://github.com/FHIR/sample-ig)
     Running the IG publisher on a clone of this IG locally will create and cache the package
+
+    TODO: Update this so that it can download and cache packages by itself
      */
+    @Ignore("Currently requires running the IG Publisher first to cache npm packages.")
     @Test
     public void TestSampleIG() throws IOException {
         NpmPackageManager pm = NpmPackageManager.fromStream(NpmPackageManagerTests.class.getResourceAsStream("myig.xml"), "4.0.1");
@@ -30,8 +33,9 @@ public class NpmPackageManagerTests implements IWorkerContext.ILoggingService {
     Running the IG publisher on a clone of this IG locally will create and cache the package
 
     NOTE: Temporarily @Ignore because it's causing the CI build to fail.
+    TODO: Update this so that it can download and cache packages by itself
      */
-    @Ignore
+    @Ignore("Currently requires running the IG Publisher first to cache npm packages.")
     @Test
     public void TestSampleContentIG() throws IOException {
         NpmPackageManager pm = NpmPackageManager.fromStream(NpmPackageManagerTests.class.getResourceAsStream("mycontentig.xml"), "4.0.1");

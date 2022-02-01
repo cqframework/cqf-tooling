@@ -23,7 +23,7 @@ public class DistributableValueSetGenerator extends Operation {
     private FhirContext fhirContext;
 
     public DistributableValueSetGenerator() {
-        this.fhirContext = FhirContext.forR4();
+        this.fhirContext = FhirContext.forR4Cached();
     }
 
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)

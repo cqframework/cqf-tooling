@@ -32,7 +32,7 @@ public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativePro
 
     public LibraryGenerator() {
         setNarrativeProvider(new NarrativeProvider());
-        setFhirContext(FhirContext.forDstu3());
+        setFhirContext(FhirContext.forDstu3Cached());
         setOutputPath("src/main/resources/org/opencds/cqf/tooling/library/output/stu3");
         setOperationName("-CqlToSTU3Library");
     }

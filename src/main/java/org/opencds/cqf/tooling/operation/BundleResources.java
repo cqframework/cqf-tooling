@@ -85,18 +85,18 @@ public class BundleResources extends Operation {
         }
 
         if (version == null) {
-            context = FhirContext.forDstu3();
+            context = FhirContext.forDstu3Cached();
         }
         else {
             switch (version.toLowerCase()) {
                 case "dstu2":
-                    context = FhirContext.forDstu2();
+                    context = FhirContext.forDstu2Cached();
                     break;
                 case "stu3":
-                    context = FhirContext.forDstu3();
+                    context = FhirContext.forDstu3Cached();
                     break;
                 case "r4":
-                    context = FhirContext.forR4();
+                    context = FhirContext.forR4Cached();
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown fhir version: " + version);

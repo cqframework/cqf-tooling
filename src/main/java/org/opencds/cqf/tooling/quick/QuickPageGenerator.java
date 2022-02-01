@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 public class QuickPageGenerator extends Operation {
 
     // Assuming R4
-    private FhirContext context = FhirContext.forR4();
+    private FhirContext context = FhirContext.forR4Cached();
     private String qicoreDirPath;
     private QuickAtlas atlas;
 

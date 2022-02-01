@@ -81,15 +81,15 @@ public class ExtractMatBundleOperation extends Operation {
         
         // Set the FhirContext based on the version specified
         if (version == null) {
-            context = FhirContext.forR4();
+            context = FhirContext.forR4Cached();
         }
         else {
             switch (version.toLowerCase()) {
                 case "stu3":
-                    context = FhirContext.forDstu3();
+                    context = FhirContext.forDstu3Cached();
                     break;
                 case "r4":
-                    context = FhirContext.forR4();
+                    context = FhirContext.forR4Cached();
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown fhir version: " + version);
