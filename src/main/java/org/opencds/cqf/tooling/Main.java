@@ -86,11 +86,11 @@ package org.opencds.cqf.tooling;
             - See the documentation for CQL to FHIR Library conversion to see which Library elements will be populated
 
         - Refresh Measure(s)
-            - command: mvn exec:java -Dexec.args="[-RefreshStu3Measure|RefreshR4Measure] [-ptm| pathToMeasures] [-ptl|pathToLibraries] (-e|encoding) (-o|-output)"
+            - command: mvn exec:java -Dexec.args="[-RefreshStu3Measure|RefreshR4Measure] [-ptm| pathToMeasures] [-ptl|pathToLibraries] (-e|encoding) (-o|-output) (-ss|-stamp)"
 
         - Refresh Library
-            - command: mvn exec:java -Dexec.args"-RefreshLibrary -ini -fv|fhir-version -lp|libraryPath
-            - Example: mvn exec:java -Dexec.args="-RefreshLibrary -ini=C:\Users\Bryn\Documents\Src\HL7\sample-ig\ig.ini -fv=fhir4 -lp=C:\Users\Bryn\Documents\Src\HL7\sample-ig\input\examples\Library-example.json"
+            - command: mvn exec:java -Dexec.args"-RefreshLibrary -ini -fv|fhir-version -lp|libraryPath (-ss|-stamp)
+            - Example: mvn exec:java -Dexec.args="-RefreshLibrary -ini=C:\Users\Bryn\Documents\Src\HL7\sample-ig\ig.ini -fv=fhir4 -lp=C:\Users\Bryn\Documents\Src\HL7\sample-ig\input\examples\Library-example.json" -ss=false
 
         - Bundle Resources
             - mvn exec:java -Dexec.args="[-BundleResources] [-pathtodirectory | -ptd] (-outputpath | -op) (-version | -v) (-encoding | -e) (-bundleid | -bid) "
