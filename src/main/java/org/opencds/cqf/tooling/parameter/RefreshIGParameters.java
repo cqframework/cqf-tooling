@@ -14,6 +14,7 @@ public class RefreshIGParameters {
     public Boolean includeTerminology;
     public Boolean includePatientScenarios;
     public Boolean versioned;
+    public Boolean shouldApplySoftwareSystemStamp;
     public String fhirUri;
     public ArrayList<String> resourceDirs;
     public Boolean conformant;

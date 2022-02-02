@@ -40,8 +40,8 @@ public class R4LibraryProcessor extends LibraryProcessor {
         If the path is not specified, or is not a known directory, process
         all known library resources
     */
-    protected List<String> refreshLibraries(String libraryPath, Encoding encoding) {
-        return refreshLibraries(libraryPath, null, encoding);
+    protected List<String> refreshLibraries(String libraryPath, Encoding encoding, Boolean shouldApplySoftwareSystemStamp) {
+        return refreshLibraries(libraryPath, null, encoding, shouldApplySoftwareSystemStamp);
     }
 
     /*
@@ -50,7 +50,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
         all known library resources, if no libraryOutputDirectory is specified,
         overwrite all known library resources
     */
-    protected List<String> refreshLibraries(String libraryPath, String libraryOutputDirectory, Encoding encoding) {
+    protected List<String> refreshLibraries(String libraryPath, String libraryOutputDirectory, Encoding encoding, Boolean shouldApplySoftwareSystemStamp) {
         File file = libraryPath != null ? new File(libraryPath) : null;
         Map<String, String> fileMap = new HashMap<String, String>();
         List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
@@ -86,7 +86,9 @@ public class R4LibraryProcessor extends LibraryProcessor {
                 filePath = getLibraryPath(libraryPath);
                 fileEncoding = encoding;
             }
-            cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
+            if (shouldApplySoftwareSystemStamp) {
+                cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
+            }
             // Issue 96
             // Passing the includeVersion here to handle not using the version number in the filename
             if (new File(filePath).exists()) {
@@ -148,9 +150,9 @@ public class R4LibraryProcessor extends LibraryProcessor {
         R4LibraryProcessor.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
 
         if (!Strings.isNullOrEmpty(params.libraryOutputDirectory)) {
-            return refreshLibraries(libraryPath, params.libraryOutputDirectory, encoding);
+            return refreshLibraries(libraryPath, params.libraryOutputDirectory, encoding, params.shouldApplySoftwareSystemStamp);
         } else {
-            return refreshLibraries(libraryPath, encoding);
+            return refreshLibraries(libraryPath, encoding, params.shouldApplySoftwareSystemStamp);
         }
     }
 }

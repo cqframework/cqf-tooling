@@ -29,14 +29,14 @@ public class STU3LibraryProcessor extends LibraryProcessor {
     /*
     Refresh all library resources in the given libraryPath
      */
-    protected List<String> refreshLibraries(String libraryPath) {
-        return refreshLibraries(libraryPath, null);
+    protected List<String> refreshLibraries(String libraryPath, Boolean shouldApplySoftwareSystemStamp) {
+        return refreshLibraries(libraryPath, null, shouldApplySoftwareSystemStamp);
     }
     
     /*
     Refresh all library resources in the given libraryPath and write to the given outputDirectory
      */
-    protected List<String> refreshLibraries(String libraryPath, String libraryOutputDirectory) {
+    protected List<String> refreshLibraries(String libraryPath, String libraryOutputDirectory, Boolean shouldApplySoftwareSystemStamp) {
         File file = new File(libraryPath);
         Map<String, String> fileMap = new HashMap<String, String>();
         List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
@@ -61,7 +61,10 @@ public class STU3LibraryProcessor extends LibraryProcessor {
 
                 cleanseRelatedArtifactReferences(library);
 
-                cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
+                if (shouldApplySoftwareSystemStamp) {
+                    cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
+                }
+
                 String outputPath = filePath;
                 if (libraryOutputDirectory != null) {
                     File libraryDirectory = new File(libraryOutputDirectory);
@@ -143,9 +146,9 @@ public class STU3LibraryProcessor extends LibraryProcessor {
         STU3LibraryProcessor.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
 
         if (!Strings.isNullOrEmpty(params.libraryOutputDirectory)) {
-            return refreshLibraries(libraryPath, params.libraryOutputDirectory);
+            return refreshLibraries(libraryPath, params.libraryOutputDirectory, params.shouldApplySoftwareSystemStamp);
         } else {
-            return refreshLibraries(libraryPath);
+            return refreshLibraries(libraryPath, params.shouldApplySoftwareSystemStamp);
         }
     }
 }
