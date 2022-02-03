@@ -46,7 +46,8 @@ public class SpreadsheetToCQLOperation extends Operation {
 
             switch (flag.replace("-", "").toLowerCase()) {
                 case "pathtospreadsheet": case "pts": pathToSpreadsheet = value; break; // -pathtospreadsheet (-pts)
-                case "hasheader": case "hh": hasHeader = Boolean.valueOf(value); break;
+                case "hasheader": case "hh": hasHeader = Boolean.valueOf(value); break; // -hasheader (-hh)
+                case "outputpath": case "op": setOutputPath(value); break; // -outputpath (-op)
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
@@ -58,7 +59,7 @@ public class SpreadsheetToCQLOperation extends Operation {
         spreadsheetName = new File(pathToSpreadsheet).getName();
         int extensionIndex = spreadsheetName.lastIndexOf(".");
         if (extensionIndex > 0) {
-            spreadsheetName = spreadsheetName.substring(0, extensionIndex - 1);
+            spreadsheetName = spreadsheetName.substring(0, extensionIndex);
         }
 
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
