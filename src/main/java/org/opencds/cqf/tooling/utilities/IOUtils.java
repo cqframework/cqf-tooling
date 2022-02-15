@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +16,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
@@ -82,6 +84,16 @@ public class IOUtils
         IParser parser = getParser(encoding, fhirContext);    
         return parser.setPrettyPrint(true).encodeResourceToString(resource).getBytes();
     }
+
+    public static String getFileContent(File file) {
+        try {
+            return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading file: " + e.getMessage());
+        }
+    }
+
 
     public static String encodeResourceAsString(IBaseResource resource, Encoding encoding, FhirContext fhirContext) 
     {
@@ -236,7 +248,9 @@ public class IOUtils
                     return null;
                 }
             }
-            resource = parser.parseResource(new FileReader(file));
+            try (FileReader reader = new FileReader(file)){
+                resource = parser.parseResource(reader);
+            }
             cachedResources.put(path, resource);
         }
         catch (Exception e)
@@ -879,14 +893,21 @@ public class IOUtils
         }
     }
 
-    private static HashSet<String> devicePaths = new LinkedHashSet<String>();
+    private static HashSet<String> devicePaths;
     public static HashSet<String> getDevicePaths(FhirContext fhirContext) {
-        if (devicePaths.isEmpty()) {
+        if (devicePaths == null) {
             setupDevicePaths(fhirContext);
         }
         return devicePaths;
     }
+
+    // TODO: This should not be necessary this is awful... For now it is needed for passing tests in Travis
+    public static void clearDevicePaths() {
+        devicePaths = null;
+    }
+
     private static void setupDevicePaths(FhirContext fhirContext) {
+        devicePaths = new LinkedHashSet<String>();
         HashMap<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
@@ -908,4 +929,15 @@ public class IOUtils
                 .forEach(entry -> devicePaths.add(entry.getKey()));
         }
     }
+
+    public static boolean isXMLOrJson(String fileDirPath, String libraryName){
+        String fileExtension = libraryName.substring(libraryName.lastIndexOf(".") + 1);
+        if(fileExtension.equalsIgnoreCase("xml") ||
+                fileExtension.equalsIgnoreCase("json")){
+            return true;
+        }
+        System.out.println("The file " + fileDirPath + libraryName + " is not the right type of file.");
+        return false;
+    }
+
 }

@@ -37,6 +37,11 @@ public class RefreshLibraryParameters {
     public Boolean versioned;
 
     /*
+    Whether the Software System Stamp should be applied via the cqfm-softwaresystem Extension
+    */
+    public Boolean shouldApplySoftwareSystemStamp;
+
+    /*
     The path to the library resource(s)
      */
     public String libraryPath;
@@ -45,4 +50,9 @@ public class RefreshLibraryParameters {
     An initialized processor context that can provide the IG context directly
      */
     public IProcessorContext parentContext;
+
+    /*
+    Path to write updated Libraries to
+    */
+    public String libraryOutputDirectory;
 }

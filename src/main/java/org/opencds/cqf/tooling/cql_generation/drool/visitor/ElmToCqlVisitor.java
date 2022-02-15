@@ -1,17 +1,17 @@
 package org.opencds.cqf.tooling.cql_generation.drool.visitor;
 
+import java.util.Arrays;
+import java.util.Stack;
+import java.util.stream.Collectors;
+
+import com.google.common.base.Strings;
+
 import org.cqframework.cql.elm.visiting.ElmBaseLibraryVisitor;
 import org.hl7.elm.r1.*;
 import org.hl7.elm.r1.Library.Statements;
 import org.opencds.cqf.tooling.cql_generation.context.ElmContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
-import java.util.Stack;
-import java.util.stream.Collectors;
-
-import com.google.common.base.Strings;
 
 /**
  * Visits every node in a Library elm tree and builds the cql string.
@@ -268,7 +268,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
     }
 
     private void newConstruct(String section) {
-        logger.info("Adding new construct: " + section);
+        logger.debug("Adding new construct: " + section);
         resetIndentLevel();
         newLine();
         addToSection(section);
@@ -490,7 +490,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         if (access.equals(AccessModifier.PRIVATE)) {
             output.append("private ");
         } else {
-            logger.info("Default cql output to ignore public access modifier");
+            logger.debug("Default cql output to ignore public access modifier");
         }
         return null;
     }
@@ -856,7 +856,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
         } else {
             if (query.getLet() != null && !query.getLet().isEmpty()) {
                 enterClause();
-                output.append(String.format("let"));
+                output.append("let");
                 query.getLet().stream().forEach(let -> visitLetClause(let, context));
                 exitClause();
             }
@@ -969,6 +969,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
      * @param context the context passed to the visitor
      * @return the visitor result
      */
+    @Override
     public Void visitWhereClause(Expression where, ElmContext context) {
         try {
             enterClause();
@@ -1215,6 +1216,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
      * @param context the context passed to the visitor
      * @return the visitor result
      */
+    @Override
     public Void visitImplies(Implies implies, ElmContext context) {
         return null;
     }
@@ -1318,6 +1320,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
      * @param context the context passed to the visitor
      * @return the visitor result
      */
+    @Override
     public Void visitExpand(Expand expand, ElmContext context) {
         return null;
     }
@@ -1865,7 +1868,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
             }
         } else if (!Strings.isNullOrEmpty(property.getScope())) {
             if (property.getScope().equals("$this")) {
-                logger.info("Found internal scope, outputting property path only");
+                logger.debug("Found internal scope, outputting property path only");
             } else {
                 output.append(" " + property.getScope());
             }
@@ -1941,6 +1944,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
      * @param context the context passed to the visitor
      * @return the visitor result
      */
+    @Override
     public Void visitCodeRef(CodeRef codeRef, ElmContext context) {
         if (codeRef.getLibraryName() != null) {
             output.append(String.format("\"%s\".\"%s\"", codeRef.getLibraryName(), codeRef.getName()));

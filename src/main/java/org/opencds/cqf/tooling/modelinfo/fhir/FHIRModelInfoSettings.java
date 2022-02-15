@@ -9,7 +9,7 @@ import org.opencds.cqf.tooling.modelinfo.ModelInfoSettings;
 public class FHIRModelInfoSettings extends ModelInfoSettings {
 
     public FHIRModelInfoSettings(String version) {
-        super("FHIR", version, "http://hl7.org/fhir", "FHIR.Patient", "birthDate.value", "fhir");
+        super("FHIR", version, "http://hl7.org/fhir", "FHIR.Patient", "birthDate.value", "fhir", null);
         this.conversionInfos = new ArrayList<ConversionInfo>() {
             {
                 add(new ConversionInfo().withFromType("FHIR.Coding").withToType("System.Code").withFunctionName("FHIRHelpers.ToCode"));

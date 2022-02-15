@@ -647,9 +647,9 @@ public class IGProcessor {
 //    {
 //        switch (igVersion) {
 //            case FHIR3:
-//                return FhirContext.forDstu3();
+//                return FhirContext.forDstu3Cached();
 //            case FHIR4:
-//                return FhirContext.forR4();
+//                return FhirContext.forR4Cached();
 //            default:
 //                throw new IllegalArgumentException("Unknown IG version: " + igVersion);
 //        }

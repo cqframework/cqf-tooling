@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ImplementationGuide xmlns="http://hl7.org/fhir">
+    <id value="gov.healthit.ecqi.ecqms"/>
+    <url value="http://ecqi.healthit.gov/ecqms/ImplementationGuide/gov.healthit.ecqi.ecqms"/>
+    <version value="2021"/>
+    <name value="eCQMContentR4"/>
+    <title value="eCQM FHIR R4 Content Implementation Guide"/>
+    <status value="draft"/>
+    <experimental value="false"/>
+    <date value="2020-06-29"/>
+    <publisher value="cqframework"/>
+    <contact>
+      <telecom>
+        <system value="url"/>
+        <value value="https://github.com/cqframework/ecqm-content-r4"/>
+      </telecom>
+    </contact>
+    <description value="Draft electronic Clinical Quality Measure (eCQM) Implementation Guide"/>
+    <packageId value="gov.healthit.ecqi.ecqms"/>
+    <!-- TODO: Identify the license for this content -->
+    <license value="CC0-1.0"/>
+	  <fhirVersion value="4.0.1"/>
+    <dependsOn id="QMIG">
+      <uri value="http://hl7.org/fhir/us/cqfmeasures/ImplementationGuide/hl7.fhir.us.cqfmeasures"/>
+      <packageId value="hl7.fhir.us.cqfmeasures"/>
+      <version value="2.0.0"/>
+    </dependsOn>
+    <definition>
+        <page>
+          <nameUrl value="toc.html" />
+          <title value="Table of Contents" />
+          <generation value="html" />
+          <page>
+            <nameUrl value="index.html" />
+            <title value="Home" />
+            <generation value="markdown" />
+          </page>
+          <page>
+            <nameUrl value="libraries.html"/>
+            <title value="Libraries" />
+            <generation value="html" />
+          </page>
+          <page>
+            <nameUrl value="measures.html" />
+            <title value="Measures" />
+            <generation value="html" />
+          </page>
+          <page>
+            <nameUrl value="downloads.html" />
+            <title value="Downloads" />
+            <generation value="html" />
+          </page>
+        </page>
+
+        <!-- copyright year is a mandatory parameter -->
+        <parameter>
+          <code value="copyrightyear" />
+          <value value="2020+" />
+        </parameter>
+        <!-- releaselabel should be the ballot status for HL7-published IGs. -->
+        <parameter>
+          <code value="releaselabel" />
+          <value value="CI Build" />
+        </parameter>
+        <!-- apply-contact is false because this is maintained per artifact -->
+        <parameter>
+          <code value="apply-contact"/>
+          <value value="false"/>
+        </parameter>
+        <!-- apply-context is false because this is maintained per artifact -->
+        <parameter>
+          <code value="apply-context"/>
+          <value value="false"/>
+        </parameter>
+        <!-- apply-copyright is false because this is maintained per artifact -->
+        <parameter>
+          <code value="apply-copyright"/>
+          <value value="false"/>
+        </parameter>
+        <!-- apply-jurisdiction is false because this is maintained per artifact -->
+        <parameter>
+          <code value="apply-jurisdiction"/>
+          <value value="false"/>
+        </parameter>
+        <!-- apply-license is false because this is maintained per artifact -->
+        <parameter>
+          <code value="apply-license"/>
+          <value value="false"/>
+        </parameter>
+        <!-- apply-publisher is false because this is maintained per artifact -->
+        <parameter>
+          <code value="apply-publisher"/>
+          <value value="false"/>
+        </parameter>
+
+        <!-- applyVersion is false because this is maintained per artifact -->
+        <parameter>
+          <code value="apply-version"/>
+          <value value="false"/>
+        </parameter>
+
+        <parameter>
+          <code value="find-other-resources" />
+          <value value="true" />
+        </parameter>
+
+        <parameter>
+          <code value="path-pages" />
+          <value value="input/pagecontent"/>
+        </parameter>
+        <parameter>
+          <code value="path-resource" />
+          <value value="input/resources/library"/>
+        </parameter>
+        <parameter>
+          <code value="path-resource" />
+          <value value="input/resources/measure"/>
+        </parameter>
+        <parameter>
+          <code value="path-resource" />
+          <value value="input/vocabulary/valueset"/>
+        </parameter>
+
+        <!-- This parameter indicates to the publisher that it should translate and package CQL libraries. See the example library resources for more -->
+        <!--
+        <parameter>
+          <code value="path-binary"/>
+          <value value="input/cql"/>
+        </parameter>
+        -->
+        <parameter>
+          <code value="path-liquid"/>
+          <value value="templates\liquid"/>
+        </parameter>
+
+        <!-- Uncomment one or more of these if you want to limit which syntaxes are supported or want to disable the display of mappings
+         <parameter>
+           <code value="excludexml"/>
+           <value value="true"/>
+         </parameter>
+         <parameter>
+           <code value="excludejson"/>
+           <value value="true"/>
+         </parameter>
+          -->
+         <parameter>
+           <code value="excludettl"/>
+           <value value="true"/>
+         </parameter>
+         <!--
+         <parameter>
+           <code value="excludemap"/>
+           <value value="true"/>
+         </parameter>-->
+    </definition>
+</ImplementationGuide>

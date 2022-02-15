@@ -6,7 +6,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -158,10 +161,10 @@ public class SpreadsheetHelper {
         String fileName = vs.getTitle() != null ? vs.getTitle().replaceAll("\\s", "").concat("." + encoding) : "valueset".concat("." + encoding);
         IParser parser =
                 encoding == null
-                        ? FhirContext.forDstu3().newJsonParser()
+                        ? FhirContext.forDstu3Cached().newJsonParser()
                         : encoding.toLowerCase().startsWith("j")
-                        ? FhirContext.forDstu3().newJsonParser()
-                        : FhirContext.forDstu3().newXmlParser();
+                        ? FhirContext.forDstu3Cached().newJsonParser()
+                        : FhirContext.forDstu3Cached().newXmlParser();
         try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + fileName)) {
             writer.write(parser.setPrettyPrint(true).encodeResourceToString(vs).getBytes());
             writer.flush();

@@ -86,11 +86,11 @@ package org.opencds.cqf.tooling;
             - See the documentation for CQL to FHIR Library conversion to see which Library elements will be populated
 
         - Refresh Measure(s)
-            - command: mvn exec:java -Dexec.args="[-RefreshStu3Measure|RefreshR4Measure] [-ptm| pathToMeasures] [-ptl|pathToLibraries] (-e|encoding) (-o|-output)"
+            - command: mvn exec:java -Dexec.args="[-RefreshStu3Measure|RefreshR4Measure] [-ptm| pathToMeasures] [-ptl|pathToLibraries] (-e|encoding) (-o|-output) (-ss|-stamp)"
 
         - Refresh Library
-            - command: mvn exec:java -Dexec.args"-RefreshLibrary -ini -fv|fhir-version -lp|libraryPath
-            - Example: mvn exec:java -Dexec.args="-RefreshLibrary -ini=C:\Users\Bryn\Documents\Src\HL7\sample-ig\ig.ini -fv=fhir4 -lp=C:\Users\Bryn\Documents\Src\HL7\sample-ig\input\examples\Library-example.json"
+            - command: mvn exec:java -Dexec.args"-RefreshLibrary -ini -fv|fhir-version -lp|libraryPath (-ss|-stamp)
+            - Example: mvn exec:java -Dexec.args="-RefreshLibrary -ini=C:\Users\Bryn\Documents\Src\HL7\sample-ig\ig.ini -fv=fhir4 -lp=C:\Users\Bryn\Documents\Src\HL7\sample-ig\input\examples\Library-example.json" -ss=false
 
         - Bundle Resources
             - mvn exec:java -Dexec.args="[-BundleResources] [-pathtodirectory | -ptd] (-outputpath | -op) (-version | -v) (-encoding | -e) (-bundleid | -bid) "
@@ -189,6 +189,18 @@ package org.opencds.cqf.tooling;
             - The -cpg flag indicates whether to mark the value set as computable with CPG profile indicators
             - The -force flag indicates that even if the value set has a compose, this should reinfer it
             - The -skipversion flag indicates that code system versions that are present in the expansion should not be expressed in the inferred compose
+
+        - PostmanCollection
+            - command: mvn exec: java -Dexec.args="-PostmanCollection (-pathtobundledir | -ptbd) (-outputpath | -op) (-version | -v) [-host] [-path] [-protocol] [-name]"
+            - This tooling generates a postman collection based on the measure transaction bundle
+            - The operation expects -ptbd is a directory containing one or more directories each of them contains measure output bundle
+            - The -op is the output directory for collection
+            - The -v expects values like r4 or dstu3
+            - The -host is the FHIR Restful server base ex, "-host=cqm-sandbox.alphora.com"
+            - The -path is the server path after base ex, "-path=cqf-ruler-r4/fhir/"
+            - The -protocol can be http or https
+            - The -name is the name for the postman collection
+
         */
 
 public class Main {

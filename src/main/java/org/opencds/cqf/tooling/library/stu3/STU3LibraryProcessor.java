@@ -7,7 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.convertors.VersionConvertor_30_50;
+import com.google.common.base.Strings;
+
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_50;
+import org.hl7.fhir.convertors.conv30_50.VersionConvertor_30_50;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -26,13 +29,22 @@ public class STU3LibraryProcessor extends LibraryProcessor {
     /*
     Refresh all library resources in the given libraryPath
      */
-    protected List<String> refreshLibraries(String libraryPath) {
+    protected List<String> refreshLibraries(String libraryPath, Boolean shouldApplySoftwareSystemStamp) {
+        return refreshLibraries(libraryPath, null, shouldApplySoftwareSystemStamp);
+    }
+    
+    /*
+    Refresh all library resources in the given libraryPath and write to the given outputDirectory
+     */
+    protected List<String> refreshLibraries(String libraryPath, String libraryOutputDirectory, Boolean shouldApplySoftwareSystemStamp) {
         File file = new File(libraryPath);
         Map<String, String> fileMap = new HashMap<String, String>();
         List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
         if (file.isDirectory()) {
             for (File libraryFile : file.listFiles()) {
-                loadLibrary(fileMap, libraries, libraryFile);
+                if(IOUtils.isXMLOrJson(libraryPath, libraryFile.getName())) {
+                    loadLibrary(fileMap, libraries, libraryFile);
+                }
             }
         }
         else {
@@ -41,16 +53,29 @@ public class STU3LibraryProcessor extends LibraryProcessor {
 
         List<String> refreshedLibraryNames = new ArrayList<String>();
         List<org.hl7.fhir.r5.model.Library> refreshedLibraries = super.refreshGeneratedContent(libraries);
+        VersionConvertor_30_50 versionConvertor_30_50 = new VersionConvertor_30_50(new BaseAdvisor_30_50());
         for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
             String filePath = fileMap.get(refreshedLibrary.getId());
             if(null != filePath) {
-                org.hl7.fhir.dstu3.model.Library library = (org.hl7.fhir.dstu3.model.Library) VersionConvertor_30_50.convertResource(refreshedLibrary);
+                org.hl7.fhir.dstu3.model.Library library = (org.hl7.fhir.dstu3.model.Library) versionConvertor_30_50.convertResource(refreshedLibrary);
 
                 cleanseRelatedArtifactReferences(library);
 
-                cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
-                IOUtils.writeResource(library, filePath, IOUtils.getEncoding(filePath), fhirContext);
-                IOUtils.updateCachedResource(library, filePath);
+                if (shouldApplySoftwareSystemStamp) {
+                    cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
+                }
+
+                String outputPath = filePath;
+                if (libraryOutputDirectory != null) {
+                    File libraryDirectory = new File(libraryOutputDirectory);
+                    if (!libraryDirectory.exists()) {
+                        //TODO: add logger and log non existant directory for writing
+                    } else {
+                        outputPath = libraryDirectory.getAbsolutePath();
+                    }
+                }
+                IOUtils.writeResource(library, outputPath, IOUtils.getEncoding(outputPath), fhirContext);
+                IOUtils.updateCachedResource(library, outputPath);
 
                 String refreshedLibraryName;
                 if (this.versioned && refreshedLibrary.getVersion() != null) {
@@ -96,7 +121,8 @@ public class STU3LibraryProcessor extends LibraryProcessor {
     private void loadLibrary(Map<String, String> fileMap, List<org.hl7.fhir.r5.model.Library> libraries, File libraryFile) {
         try {
             Resource resource = (Resource) IOUtils.readResource(libraryFile.getAbsolutePath(), fhirContext);
-            org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) VersionConvertor_30_50.convertResource(resource);
+            VersionConvertor_30_50 versionConvertor_30_50 = new VersionConvertor_30_50(new BaseAdvisor_30_50());
+            org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) versionConvertor_30_50.convertResource(resource);
             fileMap.put(library.getId(), libraryFile.getAbsolutePath());
             libraries.add(library);
         } catch (Exception ex) {
@@ -119,6 +145,10 @@ public class STU3LibraryProcessor extends LibraryProcessor {
 
         STU3LibraryProcessor.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
 
-        return refreshLibraries(libraryPath);
+        if (!Strings.isNullOrEmpty(params.libraryOutputDirectory)) {
+            return refreshLibraries(libraryPath, params.libraryOutputDirectory, params.shouldApplySoftwareSystemStamp);
+        } else {
+            return refreshLibraries(libraryPath, params.shouldApplySoftwareSystemStamp);
+        }
     }
 }

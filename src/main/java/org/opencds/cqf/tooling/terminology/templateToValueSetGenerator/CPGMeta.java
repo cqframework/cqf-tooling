@@ -32,9 +32,10 @@ public class CPGMeta {
     private String purposeExclusionCriteria;
 
     private final String KEYWORD_URL            = "http://hl7.org/fhir/StructureDefinition/valueset-keyWord";
+    private final String WARNING_URL            = "http://hl7.org/fhir/StructureDefinition/valueset-warning";
+    //R4 only
     private final String RULES_TEXT_URL         = "http://hl7.org/fhir/StructureDefinition/valueset-rules-text";
     private final String EXPRESSION_URL         = "http://hl7.org/fhir/StructureDefinition/valueset-expression";
-    private final String WARNING_URL            = "http://hl7.org/fhir/StructureDefinition/valueset-warning";
     private final String CLINICAL_FOCUS_URL     = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-clinical-focus";
     private final String DATA_ELEMENT_SCOPE_URL = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-dataelement-scope";
     private final String INCLUSION_CRITERIA_URL = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/cdc-valueset-inclusion-criteria";
@@ -53,46 +54,44 @@ public class CPGMeta {
         vs.setPurpose(purpose);
 
         if (keyword != null) {
-            vs.addExtension(new Extension().setUrl(KEYWORD_URL).setValue(new StringType(keyword)));
+            vs = setExtension(vs, KEYWORD_URL, keyword);
         }
-        if (rulesText != null) {
-            vs.addExtension(new Extension().setUrl(RULES_TEXT_URL).setValue(new StringType(rulesText)));
+        if (warning != null) {
+            vs = setExtension(vs, WARNING_URL, warning);
         }
-        if (expressionDescription != null || expressionName != null || expressionLanguage != null
-                || expressionExpression != null || expressionReference != null)
-        {
-            vs.addExtension(
-                    new Extension()
-                            .setUrl(EXPRESSION_URL)
-                            .setValue(
-                                    new Expression()
-                                            .setDescription(expressionDescription)
-                                            .setName(expressionName)
-                                            .setLanguage(expressionLanguage)
-                                            .setExpression(expressionExpression)
-                                            .setReference(expressionReference)
-                            )
-            );
-        }
-
-        if (outputVersion.equalsIgnoreCase("stu3")) {
-            if (warning != null) {
-                vs.addExtension(new Extension().setUrl(WARNING_URL).setValue(new StringType(warning)));
+        if (outputVersion.equalsIgnoreCase("r4")) {
+            if (rulesText != null) {
+                vs.addExtension(new Extension().setUrl(RULES_TEXT_URL).setValue(new MarkdownType(rulesText)));
             }
             if (purposeClinicalFocus != null) {
-                vs.addExtension(new Extension().setUrl(CLINICAL_FOCUS_URL).setValue(new StringType(purposeClinicalFocus)));
+                vs = setExtension(vs, CLINICAL_FOCUS_URL, purposeClinicalFocus);
             }
             if (purposeDataElementScope != null) {
-                vs.addExtension(new Extension().setUrl(DATA_ELEMENT_SCOPE_URL).setValue(new StringType(purposeDataElementScope)));
+                vs = setExtension(vs, DATA_ELEMENT_SCOPE_URL, purposeDataElementScope);
             }
             if (purposeInclusionCriteria != null) {
-                vs.addExtension(new Extension().setUrl(INCLUSION_CRITERIA_URL).setValue(new StringType(purposeInclusionCriteria)));
+                vs = setExtension(vs, INCLUSION_CRITERIA_URL, purposeInclusionCriteria);
             }
             if (purposeExclusionCriteria != null) {
-                vs.addExtension(new Extension().setUrl(EXCLUSION_CRITERIA_URL).setValue(new StringType(purposeExclusionCriteria)));
+                vs = setExtension(vs, EXCLUSION_CRITERIA_URL, purposeExclusionCriteria);
+            }
+            if (expressionDescription != null || expressionName != null || expressionLanguage != null
+                    || expressionExpression != null || expressionReference != null)
+            {
+                vs.addExtension(
+                        new Extension()
+                                .setUrl(EXPRESSION_URL)
+                                .setValue(
+                                        new Expression()
+                                                .setDescription(expressionDescription)
+                                                .setName(expressionName)
+                                                .setLanguage(expressionLanguage)
+                                                .setExpression(expressionExpression)
+                                                .setReference(expressionReference)
+                                )
+                );
             }
         }
-
         if (compose != null) {
             try {
                 ValueSet tempVs = fhirContext.newXmlParser().parseResource(ValueSet.class, "<ValueSet>" + compose + "</ValueSet>");
@@ -103,6 +102,11 @@ public class CPGMeta {
             }
         }
 
+        return vs;
+    }
+
+    private ValueSet setExtension(ValueSet vs, String url, String valueToSet){
+        vs.addExtension(new Extension().setUrl(url).setValue(new StringType(valueToSet)));
         return vs;
     }
 

@@ -147,6 +147,19 @@ public abstract class ClassInfoBuilder {
         return typeName;
     }
 
+    private String getTargetTypeName(StructureDefinition sd) {
+        String typeId = getTail(sd.getType());
+        if (typeId == null) {
+            typeId = sd.getType();
+        }
+        String typeName = getTypeName(sd);
+        if (typeId != null && typeName != null && !typeId.equals(typeName)) {
+            return typeId;
+        }
+
+        return null;
+    }
+
     private String getLabel(StructureDefinition sd) {
         return sd.getTitle() != null ? sd.getTitle() : getTypeName(sd);
     }
@@ -1216,7 +1229,7 @@ public abstract class ClassInfoBuilder {
                 String targetMap = sliceInfo.getSliceMap();
                 if (targetMap != null && !targetMap.isEmpty()) {
                     if (cie.getTarget() != null && !cie.getTarget().isEmpty()) {
-                        targetMap = cie.getTarget().replace("%value", targetMap + (isClassType(typeSpecifier) ? ".value" : ""));
+                        targetMap = cie.getTarget().replace("%value", targetMap + (sliceInfo.isExtensionSlicing() ? ".value" : ""));
                     }
                     cie.setTarget(targetMap);
                 }
@@ -1326,6 +1339,13 @@ public abstract class ClassInfoBuilder {
                 .withIdentifier(sd.getUrl())
                 .withRetrievable(sd.getKind() == StructureDefinitionKind.RESOURCE);
 
+        if (sd.getKind() == StructureDefinitionKind.RESOURCE) {
+            String targetTypeName = getTargetTypeName(sd);
+            if (targetTypeName != null) {
+                info.setTarget(targetTypeName);
+            }
+        }
+
         this.typeInfos.put(qualifiedTypeName, info);
 
         AtomicReference<Integer> index = new AtomicReference<Integer>(1);
@@ -1333,7 +1353,7 @@ public abstract class ClassInfoBuilder {
         String path = sd.getType(); // Type is used to navigate the elements, regardless of the baseDefinition
         String id = path; // Id starts with the Type
         // TODO: Switch to differential here, but several of the primitive types declare "value" elements of type string when this happens? (positiveInt, markdown, among others)
-        List<ElementDefinition> eds = sd.getDifferential().getElement();
+        List<ElementDefinition> eds = sd.getSnapshot().getElement();
         SliceList elementSlices = null;
 
         while (index.get() < eds.size()) {
@@ -1446,7 +1466,13 @@ public abstract class ClassInfoBuilder {
         String elementPath = this.unQualify(strippedPath);
 
         TypeInfo rootType = this.resolveType(modelName + "." + root);
+        if (rootType == null) {
+            throw new IllegalArgumentException(String.format("Could not resolve type %s", root));
+        }
         ClassInfoElement element = this.forPath(((ClassInfo) rootType).getElement(), elementPath);
+        if (element == null) {
+            throw new IllegalArgumentException(String.format("Could not resolve path %s.%s", root, elementPath));
+        }
         return this.getTypeSpecifier(element);
     }
 
