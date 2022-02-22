@@ -11,6 +11,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
+import org.cqframework.cql.cql2elm.StringEscapeUtils;
 import org.opencds.cqf.tooling.Operation;
 
 public class SpreadsheetToCQLOperation extends Operation {
@@ -125,7 +126,7 @@ public class SpreadsheetToCQLOperation extends Operation {
                     result.append("\"");
                     result.append(": ");
                     result.append("'");
-                    result.append(SpreadsheetHelper.getCellAsString(cell));
+                    result.append(StringEscapeUtils.escapeCql(SpreadsheetHelper.getCellAsString(cell)));
                     result.append("'");
                 }
                 result.append(" }");
