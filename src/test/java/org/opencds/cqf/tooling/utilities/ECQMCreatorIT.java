@@ -343,6 +343,25 @@ public class ECQMCreatorIT {
     }
 
     @Test
+    public void TestCMS159FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using
+        // TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass()
+                .getResource("ecqm-content-r4-2021/bundles/CMS159FHIR-v0-0-001-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/DepressionRemissionatTwelveMonthsFHIR.cql",
+                    "ecqm-content-r4-2021/input/resources/measure/DepressionRemissionatTwelveMonthsFHIR.json");
+            assertTrue(null != measure);
+            assertDataReqsNotEmpty(measure);
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
+    @Test
     public void TestCMS157FHIR() {
         // Extract the bundle
         // NOTE: This is a 2021-AUFHIR measure, this is the test created using
@@ -452,6 +471,25 @@ public class ECQMCreatorIT {
         try {
             Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/DementiaCognitiveAssessmentFHIR.cql",
                     "ecqm-content-r4-2021/input/resources/measure/DementiaCognitiveAssessmentFHIR.json");
+            assertTrue(null != measure);
+            assertDataReqsNotEmpty(measure);
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
+    @Test
+    public void TestCMS147FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using
+        // TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass()
+                .getResource("ecqm-content-r4-2021/bundles/CMS147FHIR-v0-0-002-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/PreventiveCareandScreeningInfluenzaImmunizationFHIR.cql",
+                    "ecqm-content-r4-2021/input/resources/measure/PreventiveCareandScreeningInfluenzaImmunizationFHIR.json");
             assertTrue(null != measure);
             assertDataReqsNotEmpty(measure);
         } catch (IOException ioException) {
@@ -764,6 +802,44 @@ public class ECQMCreatorIT {
         try {
             Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/CervicalCancerScreeningFHIR.cql",
                     "ecqm-content-r4-2021/input/resources/measure/CervicalCancerScreeningFHIR.json");
+            assertTrue(null != measure);
+            assertDataReqsNotEmpty(measure);
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
+    @Test
+    public void TestCMS108FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using
+        // TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass()
+                .getResource("ecqm-content-r4-2021/bundles/CMS108-v0-0-003-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/VenousThromboembolismProphylaxisFHIR.cql",
+                    "ecqm-content-r4-2021/input/resources/measure/VenousThromboembolismProphylaxisFHIR.json");
+            assertTrue(null != measure);
+            assertDataReqsNotEmpty(measure);
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
+    @Test
+    public void TestCMS190FHIR() {
+        // Extract the bundle
+        // NOTE: This is a 2021-AUFHIR measure, this is the test created using
+        // TestCMS125FHIR as template
+        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
+        o.execute(new String[] { "-ExtractMATBundle", this.getClass()
+                .getResource("ecqm-content-r4-2021/bundles/CMS190-v0-0-003-FHIR-4-0-1.json").getFile() });
+
+        try {
+            Measure measure = refreshMeasure("ecqm-content-r4-2021/input/cql/IntensiveCareUnitVenousThromboembolismProphylaxisFHIR.cql",
+                    "ecqm-content-r4-2021/input/resources/measure/IntensiveCareUnitVenousThromboembolismProphylaxisFHIR.json");
             assertTrue(null != measure);
             assertDataReqsNotEmpty(measure);
         } catch (IOException ioException) {
