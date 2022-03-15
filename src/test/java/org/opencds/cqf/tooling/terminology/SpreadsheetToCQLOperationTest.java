@@ -2,25 +2,20 @@ package org.opencds.cqf.tooling.terminology;
 
 import static org.junit.Assert.*;
 
+import org.junit.Test;
 import java.io.BufferedReader;
+
 import java.io.FileReader;
 import java.io.IOException;
-import org.junit.Test;
 
 public class SpreadsheetToCQLOperationTest {
 
-	// replace with your location for cqf-tooling
-	String mydir = "/Users/pranav.mechineni/Desktop/final_git/";
-
-	String input_xlsx = mydir
-			+ "cqf-tooling/src/test/resources/org/opencds/cqf/tooling/testfiles/SpreadsheetToCQLOperation/CQLv151ChangesApplied.xlsx";
-	String output_cql_dir = mydir
-			+ "cqf-tooling/src/test/resources/org/opencds/cqf/tooling/testfiles/SpreadsheetToCQLOperation/generated/";
-	String expected_output = mydir
-			+ "cqf-tooling/src/test/resources/org/opencds/cqf/tooling/testfiles/SpreadsheetToCQLOperation/CQLv151ChangesApplied.cql";
+	String input_xlsx = "../cqf-tooling/src/test/resources/org/opencds/cqf/tooling/testfiles/SpreadsheetToCQLOperation/CQLv151ChangesApplied.xlsx";
+	String output_cql_dir = "../cqf-tooling/src/test/resources/org/opencds/cqf/tooling/testfiles/SpreadsheetToCQLOperation/generated/";
+	String expected_output = "../cqf-tooling/src/test/resources/org/opencds/cqf/tooling/testfiles/SpreadsheetToCQLOperation/CQLv151ChangesApplied.cql";
 
 	@Test
-	public void generate_CQL_test() {
+	public void generate_CQL_test() throws IOException {
 		SpreadsheetToCQLOperation tester = new SpreadsheetToCQLOperation();
 
 		String[] arguments = new String[3];
@@ -43,6 +38,7 @@ public class SpreadsheetToCQLOperationTest {
 
 		BufferedReader reader1 = new BufferedReader(new FileReader(output_cql_dir + "CQLv151ChangesApplied.cql"));
 		BufferedReader reader2 = new BufferedReader(new FileReader(expected_output));
+
 		// skip past generated time so we only compare everything in CQL format
 		for (int i = 0; i <= 5; i++) {
 			reader1.readLine();
@@ -86,7 +82,7 @@ public class SpreadsheetToCQLOperationTest {
 
 		reader2.close();
 
-		assertEquals(true, isEqual);
+		assertTrue(isEqual);
 	}
 
 }
