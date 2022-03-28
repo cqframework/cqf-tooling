@@ -49,17 +49,11 @@ public class BaseCqfmSoftwareSystemHelperTest {
 	@Test
 	public void testGetSystemIsValid4() {
 		CqfmSoftwareSystemHelper cqfmSoftwareSystemHelper = new CqfmSoftwareSystemHelper("Root Dir");
-		assertFalse(cqfmSoftwareSystemHelper.getSystemIsValid(new CqfmSoftwareSystem("Name", null, null)));
-	}
-
-	@Test
-	public void testGetSystemIsValid5() {
-		CqfmSoftwareSystemHelper cqfmSoftwareSystemHelper = new CqfmSoftwareSystemHelper("Root Dir");
 		assertFalse(cqfmSoftwareSystemHelper.getSystemIsValid(new CqfmSoftwareSystem("Name", "", null)));
 	}
 
 	@Test
-	public void testGetSystemIsValid6() {
+	public void testGetSystemIsValid5() {
 		assertFalse((new CqfmSoftwareSystemHelper("Root Dir")).getSystemIsValid(null));
 	}
 
