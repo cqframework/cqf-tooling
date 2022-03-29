@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import com.google.common.base.Strings;
 
@@ -29,11 +30,26 @@ import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import ca.uhn.fhir.context.FhirContext;
 
 public class LibraryProcessor extends BaseProcessor {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     public static final String ResourcePrefix = "library-";   
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
     }
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static Pattern pattern;
+
+    private static Pattern getPattern() {
+        if(pattern == null) {
+            String regex = "^[a-zA-Z]+[a-zA-Z0-9_\\-\\.]*";
+            pattern = Pattern.compile(regex);
+        }
+        return pattern;
+    }
+
+    public static void validateIdAlphaNumeric(String id) {
+        if(!getPattern().matcher(id).find()) {
+            throw new RuntimeException("The library id format is invalid.");
+        }
+    }
     
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
         return refreshIgLibraryContent(parentContext, outputEncoding, null, versioned, fhirContext, shouldApplySoftwareSystemStamp);
@@ -189,7 +205,8 @@ public class LibraryProcessor extends BaseProcessor {
                     newLibrary.setName(fileInfo.getIdentifier().getId());
                     newLibrary.setVersion(fileInfo.getIdentifier().getVersion());
                     newLibrary.setUrl(String.format("%s/Library/%s", (newLibrary.getName().equals("FHIRHelpers") ? "http://hl7.org/fhir" : canonicalBase), fileInfo.getIdentifier().getId()));
-                    newLibrary.setId(getId(newLibrary.getName()) + (versioned ? "-" + newLibrary.getVersion() : ""));
+                    newLibrary.setId(newLibrary.getName() + (versioned ? "-" + newLibrary.getVersion() : ""));
+                    validateIdAlphaNumeric(newLibrary.getId());
                     List<Attachment> attachments = new ArrayList<Attachment>();
                     Attachment attachment = new Attachment();
                     attachment.setContentType("application/elm+xml");
