@@ -19,7 +19,6 @@ import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.UsageContext;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r4.model.ValueSet.ValueSetComposeComponent;
 import org.opencds.cqf.tooling.casereporting.validation.UsPublicHealthValidatorModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +52,8 @@ public class ErsdTransformer {
         Library specificationLibrary = new Library();
         specificationLibrary.setId(new IdType("Library", "SpecificationLibrary", "1.0.0"));
         specificationLibrary.getMeta().addProfile(usPhSpecificationLibraryProfileUrl);
-        specificationLibrary.setName("Specification Library");
+        specificationLibrary.setName("SpecificationLibrary");
+        specificationLibrary.setTitle("Specification Library");
         specificationLibrary.setVersion("1.0.0");
         specificationLibrary.setDescription("Defines the asset-collection library containing the US Public Health specification assets.");
         specificationLibrary.setStatus(PublicationStatus.ACTIVE);
@@ -98,9 +98,16 @@ public class ErsdTransformer {
         relatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
         relatedArtifact.setResource(res.getUrlElement().asStringValue());
         specificationLibrary.addRelatedArtifact(relatedArtifact);
-        res.setVersion("1.0.0");
-        res.setPublisher("eCR");
-        res.setExperimental(true);
+        // res.setType(new CodeableConcept(new Coding("http://terminology.hl7.org/CodeSystem/plan-definition-type", "workflow-definition", "Workflow Definition")));
+        // res.getAction().forEach(action -> {
+        //     action.getTrigger().forEach(trigger -> {
+        //         trigger.setType(TriggerType.NAMEDEVENT);
+        //     });
+        // });
+        // res.setVersion("1.0.0");
+        // res.setPublisher("eCR");
+        // res.setExperimental(true);
+        // res.setDescription("Example Description");
         return null;
     }
 
@@ -130,15 +137,15 @@ public class ErsdTransformer {
         if (!isValid) {
             return result.toOperationOutcome();
         }
-        bundle.getEntry().stream()
-            .filter(x -> (x.hasResource() && x.getResource().fhirType().equals("ValueSet")))
-            .map(x -> (ValueSet) x.getResource())
-            .forEach(vs -> {
-                RelatedArtifact relatedArtifact = new RelatedArtifact();
-                relatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
-                relatedArtifact.setResource(vs.getUrlElement().asStringValue());
-                res.addRelatedArtifact(relatedArtifact);
-        });
+        // bundle.getEntry().stream()
+        //     .filter(x -> (x.hasResource() && x.getResource().fhirType().equals("ValueSet")))
+        //     .map(x -> (ValueSet) x.getResource())
+        //     .forEach(vs -> {
+        //         RelatedArtifact relatedArtifact = new RelatedArtifact();
+        //         relatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
+        //         relatedArtifact.setResource(vs.getUrlElement().asStringValue());
+        //         res.addRelatedArtifact(relatedArtifact);
+        // });
         RelatedArtifact relatedArtifact = new RelatedArtifact();
         relatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
         relatedArtifact.setResource(res.getUrlElement().asStringValue());
@@ -165,7 +172,7 @@ public class ErsdTransformer {
             RelatedArtifact relatedArtifact = new RelatedArtifact();
             relatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
             relatedArtifact.setResource(res.getUrlElement().asStringValue());
-            specificationLibrary.addRelatedArtifact(relatedArtifact);
+            // specificationLibrary.addRelatedArtifact(relatedArtifact);
         }
         res.addUseContext(
             new UsageContext(
@@ -190,7 +197,7 @@ public class ErsdTransformer {
         for (BundleEntryComponent entry : bundle.getEntry()) {
             if (entry.getResource() instanceof ValueSet) {
                 ValueSet v = (ValueSet) entry.getResource();
-                v.setCompose(new ValueSetComposeComponent());
+                //v.setCompose(new ValueSetComposeComponent());
                 v.setText(new Narrative());
                 v.getExpansion().getContains().forEach(x -> x.setDisplay(""));
             }
