@@ -32,7 +32,6 @@ public class QuestionnaireProcessorTest extends RefreshTest {
     @BeforeMethod
     public void setUp() throws Exception {
         IOUtils.resourceDirectories = new ArrayList<String>();
-        IOUtils.clearPaths();
         System.setOut(new PrintStream(this.console));
         File dir  = new File(TARGET_PATH);
         if (dir.exists()) {
@@ -47,6 +46,10 @@ public class QuestionnaireProcessorTest extends RefreshTest {
 
     // A very crude test just to ensure that a bundle file is created. Should be improved and made to be more
     // sophisticated with new $package implementation
+    //NOTE: Currently disabled because the testing infrastructure doesn't quite work - IOUtils is has static methods accessing
+    // instance state and so the state (an IG load specifically) carries accross tests. Specifically, the paths get set in IOUtils
+    // on the first pass and then don't update so in this test, the relevant paths from the IG test data don't ever get set -
+    // the paths are still set to those from the first test.
     //@Test
     private void testBundleQuestionnairesR4() throws Exception {
         copyResourcesToTargetDir(TARGET_PATH, "testfiles" + separator + "bundleQuestionnaires");
