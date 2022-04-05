@@ -466,7 +466,7 @@
                             <arg>-Xlint:-options</arg>
                             <!-- This fixes a warning about Test annotations not being processed as part of compilation - They won't be since they are processed as part of testing-->
                             <arg>-Xlint:-processing</arg>
-<!--                            <arg>-Werror</arg>-->
+                            <arg>-Werror</arg>
                         </compilerArgs>
                     </configuration>
                 </plugin>
