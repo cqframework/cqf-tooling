@@ -956,20 +956,6 @@ public class IOUtils
     }
 
     // TODO: This should not be necessary this is awful... For now it is needed for passing tests in Travis
-    public static void clearPaths() {
-        cqlLibraryPaths = new LinkedHashSet<String>();
-        terminologyPaths = new LinkedHashSet<String>();
-        libraryPaths = new LinkedHashSet<String>();
-        libraryUrlMap = new LinkedHashMap<String, IBaseResource>();
-        activityDefinitionPaths = new LinkedHashSet<String>();
-        planDefinitionPaths = new LinkedHashSet<String>();
-        measurePaths = new LinkedHashSet<String>();
-        measureReportPaths = new LinkedHashSet<String>();
-        questionnairePaths = new LinkedHashSet<String>();
-        devicePaths = new LinkedHashSet<String>();
-    }
-
-    // TODO: This should not be necessary this is awful... For now it is needed for passing tests in Travis
     public static void clearDevicePaths() {
         devicePaths = null;
     }
