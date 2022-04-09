@@ -387,9 +387,8 @@ public class TemplateToValueSetGenerator extends Operation {
             Row row = rowIterator.next();
 
             String code = SpreadsheetHelper.getCellAsString(row.getCell(0));
-            if (code.length() <= 0) continue;
-
             if (code == null || code.equals("Code")) continue;
+            if (code.length() <= 0) continue;
 
             // ???
             if (code.equals("expansion")) {
