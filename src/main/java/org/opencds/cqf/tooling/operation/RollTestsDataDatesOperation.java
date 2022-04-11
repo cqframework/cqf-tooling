@@ -2,14 +2,19 @@ package org.opencds.cqf.tooling.operation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.parser.XmlParser;
-import com.google.gson.JsonObject;
+import org.hl7.fhir.Bundle;
+import org.hl7.fhir.BundleEntry;
+import org.hl7.fhir.ResourceContainer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.processor.IGProcessor;
+import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 
@@ -17,6 +22,21 @@ public class RollTestsDataDatesOperation extends Operation {
     private FhirContext fhirContext;
     public static final String separator = System.getProperty("file.separator");
 
+    /**
+     *
+     * open directory;
+     * Get object
+     *      if directory goto open directory
+     *      else
+     *          if file type fhir resource
+     *              if bundle use bundleutils.getR4ResourcesFromBundle to get resources
+     *                  for each resource look for date items and adjust
+     *              else
+     *                  look for date items and adjust
+     *          else if cdsHook
+     *              find all resources, including the draftOrder one and adjust
+
+     */
     @Override
     public void execute(String[] args) {
         String inputPath = "";
@@ -87,6 +107,7 @@ public class RollTestsDataDatesOperation extends Operation {
                 }
                 rollDatesInFile(nextFile);
             }
+//            BundleUtils.extractR4Resources();
 //            if (IOUtils.isXMLOrJson(libraryPath, libraryFile.getName())) {
 //                loadLibrary(fileMap, libraries, libraryFile);
 //            }
@@ -99,8 +120,8 @@ public class RollTestsDataDatesOperation extends Operation {
         String fileContents = IOUtils.getFileContent(file);
         if (fileContents.contains("hookInstance")){
             if (fileEncoding.equals(IOUtils.Encoding.XML)) {
-                XMLParser xmlParser = new XmlParser();
-                JsonObject hook =
+//                XMLParser xmlParser = new XmlParser();
+//                JsonObject hook =
             }else if(fileEncoding.equals(IOUtils.Encoding.JSON)){
 
             }
@@ -110,10 +131,43 @@ public class RollTestsDataDatesOperation extends Operation {
             IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext);
             if (null != resource) {
                 String resourceType = resource.fhirType();
-                System.out.println(resourceType);
+                if (resourceType.equals("Bundle")){
+                    rollBundleDates(resource);
+                }
+                else{
+
+                }
             }
         }
     }
+
+    private void rollBundleDates(IBaseResource iBaseResource){
+        switch (fhirContext.getVersion().getVersion().name()) {
+            case "R4":
+                ArrayList<org.hl7.fhir.r4.model.Resource> r4ResourceArrayList = BundleUtils.getR4ResourcesFromBundle((org.hl7.fhir.r4.model.Bundle)iBaseResource);
+                r4ResourceArrayList.forEach(resource -> {
+                    rollDatesInR4Resource(resource);
+                });
+                break;
+            case "Stu3":
+                ArrayList<org.hl7.fhir.dstu3.model.Resource> stu3resourceArrayList = BundleUtils.getStu3ResourcesFromBundle((org.hl7.fhir.dstu3.model.Bundle)iBaseResource);
+                stu3resourceArrayList.forEach(resource -> {
+                    rollDatesInStu3Resource(resource);
+                });                break;
+        }
+    }
+
+    private void rollDatesInR4Resource(org.hl7.fhir.r4.model.Resource resource){
+        switch (resource.getResourceType().name()){
+            case "Patient":
+            case "MedicationRequest":
+            case "Encounter":
+            case "Observation":
+                break;
+        }
+    }
+
+    private void rollDatesInStu3Resource(org.hl7.fhir.dstu3.model.Resource resource){}
 
     private IParser getParser(IOUtils.Encoding encoding)
     {
