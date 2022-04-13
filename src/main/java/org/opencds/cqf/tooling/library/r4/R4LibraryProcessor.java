@@ -8,7 +8,8 @@ import java.util.Map;
 
 import com.google.common.base.Strings;
 
-import org.hl7.fhir.convertors.VersionConvertor_40_50;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
+import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.r4.formats.FormatUtilities;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Resource;
@@ -39,8 +40,8 @@ public class R4LibraryProcessor extends LibraryProcessor {
         If the path is not specified, or is not a known directory, process
         all known library resources
     */
-    protected List<String> refreshLibraries(String libraryPath, Encoding encoding) {
-        return refreshLibraries(libraryPath, null, encoding);
+    protected List<String> refreshLibraries(String libraryPath, Encoding encoding, Boolean shouldApplySoftwareSystemStamp) {
+        return refreshLibraries(libraryPath, null, encoding, shouldApplySoftwareSystemStamp);
     }
 
     /*
@@ -49,7 +50,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
         all known library resources, if no libraryOutputDirectory is specified,
         overwrite all known library resources
     */
-    protected List<String> refreshLibraries(String libraryPath, String libraryOutputDirectory, Encoding encoding) {
+    protected List<String> refreshLibraries(String libraryPath, String libraryOutputDirectory, Encoding encoding, Boolean shouldApplySoftwareSystemStamp) {
         File file = libraryPath != null ? new File(libraryPath) : null;
         Map<String, String> fileMap = new HashMap<String, String>();
         List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
@@ -61,7 +62,9 @@ public class R4LibraryProcessor extends LibraryProcessor {
         }
         else if (file.isDirectory()) {
             for (File libraryFile : file.listFiles()) {
-                loadLibrary(fileMap, libraries, libraryFile);
+                if(IOUtils.isXMLOrJson(libraryPath, libraryFile.getName())) {
+                    loadLibrary(fileMap, libraries, libraryFile);
+                }
             }
         }
         else {
@@ -70,8 +73,9 @@ public class R4LibraryProcessor extends LibraryProcessor {
 
         List<String> refreshedLibraryNames = new ArrayList<String>();
         List<org.hl7.fhir.r5.model.Library> refreshedLibraries = super.refreshGeneratedContent(libraries);
+        VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
         for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
-            Library library = (Library) VersionConvertor_40_50.convertResource(refreshedLibrary);
+            Library library = (Library) versionConvertor_40_50.convertResource(refreshedLibrary);
             String filePath = null;
             Encoding fileEncoding = null;            
             if (fileMap.containsKey(refreshedLibrary.getId()))
@@ -82,7 +86,9 @@ public class R4LibraryProcessor extends LibraryProcessor {
                 filePath = getLibraryPath(libraryPath);
                 fileEncoding = encoding;
             }
-            cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
+            if (shouldApplySoftwareSystemStamp) {
+                cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
+            }
             // Issue 96
             // Passing the includeVersion here to handle not using the version number in the filename
             if (new File(filePath).exists()) {
@@ -118,7 +124,8 @@ public class R4LibraryProcessor extends LibraryProcessor {
     private void loadLibrary(Map<String, String> fileMap, List<org.hl7.fhir.r5.model.Library> libraries, File libraryFile) {
         try {
             Resource resource = FormatUtilities.loadFile(libraryFile.getAbsolutePath());
-            org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) VersionConvertor_40_50.convertResource(resource);
+            VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
+            org.hl7.fhir.r5.model.Library library = (org.hl7.fhir.r5.model.Library) versionConvertor_40_50.convertResource(resource);
             fileMap.put(library.getId(), libraryFile.getAbsolutePath());
             libraries.add(library);
         } catch (Exception ex) {
@@ -143,9 +150,9 @@ public class R4LibraryProcessor extends LibraryProcessor {
         R4LibraryProcessor.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
 
         if (!Strings.isNullOrEmpty(params.libraryOutputDirectory)) {
-            return refreshLibraries(libraryPath, params.libraryOutputDirectory, encoding);
+            return refreshLibraries(libraryPath, params.libraryOutputDirectory, encoding, params.shouldApplySoftwareSystemStamp);
         } else {
-            return refreshLibraries(libraryPath, encoding);
+            return refreshLibraries(libraryPath, encoding, params.shouldApplySoftwareSystemStamp);
         }
     }
 }

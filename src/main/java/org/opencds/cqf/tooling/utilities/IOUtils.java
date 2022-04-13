@@ -25,6 +25,7 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 
@@ -248,7 +249,9 @@ public class IOUtils
                     return null;
                 }
             }
-            resource = parser.parseResource(new FileReader(file));
+            try (FileReader reader = new FileReader(file)){
+                resource = parser.parseResource(reader);
+            }
             cachedResources.put(path, resource);
         }
         catch (Exception e)
@@ -681,6 +684,10 @@ public class IOUtils
         if (libraryPathMap.isEmpty()) {
             setupLibraryPaths(fhirContext);
         }
+        LogUtils.info(String.format("libraryUrlMap Size: %d", libraryPathMap.size()));
+        for (Map.Entry<String, IBaseResource> e : libraryUrlMap.entrySet()) {
+            LogUtils.info(String.format("libraryUrlMap Entry: %s", e.getKey()));
+        }
         return libraryUrlMap;
     }
     private static Map<String, String> libraryPathMap = new LinkedHashMap<String, String>();
@@ -849,6 +856,54 @@ public class IOUtils
         }
     }
 
+    private static HashSet<String> questionnairePaths = new LinkedHashSet<String>();
+    public static HashSet<String> getQuestionnairePaths(FhirContext fhirContext) {
+        if (questionnairePaths.isEmpty()) {
+            setupQuestionnairePaths(fhirContext);
+        }
+        return questionnairePaths;
+    }
+
+    private static Map<String, String> questionnairePathMap = new LinkedHashMap<String, String>();
+    public static Map<String, String> getQuestionnairePathMap(FhirContext fhirContext) {
+        if (questionnairePathMap.isEmpty()) {
+            setupQuestionnairePaths(fhirContext);
+        }
+        return questionnairePathMap;
+    }
+
+    private static Map<String, IBaseResource> questionnaires = new LinkedHashMap<String, IBaseResource>();
+    public static Map<String, IBaseResource> getQuestionnaires(FhirContext fhirContext) {
+        if (questionnaires.isEmpty()) {
+            setupQuestionnairePaths(fhirContext);
+        }
+        return questionnaires;
+    }
+
+    private static void setupQuestionnairePaths(FhirContext fhirContext) {
+        HashMap<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
+        for(String dir : resourceDirectories) {
+            for(String path : IOUtils.getFilePaths(dir, true))
+            {
+                try {
+                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                } catch (Exception e) {
+                    System.out.println(String.format("Error setting Questionnaire paths while reading resource at: '%s'. Error: %s", path, e.getMessage()));
+                }
+            }
+            RuntimeResourceDefinition questionnaireDefinition = ResourceUtils.getResourceDefinition(fhirContext, "Questionnaire");
+            String questionnaireClassName = questionnaireDefinition.getImplementingClass().getName();
+            resources.entrySet().stream()
+                    .filter(entry -> entry.getValue() != null)
+                    .filter(entry ->  questionnaireClassName.equals(entry.getValue().getClass().getName()))
+                    .forEach(entry -> {
+                        questionnairePaths.add(entry.getKey());
+                        questionnaires.put(entry.getValue().getIdElement().getIdPart(), entry.getValue());
+                        questionnairePathMap.put(entry.getValue().getIdElement().getIdPart(), entry.getKey());
+                    });
+        }
+    }
+
     private static HashSet<String> activityDefinitionPaths = new LinkedHashSet<String>();
     public static HashSet<String> getActivityDefinitionPaths(FhirContext fhirContext) {
         if (activityDefinitionPaths.isEmpty()) {
@@ -857,6 +912,7 @@ public class IOUtils
         }
         return activityDefinitionPaths;
     }
+
     private static void setupActivityDefinitionPaths(FhirContext fhirContext) {
         HashMap<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
         // BUG: resourceDirectories is being populated with all "per-convention" directories during validation. So,
@@ -891,14 +947,21 @@ public class IOUtils
         }
     }
 
-    private static HashSet<String> devicePaths = new LinkedHashSet<String>();
+    private static HashSet<String> devicePaths;
     public static HashSet<String> getDevicePaths(FhirContext fhirContext) {
-        if (devicePaths.isEmpty()) {
+        if (devicePaths == null) {
             setupDevicePaths(fhirContext);
         }
         return devicePaths;
     }
+
+    // TODO: This should not be necessary this is awful... For now it is needed for passing tests in Travis
+    public static void clearDevicePaths() {
+        devicePaths = null;
+    }
+
     private static void setupDevicePaths(FhirContext fhirContext) {
+        devicePaths = new LinkedHashSet<String>();
         HashMap<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))
@@ -920,4 +983,15 @@ public class IOUtils
                 .forEach(entry -> devicePaths.add(entry.getKey()));
         }
     }
+
+    public static boolean isXMLOrJson(String fileDirPath, String libraryName){
+        String fileExtension = libraryName.substring(libraryName.lastIndexOf(".") + 1);
+        if(fileExtension.equalsIgnoreCase("xml") ||
+                fileExtension.equalsIgnoreCase("json")){
+            return true;
+        }
+        System.out.println("The file " + fileDirPath + libraryName + " is not the right type of file.");
+        return false;
+    }
+
 }

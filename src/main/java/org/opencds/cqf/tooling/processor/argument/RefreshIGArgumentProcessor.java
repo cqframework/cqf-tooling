@@ -31,6 +31,9 @@ public class RefreshIGArgumentProcessor {
     public static final String[] FHIR_URI_OPTIONS = {"fs", "fhir-uri"};
     public static final String[] MEASURE_TO_REFRESH_PATH = {"mtrp", "measure-to-refresh-path"};
     public static final String[] RESOURCE_PATH_OPTIONS = {"rp", "resourcepath"};
+    public static final String[] LIBRARY_OUTPUT_PATH_OPTIONS = {"libraryOutput", "libraryOutputPath", "lop"};
+    public static final String[] MEASURE_OUTPUT_PATH_OPTIONS = {"measureOutput", "measureOutputPath", "mop"};
+    public static final String[] SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS = { "ss", "stamp" };
 
     @SuppressWarnings("unused")
     public OptionParser build() {
@@ -43,6 +46,9 @@ public class RefreshIGArgumentProcessor {
         OptionSpecBuilder igOutputEncodingBuilder = parser.acceptsAll(asList(IG_OUTPUT_ENCODING), "If omitted, output will be generated using JSON encoding.");
         OptionSpecBuilder fhirUriBuilder = parser.acceptsAll(asList(FHIR_URI_OPTIONS),"If omitted the final bundle will not be loaded to a FHIR server.");
         OptionSpecBuilder measureToRefreshPathBuilder = parser.acceptsAll(asList(MEASURE_TO_REFRESH_PATH), "Path to Measure to refresh.");
+        OptionSpecBuilder libraryOutputPathBuilder = parser.acceptsAll(asList(LIBRARY_OUTPUT_PATH_OPTIONS),"If omitted, the libraries will overwrite any existing libraries");
+        OptionSpecBuilder measureOutputPathBuilder = parser.acceptsAll(asList(MEASURE_OUTPUT_PATH_OPTIONS),"If omitted, the measures will overwrite any existing measures");
+        OptionSpecBuilder shouldApplySoftwareSystemStampBuilder = parser.acceptsAll(asList(SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS),"Indicates whether refreshed Measure and Library resources should be stamped with the 'cqf-tooling' stamp via the cqfm-softwaresystem Extension.");
 
         OptionSpec<String> ini = iniBuilder.withRequiredArg().describedAs("Path to the IG ini file");
         OptionSpec<String> rootDir = rootDirBuilder.withOptionalArg().describedAs("Root directory of the IG");
@@ -50,6 +56,9 @@ public class RefreshIGArgumentProcessor {
         OptionSpec<String> resourcePath = resourcePathBuilder.withOptionalArg().describedAs("directory of resources");
         OptionSpec<String> igOutputEncoding = igOutputEncodingBuilder.withOptionalArg().describedAs("desired output encoding for resources");
         OptionSpec<String> measureToRefreshPath = measureToRefreshPathBuilder.withOptionalArg().describedAs("Path to Measure to refresh.");
+        OptionSpec<String> libraryOutputPath = libraryOutputPathBuilder.withOptionalArg().describedAs("path to the output directory for updated libraries");
+        OptionSpec<String> measureOutputPath = measureOutputPathBuilder.withOptionalArg().describedAs("path to the output directory for updated measures");
+        OptionSpec<String> shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStampBuilder.withOptionalArg().describedAs("Indicates whether refreshed Measure and Library resources should be stamped with the 'cqf-tooling' stamp via the cqfm-softwaresystem Extension");
 
         //TODO: FHIR user / password (and other auth options)
         OptionSpec<String> fhirUri = fhirUriBuilder.withOptionalArg().describedAs("uri of fhir server");  
@@ -92,6 +101,23 @@ public class RefreshIGArgumentProcessor {
         String fhirUri = (String)options.valueOf(FHIR_URI_OPTIONS[0]);
         String measureToRefreshPath = (String)options.valueOf(MEASURE_TO_REFRESH_PATH[0]);
 
+        String libraryOutputPath = (String)options.valueOf(LIBRARY_OUTPUT_PATH_OPTIONS[0]);
+        if (libraryOutputPath == null) {
+            libraryOutputPath = "";
+        }
+
+        String measureOutputPath = (String)options.valueOf(MEASURE_OUTPUT_PATH_OPTIONS[0]);
+        if (measureOutputPath == null) {
+            measureOutputPath = "";
+        }
+
+        Boolean shouldApplySoftwareSystemStamp = true;
+        String shouldApplySoftwareSystemStampValue = (String)options.valueOf(SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS[0]);
+
+        if ((shouldApplySoftwareSystemStampValue != null) && shouldApplySoftwareSystemStampValue.equalsIgnoreCase("false")) {
+            shouldApplySoftwareSystemStamp = false;
+        }
+
         ArrayList<String> paths = new ArrayList<String>();
         if (resourcePaths != null && !resourcePaths.isEmpty()) {
             paths.addAll(resourcePaths);
@@ -107,9 +133,12 @@ public class RefreshIGArgumentProcessor {
         ip.includeTerminology = includeTerminology;
         ip.includePatientScenarios = includePatientScenarios;
         ip.versioned = versioned;
+        ip.shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStamp;
         ip.resourceDirs = paths;
         ip.fhirUri = fhirUri;
         ip.measureToRefreshPath = measureToRefreshPath;
+        ip.libraryOutputPath = libraryOutputPath;
+        ip.measureOutputPath = measureOutputPath;
        
         return ip;
     }

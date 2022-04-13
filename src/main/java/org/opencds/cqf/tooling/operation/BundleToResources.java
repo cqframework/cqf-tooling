@@ -1,13 +1,18 @@
 package org.opencds.cqf.tooling.operation;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class BundleToResources extends Operation {
 
@@ -70,18 +75,18 @@ public class BundleToResources extends Operation {
         }
 
         if (version == null) {
-            context = FhirContext.forR4();
+            context = FhirContext.forR4Cached();
         }
         else {
             switch (version.toLowerCase()) {
                 case "dstu2":
-                    context = FhirContext.forDstu2();
+                    context = FhirContext.forDstu2Cached();
                     break;
                 case "stu3":
-                    context = FhirContext.forDstu3();
+                    context = FhirContext.forDstu3Cached();
                     break;
                 case "r4":
-                    context = FhirContext.forR4();
+                    context = FhirContext.forR4Cached();
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown fhir version: " + version);

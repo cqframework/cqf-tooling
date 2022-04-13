@@ -12,6 +12,7 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -67,19 +68,24 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
             IOUtils.Encoding deviceOutputEncoding = IOUtils.Encoding.JSON;
             for (String path : IOUtils.getDevicePaths(fhirContext)) {
                 DomainResource resourceInPath;
-                try {
-                    if (path.endsWith("xml")) {
-                        deviceOutputEncoding = IOUtils.Encoding.XML;
-                        XmlParser xmlParser = (XmlParser)fhirContext.newXmlParser();
-                        resourceInPath = (DomainResource) xmlParser.parseResource(new FileReader(new File(path)));
+                if (path.endsWith("xml")) {
+                    deviceOutputEncoding = IOUtils.Encoding.XML;
+                    XmlParser xmlParser = (XmlParser)fhirContext.newXmlParser();
+                    try (FileReader reader = new FileReader(new File(path))) {
+                        resourceInPath = (DomainResource) xmlParser.parseResource(reader);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException("Error parsing " + e.getLocalizedMessage());
                     }
-                    else {
-                        JsonParser jsonParser = (JsonParser)fhirContext.newJsonParser();
-                        resourceInPath = (DomainResource) jsonParser.parseResource(new FileReader(new File(path)));
+                }
+                else {
+                    JsonParser jsonParser = (JsonParser)fhirContext.newJsonParser();
+                    try (FileReader reader = new FileReader(new File(path))) {
+                        resourceInPath = (DomainResource) jsonParser.parseResource(reader);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException("Error parsing " + e.getLocalizedMessage());
                     }
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException("Error parsing " + e.getLocalizedMessage());
                 }
 
                 // NOTE: Takes the first device that matches on ID and Version.

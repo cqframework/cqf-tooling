@@ -24,7 +24,7 @@ public class ToJsonValueSetDbOperation extends Operation {
 
     public FhirContext getFhirContext() {
         if (fhirContext == null) {
-            fhirContext = FhirContext.forR4();
+            fhirContext = FhirContext.forR4Cached();
         }
 
         return fhirContext;
