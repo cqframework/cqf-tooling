@@ -25,6 +25,7 @@ import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.MeasureProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
+import org.opencds.cqf.tooling.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -53,7 +54,8 @@ public class IGProcessorTest extends RefreshTest {
         MeasureProcessor measureProcessor = new MeasureProcessor();
         CDSHooksProcessor cdsHooksProcessor = new CDSHooksProcessor();
         PlanDefinitionProcessor planDefinitionProcessor = new PlanDefinitionProcessor(libraryProcessor, cdsHooksProcessor);
-        IGBundleProcessor igBundleProcessor = new IGBundleProcessor(measureProcessor, planDefinitionProcessor);
+		QuestionnaireProcessor questionnaireProcessor = new QuestionnaireProcessor(libraryProcessor);
+        IGBundleProcessor igBundleProcessor = new IGBundleProcessor(measureProcessor, planDefinitionProcessor, questionnaireProcessor);
         processor = new IGProcessor(igBundleProcessor, libraryProcessor, measureProcessor);
     }
  
@@ -88,6 +90,7 @@ public class IGProcessorTest extends RefreshTest {
         params.includeDependencies = true;
         params.includePatientScenarios = true;
 		params.versioned = false;
+		params.shouldApplySoftwareSystemStamp = true;
         processor.publishIG(params);
 
 		// determine fhireContext for measure lookup

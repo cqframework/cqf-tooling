@@ -13,7 +13,9 @@ import java.util.Set;
 
 public class MeasureRefreshProcessor {
     public Measure refreshMeasure(Measure measureToUse, LibraryManager libraryManager, TranslatedLibrary translatedLibrary, CqlTranslatorOptions options) {
-        Library moduleDefinitionLibrary = getModuleDefinitionLibrary(measureToUse, libraryManager, translatedLibrary, options);
+        
+    	Library moduleDefinitionLibrary = getModuleDefinitionLibrary(measureToUse, libraryManager, translatedLibrary, options);
+        
         measureToUse.setDate(new Date());
         // http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/measure-cqfm
         setMeta(measureToUse, moduleDefinitionLibrary);
@@ -27,13 +29,11 @@ public class MeasureRefreshProcessor {
         clearMeasureExtensions(measureToUse, "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement");
         clearMeasureExtensions(measureToUse, "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode");
         clearMeasureExtensions(measureToUse, "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition");
+        clearMeasureExtensions(measureToUse, "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements");
         clearRelatedArtifacts(measureToUse);
-        setParameters(measureToUse, moduleDefinitionLibrary);
-        setDataRequirements(measureToUse, moduleDefinitionLibrary);
-        setDirectReferenceCode(measureToUse, moduleDefinitionLibrary);
-        setLogicDefinition(measureToUse, moduleDefinitionLibrary);
-        measureToUse.setRelatedArtifact(moduleDefinitionLibrary.getRelatedArtifact());
-
+        
+        setEffectiveDataRequirements(measureToUse, moduleDefinitionLibrary);
+        
         return measureToUse;
     }
 
@@ -68,29 +68,29 @@ public class MeasureRefreshProcessor {
         measure.getRelatedArtifact().removeIf(r -> r.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON);
     }
 
-    private void setLogicDefinition(Measure measureToUse, Library moduleDefinitionLibrary) {
-        moduleDefinitionLibrary.getExtension().forEach(extension -> {
-            if (extension.getUrl().equalsIgnoreCase("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition")) {
-                measureToUse.addExtension(extension);
-            }
-        });
-    }
-
-    private void setDirectReferenceCode(Measure measureToUse, Library moduleDefinitionLibrary) {
-        moduleDefinitionLibrary.getExtension().forEach(extension -> {
-            if(extension.getUrl().equalsIgnoreCase("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode")) {
-                measureToUse.addExtension(extension);
-            }
-        });
-    }
-
-    private void setDataRequirements(Measure measureToUse, Library moduleDefinitionLibrary) {
-        moduleDefinitionLibrary.getDataRequirement().forEach(dataRequirement -> {
-            Extension dataReqExtension = new Extension();
-            dataReqExtension.setUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement");
-            dataReqExtension.setValue(dataRequirement);
-            measureToUse.addExtension(dataReqExtension);
-        });
+    private void setEffectiveDataRequirements(Measure measureToUse, Library moduleDefinitionLibrary) {
+    	
+    	moduleDefinitionLibrary.setId("effective-data-requirements");
+    	
+    	int delIndex = -1;
+    	for (Resource res : measureToUse.getContained()) {
+    		if (res instanceof Library && ((Library)res).getId().equalsIgnoreCase("effective-data-requirements")) {
+    			delIndex = measureToUse.getContained().indexOf(res);
+    			break;
+    		}
+    	}
+    	
+    	if (delIndex >= 0) {
+    		measureToUse.getContained().remove(delIndex);
+    	}
+    	
+    	measureToUse.getContained().add(moduleDefinitionLibrary);
+        	
+    	Extension effDataReqExtension = new Extension();
+    	effDataReqExtension.setUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements");
+        effDataReqExtension.setId("effective-data-requirements");
+        effDataReqExtension.setValue(new Reference().setReference("#effective-data-requirements"));
+        measureToUse.addExtension(effDataReqExtension);
     }
 
     private void setParameters(Measure measureToUse, Library moduleDefinitionLibrary) {
@@ -120,4 +120,6 @@ public class MeasureRefreshProcessor {
             measureToUse.getMeta().addProfile("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-measure-cqfm");
         }
     }
+    
+    
 }

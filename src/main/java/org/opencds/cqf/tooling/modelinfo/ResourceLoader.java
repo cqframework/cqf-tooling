@@ -66,7 +66,7 @@ public class ResourceLoader {
     private List<StructureDefinition> readStructureDefFromFolder(String path) {
         Collection<File> files = getFiles(path);
 
-        IParser parser = FhirContext.forR4().newJsonParser();
+        IParser parser = FhirContext.forR4Cached().newJsonParser();
 
         List<StructureDefinition> objects = new ArrayList<StructureDefinition>();
 

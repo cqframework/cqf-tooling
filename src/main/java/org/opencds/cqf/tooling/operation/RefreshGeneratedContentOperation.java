@@ -14,6 +14,7 @@ public abstract class RefreshGeneratedContentOperation extends Operation {
     private String pathToMeasures; // -ptm
     private String pathToLibraries; // -ptl
     private String operationName;
+    protected Boolean shouldApplySoftwareSystemStamp; // -ss
 
     private String encoding; // -e (json|xml)
 
@@ -21,24 +22,29 @@ public abstract class RefreshGeneratedContentOperation extends Operation {
         setOutputPath(outputPath);
         this.operationName = operationName;
         this.fhirContext = fhirContext;
+        this.shouldApplySoftwareSystemStamp = true;
     }
 
-    public RefreshGeneratedContentOperation(String outputPath, String operationName, FhirContext fhirContext, String pathToLibraries, String pathToMeasures) {
+    public RefreshGeneratedContentOperation(String outputPath, String operationName, FhirContext fhirContext,
+                                            String pathToLibraries, String pathToMeasures) {
         setOutputPath(outputPath);
         this.operationName = operationName;
         this.fhirContext = fhirContext;
         this.pathToLibraries = pathToLibraries;
         this.pathToMeasures = pathToMeasures;
+        this.shouldApplySoftwareSystemStamp = true;
     }
 
     @Override
     public void execute(String[] args) {
         for (String arg : args) {
             if (arg.equals(operationName)) continue;
+
             String[] flagAndValue = arg.split("=");
             if (flagAndValue.length < 2) {
                 throw new IllegalArgumentException("Invalid argument: " + arg);
             }
+
             String flag = flagAndValue[0];
             String value = flagAndValue[1];
 
@@ -54,6 +60,10 @@ public abstract class RefreshGeneratedContentOperation extends Operation {
                 case "pathToLibraries":
                 case "ptl":
                     pathToLibraries = value;
+                    break;
+                case "stamp":
+                case "ss":
+                    shouldApplySoftwareSystemStamp = Boolean.parseBoolean(value);
                     break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }

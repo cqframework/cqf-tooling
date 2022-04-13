@@ -27,14 +27,16 @@ public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperatio
 
     //NOTE: Only consumed from OperationFactory - that call should come through a proper Operation that calls a processor.
     public RefreshStu3MeasureOperation() {
-        super("src/main/resources/org/opencds/cqf/tooling/measure/output/stu3", "-RefreshStu3Measure", FhirContext.forCached(FhirVersionEnum.DSTU3));
+        super("src/main/resources/org/opencds/cqf/tooling/measure/output/stu3",
+                "-RefreshStu3Measure", FhirContext.forCached(FhirVersionEnum.DSTU3));
         cqfmHelper = new CqfmSoftwareSystemHelper("src/main/resources/org/opencds/cqf/tooling/measure/output/r4");
         jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
         xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
     }
 
     public RefreshStu3MeasureOperation(String pathToMeasures) {
-        super(pathToMeasures, "-RefreshStu3Measure", FhirContext.forCached(FhirVersionEnum.DSTU3), null, pathToMeasures);
+        super(pathToMeasures, "-RefreshStu3Measure", FhirContext.forCached(FhirVersionEnum.DSTU3),
+                null, pathToMeasures);
         if (!Strings.isNullOrEmpty(getOutputPath())) {
             cqfmHelper = new CqfmSoftwareSystemHelper(getOutputPath());
         } else {
@@ -83,7 +85,9 @@ public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperatio
     }
 
     public Measure refreshMeasure(Measure measure) {
-        cqfmHelper.ensureCQFToolingExtensionAndDevice(measure, this.getFhirContext());
+        if (shouldApplySoftwareSystemStamp) {
+            cqfmHelper.ensureCQFToolingExtensionAndDevice(measure, this.getFhirContext());
+        }
 //        CqfMeasure cqfMeasure = this.dataRequirementsProvider.createCqfMeasure(measure, this.libraryResourceProvider);
 //
 //        // Ensure All Related Artifacts for all referenced Libraries

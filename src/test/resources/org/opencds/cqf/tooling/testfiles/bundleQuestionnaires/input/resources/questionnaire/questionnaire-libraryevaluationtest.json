@@ -1,0 +1,413 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "libraryevaluationtest",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/cqf-questionnaire"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
+      "valueCanonical": "http://mycontentig.com/fhir/Library/LibraryEvaluationTest"
+    }
+  ],
+  "url": "http://mycontentig.com/fhir/Questionnaire/library-evaluation-test",
+  "identifier": [
+    {
+      "use": "official",
+      "value": "LIBRARYEVALUATIONTEST"
+    }
+  ],
+  "version": "1.0.0",
+  "name": "LibraryEvaluationTestQuestionnaire",
+  "title": "Library Evaluation Test Questionnaire",
+  "status": "active",
+  "experimental": false,
+  "subjectType": [
+    "Patient"
+  ],
+  "description": "A questionnaire for indication of Total Knee Arthroplasty Procedure.",
+  "item": [
+    {
+      "extension": [
+        {
+          "url": "http://mycontentig.com/fhir/ValueSet/boolean-calculation-method",
+          "valueCode": "one-or-more"
+        }
+      ],
+      "type": "question",
+      "required": false,
+      "linkId": "7AEB32D7BD8E52C7",
+      "text": "Procedure is indicated for 1 or more of the following.",
+      "prefix": "1",
+      "item": [
+        {
+          "extension": [
+            {
+              "url": "http://mycontentig.com/fhir/ValueSet/boolean-calculation-method",
+              "valueCode": "all"
+            }
+          ],
+          "type": "question",
+          "required": false,
+          "linkId": "7AEB32D7BD8E52C7-F1CFC1157962C1F3",
+          "text": "Degenerative joint disease, as indicated by ALL of the following.",
+          "prefix": "1.1",
+          "item": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql",
+                    "expression": "Has Presence of significant radiographic findings, which may include knee joint destruction, angular deformity, or severe narrowing"
+                  }
+                }
+              ],
+              "type": "boolean",
+              "required": false,
+              "linkId": "7AEB32D7BD8E52C7-F1CFC1157962C1F3-5DB0D0DA537908E5",
+              "text": "Presence of significant radiographic findings, which may include knee joint destruction, angular deformity, or severe narrowing.",
+              "prefix": "1.1.1"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql",
+                    "expression": "Has Optimal medical management has been tried and failed (eg, weight loss, analgesics, NSAIDs, physical therapy, activity modification)"
+                  }
+                }
+              ],
+              "type": "boolean",
+              "required": false,
+              "linkId": "7AEB32D7BD8E52C7-F1CFC1157962C1F3-DE330A145C60953E",
+              "text": "Optimal medical management has been tried and failed (eg, weight loss, analgesics, NSAIDs, physical therapy, activity modification).",
+              "prefix": "1.1.2"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql",
+                    "expression": "Has Patient has failed or is not candidate for more conservative measures (eg, osteotomy)"
+                  }
+                }
+              ],
+              "type": "boolean",
+              "required": false,
+              "linkId": "7AEB32D7BD8E52C7-F1CFC1157962C1F3-122E41C63B98DF21",
+              "text": "Patient has failed or is not candidate for more conservative measures (eg, osteotomy).",
+              "prefix": "1.1.3"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://mycontentig.com/fhir/ValueSet/boolean-calculation-method",
+                  "valueCode": "one-or-more"
+                }
+              ],
+              "type": "question",
+              "required": false,
+              "linkId": "7AEB32D7BD8E52C7-F1CFC1157962C1F3-76ED5EB736DAB43C",
+              "text": "Treatment indicated due to 1 or more of the following.",
+              "prefix": "1.1.4",
+              "item": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                      "valueExpression": {
+                        "language": "text/cql",
+                        "expression": "Has Disabling Pain Conditions"
+                      }
+                    }
+                  ],
+                  "type": "boolean",
+                  "required": false,
+                  "linkId": "7AEB32D7BD8E52C7-F1CFC1157962C1F3-76ED5EB736DAB43C-85E212BC49A78F11",
+                  "text": "Disabling pain.",
+                  "prefix": "1.1.4.1"
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                      "valueExpression": {
+                        "language": "text/cql",
+                        "expression": "Has Functional Disability Conditions"
+                      }
+                    }
+                  ],
+                  "type": "boolean",
+                  "required": false,
+                  "linkId": "7AEB32D7BD8E52C7-F1CFC1157962C1F3-76ED5EB736DAB43C-CBCEFE8095B0DAB9",
+                  "text": "Functional disability.",
+                  "prefix": "1.1.4.2"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+              "valueExpression": {
+                "language": "text/cql",
+                "expression": "Has Failure of Previous Proximal Tibial or Distal Femoral Osteotomy"
+              }
+            }
+          ],
+          "type": "boolean",
+          "required": false,
+          "linkId": "7AEB32D7BD8E52C7-D9E9104ABD48B3ED",
+          "text": "Failure of previous proximal tibial or distal femoral osteotomy",
+          "prefix": "1.2"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+              "valueExpression": {
+                "language": "text/cql",
+                "expression": "Has Post Traumatic Knee Joint Destruction"
+              }
+            }
+          ],
+          "type": "boolean",
+          "required": false,
+          "linkId": "7AEB32D7BD8E52C7-F8EDD31510D0A2F2",
+          "text": "Posttraumatic knee joint destruction",
+          "prefix": "1.3"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+              "valueExpression": {
+                "language": "text/cql",
+                "expression": "Has Distal Femur Fracture or Tibial Plateau Fracture in Patient with Osteoporosis"
+              }
+            }
+          ],
+          "type": "boolean",
+          "required": false,
+          "linkId": "7AEB32D7BD8E52C7-3F639D0886F5C7E6",
+          "text": "Distal femur fracture or tibial plateau fracture in patient with osteoporosis",
+          "prefix": "1.4"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+              "valueExpression": {
+                "language": "text/cql",
+                "expression": "Has Limb Salvage for Malignancy Conditions"
+              }
+            }
+          ],
+          "type": "boolean",
+          "required": false,
+          "linkId": "7AEB32D7BD8E52C7-6E5685BB963AE549",
+          "text": "Limb salvage for malignancy",
+          "prefix": "1.5"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+              "valueExpression": {
+                "language": "text/cql",
+                "expression": "Has Congenital Deformity Conditions"
+              }
+            }
+          ],
+          "type": "boolean",
+          "required": false,
+          "linkId": "7AEB32D7BD8E52C7-F023C97A3CDB20FB",
+          "text": "Congenital deformity",
+          "prefix": "1.6"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+              "valueExpression": {
+                "language": "text/cql",
+                "expression": "Has Hemophilic Arthropathy Conditions"
+              }
+            }
+          ],
+          "type": "boolean",
+          "required": false,
+          "linkId": "7AEB32D7BD8E52C7-8C31772570DFB19F",
+          "text": "Hemophilic arthropathy",
+          "prefix": "1.7"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+              "valueExpression": {
+                "language": "text/cql",
+                "expression": "Has Pigmented Villonodular Synovitis with Joint Destruction"
+              }
+            }
+          ],
+          "type": "boolean",
+          "required": false,
+          "linkId": "7AEB32D7BD8E52C7-8678AD85918E8B45",
+          "text": "Pigmented Villonodular Synovitis with Joint Destruction",
+          "prefix": "1.8"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://mycontentig.com/fhir/ValueSet/boolean-calculation-method",
+              "valueCode": "one-or-more"
+            }
+          ],
+          "type": "question",
+          "required": false,
+          "linkId": "7AEB32D7BD8E52C7-59F7A040E7CDBFD7",
+          "text": "Replacement (revision) of previous arthroplasty, as indicated by 1 or more of the following",
+          "prefix": "1.9",
+          "item": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql",
+                    "expression": "Has Disabling Pain Conditions"
+                  }
+                }
+              ],
+              "type": "boolean",
+              "required": false,
+              "linkId": "7AEB32D7BD8E52C7-59F7A040E7CDBFD7-85E212BC49A78F11",
+              "text": "Disabling pain",
+              "prefix": "1.9.1"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql",
+                    "expression": "Has Functional Disability Conditions"
+                  }
+                }
+              ],
+              "type": "boolean",
+              "required": false,
+              "linkId": "7AEB32D7BD8E52C7-59F7A040E7CDBFD7-CBCEFE8095B0DAB9",
+              "text": "Functional disability",
+              "prefix": "1.9.2"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql",
+                    "expression": "Has Progressive and Substantial Bone Loss (Osteolysis)"
+                  }
+                }
+              ],
+              "type": "boolean",
+              "required": false,
+              "linkId": "7AEB32D7BD8E52C7-59F7A040E7CDBFD7-6E99CA7593E198B8",
+              "text": "Progressive and substantial bone loss (osteolysis)",
+              "prefix": "1.9.3"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql",
+                    "expression": "Has Dislocation of Patella"
+                  }
+                }
+              ],
+              "type": "boolean",
+              "required": false,
+              "linkId": "7AEB32D7BD8E52C7-59F7A040E7CDBFD7-A52C4ECD0790AC63",
+              "text": "Dislocation of patella",
+              "prefix": "1.9.4"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql",
+                    "expression": "Has Aseptic Component Instability"
+                  }
+                }
+              ],
+              "type": "boolean",
+              "required": false,
+              "linkId": "7AEB32D7BD8E52C7-59F7A040E7CDBFD7-60C12321081444AC",
+              "text": "Aseptic component instability",
+              "prefix": "1.9.5"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql",
+                    "expression": "Has Tissue or Systemic Reaction to Metal Implant"
+                  }
+                }
+              ],
+              "type": "boolean",
+              "required": false,
+              "linkId": "7AEB32D7BD8E52C7-59F7A040E7CDBFD7-E9F8A5E6A4CD194A",
+              "text": "Tissue or systemic reaction to metal implant",
+              "prefix": "1.9.6"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql",
+                    "expression": "Has Infection"
+                  }
+                }
+              ],
+              "type": "boolean",
+              "required": false,
+              "linkId": "7AEB32D7BD8E52C7-59F7A040E7CDBFD7-C6CABDDE21284E33",
+              "text": "Infection",
+              "prefix": "1.9.7"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+                  "valueExpression": {
+                    "language": "text/cql",
+                    "expression": "Has Periprosthetic Fracture"
+                  }
+                }
+              ],
+              "type": "boolean",
+              "required": false,
+              "linkId": "7AEB32D7BD8E52C7-59F7A040E7CDBFD7-04A08944B99C076A",
+              "text": "Periprosthetic fracture",
+              "prefix": "1.9.8"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

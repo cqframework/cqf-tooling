@@ -9,6 +9,7 @@ import org.opencds.cqf.tooling.processor.IGBundleProcessor;
 import org.opencds.cqf.tooling.processor.IGProcessor;
 import org.opencds.cqf.tooling.processor.PlanDefinitionProcessor;
 import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
+import org.opencds.cqf.tooling.questionnaire.QuestionnaireProcessor;
 
 public class RefreshIGOperation extends Operation {
 
@@ -34,7 +35,8 @@ public class RefreshIGOperation extends Operation {
         LibraryProcessor libraryProcessor = new LibraryProcessor();
         CDSHooksProcessor cdsHooksProcessor = new CDSHooksProcessor();
         PlanDefinitionProcessor planDefinitionProcessor = new PlanDefinitionProcessor(libraryProcessor, cdsHooksProcessor);
-        IGBundleProcessor igBundleProcessor = new IGBundleProcessor(measureProcessor, planDefinitionProcessor);
+        QuestionnaireProcessor questionnaireProcessor = new QuestionnaireProcessor(libraryProcessor);
+        IGBundleProcessor igBundleProcessor = new IGBundleProcessor(measureProcessor, planDefinitionProcessor, questionnaireProcessor);
         IGProcessor processor = new IGProcessor(igBundleProcessor, libraryProcessor, measureProcessor);
         processor.publishIG(params);
     }

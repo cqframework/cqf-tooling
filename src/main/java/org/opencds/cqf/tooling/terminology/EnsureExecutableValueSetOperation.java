@@ -1,15 +1,22 @@
 package org.opencds.cqf.tooling.terminology;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.File;
+import java.time.Instant;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.MarkdownType;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import java.io.File;
-import java.time.Instant;
-import java.util.*;
+import ca.uhn.fhir.context.FhirContext;
 
 public class EnsureExecutableValueSetOperation extends Operation {
     private static final String USAGE_WARNING = "CAUTION: The compose element in this ValueSet resource was inferred from the expansion element. It is NOT an authoritative definition of the value set and is provided only for convenience for systems that assume a compose will be present.";
@@ -24,7 +31,7 @@ public class EnsureExecutableValueSetOperation extends Operation {
 
     public FhirContext getFhirContext() {
         if (fhirContext == null) {
-            fhirContext = FhirContext.forR4();
+            fhirContext = FhirContext.forR4Cached();
         }
 
         return fhirContext;

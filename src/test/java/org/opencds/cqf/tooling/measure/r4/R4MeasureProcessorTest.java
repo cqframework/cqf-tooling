@@ -18,6 +18,8 @@ public class R4MeasureProcessorTest extends MeasureProcessorTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
+        //IOUtils.resourceDirectories = new ArrayList<String>();
+        //IOUtils.clearDevicePaths();
         File dir  = new File("target" + separator + "refreshMeasures" + separator + "r4");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);

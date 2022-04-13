@@ -1,5 +1,13 @@
 package org.opencds.cqf.tooling;
 
+import static org.testng.Assert.assertNotNull;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+
+import com.google.common.base.Strings;
+
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -10,14 +18,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
 import ca.uhn.fhir.context.FhirContext;
-
-import static org.testng.Assert.assertNotNull;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-
-import com.google.common.base.Strings;
 
 public abstract class RefreshTest implements CqfmSoftwareSystemTest {
     private FhirContext fhirContext;
@@ -46,7 +46,7 @@ public abstract class RefreshTest implements CqfmSoftwareSystemTest {
         }
     }
     
-    protected void validateCqfmSofwareSystemExtension(String domainResourcePath) {
+    protected void validateCqfmSoftwareSystemExtension(String domainResourcePath) {
         IBaseResource resource = IOUtils.readResource(domainResourcePath, getFhirContext());
         if (resource == null || !(resource instanceof Library)) {
             // log error

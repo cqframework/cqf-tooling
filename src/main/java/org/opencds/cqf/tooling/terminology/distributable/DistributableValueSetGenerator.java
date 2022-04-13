@@ -23,7 +23,7 @@ public class DistributableValueSetGenerator extends Operation {
     private FhirContext fhirContext;
 
     public DistributableValueSetGenerator() {
-        this.fhirContext = FhirContext.forR4();
+        this.fhirContext = FhirContext.forR4Cached();
     }
 
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
@@ -218,7 +218,7 @@ public class DistributableValueSetGenerator extends Operation {
             }
             distributableValueSetMeta = resolveDistributableValueSetMeta(workbook.getSheet(entrySet.getValue().getMetaPageName()));
             vs = distributableValueSetMeta.populate(fhirContext);
-            meta.getOrganizationalMetaData().populate(vs);
+            meta.getOrganizationalMetaData().populate(vs, fhirContext.getVersion().toString());
 
             resolveCodeList(meta, workbook.getSheet(entrySet.getValue().getCodeListPageName()), vs);
 

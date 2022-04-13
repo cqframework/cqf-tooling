@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling.utilities;
 
+import static org.opencds.cqf.tooling.utilities.CanonicalUtils.getTail;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -12,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.Validate;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
@@ -28,6 +31,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.Extension;
 import org.opencds.cqf.tooling.processor.ValueSetsProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.slf4j.Logger;
@@ -41,11 +45,10 @@ import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 
-import static org.opencds.cqf.tooling.utilities.CanonicalUtils.getTail;
-
 public class ResourceUtils 
 {
-  
+    private static String cqfLibraryExtensionUrl = "http://hl7.org/fhir/StructureDefinition/cqf-library";
+
     public enum FhirVersion 
     { 
         DSTU3("dstu3"), R4("r4"); 
@@ -103,9 +106,9 @@ public class ResourceUtils
     public static FhirContext getFhirContext(FhirVersion fhirVersion) {
       switch (fhirVersion) {
         case DSTU3:
-          return FhirContext.forDstu3();
+          return FhirContext.forDstu3Cached();
         case R4:
-          return FhirContext.forR4();
+          return FhirContext.forR4Cached();
         default:
           throw new IllegalArgumentException("Unsupported FHIR version: " + fhirVersion);
       }
@@ -621,6 +624,39 @@ public class ResourceUtils
             String reference = planDefinition.getLibrary().get(0).getReference();
             String parts[] = reference.split("/");
             return parts[parts.length - 1];
+        }
+        else if (resource instanceof org.hl7.fhir.r5.model.Questionnaire) {
+            org.hl7.fhir.r5.model.Questionnaire questionnaire = (org.hl7.fhir.r5.model.Questionnaire)resource;
+
+            org.hl7.fhir.r5.model.Extension libraryExtension = questionnaire.getExtensionByUrl(cqfLibraryExtensionUrl);
+            if (libraryExtension != null) {
+                return ((org.hl7.fhir.r5.model.CanonicalType)libraryExtension.getValue()).getValueAsString();
+            }
+
+            return null;
+        }
+        else if (resource instanceof org.hl7.fhir.r4.model.Questionnaire) {
+            org.hl7.fhir.r4.model.Questionnaire questionnaire = (org.hl7.fhir.r4.model.Questionnaire)resource;
+
+            org.hl7.fhir.r4.model.Extension libraryExtension = questionnaire.getExtensionByUrl(cqfLibraryExtensionUrl);
+            if (libraryExtension != null) {
+                return ((CanonicalType)libraryExtension.getValue()).getValueAsString();
+            }
+
+            return null;
+        }
+        else if (resource instanceof org.hl7.fhir.dstu3.model.Questionnaire) {
+            org.hl7.fhir.dstu3.model.Questionnaire questionnaire = (org.hl7.fhir.dstu3.model.Questionnaire)resource;
+
+            List<org.hl7.fhir.dstu3.model.Extension> libraryExtensions =
+                    questionnaire.getExtensionsByUrl(cqfLibraryExtensionUrl);
+
+            if (libraryExtensions.size() == 0) {
+                return null;
+            } else {
+                Validate.isTrue(libraryExtensions.size() == 1, "Url " + cqfLibraryExtensionUrl + " must have only one match", new Object[0]);
+                return libraryExtensions.get(0).getValue().toString();
+            }
         }
         else {
            throw new IllegalArgumentException("Unsupported fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
