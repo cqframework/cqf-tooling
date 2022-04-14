@@ -32,6 +32,88 @@ public class SpreadsheetToCQLOperationTest {
 		}
 
 	}
+	
+	
+	@Test
+	//checking if it works with header argument as well
+	public void generate_CQL_test2()  {
+		SpreadsheetToCQLOperation tester = new SpreadsheetToCQLOperation();
+
+		String[] arguments = new String[4];
+		arguments[0] = "-SpreadsheetToCQL";
+		arguments[1] = "-pts=" + input_xlsx;
+		arguments[2] = "-op=" + output_cql_dir;
+		arguments[3] = "-hh=" + true;
+		tester.execute(arguments);
+		assert(true);
+		
+	}
+	
+	
+	@Test(expected = IllegalArgumentException.class)
+	//If the first argument is not SpreadsheetToCQL, then it will cause an illegal argument exception
+	public void first_arg_test()  {
+		SpreadsheetToCQLOperation tester = new SpreadsheetToCQLOperation();
+
+		String[] arguments = new String[3];
+		arguments[0] = "-Spreasheet";
+		arguments[1] = "-pts=" + input_xlsx;
+		arguments[2] = "-op=" + output_cql_dir;
+
+		tester.execute(arguments);
+		
+		
+		
+	}
+	
+	
+	@Test(expected = IllegalArgumentException.class)
+	//If there is less than two arguments passed then an illegal argument exception will be thrown
+	public void arguments_test()  {
+		SpreadsheetToCQLOperation tester = new SpreadsheetToCQLOperation();
+
+		String[] arguments = new String[2];
+		arguments[0] = "SpreadsheetToCQL";
+		tester.execute(arguments);
+		
+		
+		
+	}
+	
+	
+	
+	@Test(expected = IllegalArgumentException.class)
+	//Checking if proper flag in wrong place throws exception
+	public void unknown_flag_test()  {
+		SpreadsheetToCQLOperation tester = new SpreadsheetToCQLOperation();
+
+		String[] arguments = new String[3];
+		arguments[0] = "-SpreadsheetToCQL";
+		arguments[1] = "-hh=" + input_xlsx;
+		arguments[2] = "-op=" + output_cql_dir;
+
+		tester.execute(arguments);
+		
+		
+		
+	}
+	@Test(expected = IllegalArgumentException.class)
+	//If there is no path to the spreadsheet then illegal argument exception is thrown
+	public void pathToSpreadsheet_test()  {
+		SpreadsheetToCQLOperation tester = new SpreadsheetToCQLOperation();
+		String[] arguments = new String[3];
+		arguments[0] = "-SpreadsheetToCQL";
+		arguments[1] = "-pathtospreadsheet=" + " ";
+		arguments[2] = "-op=" + output_cql_dir;
+		
+		
+
+		tester.execute(arguments);
+		
+		
+		
+	}
+	
 
 	@Test
 	public void compare_output_test() throws IOException {
