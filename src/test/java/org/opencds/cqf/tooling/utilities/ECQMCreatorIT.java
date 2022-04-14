@@ -44,6 +44,10 @@ public class ECQMCreatorIT {
 
     private static FhirContext context = FhirContext.forR5();
 
+    // Turn this to true to add full regression tests
+    // Disabling most of the FHIR measure refresh tests to reduce build time
+    private static boolean FULL_REGRESSION = false;
+
     private Measure refreshMeasure(String primaryLibraryPath, String measurePath) throws IOException {
         CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
         cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
@@ -226,327 +230,420 @@ public class ECQMCreatorIT {
     
     @Test
     public void TestCMS130FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS130FHIR-v0-0-002-FHIR-4-0-1.json", "ColorectalCancerScreeningsFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS130FHIR-v0-0-002-FHIR-4-0-1.json", "ColorectalCancerScreeningsFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS347FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS347FHIR-v0-1-013-FHIR-4-0-1.json", "FHIR347");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS347FHIR-v0-1-013-FHIR-4-0-1.json", "FHIR347");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestHybridHWRFHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("HybridHWRFHIR-v1-3-001-FHIR-4-0-1.json", "HybridHWRFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("HybridHWRFHIR-v1-3-001-FHIR-4-0-1.json", "HybridHWRFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestHybridHWMFHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("HybridHWMFHIR-v0-101-021-FHIR-4-0-1.json", "HybridHWMFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("HybridHWMFHIR-v0-101-021-FHIR-4-0-1.json", "HybridHWMFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestSafeUseofOpioidsFHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("Safe Use of OpioidsFHIR-v0-0-009-FHIR-4-0-1.json", "SafeUseofOpioidsConcurrentPrescribingFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("Safe Use of OpioidsFHIR-v0-0-009-FHIR-4-0-1.json", "SafeUseofOpioidsConcurrentPrescribingFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestIPSSwithBPHdxFHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("IPSS with BPH dxFHIR-v0-0-004-FHIR-4-0-1.json", "UrinarySymptomScoreChange6to12MonthsAfterDiagnosisofBenignProstaticHyperplasiaFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("IPSS with BPH dxFHIR-v0-0-004-FHIR-4-0-1.json", "UrinarySymptomScoreChange6to12MonthsAfterDiagnosisofBenignProstaticHyperplasiaFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestHIVScreeningFHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("HIV ScreeningFHIR-v0-0-003-FHIR-4-0-1.json", "HIVScreeningFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("HIV ScreeningFHIR-v0-0-003-FHIR-4-0-1.json", "HIVScreeningFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestDEXAScreenProstateFHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-
-        List<DataRequirement> drs = StartMatOutputTest("DEXA screen prostateFHIR-v0-0-005-FHIR-4-0-1.json", "BoneDensityProstateCancerAndrogenDeprivationTherapyFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            // Extract the bundle
+            // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+            List<DataRequirement> drs = StartMatOutputTest("DEXA screen prostateFHIR-v0-0-005-FHIR-4-0-1.json", "BoneDensityProstateCancerAndrogenDeprivationTherapyFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS249FHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-
-        List<DataRequirement> drs = StartMatOutputTest("CMS249FHIR-v0-0-001-FHIR-4-0-1.json", "AppropriateDXAScansForWomenUnder65FHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            // Extract the bundle
+            // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+            List<DataRequirement> drs = StartMatOutputTest("CMS249FHIR-v0-0-001-FHIR-4-0-1.json", "AppropriateDXAScansForWomenUnder65FHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS177FHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-
-        List<DataRequirement> drs = StartMatOutputTest("CMS177FHIR-v0-0-002-FHIR-4-0-1.json", "ChildandAdolescentMajorDepressiveDisorderMDDSuicideRiskAssessmentFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            // Extract the bundle
+            // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+            List<DataRequirement> drs = StartMatOutputTest("CMS177FHIR-v0-0-002-FHIR-4-0-1.json", "ChildandAdolescentMajorDepressiveDisorderMDDSuicideRiskAssessmentFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS165FHIR() {
-
-        List<DataRequirement> drs = StartMatOutputTest("CMS165FHIR-v0-0-003-FHIR-4-0-1.json", "ControllingHighBloodPressureFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS165FHIR-v0-0-003-FHIR-4-0-1.json", "ControllingHighBloodPressureFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS161FHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-
-        List<DataRequirement> drs = StartMatOutputTest("CMS161FHIR-v0-0-002-FHIR-4-0-1.json", "AdultMajorDepressiveDisorderMDDSuicideRiskAssessmentFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            // Extract the bundle
+            // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+            List<DataRequirement> drs = StartMatOutputTest("CMS161FHIR-v0-0-002-FHIR-4-0-1.json", "AdultMajorDepressiveDisorderMDDSuicideRiskAssessmentFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS157FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS157FHIR-v0-0-006-FHIR-4-0-1.json", "OncologyPainIntensityQuantifiedFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS157FHIR-v0-0-006-FHIR-4-0-1.json", "OncologyPainIntensityQuantifiedFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS156FHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-        List<DataRequirement> drs = StartMatOutputTest("CMS156FHIR-v0-0-001-FHIR-4-0-1.json", "UseofHighRiskMedicationsintheElderlyFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            // Extract the bundle
+            // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+            List<DataRequirement> drs = StartMatOutputTest("CMS156FHIR-v0-0-001-FHIR-4-0-1.json", "UseofHighRiskMedicationsintheElderlyFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS155FHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-        List<DataRequirement> drs = StartMatOutputTest("CMS155FHIR-v0-0-002-FHIR-4-0-1.json", "WeightAssessmentandCounselingforNutritionandPhysicalActivityforChildrenandAdolescentsFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            // Extract the bundle
+            // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+            List<DataRequirement> drs = StartMatOutputTest("CMS155FHIR-v0-0-002-FHIR-4-0-1.json", "WeightAssessmentandCounselingforNutritionandPhysicalActivityforChildrenandAdolescentsFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS154FHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-        List<DataRequirement> drs = StartMatOutputTest("CMS154FHIR-v0-0-001-FHIR-4-0-1.json", "AppropriateTreatmentforUpperRespiratoryInfectionURIFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            // Extract the bundle
+            // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+            List<DataRequirement> drs = StartMatOutputTest("CMS154FHIR-v0-0-001-FHIR-4-0-1.json", "AppropriateTreatmentforUpperRespiratoryInfectionURIFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS153FHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-        List<DataRequirement> drs = StartMatOutputTest("CMS153FHIR-v0-0-002-FHIR-4-0-1.json", "ChlamydiaScreeningforWomenFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            // Extract the bundle
+            // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+            List<DataRequirement> drs = StartMatOutputTest("CMS153FHIR-v0-0-002-FHIR-4-0-1.json", "ChlamydiaScreeningforWomenFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS149FHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-        List<DataRequirement> drs = StartMatOutputTest("CMS149FHIR-v0-0-002-FHIR-4-0-1.json", "DementiaCognitiveAssessmentFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            // Extract the bundle
+            // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+            List<DataRequirement> drs = StartMatOutputTest("CMS149FHIR-v0-0-002-FHIR-4-0-1.json", "DementiaCognitiveAssessmentFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS146FHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-        List<DataRequirement> drs = StartMatOutputTest("CMS146FHIR-v0-0-001-FHIR-4-0-1.json", "AppropriateTestingforPharyngitisFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            // Extract the bundle
+            // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+            List<DataRequirement> drs = StartMatOutputTest("CMS146FHIR-v0-0-001-FHIR-4-0-1.json", "AppropriateTestingforPharyngitisFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS145FHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-        List<DataRequirement> drs = StartMatOutputTest("CMS145FHIR-v0-0-007-FHIR-4-0-1.json", "CADBetaBlockerTherapyPriorMIorLVSDFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            // Extract the bundle
+            // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+            List<DataRequirement> drs = StartMatOutputTest("CMS145FHIR-v0-0-007-FHIR-4-0-1.json", "CADBetaBlockerTherapyPriorMIorLVSDFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS144FHIR() {
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-        List<DataRequirement> drs = StartMatOutputTest("CMS144FHIR-v0-0-005-FHIR-4-0-1.json", "HFBetaBlockerTherapyforLVSDFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            // Extract the bundle
+            // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+            List<DataRequirement> drs = StartMatOutputTest("CMS144FHIR-v0-0-005-FHIR-4-0-1.json", "HFBetaBlockerTherapyforLVSDFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS143FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS143FHIR-v0-0-001-FHIR-4-0-1.json", "POAGOpticNerveEvaluationFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS143FHIR-v0-0-001-FHIR-4-0-1.json", "POAGOpticNerveEvaluationFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS142FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS142FHIR-v0-0-004-FHIR-4-0-1.json", "DRCommunicationWithPhysicianManagingDiabetesFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS142FHIR-v0-0-004-FHIR-4-0-1.json", "DRCommunicationWithPhysicianManagingDiabetesFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
 
     @Test
     public void TestCMS139FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS139FHIR-v0-0-001-FHIR-4-0-1.json", "FallsScreeningforFutureFallRiskFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS139FHIR-v0-0-001-FHIR-4-0-1.json", "FallsScreeningforFutureFallRiskFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
-    public void TestCMS138FHIR() { 
-        // Extract the bundle
-        // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
-        List<DataRequirement> drs = StartMatOutputTest("CMS138FHIR-v0-0-001-FHIR-4-0-1.json", "PreventiveCareandScreeningTobaccoUseScreeningandCessationInterventionFHIR");
-        // TODO: Measure-specific validation of data requirements content
+    public void TestCMS138FHIR() {
+        if (FULL_REGRESSION) {
+            // Extract the bundle
+            // NOTE: This is a 2021-AUFHIR measure, this is the test created using TestCMS125FHIR as template
+            List<DataRequirement> drs = StartMatOutputTest("CMS138FHIR-v0-0-001-FHIR-4-0-1.json", "PreventiveCareandScreeningTobaccoUseScreeningandCessationInterventionFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS137FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS137FHIR-v0-0-001-FHIR-4-0-1.json", "InitiationandEngagementofAlcoholandOtherDrugDependenceTreatmentFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS137FHIR-v0-0-001-FHIR-4-0-1.json", "InitiationandEngagementofAlcoholandOtherDrugDependenceTreatmentFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS136FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS136FHIR-v0-0-001-FHIR-4-0-1.json", "FollowUpCareforChildrenPrescribedADHDMedicationADDFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS136FHIR-v0-0-001-FHIR-4-0-1.json", "FollowUpCareforChildrenPrescribedADHDMedicationADDFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS135FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS135FHIR-v0-0-013-FHIR-4-0-1.json", "HFACEIorARBorARNIforLVSDFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS135FHIR-v0-0-013-FHIR-4-0-1.json", "HFACEIorARBorARNIforLVSDFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS134FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS134FHIR-v0-0-001-FHIR-4-0-1.json", "DiabetesMedicalAttentionforNephropathyFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS134FHIR-v0-0-001-FHIR-4-0-1.json", "DiabetesMedicalAttentionforNephropathyFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS133FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS133FHIR-v0-0-009-FHIR-4-0-1.json", "Cataracts2040BCVAwithin90DaysFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS133FHIR-v0-0-009-FHIR-4-0-1.json", "Cataracts2040BCVAwithin90DaysFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS131FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS131FHIR-v0-0-003-FHIR-4-0-1.json", "DiabetesEyeExamFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS131FHIR-v0-0-003-FHIR-4-0-1.json", "DiabetesEyeExamFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS129FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS129FHIR-v0-0-005-FHIR-4-0-1.json", "ProstateCaAvoidanceBoneScanOveruseFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS129FHIR-v0-0-005-FHIR-4-0-1.json", "ProstateCaAvoidanceBoneScanOveruseFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS128FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS128FHIR-v0-0-001-FHIR-4-0-1.json", "AntidepressantMedicationManagementFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS128FHIR-v0-0-001-FHIR-4-0-1.json", "AntidepressantMedicationManagementFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS127FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS127FHIR-v0-0-001-FHIR-4-0-1.json", "PneumococcalVaccinationStatusforOlderAdultsFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS127FHIR-v0-0-001-FHIR-4-0-1.json", "PneumococcalVaccinationStatusforOlderAdultsFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS124FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS124FHIR-v0-0-003-FHIR-4-0-1.json", "CervicalCancerScreeningFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS124FHIR-v0-0-003-FHIR-4-0-1.json", "CervicalCancerScreeningFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS117FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS117FHIR-v0-0-001-FHIR-4-0-1.json", "ChildhoodImmunizationStatusFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS117FHIR-v0-0-001-FHIR-4-0-1.json", "ChildhoodImmunizationStatusFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS90FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS90FHIR-v0-0-005-FHIR-4-0-1.json", "FunctionalStatusAssessmentsforHeartFailureFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS90FHIR-v0-0-005-FHIR-4-0-1.json", "FunctionalStatusAssessmentsforHeartFailureFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }    
     
     @Test
     public void TestCMS75FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS75FHIR-v0-0-001-FHIR-4-0-1.json", "ChildrenWhoHaveDentalDecayorCavitiesFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS75FHIR-v0-0-001-FHIR-4-0-1.json", "ChildrenWhoHaveDentalDecayorCavitiesFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS74FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS74FHIR-v0-0-004-FHIR-4-0-1.json", "PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS74FHIR-v0-0-004-FHIR-4-0-1.json", "PrimaryCariesPreventionasOfferedbyPCPsincludingDentistsFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS72FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS72FHIR-v0-0-003-FHIR-4-0-1.json", "AntithromboticTherapyByEndofHospitalDay2FHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS72FHIR-v0-0-003-FHIR-4-0-1.json", "AntithromboticTherapyByEndofHospitalDay2FHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS69FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS69FHIR-v0-0-004-FHIR-4-0-1.json", "PCSBMIScreenAndFollowUpFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS69FHIR-v0-0-004-FHIR-4-0-1.json", "PCSBMIScreenAndFollowUpFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS68FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS68FHIR-v0-0-004-FHIR-4-0-1.json", "DocumentationofCurrentMedicationsFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS68FHIR-v0-0-004-FHIR-4-0-1.json", "DocumentationofCurrentMedicationsFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS66FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS66FHIR-v0-0-002-FHIR-4-0-1.json", "FunctionalStatusAssessmentforTotalKneeReplacementFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS66FHIR-v0-0-002-FHIR-4-0-1.json", "FunctionalStatusAssessmentforTotalKneeReplacementFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS56FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS56FHIR-v0-0-003-FHIR-4-0-1.json", "FunctionalStatusAssessmentforTotalHipReplacementFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS56FHIR-v0-0-003-FHIR-4-0-1.json", "FunctionalStatusAssessmentforTotalHipReplacementFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS50FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS50FHIR-v0-0-013-FHIR-4-0-1.json", "CRLReceiptofSpecialistReportFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS50FHIR-v0-0-013-FHIR-4-0-1.json", "CRLReceiptofSpecialistReportFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS22FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS22FHIR-v0-0-007-FHIR-4-0-1.json", "PreventiveBPScreeningFollowUpFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS22FHIR-v0-0-007-FHIR-4-0-1.json", "PreventiveBPScreeningFollowUpFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestCMS2FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS2FHIR-v0-0-002-FHIR-4-0-1.json", "PCSDepressionScreenAndFollowUpFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS2FHIR-v0-0-002-FHIR-4-0-1.json", "PCSDepressionScreenAndFollowUpFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
     
     @Test
     public void TestBCG4NonmuscleInvasiveBCaFHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("BCG 4 nonmuscle invasive BCaFHIR-v0-0-006-FHIR-4-0-1.json", "IntravesicalBacillusCalmetteGuerinForNonmuscleInvasiveBladderCancerFHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("BCG 4 nonmuscle invasive BCaFHIR-v0-0-006-FHIR-4-0-1.json", "IntravesicalBacillusCalmetteGuerinForNonmuscleInvasiveBladderCancerFHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
 
     @Test
     public void TestCMS122FHIR() {
-        List<DataRequirement> drs = StartMatOutputTest("CMS122FHIR-v0-0-004-FHIR-4-0-1.json", "DiabetesHemoglobinA1cHbA1cPoorControl9FHIR");
-        // TODO: Measure-specific validation of data requirements content
+        if (FULL_REGRESSION) {
+            List<DataRequirement> drs = StartMatOutputTest("CMS122FHIR-v0-0-004-FHIR-4-0-1.json", "DiabetesHemoglobinA1cHbA1cPoorControl9FHIR");
+            // TODO: Measure-specific validation of data requirements content
+        }
     }
 
     @Test
