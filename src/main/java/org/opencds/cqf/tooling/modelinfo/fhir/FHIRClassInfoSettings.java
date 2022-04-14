@@ -101,8 +101,8 @@ class FHIRClassInfoSettings extends ClassInfoSettings {
                 put("ChargeItemDefinition", "code");
                 put("Claim", "type");
                 put("ClinicalImpression", "code");
-                put("Communication", "category");
-                put("CommunicationRequest", "category");
+                put("Communication", "reasonCode");
+                put("CommunicationRequest", "reasonCode");
                 put("Composition", "type");
                 put("Condition", "code");
                 put("Consent", "category");
@@ -124,7 +124,7 @@ class FHIRClassInfoSettings extends ClassInfoSettings {
                 put("Library", "topic");
                 put("Location", "type");
                 put("Measure", "topic");
-                put("MeasureReport", "measure.topic");
+                put("MeasureReport", "type");
                 put("Medication", "code");
                 put("MedicationAdministration", "medication");
                 put("MedicationDispense", "medication");
