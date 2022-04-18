@@ -598,8 +598,12 @@ public abstract class ClassInfoBuilder {
         return false;
     }
 
+    private boolean isMappedTypeName(String qualifiedTypeName) {
+        return this.settings.useCQLPrimitives && this.settings.cqlTypeMappings.values().contains(qualifiedTypeName);
+    }
+
     private boolean isMappedTypeName(String modelName, String typeName) {
-        return this.settings.useCQLPrimitives && this.settings.cqlTypeMappings.values().contains(modelName + "." + typeName);
+        return isMappedTypeName(modelName + "." + typeName);
     }
 
     private boolean isPrimitiveMappedTypeName(String modelName, String typeName) {
@@ -921,6 +925,17 @@ public abstract class ClassInfoBuilder {
                         return typeTargets.get(qualifiedTypeName);
                     }
                 }
+            }
+            else if (typeSpecifier instanceof IntervalTypeSpecifier) {
+                IntervalTypeSpecifier intervalTypeSpecifier = (IntervalTypeSpecifier)typeSpecifier;
+                if (intervalTypeSpecifier.getPointTypeSpecifier() instanceof NamedTypeSpecifier) {
+                    NamedTypeSpecifier namedTypeSpecifier = (NamedTypeSpecifier)intervalTypeSpecifier.getPointTypeSpecifier();
+                    String mappedTypeName = String.format("Interval<%s.%s>", namedTypeSpecifier.getNamespace(), namedTypeSpecifier.getName());
+                    if (isMappedTypeName(mappedTypeName)) {
+                        return this.settings.helpersLibraryName + ".ToInterval(%value)";
+                    }
+                }
+                return null;
             }
             else if (typeSpecifier instanceof ChoiceTypeSpecifier) {
                 ChoiceTypeSpecifier choiceTypeSpecifier = (ChoiceTypeSpecifier)typeSpecifier;
