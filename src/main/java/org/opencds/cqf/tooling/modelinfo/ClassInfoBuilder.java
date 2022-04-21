@@ -938,20 +938,26 @@ public abstract class ClassInfoBuilder {
                 return null;
             }
             else if (typeSpecifier instanceof ChoiceTypeSpecifier) {
-                ChoiceTypeSpecifier choiceTypeSpecifier = (ChoiceTypeSpecifier)typeSpecifier;
-                StringBuilder target = new StringBuilder();
-                for (TypeSpecifier choice : choiceTypeSpecifier.getChoice()) {
-                    if (target.length() > 0) {
-                        target.append(";"); // Separator for target per choice type
-                    }
-                    if (choice instanceof NamedTypeSpecifier) {
-                        NamedTypeSpecifier namedChoice = (NamedTypeSpecifier)choice;
-                        target.append(getTypeName(namedChoice));
-                        target.append(":");
-                        target.append(determineTarget(namedChoice));
-                    }
-                }
-                return target.toString();
+                // Added a ToValue(Choice<...>) function to FHIRHelpers that moves this to a run-time decision
+                // The reason is that to do it compile-time requires access to the base FHIR types, which don't exist in the QICore model
+                // Moving it to a run-time decision (which is effectively the same performance-wise as the compile-time decision
+                // because it was performed with a case anyway) means the compiler doesn't need to get involved and the mapping
+                // can just be output in the ELM. See applyTargetMap in the CQL-to-ELM translator.
+                return settings.helpersLibraryName + ".ToValue(%value)";
+//                ChoiceTypeSpecifier choiceTypeSpecifier = (ChoiceTypeSpecifier)typeSpecifier;
+//                StringBuilder target = new StringBuilder();
+//                for (TypeSpecifier choice : choiceTypeSpecifier.getChoice()) {
+//                    if (target.length() > 0) {
+//                        target.append(";"); // Separator for target per choice type
+//                    }
+//                    if (choice instanceof NamedTypeSpecifier) {
+//                        NamedTypeSpecifier namedChoice = (NamedTypeSpecifier)choice;
+//                        target.append(getTypeName(namedChoice));
+//                        target.append(":");
+//                        target.append(determineTarget(namedChoice));
+//                    }
+//                }
+//                return target.toString();
             }
         }
 
