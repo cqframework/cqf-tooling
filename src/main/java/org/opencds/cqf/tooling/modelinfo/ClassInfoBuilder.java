@@ -1,10 +1,6 @@
 package org.opencds.cqf.tooling.modelinfo;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -26,6 +22,7 @@ public abstract class ClassInfoBuilder {
     protected Map<String, StructureDefinition> structureDefinitions;
     protected Map<String, TypeInfo> typeInfos = new HashMap<String, TypeInfo>();
     protected Map<String, String> typeTargets = new HashMap<String, String>();
+    protected Set<String> requiredBindingTypeNames = new HashSet<String>();
     protected ClassInfoSettings settings;
 
     public ClassInfoBuilder(ClassInfoSettings settings, Map<String, StructureDefinition> structureDefinitions) {
@@ -607,7 +604,10 @@ public abstract class ClassInfoBuilder {
     }
 
     private boolean isPrimitiveMappedTypeName(String modelName, String typeName) {
-        return this.settings.useCQLPrimitives && this.settings.primitiveTypeMappings.values().contains(modelName + "." + typeName);
+        String qualifiedTypeName = getTypeName(modelName, typeName);
+        return this.settings.useCQLPrimitives &&
+                (this.settings.primitiveTypeMappings.values().contains(qualifiedTypeName) ||
+                        this.requiredBindingTypeNames.contains(qualifiedTypeName));
     }
 
     private String resolveMappedTypeName(String modelName, String typeName) {
@@ -720,6 +720,18 @@ public abstract class ClassInfoBuilder {
         return left.equals(right);
     }
 
+    private boolean hasRequiredBinding(ElementDefinition ed, String typeCode) {
+        return typeCode != null && typeCode.equals("code") && ed.hasBinding() && ed.getBinding().getStrength() == BindingStrength.REQUIRED;
+    }
+
+    private String getRequiredBindingName(ElementDefinition ed) {
+        Extension bindingExtension = this.extension(ed.getBinding(), "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName");
+        if (bindingExtension != null) {
+            return capitalizePath(((StringType) (bindingExtension.getValue())).getValue());
+        }
+        return null;
+    }
+
     // Builds the type specifier for the given element
     private TypeSpecifier buildElementTypeSpecifier(String modelName, String root, ElementDefinition ed) {
         if (ed.getContentReference() != null) {
@@ -821,13 +833,15 @@ public abstract class ClassInfoBuilder {
 
                 return nts;
             }
-            else if (typeCode != null && typeCode.equals("code") && ed.hasBinding()
-                    && ed.getBinding().getStrength() == BindingStrength.REQUIRED) {
-                Extension bindingExtension = this.extension(ed.getBinding(), "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName");
-                if (bindingExtension != null) {
-                    typeName = capitalizePath(((StringType) (bindingExtension.getValue())).getValue());
+            else if (hasRequiredBinding(ed, typeCode)) {
+                String requiredBindingName = getRequiredBindingName(ed);
+                if (requiredBindingName != null) {
+                    typeName = requiredBindingName;
+                    requiredBindingName = getTypeName(modelName, typeName);
+                    if (!requiredBindingTypeNames.contains(requiredBindingName)) {
+                        requiredBindingTypeNames.add(requiredBindingName);
+                    }
                 }
-
                 else {
                     TypeSpecifier ts = this.buildTypeSpecifier(modelName, ed.hasType() ? ed.getType() : null);
                     if (ts instanceof NamedTypeSpecifier && ((NamedTypeSpecifier) ts).getName() == null) {
