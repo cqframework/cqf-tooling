@@ -1260,8 +1260,12 @@ public abstract class ClassInfoBuilder {
             }
         }
 
+        
+        //TODO: Revisit this and try to adjust code to be more dynamic and handle all ListTypes that also have a slice:
+        boolean sliceCountGreaterThan = ed.getId().equalsIgnoreCase("Encounter.diagnosis") ? slices.getSlices().size() > 1 : slices.getSlices().size() > 0;
+        
         // If this is a not a slice and not a slicing root, but there are slices (slices.size() > 0)
-        if (!ed.hasSliceName() && !(sliceInfo != null && sliceInfo.getSliceRoot().getId().equals(ed.getId())) && (slices.getSlices().size() > 0)) {
+        if (!ed.hasSliceName() && !(sliceInfo != null && sliceInfo.getSliceRoot().getId().equals(ed.getId())) && (sliceCountGreaterThan)) {
 
             if (!(typeSpecifier instanceof NamedTypeSpecifier)) {
                 throw new IllegalArgumentException("Derived type for slicing support only supported for named types");
