@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
@@ -77,6 +78,11 @@ public class GenericValueSetGenerator extends Operation {
     private int systemRow = 1;
     private int systemCol = 2;
 
+    private boolean hasSynonymDesignation = false;
+    private int synonymDesignationSheet = 1; // -synonymdesignation (-syn) = sheet#:row#:column#
+    private int synonymDesignationRow = 1;
+    private int synonymDesignationCol = 4;
+
     private boolean hasStaticSystem = false;
     private int staticSystemSheet = -1; // -staticsystem (-ss) = sheet#:row#:column#
     private int staticSystemRow = -1;
@@ -94,10 +100,7 @@ public class GenericValueSetGenerator extends Operation {
 
     private Map<Integer, org.opencds.cqf.tooling.terminology.ValueSet> codesBySystem = new HashMap<>();
 
-    @Override
-    public void execute(String[] args) {
-        setOutputPath("src/main/resources/org/opencds/cqf/tooling/terminology/output"); // default
-
+    private void processArguments(String[] args) {
         for (String arg : args) {
             if (arg.equals("-XlsxToValueSet")) {
                 continue;
@@ -197,6 +200,13 @@ public class GenericValueSetGenerator extends Operation {
                         systemRow = Integer.valueOf(sheetRowCol[1]);
                         systemCol = Integer.valueOf(sheetRowCol[2]);
                         break;
+                    case "synonymdesignation": case "syn":
+                        hasSynonymDesignation = true;
+                        if (sheetRowCol == null) break;
+                        synonymDesignationSheet = Integer.valueOf(sheetRowCol[0]);
+                        synonymDesignationRow = Integer.valueOf(sheetRowCol[1]);
+                        synonymDesignationCol = Integer.valueOf(sheetRowCol[2]);
+                        break;
                     case "staticsystem": case "ss":
                         if (hasSystem) {
                             throw new IllegalArgumentException("Cannot have both system and staticsystem flags set");
@@ -255,6 +265,13 @@ public class GenericValueSetGenerator extends Operation {
         if (!hasSystem && !hasStaticSystem) {
             throw new IllegalArgumentException("-system or -staticsystem flag must be specified");
         }
+    }
+
+    @Override
+    public void execute(String[] args) {
+        setOutputPath("src/main/resources/org/opencds/cqf/tooling/terminology/output"); // default
+
+        processArguments(args);
 
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
         ValueSet vs = new ValueSet();
@@ -297,6 +314,7 @@ public class GenericValueSetGenerator extends Operation {
         Iterator<Row> codeIterator = workbook.getSheetAt(codeSheet).rowIterator();
         Iterator<Row> displayIterator = hasDisplay ? workbook.getSheetAt(displaySheet).rowIterator() : null;
         Iterator<Row> systemIterator = hasSystem ? workbook.getSheetAt(systemSheet).rowIterator() : null;
+        Iterator<Row> synonymDesignationIterator = hasSynonymDesignation ? workbook.getSheetAt(synonymDesignationSheet).rowIterator() : null;
         String system = hasStaticSystem
                 ? SpreadsheetHelper.getCellAsString(workbook.getSheetAt(staticSystemSheet).getRow(staticSystemRow).getCell(staticSystemCol))
                 : null;
@@ -311,12 +329,19 @@ public class GenericValueSetGenerator extends Operation {
                 continue;
             }
 
+            String code = SpreadsheetHelper.getCellAsString(row.getCell(codeCol));
+            if (code == null || code.isEmpty()) {
+                break;
+            }
+
             if (systemIterator != null) {
                 system = getNextValue(systemIterator, systemRow, systemCol);
             }
+            
             if (system == null) {
                 throw new IllegalArgumentException("System not provided");
             }
+
             try {
                 system = system.startsWith("http") ? system : CodeSystemLookupDictionary.getUrlFromName(system);
             } catch (IllegalArgumentException e) {
@@ -333,14 +358,26 @@ public class GenericValueSetGenerator extends Operation {
                 codesBySystem.put(hash, new org.opencds.cqf.tooling.terminology.ValueSet().setSystem(system).setVersion(version));
             }
 
-            String code = SpreadsheetHelper.getCellAsString(row.getCell(codeCol));
-
             String display = null;
             if (displayIterator != null) {
                 display = getNextValue(displayIterator, displayRow, displayCol);
             }
 
+            String synonym = null;
+            if (synonymDesignationIterator != null) {
+                synonym = getNextValue(synonymDesignationIterator, synonymDesignationRow, synonymDesignationCol);
+            }
+
             ValueSet.ConceptReferenceComponent concept = new ValueSet.ConceptReferenceComponent().setCode(code).setDisplay(display);
+            if (synonym != null && !synonym.isEmpty()) {
+                Coding synonymUseCoding = new Coding();
+                synonymUseCoding.setSystem("http://snomed.info/sct");
+                synonymUseCoding.setCode("synonym");
+                synonymUseCoding.setDisplay("Synonym");
+
+                ValueSet.ConceptReferenceDesignationComponent conceptDesignation = new ValueSet.ConceptReferenceDesignationComponent().setUse(synonymUseCoding).setValue(synonym);
+                concept.getDesignation().add(conceptDesignation);
+            }
             codesBySystem.get(hash).addCode(concept);
         }
     }
