@@ -329,16 +329,19 @@ public class GenericValueSetGenerator extends Operation {
                 continue;
             }
 
-            if (getNextValue(codeIterator, row.getRowNum(), 0) == null) {
+            String code = SpreadsheetHelper.getCellAsString(row.getCell(codeCol));
+            if (code == null || code.isEmpty()) {
                 break;
             }
 
             if (systemIterator != null) {
                 system = getNextValue(systemIterator, systemRow, systemCol);
             }
+            
             if (system == null) {
                 throw new IllegalArgumentException("System not provided");
             }
+
             try {
                 system = system.startsWith("http") ? system : CodeSystemLookupDictionary.getUrlFromName(system);
             } catch (IllegalArgumentException e) {
@@ -354,8 +357,6 @@ public class GenericValueSetGenerator extends Operation {
             if (!codesBySystem.containsKey(hash)) {
                 codesBySystem.put(hash, new org.opencds.cqf.tooling.terminology.ValueSet().setSystem(system).setVersion(version));
             }
-
-            String code = SpreadsheetHelper.getCellAsString(row.getCell(codeCol));
 
             String display = null;
             if (displayIterator != null) {
