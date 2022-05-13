@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling;
 
 //import org.opencds.cqf.tooling.jsonschema.SchemaGenerator;
 import org.apache.commons.lang.NotImplementedException;
+import org.opencds.cqf.tooling.dateroller.DataDateRollerOperation;
 import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.TemplateToValueSetGenerator;
 import org.opencds.cqf.tooling.acceleratorkit.DTProcessor;
 import org.opencds.cqf.tooling.acceleratorkit.Processor;
@@ -100,7 +101,7 @@ class OperationFactory {
             case "PostmanCollection":
                 return new PostmanCollectionOperation();
             case "RollTestsDataDates":
-                return new RollTestsDataDatesOperation();
+                return new DataDateRollerOperation();
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operationName);
         }

@@ -1,0 +1,807 @@
+{
+  "resourceType": "Measure",
+  "id": "PreventiveCareandScreeningInfluenzaImmunizationFHIR",
+  "meta": {
+    "versionId": "2",
+    "lastUpdated": "2021-06-28T12:11:02.000+00:00",
+    "source": "#VyoIZoqchMWLK8ia",
+    "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/proportion-measure-cqfm", "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-measure-cqfm" ]
+  },
+  "language": "en",
+  "contained": [ {
+    "resourceType": "Library",
+    "id": "effective-data-requirements",
+    "extension": [ {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+      "valueCoding": {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "99211",
+        "display": "Office or other outpatient visit for the evaluation and management of an established patient, that may not require the presence of a physician or other qualified health care professional. Usually, the presenting problem(s) are minimal."
+      }
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+      "valueCoding": {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active",
+        "display": "active"
+      }
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Influenza Season Including August and September of the Prior Year"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Influenza Season Including August and September of the Prior Year\":\n  Interval[start of \"Measurement Period\" - 5 months, start of \"Measurement Period\" + 3 months )"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 0
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Influenza Vaccination Procedure"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Influenza Vaccination Procedure\":\n  [Procedure: \"Influenza Vaccination\"] FluVaccination\n          \t\twhere Global.\"Normalize Interval\"(FluVaccination.performed) during \"Influenza Season Including August and September of the Prior Year\"\n              and FluVaccination.status = 'completed'"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 1
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Influenza Immunization Administered"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Influenza Immunization Administered\":\n  [Immunization: \"Influenza Vaccine\"] AdministeredFluVaccine\n          \t\twhere Global.\"Normalize Interval\"(AdministeredFluVaccine. occurrence) during \"Influenza Season Including August and September of the Prior Year\"\n              and AdministeredFluVaccine.status = 'completed'"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 2
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Numerator"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Numerator\":\n  exists \"Influenza Vaccination Procedure\"\n          \t\tor exists \"Influenza Immunization Administered\""
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 3
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Qualifying Encounter During Measurement Period"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Qualifying Encounter During Measurement Period\":\n  ( [Encounter: \"Office Visit\"]\n          \t\tunion [Encounter: \"Outpatient Consultation\"]\n          \t\tunion [Encounter: \"Care Services in Long-Term Residential Facility\"]\n          \t\tunion [Encounter: \"Home Healthcare Services\"]\n          \t\tunion [Encounter: \"Patient Provider Interaction\"]\n          \t\tunion [Encounter: \"Preventive Care Services, Initial Office Visit, 0 to 17\"]\n          \t\tunion [Encounter: \"Preventive Care Services-Initial Office Visit, 18 and Up\"]\n          \t\tunion [Encounter: \"Preventive Care Services-Individual Counseling\"]\n          \t\tunion [Encounter: \"Preventive Care Services - Group Counseling\"]\n          \t\tunion [Encounter: \"Preventive Care Services - Other\"]\n          \t\tunion [Encounter: \"Discharge Services - Nursing Facility\"]\n          \t\tunion [Encounter: \"Nursing Facility Visit\"]\n          \t\tunion [Encounter: \"Annual Wellness Visit\"]\n          \t\tunion [Encounter: \"Preventive Care, Established Office Visit, 0 to 17\"]\n          \t\tunion [Encounter: \"Preventive Care Services - Established Office Visit, 18 and Up\"]\n                  union [Encounter: \"Office or other outpatient visit for the evaluation and management of an established patient, that may not require the presence of a physician or other qualified health care professional. Usually, the presenting problem(s) are minimal.\"]\n                  union [Encounter: \"Online Assessments\"]\n                  union [Encounter: \"Telephone Visits\"] ) QualifyingEncounter\n          \t\twhere QualifyingEncounter.period during \"Measurement Period\"\n          \t\tand QualifyingEncounter.status ='finished'"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 4
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Hemodialysis During Measurement Period"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Hemodialysis During Measurement Period\":\n  [Procedure: \"Hemodialysis\"] Hemodialysis\n          \twhere Global.\"Normalize Interval\"(Hemodialysis.performed) overlaps \"Measurement Period\"\n          \t\tand Hemodialysis.status = 'completed'"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 5
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Peritoneal Dialysis During Measurement Period"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Peritoneal Dialysis During Measurement Period\":\n  [Procedure: \"Peritoneal Dialysis\"] PeritonealDialysis\n        where Global.\"Normalize Interval\"( PeritonealDialysis.performed) overlaps \"Measurement Period\"\n              and  PeritonealDialysis.status = 'completed'"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 6
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Initial Population"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Initial Population\":\n  AgeInMonthsAt( date from start of \"Measurement Period\" ) >= 6\n      and ( exists \"Qualifying Encounter During Measurement Period\"\n          \t\tor exists \"Hemodialysis During Measurement Period\"\n            or exists \"Peritoneal Dialysis During Measurement Period\")"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 7
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Influenza Season"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Influenza Season\":\n  Interval[start of \"Measurement Period\" - 3 months, start of \"Measurement Period\" + 3 months )"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 8
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Encounter During Influenza Season"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Encounter During Influenza Season\":\n  [Encounter: \"Encounter-Influenza\"] FluEncounter\n          \t\twhere FluEncounter.period starts during \"Influenza Season\"\n          \t\tand FluEncounter.status = 'finished'"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 9
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Hemodialysis During Influenza Season"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Hemodialysis During Influenza Season\":\n  [Procedure: \"Hemodialysis\"] FluSeasonHemodialysis\n        where Global.\"Normalize Interval\"(FluSeasonHemodialysis.performed ) overlaps \"Influenza Season\"\n          \t\tand FluSeasonHemodialysis.status = 'completed'"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 10
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Peritoneal Dialysis During Influenza Season"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Peritoneal Dialysis During Influenza Season\":\n  [Procedure: \"Peritoneal Dialysis\"] FluSeasonPeritonealDialysis\n        where Global.\"Normalize Interval\"( FluSeasonPeritonealDialysis.performed ) overlaps \"Influenza Season\"\n          and  FluSeasonPeritonealDialysis.status = 'completed'"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 11
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Denominator"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Denominator\":\n  \"Initial Population\"\n        and ( exists \"Encounter During Influenza Season\"\n            or exists \"Hemodialysis During Influenza Season\"\n            or exists \"Peritoneal Dialysis During Influenza Season\"\n        )"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 12
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Medical Patient or System Reason for Not Performing Influenza Vaccination"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Medical Patient or System Reason for Not Performing Influenza Vaccination\":\n  [Procedure: \"Influenza Vaccination\"] NoFluVaccination\n      \t\twhere Global.GetExtension(NoFluVaccination, 'qicore-recorded').value during \"Influenza Season Including August and September of the Prior Year\"\n      \t\tand NoFluVaccination.status = 'not-done'\n      \t\tand ( NoFluVaccination.statusReason in \"Medical Reason\"\n      \t\t\t\t\tor NoFluVaccination.statusReason in \"Patient Reason\"\n      \t\t\t\t\tor NoFluVaccination.statusReason in \"System Reason\"\n      \t\t\t\t\tor NoFluVaccination.statusReason in \"Influenza Vaccination Declined\"\n      \t\t\t)"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 13
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Medical Patient or System Reason for Not Administering Influenza Vaccine"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Medical Patient or System Reason for Not Administering Influenza Vaccine\":\n  [Immunization: \"Influenza Vaccine\"] NoFluVaccine\n      \t\twhere NoFluVaccine.recorded during \"Influenza Season Including August and September of the Prior Year\"\n      \t\tand NoFluVaccine.status = 'not done'\n      \t\t\tand ( NoFluVaccine.statusReason in \"Medical Reason\"\n      \t\t\t\t\tor NoFluVaccine.statusReason in \"Patient Reason\"\n      \t\t\t\t\tor NoFluVaccine.statusReason in \"System Reason\"\n      \t\t\t\t\tor NoFluVaccine.statusReason in \"Influenza Vaccination Declined\"\n      \t\t\t)"
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 14
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Diagnosis of Allergy to Egg"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Diagnosis of Allergy to Egg\":\n  [Condition: \"Allergy to Eggs\"] EggAllergy\n          \t\twhere Global.\"Prevalence Period\"(EggAllergy) overlaps after \"Influenza Season\""
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 15
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Egg Substance Allergy"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Egg Substance Allergy\":\n  [AllergyIntolerance: \"Egg Substance\"] AllergyEggSubstance\n          \t\twhere Global.\"Normalize Interval\"(AllergyEggSubstance.onset) overlaps after \"Influenza Season\"\n              and AllergyEggSubstance.clinicalStatus ~ Global.\"active\""
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 16
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Diagnosis of Allergy to Influenza Vaccine"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Diagnosis of Allergy to Influenza Vaccine\":\n  [Condition: \"Allergy to Influenza Vaccine\"] FluVaccineAllergyDiagnosis\n          \t\twhere Global.\"Prevalence Period\"(FluVaccineAllergyDiagnosis) overlaps after \"Influenza Season\""
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 17
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Diagnosis of Intolerance to Influenza Vaccine"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Diagnosis of Intolerance to Influenza Vaccine\":\n  [Condition: \"Intolerance to Influenza Vaccine\"] FluVaccineIntoleranceDiagnosis\n          \t\twhere Global.\"Prevalence Period\"(FluVaccineIntoleranceDiagnosis) overlaps after \"Influenza Season\""
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 18
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Intolerance of Influenza Vaccination Procedure"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Intolerance of Influenza Vaccination Procedure\":\n  [AllergyIntolerance: \"Influenza Vaccination\"] FluVaccinationIntolerance\n          \t\twhere Global.\"Normalize Interval\"(FluVaccinationIntolerance.onset) overlaps after \"Influenza Season\"\n                  and FluVaccinationIntolerance.clinicalStatus ~ Global.\"active\""
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 19
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Allergy or Intolerance to Influenza Vaccine"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Allergy or Intolerance to Influenza Vaccine\":\n  [AllergyIntolerance: \"Influenza Vaccine\"] FluVaccineAllergyIntolerance\n          \t\twhere Global.\"Normalize Interval\"(FluVaccineAllergyIntolerance.onset) overlaps \"Influenza Season\"\n              and FluVaccineAllergyIntolerance.clinicalStatus ~ Global.\"active\""
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 20
+      } ]
+    }, {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition",
+      "extension": [ {
+        "url": "libraryName",
+        "valueString": "PreventiveCareandScreeningInfluenzaImmunizationFHIR"
+      }, {
+        "url": "name",
+        "valueString": "Denominator Exceptions"
+      }, {
+        "url": "statement",
+        "valueString": "define \"Denominator Exceptions\":\n  exists \"Medical Patient or System Reason for Not Performing Influenza Vaccination\"\n          \t\tor exists \"Medical Patient or System Reason for Not Administering Influenza Vaccine\"\n          \t\tor exists \"Diagnosis of Allergy to Egg\"\n          \t\tor exists \"Egg Substance Allergy\"\n          \t\tor exists \"Diagnosis of Allergy to Influenza Vaccine\"\n          \t\tor exists \"Diagnosis of Intolerance to Influenza Vaccine\"\n          \t\tor exists \"Intolerance of Influenza Vaccination Procedure\"\n          \t\tor exists \"Allergy or Intolerance to Influenza Vaccine\""
+      }, {
+        "url": "displaySequence",
+        "valueInteger": 21
+      } ]
+    } ],
+    "status": "active",
+    "type": {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/library-type",
+        "code": "module-definition"
+      } ]
+    },
+    "relatedArtifact": [ {
+      "type": "depends-on",
+      "display": "Library Global",
+      "resource": "Library/MATGlobalCommonFunctionsFHIR4|5.0.000"
+    }, {
+      "type": "depends-on",
+      "display": "Library FHIRHelpers",
+      "resource": "Library/FHIRHelpers|4.0.001"
+    }, {
+      "type": "depends-on",
+      "display": "Code system CPT",
+      "resource": "http://www.ama-assn.org/go/cpt"
+    }, {
+      "type": "depends-on",
+      "display": "Code system ConditionClinicalStatusCodes",
+      "resource": "http://terminology.hl7.org/CodeSystem/condition-clinical"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Influenza Vaccination",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.402"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Influenza Vaccine",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1254"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Office Visit",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Outpatient Consultation",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1008"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Care Services in Long-Term Residential Facility",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1014"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Home Healthcare Services",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Patient Provider Interaction",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1012"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Preventive Care Services, Initial Office Visit, 0 to 17",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1022"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Preventive Care Services-Initial Office Visit, 18 and Up",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Preventive Care Services-Individual Counseling",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1026"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Preventive Care Services - Group Counseling",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1027"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Preventive Care Services - Other",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1030"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Discharge Services - Nursing Facility",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1013"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Nursing Facility Visit",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1012"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Annual Wellness Visit",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Preventive Care, Established Office Visit, 0 to 17",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1024"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Preventive Care Services - Established Office Visit, 18 and Up",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Online Assessments",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1089"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Telephone Visits",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1080"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Hemodialysis",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1083"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Peritoneal Dialysis",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1084"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Encounter-Influenza",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1252"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Medical Reason",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1007"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Patient Reason",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1008"
+    }, {
+      "type": "depends-on",
+      "display": "Value set System Reason",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1009"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Influenza Vaccination Declined",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1255"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Allergy to Eggs",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1253"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Egg Substance",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1537"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Allergy to Influenza Vaccine",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1256"
+    }, {
+      "type": "depends-on",
+      "display": "Value set Intolerance to Influenza Vaccine",
+      "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1257"
+    } ],
+    "parameter": [ {
+      "name": "Measurement Period",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "type": "Period"
+    }, {
+      "name": "Numerator",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "boolean"
+    }, {
+      "name": "Denominator",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "boolean"
+    }, {
+      "name": "Initial Population",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "boolean"
+    }, {
+      "name": "Denominator Exceptions",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "type": "boolean"
+    } ],
+    "dataRequirement": [ {
+      "type": "Procedure",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Procedure" ],
+      "mustSupport": [ "code", "performed", "status" ],
+      "codeFilter": [ {
+        "path": "code",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.402"
+      }, {
+        "path": "status",
+        "code": [ {
+          "code": "completed"
+        } ]
+      } ]
+    }, {
+      "type": "Procedure",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Procedure" ],
+      "mustSupport": [ "code", "performed", "status" ],
+      "codeFilter": [ {
+        "path": "code",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1083"
+      }, {
+        "path": "status",
+        "code": [ {
+          "code": "completed"
+        } ]
+      } ]
+    }, {
+      "type": "Procedure",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Procedure" ],
+      "mustSupport": [ "code", "performed", "status" ],
+      "codeFilter": [ {
+        "path": "code",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1084"
+      }, {
+        "path": "status",
+        "code": [ {
+          "code": "completed"
+        } ]
+      } ]
+    }, {
+      "type": "Procedure",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Procedure" ],
+      "mustSupport": [ "code", "status", "statusReason" ],
+      "codeFilter": [ {
+        "path": "code",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.402"
+      } ]
+    }, {
+      "type": "Immunization",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Immunization" ],
+      "mustSupport": [ "vaccineCode", "occurrence", "status" ],
+      "codeFilter": [ {
+        "path": "vaccineCode",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1254"
+      }, {
+        "path": "status",
+        "code": [ {
+          "code": "completed"
+        } ]
+      } ]
+    }, {
+      "type": "Immunization",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Immunization" ],
+      "mustSupport": [ "vaccineCode", "recorded", "status", "statusReason" ],
+      "codeFilter": [ {
+        "path": "vaccineCode",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1254"
+      } ]
+    }, {
+      "type": "Patient",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Patient" ]
+    }, {
+      "type": "Encounter",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Encounter" ],
+      "mustSupport": [ "type", "period", "status" ],
+      "codeFilter": [ {
+        "path": "type",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1252"
+      }, {
+        "path": "status",
+        "code": [ {
+          "code": "finished"
+        } ]
+      } ]
+    }, {
+      "type": "Condition",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Condition" ],
+      "mustSupport": [ "code" ],
+      "codeFilter": [ {
+        "path": "code",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1253"
+      } ]
+    }, {
+      "type": "Condition",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Condition" ],
+      "mustSupport": [ "code" ],
+      "codeFilter": [ {
+        "path": "code",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1256"
+      } ]
+    }, {
+      "type": "Condition",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/Condition" ],
+      "mustSupport": [ "code" ],
+      "codeFilter": [ {
+        "path": "code",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1257"
+      } ]
+    }, {
+      "type": "AllergyIntolerance",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/AllergyIntolerance" ],
+      "mustSupport": [ "code", "onset", "clinicalStatus" ],
+      "codeFilter": [ {
+        "path": "code",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1537"
+      }, {
+        "path": "clinicalStatus"
+      } ]
+    }, {
+      "type": "AllergyIntolerance",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/AllergyIntolerance" ],
+      "mustSupport": [ "code", "onset", "clinicalStatus" ],
+      "codeFilter": [ {
+        "path": "code",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.402"
+      }, {
+        "path": "clinicalStatus"
+      } ]
+    }, {
+      "type": "AllergyIntolerance",
+      "profile": [ "http://hl7.org/fhir/StructureDefinition/AllergyIntolerance" ],
+      "mustSupport": [ "code", "onset", "clinicalStatus" ],
+      "codeFilter": [ {
+        "path": "code",
+        "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1254"
+      }, {
+        "path": "clinicalStatus"
+      } ]
+    } ]
+  } ],
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+    "valueCode": "boolean"
+  }, {
+    "id": "effective-data-requirements",
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements",
+    "valueReference": {
+      "reference": "#effective-data-requirements"
+    }
+  } ],
+  "url": "http://ecqi.healthit.gov/ecqms/Measure/PreventiveCareandScreeningInfluenzaImmunizationFHIR",
+  "identifier": [ {
+    "use": "official",
+    "system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/guid",
+    "value": "ae242431-e05e-4872-9a90-9e7d3e372ea1"
+  }, {
+    "use": "official",
+    "system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/cms",
+    "value": "147FHIR"
+  }, {
+    "use": "official",
+    "system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/nqf",
+    "value": "0041e"
+  } ],
+  "version": "0.0.001",
+  "name": "PreventiveCareandScreeningInfluenzaImmunizationFHIR",
+  "title": "Preventive Care and Screening: Influenza ImmunizationFHIR",
+  "status": "draft",
+  "experimental": false,
+  "date": "2022-04-22T09:41:56-06:00",
+  "publisher": "National Committee for Quality Assurance",
+  "contact": [ {
+    "telecom": [ {
+      "system": "url",
+      "value": "https://cms.gov"
+    } ]
+  } ],
+  "description": "Percentage of patients aged 6 months and older seen for a visit between October 1 and March 31 who received an influenza immunization OR who reported previous receipt of an influenza immunization",
+  "purpose": "Unknown",
+  "copyright": "This Physician Performance Measure (Measure) and related data specifications are owned by the National Committee for Quality Assurance (NCQA). NCQA is not responsible for any use of the Measure. NCQA makes no representations, warranties, or endorsement about the quality of any organization or physician that uses or reports performance measures and NCQA has no liability to anyone who relies on such measures or specifications. NCQA holds a copyright in the Measure. The Measure can be reproduced and distributed, without modification, for noncommercial purposes (e.g., use by healthcare providers in connection with their practices) without obtaining approval from NCQA. Commercial use is defined as the sale, licensing, or distribution of the Measure for commercial gain, or incorporation of the Measure into a product or service that is sold, licensed or distributed for commercial gain. All commercial uses or requests for modification must be approved by NCQA and are subject to a license at the discretion of NCQA. The PCPI’s and AMA’s significant past efforts and contributions to the development and updating of the measure are acknowledged. (C) 2012-2020 National Committee for Quality Assurance. All Rights Reserved.\n\nLimited proprietary coding is contained in the Measure specifications for user convenience. Users of proprietary code sets should obtain all necessary licenses from the owners of the code sets. NCQA disclaims all liability for use or accuracy of any third party codes contained in the specifications.\n\nCPT(R) contained in the Measure specifications is copyright 2004-2020 American Medical Association. LOINC(R) copyright 2004-2020 Regenstrief Institute, Inc. This material contains SNOMED Clinical Terms(R) (SNOMED CT[R]) copyright 2004-2020 International Health Terminology Standards Development Organisation. ICD-10 copyright 2020 World Health Organization. All Rights Reserved.",
+  "effectivePeriod": {
+    "start": "2022-01-01",
+    "end": "2022-12-31"
+  },
+  "relatedArtifact": [ {
+    "type": "citation",
+    "citation": "Centers for Disease Control and Prevention. (2019, September 5). About Flu. Retrieved from\nhttps://www.cdc.gov/flu/about/index.html"
+  }, {
+    "type": "citation",
+    "citation": "Centers for Disease Control and Prevention. (2019, September 26). Flu Vaccination Coverage: United States, 2018-19 Influenza Season. Retrieved from \nhttps://www.cdc.gov/flu/fluvaxview/coverage-1819estimates.htm"
+  }, {
+    "type": "citation",
+    "citation": "Grohskopf, L.A., Alyanak, E., Broder, K. R., Blanton, L. H. , Fry, A. M., Jernigan, D. B, Atmar, R. L. (2020).  Prevention and Control of Seasonal Influenza with Vaccines: Recommendations of the Advisory Committee on Immunization Practices — United States, 2020–21 Influenza Season. MMWR Recommendations and Reports; 69(No. RR-8):1–24. DOI: http://dx.doi.org/10.15585/mmwr.rr6908a1."
+  } ],
+  "library": [ "http://ecqi.healthit.gov/ecqms/Library/PreventiveCareandScreeningInfluenzaImmunizationFHIR" ],
+  "disclaimer": "The performance Measure is not a clinical guideline and does not establish a standard of medical care, and has not been tested for all potential applications. THE MEASURE AND SPECIFICATIONS ARE PROVIDED \"AS IS\" WITHOUT WARRANTY OF ANY KIND.\n\nDue to technical limitations, registered trademarks are indicated by (R) or [R] and unregistered trademarks are indicated by (TM) or [TM].",
+  "scoring": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-scoring",
+      "code": "proportion",
+      "display": "Proportion"
+    } ]
+  },
+  "type": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-type",
+      "code": "process"
+    } ]
+  } ],
+  "rationale": "Influenza vaccination is the most effective protection against influenza virus infection (Centers for Disease Control and Prevention [CDC], 2019). Influenza may lead to serious complications including hospitalization or death (CDC, 2019). Influenza vaccine is recommended for all persons aged >=6 months who do not have contraindications to vaccination. However, data indicate that less than half of all eligible individuals receive an influenza vaccination (CDC, 2019). This measure promotes annual influenza vaccination for all persons aged >= 6 months.",
+  "clinicalRecommendationStatement": "Routine annual influenza vaccination is recommended for all persons aged >= 6 months who do not have contraindications. Optimally, vaccination should occur before onset of influenza activity in the community. Although vaccination by the end of October is recommended, vaccine administered in December or later, even if influenza activity has already begun, is likely to be beneficial in the majority of influenza seasons (CDC/Advisory Committee on Immunization Practices [ACIP], 2020).",
+  "improvementNotation": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-improvement-notation",
+      "code": "increase"
+    } ]
+  },
+  "guidance": "The timeframe for the visit during the \"Encounter, Performed\": \"Encounter-Influenza\" or \"Procedure, Performed\": \"Peritoneal Dialysis\" or \"Procedure, Performed\": \"Hemodialysis\" in the Population Criteria-Denominator, refers to the influenza season defined by the measure: October through March (October 1 for the year prior to the start of the reporting period through March 31 during the reporting period). The \"Encounter-Influenza\" Grouping OID detailed in the data criteria section below is comprised of several individual OIDs of different encounter types. The individual OIDs are included in the value set and should be reviewed to determine that an applicable visit occurred during the timeframe for \"Encounter, Performed\": \"Encounter-Influenza\" as specified in the denominator.\n\nTo enable reporting of this measure at the close of the reporting period, this measure will only assess the influenza season that ends in March of the reporting period. The subsequent influenza season (ending March of the following year) will be measured and reported in the following year.\n\nDue to the changing stance of the CDC/ACIP recommendations regarding the live attenuated influenza vaccine (LAIV) for a particular flu season, this measure will not include the administration of this specific formulation of the flu vaccination. Given the variance of the timeframes for the annual update cycles, program implementation, and publication of revised recommendations from the CDC/ACIP, it has been determined that the coding for this measure will specifically exclude this formulation, so as not to inappropriately include this form of the vaccine for flu seasons when CDC/ACIP explicitly advise against it. However, it is recommended that all eligible professionals or eligible clinicians to review the guidelines for each flu season to determine appropriateness of the LAIV and other formulations of the flu vaccine. Should the LAIV be recommended for administration for a particular flu season, eligible professional or clinician may consider one of the following options: 1) satisfy the numerator by reporting either previous receipt or using the CVX 88 for unspecified formulation, 2) report a denominator exception, either as a patient reason (e.g., for patient preference) or a system reason (e.g., the institution only carries LAIV).\n\nPatient self-report for procedures as well as immunizations should be recorded in 'Procedure, Performed' template or 'Immunization, Administered' template in QRDA-1.\n\nThis eCQM is a patient-based measure.\n\nThis version of the eCQM uses QDM version 5.5. Please refer to the eCQI resource center (https://ecqi.healthit.gov/qdm) for more information on the QDM.",
+  "group": [ {
+    "population": [ {
+      "id": "34E1F6CB-FD58-484F-B095-23E464999DD2",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "initial-population",
+          "display": "Initial Population"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.identifier",
+        "expression": "Initial Population"
+      }
+    }, {
+      "id": "E9E26B88-7DB8-4DBC-89B9-FFEA9AD16FB9",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "denominator",
+          "display": "Denominator"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.identifier",
+        "expression": "Denominator"
+      }
+    }, {
+      "id": "1FDC22F6-CE98-49F4-A764-A2C46323BF2D",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "denominator-exception",
+          "display": "Denominator Exception"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.identifier",
+        "expression": "Denominator Exceptions"
+      }
+    }, {
+      "id": "A68AF078-A92D-46AE-A927-9FE7492B227B",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "numerator",
+          "display": "Numerator"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.identifier",
+        "expression": "Numerator"
+      }
+    } ]
+  } ]
+}
