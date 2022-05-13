@@ -55,7 +55,8 @@ public class ErsdTransformer {
         specificationLibrary.setName("SpecificationLibrary");
         specificationLibrary.setTitle("Specification Library");
         specificationLibrary.setVersion("1.0.0");
-        specificationLibrary.setDescription("Defines the asset-collection library containing the US Public Health specification assets.");
+        specificationLibrary.setDescription(
+                "Defines the asset-collection library containing the US Public Health specification assets.");
         specificationLibrary.setStatus(PublicationStatus.ACTIVE);
         specificationLibrary.setExperimental(true);
         specificationLibrary.setPublisher("eCR");
@@ -63,24 +64,43 @@ public class ErsdTransformer {
         resolveRelatedArtifacts(bundle, specificationLibrary);
         specificationLibrary.setType(new CodeableConcept(
                 new Coding("http://terminology.hl7.org/CodeSystem/library-type", "asset-collection", null)));
+        boolean foundSpecificationType = false;
+        String useContextCode = "specification-type";
+        if (specificationLibrary.hasUseContext() && !specificationLibrary.getUseContext().isEmpty()) {
+            for (UsageContext useContext : specificationLibrary.getUseContext()) {
+                if (useContext.getCode().getCode().equals(useContextCode)) {
+                    foundSpecificationType = true;
+                }
+            }
+        }
+        CodeableConcept type = new CodeableConcept(
+                new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "program", null));
+        UsageContext usageContext = new UsageContext(
+                new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", useContextCode, null),
+                type);
+        if (!foundSpecificationType) {
+            specificationLibrary.addUseContext(usageContext);
+        }
+
         return resolveSpecificationBundle(bundle, specificationLibrary);
     }
 
     private Bundle resolveRelatedArtifacts(Bundle bundle, Library specificationLibrary) {
         bundle.getEntry().stream()
-            .filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition"))
-            .forEach(x -> resolvePlanDefinition((PlanDefinition) x.getResource(), specificationLibrary));
+                .filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition"))
+                .forEach(x -> resolvePlanDefinition((PlanDefinition) x.getResource(), specificationLibrary));
         bundle.getEntry().stream()
-            .filter(x -> x.hasResource() && x.getResource().fhirType().equals("Library"))
-            .forEach(x -> resolveTriggeringValueSetLibrary((Library) x.getResource(), specificationLibrary, bundle));
+                .filter(x -> x.hasResource() && x.getResource().fhirType().equals("Library"))
+                .forEach(
+                        x -> resolveTriggeringValueSetLibrary((Library) x.getResource(), specificationLibrary, bundle));
         bundle.getEntry().stream()
-            .filter(x -> x.hasResource() && x.getResource().fhirType().equals("ValueSet"))
-            .forEach(x -> resolveTriggeringValueSet((ValueSet) x.getResource(), specificationLibrary));
+                .filter(x -> x.hasResource() && x.getResource().fhirType().equals("ValueSet"))
+                .forEach(x -> resolveTriggeringValueSet((ValueSet) x.getResource(), specificationLibrary));
         return bundle;
     }
-    
+
     private IBaseOperationOutcome resolvePlanDefinition(PlanDefinition res, Library specificationLibrary) {
-        if(!resolveProfile(res, usPhPlanDefinitionProfileUrl)) {
+        if (!resolveProfile(res, usPhPlanDefinitionProfileUrl)) {
             res.getMeta().addProfile(usPhPlanDefinitionProfileUrl);
         }
         ValidationResult result = validator.validateWithResult(res);
@@ -98,11 +118,13 @@ public class ErsdTransformer {
         relatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
         relatedArtifact.setResource(res.getUrlElement().asStringValue());
         specificationLibrary.addRelatedArtifact(relatedArtifact);
-        // res.setType(new CodeableConcept(new Coding("http://terminology.hl7.org/CodeSystem/plan-definition-type", "workflow-definition", "Workflow Definition")));
+        // res.setType(new CodeableConcept(new
+        // Coding("http://terminology.hl7.org/CodeSystem/plan-definition-type",
+        // "workflow-definition", "Workflow Definition")));
         // res.getAction().forEach(action -> {
-        //     action.getTrigger().forEach(trigger -> {
-        //         trigger.setType(TriggerType.NAMEDEVENT);
-        //     });
+        // action.getTrigger().forEach(trigger -> {
+        // trigger.setType(TriggerType.NAMEDEVENT);
+        // });
         // });
         // res.setVersion("1.0.0");
         // res.setPublisher("eCR");
@@ -123,8 +145,9 @@ public class ErsdTransformer {
         return resolvedProfile;
     }
 
-    private IBaseOperationOutcome resolveTriggeringValueSetLibrary(Library res, Library specificationLibrary, Bundle bundle) {
-        if(!resolveProfile(res, usPhTriggeringValueSetLibraryProfileUrl)) {
+    private IBaseOperationOutcome resolveTriggeringValueSetLibrary(Library res, Library specificationLibrary,
+            Bundle bundle) {
+        if (!resolveProfile(res, usPhTriggeringValueSetLibraryProfileUrl)) {
             res.getMeta().addProfile(usPhTriggeringValueSetLibraryProfileUrl);
         }
         ValidationResult result = validator.validateWithResult(res);
@@ -138,13 +161,14 @@ public class ErsdTransformer {
             return result.toOperationOutcome();
         }
         // bundle.getEntry().stream()
-        //     .filter(x -> (x.hasResource() && x.getResource().fhirType().equals("ValueSet")))
-        //     .map(x -> (ValueSet) x.getResource())
-        //     .forEach(vs -> {
-        //         RelatedArtifact relatedArtifact = new RelatedArtifact();
-        //         relatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
-        //         relatedArtifact.setResource(vs.getUrlElement().asStringValue());
-        //         res.addRelatedArtifact(relatedArtifact);
+        // .filter(x -> (x.hasResource() &&
+        // x.getResource().fhirType().equals("ValueSet")))
+        // .map(x -> (ValueSet) x.getResource())
+        // .forEach(vs -> {
+        // RelatedArtifact relatedArtifact = new RelatedArtifact();
+        // relatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
+        // relatedArtifact.setResource(vs.getUrlElement().asStringValue());
+        // res.addRelatedArtifact(relatedArtifact);
         // });
         RelatedArtifact relatedArtifact = new RelatedArtifact();
         relatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
@@ -156,7 +180,7 @@ public class ErsdTransformer {
     }
 
     private IBaseOperationOutcome resolveTriggeringValueSet(ValueSet res, Library specificationLibrary) {
-        if(!resolveProfile(res, usPhTriggeringValueSetProfileUrl)) {
+        if (!resolveProfile(res, usPhTriggeringValueSetProfileUrl)) {
             res.getMeta().addProfile(usPhTriggeringValueSetProfileUrl);
         }
         ValidationResult result = validator.validateWithResult(res);
@@ -175,15 +199,12 @@ public class ErsdTransformer {
             // specificationLibrary.addRelatedArtifact(relatedArtifact);
         }
         res.addUseContext(
-            new UsageContext(
-                new Coding(
-                    "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "reporting", null
-                ),
-                new CodeableConcept(
-                    new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "triggering", null)
-                )
-            )
-        );
+                new UsageContext(
+                        new Coding(
+                                "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "reporting", null),
+                        new CodeableConcept(
+                                new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "triggering",
+                                        null))));
         res.setVersion("1.0.0");
         res.setPublisher("eCR");
         res.setExperimental(true);
@@ -191,13 +212,15 @@ public class ErsdTransformer {
     }
 
     private Bundle resolveSpecificationBundle(Bundle bundle, Library specificationLibrary) {
-        System.out.println(FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(specificationLibrary));
+        System.out.println(FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true)
+                .encodeResourceToString(specificationLibrary));
         List<BundleEntryComponent> entries = new ArrayList<BundleEntryComponent>();
-        entries.add(new BundleEntryComponent().setResource(specificationLibrary).setFullUrl("http://hl7.org/fhir/us/ecr/Library/SpecificationLibrary"));
+        entries.add(new BundleEntryComponent().setResource(specificationLibrary)
+                .setFullUrl("http://hl7.org/fhir/us/ecr/Library/SpecificationLibrary"));
         for (BundleEntryComponent entry : bundle.getEntry()) {
             if (entry.getResource() instanceof ValueSet) {
                 ValueSet v = (ValueSet) entry.getResource();
-                //v.setCompose(new ValueSetComposeComponent());
+                // v.setCompose(new ValueSetComposeComponent());
                 v.setText(new Narrative());
                 v.getExpansion().getContains().forEach(x -> x.setDisplay(""));
             }
