@@ -177,17 +177,5 @@ public class ResourceDataDateRoller {
         LocalDate newDate = now.minusDays(last.minusDays(effective.getLong(ChronoField.EPOCH_DAY)).getLong(ChronoField.EPOCH_DAY)).toLocalDate();
         DateFormat dFormat = new SimpleDateFormat("yyyy-mm-dd");
 
-
-
-
-        try {
-            Date lstDate = dFormat.parse("2022-01-31");
-            Float newFloat = new Float("30.0");
-            Date nowDate = new Date();
-//            int incrementDays = DateUtils
-//            DateUtils.addDays(lstDate, )
-        }catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
