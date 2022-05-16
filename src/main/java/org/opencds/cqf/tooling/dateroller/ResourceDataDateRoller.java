@@ -177,5 +177,12 @@ public class ResourceDataDateRoller {
         LocalDate newDate = now.minusDays(last.minusDays(effective.getLong(ChronoField.EPOCH_DAY)).getLong(ChronoField.EPOCH_DAY)).toLocalDate();
         DateFormat dFormat = new SimpleDateFormat("yyyy-mm-dd");
 
+        DataDateRollerSettings ddrSettings = new DataDateRollerSettings();
+        ddrSettings.setLastDateUpdated(LocalDate.parse("2022-04-30"));
+        ddrSettings.setDurationLength(Float.parseFloat("40.0"));
+        ddrSettings.setDurationUnitCode("d");
+        System.out.println(DataDateRollerUtils.isCurrentDateGreaterThanInterval(ddrSettings));
+
+
     }
 }

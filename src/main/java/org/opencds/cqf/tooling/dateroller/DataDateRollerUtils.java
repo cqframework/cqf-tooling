@@ -7,10 +7,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 public class DataDateRollerUtils {
@@ -38,31 +40,31 @@ public class DataDateRollerUtils {
     }
 
     public static LocalDate rollDate(LocalDate dateToRoll, DataDateRollerSettings dataDateRollerSettings) {
-        switch (dataDateRollerSettings.getDurationUnitCode()) {
-            case "d":
-                 long d = dataDateRollerSettings.getDurationLength().longValue() + (new Date().getTime() - dataDateRollerSettings.getLastDateUpdated().getLong(ChronoField.EPOCH_DAY));
-//                new Date(dateToRoll.plusDays(new Date().getTime() - (dataDateRollerSettings.getLastDateUpdated().getLong(ChronoField.EPOCH_DAY) - dateToRoll.getLong(ChronoField.EPOCH_DAY)));
-                return dateToRoll.plusDays(dataDateRollerSettings.getDurationLength().longValue());// + (LocalDate.getLong(ChronoField.EPOCH_DAY) - dateToRoll));
-            case "w":
-                return dateToRoll.plusWeeks(dataDateRollerSettings.getDurationLength().longValue());
-            case "m":
-                return dateToRoll.plusMonths(dataDateRollerSettings.getDurationLength().longValue());
-            case "y":
-                return dateToRoll.plusYears(dataDateRollerSettings.getDurationLength().longValue());
-            default:
-                throw new IllegalArgumentException("The code in the Extension http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/dataDateRoller for duration is incorrect. Must be {d, w, m, or y}");
-        }
+        return dateToRoll.plusDays(LocalDate.now().getLong(ChronoField.EPOCH_DAY) - dataDateRollerSettings.getLastDateUpdated().getLong(ChronoField.EPOCH_DAY));
     }
-
 
     public static boolean isCurrentDateGreaterThanInterval(DataDateRollerSettings dataDateRollerSettings) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime lastUpdated = LocalDate.parse(dataDateRollerSettings.getLastDateUpdated().toString()).atStartOfDay();
         int valueDuration = dataDateRollerSettings.getDurationLength().intValue();
-        if(now.minusDays(lastUpdated.getLong(ChronoField.EPOCH_DAY)).getLong(ChronoField.EPOCH_DAY) > valueDuration){
-            return true;
+        boolean canUpdateDates;
+        switch (dataDateRollerSettings.getDurationUnitCode()) {
+            case "d":
+                canUpdateDates = ChronoUnit.DAYS.between(lastUpdated, now) > valueDuration;
+                break;
+            case "w":
+                canUpdateDates = ChronoUnit.WEEKS.between(lastUpdated, now) > valueDuration;
+                break;
+            case "m":
+                canUpdateDates = ChronoUnit.MONTHS.between(lastUpdated, now) > valueDuration;
+                break;
+            case "y":
+                canUpdateDates = ChronoUnit.YEARS.between(lastUpdated, now) > valueDuration;
+                break;
+            default:
+                throw new IllegalArgumentException("The code in the Extension http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/dataDateRoller for duration is incorrect. Must be {d, w, m, or y}");
         }
-        return false;
+        return canUpdateDates;
     }
 
     public static IBaseResource jsonToIBaseResource(JsonObject jsonObject) {
