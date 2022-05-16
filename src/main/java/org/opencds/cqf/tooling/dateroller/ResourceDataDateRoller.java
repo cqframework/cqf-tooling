@@ -1,9 +1,6 @@
 package org.opencds.cqf.tooling.dateroller;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.apache.commons.lang.time.DateUtils;
-import org.apache.poi.ss.formula.functions.T;
-import org.hl7.fhir.DateTime;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
@@ -12,17 +9,14 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ResourceDataDateRoller {
     private static Logger logger = LoggerFactory.getLogger(ResourceDataDateRoller.class);
