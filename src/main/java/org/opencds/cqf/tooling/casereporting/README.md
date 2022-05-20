@@ -35,7 +35,7 @@ Steps to transform eRSDv1 to eRSDV2
 3. Replace the PlanDefinition resource in the source bundle with the PlanDefinition (either the xml or json version, 
    depending on which encoding you're using for your source bundle) found in the 
    'plandefinition-us-ecr-specification."json"|"xml"' file located here:
-          (https://github.com/cqframework/cqf-tooling/src/test/resources/org/opencds/cqf/tooling/casereporting/transformer/eRSDv2PlanDefinition)
+          (https://github.com/cqframework/cqf-tooling/master/src/test/resources/org/opencds/cqf/tooling/casereporting/transformer/eRSDv2PlanDefinition)
 4. Run the ErsdTransformer by invoking the "TransformErsd" Operation as described above. 
 5. Upon completion of a successful transform run, the output eRSDv2 bundle should be written to the file path specified
    in the -op argument. 
