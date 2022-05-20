@@ -33,7 +33,7 @@ The following parameters are supported:
 Steps to transform eRSDv1 to eRSDV2
 
 1. Download the eRSDv1 bundle at https://ersd.aimsplatform.org/#/home
-2. If transforming the JSON bundle, remove all "fhir_comment" elements.
+2. Remove all "fhir_comment" elements from the JSON bundle.
 3. Replace the PlanDefinition resource in the source bundle with the PlanDefinition (either the xml or json version, 
    depending on which encoding you're using for your source bundle) found in the 
    'plandefinition-us-ecr-specification."json"|"xml"' file located here:
