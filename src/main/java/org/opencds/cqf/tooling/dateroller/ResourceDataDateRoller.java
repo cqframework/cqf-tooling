@@ -9,10 +9,13 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,7 +33,8 @@ public class ResourceDataDateRoller {
     Condition
     Encounter
     Observation
-
+    CarePlan
+    Procedure
 */
     public static void rollBundleDates(FhirContext fhirContext, IBaseResource iBaseResource) {
         switch (fhirContext.getVersion().getVersion().name()) {
@@ -49,21 +53,20 @@ public class ResourceDataDateRoller {
         }
     }
 
-    private static DataDateRollerSettings populateDataDateRollerSettings(org.hl7.fhir.r4.model.Resource resource){
+    private static DataDateRollerSettings populateDataDateRollerSettings(org.hl7.fhir.r4.model.Resource resource) {
         DataDateRollerSettings dataDateRollerSettings = new DataDateRollerSettings();
         Property extension = resource.getChildByName("extension");
-        List <Base> extValues = extension.getValues();
-        for(Base extValue: extValues){
-            List <Base> urlBase = extValue.getChildByName("url").getValues();
+        List<Base> extValues = extension.getValues();
+        for (Base extValue : extValues) {
+            List<Base> urlBase = extValue.getChildByName("url").getValues();
             String url = ((UriType) urlBase.get(0)).getValue();
-            if(url.equalsIgnoreCase("http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/dataDateRoller")){
+            if (url.equalsIgnoreCase("http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/dataDateRoller")) {
                 String firstExtensionUrlValue = extValue.getChildByName("extension").getValues().get(0).getChildByName("url").getValues().get(0).toString();
                 String secondExtensionUrlValue = extValue.getChildByName("extension").getValues().get(1).getChildByName("url").getValues().get(0).toString();
-                if(null != firstExtensionUrlValue && null != secondExtensionUrlValue) {
+                if (null != firstExtensionUrlValue && null != secondExtensionUrlValue) {
                     dataDateRollerSettings = getDataDateRollerSettings(dataDateRollerSettings, extValue, firstExtensionUrlValue, 0);
-                    dataDateRollerSettings = getDataDateRollerSettings(dataDateRollerSettings, extValue, secondExtensionUrlValue,1);
-                }
-                else{
+                    dataDateRollerSettings = getDataDateRollerSettings(dataDateRollerSettings, extValue, secondExtensionUrlValue, 1);
+                } else {
                     throw new IllegalArgumentException("Extension http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/dataDateRoller is not formatted correctly.");
                 }
                 return dataDateRollerSettings;
@@ -74,22 +77,23 @@ public class ResourceDataDateRoller {
     }
 
     private static DataDateRollerSettings getDataDateRollerSettings(DataDateRollerSettings dataDateRollerSettings, Base extValue, String extensionUrlValue, int extensionPosition) {
-        if(extensionUrlValue.contains("dateLastUpdated")) {
+        if (extensionUrlValue.contains("dateLastUpdated")) {
             dataDateRollerSettings = getLastUpdatedSettings(dataDateRollerSettings, extValue.getChildByName("extension").getValues().get(extensionPosition).getNamedProperty("value").getValues().get(0));
         }
-        if(extensionUrlValue.contains("frequency")){
-                dataDateRollerSettings = getFrequencySettings(dataDateRollerSettings, extValue.getChildByName("extension").getValues().get(extensionPosition).getNamedProperty("value").getValues().get(0));
+        if (extensionUrlValue.contains("frequency")) {
+            dataDateRollerSettings = getFrequencySettings(dataDateRollerSettings, extValue.getChildByName("extension").getValues().get(extensionPosition).getNamedProperty("value").getValues().get(0));
         }
         return dataDateRollerSettings;
     }
 
-    private static DataDateRollerSettings getFrequencySettings(DataDateRollerSettings dataDateRollerSettings, Base frequency){
+    private static DataDateRollerSettings getFrequencySettings(DataDateRollerSettings dataDateRollerSettings, Base frequency) {
         dataDateRollerSettings.setDurationUnitCode(frequency.getNamedProperty("code").getValues().get(0).toString());
         String codeValue = frequency.getNamedProperty("value").getValues().get(0).toString();
         dataDateRollerSettings.setDurationLength(Float.parseFloat(codeValue.substring(codeValue.indexOf("[") + 1, codeValue.indexOf("]"))));
         return dataDateRollerSettings;
     }
-    private static DataDateRollerSettings getLastUpdatedSettings(DataDateRollerSettings dataDateRollerSettings, Base lastUpdated){
+
+    private static DataDateRollerSettings getLastUpdatedSettings(DataDateRollerSettings dataDateRollerSettings, Base lastUpdated) {
         String lastUpdatedStringDate = lastUpdated.toString();
         lastUpdatedStringDate = lastUpdatedStringDate.substring(lastUpdatedStringDate.indexOf("[") + 1, lastUpdatedStringDate.indexOf("]"));
         LocalDate newLocalDate = LocalDate.parse(lastUpdatedStringDate);
@@ -99,72 +103,92 @@ public class ResourceDataDateRoller {
 
     public static void rollDatesInR4Resource(IBaseResource resource) {
         org.hl7.fhir.r4.model.Resource r4Resource = (org.hl7.fhir.r4.model.Resource) resource;
-/*
-        if(r4Resource.getResourceType().name().equalsIgnoreCase("observation")){
-            Observation obs = (Observation) r4Resource;
-            Extension dataDateRoller = obs.getExtensionByUrl("http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/dataDateRoller");
-            if(null != dataDateRoller) {
-                DateTimeType newBaseEffectiveDate = new DateTimeType();
-                obs.setEffective(newBaseEffectiveDate);
-            }
-        }
-*/
         DataDateRollerSettings dataDateRollerSettings = populateDataDateRollerSettings(r4Resource);
-        if(null != dataDateRollerSettings) {
+        if (null != dataDateRollerSettings) {
             if (DataDateRollerUtils.isCurrentDateGreaterThanInterval(dataDateRollerSettings)) {
                 Field[] fields = r4Resource.getClass().getDeclaredFields();
-
                 for (Field field : fields) {
-                    if ((field.getType().getName().equals("org.hl7.fhir.r4.model.DateTimeType")) ||
-                            (field.getType().getName().equals("org.hl7.fhir.r4.model.DateType"))) {
-                        System.out.println(r4Resource.getChildByName(field.getName()).getValues().get(0));
-                    }
-                    if (field.getType().getName().equals("org.hl7.fhir.r4.model.MedicationRequest$MedicationRequestDispenseRequestComponent")) {
-                        System.out.println("From getR4DateTimeType start:  " + getR4DateTimeTypeFromPeriod(r4Resource.getChildByName(field.getName()).getValues().get(0).getChildByName("validityPeriod"), "start"));
-                        System.out.println("From getR4DateTimeType end:  " + getR4DateTimeTypeFromPeriod(r4Resource.getChildByName(field.getName()).getValues().get(0).getChildByName("validityPeriod"), "end"));
-                    }
-                    if (field.getType().getName().equals("org.hl7.fhir.r4.model.Period")) {
-                        System.out.println(getR4DateTimeTypeFromPeriod(r4Resource.getChildByName(field.getName()), "start"));
-                        System.out.println(getR4DateTimeTypeFromPeriod(r4Resource.getChildByName(field.getName()), "end"));
-                    }
-                    //Observation.effectiveDate comes in like this ??
-                    if (field.getName().equalsIgnoreCase("effective") && field.getType().getName().equals("org.hl7.fhir.r4.model.Type")) {
-                        try {
-                            String effectiveStringDate = r4Resource.getNamedProperty("effective").getValues().get(0).toString();
-                            effectiveStringDate = effectiveStringDate.substring(effectiveStringDate.indexOf("[") + 1, effectiveStringDate.indexOf("]"));
-                            LocalDate newEffectiveDate = DataDateRollerUtils.rollDate(LocalDate.parse(effectiveStringDate), dataDateRollerSettings);
-                            DateTimeType newBaseEffectiveDate = new DateTimeType();
-                            ZoneId defaultZoneId = ZoneId.systemDefault();
-                            newBaseEffectiveDate.setValue(Date.from(newEffectiveDate.atStartOfDay(defaultZoneId).toInstant()));
-                            r4Resource.getNamedProperty("effective").getValues().set(0, (Base) newBaseEffectiveDate);
-                        } catch (Exception ex) {
-                            System.out.println("Rolling date in field " + field.getName() + " did not work due to unknown error.");
-                            continue;
+                    try {
+                        Property resourceProperty = r4Resource.getNamedProperty(field.getName());
+                        if (null != resourceProperty) {
+                            String propertyTypeCode = resourceProperty.getTypeCode();
+                            if (null != propertyTypeCode && !propertyTypeCode.isEmpty()) {
+                                if (propertyTypeCode.toLowerCase().contains("datetime") ||
+                                        propertyTypeCode.toLowerCase().contains("date") ||
+                                        propertyTypeCode.toLowerCase().contains("dateType") ||
+                                        propertyTypeCode.toLowerCase().contains("period") ||
+                                        propertyTypeCode.toLowerCase().contains("timing") ||
+                                        propertyTypeCode.toLowerCase().contains("instant")) {
+                                    if (!resourceProperty.getValues().isEmpty() &&
+                                            !resourceProperty.getValues().get(0).fhirType().equalsIgnoreCase("period")) {
+                                        LocalDate dateToRole = DataDateRollerUtils.getOldDateFromR4Resource(r4Resource, field);
+                                        LocalDate newLocalDate = DataDateRollerUtils.rollDate(dateToRole, dataDateRollerSettings);
+                                        DateTimeType ddType = new DateTimeType();
+                                        ZoneId defaultZoneId = ZoneId.systemDefault();
+                                        ddType.setValue(Date.from(newLocalDate.atStartOfDay(defaultZoneId).toInstant()));
+                                        Property oldProperty = r4Resource.getNamedProperty(field.getName());
+                                        List<Base> values = new ArrayList<>();
+                                        values.add(0, ddType);
+                                        Property newProperty = new Property(oldProperty.getName(), oldProperty.getTypeCode(), oldProperty.getDefinition(), oldProperty.getMinCardinality(), oldProperty.getMaxCardinality(), values);
+                                        Base newBase = r4Resource.makeProperty(newProperty.getName().hashCode(), newProperty.getName());
+                                        if (newProperty.getTypeCode().contains("dateTime")) {
+                                            ((DateTimeType) newBase).setValue(Date.from(newLocalDate.atStartOfDay(defaultZoneId).toInstant()));
+                                        } else if (newProperty.getTypeCode().contains("date")) {
+                                            ((DateType) newBase).setValue(Date.from(newLocalDate.atStartOfDay(defaultZoneId).toInstant()));
+                                        }
+                                     } else if (null != resourceProperty.getValues() &&
+                                            resourceProperty.getValues().size() > 0 &&
+                                             resourceProperty.getValues().get(0).fhirType().equalsIgnoreCase("period")) {
+                                        handlePeriod(r4Resource, dataDateRollerSettings, field.getName());
+                                    }
+                                }
+                            }
+                            if (field.getName().contains("dispenseRequest")) {
+                                if(null != r4Resource.getNamedProperty(field.getName()).getValues() &&
+                                        r4Resource.getNamedProperty(field.getName()).getValues().size() > 0) {
+                                    Period newPeriod = rollPeriodDates(r4Resource.getNamedProperty(field.getName()).getValues().get(0).getNamedProperty("validityPeriod"), dataDateRollerSettings);
+                                    MedicationRequest medReq = (MedicationRequest) r4Resource;
+                                    medReq.getDispenseRequest().setValidityPeriod(newPeriod);
+                                }
+                            }
                         }
+                    } catch (Exception ex) {
+                        logger.debug(ex.getMessage());
+                        ex.printStackTrace();
                     }
                 }
+                DataDateRollerUtils.incrementLastUpdated(r4Resource);
             }
         }
     }
 
-    private static void setR4ResourceNewRolledDate(org.hl7.fhir.r4.model.Resource r4Resource){
-        String resourceType = r4Resource.fhirType();
-        switch(r4Resource.fhirType()){
-            case "Observation":
-//                (Observation)r4Resource.
-                break;
-        }
+    private static void handlePeriod(Resource r4Resource, DataDateRollerSettings dataDateRollerSettings, String fieldName) {
+        Property oldPeriodProperty = r4Resource.getNamedProperty(fieldName);
+        Period newPeriod = rollPeriodDates(oldPeriodProperty, dataDateRollerSettings);
+        Base newBase = r4Resource.makeProperty(fieldName.hashCode(), fieldName);
+        ((Period) newBase).setEnd(newPeriod.getEnd());
+        ((Period) newBase).setStart(newPeriod.getStart());
+        System.out.println();
     }
 
-    private static DateTimeType getR4DateTimeTypeFromPeriod(Property period, String periodPosition){
-        return (DateTimeType)period.getValues().get(0).getChildByName(periodPosition).getValues().get(0);
+    private static Period rollPeriodDates(Property period, DataDateRollerSettings dataDateRollerSettings) {
+        LocalDate startLocalDate = DataDateRollerUtils.getLocalDateFromPeriod(period, "start");
+        LocalDate endLocalDate = DataDateRollerUtils.getLocalDateFromPeriod(period, "end");
+        startLocalDate = DataDateRollerUtils.rollDate(startLocalDate, dataDateRollerSettings);
+        endLocalDate = DataDateRollerUtils.rollDate(endLocalDate, dataDateRollerSettings);
+        ZoneId defaultZoneId = ZoneId.systemDefault();
+        Period newPeriod = new Period();
+        newPeriod.setStart(Date.from(startLocalDate.atStartOfDay(defaultZoneId).toInstant()));
+        newPeriod.setEnd(Date.from(endLocalDate.atStartOfDay(defaultZoneId).toInstant()));
+        return newPeriod;
     }
+
 
     public static void rollDatesInStu3Resource(IBaseResource resource) {
         org.hl7.fhir.dstu3.model.Resource stu3Resource = (org.hl7.fhir.dstu3.model.Resource) resource;
     }
 
-    public static void main(String args []){
+    public static void main(String args[]) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime last = LocalDate.parse("2022-01-31").atStartOfDay();
         LocalDateTime effective = LocalDate.parse("2022-04-01").atStartOfDay();

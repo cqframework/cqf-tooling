@@ -22,6 +22,7 @@ public class DataDateRollerOperation extends Operation {
     private FhirContext fhirContext;
     public static final String separator = System.getProperty("file.separator");
     public String fhirVersion;
+    private IOUtils.Encoding fileEncoding;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -116,7 +117,7 @@ public class DataDateRollerOperation extends Operation {
     }
 
     private void rollDatesInFile(File file) {
-        IOUtils.Encoding fileEncoding = IOUtils.getEncoding(file.getName());
+        fileEncoding = IOUtils.getEncoding(file.getName());
 
         String fileContents = IOUtils.getFileContent(file);
         if (fileContents.contains("hookInstance")) {
@@ -140,7 +141,10 @@ public class DataDateRollerOperation extends Operation {
                     ResourceDataDateRoller.rollBundleDates(fhirContext, resource);
                 } else {
                     ResourceDataDateRoller.rollDatesInR4Resource(resource);
+                    System.out.println("");
                 }
+//baustin temporary to keep it from overwriting my data
+IOUtils.writeResource(resource,file.getAbsolutePath(), fileEncoding,fhirContext);
             }
         }
     }
