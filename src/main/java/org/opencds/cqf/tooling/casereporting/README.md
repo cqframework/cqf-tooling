@@ -11,7 +11,7 @@ new bundle which gets written to the directory specified via the "outputpath" in
 The expected structure of the eRSD version 1 bundle is a bundle with a single entry that is the bundle containing that 
 artifacts (PlanDefinition, ValueSet Library, ValueSets - grouping and leaf). An input bundle that does not conform to 
 this expected structure will result in a runtime error. Also, if the input file is JSON encoded, any "fhir_comment" 
-elements will need to be manually removed before processing. Both XML and JSON are supported for the input file.
+elements will need to be manually removed before processing. Currently, only JSON is supported for the input file.
 
 ### Invocation and Arguments
 command: mvn exec: java -Dexec.args="-TransformErsd (-pathtobundle | -ptb) (-outputpath | -op) [-pathtoplandefinition | -ptpd] [-encoding | -e]"

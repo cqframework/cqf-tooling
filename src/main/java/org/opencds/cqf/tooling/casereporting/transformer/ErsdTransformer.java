@@ -8,8 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import ca.uhn.fhir.parser.JsonParser;
-import ca.uhn.fhir.parser.XmlParser;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -18,7 +16,6 @@ import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.casereporting.validation.UsPublicHealthValidatorModule;
 import org.opencds.cqf.tooling.parameter.TransformErsdParameters;
-import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +27,6 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 
-import javax.xml.crypto.dsig.Transform;
-
 public class ErsdTransformer extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(ErsdTransformer.class);
     private FhirContext ctx;
@@ -42,9 +37,8 @@ public class ErsdTransformer extends Operation {
     private final String usPhTriggeringValueSetLibraryProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset-library";
     private final String usPhTriggeringValueSetProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset";
 
-//    private TransformErsdParameters inputParameters;
     private JsonParser jsonParser;
-    private XmlParser xmlParser;
+//    private XmlParser xmlParser;
 
     public ErsdTransformer() {
         ctx = FhirContext.forR4();
@@ -53,7 +47,7 @@ public class ErsdTransformer extends Operation {
         // validator.setValidateAgainstStandardSchematron(true);
         validator.registerValidatorModule(module);
         jsonParser = (JsonParser)ctx.newJsonParser();
-        xmlParser = (XmlParser)ctx.newXmlParser();
+//        xmlParser = (XmlParser)ctx.newXmlParser();
     }
 
     @Override
@@ -155,11 +149,13 @@ public class ErsdTransformer extends Operation {
         File bundleFile = new File(pathToBundle);
         if (bundleFile.isFile()) {
             try {
-                if (bundleFile.getName().endsWith("xml")) {
-                    sourceBundle = (Bundle)xmlParser.parseResource(new FileInputStream(bundleFile));
+                if (bundleFile.getName().endsWith("json")) {
+                    sourceBundle = (Bundle)jsonParser.parseResource(new FileInputStream(bundleFile));
                 }
                 else {
-                    sourceBundle = (Bundle)jsonParser.parseResource(new FileInputStream(bundleFile));
+                    throw new IllegalArgumentException("Currently, only JSON is supported for the input bundle.");
+                    //TODO: currently fails du to "Content is not allowed in prolog."
+//                    sourceBundle = (Bundle)xmlParser.parseResource(new FileInputStream(bundleFile));
                 }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
