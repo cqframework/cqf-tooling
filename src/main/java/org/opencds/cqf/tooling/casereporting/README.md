@@ -1,17 +1,19 @@
-###Overview
+# eRSD Transformer
+
+### Overview
 The eRSD Transformer is meant for transforming an eRSD v1 bundle into an eRSD v2 bundle. It is implemented 
 as an Operation and can be invoked, like other Operations, via commandline on the CQF Tooling jar. The Transformer reads 
 in an eRSD v1 bundle from the file specified via the "pathtobundle" input parameter. The contents of that bundle are 
 modified, or "transformed" slightly to make them conformant with the eRSD v2 specification. They are then added to a 
 new bundle which gets written to the directory specified via the "outputpath" input parameter. 
 
-###Expectations
+### Expectations
 The expected structure of the eRSD version 1 bundle is a bundle with a single entry that is the bundle containing that 
 artifacts (PlanDefinition, ValueSet Library, ValueSets - grouping and leaf). An input bundle that does not conform to 
 this expected structure will result in a runtime error. Also, if the input file is JSON encoded, any "fhir_comment" 
 elements will need to be manually removed before processing. Both XML and JSON are supported for the input file.
 
-###Invocation and Arguments
+### Invocation and Arguments
 command: mvn exec: java -Dexec.args="-TransformErsd (-pathtobundle | -ptb) (-outputpath | -op) [-pathtoplandefinition | -ptpd] [-encoding | -e]"
 
 The following parameters are supported:
@@ -27,7 +29,7 @@ The following parameters are supported:
   So if you want both json and xml bundles, you would specify both -e=json and -e=xml. If no encoding argument
   is supplied, the transformer will assume "json" as the default and output a single JSON-encoded bundle.
 
-###Summary Steps
+### Summary Steps
 Steps to transform eRSDv1 to eRSDV2
 
 1. Download the eRSDv1 bundle at https://ersd.aimsplatform.org/#/home
