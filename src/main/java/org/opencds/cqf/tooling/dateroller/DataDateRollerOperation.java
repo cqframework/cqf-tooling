@@ -111,12 +111,12 @@ public class DataDateRollerOperation extends Operation {
                     (!file.getName().toLowerCase(Locale.ROOT).contains("json"))) {
                 return;
             }
-            logger.info("Rolling dates for file: " + file.getAbsolutePath());
             rollDatesInFile(file);
         }
     }
 
     private void rollDatesInFile(File file) {
+        logger.info("Rolling dates for file: " + file.getAbsolutePath());
         fileEncoding = IOUtils.getEncoding(file.getName());
 
         String fileContents = IOUtils.getFileContent(file);

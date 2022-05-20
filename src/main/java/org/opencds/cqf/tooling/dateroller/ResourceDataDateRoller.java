@@ -72,7 +72,6 @@ public class ResourceDataDateRoller {
                 return dataDateRollerSettings;
             }
         }
-        System.out.println("ghost");
         return null;
     }
 
@@ -145,7 +144,10 @@ public class ResourceDataDateRoller {
                             }
                             if (field.getName().contains("dispenseRequest")) {
                                 if(null != r4Resource.getNamedProperty(field.getName()).getValues() &&
-                                        r4Resource.getNamedProperty(field.getName()).getValues().size() > 0) {
+                                        r4Resource.getNamedProperty(field.getName()).getValues().size() > 0 &&
+                                        null != r4Resource.getNamedProperty(field.getName()).getValues().get(0).getNamedProperty("validityPeriod") &&
+                                        null != r4Resource.getNamedProperty(field.getName()).getValues().get(0).getNamedProperty("validityPeriod").getValues() &&
+                                        r4Resource.getNamedProperty(field.getName()).getValues().get(0).getNamedProperty("validityPeriod").getValues().size() > 0) {
                                     Period newPeriod = rollPeriodDates(r4Resource.getNamedProperty(field.getName()).getValues().get(0).getNamedProperty("validityPeriod"), dataDateRollerSettings);
                                     MedicationRequest medReq = (MedicationRequest) r4Resource;
                                     medReq.getDispenseRequest().setValidityPeriod(newPeriod);
