@@ -1,25 +1,25 @@
 package org.opencds.cqf.tooling.casereporting.transformer;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
+import ca.uhn.fhir.parser.JsonParser;
+import ca.uhn.fhir.parser.XmlParser;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.Narrative;
-import org.hl7.fhir.r4.model.PlanDefinition;
-import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.UsageContext;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.casereporting.validation.UsPublicHealthValidatorModule;
+import org.opencds.cqf.tooling.parameter.TransformErsdParameters;
+import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,9 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 
-public class ErsdTransformer {
+import javax.xml.crypto.dsig.Transform;
+
+public class ErsdTransformer extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(ErsdTransformer.class);
     private FhirContext ctx;
     private FhirValidator validator;
@@ -40,15 +42,150 @@ public class ErsdTransformer {
     private final String usPhTriggeringValueSetLibraryProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset-library";
     private final String usPhTriggeringValueSetProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset";
 
+//    private TransformErsdParameters inputParameters;
+    private JsonParser jsonParser;
+    private XmlParser xmlParser;
+
     public ErsdTransformer() {
         ctx = FhirContext.forR4();
         validator = ctx.newValidator();
         // validator.setValidateAgainstStandardSchema(true);
         // validator.setValidateAgainstStandardSchematron(true);
         validator.registerValidatorModule(module);
+        jsonParser = (JsonParser)ctx.newJsonParser();
+        xmlParser = (XmlParser)ctx.newXmlParser();
     }
 
-    public Bundle transform(Bundle bundle) {
+    @Override
+    public void execute(String[] args) {
+        transform(args);
+    }
+
+    private TransformErsdParameters gatherParameters(String[] args) {
+        TransformErsdParameters params = new TransformErsdParameters();
+        params.encodings = new HashSet<>();
+
+        params.outputPath = "src/main/resources/org/opencds/cqf/tooling/casereporting/output"; // default
+        for (String arg : args) {
+            if (arg.equals("-TransformErsd")) {
+                continue;
+            }
+
+            String[] flagAndValue = arg.split("=");
+            if (flagAndValue.length < 2) {
+                throw new IllegalArgumentException("Invalid argument: " + arg);
+            }
+            String flag = flagAndValue[0];
+            String value = flagAndValue[1];
+
+            switch (flag.replace("-", "").toLowerCase()) {
+                case "outputpath": case "op": params.outputPath = value; break; // -outputpath (-op)
+                case "pathtobundle": case "ptb": params.pathToBundle = value; break; // -pathtobundle (-ptb)
+                case "pathtoplandefinition": case "ptpd": params.pathToV2PlanDefinition = value; break; // -pathtoplandefinition (-ptpd)
+                case "encoding": case "e": // -encoding (-e)
+                    IOUtils.Encoding encoding = IOUtils.Encoding.parse(value.toLowerCase());
+                    if (encoding == IOUtils.Encoding.JSON || encoding == IOUtils.Encoding.XML) {
+                        params.encodings.add(encoding); break;
+                    } else {
+                        throw new IllegalArgumentException("Invalid encoding: " + value);
+                    }
+                default: throw new IllegalArgumentException("Unknown flag: " + flag);
+            }
+        }
+
+        if (params.encodings.isEmpty()) {
+            params.encodings.add(IOUtils.Encoding.JSON);
+        }
+
+        if (params.pathToBundle == null) {
+            throw new IllegalArgumentException("The path to the ersd bundle is required");
+        }
+
+        return params;
+    }
+
+    public void transform(String[] args) {
+        TransformErsdParameters inputParameters = gatherParameters(args);
+        transform(inputParameters);
+    }
+
+    public void transform(TransformErsdParameters params) {
+        Bundle sourceBundle = getAndValidateBundle(params.pathToBundle);
+        PlanDefinition v2PlanDefinition = getV2PlanDefinition(params.pathToV2PlanDefinition);
+        if (v2PlanDefinition != null) {
+            if (sourceBundle.getEntry().stream().filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition")).count() > 1) {
+                throw new IllegalArgumentException("The input Bundle includes more than one PlanDefinition and you have " +
+                        "specified a path to a v2 PlanDefinition (via the pathtoplandefinition argument) but the " +
+                        "PlanDefinition to be replaced cannot be determined and so it will not be replaced. Please " +
+                        "manually replace the PlanDefinition in the input Bundle and then run the transformer again.");
+            }
+
+            BundleEntryComponent bundleEntry =
+                    sourceBundle.getEntry().stream().filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition")).findFirst().get();
+            bundleEntry.setFullUrl(v2PlanDefinition.getUrl());
+            bundleEntry.setResource(v2PlanDefinition);
+        }
+
+        Library specificationLibrary = createSpecificationLibrary();
+        resolveRelatedArtifacts(sourceBundle, specificationLibrary);
+        Bundle specificationBundle = resolveSpecificationBundle(sourceBundle, specificationLibrary);
+
+        if (params.encodings == null) {
+            params.encodings = new HashSet<>();
+        }
+        if (params.encodings.isEmpty()) {
+            params.encodings.add(IOUtils.Encoding.JSON);
+        }
+
+        for (IOUtils.Encoding encoding: params.encodings) {
+            IOUtils.writeBundle(specificationBundle, params.outputPath, encoding, FhirContext.forR4Cached());
+        }
+    }
+
+    private PlanDefinition getV2PlanDefinition(String pathToPlanDefinition) {
+        PlanDefinition planDef = null;
+        if (pathToPlanDefinition != null && !pathToPlanDefinition.isEmpty()) {
+            planDef = (PlanDefinition)IOUtils.readResource(pathToPlanDefinition, ctx, true);
+        }
+        return planDef;
+    }
+
+    private Bundle getAndValidateBundle(String pathToBundle) {
+        Bundle sourceBundle = null;
+        File bundleFile = new File(pathToBundle);
+        if (bundleFile.isFile()) {
+            try {
+                if (bundleFile.getName().endsWith("xml")) {
+                    sourceBundle = (Bundle)xmlParser.parseResource(new FileInputStream(bundleFile));
+                }
+                else {
+                    sourceBundle = (Bundle)jsonParser.parseResource(new FileInputStream(bundleFile));
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Error parsing " + bundleFile.getName());
+            }
+        }
+        if (sourceBundle == null) {
+            return null;
+        }
+
+        // The structure of the eRSD bundle is a bundle with a single entry - the bundle that contains the artifacts.
+        // We need to ensure that the bundle is structured as expected and then extract that inner bundle to work with.
+        // Rather than requiring the user to trim off that outer bundle as a manual step, we'll just do that here.
+        Bundle sourceArtifactBundle;
+        if (sourceBundle.getEntry().size() == 1
+                && sourceBundle.getEntry().get(0).hasResource()
+                && sourceBundle.getEntry().get(0).getResource().fhirType().equals("Bundle")) {
+            sourceArtifactBundle = (Bundle)sourceBundle.getEntry().get(0).getResource();
+        } else {
+            throw new RuntimeException("The bundle provided is not structured as expected. Expectation is a Bundle with a single entry - another bundle that contains the artifacts.");
+        }
+
+        return sourceArtifactBundle;
+    }
+
+    private Library createSpecificationLibrary() {
         Library specificationLibrary = new Library();
         specificationLibrary.setId(new IdType("Library", "SpecificationLibrary", "1.0.0"));
         specificationLibrary.getMeta().addProfile(usPhSpecificationLibraryProfileUrl);
@@ -60,8 +197,7 @@ public class ErsdTransformer {
         specificationLibrary.setStatus(PublicationStatus.ACTIVE);
         specificationLibrary.setExperimental(true);
         specificationLibrary.setPublisher("eCR");
-        specificationLibrary.setUrl("http://hl7.org/fhir/us/ecr/Library/SpecificationLibrary");
-        resolveRelatedArtifacts(bundle, specificationLibrary);
+        specificationLibrary.setUrl("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary");
         specificationLibrary.setType(new CodeableConcept(
                 new Coding("http://terminology.hl7.org/CodeSystem/library-type", "asset-collection", null)));
         boolean foundSpecificationType = false;
@@ -81,22 +217,19 @@ public class ErsdTransformer {
         if (!foundSpecificationType) {
             specificationLibrary.addUseContext(usageContext);
         }
-
-        return resolveSpecificationBundle(bundle, specificationLibrary);
+        return specificationLibrary;
     }
 
-    private Bundle resolveRelatedArtifacts(Bundle bundle, Library specificationLibrary) {
+    private void resolveRelatedArtifacts(Bundle bundle, Library specificationLibrary) {
         bundle.getEntry().stream()
                 .filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition"))
                 .forEach(x -> resolvePlanDefinition((PlanDefinition) x.getResource(), specificationLibrary));
         bundle.getEntry().stream()
                 .filter(x -> x.hasResource() && x.getResource().fhirType().equals("Library"))
-                .forEach(
-                        x -> resolveTriggeringValueSetLibrary((Library) x.getResource(), specificationLibrary, bundle));
+                .forEach( x -> resolveTriggeringValueSetLibrary((Library) x.getResource(), specificationLibrary, bundle));
         bundle.getEntry().stream()
                 .filter(x -> x.hasResource() && x.getResource().fhirType().equals("ValueSet"))
                 .forEach(x -> resolveTriggeringValueSet((ValueSet) x.getResource(), specificationLibrary));
-        return bundle;
     }
 
     private IBaseOperationOutcome resolvePlanDefinition(PlanDefinition res, Library specificationLibrary) {
@@ -199,12 +332,11 @@ public class ErsdTransformer {
             // specificationLibrary.addRelatedArtifact(relatedArtifact);
         }
         res.addUseContext(
-                new UsageContext(
-                        new Coding(
-                                "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "reporting", null),
-                        new CodeableConcept(
-                                new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "triggering",
-                                        null))));
+            new UsageContext(
+                new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "reporting", null),
+                new CodeableConcept(new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "triggering", null))
+            )
+        );
         res.setVersion("1.0.0");
         res.setPublisher("eCR");
         res.setExperimental(true);
@@ -216,7 +348,7 @@ public class ErsdTransformer {
                 .encodeResourceToString(specificationLibrary));
         List<BundleEntryComponent> entries = new ArrayList<BundleEntryComponent>();
         entries.add(new BundleEntryComponent().setResource(specificationLibrary)
-                .setFullUrl("http://hl7.org/fhir/us/ecr/Library/SpecificationLibrary"));
+                .setFullUrl("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
         for (BundleEntryComponent entry : bundle.getEntry()) {
             if (entry.getResource() instanceof ValueSet) {
                 ValueSet v = (ValueSet) entry.getResource();
