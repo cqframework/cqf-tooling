@@ -34,8 +34,6 @@ public class MeasureRefreshProcessor {
         
         setEffectiveDataRequirements(measureToUse, moduleDefinitionLibrary);
         
-        measureToUse.setRelatedArtifact(moduleDefinitionLibrary.getRelatedArtifact());
-
         return measureToUse;
     }
 

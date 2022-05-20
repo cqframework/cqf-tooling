@@ -1,10 +1,6 @@
 package org.opencds.cqf.tooling.modelinfo;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -26,6 +22,7 @@ public abstract class ClassInfoBuilder {
     protected Map<String, StructureDefinition> structureDefinitions;
     protected Map<String, TypeInfo> typeInfos = new HashMap<String, TypeInfo>();
     protected Map<String, String> typeTargets = new HashMap<String, String>();
+    protected Set<String> requiredBindingTypeNames = new HashSet<String>();
     protected ClassInfoSettings settings;
 
     public ClassInfoBuilder(ClassInfoSettings settings, Map<String, StructureDefinition> structureDefinitions) {
@@ -598,12 +595,19 @@ public abstract class ClassInfoBuilder {
         return false;
     }
 
+    private boolean isMappedTypeName(String qualifiedTypeName) {
+        return this.settings.useCQLPrimitives && this.settings.cqlTypeMappings.values().contains(qualifiedTypeName);
+    }
+
     private boolean isMappedTypeName(String modelName, String typeName) {
-        return this.settings.useCQLPrimitives && this.settings.cqlTypeMappings.values().contains(modelName + "." + typeName);
+        return isMappedTypeName(modelName + "." + typeName);
     }
 
     private boolean isPrimitiveMappedTypeName(String modelName, String typeName) {
-        return this.settings.useCQLPrimitives && this.settings.primitiveTypeMappings.values().contains(modelName + "." + typeName);
+        String qualifiedTypeName = getTypeName(modelName, typeName);
+        return this.settings.useCQLPrimitives &&
+                (this.settings.primitiveTypeMappings.values().contains(qualifiedTypeName) ||
+                        this.requiredBindingTypeNames.contains(qualifiedTypeName));
     }
 
     private String resolveMappedTypeName(String modelName, String typeName) {
@@ -716,6 +720,18 @@ public abstract class ClassInfoBuilder {
         return left.equals(right);
     }
 
+    private boolean hasRequiredBinding(ElementDefinition ed, String typeCode) {
+        return typeCode != null && typeCode.equals("code") && ed.hasBinding() && ed.getBinding().getStrength() == BindingStrength.REQUIRED;
+    }
+
+    private String getRequiredBindingName(ElementDefinition ed) {
+        Extension bindingExtension = this.extension(ed.getBinding(), "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName");
+        if (bindingExtension != null) {
+            return capitalizePath(((StringType) (bindingExtension.getValue())).getValue());
+        }
+        return null;
+    }
+
     // Builds the type specifier for the given element
     private TypeSpecifier buildElementTypeSpecifier(String modelName, String root, ElementDefinition ed) {
         if (ed.getContentReference() != null) {
@@ -817,13 +833,15 @@ public abstract class ClassInfoBuilder {
 
                 return nts;
             }
-            else if (typeCode != null && typeCode.equals("code") && ed.hasBinding()
-                    && ed.getBinding().getStrength() == BindingStrength.REQUIRED) {
-                Extension bindingExtension = this.extension(ed.getBinding(), "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName");
-                if (bindingExtension != null) {
-                    typeName = capitalizePath(((StringType) (bindingExtension.getValue())).getValue());
+            else if (hasRequiredBinding(ed, typeCode)) {
+                String requiredBindingName = getRequiredBindingName(ed);
+                if (requiredBindingName != null) {
+                    typeName = requiredBindingName;
+                    requiredBindingName = getTypeName(modelName, typeName);
+                    if (!requiredBindingTypeNames.contains(requiredBindingName)) {
+                        requiredBindingTypeNames.add(requiredBindingName);
+                    }
                 }
-
                 else {
                     TypeSpecifier ts = this.buildTypeSpecifier(modelName, ed.hasType() ? ed.getType() : null);
                     if (ts instanceof NamedTypeSpecifier && ((NamedTypeSpecifier) ts).getName() == null) {
@@ -922,21 +940,38 @@ public abstract class ClassInfoBuilder {
                     }
                 }
             }
-            else if (typeSpecifier instanceof ChoiceTypeSpecifier) {
-                ChoiceTypeSpecifier choiceTypeSpecifier = (ChoiceTypeSpecifier)typeSpecifier;
-                StringBuilder target = new StringBuilder();
-                for (TypeSpecifier choice : choiceTypeSpecifier.getChoice()) {
-                    if (target.length() > 0) {
-                        target.append(";"); // Separator for target per choice type
-                    }
-                    if (choice instanceof NamedTypeSpecifier) {
-                        NamedTypeSpecifier namedChoice = (NamedTypeSpecifier)choice;
-                        target.append(getTypeName(namedChoice));
-                        target.append(":");
-                        target.append(determineTarget(namedChoice));
+            else if (typeSpecifier instanceof IntervalTypeSpecifier) {
+                IntervalTypeSpecifier intervalTypeSpecifier = (IntervalTypeSpecifier)typeSpecifier;
+                if (intervalTypeSpecifier.getPointTypeSpecifier() instanceof NamedTypeSpecifier) {
+                    NamedTypeSpecifier namedTypeSpecifier = (NamedTypeSpecifier)intervalTypeSpecifier.getPointTypeSpecifier();
+                    String mappedTypeName = String.format("Interval<%s.%s>", namedTypeSpecifier.getNamespace(), namedTypeSpecifier.getName());
+                    if (isMappedTypeName(mappedTypeName)) {
+                        return this.settings.helpersLibraryName + ".ToInterval(%value)";
                     }
                 }
-                return target.toString();
+                return null;
+            }
+            else if (typeSpecifier instanceof ChoiceTypeSpecifier) {
+                // Added a ToValue(Choice<...>) function to FHIRHelpers that moves this to a run-time decision
+                // The reason is that to do it compile-time requires access to the base FHIR types, which don't exist in the QICore model
+                // Moving it to a run-time decision (which is effectively the same performance-wise as the compile-time decision
+                // because it was performed with a case anyway) means the compiler doesn't need to get involved and the mapping
+                // can just be output in the ELM. See applyTargetMap in the CQL-to-ELM translator.
+                return settings.helpersLibraryName + ".ToValue(%value)";
+//                ChoiceTypeSpecifier choiceTypeSpecifier = (ChoiceTypeSpecifier)typeSpecifier;
+//                StringBuilder target = new StringBuilder();
+//                for (TypeSpecifier choice : choiceTypeSpecifier.getChoice()) {
+//                    if (target.length() > 0) {
+//                        target.append(";"); // Separator for target per choice type
+//                    }
+//                    if (choice instanceof NamedTypeSpecifier) {
+//                        NamedTypeSpecifier namedChoice = (NamedTypeSpecifier)choice;
+//                        target.append(getTypeName(namedChoice));
+//                        target.append(":");
+//                        target.append(determineTarget(namedChoice));
+//                    }
+//                }
+//                return target.toString();
             }
         }
 

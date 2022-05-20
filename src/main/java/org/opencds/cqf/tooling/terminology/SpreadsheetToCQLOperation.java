@@ -11,6 +11,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
+import org.cqframework.cql.cql2elm.StringEscapeUtils;
 import org.opencds.cqf.tooling.Operation;
 
 public class SpreadsheetToCQLOperation extends Operation {
@@ -46,7 +47,8 @@ public class SpreadsheetToCQLOperation extends Operation {
 
             switch (flag.replace("-", "").toLowerCase()) {
                 case "pathtospreadsheet": case "pts": pathToSpreadsheet = value; break; // -pathtospreadsheet (-pts)
-                case "hasheader": case "hh": hasHeader = Boolean.valueOf(value); break;
+                case "hasheader": case "hh": hasHeader = Boolean.valueOf(value); break; // -hasheader (-hh)
+                case "outputpath": case "op": setOutputPath(value); break; // -outputpath (-op)
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
@@ -58,7 +60,7 @@ public class SpreadsheetToCQLOperation extends Operation {
         spreadsheetName = new File(pathToSpreadsheet).getName();
         int extensionIndex = spreadsheetName.lastIndexOf(".");
         if (extensionIndex > 0) {
-            spreadsheetName = spreadsheetName.substring(0, extensionIndex - 1);
+            spreadsheetName = spreadsheetName.substring(0, extensionIndex);
         }
 
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
@@ -124,7 +126,7 @@ public class SpreadsheetToCQLOperation extends Operation {
                     result.append("\"");
                     result.append(": ");
                     result.append("'");
-                    result.append(SpreadsheetHelper.getCellAsString(cell));
+                    result.append(StringEscapeUtils.escapeCql(SpreadsheetHelper.getCellAsString(cell)));
                     result.append("'");
                 }
                 result.append(" }");
