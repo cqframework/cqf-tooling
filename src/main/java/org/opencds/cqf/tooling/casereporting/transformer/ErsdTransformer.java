@@ -333,6 +333,12 @@ public class ErsdTransformer extends Operation {
                 new CodeableConcept(new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "triggering", null))
             )
         );
+        res.addUseContext(
+            new UsageContext(
+                new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "priority", null),
+                new CodeableConcept(new Coding("http://hl7.org/fhir/us/ecr/ValueSet/us-ph-valueset-priority", "routine", null))
+            )
+        );
         res.setVersion("1.0.0");
         res.setPublisher("eCR");
         res.setExperimental(true);
