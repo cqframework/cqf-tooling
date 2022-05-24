@@ -2,42 +2,22 @@ package org.opencds.cqf.tooling.dateroller;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import com.google.gson.JsonObject;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class DataDateRollerUtils {
     private static Logger logger = LoggerFactory.getLogger(ResourceDataDateRoller.class);
-
-    public static LocalDate stringToDate(String stringToConvert) {
-        LocalDate localDate = null;
-        DateTimeFormatter format
-                = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        try {
-            localDate = LocalDate.parse(stringToConvert, format);
-        } catch (IllegalArgumentException iaex) {
-            System.out.println(iaex);
-        }
-        return localDate;
-    }
 
     public static IParser getParser(IOUtils.Encoding encoding, FhirContext fhirContext) {
         switch (encoding) {
@@ -102,21 +82,6 @@ public class DataDateRollerUtils {
             logger.debug(ex.getMessage());
             return null;
         }
-    }
-
-    public static Property createNewR4PropertyFromR4Resource(Resource r4Resource, Field field, LocalDate newLocalDate) {
-        DateTimeType ddType = new DateTimeType();
-        ZoneId defaultZoneId = ZoneId.systemDefault();
-        Date newDate = new Date(newLocalDate.toEpochDay());
-        ddType.setValue(Date.from(newLocalDate.atStartOfDay(defaultZoneId).toInstant()));
-        Property oldProperty = r4Resource.getNamedProperty(field.getName());
-        return new Property(oldProperty.getName(), oldProperty.getTypeCode(), oldProperty.getDefinition(), oldProperty.getMinCardinality(), oldProperty.getMaxCardinality(), new ArrayList<>());
-    }
-
-    public static IBaseResource jsonToIBaseResource(JsonObject jsonObject) {
-//        ResourceUtils.
-        return null;
-//        IBaseResource baseResource = IBaseResource;
     }
 
     public static DateTimeType getR4DateTimeTypeFromPeriod(Property period, String periodPosition) {

@@ -1,6 +1,11 @@
 package org.opencds.cqf.tooling.dateroller;
 
+import org.hl7.fhir.r4.model.Base;
+import org.hl7.fhir.r4.model.Property;
+import org.hl7.fhir.r4.model.UriType;
+
 import java.time.LocalDate;
+import java.util.List;
 
 public class DataDateRollerSettings {
     private LocalDate lastDateUpdated;
@@ -15,4 +20,47 @@ public class DataDateRollerSettings {
 
     public String getDurationUnitCode() {return durationUnitCode;}
     public void setDurationUnitCode(String durationUnitCode) {this.durationUnitCode = durationUnitCode;}
+
+
+    public void populateDataDateRollerSettings(org.hl7.fhir.r4.model.Resource resource) {
+        Property extension = resource.getChildByName("extension");
+        List<Base> extValues = extension.getValues();
+        for (Base extValue : extValues) {
+            List<Base> urlBase = extValue.getChildByName("url").getValues();
+            String url = ((UriType) urlBase.get(0)).getValue();
+            if (url.equalsIgnoreCase("http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/dataDateRoller")) {
+                String firstExtensionUrlValue = extValue.getChildByName("extension").getValues().get(0).getChildByName("url").getValues().get(0).toString();
+                String secondExtensionUrlValue = extValue.getChildByName("extension").getValues().get(1).getChildByName("url").getValues().get(0).toString();
+                if (null != firstExtensionUrlValue && null != secondExtensionUrlValue) {
+                    getDataDateRollerSettings(extValue, firstExtensionUrlValue, 0);
+                    getDataDateRollerSettings(extValue, secondExtensionUrlValue, 1);
+                } else {
+                    throw new IllegalArgumentException("Extension http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/dataDateRoller is not formatted correctly.");
+                }
+            }
+        }
+    }
+
+    private void getDataDateRollerSettings(Base extValue, String extensionUrlValue, int extensionPosition) {
+        if (extensionUrlValue.contains("dateLastUpdated")) {
+            getLastUpdatedSettings(extValue.getChildByName("extension").getValues().get(extensionPosition).getNamedProperty("value").getValues().get(0));
+        }
+        if (extensionUrlValue.contains("frequency")) {
+            getFrequencySettings(extValue.getChildByName("extension").getValues().get(extensionPosition).getNamedProperty("value").getValues().get(0));
+        }
+    }
+
+    private void getFrequencySettings(Base frequency) {
+        this.setDurationUnitCode(frequency.getNamedProperty("code").getValues().get(0).toString());
+        String codeValue = frequency.getNamedProperty("value").getValues().get(0).toString();
+        this.setDurationLength(Float.parseFloat(codeValue.substring(codeValue.indexOf("[") + 1, codeValue.indexOf("]"))));
+    }
+
+
+    private void getLastUpdatedSettings(Base lastUpdated) {
+        String lastUpdatedStringDate = lastUpdated.toString();
+        lastUpdatedStringDate = lastUpdatedStringDate.substring(lastUpdatedStringDate.indexOf("[") + 1, lastUpdatedStringDate.indexOf("]"));
+        LocalDate newLocalDate = LocalDate.parse(lastUpdatedStringDate);
+        this.setLastDateUpdated(newLocalDate);
+    }
 }

@@ -1,9 +1,7 @@
 package org.opencds.cqf.tooling.dateroller;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import com.google.gson.*;
-import com.google.gson.stream.JsonWriter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -14,10 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.time.LocalDate;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicReference;
 
 
 public class DataDateRollerOperation extends Operation {
@@ -25,26 +20,13 @@ public class DataDateRollerOperation extends Operation {
     public static final String separator = System.getProperty("file.separator");
     public String fhirVersion;
     private IOUtils.Encoding fileEncoding;
-
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    /**
-     * open directory;
-     * Get object
-     * if directory goto open directory
-     * else
-     * if file type fhir resource
-     * if bundle use bundleutils.getR4ResourcesFromBundle to get resources
-     * for each resource look for date items and adjust
-     * else
-     * look for date items and adjust
-     * else if cdsHook
-     * find all resources, including the draftOrder one and adjust
-     */
     @Override
     public void execute(String[] args) {
         String inputPath = "";
-//        setOutputPath("src" + separator + "main" + separator + "resources" + separator + "org.opencds.cqf" + separator + "tooling");
+        setOutputPath("src" + separator + "main" + separator + "resources" + separator + "org.opencds.cqf" + separator + "tooling");
+        boolean outputPathProvided = false;
         for (String arg : args) {
             if (arg.equals("-RollTestsDataDates")) continue;
             String[] flagAndValue = arg.split("=");
@@ -53,7 +35,6 @@ public class DataDateRollerOperation extends Operation {
             }
             String flag = flagAndValue[0];
             String value = flagAndValue[1];
-
             switch (flag.replace("-", "").toLowerCase()) {
                 case "inputpath":
                 case "ip":
@@ -62,6 +43,7 @@ public class DataDateRollerOperation extends Operation {
                 case "outputpath":
                 case "op":
                     setOutputPath(value);
+                    outputPathProvided = true;
                     break; // -outputpath (-op)
                 case "version":
                 case "v":
@@ -74,8 +56,9 @@ public class DataDateRollerOperation extends Operation {
         if (inputPath.length() < 1) {
             throw new IllegalArgumentException("The directory to files to change dates is required as -ip=");
         }
-        if(null == getOutputPath() || getOutputPath().length() < 1){
-            setOutputPath(inputPath);
+        if(!outputPathProvided){
+            // TODO - use output path
+//            setOutputPath(inputPath);
         }
         if (fhirVersion.length() < 1) {
             throw new IllegalArgumentException("The FHIR version(-v) must be specified and must be the version number such as 3.0.0 or 4.0.1");
@@ -122,12 +105,8 @@ public class DataDateRollerOperation extends Operation {
         String fileContents = IOUtils.getFileContent(file);
         if (fileContents.contains("hookInstance")) {
             if (fileEncoding.equals(IOUtils.Encoding.XML)) {
+                logger.error("Current CDS Hooks specification calls for JSON only. (5/2022)");
                 return;
-/**
- *          turn xml into json then call rollJSONHookDates
- */
-//                XMLParser xmlParser = new XmlParser();
-//                JsonObject hook =
             } else if (fileEncoding.equals(IOUtils.Encoding.JSON)) {
                 HookDataDateRoller hookDataDateRoller = new HookDataDateRoller(fhirContext, fileEncoding);
                 JsonObject hook = hookDataDateRoller.rollJSONHookDates(JsonParser.parseString(fileContents).getAsJsonObject());//this should be the whole hook
@@ -155,34 +134,4 @@ public class DataDateRollerOperation extends Operation {
             }
         }
     }
-// resource.getClass().getName() "org.hl7.fhir.r4.model.MedicationRequest"
-    //resource.getClass().getDeclaredFields()
-
-    private LocalDate getLastUpdated(JsonArray dataDateRollerExtensions) {
-        AtomicReference<LocalDate> lastUpdated = null;
-        dataDateRollerExtensions.forEach(extensionMember -> {
-            String url = extensionMember.getAsJsonObject().get("url").getAsString();
-            if (null != url && url.equalsIgnoreCase("dateLastUpdated")) {
-                String dateString = extensionMember.getAsJsonObject().get("valueDateTime").getAsString();
-                lastUpdated.set(DataDateRollerUtils.stringToDate(dateString));
-            }
-        });
-        return lastUpdated.get();
-    }
-
-    /**
-     * if resource has an extension with "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/dataDateRoller"
-     * then get sub-extension from that with "url": "dateLastUpdated", and grab it's "valueDateTime": "2022-04-22"
-     * then get sub-extension "url": "frequency", and grab it's
-     * "valueDuration": {
-     * "value": 30.0,
-     * "unit": "days",
-     * "system": "http://unitsofmeasure.org",
-     * "code": "d"
-     * }
-     * //grab current dateTime objects and update them to current dateTime + valueDuration value (in whatever unit is in extension)
-     * //    Then set dateLastUpdated to current dateTime
-     * <p>
-     * newDate = Current date - lastRunDate + frequency + objects dateValue
-     */
 }

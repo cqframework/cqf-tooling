@@ -8,34 +8,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class ResourceDataDateRoller {
     private static Logger logger = LoggerFactory.getLogger(ResourceDataDateRoller.class);
-    //        logger.debug("test");
 
-    /*
-    Opioid r4 Resources:
-    patient
-    MedicationRequest
-    MedicationStatement
-    Condition
-    Encounter
-    Observation
-    CarePlan
-    Procedure
-*/
     public static void rollBundleDates(FhirContext fhirContext, IBaseResource iBaseResource) {
         switch (fhirContext.getVersion().getVersion().name()) {
             case "R4":
@@ -53,57 +34,11 @@ public class ResourceDataDateRoller {
         }
     }
 
-    private static DataDateRollerSettings populateDataDateRollerSettings(org.hl7.fhir.r4.model.Resource resource) {
-        DataDateRollerSettings dataDateRollerSettings = new DataDateRollerSettings();
-        Property extension = resource.getChildByName("extension");
-        List<Base> extValues = extension.getValues();
-        for (Base extValue : extValues) {
-            List<Base> urlBase = extValue.getChildByName("url").getValues();
-            String url = ((UriType) urlBase.get(0)).getValue();
-            if (url.equalsIgnoreCase("http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/dataDateRoller")) {
-                String firstExtensionUrlValue = extValue.getChildByName("extension").getValues().get(0).getChildByName("url").getValues().get(0).toString();
-                String secondExtensionUrlValue = extValue.getChildByName("extension").getValues().get(1).getChildByName("url").getValues().get(0).toString();
-                if (null != firstExtensionUrlValue && null != secondExtensionUrlValue) {
-                    dataDateRollerSettings = getDataDateRollerSettings(dataDateRollerSettings, extValue, firstExtensionUrlValue, 0);
-                    dataDateRollerSettings = getDataDateRollerSettings(dataDateRollerSettings, extValue, secondExtensionUrlValue, 1);
-                } else {
-                    throw new IllegalArgumentException("Extension http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/dataDateRoller is not formatted correctly.");
-                }
-                return dataDateRollerSettings;
-            }
-        }
-        return null;
-    }
-
-    private static DataDateRollerSettings getDataDateRollerSettings(DataDateRollerSettings dataDateRollerSettings, Base extValue, String extensionUrlValue, int extensionPosition) {
-        if (extensionUrlValue.contains("dateLastUpdated")) {
-            dataDateRollerSettings = getLastUpdatedSettings(dataDateRollerSettings, extValue.getChildByName("extension").getValues().get(extensionPosition).getNamedProperty("value").getValues().get(0));
-        }
-        if (extensionUrlValue.contains("frequency")) {
-            dataDateRollerSettings = getFrequencySettings(dataDateRollerSettings, extValue.getChildByName("extension").getValues().get(extensionPosition).getNamedProperty("value").getValues().get(0));
-        }
-        return dataDateRollerSettings;
-    }
-
-    private static DataDateRollerSettings getFrequencySettings(DataDateRollerSettings dataDateRollerSettings, Base frequency) {
-        dataDateRollerSettings.setDurationUnitCode(frequency.getNamedProperty("code").getValues().get(0).toString());
-        String codeValue = frequency.getNamedProperty("value").getValues().get(0).toString();
-        dataDateRollerSettings.setDurationLength(Float.parseFloat(codeValue.substring(codeValue.indexOf("[") + 1, codeValue.indexOf("]"))));
-        return dataDateRollerSettings;
-    }
-
-    private static DataDateRollerSettings getLastUpdatedSettings(DataDateRollerSettings dataDateRollerSettings, Base lastUpdated) {
-        String lastUpdatedStringDate = lastUpdated.toString();
-        lastUpdatedStringDate = lastUpdatedStringDate.substring(lastUpdatedStringDate.indexOf("[") + 1, lastUpdatedStringDate.indexOf("]"));
-        LocalDate newLocalDate = LocalDate.parse(lastUpdatedStringDate);
-        dataDateRollerSettings.setLastDateUpdated(newLocalDate);
-        return dataDateRollerSettings;
-    }
-
     public static void rollDatesInR4Resource(IBaseResource resource) {
         org.hl7.fhir.r4.model.Resource r4Resource = (org.hl7.fhir.r4.model.Resource) resource;
         logger.info("resource having date rolled:  " + r4Resource.getNamedProperty("id").getValues().get(0));
-        DataDateRollerSettings dataDateRollerSettings = populateDataDateRollerSettings(r4Resource);
+        DataDateRollerSettings dataDateRollerSettings = new DataDateRollerSettings();
+        dataDateRollerSettings.populateDataDateRollerSettings(r4Resource);
         if (null != dataDateRollerSettings) {
             if (DataDateRollerUtils.isCurrentDateGreaterThanInterval(dataDateRollerSettings)) {
                 Field[] fields = r4Resource.getClass().getDeclaredFields();
@@ -192,21 +127,5 @@ public class ResourceDataDateRoller {
 
     public static void rollDatesInStu3Resource(IBaseResource resource) {
         org.hl7.fhir.dstu3.model.Resource stu3Resource = (org.hl7.fhir.dstu3.model.Resource) resource;
-    }
-
-    public static void main(String args[]) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime last = LocalDate.parse("2022-01-31").atStartOfDay();
-        LocalDateTime effective = LocalDate.parse("2022-04-01").atStartOfDay();
-        LocalDate newDate = now.minusDays(last.minusDays(effective.getLong(ChronoField.EPOCH_DAY)).getLong(ChronoField.EPOCH_DAY)).toLocalDate();
-        DateFormat dFormat = new SimpleDateFormat("yyyy-mm-dd");
-
-        DataDateRollerSettings ddrSettings = new DataDateRollerSettings();
-        ddrSettings.setLastDateUpdated(LocalDate.parse("2022-04-30"));
-        ddrSettings.setDurationLength(Float.parseFloat("40.0"));
-        ddrSettings.setDurationUnitCode("d");
-        System.out.println(DataDateRollerUtils.isCurrentDateGreaterThanInterval(ddrSettings));
-
-
     }
 }
