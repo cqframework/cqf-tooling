@@ -2,16 +2,18 @@ package org.opencds.cqf.tooling.dateroller;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import com.google.gson.*;
+import com.google.gson.stream.JsonWriter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonParser;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.Locale;
@@ -42,7 +44,7 @@ public class DataDateRollerOperation extends Operation {
     @Override
     public void execute(String[] args) {
         String inputPath = "";
-        setOutputPath("src" + separator + "main" + separator + "resources" + separator + "org.opencds.cqf" + separator + "tooling");
+//        setOutputPath("src" + separator + "main" + separator + "resources" + separator + "org.opencds.cqf" + separator + "tooling");
         for (String arg : args) {
             if (arg.equals("-RollTestsDataDates")) continue;
             String[] flagAndValue = arg.split("=");
@@ -72,7 +74,9 @@ public class DataDateRollerOperation extends Operation {
         if (inputPath.length() < 1) {
             throw new IllegalArgumentException("The directory to files to change dates is required as -ip=");
         }
-
+        if(null == getOutputPath() || getOutputPath().length() < 1){
+            setOutputPath(inputPath);
+        }
         if (fhirVersion.length() < 1) {
             throw new IllegalArgumentException("The FHIR version(-v) must be specified and must be the version number such as 3.0.0 or 4.0.1");
         }
@@ -101,10 +105,6 @@ public class DataDateRollerOperation extends Operation {
                 }
                 rollDatesInFile(nextFile);
             }
-//            BundleUtils.extractR4Resources();
-//            if (IOUtils.isXMLOrJson(libraryPath, libraryFile.getName())) {
-//                loadLibrary(fileMap, libraries, libraryFile);
-//            }
         }
         if (file.isFile()) {
             if ((!file.getName().toLowerCase(Locale.ROOT).contains("xml")) &&
@@ -129,22 +129,29 @@ public class DataDateRollerOperation extends Operation {
 //                XMLParser xmlParser = new XmlParser();
 //                JsonObject hook =
             } else if (fileEncoding.equals(IOUtils.Encoding.JSON)) {
-                HookDataDateRoller.rollJSONHookDates(JsonParser.parseString(fileContents).getAsJsonObject());//this should be the whole hook
+                HookDataDateRoller hookDataDateRoller = new HookDataDateRoller(fhirContext, fileEncoding);
+                JsonObject hook = hookDataDateRoller.rollJSONHookDates(JsonParser.parseString(fileContents).getAsJsonObject());//this should be the whole hook
+                FileWriter fileWriter = null;
+                try {
+                    fileWriter = new FileWriter(file.getAbsolutePath());
+                    Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
+                    gson.toJson(hook, fileWriter);
+                    fileWriter.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
-        } else if (fileContents.contains("resourceType")) {
-            IParser fileParser = DataDateRollerUtils.getParser(fileEncoding, fhirContext);
+        } else if (fileContents.contains("resource")) {
             IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext);
             if (null != resource) {
-                Field[] fields = resource.getClass().getFields();
                 String resourceType = resource.fhirType();
-                if (resourceType.equals("Bundle")) {
+                if (resourceType.equalsIgnoreCase("Bundle")) {
                     ResourceDataDateRoller.rollBundleDates(fhirContext, resource);
                 } else {
                     ResourceDataDateRoller.rollDatesInR4Resource(resource);
                     System.out.println("");
                 }
-//baustin temporary to keep it from overwriting my data
-IOUtils.writeResource(resource,file.getAbsolutePath(), fileEncoding,fhirContext);
+                IOUtils.writeResource(resource, file.getAbsolutePath(), fileEncoding, fhirContext);
             }
         }
     }

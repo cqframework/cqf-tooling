@@ -102,6 +102,7 @@ public class ResourceDataDateRoller {
 
     public static void rollDatesInR4Resource(IBaseResource resource) {
         org.hl7.fhir.r4.model.Resource r4Resource = (org.hl7.fhir.r4.model.Resource) resource;
+        logger.info("resource having date rolled:  " + r4Resource.getNamedProperty("id").getValues().get(0));
         DataDateRollerSettings dataDateRollerSettings = populateDataDateRollerSettings(r4Resource);
         if (null != dataDateRollerSettings) {
             if (DataDateRollerUtils.isCurrentDateGreaterThanInterval(dataDateRollerSettings)) {
@@ -121,6 +122,9 @@ public class ResourceDataDateRoller {
                                     if (!resourceProperty.getValues().isEmpty() &&
                                             !resourceProperty.getValues().get(0).fhirType().equalsIgnoreCase("period")) {
                                         LocalDate dateToRole = DataDateRollerUtils.getOldDateFromR4Resource(r4Resource, field);
+                                        if(null == dateToRole){
+                                            continue;
+                                        }
                                         LocalDate newLocalDate = DataDateRollerUtils.rollDate(dateToRole, dataDateRollerSettings);
                                         DateTimeType ddType = new DateTimeType();
                                         ZoneId defaultZoneId = ZoneId.systemDefault();

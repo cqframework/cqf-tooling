@@ -83,16 +83,25 @@ public class DataDateRollerUtils {
         return stringDateFromR4ResourceToLocalDate(strDateToRoll);
     }
 
-    public static LocalDate getLocalDateFromPeriod(Property period, String periodPosition){
-        DateTimeType startTimeType = getR4DateTimeTypeFromPeriod(period,periodPosition);
-        return stringDateFromR4ResourceToLocalDate(getR4DateTimeTypeFromPeriod(period,periodPosition).toString());
+    public static LocalDate getLocalDateFromPeriod(Property period, String periodPosition) {
+        DateTimeType startTimeType = getR4DateTimeTypeFromPeriod(period, periodPosition);
+        return stringDateFromR4ResourceToLocalDate(getR4DateTimeTypeFromPeriod(period, periodPosition).toString());
     }
-    public static LocalDate stringDateFromR4ResourceToLocalDate(String strDateToRoll){
-        strDateToRoll = strDateToRoll.substring(strDateToRoll.indexOf("[") + 1, strDateToRoll.indexOf("]"));
-        if(strDateToRoll.contains("T")) {
+
+    public static LocalDate stringDateFromR4ResourceToLocalDate(String strDateToRoll) {
+        if (strDateToRoll.contains("[")) {
+            strDateToRoll = strDateToRoll.substring(strDateToRoll.indexOf("[") + 1, strDateToRoll.indexOf("]"));
+        }
+        if (strDateToRoll.contains("T")) {
             strDateToRoll = strDateToRoll.substring(0, strDateToRoll.indexOf('T'));
         }
-        return LocalDate.parse(strDateToRoll);
+        try{
+            return LocalDate.parse(strDateToRoll);
+        }
+        catch(Exception ex){
+            logger.debug(ex.getMessage());
+            return null;
+        }
     }
 
     public static Property createNewR4PropertyFromR4Resource(Resource r4Resource, Field field, LocalDate newLocalDate) {
@@ -140,10 +149,10 @@ public class DataDateRollerUtils {
                 }
                 extensionList.add(newDDRExtension);
             } else {        //add all current non-dataDateRoller extensions
-                extensionList.add((Extension)extValue);
+                extensionList.add((Extension) extValue);
             }
         }
-        DomainResource dResource = (DomainResource)r4Resource;
+        DomainResource dResource = (DomainResource) r4Resource;
         dResource.setExtension(extensionList);
     }
 }
