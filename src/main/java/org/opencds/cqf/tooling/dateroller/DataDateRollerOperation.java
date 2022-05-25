@@ -120,7 +120,7 @@ public class DataDateRollerOperation extends Operation {
                     throw new RuntimeException(e);
                 }
             }
-        } else if (fileContents.contains("resource")) {
+        } else {
             IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext);
             if (null != resource) {
                 String resourceType = resource.fhirType();
