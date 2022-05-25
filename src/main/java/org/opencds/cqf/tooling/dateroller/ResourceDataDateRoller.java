@@ -36,7 +36,7 @@ public class ResourceDataDateRoller {
             case "R4":
                 RollDatesR4.rollDatesInResource(resource);
                 break;
-            case "Stu3":
+            case "DSTU3":
                 RollDatesDstu3.rollDatesInResource(resource);
                 break;
         }
