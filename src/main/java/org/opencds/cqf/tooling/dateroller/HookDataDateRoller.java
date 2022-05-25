@@ -68,6 +68,9 @@ public class HookDataDateRoller {
             } catch (Exception ex) {
                 continue;
             }
+            if(null == item){
+                continue;
+            }
             IBaseResource resource = resourceParser.parseResource(item.getAsJsonObject("resource").toString());
             if (null == resource) {
                 logger.info("This hook did not contain prefetch items");

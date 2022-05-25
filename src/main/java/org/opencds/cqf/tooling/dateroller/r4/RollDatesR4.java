@@ -19,8 +19,7 @@ public class RollDatesR4 {
         Resource r4Resource = (Resource) resource;
         logger.info("resource having date rolled:  " + r4Resource.getNamedProperty("id").getValues().get(0));
         DataDateRollerSettingsR4 dataDateRollerSettings = new DataDateRollerSettingsR4();
-        dataDateRollerSettings.populateDataDateRollerSettings(r4Resource);
-        if (null != dataDateRollerSettings) {
+        if (dataDateRollerSettings.populateDataDateRollerSettings(r4Resource)) {
             if (DataDateRollerUtilsR4.isCurrentDateGreaterThanInterval(dataDateRollerSettings)) {
                 Field[] fields = r4Resource.getClass().getDeclaredFields();
                 for (Field field : fields) {
@@ -90,7 +89,6 @@ public class RollDatesR4 {
         Base newBase = r4Resource.makeProperty(fieldName.hashCode(), fieldName);
         ((Period) newBase).setEnd(newPeriod.getEnd());
         ((Period) newBase).setStart(newPeriod.getStart());
-        System.out.println();
     }
 
     private static Period rollPeriodDates(Property period, DataDateRollerSettingsR4 dataDateRollerSettings) {

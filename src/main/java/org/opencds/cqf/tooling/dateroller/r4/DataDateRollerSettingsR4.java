@@ -20,13 +20,15 @@ public class DataDateRollerSettingsR4 {
     public void setDurationUnitCode(String durationUnitCode) {this.durationUnitCode = durationUnitCode;}
 
 
-    public void populateDataDateRollerSettings(Resource resource) {
+    public boolean populateDataDateRollerSettings(Resource resource) {
         Property extension = resource.getChildByName("extension");
         List<Base> extValues = extension.getValues();
+        boolean extensionFound = false;
         for (Base extValue : extValues) {
             List<Base> urlBase = extValue.getChildByName("url").getValues();
             String url = ((UriType) urlBase.get(0)).getValue();
             if (url.equalsIgnoreCase("http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/dataDateRoller")) {
+                extensionFound = true;
                 String firstExtensionUrlValue = extValue.getChildByName("extension").getValues().get(0).getChildByName("url").getValues().get(0).toString();
                 String secondExtensionUrlValue = extValue.getChildByName("extension").getValues().get(1).getChildByName("url").getValues().get(0).toString();
                 if (null != firstExtensionUrlValue && null != secondExtensionUrlValue) {
@@ -37,6 +39,7 @@ public class DataDateRollerSettingsR4 {
                 }
             }
         }
+        return extensionFound;
     }
 
     private void getDataDateRollerSettings(Base extValue, String extensionUrlValue, int extensionPosition) {

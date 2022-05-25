@@ -128,7 +128,6 @@ public class DataDateRollerOperation extends Operation {
                     ResourceDataDateRoller.rollBundleDates(fhirContext, resource);
                 } else {
                     ResourceDataDateRoller.rollResourceDates(fhirContext, resource);
-                    System.out.println("");
                 }
                 IOUtils.writeResource(resource, file.getAbsolutePath(), fileEncoding, fhirContext);
             }
