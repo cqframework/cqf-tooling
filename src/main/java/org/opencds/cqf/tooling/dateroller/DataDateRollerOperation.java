@@ -25,7 +25,8 @@ public class DataDateRollerOperation extends Operation {
     @Override
     public void execute(String[] args) {
         String inputPath = "";
-        setOutputPath("src" + separator + "main" + separator + "resources" + separator + "org.opencds.cqf" + separator + "tooling");
+        setOutputPath("");
+//        setOutputPath("src" + separator + "main" + separator + "resources" + separator + "org.opencds.cqf" + separator + "tooling");
         boolean outputPathProvided = false;
         for (String arg : args) {
             if (arg.equals("-RollTestsDataDates")) continue;
@@ -56,22 +57,25 @@ public class DataDateRollerOperation extends Operation {
         if (inputPath.length() < 1) {
             throw new IllegalArgumentException("The directory to files to change dates is required as -ip=");
         }
-        if(!outputPathProvided){
-            // TODO - use output path
-//            setOutputPath(inputPath);
-        }
         if (fhirVersion.length() < 1) {
             throw new IllegalArgumentException("The FHIR version(-v) must be specified and must be the version number such as 3.0.0 or 4.0.1");
         }
         fhirContext = ResourceUtils.getFhirContext(ResourceUtils.FhirVersion.parse(fhirVersion));
 
-        rollAllDates(inputPath);
+        rollAllDates(inputPath, outputPathProvided);
     }
 
-    private void rollAllDates(String inputPath) {
+    private void rollAllDates(String inputPath, boolean outputPathProvided) {
         File file = inputPath != null ? new File(inputPath) : null;
         if (file == null || !file.exists()) {
             throw new IllegalArgumentException("inputPath " + inputPath + " does not exist");
+        }
+        if(!outputPathProvided){
+             if(file.isDirectory()){
+                 setOutputPath(inputPath);
+             }else {
+                 setOutputPath(inputPath.substring(0, inputPath.lastIndexOf(separator)));
+             }
         }
         processFiles(file, inputPath);
     }
@@ -112,7 +116,8 @@ public class DataDateRollerOperation extends Operation {
                 JsonObject hook = hookDataDateRoller.rollJSONHookDates(JsonParser.parseString(fileContents).getAsJsonObject());//this should be the whole hook
                 FileWriter fileWriter = null;
                 try {
-                    fileWriter = new FileWriter(file.getAbsolutePath());
+                    String fileNameAndPathToWrite = getOutputPath() + file.getAbsolutePath().substring(file.getAbsolutePath().lastIndexOf(separator));
+                    fileWriter = new FileWriter(fileNameAndPathToWrite);
                     Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
                     gson.toJson(hook, fileWriter);
                     fileWriter.close();
@@ -129,7 +134,8 @@ public class DataDateRollerOperation extends Operation {
                 } else {
                     ResourceDataDateRoller.rollResourceDates(fhirContext, resource);
                 }
-                IOUtils.writeResource(resource, file.getAbsolutePath(), fileEncoding, fhirContext);
+                String fileNameAndPathToWrite = getOutputPath() + file.getAbsolutePath().substring(file.getAbsolutePath().lastIndexOf(separator));
+                IOUtils.writeResource(resource, fileNameAndPathToWrite, fileEncoding, fhirContext);
             }
         }
     }
