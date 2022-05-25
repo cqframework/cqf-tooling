@@ -1,5 +1,6 @@
 # RollTestDataDates
 
+This operation takes a file or a directory and rolls forward dates in resources and cds hook requests. It then overwrites the original files with the updated ones.
 ## Description of Operation
 If a resource in a xml or json file has an extension
 
@@ -13,6 +14,7 @@ An example command line would be:
 OR
 
     JAVA -jar tooling-1.4.1-SNAPSHOT-jar-with-dependencies.jar -RollTestsDataDates -v=r4 -ip="$USER_HOME$/sandbox/rollDate/files/bundle-example-rec-02-true-make-recommendations.json"
+
 
 Sample extension:
     

@@ -25,9 +25,6 @@ public class DataDateRollerOperation extends Operation {
     @Override
     public void execute(String[] args) {
         String inputPath = "";
-        setOutputPath("");
-//        setOutputPath("src" + separator + "main" + separator + "resources" + separator + "org.opencds.cqf" + separator + "tooling");
-        boolean outputPathProvided = false;
         for (String arg : args) {
             if (arg.equals("-RollTestsDataDates")) continue;
             String[] flagAndValue = arg.split("=");
@@ -41,11 +38,6 @@ public class DataDateRollerOperation extends Operation {
                 case "ip":
                     inputPath = value;
                     break;
-                case "outputpath":
-                case "op":
-                    setOutputPath(value);
-                    outputPathProvided = true;
-                    break; // -outputpath (-op)
                 case "version":
                 case "v":
                     fhirVersion = value;
@@ -62,29 +54,22 @@ public class DataDateRollerOperation extends Operation {
         }
         fhirContext = ResourceUtils.getFhirContext(ResourceUtils.FhirVersion.parse(fhirVersion));
 
-        rollAllDates(inputPath, outputPathProvided);
+        rollAllDates(inputPath);
     }
 
-    private void rollAllDates(String inputPath, boolean outputPathProvided) {
+    private void rollAllDates(String inputPath) {
         File file = inputPath != null ? new File(inputPath) : null;
         if (file == null || !file.exists()) {
             throw new IllegalArgumentException("inputPath " + inputPath + " does not exist");
         }
-        if(!outputPathProvided){
-             if(file.isDirectory()){
-                 setOutputPath(inputPath);
-             }else {
-                 setOutputPath(inputPath.substring(0, inputPath.lastIndexOf(separator)));
-             }
-        }
-        processFiles(file, inputPath);
+        processFiles(file);
     }
 
-    private void processFiles(File file, String currentPath) {
+    private void processFiles(File file) {
         if (file.isDirectory()) {
             for (File nextFile : file.listFiles()) {
                 if (nextFile.isDirectory()) {
-                    processFiles(nextFile, currentPath);
+                    processFiles(nextFile);
                 }
                 if ((!nextFile.getName().toLowerCase(Locale.ROOT).contains("xml")) &&
                         (!nextFile.getName().toLowerCase(Locale.ROOT).contains("json"))) {
@@ -116,8 +101,7 @@ public class DataDateRollerOperation extends Operation {
                 JsonObject hook = hookDataDateRoller.rollJSONHookDates(JsonParser.parseString(fileContents).getAsJsonObject());//this should be the whole hook
                 FileWriter fileWriter = null;
                 try {
-                    String fileNameAndPathToWrite = getOutputPath() + file.getAbsolutePath().substring(file.getAbsolutePath().lastIndexOf(separator));
-                    fileWriter = new FileWriter(fileNameAndPathToWrite);
+                    fileWriter = new FileWriter(file.getAbsolutePath());
                     Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
                     gson.toJson(hook, fileWriter);
                     fileWriter.close();
@@ -131,11 +115,11 @@ public class DataDateRollerOperation extends Operation {
                 String resourceType = resource.fhirType();
                 if (resourceType.equalsIgnoreCase("Bundle")) {
                     ResourceDataDateRoller.rollBundleDates(fhirContext, resource);
+                    IOUtils.writeBundle(resource, file.getAbsolutePath(), fileEncoding, fhirContext);
                 } else {
                     ResourceDataDateRoller.rollResourceDates(fhirContext, resource);
+                    IOUtils.writeResource(resource, file.getAbsolutePath(), fileEncoding, fhirContext);
                 }
-                String fileNameAndPathToWrite = getOutputPath() + file.getAbsolutePath().substring(file.getAbsolutePath().lastIndexOf(separator));
-                IOUtils.writeResource(resource, fileNameAndPathToWrite, fileEncoding, fhirContext);
             }
         }
     }
