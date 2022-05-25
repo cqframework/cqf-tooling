@@ -127,7 +127,7 @@ public class DataDateRollerOperation extends Operation {
                 if (resourceType.equalsIgnoreCase("Bundle")) {
                     ResourceDataDateRoller.rollBundleDates(fhirContext, resource);
                 } else {
-                    ResourceDataDateRoller.rollDatesInR4Resource(resource);
+                    ResourceDataDateRoller.rollResourceDates(fhirContext, resource);
                     System.out.println("");
                 }
                 IOUtils.writeResource(resource, file.getAbsolutePath(), fileEncoding, fhirContext);

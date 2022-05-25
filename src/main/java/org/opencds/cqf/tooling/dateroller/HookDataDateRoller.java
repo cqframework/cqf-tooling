@@ -51,7 +51,7 @@ public class HookDataDateRoller {
             if (resource.fhirType().equalsIgnoreCase("bundle")) {
                 ResourceDataDateRoller.rollBundleDates(fhirContext, resource);
             } else {
-                ResourceDataDateRoller.rollDatesInR4Resource(resource);
+                ResourceDataDateRoller.rollResourceDates(fhirContext, resource);
             }
             context.remove("draftOrders");
             JsonElement newDraftOrders = JsonParser.parseString(resourceParser.setPrettyPrint(true).encodeResourceToString(resource));
@@ -76,7 +76,7 @@ public class HookDataDateRoller {
             if (resource.fhirType().equalsIgnoreCase("bundle")) {
                 ResourceDataDateRoller.rollBundleDates(fhirContext, resource);
             } else {
-                ResourceDataDateRoller.rollDatesInR4Resource(resource);
+                ResourceDataDateRoller.rollResourceDates(fhirContext, resource);
             }
             JsonObject response = item.getAsJsonObject("response");
             item.add("response", response);

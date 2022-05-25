@@ -1,13 +1,10 @@
-package org.opencds.cqf.tooling.dateroller;
+package org.opencds.cqf.tooling.dateroller.dstu3;
 
-import org.hl7.fhir.r4.model.Base;
-import org.hl7.fhir.r4.model.Property;
-import org.hl7.fhir.r4.model.UriType;
-
+import org.hl7.fhir.dstu3.model.*;
 import java.time.LocalDate;
 import java.util.List;
 
-public class DataDateRollerSettings {
+public class DataDateRollerSettingsDstu3 {
     private LocalDate lastDateUpdated;
     private  Float durationLength;
     private String durationUnitCode;
@@ -22,7 +19,7 @@ public class DataDateRollerSettings {
     public void setDurationUnitCode(String durationUnitCode) {this.durationUnitCode = durationUnitCode;}
 
 
-    public void populateDataDateRollerSettings(org.hl7.fhir.r4.model.Resource resource) {
+    public void populateDataDateRollerSettings(Resource resource) {
         Property extension = resource.getChildByName("extension");
         List<Base> extValues = extension.getValues();
         for (Base extValue : extValues) {
