@@ -184,6 +184,109 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
                     "    else\n" +
                     "        Reference { reference: string { value: reference } }\n" +
                     "\n" +
+                    "define function ToValue(value Choice<base64Binary,\n" +
+                    "        boolean,\n" +
+                    "        canonical,\n" +
+                    "        code,\n" +
+                    "        date,\n" +
+                    "        dateTime,\n" +
+                    "        decimal,\n" +
+                    "        id,\n" +
+                    "        instant,\n" +
+                    "        integer,\n" +
+                    "        markdown,\n" +
+                    "        oid,\n" +
+                    "        positiveInt,\n" +
+                    "        string,\n" +
+                    "        time,\n" +
+                    "        unsignedInt,\n" +
+                    "        uri,\n" +
+                    "        url,\n" +
+                    "        uuid,\n" +
+                    "        Address,\n" +
+                    "        Age,\n" +
+                    "        Annotation,\n" +
+                    "        Attachment,\n" +
+                    "        CodeableConcept,\n" +
+                    "        Coding,\n" +
+                    "        ContactPoint,\n" +
+                    "        Count,\n" +
+                    "        Distance,\n" +
+                    "        Duration,\n" +
+                    "        HumanName,\n" +
+                    "        Identifier,\n" +
+                    "        Money,\n" +
+                    "        Period,\n" +
+                    "        Quantity,\n" +
+                    "        Range,\n" +
+                    "        Ratio,\n" +
+                    "        Reference,\n" +
+                    "        SampledData,\n" +
+                    "        Signature,\n" +
+                    "        Timing,\n" +
+                    "        ContactDetail,\n" +
+                    "        Contributor,\n" +
+                    "        DataRequirement,\n" +
+                    "        Expression,\n" +
+                    "        ParameterDefinition,\n" +
+                    "        RelatedArtifact,\n" +
+                    "        TriggerDefinition,\n" +
+                    "        UsageContext,\n" +
+                    "        Dosage,\n" +
+                    "        Meta>):\n" +
+                    "    case\n" +
+                    "        when value is base64Binary then (value as base64Binary).value\n" +
+                    "        when value is boolean then (value as boolean).value\n" +
+                    "        when value is canonical then (value as canonical).value\n" +
+                    "        when value is code then (value as code).value\n" +
+                    "        when value is date then (value as date).value\n" +
+                    "        when value is dateTime then (value as dateTime).value\n" +
+                    "        when value is decimal then (value as decimal).value\n" +
+                    "        when value is id then (value as id).value\n" +
+                    "        when value is instant then (value as instant).value\n" +
+                    "        when value is integer then (value as integer).value\n" +
+                    "        when value is markdown then (value as markdown).value\n" +
+                    "        when value is oid then (value as oid).value\n" +
+                    "        when value is positiveInt then (value as positiveInt).value\n" +
+                    "        when value is string then (value as string).value\n" +
+                    "        when value is time then (value as time).value\n" +
+                    "        when value is unsignedInt then (value as unsignedInt).value\n" +
+                    "        when value is uri then (value as uri).value\n" +
+                    "        when value is url then (value as url).value\n" +
+                    "        when value is uuid then (value as uuid).value\n" +
+                    "        when value is Age then ToQuantity(value as Age)\n" +
+                    "        when value is CodeableConcept then ToConcept(value as CodeableConcept)\n" +
+                    "        when value is Coding then ToCode(value as Coding)\n" +
+                    "        when value is Count then ToQuantity(value as Count)\n" +
+                    "        when value is Distance then ToQuantity(value as Distance)\n" +
+                    "        when value is Duration then ToQuantity(value as Duration)\n" +
+                    "        when value is Quantity then ToQuantity(value as Quantity)\n" +
+                    "        when value is Range then ToInterval(value as Range)\n" +
+                    "        when value is Period then ToInterval(value as Period)\n" +
+                    "        when value is Ratio then ToRatio(value as Ratio)\n" +
+                    "        else value as Choice<Address,\n" +
+                    "            Annotation,\n" +
+                    "            Attachment,\n" +
+                    "            ContactPoint,\n" +
+                    "            HumanName,\n" +
+                    "            Identifier,\n" +
+                    "            Money,\n" +
+                    "            Reference,\n" +
+                    "            SampledData,\n" +
+                    "            Signature,\n" +
+                    "            Timing,\n" +
+                    "            ContactDetail,\n" +
+                    "            Contributor,\n" +
+                    "            DataRequirement,\n" +
+                    "            Expression,\n" +
+                    "            ParameterDefinition,\n" +
+                    "            RelatedArtifact,\n" +
+                    "            TriggerDefinition,\n" +
+                    "            UsageContext,\n" +
+                    "            Dosage,\n" +
+                    "            Meta>\n" +
+                    "    end\n" +
+                    "\n" +
                     "define function resolve(reference String) returns Resource: external\n" +
                     "define function resolve(reference Reference) returns Resource: external\n" +
                     "define function reference(resource Resource) returns Reference: external\n" +

@@ -2,16 +2,10 @@ package org.opencds.cqf.tooling.terminology;
 
 import java.io.File;
 import java.time.Instant;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.MarkdownType;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -39,7 +33,7 @@ public class EnsureExecutableValueSetOperation extends Operation {
 
     @Override
     public void execute(String[] args) {
-        setOutputPath("src/main/resources/org/opencds/cqf/tooling/terminology/output"); // default
+        //setOutputPath("src/main/resources/org/opencds/cqf/tooling/terminology/output"); //default
 
         for (String arg : args) {
             if (arg.equals("-EnsureExecutableValueSet")) {
@@ -67,6 +61,9 @@ public class EnsureExecutableValueSetOperation extends Operation {
                 case "skipversion": case "sv": skipVersion = value.toLowerCase().equals("true") ? true : false; break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
+            if (null == super.getOutputPath() || "" == getOutputPath()) {
+                setOutputPath(this.valueSetPath); //default to editing files in place
+            }
         }
 
         if (valueSetPath == null) {
@@ -79,7 +76,7 @@ public class EnsureExecutableValueSetOperation extends Operation {
                 if (resource instanceof ValueSet) {
                     ValueSet valueSet = (ValueSet)resource;
                     if ((ensureExecutable && refreshExpansion(valueSet)) || (ensureComputable && inferCompose(valueSet))) {
-                        IOUtils.writeResource(valueSet, file.getAbsolutePath(), IOUtils.Encoding.parse(encoding), getFhirContext());
+                        IOUtils.writeResource(valueSet, super.getOutputPath(), IOUtils.Encoding.parse(encoding), getFhirContext());
                     }
                 }
             }
@@ -90,6 +87,15 @@ public class EnsureExecutableValueSetOperation extends Operation {
         if (hasSimpleCompose(valueSet) && (!valueSet.hasExpansion() || force)) {
             ValueSet.ValueSetExpansionComponent expansion = new ValueSet.ValueSetExpansionComponent();
             expansion.setTimestamp(Date.from(Instant.now()));
+
+            //Expansions via EnsureExecutableValueSet are run independent of terminology servers and should be flagged as such
+            ArrayList<ValueSet.ValueSetExpansionParameterComponent> expansionParameters = new ArrayList<>();
+            ValueSet.ValueSetExpansionParameterComponent parameterNaive = new ValueSet.ValueSetExpansionParameterComponent();
+            parameterNaive.setName("naive");
+            parameterNaive.setValue(new BooleanType(true));
+            expansionParameters.add(parameterNaive);
+            expansion.setParameter(expansionParameters);
+
             for (ValueSet.ConceptSetComponent csc : valueSet.getCompose().getInclude()) {
                 for (ValueSet.ConceptReferenceComponent crc : csc.getConcept()) {
                     expansion.addContains()
