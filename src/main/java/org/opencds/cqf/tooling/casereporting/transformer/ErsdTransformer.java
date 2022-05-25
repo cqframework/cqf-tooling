@@ -154,7 +154,7 @@ public class ErsdTransformer extends Operation {
                 }
                 else {
                     throw new IllegalArgumentException("Currently, only JSON is supported for the input bundle.");
-                    //TODO: currently fails du to "Content is not allowed in prolog."
+                    //TODO: currently fails due to "Content is not allowed in prolog."
 //                    sourceBundle = (Bundle)xmlParser.parseResource(new FileInputStream(bundleFile));
                 }
             } catch (FileNotFoundException e) {
@@ -196,23 +196,21 @@ public class ErsdTransformer extends Operation {
         specificationLibrary.setUrl("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary");
         specificationLibrary.setType(new CodeableConcept(
                 new Coding("http://terminology.hl7.org/CodeSystem/library-type", "asset-collection", null)));
-        boolean foundSpecificationType = false;
-        String useContextCode = "specification-type";
-        if (specificationLibrary.hasUseContext() && !specificationLibrary.getUseContext().isEmpty()) {
-            for (UsageContext useContext : specificationLibrary.getUseContext()) {
-                if (useContext.getCode().getCode().equals(useContextCode)) {
-                    foundSpecificationType = true;
-                }
-            }
-        }
-        CodeableConcept type = new CodeableConcept(
-                new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "program", null));
-        UsageContext usageContext = new UsageContext(
-                new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", useContextCode, null),
-                type);
-        if (!foundSpecificationType) {
-            specificationLibrary.addUseContext(usageContext);
-        }
+
+        UsageContext reportingUsageContext =
+            new UsageContext(
+                new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "reporting", null),
+                new CodeableConcept(new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "triggering", null))
+            );
+        specificationLibrary.addUseContext(reportingUsageContext);
+
+        UsageContext specificationTypeUsageContext =
+                new UsageContext(
+                        new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "specification-type", null),
+                        new CodeableConcept(new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "program", null))
+                );
+        specificationLibrary.addUseContext(specificationTypeUsageContext);
+
         return specificationLibrary;
     }
 
