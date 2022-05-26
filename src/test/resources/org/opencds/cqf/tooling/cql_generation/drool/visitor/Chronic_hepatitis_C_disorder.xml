@@ -1,0 +1,1499 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<library xmlns="urn:hl7-org:elm:r1" xmlns:t="urn:hl7-org:elm-types:r1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:fhir="http://hl7.org/fhir" xmlns:qdm43="urn:healthit-gov:qdm:v4_3" xmlns:qdm53="urn:healthit-gov:qdm:v5_3" xmlns:a="urn:hl7-org:cql-annotations:r1">
+   <annotation translatorOptions="EnableAnnotations,EnableLocators,DisableListDemotion,DisableListPromotion" xsi:type="a:CqlToElmInfo"/>
+   <annotation message="Could not resolve membership operator for terminology target of the retrieve." errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
+   <annotation message="Could not resolve membership operator for terminology target of the retrieve." errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
+   <annotation message="Could not resolve membership operator for terminology target of the retrieve." errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
+   <identifier id="Chronic_hepatitis_C_disorder" version="1.0.0"/>
+   <schemaIdentifier id="urn:hl7-org:elm" version="r1"/>
+   <usings>
+      <def localIdentifier="FHIR" uri="http://hl7.org/fhir" version="4.0.0"/>
+      <def localIdentifier="System" uri="urn:hl7-org:elm-types:r1"/>
+   </usings>
+   <includes>
+      <def localIdentifier="FHIRHelpers" path="FHIRHelpers" version="4.0.0"/>
+   </includes>
+   <codeSystems>
+      <def name="ObservationStatus" id="http://hl7.org/fhir/observation-status" accessLevel="Public"/>
+      <def name="Condition Category Codes" id="http://terminology.hl7.org/CodeSystem/condition-category" accessLevel="Public"/>
+      <def name="Condition Clinical Status Codes" id="http://terminology.hl7.org/CodeSystem/condition-clinical" accessLevel="Public"/>
+   </codeSystems>
+   <valueSets>
+      <def name="Hepatitis C Virus Infection (Tests for hepatitis C virus Antibody)" id="https://hln.com/fhir/ValueSet/HCV005" accessLevel="Public"/>
+      <def name="Present or Positive Lab Result Value" id="https://hln.com/fhir/ValueSet/LabRLT001" accessLevel="Public"/>
+      <def name="Abnormal Interpretation of an Observation" id="https://hln.com/fhir/ValueSet/LabRLT002" accessLevel="Public"/>
+      <def name="Hepatitis C Virus Infection (Tests for hepatitis C virus Antigen)" id="https://hln.com/fhir/ValueSet/HCV004" accessLevel="Public"/>
+      <def name="Hepatitis C Virus Infection (Tests for hepatitis C virus Nucleic Acid)" id="https://hln.com/fhir/ValueSet/HCV003" accessLevel="Public"/>
+      <def name="Hepatitis C Virus Infection (Organism or Substance in Lab Results)" id="https://hln.com/fhir/ValueSet/HCV001" accessLevel="Public"/>
+      <def name="Organisms (Tests for Nucleic Acid)" id="https://hln.com/fhir/ValueSet/LabTST018" accessLevel="Public"/>
+      <def name="Hepatitis C Virus Infection (Disorders)" id="https://hln.com/fhir/ValueSet/HCV002" accessLevel="Public"/>
+      <def name="Indeterminate or Equivocal Lab Result Value" id="https://hln.com/fhir/ValueSet/LabRLT011" accessLevel="Public"/>
+      <def name="Negative or Undetected Lab Result Value" id="https://hln.com/fhir/ValueSet/LabRLT012" accessLevel="Public"/>
+   </valueSets>
+   <codes>
+      <def name="Final" id="final" display="Final" accessLevel="Public">
+         <codeSystem name="ObservationStatus"/>
+      </def>
+      <def name="Amended" id="amended" display="Amended" accessLevel="Public">
+         <codeSystem name="ObservationStatus"/>
+      </def>
+      <def name="Encounter Diagnosis" id="encounter-diagnosis" display="Encounter Diagnosis" accessLevel="Public">
+         <codeSystem name="Condition Category Codes"/>
+      </def>
+      <def name="Problem" id="problem-list-item" display="Problem List Item" accessLevel="Public">
+         <codeSystem name="Condition Category Codes"/>
+      </def>
+      <def name="Active" id="active" display="Active" accessLevel="Public">
+         <codeSystem name="Condition Clinical Status Codes"/>
+      </def>
+   </codes>
+   <contexts>
+      <def name="Patient"/>
+   </contexts>
+   <statements>
+      <def name="Patient has lab result with test name (specific for an organism or substance)-b481d66f26d02748db992306b3f782a3" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <return>
+                        <expression path="code" scope="O" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Hepatitis C Virus Infection (Tests for hepatitis C virus Antibody)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Value (ordinal)-2ae905a56c5a50243263f85fe576c225" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <where xsi:type="In">
+                        <operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                           <operand path="Observation.status" scope="O" xsi:type="Property"/>
+                        </operand>
+                        <operand xsi:type="Query">
+                           <source alias="$this">
+                              <expression xsi:type="List">
+                                 <element name="Final" xsi:type="CodeRef"/>
+                                 <element name="Amended" xsi:type="CodeRef"/>
+                              </expression>
+                           </source>
+                           <where xsi:type="Not">
+                              <operand xsi:type="IsNull">
+                                 <operand path="code" scope="$this" xsi:type="Property"/>
+                              </operand>
+                           </where>
+                           <return>
+                              <expression path="code" scope="$this" xsi:type="Property"/>
+                           </return>
+                        </operand>
+                     </where>
+                     <return>
+                        <expression strict="false" xsi:type="As">
+                           <operand path="value" scope="O" xsi:type="Property"/>
+                           <asTypeSpecifier name="fhir:CodeableConcept" xsi:type="NamedTypeSpecifier"/>
+                        </expression>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Present or Positive Lab Result Value"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Interpretation-fffba914c83879e9a5fbb46b4373a867" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Flatten">
+                     <operand xsi:type="Query">
+                        <source alias="O">
+                           <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                        </source>
+                        <return>
+                           <expression path="interpretation" scope="O" xsi:type="Property"/>
+                        </return>
+                     </operand>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Patient has lab result with test name (specific for an organism or substance)-5a1ba399bf0666cbb38febe44fd88f8e" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <return>
+                        <expression path="code" scope="O" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Hepatitis C Virus Infection (Tests for hepatitis C virus Antigen)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Value (ordinal)-de552532c3844868df5b392615261d51" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <where xsi:type="In">
+                        <operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                           <operand path="Observation.status" scope="O" xsi:type="Property"/>
+                        </operand>
+                        <operand xsi:type="Query">
+                           <source alias="$this">
+                              <expression xsi:type="List">
+                                 <element name="Final" xsi:type="CodeRef"/>
+                                 <element name="Amended" xsi:type="CodeRef"/>
+                              </expression>
+                           </source>
+                           <where xsi:type="Not">
+                              <operand xsi:type="IsNull">
+                                 <operand path="code" scope="$this" xsi:type="Property"/>
+                              </operand>
+                           </where>
+                           <return>
+                              <expression path="code" scope="$this" xsi:type="Property"/>
+                           </return>
+                        </operand>
+                     </where>
+                     <return>
+                        <expression strict="false" xsi:type="As">
+                           <operand path="value" scope="O" xsi:type="Property"/>
+                           <asTypeSpecifier name="fhir:CodeableConcept" xsi:type="NamedTypeSpecifier"/>
+                        </expression>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Present or Positive Lab Result Value"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Interpretation-a9e0af8282bcfd505e8150f5783b75c0" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Flatten">
+                     <operand xsi:type="Query">
+                        <source alias="O">
+                           <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                        </source>
+                        <return>
+                           <expression path="interpretation" scope="O" xsi:type="Property"/>
+                        </return>
+                     </operand>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Patient has lab result with test name (specific for an organism or substance)-a6ca23e387b49acdd343dd326133489d" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <return>
+                        <expression path="code" scope="O" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Hepatitis C Virus Infection (Tests for hepatitis C virus Nucleic Acid)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Value (ordinal)-d32d5cb74ff9434167edf35ac03db667" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <where xsi:type="In">
+                        <operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                           <operand path="Observation.status" scope="O" xsi:type="Property"/>
+                        </operand>
+                        <operand xsi:type="Query">
+                           <source alias="$this">
+                              <expression xsi:type="List">
+                                 <element name="Final" xsi:type="CodeRef"/>
+                                 <element name="Amended" xsi:type="CodeRef"/>
+                              </expression>
+                           </source>
+                           <where xsi:type="Not">
+                              <operand xsi:type="IsNull">
+                                 <operand path="code" scope="$this" xsi:type="Property"/>
+                              </operand>
+                           </where>
+                           <return>
+                              <expression path="code" scope="$this" xsi:type="Property"/>
+                           </return>
+                        </operand>
+                     </where>
+                     <return>
+                        <expression strict="false" xsi:type="As">
+                           <operand path="value" scope="O" xsi:type="Property"/>
+                           <asTypeSpecifier name="fhir:CodeableConcept" xsi:type="NamedTypeSpecifier"/>
+                        </expression>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Present or Positive Lab Result Value"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Interpretation-4ac72b5347ac2a30b31b3c19e8f38142" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Flatten">
+                     <operand xsi:type="Query">
+                        <source alias="O">
+                           <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                        </source>
+                        <return>
+                           <expression path="interpretation" scope="O" xsi:type="Property"/>
+                        </return>
+                     </operand>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Patient has lab result with test name (specific for an organism or substance)-d2ce1a40d5615ff5ac803ff7c17472f8" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <return>
+                        <expression path="code" scope="O" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Hepatitis C Virus Infection (Tests for hepatitis C virus Antibody)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Value (ordinal)-1f89deb16439bcb8d3b6497fe893a2fc" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <where xsi:type="In">
+                        <operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                           <operand path="Observation.status" scope="O" xsi:type="Property"/>
+                        </operand>
+                        <operand xsi:type="Query">
+                           <source alias="$this">
+                              <expression xsi:type="List">
+                                 <element name="Final" xsi:type="CodeRef"/>
+                                 <element name="Amended" xsi:type="CodeRef"/>
+                              </expression>
+                           </source>
+                           <where xsi:type="Not">
+                              <operand xsi:type="IsNull">
+                                 <operand path="code" scope="$this" xsi:type="Property"/>
+                              </operand>
+                           </where>
+                           <return>
+                              <expression path="code" scope="$this" xsi:type="Property"/>
+                           </return>
+                        </operand>
+                     </where>
+                     <return>
+                        <expression strict="false" xsi:type="As">
+                           <operand path="value" scope="O" xsi:type="Property"/>
+                           <asTypeSpecifier name="fhir:CodeableConcept" xsi:type="NamedTypeSpecifier"/>
+                        </expression>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Present or Positive Lab Result Value"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Value (nominal)-12a888c3f2187e1072d67a525d16012b" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <where xsi:type="In">
+                        <operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                           <operand path="Observation.status" scope="O" xsi:type="Property"/>
+                        </operand>
+                        <operand xsi:type="Query">
+                           <source alias="$this">
+                              <expression xsi:type="List">
+                                 <element name="Final" xsi:type="CodeRef"/>
+                                 <element name="Amended" xsi:type="CodeRef"/>
+                              </expression>
+                           </source>
+                           <where xsi:type="Not">
+                              <operand xsi:type="IsNull">
+                                 <operand path="code" scope="$this" xsi:type="Property"/>
+                              </operand>
+                           </where>
+                           <return>
+                              <expression path="code" scope="$this" xsi:type="Property"/>
+                           </return>
+                        </operand>
+                     </where>
+                     <return>
+                        <expression strict="false" xsi:type="As">
+                           <operand path="value" scope="O" xsi:type="Property"/>
+                           <asTypeSpecifier name="fhir:CodeableConcept" xsi:type="NamedTypeSpecifier"/>
+                        </expression>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Hepatitis C Virus Infection (Organism or Substance in Lab Results)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Interpretation-352105c364251ca7e1e83c3eaff10a12" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Flatten">
+                     <operand xsi:type="Query">
+                        <source alias="O">
+                           <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                        </source>
+                        <return>
+                           <expression path="interpretation" scope="O" xsi:type="Property"/>
+                        </return>
+                     </operand>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Patient has lab result with test name (specific for an organism or substance)-726d258060b2995732f8d4a7dc70732c" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <return>
+                        <expression path="code" scope="O" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Hepatitis C Virus Infection (Tests for hepatitis C virus Antigen)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Value (ordinal)-5827e773c5ab64ef3f65c1950a512fbe" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <where xsi:type="In">
+                        <operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                           <operand path="Observation.status" scope="O" xsi:type="Property"/>
+                        </operand>
+                        <operand xsi:type="Query">
+                           <source alias="$this">
+                              <expression xsi:type="List">
+                                 <element name="Final" xsi:type="CodeRef"/>
+                                 <element name="Amended" xsi:type="CodeRef"/>
+                              </expression>
+                           </source>
+                           <where xsi:type="Not">
+                              <operand xsi:type="IsNull">
+                                 <operand path="code" scope="$this" xsi:type="Property"/>
+                              </operand>
+                           </where>
+                           <return>
+                              <expression path="code" scope="$this" xsi:type="Property"/>
+                           </return>
+                        </operand>
+                     </where>
+                     <return>
+                        <expression strict="false" xsi:type="As">
+                           <operand path="value" scope="O" xsi:type="Property"/>
+                           <asTypeSpecifier name="fhir:CodeableConcept" xsi:type="NamedTypeSpecifier"/>
+                        </expression>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Present or Positive Lab Result Value"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Value (nominal)-b813c8006acbcbff7c1fc943736883c4" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <where xsi:type="In">
+                        <operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                           <operand path="Observation.status" scope="O" xsi:type="Property"/>
+                        </operand>
+                        <operand xsi:type="Query">
+                           <source alias="$this">
+                              <expression xsi:type="List">
+                                 <element name="Final" xsi:type="CodeRef"/>
+                                 <element name="Amended" xsi:type="CodeRef"/>
+                              </expression>
+                           </source>
+                           <where xsi:type="Not">
+                              <operand xsi:type="IsNull">
+                                 <operand path="code" scope="$this" xsi:type="Property"/>
+                              </operand>
+                           </where>
+                           <return>
+                              <expression path="code" scope="$this" xsi:type="Property"/>
+                           </return>
+                        </operand>
+                     </where>
+                     <return>
+                        <expression strict="false" xsi:type="As">
+                           <operand path="value" scope="O" xsi:type="Property"/>
+                           <asTypeSpecifier name="fhir:CodeableConcept" xsi:type="NamedTypeSpecifier"/>
+                        </expression>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Hepatitis C Virus Infection (Organism or Substance in Lab Results)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Interpretation-8de29ebeca86466b133b549fab1594a1" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Flatten">
+                     <operand xsi:type="Query">
+                        <source alias="O">
+                           <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                        </source>
+                        <return>
+                           <expression path="interpretation" scope="O" xsi:type="Property"/>
+                        </return>
+                     </operand>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Patient has lab result with test name (specific for an organism or substance)-1eb1f4e0509e86b6a89423412dba76da" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <return>
+                        <expression path="code" scope="O" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Hepatitis C Virus Infection (Tests for hepatitis C virus Nucleic Acid)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Value (ordinal)-b524b38cbe6fd75faf1b1516e7f25c00" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <where xsi:type="In">
+                        <operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                           <operand path="Observation.status" scope="O" xsi:type="Property"/>
+                        </operand>
+                        <operand xsi:type="Query">
+                           <source alias="$this">
+                              <expression xsi:type="List">
+                                 <element name="Final" xsi:type="CodeRef"/>
+                                 <element name="Amended" xsi:type="CodeRef"/>
+                              </expression>
+                           </source>
+                           <where xsi:type="Not">
+                              <operand xsi:type="IsNull">
+                                 <operand path="code" scope="$this" xsi:type="Property"/>
+                              </operand>
+                           </where>
+                           <return>
+                              <expression path="code" scope="$this" xsi:type="Property"/>
+                           </return>
+                        </operand>
+                     </where>
+                     <return>
+                        <expression strict="false" xsi:type="As">
+                           <operand path="value" scope="O" xsi:type="Property"/>
+                           <asTypeSpecifier name="fhir:CodeableConcept" xsi:type="NamedTypeSpecifier"/>
+                        </expression>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Present or Positive Lab Result Value"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Value (nominal)-53c93d7873931e6976ae6d6766887477" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <where xsi:type="In">
+                        <operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                           <operand path="Observation.status" scope="O" xsi:type="Property"/>
+                        </operand>
+                        <operand xsi:type="Query">
+                           <source alias="$this">
+                              <expression xsi:type="List">
+                                 <element name="Final" xsi:type="CodeRef"/>
+                                 <element name="Amended" xsi:type="CodeRef"/>
+                              </expression>
+                           </source>
+                           <where xsi:type="Not">
+                              <operand xsi:type="IsNull">
+                                 <operand path="code" scope="$this" xsi:type="Property"/>
+                              </operand>
+                           </where>
+                           <return>
+                              <expression path="code" scope="$this" xsi:type="Property"/>
+                           </return>
+                        </operand>
+                     </where>
+                     <return>
+                        <expression strict="false" xsi:type="As">
+                           <operand path="value" scope="O" xsi:type="Property"/>
+                           <asTypeSpecifier name="fhir:CodeableConcept" xsi:type="NamedTypeSpecifier"/>
+                        </expression>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Hepatitis C Virus Infection (Organism or Substance in Lab Results)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Interpretation-de207ba1aaff6218674cd4ebd27b2829" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Flatten">
+                     <operand xsi:type="Query">
+                        <source alias="O">
+                           <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                        </source>
+                        <return>
+                           <expression path="interpretation" scope="O" xsi:type="Property"/>
+                        </return>
+                     </operand>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Patient has lab result with test name (NOT specific for an organism or substance)-fa1255e5212439dcde55d39bbe79785d" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <return>
+                        <expression path="code" scope="O" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Organisms (Tests for Nucleic Acid)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Value (nominal)-657b59154435c5fe541acf3cb1796ca7" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <where xsi:type="In">
+                        <operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                           <operand path="Observation.status" scope="O" xsi:type="Property"/>
+                        </operand>
+                        <operand xsi:type="Query">
+                           <source alias="$this">
+                              <expression xsi:type="List">
+                                 <element name="Final" xsi:type="CodeRef"/>
+                                 <element name="Amended" xsi:type="CodeRef"/>
+                              </expression>
+                           </source>
+                           <where xsi:type="Not">
+                              <operand xsi:type="IsNull">
+                                 <operand path="code" scope="$this" xsi:type="Property"/>
+                              </operand>
+                           </where>
+                           <return>
+                              <expression path="code" scope="$this" xsi:type="Property"/>
+                           </return>
+                        </operand>
+                     </where>
+                     <return>
+                        <expression strict="false" xsi:type="As">
+                           <operand path="value" scope="O" xsi:type="Property"/>
+                           <asTypeSpecifier name="fhir:CodeableConcept" xsi:type="NamedTypeSpecifier"/>
+                        </expression>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Hepatitis C Virus Infection (Organism or Substance in Lab Results)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Patient has a diagnosis of-2dc8415725af446026d427eeb243a4af" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="C">
+                        <expression dataType="fhir:Condition" codeProperty="category" codeComparator="~" xsi:type="Retrieve">
+                           <codes xsi:type="ToList">
+                              <operand name="Encounter Diagnosis" xsi:type="CodeRef"/>
+                           </codes>
+                        </expression>
+                     </source>
+                     <return>
+                        <expression path="code" scope="C" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Hepatitis C Virus Infection (Disorders)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Patient has a problem of-22625fdf978267746f5b28e3d7332759" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="C">
+                        <expression dataType="fhir:Condition" codeProperty="category" codeComparator="~" xsi:type="Retrieve">
+                           <codes xsi:type="ToList">
+                              <operand name="Problem" xsi:type="CodeRef"/>
+                           </codes>
+                        </expression>
+                     </source>
+                     <return>
+                        <expression path="code" scope="C" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Hepatitis C Virus Infection (Disorders)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Problem has status of-6fd4b327b1bd61c86e4d072b4011fa23" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="C">
+                        <expression dataType="fhir:Condition" codeProperty="category" codeComparator="~" xsi:type="Retrieve">
+                           <codes xsi:type="ToList">
+                              <operand name="Problem" xsi:type="CodeRef"/>
+                           </codes>
+                        </expression>
+                     </source>
+                     <return>
+                        <expression path="clinicalStatus" scope="C" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="Equivalent">
+                  <operand name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </operand>
+                  <operand xsi:type="ToConcept">
+                     <operand name="Active" xsi:type="CodeRef"/>
+                  </operand>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Group 1-f808b7a8e6851d9bde8679a8824623b1" context="Patient" accessLevel="Public">
+         <expression xsi:type="And">
+            <operand name="Problem has status of-6fd4b327b1bd61c86e4d072b4011fa23" xsi:type="ExpressionRef"/>
+            <operand name="Patient has a problem of-22625fdf978267746f5b28e3d7332759" xsi:type="ExpressionRef"/>
+         </expression>
+      </def>
+      <def name="Patient has lab result with test name (specific for an organism or substance)-3749ef34cedb77e0cd5cde1d76a912f3" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <return>
+                        <expression path="code" scope="O" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Hepatitis C Virus Infection (Tests for hepatitis C virus Antigen)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Value (ordinal)-a160d9028554c3924b2be6cd9ff23321" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <where xsi:type="In">
+                        <operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                           <operand path="Observation.status" scope="O" xsi:type="Property"/>
+                        </operand>
+                        <operand xsi:type="Query">
+                           <source alias="$this">
+                              <expression xsi:type="List">
+                                 <element name="Final" xsi:type="CodeRef"/>
+                                 <element name="Amended" xsi:type="CodeRef"/>
+                              </expression>
+                           </source>
+                           <where xsi:type="Not">
+                              <operand xsi:type="IsNull">
+                                 <operand path="code" scope="$this" xsi:type="Property"/>
+                              </operand>
+                           </where>
+                           <return>
+                              <expression path="code" scope="$this" xsi:type="Property"/>
+                           </return>
+                        </operand>
+                     </where>
+                     <return>
+                        <expression strict="false" xsi:type="As">
+                           <operand path="value" scope="O" xsi:type="Property"/>
+                           <asTypeSpecifier name="fhir:CodeableConcept" xsi:type="NamedTypeSpecifier"/>
+                        </expression>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Indeterminate or Equivocal Lab Result Value"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Interpretation-9ac3719ba8053740aec096377d7b29be" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Flatten">
+                     <operand xsi:type="Query">
+                        <source alias="O">
+                           <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                        </source>
+                        <return>
+                           <expression path="interpretation" scope="O" xsi:type="Property"/>
+                        </return>
+                     </operand>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Patient has lab result with test name (specific for an organism or substance)-316a1211ad3f0cbf464a84ba145c1028" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <return>
+                        <expression path="code" scope="O" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Hepatitis C Virus Infection (Tests for hepatitis C virus Nucleic Acid)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Value (ordinal)-394e88c020919cda1331f29f40f18a05" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <where xsi:type="In">
+                        <operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                           <operand path="Observation.status" scope="O" xsi:type="Property"/>
+                        </operand>
+                        <operand xsi:type="Query">
+                           <source alias="$this">
+                              <expression xsi:type="List">
+                                 <element name="Final" xsi:type="CodeRef"/>
+                                 <element name="Amended" xsi:type="CodeRef"/>
+                              </expression>
+                           </source>
+                           <where xsi:type="Not">
+                              <operand xsi:type="IsNull">
+                                 <operand path="code" scope="$this" xsi:type="Property"/>
+                              </operand>
+                           </where>
+                           <return>
+                              <expression path="code" scope="$this" xsi:type="Property"/>
+                           </return>
+                        </operand>
+                     </where>
+                     <return>
+                        <expression strict="false" xsi:type="As">
+                           <operand path="value" scope="O" xsi:type="Property"/>
+                           <asTypeSpecifier name="fhir:CodeableConcept" xsi:type="NamedTypeSpecifier"/>
+                        </expression>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Indeterminate or Equivocal Lab Result Value"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Interpretation-a3484a1b2a62d6e68cf0fae2eae3ca0f" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Flatten">
+                     <operand xsi:type="Query">
+                        <source alias="O">
+                           <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                        </source>
+                        <return>
+                           <expression path="interpretation" scope="O" xsi:type="Property"/>
+                        </return>
+                     </operand>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Patient has lab result with test name (specific for an organism or substance)-307a499912f58cca5b062ccca3e12470" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <return>
+                        <expression path="code" scope="O" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Hepatitis C Virus Infection (Tests for hepatitis C virus Antibody)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Value (ordinal)-f1273519cdc4cd85746573bb05422d2e" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <where xsi:type="In">
+                        <operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                           <operand path="Observation.status" scope="O" xsi:type="Property"/>
+                        </operand>
+                        <operand xsi:type="Query">
+                           <source alias="$this">
+                              <expression xsi:type="List">
+                                 <element name="Final" xsi:type="CodeRef"/>
+                                 <element name="Amended" xsi:type="CodeRef"/>
+                              </expression>
+                           </source>
+                           <where xsi:type="Not">
+                              <operand xsi:type="IsNull">
+                                 <operand path="code" scope="$this" xsi:type="Property"/>
+                              </operand>
+                           </where>
+                           <return>
+                              <expression path="code" scope="$this" xsi:type="Property"/>
+                           </return>
+                        </operand>
+                     </where>
+                     <return>
+                        <expression strict="false" xsi:type="As">
+                           <operand path="value" scope="O" xsi:type="Property"/>
+                           <asTypeSpecifier name="fhir:CodeableConcept" xsi:type="NamedTypeSpecifier"/>
+                        </expression>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Indeterminate or Equivocal Lab Result Value"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab Result Interpretation-a68cec50e75e1cbebca5ab9be3e76d35" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Flatten">
+                     <operand xsi:type="Query">
+                        <source alias="O">
+                           <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                        </source>
+                        <return>
+                           <expression path="interpretation" scope="O" xsi:type="Property"/>
+                        </return>
+                     </operand>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Abnormal Interpretation of an Observation"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Patient has lab result with test name (specific for an organism or substance)-8faf8f0cf332fa03dc93f83bc9dbfc9e" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <return>
+                        <expression path="code" scope="O" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Hepatitis C Virus Infection (Tests for hepatitis C virus Antibody)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab result value of (ordinal)-2e8704bc6fdb200dacc87edfb4a19b43" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <where xsi:type="In">
+                        <operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                           <operand path="Observation.status" scope="O" xsi:type="Property"/>
+                        </operand>
+                        <operand xsi:type="Query">
+                           <source alias="$this">
+                              <expression xsi:type="List">
+                                 <element name="Final" xsi:type="CodeRef"/>
+                                 <element name="Amended" xsi:type="CodeRef"/>
+                              </expression>
+                           </source>
+                           <where xsi:type="Not">
+                              <operand xsi:type="IsNull">
+                                 <operand path="code" scope="$this" xsi:type="Property"/>
+                              </operand>
+                           </where>
+                           <return>
+                              <expression path="code" scope="$this" xsi:type="Property"/>
+                           </return>
+                        </operand>
+                     </where>
+                     <return>
+                        <expression strict="false" xsi:type="As">
+                           <operand path="value" scope="O" xsi:type="Property"/>
+                           <asTypeSpecifier name="fhir:CodeableConcept" xsi:type="NamedTypeSpecifier"/>
+                        </expression>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Negative or Undetected Lab Result Value"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Patient has lab result with test name (specific for an organism or substance)-fcc058542b96c720ff1967f5842c8442" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <return>
+                        <expression path="code" scope="O" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Hepatitis C Virus Infection (Tests for hepatitis C virus Antigen)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab result value of (ordinal)-d6a813ee77b92376b16a79da379a7018" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <where xsi:type="In">
+                        <operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                           <operand path="Observation.status" scope="O" xsi:type="Property"/>
+                        </operand>
+                        <operand xsi:type="Query">
+                           <source alias="$this">
+                              <expression xsi:type="List">
+                                 <element name="Final" xsi:type="CodeRef"/>
+                                 <element name="Amended" xsi:type="CodeRef"/>
+                              </expression>
+                           </source>
+                           <where xsi:type="Not">
+                              <operand xsi:type="IsNull">
+                                 <operand path="code" scope="$this" xsi:type="Property"/>
+                              </operand>
+                           </where>
+                           <return>
+                              <expression path="code" scope="$this" xsi:type="Property"/>
+                           </return>
+                        </operand>
+                     </where>
+                     <return>
+                        <expression strict="false" xsi:type="As">
+                           <operand path="value" scope="O" xsi:type="Property"/>
+                           <asTypeSpecifier name="fhir:CodeableConcept" xsi:type="NamedTypeSpecifier"/>
+                        </expression>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Negative or Undetected Lab Result Value"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Patient has lab result with test name (specific for an organism or substance)-96b965415ccdc1dc6e8eecf9783dd226" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <return>
+                        <expression path="code" scope="O" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Hepatitis C Virus Infection (Tests for hepatitis C virus Nucleic Acid)"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Lab result value of (ordinal)-2f28b0ea75979e7b1885eff6c81939b4" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="O">
+                        <expression dataType="fhir:Observation" xsi:type="Retrieve"/>
+                     </source>
+                     <where xsi:type="In">
+                        <operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                           <operand path="Observation.status" scope="O" xsi:type="Property"/>
+                        </operand>
+                        <operand xsi:type="Query">
+                           <source alias="$this">
+                              <expression xsi:type="List">
+                                 <element name="Final" xsi:type="CodeRef"/>
+                                 <element name="Amended" xsi:type="CodeRef"/>
+                              </expression>
+                           </source>
+                           <where xsi:type="Not">
+                              <operand xsi:type="IsNull">
+                                 <operand path="code" scope="$this" xsi:type="Property"/>
+                              </operand>
+                           </where>
+                           <return>
+                              <expression path="code" scope="$this" xsi:type="Property"/>
+                           </return>
+                        </operand>
+                     </where>
+                     <return>
+                        <expression strict="false" xsi:type="As">
+                           <operand path="value" scope="O" xsi:type="Property"/>
+                           <asTypeSpecifier name="fhir:CodeableConcept" xsi:type="NamedTypeSpecifier"/>
+                        </expression>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Negative or Undetected Lab Result Value"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="ConditionCriteriaMet" context="Patient" accessLevel="Public">
+         <expression xsi:type="And">
+            <operand xsi:type="Or">
+               <operand xsi:type="Or">
+                  <operand xsi:type="And">
+                     <operand xsi:type="Or">
+                        <operand xsi:type="Or">
+                           <operand xsi:type="And">
+                              <operand xsi:type="Or">
+                                 <operand xsi:type="Or">
+                                    <operand xsi:type="And">
+                                       <operand xsi:type="Or">
+                                          <operand xsi:type="Or">
+                                             <operand xsi:type="Or">
+                                                <operand xsi:type="And">
+                                                   <operand xsi:type="Or">
+                                                      <operand xsi:type="Or">
+                                                         <operand xsi:type="Or">
+                                                            <operand xsi:type="And">
+                                                               <operand xsi:type="Or">
+                                                                  <operand xsi:type="Or">
+                                                                     <operand xsi:type="Or">
+                                                                        <operand xsi:type="And">
+                                                                           <operand xsi:type="Or">
+                                                                              <operand xsi:type="Or">
+                                                                                 <operand xsi:type="And">
+                                                                                    <operand xsi:type="And">
+                                                                                       <operand xsi:type="Or">
+                                                                                          <operand xsi:type="Or">
+                                                                                             <operand xsi:type="And">
+                                                                                                <operand xsi:type="Or">
+                                                                                                   <operand xsi:type="Or">
+                                                                                                      <operand xsi:type="And">
+                                                                                                         <operand xsi:type="Or">
+                                                                                                            <operand xsi:type="Or">
+                                                                                                               <operand xsi:type="And">
+                                                                                                                  <operand xsi:type="And">
+                                                                                                                     <operand xsi:type="And">
+                                                                                                                        <operand xsi:type="And">
+                                                                                                                           <operand xsi:type="And">
+                                                                                                                              <operand name="Lab result value of (ordinal)-2f28b0ea75979e7b1885eff6c81939b4" xsi:type="ExpressionRef"/>
+                                                                                                                              <operand name="Patient has lab result with test name (specific for an organism or substance)-96b965415ccdc1dc6e8eecf9783dd226" xsi:type="ExpressionRef"/>
+                                                                                                                           </operand>
+                                                                                                                           <operand name="Lab result value of (ordinal)-d6a813ee77b92376b16a79da379a7018" xsi:type="ExpressionRef"/>
+                                                                                                                        </operand>
+                                                                                                                        <operand name="Patient has lab result with test name (specific for an organism or substance)-fcc058542b96c720ff1967f5842c8442" xsi:type="ExpressionRef"/>
+                                                                                                                     </operand>
+                                                                                                                     <operand name="Lab result value of (ordinal)-2e8704bc6fdb200dacc87edfb4a19b43" xsi:type="ExpressionRef"/>
+                                                                                                                  </operand>
+                                                                                                                  <operand name="Patient has lab result with test name (specific for an organism or substance)-8faf8f0cf332fa03dc93f83bc9dbfc9e" xsi:type="ExpressionRef"/>
+                                                                                                               </operand>
+                                                                                                               <operand name="Lab Result Interpretation-a68cec50e75e1cbebca5ab9be3e76d35" xsi:type="ExpressionRef"/>
+                                                                                                            </operand>
+                                                                                                            <operand name="Lab Result Value (ordinal)-f1273519cdc4cd85746573bb05422d2e" xsi:type="ExpressionRef"/>
+                                                                                                         </operand>
+                                                                                                         <operand name="Patient has lab result with test name (specific for an organism or substance)-307a499912f58cca5b062ccca3e12470" xsi:type="ExpressionRef"/>
+                                                                                                      </operand>
+                                                                                                      <operand name="Lab Result Interpretation-a3484a1b2a62d6e68cf0fae2eae3ca0f" xsi:type="ExpressionRef"/>
+                                                                                                   </operand>
+                                                                                                   <operand name="Lab Result Value (ordinal)-394e88c020919cda1331f29f40f18a05" xsi:type="ExpressionRef"/>
+                                                                                                </operand>
+                                                                                                <operand name="Patient has lab result with test name (specific for an organism or substance)-316a1211ad3f0cbf464a84ba145c1028" xsi:type="ExpressionRef"/>
+                                                                                             </operand>
+                                                                                             <operand name="Lab Result Interpretation-9ac3719ba8053740aec096377d7b29be" xsi:type="ExpressionRef"/>
+                                                                                          </operand>
+                                                                                          <operand name="Lab Result Value (ordinal)-a160d9028554c3924b2be6cd9ff23321" xsi:type="ExpressionRef"/>
+                                                                                       </operand>
+                                                                                       <operand name="Patient has lab result with test name (specific for an organism or substance)-3749ef34cedb77e0cd5cde1d76a912f3" xsi:type="ExpressionRef"/>
+                                                                                    </operand>
+                                                                                    <operand name="Group 1-f808b7a8e6851d9bde8679a8824623b1" xsi:type="ExpressionRef"/>
+                                                                                 </operand>
+                                                                                 <operand name="Patient has a diagnosis of-2dc8415725af446026d427eeb243a4af" xsi:type="ExpressionRef"/>
+                                                                              </operand>
+                                                                              <operand name="Lab Result Value (nominal)-657b59154435c5fe541acf3cb1796ca7" xsi:type="ExpressionRef"/>
+                                                                           </operand>
+                                                                           <operand name="Patient has lab result with test name (NOT specific for an organism or substance)-fa1255e5212439dcde55d39bbe79785d" xsi:type="ExpressionRef"/>
+                                                                        </operand>
+                                                                        <operand name="Lab Result Interpretation-de207ba1aaff6218674cd4ebd27b2829" xsi:type="ExpressionRef"/>
+                                                                     </operand>
+                                                                     <operand name="Lab Result Value (nominal)-53c93d7873931e6976ae6d6766887477" xsi:type="ExpressionRef"/>
+                                                                  </operand>
+                                                                  <operand name="Lab Result Value (ordinal)-b524b38cbe6fd75faf1b1516e7f25c00" xsi:type="ExpressionRef"/>
+                                                               </operand>
+                                                               <operand name="Patient has lab result with test name (specific for an organism or substance)-1eb1f4e0509e86b6a89423412dba76da" xsi:type="ExpressionRef"/>
+                                                            </operand>
+                                                            <operand name="Lab Result Interpretation-8de29ebeca86466b133b549fab1594a1" xsi:type="ExpressionRef"/>
+                                                         </operand>
+                                                         <operand name="Lab Result Value (nominal)-b813c8006acbcbff7c1fc943736883c4" xsi:type="ExpressionRef"/>
+                                                      </operand>
+                                                      <operand name="Lab Result Value (ordinal)-5827e773c5ab64ef3f65c1950a512fbe" xsi:type="ExpressionRef"/>
+                                                   </operand>
+                                                   <operand name="Patient has lab result with test name (specific for an organism or substance)-726d258060b2995732f8d4a7dc70732c" xsi:type="ExpressionRef"/>
+                                                </operand>
+                                                <operand name="Lab Result Interpretation-352105c364251ca7e1e83c3eaff10a12" xsi:type="ExpressionRef"/>
+                                             </operand>
+                                             <operand name="Lab Result Value (nominal)-12a888c3f2187e1072d67a525d16012b" xsi:type="ExpressionRef"/>
+                                          </operand>
+                                          <operand name="Lab Result Value (ordinal)-1f89deb16439bcb8d3b6497fe893a2fc" xsi:type="ExpressionRef"/>
+                                       </operand>
+                                       <operand name="Patient has lab result with test name (specific for an organism or substance)-d2ce1a40d5615ff5ac803ff7c17472f8" xsi:type="ExpressionRef"/>
+                                    </operand>
+                                    <operand name="Lab Result Interpretation-4ac72b5347ac2a30b31b3c19e8f38142" xsi:type="ExpressionRef"/>
+                                 </operand>
+                                 <operand name="Lab Result Value (ordinal)-d32d5cb74ff9434167edf35ac03db667" xsi:type="ExpressionRef"/>
+                              </operand>
+                              <operand name="Patient has lab result with test name (specific for an organism or substance)-a6ca23e387b49acdd343dd326133489d" xsi:type="ExpressionRef"/>
+                           </operand>
+                           <operand name="Lab Result Interpretation-a9e0af8282bcfd505e8150f5783b75c0" xsi:type="ExpressionRef"/>
+                        </operand>
+                        <operand name="Lab Result Value (ordinal)-de552532c3844868df5b392615261d51" xsi:type="ExpressionRef"/>
+                     </operand>
+                     <operand name="Patient has lab result with test name (specific for an organism or substance)-5a1ba399bf0666cbb38febe44fd88f8e" xsi:type="ExpressionRef"/>
+                  </operand>
+                  <operand name="Lab Result Interpretation-fffba914c83879e9a5fbb46b4373a867" xsi:type="ExpressionRef"/>
+               </operand>
+               <operand name="Lab Result Value (ordinal)-2ae905a56c5a50243263f85fe576c225" xsi:type="ExpressionRef"/>
+            </operand>
+            <operand name="Patient has lab result with test name (specific for an organism or substance)-b481d66f26d02748db992306b3f782a3" xsi:type="ExpressionRef"/>
+         </expression>
+      </def>
+   </statements>
+</library>

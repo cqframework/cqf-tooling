@@ -1,0 +1,14 @@
+{ 
+  "resourceType":"ServiceRequest",
+  "id": "modelingK-some-patient",
+  "intent": "order",
+  "status": "active",
+  "code": {
+    "coding": [{
+      "code":"some-code"
+    }]
+  },
+  "subject":  {
+    "reference":"Patient/some-patient"
+  }
+}

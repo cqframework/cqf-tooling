@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<library xmlns="urn:hl7-org:elm:r1" xmlns:t="urn:hl7-org:elm-types:r1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:fhir="http://hl7.org/fhir" xmlns:qdm43="urn:healthit-gov:qdm:v4_3" xmlns:qdm53="urn:healthit-gov:qdm:v5_3" xmlns:a="urn:hl7-org:cql-annotations:r1">
+   <annotation translatorOptions="EnableAnnotations,EnableLocators,DisableListDemotion,DisableListPromotion" xsi:type="a:CqlToElmInfo"/>
+   <identifier id="Age__1_year_333d0" version="4.0.1"/>
+   <schemaIdentifier id="urn:hl7-org:elm" version="r1"/>
+   <usings>
+      <def localIdentifier="FHIR" uri="http://hl7.org/fhir" version="4.0.0"/>
+      <def localIdentifier="System" uri="urn:hl7-org:elm-types:r1"/>
+   </usings>
+   <includes>
+      <def localIdentifier="FHIRHelpers" path="FHIRHelpers" version="4.0.0"/>
+   </includes>
+   <contexts>
+      <def name="Patient"/>
+   </contexts>
+   <statements>
+      <def name="Units:-dbc843ec4ff74f18ccdf1e8ad2e88b78" context="Patient" accessLevel="Public">
+         <expression xsi:type="Less">
+            <operand xsi:type="ToQuantity">
+               <operand name="CalculateAgeAt" libraryName="System" xsi:type="FunctionRef">
+                  <operand name="ToDate" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand path="birthDate" xsi:type="Property">
+                        <source name="Patient" xsi:type="ExpressionRef"/>
+                     </operand>
+                  </operand>
+                  <operand xsi:type="Today"/>
+               </operand>
+            </operand>
+            <operand value="1" unit="years" xsi:type="Quantity"/>
+         </expression>
+      </def>
+      <def name="ConditionCriteriaMet" context="Patient" accessLevel="Public">
+         <expression name="Units:-dbc843ec4ff74f18ccdf1e8ad2e88b78" xsi:type="ExpressionRef"/>
+      </def>
+   </statements>
+</library>

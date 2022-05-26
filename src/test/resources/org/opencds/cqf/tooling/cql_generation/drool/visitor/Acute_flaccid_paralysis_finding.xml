@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<library xmlns="urn:hl7-org:elm:r1" xmlns:t="urn:hl7-org:elm-types:r1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:fhir="http://hl7.org/fhir" xmlns:qdm43="urn:healthit-gov:qdm:v4_3" xmlns:qdm53="urn:healthit-gov:qdm:v5_3" xmlns:a="urn:hl7-org:cql-annotations:r1">
+   <annotation translatorOptions="EnableAnnotations,EnableLocators,DisableListDemotion,DisableListPromotion" xsi:type="a:CqlToElmInfo"/>
+   <annotation message="Could not resolve membership operator for terminology target of the retrieve." errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
+   <annotation message="Could not resolve membership operator for terminology target of the retrieve." errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
+   <annotation message="Could not resolve membership operator for terminology target of the retrieve." errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
+   <annotation message="Could not resolve membership operator for terminology target of the retrieve." errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
+   <annotation message="Could not resolve membership operator for terminology target of the retrieve." errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
+   <annotation message="Could not resolve membership operator for terminology target of the retrieve." errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
+   <identifier id="Acute_flaccid_paralysis_finding" version="1.0.0"/>
+   <schemaIdentifier id="urn:hl7-org:elm" version="r1"/>
+   <usings>
+      <def localIdentifier="FHIR" uri="http://hl7.org/fhir" version="4.0.0"/>
+      <def localIdentifier="System" uri="urn:hl7-org:elm-types:r1"/>
+   </usings>
+   <includes>
+      <def localIdentifier="FHIRHelpers" path="FHIRHelpers" version="4.0.0"/>
+   </includes>
+   <codeSystems>
+      <def name="Condition Category Codes" id="http://terminology.hl7.org/CodeSystem/condition-category" accessLevel="Public"/>
+      <def name="Condition Clinical Status Codes" id="http://terminology.hl7.org/CodeSystem/condition-clinical" accessLevel="Public"/>
+   </codeSystems>
+   <valueSets>
+      <def name="Limb Weakness" id="https://hln.com/fhir/ValueSet/SYMP113" accessLevel="Public"/>
+      <def name="Myelitis [Non Specific]" id="https://hln.com/fhir/ValueSet/POL004" accessLevel="Public"/>
+   </valueSets>
+   <codes>
+      <def name="Encounter Diagnosis" id="encounter-diagnosis" display="Encounter Diagnosis" accessLevel="Public">
+         <codeSystem name="Condition Category Codes"/>
+      </def>
+      <def name="Problem" id="problem-list-item" display="Problem List Item" accessLevel="Public">
+         <codeSystem name="Condition Category Codes"/>
+      </def>
+      <def name="Active" id="active" display="Active" accessLevel="Public">
+         <codeSystem name="Condition Clinical Status Codes"/>
+      </def>
+   </codes>
+   <contexts>
+      <def name="Patient"/>
+   </contexts>
+   <statements>
+      <def name="Patient has a diagnosis of-6f073b96f2867d72177c65ebb7db9bad" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="C">
+                        <expression dataType="fhir:Condition" codeProperty="category" codeComparator="~" xsi:type="Retrieve">
+                           <codes xsi:type="ToList">
+                              <operand name="Encounter Diagnosis" xsi:type="CodeRef"/>
+                           </codes>
+                        </expression>
+                     </source>
+                     <return>
+                        <expression path="code" scope="C" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Limb Weakness"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Patient has a problem of-4941abf86a7551feed605848adf0025d" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="C">
+                        <expression dataType="fhir:Condition" codeProperty="category" codeComparator="~" xsi:type="Retrieve">
+                           <codes xsi:type="ToList">
+                              <operand name="Problem" xsi:type="CodeRef"/>
+                           </codes>
+                        </expression>
+                     </source>
+                     <return>
+                        <expression path="code" scope="C" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Limb Weakness"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Problem has status of-79bf4ed76a7d1b943c836ced5f91a711" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="C">
+                        <expression dataType="fhir:Condition" codeProperty="category" codeComparator="~" xsi:type="Retrieve">
+                           <codes xsi:type="ToList">
+                              <operand name="Problem" xsi:type="CodeRef"/>
+                           </codes>
+                        </expression>
+                     </source>
+                     <return>
+                        <expression path="clinicalStatus" scope="C" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="Equivalent">
+                  <operand name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </operand>
+                  <operand xsi:type="ToConcept">
+                     <operand name="Active" xsi:type="CodeRef"/>
+                  </operand>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Group 1-e9b482b3671fd187181e8b1aa2d25e61" context="Patient" accessLevel="Public">
+         <expression xsi:type="And">
+            <operand name="Problem has status of-79bf4ed76a7d1b943c836ced5f91a711" xsi:type="ExpressionRef"/>
+            <operand name="Patient has a problem of-4941abf86a7551feed605848adf0025d" xsi:type="ExpressionRef"/>
+         </expression>
+      </def>
+      <def name="Patient has a diagnosis of-eb235a105661481694506e4c1496edfa" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="C">
+                        <expression dataType="fhir:Condition" codeProperty="category" codeComparator="~" xsi:type="Retrieve">
+                           <codes xsi:type="ToList">
+                              <operand name="Encounter Diagnosis" xsi:type="CodeRef"/>
+                           </codes>
+                        </expression>
+                     </source>
+                     <return>
+                        <expression path="code" scope="C" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Myelitis [Non Specific]"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Patient has a problem of-13ce5c061f1f417317bf2a41471d0027" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="C">
+                        <expression dataType="fhir:Condition" codeProperty="category" codeComparator="~" xsi:type="Retrieve">
+                           <codes xsi:type="ToList">
+                              <operand name="Problem" xsi:type="CodeRef"/>
+                           </codes>
+                        </expression>
+                     </source>
+                     <return>
+                        <expression path="code" scope="C" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="InValueSet">
+                  <code name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </code>
+                  <valueset name="Myelitis [Non Specific]"/>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Problem has status of-5dee8c8324d8d30c73bcfe3b80028148" context="Patient" accessLevel="Public">
+         <expression xsi:type="Exists">
+            <operand xsi:type="Query">
+               <source alias="Alias">
+                  <expression xsi:type="Query">
+                     <source alias="C">
+                        <expression dataType="fhir:Condition" codeProperty="category" codeComparator="~" xsi:type="Retrieve">
+                           <codes xsi:type="ToList">
+                              <operand name="Problem" xsi:type="CodeRef"/>
+                           </codes>
+                        </expression>
+                     </source>
+                     <return>
+                        <expression path="clinicalStatus" scope="C" xsi:type="Property"/>
+                     </return>
+                  </expression>
+               </source>
+               <where xsi:type="Equivalent">
+                  <operand name="ToConcept" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+                     <operand name="Alias" xsi:type="AliasRef"/>
+                  </operand>
+                  <operand xsi:type="ToConcept">
+                     <operand name="Active" xsi:type="CodeRef"/>
+                  </operand>
+               </where>
+            </operand>
+         </expression>
+      </def>
+      <def name="Group 1-4c9f3a53906a12dff65e81d594403649" context="Patient" accessLevel="Public">
+         <expression xsi:type="And">
+            <operand name="Problem has status of-5dee8c8324d8d30c73bcfe3b80028148" xsi:type="ExpressionRef"/>
+            <operand name="Patient has a problem of-13ce5c061f1f417317bf2a41471d0027" xsi:type="ExpressionRef"/>
+         </expression>
+      </def>
+      <def name="ConditionCriteriaMet" context="Patient" accessLevel="Public">
+         <expression xsi:type="Or">
+            <operand xsi:type="And">
+               <operand xsi:type="Or">
+                  <operand name="Group 1-4c9f3a53906a12dff65e81d594403649" xsi:type="ExpressionRef"/>
+                  <operand name="Patient has a diagnosis of-eb235a105661481694506e4c1496edfa" xsi:type="ExpressionRef"/>
+               </operand>
+               <operand name="Group 1-e9b482b3671fd187181e8b1aa2d25e61" xsi:type="ExpressionRef"/>
+            </operand>
+            <operand name="Patient has a diagnosis of-6f073b96f2867d72177c65ebb7db9bad" xsi:type="ExpressionRef"/>
+         </expression>
+      </def>
+   </statements>
+</library>

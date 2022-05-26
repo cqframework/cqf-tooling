@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ImplementationGuide xmlns="http://hl7.org/fhir">
+    <id value="fhir.dbcg.connectathon-stu3-2020"/>
+    <url value="http://fhir.org/guides/dbcg/connectathon/ImplementationGuide/fhir.dbcg.connectathon-stu3-2020"/>
+    <version value="3.0.2"/>
+    <name value="Connectathon_DBCG_DSTU3_2020"/>
+    <status value="draft"/>
+    <experimental value="false"/>
+    <date value="2020-04-24"/>
+    <publisher value="DBCG"/>
+    <contact>
+      <telecom>
+        <system value="url"/>
+        <value value="http://www.dynamiccontentgroup.com"/>
+      </telecom>
+    </contact>
+    <description value="Connectathon Implementation Guide DSTU3 2020"/>
+	  <fhirVersion value="3.0.2"/>
+</ImplementationGuide>

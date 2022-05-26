@@ -1,0 +1,16 @@
+{
+    "resourceType": "MedicationAdministration",
+    "id": "modelingL-some-patient",
+    "status": "in-progress",
+    "medicationCodeableConcept": {
+      "coding": [{
+        "code": "some-code"
+        }
+      ]
+    },
+    "subject": {"reference": "Patient/some-patient"},
+    "effective":  {
+        "start": "2020-01-01",
+        "end": "2021-12-31"
+    }
+}

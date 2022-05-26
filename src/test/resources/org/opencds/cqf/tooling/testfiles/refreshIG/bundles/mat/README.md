@@ -1,0 +1,1 @@
+This directory is for the placement of MAT export bundles. You should create a directory that matches the name of the library that you exported and then place the JSON exported from MAT in that directory. This will be used to extract the CQL, Library, and Measure resources from the bundle and place them in the input directory to allow generation of valuesets and test data.

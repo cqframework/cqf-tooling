@@ -1,0 +1,30 @@
+{
+  "resourceType": "Condition",
+  "id": "modelingE-some-patient",
+  "subject":  {
+    "reference":"Patient/some-patient"
+  },
+  "clinicalStatus": {
+      "coding": [{
+          "code": "confirmed"
+      }]
+  },
+  "verificationStatus":{
+      "coding": [{
+          "code": "confirmed"
+      }]
+  },
+  "category": {
+      "coding": [{
+          "code": "problem-list-item",
+          "display": "Problem List Item",
+          "system" : "http://terminology.hl7.org/CodeSystem/condition-category"
+      }]
+  },
+  "code":  {
+    "coding": [{
+      "code": "some-code"
+      }
+    ]
+  }
+}
