@@ -29,6 +29,7 @@ import ca.uhn.fhir.validation.ValidationResult;
 
 public class ErsdTransformer extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(ErsdTransformer.class);
+    private static final String PUBLISHER = "Association of Public Health Laboratories (APHL)";
     private FhirContext ctx;
     private FhirValidator validator;
     private IValidatorModule module = new UsPublicHealthValidatorModule();
@@ -39,6 +40,8 @@ public class ErsdTransformer extends Operation {
 
     private JsonParser jsonParser;
 //    private XmlParser xmlParser;
+
+    private String version;
 
     public ErsdTransformer() {
         ctx = FhirContext.forR4();
@@ -115,7 +118,8 @@ public class ErsdTransformer extends Operation {
             }
 
             BundleEntryComponent bundleEntry =
-                    sourceBundle.getEntry().stream().filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition")).findFirst().get();
+                sourceBundle.getEntry().stream().filter(x -> x.hasResource()
+                        && x.getResource().fhirType().equals("PlanDefinition")).findFirst().get();
             bundleEntry.setFullUrl(v2PlanDefinition.getUrl());
             bundleEntry.setResource(v2PlanDefinition);
         }
@@ -175,7 +179,19 @@ public class ErsdTransformer extends Operation {
                 && sourceBundle.getEntry().get(0).getResource().fhirType().equals("Bundle")) {
             sourceArtifactBundle = (Bundle)sourceBundle.getEntry().get(0).getResource();
         } else {
-            throw new RuntimeException("The bundle provided is not structured as expected. Expectation is a Bundle with a single entry - another bundle that contains the artifacts.");
+            throw new IllegalArgumentException("The bundle provided is not structured as expected. Expectation is a Bundle with a single entry - another bundle that contains the artifacts.");
+        }
+
+        Library rctc =
+            (Library)sourceArtifactBundle.getEntry().stream()
+                .filter(x -> x.hasResource()
+                    && x.getResource().fhirType().equals("Library")
+                    && ((Library)x.getResource()).getUrl().equals("http://hl7.org/fhir/us/ecr/Library/rctc")).findFirst().get().getResource();
+
+        if (rctc.hasVersion()) {
+            this.version = rctc.getVersion();
+        } else {
+            throw new IllegalArgumentException("The 'rctc' Library included in the input bundle does not include a version and should");
         }
 
         return sourceArtifactBundle;
@@ -187,12 +203,12 @@ public class ErsdTransformer extends Operation {
         specificationLibrary.getMeta().addProfile(usPhSpecificationLibraryProfileUrl);
         specificationLibrary.setName("SpecificationLibrary");
         specificationLibrary.setTitle("Specification Library");
-        specificationLibrary.setVersion("1.0.0");
+        specificationLibrary.setVersion(this.version);
         specificationLibrary.setDescription(
                 "Defines the asset-collection library containing the US Public Health specification assets.");
         specificationLibrary.setStatus(PublicationStatus.ACTIVE);
         specificationLibrary.setExperimental(true);
-        specificationLibrary.setPublisher("eCR");
+        specificationLibrary.setPublisher(PUBLISHER);
         specificationLibrary.setUrl("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary");
         specificationLibrary.setType(new CodeableConcept(
                 new Coding("http://terminology.hl7.org/CodeSystem/library-type", "asset-collection", null)));
@@ -253,8 +269,8 @@ public class ErsdTransformer extends Operation {
         // trigger.setType(TriggerType.NAMEDEVENT);
         // });
         // });
-        // res.setVersion("1.0.0");
-        // res.setPublisher("eCR");
+        // res.setVersion(this.version);
+        // res.setPublisher(PUBLISHER);
         // res.setExperimental(true);
         // res.setDescription("Example Description");
         return null;
@@ -301,8 +317,23 @@ public class ErsdTransformer extends Operation {
         relatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
         relatedArtifact.setResource(res.getUrlElement().asStringValue());
         specificationLibrary.addRelatedArtifact(relatedArtifact);
-        res.setPublisher("eCR");
+        res.setPublisher(PUBLISHER);
         res.setExperimental(false);
+
+        UsageContext reportingUsageContext =
+            new UsageContext(
+                    new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "reporting", null),
+                    new CodeableConcept(new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "triggering", null))
+            );
+        res.addUseContext(reportingUsageContext);
+
+        UsageContext specificationTypeUsageContext =
+            new UsageContext(
+                    new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "specification-type", null),
+                    new CodeableConcept(new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "value-set-library", null))
+            );
+        res.addUseContext(specificationTypeUsageContext);
+
         return null;
     }
 
@@ -319,11 +350,6 @@ public class ErsdTransformer extends Operation {
         }
         if (!isValid) {
             return result.toOperationOutcome();
-        } else {
-            RelatedArtifact relatedArtifact = new RelatedArtifact();
-            relatedArtifact.setType(RelatedArtifactType.COMPOSEDOF);
-            relatedArtifact.setResource(res.getUrlElement().asStringValue());
-            // specificationLibrary.addRelatedArtifact(relatedArtifact);
         }
         res.addUseContext(
             new UsageContext(
@@ -337,8 +363,37 @@ public class ErsdTransformer extends Operation {
                 new CodeableConcept(new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "routine", null))
             )
         );
-        res.setVersion("1.0.0");
-        res.setPublisher("eCR");
+        res.setVersion(this.version);
+        res.setPublisher(PUBLISHER);
+
+        // Groupers need to have an include per ValueSet in the compose rather than all in one Include together.
+        List<String> grouperUrls = new ArrayList<>();
+        grouperUrls.add("http://hl7.org/fhir/us/ecr/ValueSet/dxtc");
+        grouperUrls.add("http://hl7.org/fhir/us/ecr/ValueSet/ostc");
+        grouperUrls.add("http://hl7.org/fhir/us/ecr/ValueSet/lotc");
+        grouperUrls.add("http://hl7.org/fhir/us/ecr/ValueSet/lrtc");
+        grouperUrls.add("http://hl7.org/fhir/us/ecr/ValueSet/mrtc");
+        grouperUrls.add("http://hl7.org/fhir/us/ecr/ValueSet/sdtc");
+        String url = res.getUrl();
+        if (grouperUrls.contains(url)) {
+            ValueSet.ValueSetComposeComponent compose = res.getCompose();
+            List<ValueSet.ConceptSetComponent> includes = compose.getInclude();
+            if (includes.size() > 1) {
+                throw new RuntimeException(String.format("Expected the %s grouping ValueSet to have a single include in its compose.", url));
+            }
+
+            ValueSet.ConceptSetComponent include = includes.get(0);
+
+            List<CanonicalType> referencedValueSets = include.getValueSet();
+            for (CanonicalType referencedValueSet : referencedValueSets) {
+                ArrayList<CanonicalType> newInclude = new ArrayList<>();
+                newInclude.add(referencedValueSet);
+                compose.addInclude(new ValueSet.ConceptSetComponent().setValueSet(newInclude));
+            }
+
+            compose.getInclude().remove(include);
+        }
+
         res.setExperimental(true);
         return null;
     }
