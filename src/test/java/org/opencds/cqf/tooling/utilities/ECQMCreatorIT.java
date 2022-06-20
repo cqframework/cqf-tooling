@@ -18,7 +18,7 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.NamespaceInfo;
 import org.cqframework.cql.cql2elm.NamespaceManager;
-import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
@@ -51,7 +51,7 @@ public class ECQMCreatorIT {
     private Measure refreshMeasure(String primaryLibraryPath, String measurePath) throws IOException {
         CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
         cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
-        cqlTranslatorOptions.getOptions().add(CqlTranslator.Options.EnableAnnotations);
+        cqlTranslatorOptions.getOptions().add(CqlTranslatorOptions.Options.EnableAnnotations);
         // This option performs data analysis, including element reference detection
         cqlTranslatorOptions.setAnalyzeDataRequirements(true);
         // This option collapses duplicate data requirements
@@ -732,7 +732,7 @@ public class ECQMCreatorIT {
         // TODO - translate measure into ELM measure then call creator with that measure
         CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
         cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
-        cqlTranslatorOptions.getOptions().add(CqlTranslator.Options.EnableAnnotations);
+        cqlTranslatorOptions.getOptions().add(CqlTranslatorOptions.Options.EnableAnnotations);
         cqlTranslatorOptions.setCollapseDataRequirements(true);
         String libraryPath = "CompositeMeasures/cql/BCSComponent.cql"; //EXM124-9.0.000.cql";//library-EXM124-9.0.000.json";
         try {
@@ -755,11 +755,11 @@ public class ECQMCreatorIT {
         }
     }
 
-    private static void cacheLibrary(TranslatedLibrary library) {
+    private static void cacheLibrary(CompiledLibrary library) {
         // Add the translated library to the library manager (NOTE: This should be a "cacheLibrary" call on the LibraryManager, available in 1.5.3+)
         // Without this, the data requirements processor will try to load the current library, resulting in a re-translation
         String libraryPath = NamespaceManager.getPath(library.getIdentifier().getSystem(), library.getIdentifier().getId());
-        libraryManager.getTranslatedLibraries().put(libraryPath, library);
+        libraryManager.getCompiledLibraries().put(libraryPath, library);
     }
 
     private static void tearDown() {
@@ -813,7 +813,7 @@ public class ECQMCreatorIT {
         return createTranslator(null, testFileName, options);
     }
 
-    public static CqlTranslator createTranslator(NamespaceInfo namespaceInfo, String testFileName, CqlTranslator.Options... options) throws IOException {
+    public static CqlTranslator createTranslator(NamespaceInfo namespaceInfo, String testFileName, CqlTranslatorOptions.Options... options) throws IOException {
         return createTranslator(namespaceInfo, testFileName, new CqlTranslatorOptions(options));
     }
 

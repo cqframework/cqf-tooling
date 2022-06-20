@@ -2,10 +2,10 @@ package org.opencds.cqf.tooling.measure;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FilenameUtils;
-import org.cqframework.cql.cql2elm.CqlTranslatorException;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
-import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -250,19 +250,19 @@ public class MeasureProcessor extends BaseProcessor {
         if (measure.hasLibrary()) {
             String libraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
             VersionedIdentifier primaryLibraryIdentifier = CanonicalUtils.toVersionedIdentifier(libraryUrl);
-            List<CqlTranslatorException> errors = new ArrayList<CqlTranslatorException>();
-            TranslatedLibrary translatedLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, cqlTranslatorOptions, errors);
+            List<CqlCompilerException> errors = new ArrayList<CqlCompilerException>();
+            CompiledLibrary compiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, cqlTranslatorOptions, errors);
             boolean hasErrors = false;
             if (errors.size() > 0) {
-                for (CqlTranslatorException e : errors) {
-                    if (e.getSeverity() == CqlTranslatorException.ErrorSeverity.Error) {
+                for (CqlCompilerException e : errors) {
+                    if (e.getSeverity() == CqlCompilerException.ErrorSeverity.Error) {
                         hasErrors = true;
                     }
                     logMessage(e.getMessage());
                 }
             }
             if (!hasErrors) {
-                return processor.refreshMeasure(measure, libraryManager, translatedLibrary, cqlTranslatorOptions);
+                return processor.refreshMeasure(measure, libraryManager, compiledLibrary, cqlTranslatorOptions);
             }
         }
         return measure;

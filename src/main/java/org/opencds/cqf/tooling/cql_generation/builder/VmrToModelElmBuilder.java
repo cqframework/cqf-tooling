@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.cqframework.cql.cql2elm.CqlSemanticException;
-import org.cqframework.cql.cql2elm.CqlTranslatorException;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.DataTypes;
 import org.cqframework.cql.cql2elm.model.QueryContext;
 import org.cqframework.cql.cql2elm.model.invocation.InValueSetInvocation;
@@ -499,11 +499,11 @@ public abstract class VmrToModelElmBuilder {
             }
 
             Property property = null;
-            CqlTranslatorException propertyException = null;
+            CqlCompilerException propertyException = null;
             if (retrieve.getCodeProperty() == null) {
                 // ERROR:
                 propertyException = new CqlSemanticException("Retrieve has a terminology target but does not specify a code path and the type of the retrieve does not have a primary code path defined.",
-                    CqlTranslatorException.ErrorSeverity.Error);
+                    CqlCompilerException.ErrorSeverity.Error);
                     libraryBuilder.recordParsingException(propertyException);
             }
             else {
@@ -516,7 +516,7 @@ public abstract class VmrToModelElmBuilder {
                     // ERROR:
                     // WARNING:
                     propertyException = new CqlSemanticException(String.format("Could not resolve code path %s for the type of the retrieve %s.",
-                            retrieve.getCodeProperty(), namedType.getName()), useStrictRetrieveTyping ? CqlTranslatorException.ErrorSeverity.Error : CqlTranslatorException.ErrorSeverity.Warning, e);
+                            retrieve.getCodeProperty(), namedType.getName()), useStrictRetrieveTyping ? CqlCompilerException.ErrorSeverity.Error : CqlCompilerException.ErrorSeverity.Warning, e);
                             libraryBuilder.recordParsingException(propertyException);
                 }
             }
@@ -548,7 +548,7 @@ public abstract class VmrToModelElmBuilder {
                             // ERROR:
                             // WARNING:
                             libraryBuilder.recordParsingException(new CqlSemanticException(String.format("Unexpected membership operator %s in retrieve", in.getClass().getSimpleName()),
-                                    useStrictRetrieveTyping ? CqlTranslatorException.ErrorSeverity.Error : CqlTranslatorException.ErrorSeverity.Warning));
+                                    useStrictRetrieveTyping ? CqlCompilerException.ErrorSeverity.Error : CqlCompilerException.ErrorSeverity.Warning));
                         }
                     }
                     break;
@@ -587,7 +587,7 @@ public abstract class VmrToModelElmBuilder {
                         // ERROR:
                         // WARNING:
                         libraryBuilder.recordParsingException(new CqlSemanticException(String.format("Unknown code comparator % in retrieve", codeComparator),
-                                useStrictRetrieveTyping ? CqlTranslatorException.ErrorSeverity.Error : CqlTranslatorException.ErrorSeverity.Warning));
+                                useStrictRetrieveTyping ? CqlCompilerException.ErrorSeverity.Error : CqlCompilerException.ErrorSeverity.Warning));
                 }
 
                 retrieve.setCodeComparator(codeComparator);
@@ -613,7 +613,7 @@ public abstract class VmrToModelElmBuilder {
                     else {
                         // WARNING:
                         libraryBuilder.recordParsingException(new CqlSemanticException("Terminology target is a list of concepts, but expects a list of codes",
-                                CqlTranslatorException.ErrorSeverity.Warning));
+                                CqlCompilerException.ErrorSeverity.Warning));
                     }
                 }
             }
@@ -630,7 +630,7 @@ public abstract class VmrToModelElmBuilder {
                 // ERROR:
                 // WARNING:
                 libraryBuilder.recordParsingException(new CqlSemanticException("Could not resolve membership operator for terminology target of the retrieve.",
-                        useStrictRetrieveTyping ? CqlTranslatorException.ErrorSeverity.Error : CqlTranslatorException.ErrorSeverity.Warning, e));
+                        useStrictRetrieveTyping ? CqlCompilerException.ErrorSeverity.Error : CqlCompilerException.ErrorSeverity.Warning, e));
             }
         }
 

@@ -2,7 +2,7 @@ package org.opencds.cqf.tooling.measure;
 
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
-import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.fhir.r5.model.*;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
 
@@ -12,15 +12,15 @@ import java.util.List;
 import java.util.Set;
 
 public class MeasureRefreshProcessor {
-    public Measure refreshMeasure(Measure measureToUse, LibraryManager libraryManager, TranslatedLibrary translatedLibrary, CqlTranslatorOptions options) {
+    public Measure refreshMeasure(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary compiledLibrary, CqlTranslatorOptions options) {
         
-    	Library moduleDefinitionLibrary = getModuleDefinitionLibrary(measureToUse, libraryManager, translatedLibrary, options);
+    	Library moduleDefinitionLibrary = getModuleDefinitionLibrary(measureToUse, libraryManager, compiledLibrary, options);
         
         measureToUse.setDate(new Date());
         // http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/measure-cqfm
         setMeta(measureToUse, moduleDefinitionLibrary);
         // Don't need to do this... it is required information to perform this processing in the first place, should just be left alone
-        //setLibrary(measureToUse, translatedLibrary);
+        //setLibrary(measureToUse, compiledLibrary);
         // Don't need to do this... type isn't a computable attribute, it's just metadata and will come from the source measure
         //setType(measureToUse);
 
@@ -37,10 +37,10 @@ public class MeasureRefreshProcessor {
         return measureToUse;
     }
 
-    private Library getModuleDefinitionLibrary(Measure measureToUse, LibraryManager libraryManager, TranslatedLibrary translatedLibrary, CqlTranslatorOptions options){
+    private Library getModuleDefinitionLibrary(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary compiledLibrary, CqlTranslatorOptions options){
         Set<String> expressionList = getExpressions(measureToUse);
         DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
-        return dqReqTrans.gatherDataRequirements(libraryManager, translatedLibrary, options, expressionList, true);
+        return dqReqTrans.gatherDataRequirements(libraryManager, compiledLibrary, options, expressionList, true);
     }
 
     private Set<String> getExpressions(Measure measureToUse) {
