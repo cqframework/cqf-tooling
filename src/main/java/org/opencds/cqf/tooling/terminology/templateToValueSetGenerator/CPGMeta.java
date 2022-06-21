@@ -95,9 +95,6 @@ public class CPGMeta {
         if (compose != null) {
             try {
                 ValueSet tempVs = fhirContext.newXmlParser().parseResource(ValueSet.class, "<ValueSet>" + compose + "</ValueSet>");
-                if(tempVs.getCompose().getInclude().isEmpty()){
-                    tempVs = fhirContext.newJsonParser().parseResource(ValueSet.class, "{\"resourceType\": \"ValueSet\"," + compose + "}");
-                }
                 vs.setCompose(tempVs.getCompose());
             } catch (Exception e) {
                 System.out.println("An error occurred in the compose for the sheet with id: " + this.id);
