@@ -2,10 +2,18 @@ package org.opencds.cqf.tooling.terminology;
 
 import java.io.File;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.MarkdownType;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -61,7 +69,7 @@ public class EnsureExecutableValueSetOperation extends Operation {
                 case "skipversion": case "sv": skipVersion = value.toLowerCase().equals("true") ? true : false; break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
-            if (null == super.getOutputPath() || "" == getOutputPath()) {
+            if (null == getOutputPath() || getOutputPath().equals("")) {
                 setOutputPath(this.valueSetPath); //default to editing files in place
             }
         }
