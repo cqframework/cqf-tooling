@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 
 public abstract class Operation {
 
-    private String outputPath = Paths.get("src/main/resources/org/opencds/cqf/tooling/terminology/output").toAbsolutePath().toString();
+    private String outputPath;
     protected String getOutputPath() {
         return outputPath;
     }
