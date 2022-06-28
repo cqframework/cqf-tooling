@@ -1,16 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
 <PlanDefinition xmlns="http://hl7.org/fhir">
-  <id value="plandefinition-ersd-instance-example"/>
+  <id value="plandefinition-us-ecr-specification"/>
   <meta>
-    <versionId value="6"/>
-    <lastUpdated value="2021-11-17T04:21:04.738+00:00"/>
-    <source value="#DYpZHR1G1x5B4mFC"/>
     <profile value="http://hl7.org/fhir/us/ecr/StructureDefinition/ersd-plandefinition"/>
   </meta>
-  <text>
-    <status value="extensions"/><div xmlns="http://www.w3.org/1999/xhtml"><p><b>Generated Narrative</b></p><div style="display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%"><p style="margin-bottom: 0px">Resource "plandefinition-ersd-instance-example" Version "6" Updated "2021-11-17 04:21:04+0000" </p><p style="margin-bottom: 0px">Information Source: #DYpZHR1G1x5B4mFC!</p><p style="margin-bottom: 0px">Profile: <a href="StructureDefinition-ersd-plandefinition.html">eRSD PlanDefinition</a></p></div><p><b>Variable</b>: <span title="text/fhirpath"><code>2 weeks</code></span>(<b>normalReportingDuration</b>)</p><p><b>url</b>: <code>http://example.org/fhir/PlanDefinition/plandefinition-ersd-instance-example</code></p><p><b>version</b>: 2.0.0</p><p><b>name</b>: PlanDefinition_eRSD_Instance_Example</p><p><b>title</b>: eRSD PlanDefinition Instance Example</p><p><b>type</b>: Workflow Definition <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="http://terminology.hl7.org/3.1.0/CodeSystem-plan-definition-type.html">PlanDefinitionType</a>#workflow-definition)</span></p><p><b>status</b>: active</p><p><b>experimental</b>: true</p><p><b>date</b>: 2020-07-31 12:32:29-0500</p><p><b>publisher</b>: HL7 Public Health Work Group (http://www.hl7.org/Special/committees/pher/index.cfm)</p><p><b>contact</b>: HL7 International - Public Health: <a href="http://www.hl7.org/Special/committees/pher">http://www.hl7.org/Special/committees/pher</a></p><p><b>description</b>: An example ersd PlanDefinition</p><p><b>jurisdiction</b>: United States of America <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (unknown#US)</span></p><p><b>effectivePeriod</b>: 2020-12-01 --&gt; (ongoing)</p><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the start of the reporting workflow in response to the encounter-start event.</p><p><b>textEquivalent</b>: Start the reporting workflow in response to an encounter-start event</p><p><b>code</b>: Initiate a reporting workflow <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#initiate-reporting-workflow)</span></p><h3>RelatedActions</h3><table class="grid"><tr><td>-</td><td><b>ActionId</b></td><td><b>Relationship</b></td><td><b>Offset[x]</b></td></tr><tr><td>*</td><td>check-suspected-disorder</td><td>before-start</td><td>60 s<span style="background: LightGoldenRodYellow"> (Details: UCUM code s = 's')</span></td></tr></table></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the start of the check suspected disorder reporting workflow in response to the encounter-start event.</p><p><b>textEquivalent</b>: Check suspected disorders for immediate reportability and setup jobs for future reportability checks.</p><p><b>code</b>: Execute a series of actions to accomplish reporting <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#execute-reporting-workflow)</span></p><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the check for suspected disorder reportability to create the patients eICR.</p><p><b>textEquivalent</b>: Check Trigger Codes based on Suspected Reportable Value set.</p><p><b>code</b>: Evaluate candidate patient's data against trigger codes to determine reportability <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#check-trigger-codes)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>code</b>: Evaluate condition to determine reportability <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#evaluate-condition)</span></p></blockquote></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the check for suspected reportability of the eICR.</p><p><b>textEquivalent</b>: Check Reportability and setup jobs for future reportability checks.</p><p><b>code</b>: Execute a series of actions to accomplish reporting <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#execute-reporting-workflow)</span></p><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the check for reportability to create the patients eICR.</p><p><b>textEquivalent</b>: Check Trigger Codes based on RCTC Value sets.</p><p><b>code</b>: Evaluate candidate patient's data against trigger codes to determine reportability <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#check-trigger-codes)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>code</b>: Evaluate condition to determine reportability <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#evaluate-condition)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>code</b>: Evaluate condition to determine reportability <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#evaluate-condition)</span></p></blockquote></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the creation of the eICR. It subsequently calls validate.</p><p><b>textEquivalent</b>: Create eICR</p><p><b>code</b>: Create a Report containing Patient's data for patients who passed the check-reportability test <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#create-report)</span></p><h3>RelatedActions</h3><table class="grid"><tr><td>-</td><td><b>ActionId</b></td><td><b>Relationship</b></td></tr><tr><td>*</td><td>validate-eicr</td><td>before-start</td></tr></table></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the validation of the eICR. It subsequently calls route-and-send.</p><p><b>textEquivalent</b>: Validate eICR</p><p><b>code</b>: Validate Report against specified profiles and terminologies. <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#validate-report)</span></p><h3>RelatedActions</h3><table class="grid"><tr><td>-</td><td><b>ActionId</b></td><td><b>Relationship</b></td></tr><tr><td>*</td><td>route-and-send-eicr</td><td>before-start</td></tr></table></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the routing and sending of the eICR.</p><p><b>textEquivalent</b>: Route and send eICR</p><p><b>code</b>: Submit the report to specified endpoint <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#submit-report)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the start of the reporting workflow in response to the encounter-modified event</p><p><b>textEquivalent</b>: Start the reporting workflow in response to an encounter-modified event</p><p><b>code</b>: Initiate a reporting workflow <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#initiate-reporting-workflow)</span></p><blockquote><p><b>condition</b></p><p><b>kind</b>: applicability</p></blockquote><h3>RelatedActions</h3><table class="grid"><tr><td>-</td><td><b>ActionId</b></td><td><b>Relationship</b></td></tr><tr><td>*</td><td>create-eicr</td><td>before-start</td></tr></table></blockquote></div>
-  </text>
   <extension url="http://hl7.org/fhir/StructureDefinition/variable">
     <valueExpression>
       <name value="normalReportingDuration"/>
@@ -18,10 +10,10 @@
       <expression value="2 weeks"/>
     </valueExpression>
   </extension>
-  <url value="http://example.org/fhir/PlanDefinition/plandefinition-ersd-instance-example"/>
-  <version value="2.0.0"/>
-  <name value="PlanDefinition_eRSD_Instance_Example"/>
-  <title value="eRSD PlanDefinition Instance Example"/>
+  <url value="http://example.org/fhir/PlanDefinition/us-ecr-specification"/>
+  <version value="0.1"/>
+  <name value="US_eCR_Specification"/>
+  <title value="US eCR Specification"/>
   <type>
     <coding>
       <system value="http://terminology.hl7.org/CodeSystem/plan-definition-type"/>
@@ -32,15 +24,15 @@
   <status value="active"/>
   <experimental value="true"/>
   <date value="2020-07-31T12:32:29.858-05:00"/>
-  <publisher value="HL7 Public Health Work Group (http://www.hl7.org/Special/committees/pher/index.cfm)"/>
+  <publisher value="eCR"></publisher>
   <contact>
-    <name value="HL7 International - Public Health"/>
+    <name value="HL7 International - Public Health"></name>
     <telecom>
-      <system value="url"/>
-      <value value="http://www.hl7.org/Special/committees/pher"/>
+      <system value="url"></system>
+      <value value="http://www.hl7.org/Special/committees/pher"></value>
     </telecom>
   </contact>
-  <description value="An example ersd PlanDefinition"/>
+  <description value="An example ersd PlanDefinition"></description>
   <jurisdiction>
     <coding>
       <system value="urn:iso:std:iso:3166"/>
@@ -55,7 +47,7 @@
   <relatedArtifact>
     <type value="depends-on"/>
     <label value="RCTC Value Set Library of Trigger Codes"/>
-    <resource value="http://example.org/fhir/Library/library-rctc-example"/>
+    <resource value="http://ersd.aimsplatform.org/fhir/Library/rctc"/>
   </relatedArtifact>
   <action id="start-workflow">
     <description value="This action represents the start of the reporting workflow in response to the encounter-start event."/>
@@ -80,13 +72,25 @@
       <type value="named-event"/>
       <name value="encounter-start"/>
     </trigger>
+    <input id="patient">
+      <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
+        <valueString value="Patient/{{context.patientId}}"/>
+      </extension>
+      <type value="Patient"/>
+    </input>
+    <input id="encounter">
+      <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
+        <valueString value="Encounter/{{context.encounterId}}"/>
+      </extension>
+      <type value="Encounter"/>
+    </input>
     <relatedAction>
       <actionId value="check-suspected-disorder"/>
       <relationship value="before-start"/>
       <offsetDuration>
-        <value value="60"/>
+        <value value="1"/>
         <system value="http://unitsofmeasure.org"/>
-        <code value="s"/>
+        <code value="h"/>
       </offsetDuration>
     </relatedAction>
   </action>
@@ -115,41 +119,40 @@
             <valueExpression>
               <language value="text/cql-identifier"/>
               <expression value="Is Suspected Disorder?"/>
-              <reference value="http://example.org/fhir/Library/RuleFilters|1.0.0"/>
+              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|1.0.0"/>
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="%modifiedConditions.exists() or %modifiedLabResults.exists() or %modifiedMedicationOrders.exists()"/>
-        </expression>
+          <expression value="%modifiedConditions.exists() or %modifiedLabResults.exists() or %modifiedMedicationOrders.exists()"/></expression>
       </condition>
       <input id="modifiedConditions">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
-          <valueString value="Condition?code:in=http://example.org/fhir/ValueSet/valueset-sdtc-example&amp;patient=Patient/{{context.patientId}}"/>
+          <valueString value="Condition?patient=Patient/{{context.patientId}}"/>
         </extension>
         <type value="Condition"/>
         <codeFilter>
           <path value="code"/>
-          <valueSet value="http://example.org/fhir/ValueSet/valueset-sdtc-example"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/sdtc"/>
         </codeFilter>
       </input>
       <input id="modifiedLabResults">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
-          <valueString value="Observation?value-concept:in=http://example.org/fhir/ValueSet/valueset-sdtc-example&amp;patient=Patient/{{context.patientId}}"/>
+          <valueString value="Observation?patient=Patient/{{context.patientId}}"/>
         </extension>
         <type value="Observation"/>
         <codeFilter>
           <path value="value"/>
-          <valueSet value="http://example.org/fhir/ValueSet/valueset-sdtc-example"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/sdtc"/>
         </codeFilter>
       </input>
       <input id="modifiedMedicationOrders">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
-          <valueString value="MedicationRequest?code:in=http://example.org/fhir/ValueSet/valueset-sdtc-example&amp;patient=Patient/{{context.patientId}}"/>
+          <valueString value="MedicationRequest?patient=Patient/{{context.patientId}}"/>
         </extension>
         <type value="MedicationRequest"/>
         <codeFilter>
           <path value="medication"/>
-          <valueSet value="http://example.org/fhir/ValueSet/valueset-sdtc-example"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/sdtc"/>
         </codeFilter>
       </input>
       <relatedAction>
@@ -171,12 +174,11 @@
             <valueExpression>
               <language value="text/cql-identifier"/>
               <expression value="Is Encounter In Progress and Longer Than Normal Reporting Duration or 72h or less after end of encounter?"/>
-              <reference value="http://example.org/fhir/Library/RuleFilters|1.0.0"/>
+              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|1.0.0"/>
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="%encounter.where((status = 'in-progress' and period.start + %normalReportingDuration &lt; now()) or status = 'finished' and period.end &lt;= now() - 72 hours)"/>
-        </expression>
+          <expression value="%encounter.where((status = 'in-progress' and period.start + %normalReportingDuration &lt; now()) or status = 'finished' and period.end &lt;= now() - 72 hours)"/></expression>
       </condition>
       <relatedAction>
         <actionId value="check-reportable"/>
@@ -214,121 +216,141 @@
             <valueExpression>
               <language value="text/cql-identifier"/>
               <expression value="Is Encounter Reportable and Within Normal Reporting Duration?"/>
-              <reference value="http://example.org/fhir/Library/RuleFilters|1.0.0"/>
+              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|1.0.0"/>
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="%encounter.where(period.start + %normalReportingDuration &gt;= now()) and (%conditions.exists() or %encounters.exists() or %immunizations.exists() or %procedures.exists() or %procedureOrders.exists() or %labOrders.exists() or %labTests.exists() or %labResults.exists() or %medicationAdministrations.exists() or %medicationOrders.exists() or %medicationDispenses.exists())"/>
-        </expression>
+          <expression
+                  value="%encounter.where(period.start + %normalReportingDuration &gt;= now()) and (%conditions.exists() or %encounters.exists() or %immunizations.exists() or %procedures.exists() or %procedureOrders.exists() or %labOrders.exists() or %labTests.exists() or %labResults.exists() or %medicationAdministrations.exists() or %medicationOrders.exists() or %medicationDispenses.exists())"/></expression>
       </condition>
       <input id="conditions">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
-          <valueString value="Condition?code:in=http://example.org/fhir/ValueSet/valueset-dxtc-example&amp;patient=Patient/{{context.patientId}}"/>
+          <valueString value="Condition?patient=Patient/{{context.patientId}}"/>
         </extension>
         <type value="Condition"/>
         <codeFilter>
           <path value="code"/>
-          <valueSet value="http://example.org/fhir/ValueSet/valueset-dxtc-example"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/dxtc"/>
         </codeFilter>
       </input>
       <input id="encounters">
-        <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
-          <valueString value="Encounter?reason-code:in=http://example.org/fhir/ValueSet/valueset-dxtc-example&amp;patient=Patient/{{context.patientId}}"/>
+        <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+          <valueString value="encounter"/>
         </extension>
         <type value="Encounter"/>
         <codeFilter>
           <path value="reasonCode"/>
-          <valueSet value="http://example.org/fhir/ValueSet/valueset-dxtc-example"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/dxtc"/>
         </codeFilter>
       </input>
       <input id="immunizations">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
-          <valueString value="Immunization?vaccine-code:in=http://example.org/fhir/ValueSet/valueset-mrtc-example&amp;patient=Patient/{{context.patientId}}"/>
+          <valueString value="Immunization?patient=Patient/{{context.patientId}}"/>
         </extension>
         <type value="Immunization"/>
         <codeFilter>
           <path value="vaccineCode"/>
-          <valueSet value="http://example.org/fhir/ValueSet/valueset-mrtc-example"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/mrtc"/>
         </codeFilter>
       </input>
       <input id="labOrders">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
-          <valueString value="ServiceRequest?code:in=http://example.org/fhir/ValueSet/valueset-lotc-example&amp;patient=Patient/{{context.patientId}}"/>
+          <valueString value="ServiceRequest?patient=Patient/{{context.patientId}}"/>
         </extension>
         <type value="ServiceRequest"/>
         <codeFilter>
           <path value="code"/>
-          <valueSet value="http://example.org/fhir/ValueSet/valueset-lotc-example"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/lotc"/>
         </codeFilter>
       </input>
       <input id="labTests">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
-          <valueString value="Observation?code:in=http://example.org/fhir/ValueSet/valueset-lotc-example&amp;patient=Patient/{{context.patientId}}"/>
+          <valueString value="Observation?patient=Patient/{{context.patientId}}"/>
         </extension>
         <type value="Observation"/>
         <codeFilter>
           <path value="code"/>
-          <valueSet value="http://example.org/fhir/ValueSet/valueset-lotc-example"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/lotc"/>
+        </codeFilter>
+      </input>
+      <input id="diagnosticOrders">
+        <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
+          <valueString value="DiagnosticReport?patient=Patient/{{context.patientId}}"/>
+        </extension>
+        <type value="DiagnosticReport"/>
+        <codeFilter>
+          <path value="code"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/lotc"/>
         </codeFilter>
       </input>
       <input id="procedureOrders">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
-          <valueString value="ServiceRequest?code:in=http://example.org/fhir/ValueSet/valueset-pctc-example&amp;patient=Patient/{{context.patientId}}"/>
+          <valueString value="ServiceRequest?patient=Patient/{{context.patientId}}"/>
         </extension>
         <type value="ServiceRequest"/>
         <codeFilter>
           <path value="code"/>
-          <valueSet value="http://example.org/fhir/ValueSet/valueset-pctc-example"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/pctc"/>
         </codeFilter>
       </input>
       <input id="procedures">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
-          <valueString value="Procedure?code:in=http://example.org/fhir/ValueSet/valueset-pctc-example&amp;patient=Patient/{{context.patientId}}"/>
+          <valueString value="Procedure?patient=Patient/{{context.patientId}}"/>
         </extension>
         <type value="Procedure"/>
         <codeFilter>
           <path value="code"/>
-          <valueSet value="http://example.org/fhir/ValueSet/valueset-pctc-example"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/pctc"/>
         </codeFilter>
       </input>
       <input id="medicationOrders">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
-          <valueString value="MedicationRequest?code:in=http://example.org/fhir/ValueSet/valueset-mrtc-example&amp;patient=Patient/{{context.patientId}}"/>
+          <valueString value="MedicationRequest?patient=Patient/{{context.patientId}}"/>
         </extension>
         <type value="MedicationRequest"/>
         <codeFilter>
           <path value="medication"/>
-          <valueSet value="http://example.org/fhir/ValueSet/valueset-mrtc-example"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/mrtc"/>
         </codeFilter>
       </input>
       <input id="medicationDispenses">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
-          <valueString value="MedicationDispense?code:in=http://example.org/fhir/ValueSet/valueset-mrtc-example&amp;patient=Patient/{{context.patientId}}"/>
+          <valueString value="MedicationDispense?patient=Patient/{{context.patientId}}"/>
         </extension>
         <type value="MedicationDispense"/>
         <codeFilter>
           <path value="medication"/>
-          <valueSet value="http://example.org/fhir/ValueSet/valueset-mrtc-example"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/mrtc"/>
         </codeFilter>
       </input>
       <input id="medicationAdministrations">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
-          <valueString value="MedicationAdministration?code:in=http://example.org/fhir/ValueSet/valueset-mrtc-example&amp;patient=Patient/{{context.patientId}}"/>
+          <valueString value="MedicationAdministration?patient=Patient/{{context.patientId}}"/>
         </extension>
         <type value="MedicationAdministration"/>
         <codeFilter>
           <path value="medication"/>
-          <valueSet value="http://example.org/fhir/ValueSet/valueset-mrtc-example"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/mrtc"/>
         </codeFilter>
       </input>
       <input id="labResults">
-        <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
-          <valueString value="Observation?value-concept:in=http://example.org/fhir/ValueSet/valueset-ostc-example&amp;patient=Patient/{{context.patientId}}"/>
+        <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+          <valueString value="labTests"/>
         </extension>
         <type value="Observation"/>
         <codeFilter>
           <path value="value"/>
-          <valueSet value="http://example.org/fhir/ValueSet/valueset-ostc-example"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/ostc"/>
+        </codeFilter>
+      </input>
+      <input id="diagnosticResults">
+        <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+          <valueString value="diagnosticOrders"/>
+        </extension>
+        <type value="DiagnosticReport"/>
+        <codeFilter>
+          <path value="code"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/ostc"/>
         </codeFilter>
       </input>
       <relatedAction>
@@ -350,13 +372,20 @@
             <valueExpression>
               <language value="text/cql-identifier"/>
               <expression value="Most recent eICR sent over 72 hours ago?"/>
-              <reference value="http://example.org/fhir/Library/RuleFilters|1.0.0"/>
+              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|1.0.0"/>
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="Composition.where(code = 'http://loinc.org#55751-2').last().date &lt; now() - 72 hours"/>
+          <expression value="%last-eicr.last().entry.first().resource.date &lt; now() - 72 hours"></expression>
         </expression>
       </condition>
+      <input id="last-eicr">
+        <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+          <valueString value="eicr-report"></valueString>
+        </extension>
+        <type value="Bundle"></type>
+        <profile value="http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"></profile>
+      </input>
       <relatedAction>
         <actionId value="create-eicr"/>
         <relationship value="before-start"/>
@@ -376,13 +405,18 @@
             <valueExpression>
               <language value="text/cql-identifier"/>
               <expression value="Is Encounter In Progress and Longer Than Normal Reporting Duration or 72h or less after end of encounter?"/>
-              <reference value="http://example.org/fhir/Library/RuleFilters|1.0.0"/>
+              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|1.0.0"/>
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="%encounter.where(status = 'in-progress' and period.start + %normalReportingDuration &gt;= now() and period.end &lt;= now() - 72 hours)"/>
-        </expression>
+          <expression value="%`inprogress-encounter`.where(status = 'in-progress' and period.start + %normalReportingDuration &gt;= now() and period.end &lt;= now() - 72 hours)"/></expression>
       </condition>
+      <input id="inprogress-encounter">
+        <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+          <valueString value="encounter"/>
+        </extension>
+        <type value="Encounter"/>
+      </input>
       <relatedAction>
         <actionId value="check-reportable"/>
         <relationship value="before-start"/>
@@ -403,39 +437,77 @@
         <code value="create-report"/>
       </coding>
     </code>
-    <input id="patient">
+    <input id="patient-data">
+      <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+        <valueString value="patient"/>
+      </extension>
       <type value="Patient"/>
       <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"/>
     </input>
-    <input id="condition">
+    <input id="condition-data">
+      <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+        <valueString value="conditions"/>
+      </extension>
       <type value="Condition"/>
       <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"/>
     </input>
-    <input id="encounter">
+    <input id="encounter-data">
+      <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+        <valueString value="encounters"/>
+      </extension>
       <type value="Encounter"/>
       <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"/>
     </input>
-    <input id="mr">
+    <input id="mr-data">
+      <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+        <valueString value="medicationOrders"/>
+      </extension>
       <type value="MedicationRequest"/>
       <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest"/>
     </input>
-    <input id="immz">
+    <input id="immz-data">
+      <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+        <valueString value="immunizations"/>
+      </extension>
       <type value="Immunization"/>
       <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-immunization"/>
     </input>
-    <input id="proc">
+    <input id="proc-data">
+      <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+        <valueString value="procedures"/>
+      </extension>
       <type value="Procedure"/>
       <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"/>
     </input>
-    <input id="obs">
+    <input id="labResult-data">
+      <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+        <valueString value="labResults"/>
+      </extension>
       <type value="Observation"/>
-      <profile value="http://hl7.org/fhir/StructureDefinition/vitalsigns"/>
+      <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab"/>
     </input>
-    <input id="svcr">
+    <input id="labOrder-data">
+      <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+        <valueString value="labOrders"/>
+      </extension>
       <type value="ServiceRequest"/>
       <profile value="http://hl7.org/fhir/StructureDefinition/ServiceRequest"/>
     </input>
-    <output id="eicr-report-output">
+    <input id="diagnosticResult-data">
+      <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+        <valueString value="diagnosticResults"/>
+      </extension>
+      <type value="DiagnosticReport"/>
+      <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab"/>
+    </input>
+    <input id="diagnosticOrder-data">
+      <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+        <valueString value="diagnosticOrders"/>
+      </extension>
+      <type value="DiagnosticReport"/>
+      <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab"/>
+    </input>
+    <output id="eicr-report">
       <type value="Bundle"/>
       <profile value="http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"/>
     </output>
@@ -453,14 +525,14 @@
         <code value="validate-report"/>
       </coding>
     </code>
-    <input id="eicr-report">
+    <input id="generated-eicr-report">
       <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
-        <valueString value="eicr-report-output"/>
+        <valueString value="eicr-report"/>
       </extension>
       <type value="Bundle"/>
       <profile value="http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"/>
     </input>
-    <output id="validated-eicr-report-output">
+    <output id="valid-eicr-report">
       <type value="Bundle"/>
       <profile value="http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"/>
     </output>
@@ -478,14 +550,14 @@
         <code value="submit-report"/>
       </coding>
     </code>
-    <input id="validated-eicr-report-input">
+    <input id="validated-eicr-report">
       <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
-        <valueString value="validated-eicr-report-output"/>
+        <valueString value="valid-eicr-report"/>
       </extension>
       <type value="Bundle"/>
       <profile value="http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"/>
     </input>
-    <output id="eicr-report-submitted">
+    <output id="submitted-eicr-report">
       <type value="Bundle"/>
       <profile value="http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"/>
     </output>
@@ -520,12 +592,11 @@
           <valueExpression>
             <language value="text/cql-identifier"/>
             <expression value="Is Encounter Longer Than Normal Reporting Duration?"/>
-            <reference value="http://example.org/fhir/Library/RuleFilters|1.0.0"/>
+            <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|1.0.0"/>
           </valueExpression>
         </extension>
         <language value="text/fhirpath"/>
-        <expression value="%encounter.where(period.start + %normalReportingDuration &lt; now())"/>
-      </expression>
+        <expression value="%encounter.where(period.start + %normalReportingDuration &lt; now())"/></expression>
     </condition>
     <relatedAction>
       <actionId value="create-eicr"/>
