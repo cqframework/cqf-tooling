@@ -11,7 +11,7 @@
     </valueExpression>
   </extension>
   <url value="http://example.org/fhir/PlanDefinition/us-ecr-specification"/>
-  <version value="0.1"/>
+  <version value="2.0.0"/>
   <name value="US_eCR_Specification"/>
   <title value="US eCR Specification"/>
   <type>
@@ -173,12 +173,12 @@
           <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternative-expression-extension">
             <valueExpression>
               <language value="text/cql-identifier"/>
-              <expression value="Is Encounter In Progress and Longer Than Normal Reporting Duration or 72h or less after end of encounter?"/>
+              <expression value="Is Encounter In Progress and Within Normal Reporting Duration or 72h or less after end of encounter?"/>
               <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|1.0.0"/>
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="%encounter.where((status = 'in-progress' and period.start + %normalReportingDuration &lt; now()) or status = 'finished' and period.end &lt;= now() - 72 hours)"/></expression>
+          <expression value="%encounter.where((status = 'in-progress' and period.start + %normalReportingDuration &gt;= now()) or status = 'finished' and period.end &lt;= now() - 72 hours)"/></expression>
       </condition>
       <relatedAction>
         <actionId value="check-reportable"/>
@@ -404,7 +404,7 @@
           <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternative-expression-extension">
             <valueExpression>
               <language value="text/cql-identifier"/>
-              <expression value="Is Encounter In Progress and Longer Than Normal Reporting Duration or 72h or less after end of encounter?"/>
+              <expression value="Is Encounter In Progress and Within Normal Reporting Duration or 72h or less after end of encounter?"/>
               <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|1.0.0"/>
             </valueExpression>
           </extension>
