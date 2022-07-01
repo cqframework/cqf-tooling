@@ -357,12 +357,24 @@ public class ErsdTransformer extends Operation {
                 new CodeableConcept(new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "triggering", null))
             )
         );
-        res.addUseContext(
-            new UsageContext(
-                new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "priority", null),
-                new CodeableConcept(new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "routine", null))
-            )
-        );
+
+        List<UsageContext> useContexts = res.getUseContext();
+        boolean hasPriorityUseContext = false;
+        for (UsageContext uc : useContexts) {
+            hasPriorityUseContext = uc.getCode().getCode().equalsIgnoreCase("priority");
+            if (hasPriorityUseContext) {
+                break;
+            }
+        }
+
+        if (!hasPriorityUseContext) {
+            res.addUseContext(
+                new UsageContext(
+                    new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "priority", null),
+                    new CodeableConcept(new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context", "routine", null))
+                )
+            );
+        }
         res.setVersion(this.version);
         res.setPublisher(PUBLISHER);
 
