@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -140,7 +141,7 @@ public class FileFhirDal implements FhirDal {
     if (resource.getIdElement().hasResourceType()){
       return true;
     } else {
-      logger.warn(String.format("ResourceType not defined for: %s", resource.getIdElement().getIdPart()));
+      logger.warn(String.format("ResourceType not defined for: %s", resource.getIdElement().getIdPart()) + " " + Arrays.toString(Thread.currentThread().getStackTrace()));
       return false;
     }
   }
@@ -149,7 +150,7 @@ public class FileFhirDal implements FhirDal {
     if (id.hasResourceType()){
       return true;
     } else {
-      logger.warn(String.format("ResourceType not defined for: %s", id.getIdPart()));
+      logger.warn(String.format("ResourceType not defined for: %s", id.getIdPart()) + " " + Arrays.toString(Thread.currentThread().getStackTrace()));
       return false;
     }
   }
