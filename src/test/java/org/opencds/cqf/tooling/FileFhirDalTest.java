@@ -23,7 +23,7 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
   private FileFhirPlatform platform;
   private FileFhirDal dal;
   private Patient patient;
-  private final String resourceDir = "./target/FileFhirDalTest";
+  private final String resourceDir = "target/FileFhirDalTest";
 
   public FileFhirDalTest() {
     FileFhirPlatformParameters platformParams = new FileFhirPlatformParameters();
