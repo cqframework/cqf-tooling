@@ -141,7 +141,8 @@ public class FileFhirDal implements FhirDal {
     if (resource.getIdElement().hasResourceType()){
       return true;
     } else {
-      logger.warn(String.format("ResourceType not defined for: %s", resource.getIdElement().getIdPart()) + " " + Arrays.toString(Thread.currentThread().getStackTrace()));
+      logger.warn(String.format("ResourceType not defined for: %s", resource.getIdElement().getIdPart()));
+      logger.info(resource.toString());
       return false;
     }
   }
@@ -150,7 +151,8 @@ public class FileFhirDal implements FhirDal {
     if (id.hasResourceType()){
       return true;
     } else {
-      logger.warn(String.format("ResourceType not defined for: %s", id.getIdPart()) + " " + Arrays.toString(Thread.currentThread().getStackTrace()));
+      logger.warn(String.format("ResourceType not defined for: %s", id.getIdPart()));
+      logger.info(id.toString());
       return false;
     }
   }
