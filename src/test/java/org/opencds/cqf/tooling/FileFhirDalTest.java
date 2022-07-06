@@ -110,10 +110,10 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
   public void noResourceType(){
     System.out.println("Running: FileFhirDalTest.noResourceType...");
     
-    Patient patient = (Patient) new Patient().setId("TestPatient");
+    Patient patient = (Patient) new Patient().setId("NoResourcePatient");
     dal.create(patient);
 
-    File file = new File(resourceDir + "/Patient/TestPatient.json");
+    File file = new File(resourceDir + "/Patient/NoResourcePatient.json");
 
     assertFalse(file.exists());
   }

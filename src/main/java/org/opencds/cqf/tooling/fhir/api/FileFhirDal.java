@@ -142,7 +142,6 @@ public class FileFhirDal implements FhirDal {
       return true;
     } else {
       logger.warn(String.format("ResourceType not defined for: %s", resource.getIdElement().getIdPart()));
-      logger.info(resource.toString());
       return false;
     }
   }
@@ -152,7 +151,6 @@ public class FileFhirDal implements FhirDal {
       return true;
     } else {
       logger.warn(String.format("ResourceType not defined for: %s", id.getIdPart()));
-      logger.info(id.toString());
       return false;
     }
   }
