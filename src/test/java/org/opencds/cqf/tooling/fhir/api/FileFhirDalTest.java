@@ -73,8 +73,10 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
 
     dal.create(this.patient);
 
-    File file = new File(resourceDir + "/Patient/TestPatient.json");
+    File file = new File(resourceDir + "/Patient/TestPatient.JSON");
+    File dir = new File(resourceDir + "/Patient");
 
+    logger.info(String.format("%s", dir.list()));
     logger.info(String.format("%s", file.getAbsolutePath()));
     logger.info(String.format("%s", file.exists()));
 
@@ -108,7 +110,7 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
 
     dal.delete(this.patient.getIdElement());
 
-    File file = new File(resourceDir + "/Patient/TestPatient.json");
+    File file = new File(resourceDir + "/Patient/TestPatient.JSON");
 
     assertFalse(file.exists());
   }
@@ -120,7 +122,7 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
     Patient patient = (Patient) new Patient().setId("NoResourcePatient");
     dal.create(patient);
 
-    File file = new File(resourceDir + "/Patient/NoResourcePatient.json");
+    File file = new File(resourceDir + "/Patient/NoResourcePatient.JSON");
 
     assertFalse(file.exists());
   }
