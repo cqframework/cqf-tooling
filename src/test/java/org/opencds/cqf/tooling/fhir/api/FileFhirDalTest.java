@@ -1,4 +1,4 @@
-package org.opencds.cqf.tooling;
+package org.opencds.cqf.tooling.fhir.api;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -9,9 +9,10 @@ import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.BeforeClass;
-import org.opencds.cqf.tooling.fhir.api.FileFhirDal;
-import org.opencds.cqf.tooling.fhir.api.FileFhirPlatform;
+import org.opencds.cqf.tooling.CqfmSoftwareSystemTest;
 import org.opencds.cqf.tooling.parameter.FileFhirPlatformParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
@@ -24,6 +25,7 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
   private FileFhirDal dal;
   private Patient patient;
   private final String resourceDir = "target/FileFhirDalTest";
+  private Logger logger;
 
   public FileFhirDalTest() {
     FileFhirPlatformParameters platformParams = new FileFhirPlatformParameters();
@@ -36,6 +38,8 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
 
     this.patient = (Patient) new Patient().setId("TestPatient");
     this.patient.setId(this.patient.getIdElement().withResourceType("Patient"));
+
+    this.logger = LoggerFactory.getLogger(this.getClass());
   }
 
   @BeforeClass
@@ -44,7 +48,7 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
     if(!testDir.exists()){
       testDir.mkdirs();
     }
-    System.out.println("Beginning Test: FileFhirDalTest");
+    logger.info("Beginning Test: FileFhirDalTest");
   }
 
   @AfterClass
@@ -58,12 +62,12 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
         throw new RuntimeException("Cannot delete " + testDir + "\n" + e.getMessage());
       }
     }
-    System.out.println("Finished Test: FileFhirDalTest");
+    logger.info("Finished Test: FileFhirDalTest");
   }
   
   @Test(priority = 1) // Create
   public void create(){
-    System.out.println("Running: FileFhirDalTest.create...");
+    logger.info("Running: FileFhirDalTest.create...");
 
     this.patient.setActive(false);
 
@@ -76,7 +80,7 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
 
   @Test(priority = 2) // Read
   public void read(){
-    System.out.println("Running: FileFhirDalTest.read...");
+    logger.info("Running: FileFhirDalTest.read...");
 
     Patient readPatient = (Patient) dal.read(this.patient.getIdElement());
 
@@ -85,7 +89,7 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
 
   @Test(priority = 3) // Update
   public void update() {
-    System.out.println("Running: FileFhirDalTest.update...");
+    logger.info("Running: FileFhirDalTest.update...");
     this.patient.setActive(true);
 
     dal.update(this.patient);
@@ -97,7 +101,7 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
 
   @Test(priority = 4) // Delete
   public void delete(){
-    System.out.println("Running: FileFhirDalTest.delete...");
+    logger.info("Running: FileFhirDalTest.delete...");
 
     dal.delete(this.patient.getIdElement());
 
@@ -108,7 +112,7 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
 
   @Test //No ResourceType
   public void noResourceType(){
-    System.out.println("Running: FileFhirDalTest.noResourceType...");
+    logger.info("Running: FileFhirDalTest.noResourceType...");
     
     Patient patient = (Patient) new Patient().setId("NoResourcePatient");
     dal.create(patient);
