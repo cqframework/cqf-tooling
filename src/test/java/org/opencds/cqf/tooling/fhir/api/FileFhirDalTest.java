@@ -75,6 +75,7 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
 
     File file = new File(resourceDir + "/Patient/TestPatient.json");
 
+    logger.info(String.format("%s", file.getAbsolutePath()));
     logger.info(String.format("%s", file.exists()));
 
     assertTrue(file.exists());
