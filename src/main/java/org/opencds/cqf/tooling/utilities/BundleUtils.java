@@ -10,6 +10,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -24,7 +26,7 @@ public class BundleUtils {
                 resource.setId(resource.getClass().getSimpleName() + "/" + resource.getIdElement().getIdPart());
             }
         }
-        
+
         switch (fhirContext.getVersion().getVersion()) {
             case DSTU3:
                 return bundleStu3Artifacts(id, resources);
@@ -61,7 +63,7 @@ public class BundleUtils {
         ResourceUtils.setIgId(id, bundle, false);
         bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
         for (IBaseResource resource : resources)
-        {            
+        {
             String resourceRef = (resource.getIdElement().getResourceType() == null) ? resource.fhirType() + "/" + resource.getIdElement().getIdPart() : resource.getIdElement().getValueAsString();
             bundle.addEntry(
             new org.hl7.fhir.r4.model.Bundle.BundleEntryComponent()
@@ -140,7 +142,7 @@ public class BundleUtils {
             }
         }
     }
-    
+
     public static void extractStu3Resources(org.hl7.fhir.dstu3.model.Bundle bundle, String encoding, String outputPath, boolean suppressNarrative) {
     	FhirContext context = FhirContext.forDstu3Cached();
     	for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
@@ -153,7 +155,7 @@ public class BundleUtils {
     		}
     	}
     }
-    
+
     public static void extractR4Resources(org.hl7.fhir.r4.model.Bundle bundle, String encoding, String outputPath, boolean suppressNarrative) {
     	FhirContext context = FhirContext.forR4Cached();
     	for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
@@ -166,4 +168,28 @@ public class BundleUtils {
     		}
     	}
     }
+
+    public static ArrayList<Resource> getR4ResourcesFromBundle(Bundle bundle){
+        ArrayList <Resource> resourceArrayList = new ArrayList<>();
+        FhirContext context = FhirContext.forR4Cached();
+        for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+            org.hl7.fhir.r4.model.Resource entryResource = entry.getResource();
+            if (entryResource != null) {
+                resourceArrayList.add(entryResource);
+            }
+        }
+        return resourceArrayList;
+    }
+
+    public static ArrayList<org.hl7.fhir.dstu3.model.Resource> getStu3ResourcesFromBundle(org.hl7.fhir.dstu3.model.Bundle bundle){
+        ArrayList <org.hl7.fhir.dstu3.model.Resource> resourceArrayList = new ArrayList<>();
+        for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+            org.hl7.fhir.dstu3.model.Resource entryResource = entry.getResource();
+            if (entryResource != null) {
+                resourceArrayList.add(entryResource);
+            }
+        }
+        return resourceArrayList;
+    }
+
 }
