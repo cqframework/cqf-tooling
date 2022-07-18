@@ -7,10 +7,10 @@
     <valueExpression>
       <name value="normalReportingDuration"/>
       <language value="text/fhirpath"/>
-      <expression value="2 weeks"/>
+      <expression value="14"/>
     </valueExpression>
   </extension>
-  <url value="http://example.org/fhir/PlanDefinition/us-ecr-specification"/>
+  <url value="http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification"/>
   <version value="2.0.0"/>
   <name value="US_eCR_Specification"/>
   <title value="US eCR Specification"/>
@@ -123,7 +123,8 @@
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="%modifiedConditions.exists() or %modifiedLabResults.exists() or %modifiedMedicationOrders.exists()"/></expression>
+          <expression value="%modifiedConditions.exists() or %modifiedLabResults.exists() or %modifiedMedicationOrders.exists()"/>
+        </expression>
       </condition>
       <input id="modifiedConditions">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
@@ -178,7 +179,8 @@
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="%encounter.where((status = 'in-progress' and period.start + %normalReportingDuration &gt;= now()) or status = 'finished' and period.end &lt;= now() - 72 hours)"/></expression>
+          <expression value="%encounter.where((status = 'in-progress' and period.start + 1 day * %normalReportingDuration &gt;= now()) or (status = 'finished' and period.end + 72 hours &gt;= now())).select(true)"/>
+        </expression>
       </condition>
       <relatedAction>
         <actionId value="check-reportable"/>
@@ -220,8 +222,8 @@
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression
-                  value="%encounter.where(period.start + %normalReportingDuration &gt;= now()) and (%conditions.exists() or %encounters.exists() or %immunizations.exists() or %procedures.exists() or %procedureOrders.exists() or %labOrders.exists() or %labTests.exists() or %labResults.exists() or %medicationAdministrations.exists() or %medicationOrders.exists() or %medicationDispenses.exists())"/></expression>
+          <expression value="%encounter.where(period.start + 1 day * %normalReportingDuration &gt;= now()).select(true) and (%conditions.exists() or %encounters.exists() or %immunizations.exists() or %procedures.exists() or %procedureOrders.exists() or %labOrders.exists() or %labTests.exists() or %labResults.exists() or %medicationAdministrations.exists() or %medicationOrders.exists() or %medicationDispenses.exists())"/>
+        </expression>
       </condition>
       <input id="conditions">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
@@ -301,7 +303,7 @@
         <codeFilter>
           <path value="code"/>
           <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/pctc"/>
-        </codeFilter>
+   f     </codeFilter>
       </input>
       <input id="medicationOrders">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
@@ -376,15 +378,15 @@
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="%last-eicr.last().entry.first().resource.date &lt; now() - 72 hours"></expression>
+          <expression value="((%lasteicr.last().entry[2].resource as Bundle).entry.first().resource as Composition).date &lt; now() - 72 hours"/>
         </expression>
       </condition>
-      <input id="last-eicr">
+      <input id="lasteicr">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
-          <valueString value="eicr-report"></valueString>
+          <valueString value="eicrreport"/>
         </extension>
-        <type value="Bundle"></type>
-        <profile value="http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"></profile>
+        <type value="Bundle"/>
+        <profile value="http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"/>
       </input>
       <relatedAction>
         <actionId value="create-eicr"/>
@@ -409,9 +411,10 @@
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="%`inprogress-encounter`.where(status = 'in-progress' and period.start + %normalReportingDuration &gt;= now() and period.end &lt;= now() - 72 hours)"/></expression>
+          <expression value="%inprogressencounter.where(status = 'in-progress' and period.start + 1 day * %normalReportingDuration &gt;= now() or (status = 'finished' and period.end + 72 hours &gt;= now())).exists()"/>
+        </expression>
       </condition>
-      <input id="inprogress-encounter">
+      <input id="inprogressencounter">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
           <valueString value="encounter"/>
         </extension>
@@ -437,77 +440,77 @@
         <code value="create-report"/>
       </coding>
     </code>
-    <input id="patient-data">
+    <input id="patientdata">
       <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
         <valueString value="patient"/>
       </extension>
       <type value="Patient"/>
       <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"/>
     </input>
-    <input id="condition-data">
+    <input id="conditiondata">
       <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
         <valueString value="conditions"/>
       </extension>
       <type value="Condition"/>
       <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"/>
     </input>
-    <input id="encounter-data">
+    <input id="encounterdata">
       <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
-        <valueString value="encounters"/>
+        <valueString value="encounter"/>
       </extension>
       <type value="Encounter"/>
       <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"/>
     </input>
-    <input id="mr-data">
+    <input id="mrdata">
       <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
         <valueString value="medicationOrders"/>
       </extension>
       <type value="MedicationRequest"/>
       <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest"/>
     </input>
-    <input id="immz-data">
+    <input id="immzdata">
       <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
         <valueString value="immunizations"/>
       </extension>
       <type value="Immunization"/>
       <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-immunization"/>
     </input>
-    <input id="proc-data">
+    <input id="procdata">
       <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
         <valueString value="procedures"/>
       </extension>
       <type value="Procedure"/>
       <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"/>
     </input>
-    <input id="labResult-data">
+    <input id="labResultdata">
       <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
         <valueString value="labResults"/>
       </extension>
       <type value="Observation"/>
       <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab"/>
     </input>
-    <input id="labOrder-data">
+    <input id="labOrderdata">
       <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
         <valueString value="labOrders"/>
       </extension>
       <type value="ServiceRequest"/>
       <profile value="http://hl7.org/fhir/StructureDefinition/ServiceRequest"/>
     </input>
-    <input id="diagnosticResult-data">
+    <input id="diagnosticResultdata">
       <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
         <valueString value="diagnosticResults"/>
       </extension>
       <type value="DiagnosticReport"/>
       <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab"/>
     </input>
-    <input id="diagnosticOrder-data">
+    <input id="diagnosticOrderdata">
       <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
         <valueString value="diagnosticOrders"/>
       </extension>
       <type value="DiagnosticReport"/>
       <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab"/>
     </input>
-    <output id="eicr-report">
+    <output id="eicrreport">
       <type value="Bundle"/>
       <profile value="http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"/>
     </output>
@@ -525,14 +528,14 @@
         <code value="validate-report"/>
       </coding>
     </code>
-    <input id="generated-eicr-report">
+    <input id="generatedeicrreport">
       <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
-        <valueString value="eicr-report"/>
+        <valueString value="eicrreport"/>
       </extension>
       <type value="Bundle"/>
       <profile value="http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"/>
     </input>
-    <output id="valid-eicr-report">
+    <output id="valideicrreport">
       <type value="Bundle"/>
       <profile value="http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"/>
     </output>
@@ -550,14 +553,14 @@
         <code value="submit-report"/>
       </coding>
     </code>
-    <input id="validated-eicr-report">
+    <input id="validatedeicrreport">
       <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
-        <valueString value="valid-eicr-report"/>
+        <valueString value="valideicrreport"/>
       </extension>
       <type value="Bundle"/>
       <profile value="http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"/>
     </input>
-    <output id="submitted-eicr-report">
+    <output id="submittedeicrreport">
       <type value="Bundle"/>
       <profile value="http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"/>
     </output>
@@ -596,7 +599,8 @@
           </valueExpression>
         </extension>
         <language value="text/fhirpath"/>
-        <expression value="%encounter.where(period.start + %normalReportingDuration &lt; now())"/></expression>
+        <expression value="%encounter.where(period.start + 1 day * %normalReportingDuration &lt; now()).select(true)"/>
+      </expression>
     </condition>
     <relatedAction>
       <actionId value="create-eicr"/>
