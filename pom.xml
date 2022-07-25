@@ -469,6 +469,7 @@
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
+                        <failOnWarning>true</failOnWarning>
                         <showWarnings>true</showWarnings>
                         <compilerArgs>
                             <arg>-Xlint:all</arg>
@@ -476,6 +477,7 @@
                             <arg>-Xlint:-options</arg>
                             <!-- This fixes a warning about Test annotations not being processed as part of compilation - They won't be since they are processed as part of testing-->
                             <arg>-Xlint:-processing</arg>
+                            <arg>-Werror</arg>
                         </compilerArgs>
                     </configuration>
                 </plugin>
@@ -692,22 +694,6 @@
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
                         <version>1.6.7</version>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.10.1</version>
-                        <configuration>
-                            <failOnWarning>true</failOnWarning>
-                            <showWarnings>true</showWarnings>
-                            <compilerArgs>
-                                <arg>-Xlint:all</arg>
-                                <!-- This fixes a boostrapclass path warning which the "release" property fixes on Java 9+ -->
-                                <arg>-Xlint:-options</arg>
-                                <!-- This fixes a warning about Test annotations not being processed as part of compilation - They won't be since they are processed as part of testing-->
-                                <arg>-Xlint:-processing</arg>
-                            </compilerArgs>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>
