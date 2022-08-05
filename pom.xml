@@ -5,16 +5,16 @@
 
     <groupId>org.opencds.cqf</groupId>
     <artifactId>tooling</artifactId>
-    <version>1.4.2</version>
+    <version>1.4.3</version>
 
     <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <cql-engine.version>1.5.7</cql-engine.version>
-        <cql-evaluator.version>1.4.4</cql-evaluator.version>
-        <cqframework.version>1.5.9</cqframework.version>
+        <cql-engine.version>1.5.9</cql-engine.version>
+        <cql-evaluator.version>1.4.6</cql-evaluator.version>
+        <cqframework.version>1.5.11</cqframework.version>
         <hapi.version>5.6.3</hapi.version>
         <core.version>5.6.15</core.version>
     </properties>
@@ -549,7 +549,6 @@
                     <configuration>
                         <serverId>ossrh</serverId>
                         <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                        <autoReleaseAfterClose>true</autoReleaseAfterClose>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -639,6 +638,29 @@
                         <goals>
                             <goal>repackage</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>target/tooling-${project.version}-jar-with-dependencies.jar</file>
+                                    <type>jar</type>
+                                    <classifier>jar-with-dependencies</classifier>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
