@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import com.google.gson.Gson;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
@@ -24,6 +22,8 @@ import org.hl7.elm.r1.UsingDef;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.tooling.cql_generation.IOUtil;
 import org.opencds.cqf.tooling.cql_generation.builder.VmrToModelElmBuilder;
+
+import com.google.gson.Gson;
 
 /**
  * Carries state needed to build Elm Libraries for any given Model.
