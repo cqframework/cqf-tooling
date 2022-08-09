@@ -284,6 +284,7 @@
               "relationship": "before-start",
               "offsetDuration": {
                 "value": 6,
+                "comparator": "&lt;=",
                 "system": "http://unitsofmeasure.org",
                 "code": "h"
               }
@@ -659,9 +660,54 @@
               "relationship": "before-start",
               "offsetDuration": {
                 "value": 6,
+                "comparator": "&lt;=",
                 "system": "http://unitsofmeasure.org",
                 "code": "h"
               }
+            }
+          ]
+        },
+        {
+          "id": "is-encounter-completed",
+          "code": [
+            {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions",
+                  "code": "complete-reporting"
+                }
+              ]
+            }
+          ],
+          "condition": [
+            {
+              "kind": "applicability",
+              "expression": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternative-expression-extension",
+                    "valueExpression": {
+                      "language": "text/cql-identifier",
+                      "expression": "Is Encounter Complete",
+                      "reference": "http://ersd.aimsplatform.org/fhir/Library/RuleFilters|1.0.0"
+                    }
+                  }
+                ],
+                "language": "text/fhirpath",
+                "expression": "%completedEncounter.exists(status = 'finished')"
+              }
+            }
+          ],
+          "input": [
+            {
+              "id": "completedEncounter",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+                  "valueString": "encounter"
+                }
+              ],
+              "type": "Encounter"
             }
           ]
         }

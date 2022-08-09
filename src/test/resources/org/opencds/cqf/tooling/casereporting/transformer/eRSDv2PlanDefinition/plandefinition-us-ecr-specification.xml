@@ -187,6 +187,7 @@
         <relationship value="before-start"/>
         <offsetDuration>
           <value value="6"/>
+          <comparator value="&lt;="/>
           <system value="http://unitsofmeasure.org"/>
           <code value="h"/>
         </offsetDuration>
@@ -425,10 +426,38 @@
         <relationship value="before-start"/>
         <offsetDuration>
           <value value="6"/>
+          <comparator value="&lt;="/>
           <system value="http://unitsofmeasure.org"/>
           <code value="h"/>
         </offsetDuration>
       </relatedAction>
+    </action>
+    <action id="is-encounter-completed">
+      <code>
+        <coding>
+          <system value="http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions"/>
+          <code value="complete-reporting"/>
+        </coding>
+      </code>
+      <condition>
+        <kind value="applicability"/>
+        <expression>
+          <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternative-expression-extension">
+            <valueExpression>
+              <language value="text/cql-identifier"/>
+              <expression value="Is Encounter Complete"/>
+              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|1.0.0"/>
+            </valueExpression>
+          </extension>
+          <language value="text/fhirpath"/>
+          <expression value="%completedEncounter.exists(status = 'finished')"/></expression>
+      </condition>
+      <input id="completedEncounter">
+        <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+          <valueString value="encounter"/>
+        </extension>
+        <type value="Encounter"/>
+      </input>
     </action>
   </action>
   <action id="create-eicr">
