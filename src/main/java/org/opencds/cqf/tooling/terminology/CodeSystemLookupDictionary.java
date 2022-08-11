@@ -28,7 +28,7 @@ public class CodeSystemLookupDictionary {
         HCPCS                       2.16.840.1.113883.6.14          ->      http://terminology.hl7.org/CodeSystem-HCPCS.html
         HCPCS Level I: CPT          2.16.840.1.113883.6.14          ->      http://terminology.hl7.org/CodeSystem-HCPCS.html
         HCPCS Level II              2.16.840.1.113883.6.285         ->      https://terminology.hl7.org/CodeSystem-hcpcs-Level-II.html
-        HSLOC                       2.16.840.1.113883.6.259         ->      http://terminology.hl7.org/CodeSystem/hsloc
+        HSLOC                       2.16.840.1.113883.6.259         ->      https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html
         ICD10                       2.16.840.1.113883.6.3           ->      http://terminology.hl7.org/CodeSystem-icd10.html
         ICD10PCS                    2.16.840.1.113883.6.4           ->      http://terminology.hl7.org/CodeSystem-icd10PCS.html
         ICS10CM                     2.16.840.1.113883.6.90          ->      http://terminology.hl7.org/CodeSystem-icd10CM.html
@@ -44,6 +44,7 @@ public class CodeSystemLookupDictionary {
         NDC                         2.16.840.1.113883.6.69          ->      https://terminology.hl7.org/CodeSystem-v3-ndc.html
         NDFRT                       2.16.840.1.113883.3.26.1.5      ->      http://terminology.hl7.org/CodeSystem-nciVersionOfNDF-RT.html
         NUCCPT                      2.16.840.1.113883.6.101         ->      http://terminology.hl7.org/CodeSystem-v3-nuccProviderCodes.html
+        PresentOnAdmission          2.16.840.1.113883.6.301.11      ->      https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding
         Provider Taxonomy           2.16.840.1.113883.6.101         ->      http://terminology.hl7.org/CodeSystem-v3-nuccProviderCodes.html
         NullFlavor                  2.16.840.1.113883.5.1008        ->      http://terminology.hl7.org/CodeSystem-v3-NullFlavor.html
         ObservationInterpretation   2.16.840.1.113883.5.83          ->      http://terminology.hl7.org/CodeSystem-v3-ObservationInterpretation.html
@@ -61,7 +62,7 @@ public class CodeSystemLookupDictionary {
         UBTOB                       2.16.840.1.113883.6.21          ->      http://terminology.hl7.org/CodeSystem-nubc-UB92.html
         POS                         2.16.840.1.113883.6.50          ->      http://terminology.hl7.org/CodeSystem-POS.html
         PYXIS                       ???                             ->      ???
-        CDCREC                      2.16.840.1.113883.6.238         ->      http://terminology.hl7.org/CodeSystem-PHRaceAndEthnicityCDC.html
+        CDCREC                      2.16.840.1.113883.6.238         ->      https://terminology.hl7.org/3.1.0/NamingSystem-CDCREC.html
         CDT                         2.16.840.1.113883.6.13          ->      http://terminology.hl7.org/CodeSystem-CD2.html
         mediaType                   2.16.840.1.113883.5.79          ->      http://terminology.hl7.org/CodeSystem-v3-mediatypes.html
         SOP                         2.16.840.1.113883.3.221.5       ->      urn:oid:2.16.840.1.113883.3.221.5
@@ -90,7 +91,7 @@ public class CodeSystemLookupDictionary {
             case "2.16.840.1.113883.5.43": return "http://terminology.hl7.org/CodeSystem/v3-EntityNamePartQualifier";
             case "2.16.840.1.113883.5.45": return "http://terminology.hl7.org/CodeSystem/v3-EntityNameUse";
             case "2.16.840.1.113883.6.14": return "http://terminology.hl7.org/CodeSystem/HCPCS";
-            case "2.16.840.1.113883.6.259": return "http://terminology.hl7.org/CodeSystem/hsloc";
+            case "2.16.840.1.113883.6.259": return "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html";
             case "2.16.840.1.113883.6.285": return "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets";
             case "2.16.840.1.113883.6.3": return "http://terminology.hl7.org/CodeSystem/icd10";
             case "2.16.840.1.113883.6.4": return "http://www.cms.gov/Medicare/Coding/ICD10";
@@ -107,6 +108,7 @@ public class CodeSystemLookupDictionary {
             case "2.16.840.1.113883.3.26.1.1": return "http://ncithesaurus-stage.nci.nih.gov";
             case "2.16.840.1.113883.3.26.1.5": return "http://terminology.hl7.org/CodeSystem/nciVersionOfNDF-RT";
             case "2.16.840.1.113883.6.101": return "http://nucc.org/provider-taxonomy";
+            case "2.16.840.1.113883.6.301.11": return "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding";
             case "2.16.840.1.113883.5.1008": return "http://terminology.hl7.org/CodeSystem/v3-NullFlavor";
             case "2.16.840.1.113883.5.83": return "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation";
             case "2.16.840.1.113883.5.1063": return "http://terminology.hl7.org/CodeSystem/v3-ObservationValue";
@@ -122,7 +124,7 @@ public class CodeSystemLookupDictionary {
             case "2.16.840.1.113883.6.21": return "http://terminology.hl7.org/CodeSystem/nubc-UB92";
             case "2.16.840.1.113883.6.301.3": return "http://terminology.hl7.org/CodeSystem/v2-0456";
             case "2.16.840.1.113883.6.50": return "http://terminology.hl7.org/CodeSystem/POS";
-            case "2.16.840.1.113883.6.238": return "http://terminology.hl7.org/CodeSystem/PHRaceAndEthnicityCDC";
+            case "2.16.840.1.113883.6.238": return "https://terminology.hl7.org/3.1.0/NamingSystem-CDCREC.html";
             case "2.16.840.1.113883.6.13": return "http://terminology.hl7.org/CodeSystem/CD2";
             case "2.16.840.1.113883.5.79": return "http://terminology.hl7.org/CodeSystem/v3-mediatypes";
             case "2.16.840.1.113883.3.221.5": return "urn:oid:2.16.840.1.113883.3.221.5";
@@ -154,7 +156,7 @@ public class CodeSystemLookupDictionary {
             case "HCPCS": return "http://terminology.hl7.org/CodeSystem/HCPCS";
             case "HCPCS Level I: CPT": return "http://terminology.hl7.org/CodeSystem/HCPCS";
             case "HCPCS Level II": return "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets";
-            case "HSLOC": return "http://terminology.hl7.org/CodeSystem/hsloc";
+            case "HSLOC": return "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html";
             case "ICD10": return "http://terminology.hl7.org/CodeSystem/icd10";
             case "ICD10CM": return "http://hl7.org/fhir/sid/icd-10-cm";
             case "ICD10PCS": return "http://www.cms.gov/Medicare/Coding/ICD10";
@@ -170,6 +172,7 @@ public class CodeSystemLookupDictionary {
             case "NDC": return "http://hl7.org/fhir/sid/ndc";
             case "NDFRT": return "http://terminology.hl7.org/CodeSystem/nciVersionOfNDF-RT";
             case "NUCCPT": return "http://nucc.org/provider-taxonomy";
+            case "PresentOnAdmission": return "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding";
             case "Provider Taxonomy": return "http://nucc.org/provider-taxonomy";
             case "NullFlavor": return "http://terminology.hl7.org/CodeSystem/v3-NullFlavor";
             case "ObservationInterpretation": return "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation";
@@ -188,7 +191,7 @@ public class CodeSystemLookupDictionary {
             case "UBTOB": return "http://terminology.hl7.org/CodeSystem/nubc-UB92";
             case "POS": return "http://terminology.hl7.org/CodeSystem/POS";
             case "PYXIS": return "http://content.alphora.com/fhir/dqm/CodeSystem/Pyxis";
-            case "CDCREC": return "http://terminology.hl7.org/CodeSystem/PHRaceAndEthnicityCDC";
+            case "CDCREC": return "https://terminology.hl7.org/3.1.0/NamingSystem-CDCREC.html";
             case "Modifier": return "http://www.ama-assn.org/go/cpt";
             case "CDT": return "http://terminology.hl7.org/CodeSystem/CD2";
             case "mediaType": return "http://terminology.hl7.org/CodeSystem/v3-mediatypes";
