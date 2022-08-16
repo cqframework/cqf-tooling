@@ -62,7 +62,7 @@ public class CodeSystemLookupDictionary {
         UBTOB                       2.16.840.1.113883.6.21          ->      http://terminology.hl7.org/CodeSystem-nubc-UB92.html
         POS                         2.16.840.1.113883.6.50          ->      http://terminology.hl7.org/CodeSystem-POS.html
         PYXIS                       ???                             ->      ???
-        CDCREC                      2.16.840.1.113883.6.238         ->      https://terminology.hl7.org/3.1.0/NamingSystem-CDCREC.html
+        CDCREC                      2.16.840.1.113883.6.238         ->      urn:oid:2.16.840.1.113883.6.238
         CDT                         2.16.840.1.113883.6.13          ->      http://terminology.hl7.org/CodeSystem-CD2.html
         mediaType                   2.16.840.1.113883.5.79          ->      http://terminology.hl7.org/CodeSystem-v3-mediatypes.html
         SOP                         2.16.840.1.113883.3.221.5       ->      urn:oid:2.16.840.1.113883.3.221.5
@@ -124,7 +124,7 @@ public class CodeSystemLookupDictionary {
             case "2.16.840.1.113883.6.21": return "http://terminology.hl7.org/CodeSystem/nubc-UB92";
             case "2.16.840.1.113883.6.301.3": return "http://terminology.hl7.org/CodeSystem/v2-0456";
             case "2.16.840.1.113883.6.50": return "http://terminology.hl7.org/CodeSystem/POS";
-            case "2.16.840.1.113883.6.238": return "https://terminology.hl7.org/3.1.0/NamingSystem-CDCREC.html";
+            case "2.16.840.1.113883.6.238": return "urn:oid:2.16.840.1.113883.6.238";
             case "2.16.840.1.113883.6.13": return "http://terminology.hl7.org/CodeSystem/CD2";
             case "2.16.840.1.113883.5.79": return "http://terminology.hl7.org/CodeSystem/v3-mediatypes";
             case "2.16.840.1.113883.3.221.5": return "urn:oid:2.16.840.1.113883.3.221.5";
@@ -191,7 +191,7 @@ public class CodeSystemLookupDictionary {
             case "UBTOB": return "http://terminology.hl7.org/CodeSystem/nubc-UB92";
             case "POS": return "http://terminology.hl7.org/CodeSystem/POS";
             case "PYXIS": return "http://content.alphora.com/fhir/dqm/CodeSystem/Pyxis";
-            case "CDCREC": return "https://terminology.hl7.org/3.1.0/NamingSystem-CDCREC.html";
+            case "CDCREC": return "urn:oid:2.16.840.1.113883.6.238";
             case "Modifier": return "http://www.ama-assn.org/go/cpt";
             case "CDT": return "http://terminology.hl7.org/CodeSystem/CD2";
             case "mediaType": return "http://terminology.hl7.org/CodeSystem/v3-mediatypes";
