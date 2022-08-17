@@ -3,6 +3,9 @@
   <meta>
     <profile value="http://hl7.org/fhir/us/ecr/StructureDefinition/ersd-plandefinition"/>
   </meta>
+  <text>
+    <status value="extensions"/><div xmlns="http://www.w3.org/1999/xhtml"><p><b>Generated Narrative: PlanDefinition</b></p><div style="display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%"><p style="margin-bottom: 0px">Resource PlanDefinition "us-ecr-specification" </p><p style="margin-bottom: 0px">Profile: <a href="StructureDefinition-ersd-plandefinition.html">eRSD PlanDefinition</a></p></div><p><b>Variable</b>: <span title="text/fhirpath"><code>14</code></span>(<b>normalReportingDuration</b>)</p><p><b>url</b>: <code>http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification</code></p><p><b>version</b>: 2.1.0</p><p><b>name</b>: PlanDefinition_eRSD_Instance_Example</p><p><b>title</b>: eRSD PlanDefinition Instance Example</p><p><b>type</b>: Workflow Definition <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="http://terminology.hl7.org/3.1.0/CodeSystem-plan-definition-type.html">PlanDefinitionType</a>#workflow-definition)</span></p><p><b>status</b>: active</p><p><b>experimental</b>: true</p><p><b>date</b>: 2020-07-31 12:32:29-0500</p><p><b>publisher</b>: HL7 Public Health Work Group (http://www.hl7.org/Special/committees/pher/index.cfm)</p><p><b>contact</b>: HL7 International - Public Health: <a href="http://www.hl7.org/Special/committees/pher">http://www.hl7.org/Special/committees/pher</a></p><p><b>description</b>: An example ersd PlanDefinition</p><p><b>jurisdiction</b>: United States of America <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (unknown#US)</span></p><p><b>effectivePeriod</b>: 2020-12-01 --&gt; (ongoing)</p><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the start of the reporting workflow in response to the encounter-start event.</p><p><b>textEquivalent</b>: Start the reporting workflow in response to an encounter-start event</p><p><b>code</b>: Initiate a reporting workflow <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#initiate-reporting-workflow)</span></p><h3>RelatedActions</h3><table class="grid"><tr><td>-</td><td><b>ActionId</b></td><td><b>Relationship</b></td><td><b>Offset[x]</b></td></tr><tr><td>*</td><td>check-suspected-disorder</td><td>before-start</td><td>1 h<span style="background: LightGoldenRodYellow"> (Details: UCUM code h = 'h')</span></td></tr></table></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the start of the check suspected disorder reporting workflow in response to the encounter-start event.</p><p><b>textEquivalent</b>: Check suspected disorders for immediate reportability and setup jobs for future reportability checks.</p><p><b>code</b>: Execute a series of actions to accomplish reporting <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#execute-reporting-workflow)</span></p><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the check for suspected disorder reportability to create the patients eICR.</p><p><b>textEquivalent</b>: Check Trigger Codes based on Suspected Reportable Value set.</p><p><b>code</b>: Evaluate candidate patient's data against trigger codes to determine reportability <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#check-trigger-codes)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>code</b>: Evaluate condition to determine reportability <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#evaluate-condition)</span></p></blockquote></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the check for suspected reportability of the eICR.</p><p><b>textEquivalent</b>: Check Reportability and setup jobs for future reportability checks.</p><p><b>code</b>: Execute a series of actions to accomplish reporting <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#execute-reporting-workflow)</span></p><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the check for reportability to create the patients eICR.</p><p><b>textEquivalent</b>: Check Trigger Codes based on RCTC Value sets.</p><p><b>code</b>: Evaluate candidate patient's data against trigger codes to determine reportability <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#check-trigger-codes)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>code</b>: Evaluate condition to determine reportability <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#evaluate-condition)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>code</b>: Evaluate condition to determine reportability <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#evaluate-condition)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>code</b>: Complete reporting for the patient <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#complete-reporting)</span></p></blockquote></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the creation of the eICR. It subsequently calls validate.</p><p><b>textEquivalent</b>: Create eICR</p><p><b>code</b>: Create a Report containing Patient's data for patients who passed the check-reportability test <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#create-report)</span></p><h3>RelatedActions</h3><table class="grid"><tr><td>-</td><td><b>ActionId</b></td><td><b>Relationship</b></td></tr><tr><td>*</td><td>validate-eicr</td><td>before-start</td></tr></table></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the validation of the eICR. It subsequently calls route-and-send.</p><p><b>textEquivalent</b>: Validate eICR</p><p><b>code</b>: Validate Report against specified profiles and terminologies. <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#validate-report)</span></p><h3>RelatedActions</h3><table class="grid"><tr><td>-</td><td><b>ActionId</b></td><td><b>Relationship</b></td></tr><tr><td>*</td><td>route-and-send-eicr</td><td>before-start</td></tr></table></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the routing and sending of the eICR.</p><p><b>textEquivalent</b>: Route and send eICR</p><p><b>code</b>: Submit the report to specified endpoint <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#submit-report)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the start of the reporting workflow in response to the encounter-modified event</p><p><b>textEquivalent</b>: Start the reporting workflow in response to an encounter-modified event</p><p><b>code</b>: Initiate a reporting workflow <span style="background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki"> (<a href="CodeSystem-us-ph-plandefinition-actions.html">US Public Health PlanDefinition Action Codes</a>#initiate-reporting-workflow)</span></p><blockquote><p><b>condition</b></p><p><b>kind</b>: applicability</p></blockquote><h3>RelatedActions</h3><table class="grid"><tr><td>-</td><td><b>ActionId</b></td><td><b>Relationship</b></td></tr><tr><td>*</td><td>create-eicr</td><td>before-start</td></tr></table></blockquote></div>
+  </text>
   <extension url="http://hl7.org/fhir/StructureDefinition/variable">
     <valueExpression>
       <name value="normalReportingDuration"/>
@@ -24,15 +27,15 @@
   <status value="active"/>
   <experimental value="true"/>
   <date value="2020-07-31T12:32:29.858-05:00"/>
-  <publisher value="eCR"></publisher>
+  <publisher value="eCR"/>
   <contact>
-    <name value="HL7 International - Public Health"></name>
+    <name value="HL7 International - Public Health"/>
     <telecom>
-      <system value="url"></system>
-      <value value="http://www.hl7.org/Special/committees/pher"></value>
+      <system value="url"/>
+      <value value="http://www.hl7.org/Special/committees/pher"/>
     </telecom>
   </contact>
-  <description value="An example ersd PlanDefinition"></description>
+  <description value="An example ersd PlanDefinition"/>
   <jurisdiction>
     <coding>
       <system value="urn:iso:std:iso:3166"/>
@@ -119,7 +122,7 @@
             <valueExpression>
               <language value="text/cql-identifier"/>
               <expression value="Is Suspected Disorder?"/>
-              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|1.0.0"/>
+              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|2.1.0"/>
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
@@ -143,7 +146,7 @@
         <type value="Observation"/>
         <codeFilter>
           <path value="value"/>
-          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/sdtc"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/sdltc"/>
         </codeFilter>
       </input>
       <input id="modifiedMedicationOrders">
@@ -153,7 +156,7 @@
         <type value="MedicationRequest"/>
         <codeFilter>
           <path value="medication"/>
-          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/sdtc"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/sdmtc"/>
         </codeFilter>
       </input>
       <relatedAction>
@@ -175,7 +178,7 @@
             <valueExpression>
               <language value="text/cql-identifier"/>
               <expression value="Is Encounter In Progress and Within Normal Reporting Duration or 72h or less after end of encounter?"/>
-              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|1.0.0"/>
+              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|2.1.0"/>
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
@@ -219,7 +222,7 @@
             <valueExpression>
               <language value="text/cql-identifier"/>
               <expression value="Is Encounter Reportable and Within Normal Reporting Duration?"/>
-              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|1.0.0"/>
+              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|2.1.0"/>
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
@@ -304,7 +307,7 @@
         <codeFilter>
           <path value="code"/>
           <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/pctc"/>
-   f     </codeFilter>
+        </codeFilter>
       </input>
       <input id="medicationOrders">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
@@ -375,7 +378,7 @@
             <valueExpression>
               <language value="text/cql-identifier"/>
               <expression value="Most recent eICR sent over 72 hours ago?"/>
-              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|1.0.0"/>
+              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|2.1.0"/>
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
@@ -408,7 +411,7 @@
             <valueExpression>
               <language value="text/cql-identifier"/>
               <expression value="Is Encounter In Progress and Within Normal Reporting Duration or 72h or less after end of encounter?"/>
-              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|1.0.0"/>
+              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|2.1.0"/>
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
@@ -446,11 +449,12 @@
             <valueExpression>
               <language value="text/cql-identifier"/>
               <expression value="Is Encounter Complete"/>
-              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|1.0.0"/>
+              <reference value="http://aphl.org/fhir/ecr/Library/RuleFilters|2.1.0"/>
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="%completedEncounter.exists(status = 'finished')"/></expression>
+          <expression value="%completedEncounter.exists(status = 'finished')"/>
+        </expression>
       </condition>
       <input id="completedEncounter">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
@@ -624,7 +628,7 @@
           <valueExpression>
             <language value="text/cql-identifier"/>
             <expression value="Is Encounter Longer Than Normal Reporting Duration?"/>
-            <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|1.0.0"/>
+            <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|2.1.0"/>
           </valueExpression>
         </extension>
         <language value="text/fhirpath"/>
