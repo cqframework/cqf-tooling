@@ -25,24 +25,24 @@ public class HookDataDateRoller {
     }
 
     public JsonObject rollJSONHookDates(JsonObject hook) {
-        JsonObject context = hook.getAsJsonObject("context");
-        if (context != null) {
+        if (!hook.get("context").isJsonNull()) {
+            JsonObject context = hook.getAsJsonObject("context");
             this.rollContextDates(context);
+            hook.remove("context");
+            hook.add("context", context);
         }
-        hook.remove("context");
-        hook.add("context", context);
-        JsonObject prefetch = hook.getAsJsonObject("prefetch");
-        if (null != prefetch) {
+        if (!hook.get("prefetch").isJsonNull()) {
+            JsonObject prefetch = hook.getAsJsonObject("prefetch");
             this.rollPrefetchItemsDates(prefetch);
+            hook.remove("prefetch");
+            hook.add("prefetch", prefetch);
         }
-        hook.remove("prefetch");
-        hook.add("prefetch", prefetch);
         return hook;
     }
 
     public void rollContextDates(JsonObject context) {
-        JsonObject draftOrders = context.getAsJsonObject("draftOrders");
-        if (draftOrders != null) {
+        if (!context.get("draftOrders").isJsonNull()) {
+            JsonObject draftOrders = context.getAsJsonObject("draftOrders");
             IBaseResource resource = resourceParser.parseResource(draftOrders.toString());
             if (null == resource) {
                 logger.error("This hook draft orders did not contain a resource");
@@ -51,7 +51,8 @@ public class HookDataDateRoller {
             if (resource.fhirType().equalsIgnoreCase("bundle")) {
                 ResourceDataDateRoller.rollBundleDates(fhirContext, resource);
             } else {
-                ResourceDataDateRoller.rollResourceDates(fhirContext, resource);
+                logger.error("Draft orders should contain a bundle.");
+                return;
             }
             context.remove("draftOrders");
             JsonElement newDraftOrders = JsonParser.parseString(resourceParser.setPrettyPrint(true).encodeResourceToString(resource));
@@ -63,12 +64,9 @@ public class HookDataDateRoller {
     public void rollPrefetchItemsDates(JsonObject prefetch) {
         JsonObject item;
         for (int i = 1; i <= prefetch.size(); i++) {
-            try {
+            if (!prefetch.get("item" + i).isJsonNull()) {
                 item = prefetch.getAsJsonObject("item" + i);
-            } catch (Exception ex) {
-                continue;
-            }
-            if(null == item){
+            }else{
                 continue;
             }
             IBaseResource resource = resourceParser.parseResource(item.getAsJsonObject("resource").toString());
