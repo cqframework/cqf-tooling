@@ -32,46 +32,57 @@ public class CqfMeasure extends Measure {
 
     @Child(name = "parameter", type = {ParameterDefinition.class}, order=26, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Parameters defined by the library", formalDefinition="The parameter element defines parameters used by the library." )
+    @SuppressWarnings("serial")
     protected List<ParameterDefinition> parameter;
 
     @Child(name = "dataRequirement", type = {DataRequirement.class}, order=27, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="What data is referenced by this library", formalDefinition="Describes a set of data that must be provided in order to be able to successfully perform the computations defined by the library." )
+    @SuppressWarnings("serial")
     protected List<DataRequirement> dataRequirement;
 
     @Child(name = "content", type = {Attachment.class}, order=28, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contents of the library, either embedded or referenced", formalDefinition="The content of the library as an Attachment. The content may be a reference to a url, or may be directly embedded as a base-64 string. Either way, the contentType of the attachment determines how to interpret the content." )
+    @SuppressWarnings("serial")
     protected List<Attachment> content;
 
     @Child(name = "populationStatements", type = {}, order=29, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Population Statements of the library", formalDefinition="The populations of the library as a MeasureGroupComponent." )
+    @SuppressWarnings("serial")
     protected List<MeasureGroupComponent> populationStatements;
     
     @Child(name = "definitionStatements", type = {}, order=30, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Defintion Statements of the library", formalDefinition="The definitions of the library as a MeasureGroupPopulationComponent." )
+    @SuppressWarnings("serial")
     protected List<MeasureGroupPopulationComponent> definitionStatements;
 
     @Child(name = "functionStatements", type = {}, order=31, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Function Statements of the library", formalDefinition="The functions of the library as a MeasureGroupPopulationComponent." )
+    @SuppressWarnings("serial")
     protected List<MeasureGroupPopulationComponent> functionStatements;
 
     @Child(name = "supplementalDataElements", type = {}, order=32, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Supplemental Data Elements of the library", formalDefinition="The supplemental data elements of the library as a MeasureGroupPopulationComponent." )
+    @SuppressWarnings("serial")
     protected List<MeasureGroupPopulationComponent> supplementalDataElements;
 
     @Child(name = "terminology", type = {TerminologyRef.class}, order=33, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Terminology of the library", formalDefinition="The terminology referenced in the library" )
+    @SuppressWarnings("serial")
     protected List<TerminologyRef> terminology;
 
     @Child(name = "dataCriteria", type = {StringType.class}, order=34, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Data Elements of the library", formalDefinition="The data elements referenced in the library" )
+    @SuppressWarnings("serial")
     protected List<StringType> dataCriteria;
 
     @Child(name = "libraries", type = {Library.class}, order=35, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Measure libraries", formalDefinition="All the libraries the measure depends on" )
+    @SuppressWarnings("serial")
     protected List<Library> libraries;
 
     @Child(name = "citations", type = {RelatedArtifact.class}, order=36, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Additional documentation, citations, etc", formalDefinition="Related artifacts such as additional documentation, justification, or bibliographic references." )
+    @SuppressWarnings("serial")
     protected List<RelatedArtifact> citations;
 
     @Child(name = "sharedPopulationCriteria", type = {PopulationCriteriaMap.class}, order=37, min=0, max=1, modifier=false, summary=false)

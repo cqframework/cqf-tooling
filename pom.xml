@@ -639,6 +639,7 @@
                 <configuration>
                     <mainClass>org.opencds.cqf.tooling.Main</mainClass>
                     <finalName>tooling-${project.version}-jar-with-dependencies</finalName>
+                    <attach>false</attach>
                 </configuration>
                 <executions>
                     <execution>
