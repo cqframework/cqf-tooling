@@ -511,6 +511,7 @@
                     <configuration>
                         <source>8</source>
                         <excludePackageNames>org.opencds.cqf.tooling.vmr</excludePackageNames>
+                        <quiet>true</quiet>
                     </configuration>
                     <executions>
                         <execution>
@@ -639,6 +640,7 @@
                 <configuration>
                     <mainClass>org.opencds.cqf.tooling.Main</mainClass>
                     <finalName>tooling-${project.version}-jar-with-dependencies</finalName>
+                    <attach>false</attach>
                 </configuration>
                 <executions>
                     <execution>
