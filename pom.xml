@@ -511,6 +511,7 @@
                     <configuration>
                         <source>8</source>
                         <excludePackageNames>org.opencds.cqf.tooling.vmr</excludePackageNames>
+                        <quiet>true</quiet>
                     </configuration>
                     <executions>
                         <execution>
