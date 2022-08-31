@@ -75,11 +75,12 @@ public class LibraryConverter {
 
     private String inferLibraryName(String libraryName, Integer libraryIndex) {
         try {
-            if (libraryName.replaceAll(" ", "").length() < 40 && !libraryName.contains("=")) {
-                libraryName = libraryName.replaceAll(" ", "_").replaceAll("<", "")
+            if (libraryName.replaceAll(" ", "").length() < 30 && !libraryName.contains("=")) {
+                libraryName = libraryName.replaceAll(" ", "").replaceAll("<", "")
                         .replaceAll(">=", "").replaceAll(",", "").replaceAll(":", "").replaceAll("#", "")
                         .replaceAll("TEST", "").replaceAll("TEST2", "").replaceAll("TEST3", "")
-                        .replaceAll("TESTExample-Daryl", "").replaceAll("[()]", "");
+                        .replaceAll("TESTExample-Daryl", "").replaceAll("[()]", "")
+                        .replaceAll("_", "").replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("-", "");
             } else {
                 logger.info("Descriptive name was too long, generating library name for " + libraryName);
                 libraryName = "GeneratedCql" + libraryIndex;

@@ -372,6 +372,34 @@
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.library</artifactId>
+            <version>${cql-evaluator.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.spring</artifactId>
+            <version>${cql-evaluator.version}</version>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+            <version>2.7.3</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.vintage</groupId>
+					<artifactId>junit-vintage-engine</artifactId>
+				</exclusion>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+		    </exclusions>
+		</dependency>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>engine</artifactId>
             <version>${cql-engine.version}</version>
             <scope>test</scope>
