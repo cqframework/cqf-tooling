@@ -64,6 +64,9 @@ public class R4MeasureProcessor extends MeasureProcessor {
         List<org.hl7.fhir.r5.model.Measure> refreshedMeasures = super.refreshGeneratedContent(measures);
         VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
         for (org.hl7.fhir.r5.model.Measure refreshedMeasure : refreshedMeasures) {
+            if(refreshedMeasure.hasIdentifier()) {
+                this.identifier = refreshedMeasure.getIdentifier().get(0);
+            }
             org.hl7.fhir.r4.model.Measure measure = (org.hl7.fhir.r4.model.Measure) versionConvertor_40_50.convertResource(refreshedMeasure);
             String filePath = null;
             IOUtils.Encoding fileEncoding = null;
@@ -75,6 +78,9 @@ public class R4MeasureProcessor extends MeasureProcessor {
                 filePath = getMeasurePath(measurePath);
                 fileEncoding = encoding;
             }
+
+
+
             cqfmHelper.ensureCQFToolingExtensionAndDevice(measure, fhirContext);
             // Issue 96
             // Passing the includeVersion here to handle not using the version number in the filename

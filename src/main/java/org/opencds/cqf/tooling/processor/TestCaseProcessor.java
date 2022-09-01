@@ -36,7 +36,7 @@ public class TestCaseProcessor
                         List<String> paths = IOUtils.getFilePaths(testCasePath, true);
                         List<IBaseResource> resources = IOUtils.readResources(paths, fhirContext);
                         ensureIds(testCasePath, resources);
-                        Object bundle = BundleUtils.bundleArtifacts(getId(FilenameUtils.getName(testCasePath)), resources, fhirContext);
+                        Object bundle = BundleUtils.bundleArtifacts(getId(FilenameUtils.getName(testCasePath)), resources, fhirContext, null);
                         IOUtils.writeBundle(bundle, testArtifactPath, encoding, fhirContext);
                     } catch (Exception e) {
                         LogUtils.putException(testCasePath, e);
