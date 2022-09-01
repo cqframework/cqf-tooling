@@ -19,7 +19,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 
 public class BundleUtils {
 
-    public static Object bundleArtifacts(String id, List<IBaseResource> resources, FhirContext fhirContext, Object... identifier) {
+    public static Object bundleArtifacts(String id, List<IBaseResource> resources, FhirContext fhirContext, List<Object>... identifiers) {
         for (IBaseResource resource : resources) {
             if (resource.getIdElement().getIdPart() == null || resource.getIdElement().getIdPart().equals("")) {
                 ResourceUtils.setIgId(id.replace("-bundle", "-" + UUID.randomUUID()), resource, false);
@@ -31,7 +31,7 @@ public class BundleUtils {
             case DSTU3:
                 return bundleStu3Artifacts(id, resources);
             case R4:
-                return bundleR4Artifacts(id, resources, identifier);
+                return bundleR4Artifacts(id, resources, identifiers[0]);
             default:
                 throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
@@ -57,13 +57,13 @@ public class BundleUtils {
         return bundle;
     }
 
-    public static org.hl7.fhir.r4.model.Bundle bundleR4Artifacts(String id, List<IBaseResource> resources, Object... identifier)
+    public static org.hl7.fhir.r4.model.Bundle bundleR4Artifacts(String id, List<IBaseResource> resources, List<Object> identifiers)
     {
         org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
         ResourceUtils.setIgId(id, bundle, false);
         bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
-        if (identifier.length > 0 && identifier[0] != null) {
-            bundle.setIdentifier((org.hl7.fhir.r4.model.Identifier) identifier[0]);
+        if (!identifiers.isEmpty()) {
+            bundle.setIdentifier((org.hl7.fhir.r4.model.Identifier) identifiers.get(0));
         }
 
         for (IBaseResource resource : resources)
