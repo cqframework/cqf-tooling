@@ -25,7 +25,7 @@ import java.util.*;
 public class MeasureProcessor extends BaseProcessor {
     public static final String ResourcePrefix = "measure-";
     public static final String MeasureTestGroupName = "measure";
-    public Object identifier;
+    protected Object identifier;
 
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
@@ -204,7 +204,7 @@ public class MeasureProcessor extends BaseProcessor {
             try {     
                 Map<String, IBaseResource> valuesets = ResourceUtils.getDepValueSetResources(cqlLibrarySourcePath, igPath, fhirContext, includeDependencies, includeVersion);      
                 if (!valuesets.isEmpty()) {
-                    Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<IBaseResource>(valuesets.values()), fhirContext, identifier);
+                    Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<IBaseResource>(valuesets.values()), fhirContext, getIdentifier());
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  
                 }  
             }  catch (Exception e) {

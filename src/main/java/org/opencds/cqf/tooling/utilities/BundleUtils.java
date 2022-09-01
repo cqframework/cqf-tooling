@@ -19,7 +19,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 
 public class BundleUtils {
 
-    public static Object bundleArtifacts(String id, List<IBaseResource> resources, FhirContext fhirContext, Object identifier) {
+    public static Object bundleArtifacts(String id, List<IBaseResource> resources, FhirContext fhirContext, Object... identifier) {
         for (IBaseResource resource : resources) {
             if (resource.getIdElement().getIdPart() == null || resource.getIdElement().getIdPart().equals("")) {
                 ResourceUtils.setIgId(id.replace("-bundle", "-" + UUID.randomUUID()), resource, false);
@@ -57,13 +57,13 @@ public class BundleUtils {
         return bundle;
     }
 
-    public static org.hl7.fhir.r4.model.Bundle bundleR4Artifacts(String id, List<IBaseResource> resources, Object identifier)
+    public static org.hl7.fhir.r4.model.Bundle bundleR4Artifacts(String id, List<IBaseResource> resources, Object... identifier)
     {
         org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
         ResourceUtils.setIgId(id, bundle, false);
         bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
-        if (identifier != null) {
-            bundle.setIdentifier((org.hl7.fhir.r4.model.Identifier) identifier);
+        if (identifier.length > 0 && identifier[0] != null) {
+            bundle.setIdentifier((org.hl7.fhir.r4.model.Identifier) identifier[0]);
         }
 
         for (IBaseResource resource : resources)
