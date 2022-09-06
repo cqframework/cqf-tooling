@@ -4,14 +4,14 @@ import java.util.Arrays;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-import com.google.common.base.Strings;
-
 import org.cqframework.cql.elm.visiting.ElmBaseLibraryVisitor;
 import org.hl7.elm.r1.*;
 import org.hl7.elm.r1.Library.Statements;
 import org.opencds.cqf.tooling.cql_generation.context.ElmContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Strings;
 
 /**
  * Visits every node in a Library elm tree and builds the cql string.
@@ -1981,9 +1981,9 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
     @Override
     public Void visitToQuantity(ToQuantity toQuantity, ElmContext context) {
         output.append("ToQuantity(");
-        visitElement(toQuantity.getOperand(), context);
+        super.visitToQuantity(toQuantity, context);
         output.append(")");
-        return super.visitToQuantity(toQuantity, context);
+        return null;
     }
 
     /**
