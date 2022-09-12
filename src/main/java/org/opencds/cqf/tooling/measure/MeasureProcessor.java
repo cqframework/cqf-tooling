@@ -1,11 +1,15 @@
 package org.opencds.cqf.tooling.measure;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.io.FilenameUtils;
-import org.cqframework.cql.cql2elm.CqlTranslatorException;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
-import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -14,13 +18,21 @@ import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.r4.R4MeasureProcessor;
 import org.opencds.cqf.tooling.measure.stu3.STU3MeasureProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshMeasureParameters;
-import org.opencds.cqf.tooling.processor.*;
-import org.opencds.cqf.tooling.utilities.*;
+import org.opencds.cqf.tooling.processor.BaseProcessor;
+import org.opencds.cqf.tooling.processor.IGBundleProcessor;
+import org.opencds.cqf.tooling.processor.IGProcessor;
+import org.opencds.cqf.tooling.processor.TestCaseProcessor;
+import org.opencds.cqf.tooling.processor.ValueSetsProcessor;
+import org.opencds.cqf.tooling.utilities.BundleUtils;
+import org.opencds.cqf.tooling.utilities.CanonicalUtils;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
+import org.opencds.cqf.tooling.utilities.LogUtils;
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import ca.uhn.fhir.context.FhirContext;
 
 public class MeasureProcessor extends BaseProcessor {
     public static final String ResourcePrefix = "measure-";
@@ -250,19 +262,19 @@ public class MeasureProcessor extends BaseProcessor {
         if (measure.hasLibrary()) {
             String libraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
             VersionedIdentifier primaryLibraryIdentifier = CanonicalUtils.toVersionedIdentifier(libraryUrl);
-            List<CqlTranslatorException> errors = new ArrayList<CqlTranslatorException>();
-            TranslatedLibrary translatedLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, cqlTranslatorOptions, errors);
+            List<CqlCompilerException> errors = new ArrayList<CqlCompilerException>();
+            CompiledLibrary CompiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, cqlTranslatorOptions, errors);
             boolean hasErrors = false;
             if (errors.size() > 0) {
-                for (CqlTranslatorException e : errors) {
-                    if (e.getSeverity() == CqlTranslatorException.ErrorSeverity.Error) {
+                for (CqlCompilerException e : errors) {
+                    if (e.getSeverity() == CqlCompilerException.ErrorSeverity.Error) {
                         hasErrors = true;
                     }
                     logMessage(e.getMessage());
                 }
             }
             if (!hasErrors) {
-                return processor.refreshMeasure(measure, libraryManager, translatedLibrary, cqlTranslatorOptions);
+                return processor.refreshMeasure(measure, libraryManager, CompiledLibrary, cqlTranslatorOptions);
             }
         }
         return measure;

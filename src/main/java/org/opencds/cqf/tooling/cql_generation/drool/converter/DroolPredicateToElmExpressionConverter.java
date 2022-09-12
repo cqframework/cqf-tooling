@@ -8,9 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.base.Strings;
-
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cdsframework.dto.CdsCodeDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicateDTO;
@@ -33,6 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
+
+import com.google.common.base.Strings;
 
 /**
  * Provides adapter functionality from any node in a
