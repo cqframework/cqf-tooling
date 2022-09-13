@@ -13,11 +13,15 @@ import org.opencds.cqf.tooling.measure.adapters.MeasureTestAdapter;
 import org.opencds.cqf.tooling.measure.adapters.ReadOnlyFhirServerMeasureTestAdapter;
 import org.opencds.cqf.tooling.measure.comparer.MeasureReportComparer;
 import org.opencds.cqf.tooling.processor.ITestProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 public class MeasureTestProcessor implements ITestProcessor {
+
+    private static final Logger logger = LoggerFactory.getLogger(MeasureTestProcessor.class);
 
     //TODO: Should probably introduce a BaseTestProcessor and this would belong there.
     public static final String TestPassedKey  = "Test Passed";
@@ -36,7 +40,7 @@ public class MeasureTestProcessor implements ITestProcessor {
 
         IMeasureReportAdapter expected = adapter.getExpectedMeasureReportAdapter();
         String measureId = expected.getMeasureId();
-        System.out.println("            Testing Measure '" + measureId + "'");
+        logger.info("Testing Measure '{}'", measureId);
 
         IMeasureReportAdapter actual = adapter.getActualMeasureReportAdapter();
 
@@ -52,7 +56,7 @@ public class MeasureTestProcessor implements ITestProcessor {
 
         IMeasureReportAdapter expected = adapter.getExpectedMeasureReportAdapter();
         String measureId = expected.getMeasureId();
-        System.out.println("            Testing Measure '" + measureId + "'");
+        logger.info("Testing Measure '{}'", measureId);
 
         IMeasureReportAdapter actual = adapter.getActualMeasureReportAdapter();
 
@@ -62,8 +66,8 @@ public class MeasureTestProcessor implements ITestProcessor {
     }
 
     private void logTestResults(String artifactId, Parameters results) {
-        //TODO: Can do whatever we want here, just printing to out for now - just hacked together console output.
-        System.out.println("            Test results for Measure '" + artifactId + "':");
+        logger.info("Test results for Measure '{}':", artifactId);
+
         for (ParametersParameter parameter : results.getParameter()) {
             String assertionString = "";
 
@@ -73,7 +77,7 @@ public class MeasureTestProcessor implements ITestProcessor {
             else {
                 assertionString = " matched expected value: ";
             }
-            System.out.println("            " + parameter.getName().getValue() + assertionString + parameter.getValueBoolean().isValue().toString());
+            logger.info(parameter.getName().getValue() + assertionString + parameter.getValueBoolean().isValue().toString());
         }
     }
 
@@ -106,7 +110,7 @@ public class MeasureTestProcessor implements ITestProcessor {
         {
             throw new IllegalArgumentException(String.format("          testPath file not found: %s", testPath));
         }
-        
+
         if ((fhirServer == null || fhirServer.trim().isEmpty()) && (contentBundlePath == null || contentBundlePath.trim().isEmpty())) {
             throw new IllegalArgumentException("If fhirServer is not specified, contentBundlePath can not be null.");
         }
@@ -114,7 +118,7 @@ public class MeasureTestProcessor implements ITestProcessor {
         if (fhirServer == null) {
             return new CqlEvaluatorMeasureTestAdapter(this.fhirContext, testPath, contentBundlePath);
         }
-        
+
         IGenericClient fhirClient = this.fhirContext.newRestfulGenericClient(fhirServer);
 
         if (contentBundlePath == null) {

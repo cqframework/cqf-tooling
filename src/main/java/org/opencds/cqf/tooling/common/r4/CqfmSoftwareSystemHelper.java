@@ -1,24 +1,37 @@
 package org.opencds.cqf.tooling.common.r4;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.JsonParser;
-import ca.uhn.fhir.parser.XmlParser;
-import org.hl7.fhir.r4.model.*;
-import org.opencds.cqf.tooling.Main;
-import org.opencds.cqf.tooling.common.BaseCqfmSoftwareSystemHelper;
-import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
-import org.opencds.cqf.tooling.utilities.IOUtils;
-
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.StringType;
+import org.opencds.cqf.tooling.Main;
+import org.opencds.cqf.tooling.common.BaseCqfmSoftwareSystemHelper;
+import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
+import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.JsonParser;
+import ca.uhn.fhir.parser.XmlParser;
+
 
 public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
+
+    private static Logger logger = LoggerFactory.getLogger(CqfmSoftwareSystemHelper.class);
 
     public CqfmSoftwareSystemHelper() { }
 
@@ -102,7 +115,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 
             /* Create the device if one doesn't already exist */
             if (device == null) {
-                System.out.println("Creating Device");
+                logger.debug("Creating Device");
                 device = createSoftwareSystemDevice(system);
             }
 

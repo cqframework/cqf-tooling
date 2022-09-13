@@ -23,8 +23,12 @@ import org.opencds.cqf.tooling.exception.IGInitializationException;
 import org.opencds.cqf.tooling.npm.LibraryLoader;
 import org.opencds.cqf.tooling.npm.NpmPackageManager;
 import org.opencds.cqf.tooling.utilities.IGUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BaseProcessor implements IProcessorContext, IWorkerContext.ILoggingService {
+
+    private static final Logger logger = LoggerFactory.getLogger(BaseProcessor.class);
 
     protected String rootDir;
 
@@ -238,11 +242,11 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
 
     @Override
     public void logMessage(String msg) {
-        System.out.println(msg);
+        logger.info(msg);
     }
 
     @Override
     public void logDebugMessage(IWorkerContext.ILoggingService.LogCategory category, String msg) {
-        logMessage(msg);
+        logger.debug("Category: {} Message: {}", category.name(), msg);
     }
 }
