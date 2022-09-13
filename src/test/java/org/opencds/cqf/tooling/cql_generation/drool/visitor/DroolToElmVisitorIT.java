@@ -155,7 +155,6 @@ public class DroolToElmVisitorIT {
         try {
             this.library = CqlLibraryReaderFactory.getReader("application/elm+xml").read(DroolToElmVisitorIT.class.getResourceAsStream(libraryPath));
         } catch (Exception e) {
-            e.getCause().getCause().getMessage();
             throw new IllegalArgumentException("Error reading ELM: " + e.getMessage());
         }
         FhirContext fhirContext = FhirContext.forR4Cached();
