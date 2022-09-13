@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.xml.bind.JAXBException;
-
 import org.cqframework.cql.elm.execution.Library;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Attachment;
@@ -19,10 +17,10 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.Context;
-import org.opencds.cqf.cql.engine.execution.CqlLibraryReader;
 import org.opencds.cqf.cql.engine.execution.InMemoryLibraryLoader;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
+import org.opencds.cqf.cql.engine.serializing.CqlLibraryReaderFactory;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
@@ -155,8 +153,8 @@ public class DroolToElmVisitorIT {
 
     public void setup(String libraryPath) {
         try {
-            this.library = CqlLibraryReader.read(DroolToElmVisitorIT.class.getResourceAsStream(libraryPath));
-        } catch (IOException | JAXBException e) {
+            this.library = CqlLibraryReaderFactory.getReader("application/elm+xml").read(DroolToElmVisitorIT.class.getResourceAsStream(libraryPath));
+        } catch (Exception e) {
             e.getCause().getCause().getMessage();
             throw new IllegalArgumentException("Error reading ELM: " + e.getMessage());
         }
@@ -188,8 +186,8 @@ public class DroolToElmVisitorIT {
         TerminologyProvider terminologyProvider = new BundleTerminologyProvider(fhirContext, bundle);
         Library fhirHelpers;
         try {
-            fhirHelpers = CqlLibraryReader.read(getLibraryHelpersElm(fhirContext));
-        } catch (IOException | JAXBException e) {
+            fhirHelpers = CqlLibraryReaderFactory.getReader("application/elm+xml").read(getLibraryHelpersElm(fhirContext));
+        } catch (Exception e) {
             e.getCause().getCause().getMessage();
             throw new IllegalArgumentException("Error reading ELM: " + e.getMessage());
         }
