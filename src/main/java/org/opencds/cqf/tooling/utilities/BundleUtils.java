@@ -32,7 +32,10 @@ public class BundleUtils {
             case DSTU3:
                 return bundleStu3Artifacts(id, resources);
             case R4:
-                return bundleR4Artifacts(id, resources, identifiers[0]);
+                if(identifiers != null && identifiers.length > 0){
+                    return bundleR4Artifacts(id, resources, identifiers[0]);
+                }
+                return bundleR4Artifacts(id, resources, null);
             default:
                 throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
