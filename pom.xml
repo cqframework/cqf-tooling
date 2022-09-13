@@ -544,6 +544,8 @@
                         <source>11</source>
                         <excludePackageNames>org.opencds.cqf.tooling.vmr</excludePackageNames>
                         <quiet>true</quiet>
+                        <!--TODO: tighten this to make sure comments aren't missing as well-->
+                        <doclint>all,-missing</doclint>
                     </configuration>
                     <executions>
                         <execution>
@@ -630,6 +632,14 @@
                     <configuration>
                         <argLine>-Xmx4096m</argLine>
                     </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

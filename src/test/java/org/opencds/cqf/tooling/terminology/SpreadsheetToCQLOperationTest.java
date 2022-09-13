@@ -1,17 +1,18 @@
 package org.opencds.cqf.tooling.terminology;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import org.junit.Test;
 import java.io.BufferedReader;
-
 import java.io.FileReader;
 import java.io.IOException;
+
+import org.junit.Test;
 
 public class SpreadsheetToCQLOperationTest {
 
 	String input_xlsx = "../cqf-tooling/src/test/resources/org/opencds/cqf/tooling/testfiles/SpreadsheetToCQLOperation/CQLv151ChangesApplied.xlsx";
-	String output_cql_dir = "../cqf-tooling/src/test/resources/org/opencds/cqf/tooling/testfiles/SpreadsheetToCQLOperation/generated/";
+	String output_cql_dir = "../cqf-tooling/target/test-output/spreadsheet-to-cql/generated/";
 	String expected_output = "../cqf-tooling/src/test/resources/org/opencds/cqf/tooling/testfiles/SpreadsheetToCQLOperation/CQLv151ChangesApplied.cql";
 
 	@Test
@@ -32,8 +33,8 @@ public class SpreadsheetToCQLOperationTest {
 		}
 
 	}
-	
-	
+
+
 	@Test
 	//checking if it works with header argument as well
 	public void generate_CQL_test2()  {
@@ -46,10 +47,10 @@ public class SpreadsheetToCQLOperationTest {
 		arguments[3] = "-hh=" + true;
 		tester.execute(arguments);
 		assert(true);
-		
+
 	}
-	
-	
+
+
 	@Test(expected = IllegalArgumentException.class)
 	//If the first argument is not SpreadsheetToCQL, then it will cause an illegal argument exception
 	public void first_arg_test()  {
@@ -61,12 +62,12 @@ public class SpreadsheetToCQLOperationTest {
 		arguments[2] = "-op=" + output_cql_dir;
 
 		tester.execute(arguments);
-		
-		
-		
+
+
+
 	}
-	
-	
+
+
 	@Test(expected = IllegalArgumentException.class)
 	//If there is less than two arguments passed then an illegal argument exception will be thrown
 	public void arguments_test()  {
@@ -75,13 +76,13 @@ public class SpreadsheetToCQLOperationTest {
 		String[] arguments = new String[2];
 		arguments[0] = "SpreadsheetToCQL";
 		tester.execute(arguments);
-		
-		
-		
+
+
+
 	}
-	
-	
-	
+
+
+
 	@Test(expected = IllegalArgumentException.class)
 	//Checking if proper flag in wrong place throws exception
 	public void unknown_flag_test()  {
@@ -93,9 +94,9 @@ public class SpreadsheetToCQLOperationTest {
 		arguments[2] = "-op=" + output_cql_dir;
 
 		tester.execute(arguments);
-		
-		
-		
+
+
+
 	}
 	@Test(expected = IllegalArgumentException.class)
 	//If there is no path to the spreadsheet then illegal argument exception is thrown
@@ -105,15 +106,15 @@ public class SpreadsheetToCQLOperationTest {
 		arguments[0] = "-SpreadsheetToCQL";
 		arguments[1] = "-pathtospreadsheet=" + " ";
 		arguments[2] = "-op=" + output_cql_dir;
-		
-		
+
+
 
 		tester.execute(arguments);
-		
-		
-		
+
+
+
 	}
-	
+
 
 	@Test
 	public void compare_output_test() throws IOException {

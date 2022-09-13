@@ -136,7 +136,7 @@ public class FileFhirDal implements FhirDal {
     return this.resourceDir + "/" + id.getResourceType() + "/" + id.getIdPart() + "." + this.encoding.toString();
   }
 
-  private Boolean resourceTypeDefined(IBaseResource resource){
+  private boolean resourceTypeDefined(IBaseResource resource){
     if (resource.getIdElement().hasResourceType()){
       return true;
     } else {
@@ -145,7 +145,7 @@ public class FileFhirDal implements FhirDal {
     }
   }
 
-  private Boolean resourceTypeDefined(IIdType id){
+  private boolean resourceTypeDefined(IIdType id){
     if (id.hasResourceType()){
       return true;
     } else {
