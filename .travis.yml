@@ -6,7 +6,7 @@ cache:
   timeout: 180
   directories:
     - "$HOME/.m2/repository"
-    - "HOME/.fhir"
+    - "$HOME/.fhir"
 install:
   - ./scripts/install.sh
 script:
