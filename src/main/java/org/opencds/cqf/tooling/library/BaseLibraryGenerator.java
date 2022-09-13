@@ -8,8 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.CqlTranslatorException;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
@@ -185,21 +186,21 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
 
     private CqlTranslator translate(File cqlFile) {
         try {
-            ArrayList<CqlTranslator.Options> options = new ArrayList<>();
-            options.add(CqlTranslator.Options.EnableDateRangeOptimization);
+            ArrayList<CqlTranslatorOptions.Options> options = new ArrayList<>();
+            options.add(CqlTranslatorOptions.Options.EnableDateRangeOptimization);
 
             CqlTranslator translator =
                 CqlTranslator.fromFile(
                     cqlFile,
                     modelManager,
                     libraryManager,
-                    options.toArray(new CqlTranslator.Options[0])
+                    options.toArray(new CqlTranslatorOptions.Options[0])
                 );
 
             if (translator.getErrors().size() > 0) {
                 System.err.println("Translation failed due to errors:");
                 ArrayList<String> errors = new ArrayList<>();
-                for (CqlTranslatorException error : translator.getErrors()) {
+                for (CqlCompilerException error : translator.getErrors()) {
                     TrackBack tb = error.getLocator();
                     String lines = tb == null ? "[n/a]" : String.format("[%d:%d, %d:%d]",
                             tb.getStartLine(), tb.getStartChar(), tb.getEndLine(), tb.getEndChar());

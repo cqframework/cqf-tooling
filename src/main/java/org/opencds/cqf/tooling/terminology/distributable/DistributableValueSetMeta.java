@@ -3,7 +3,7 @@ package org.opencds.cqf.tooling.terminology.distributable;
 import java.time.Instant;
 import java.util.Date;
 
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.text.WordUtils;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;

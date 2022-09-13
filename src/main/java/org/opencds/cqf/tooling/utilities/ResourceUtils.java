@@ -19,9 +19,9 @@ import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
 import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
-import org.cqframework.cql.cql2elm.FhirLibrarySourceProvider;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -31,10 +31,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.Extension;
 import org.opencds.cqf.tooling.processor.ValueSetsProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -45,32 +45,34 @@ import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 
-public class ResourceUtils 
+public class ResourceUtils
 {
+    private static final Logger logger = LoggerFactory.getLogger(ResourceUtils.class);
+
     private static String cqfLibraryExtensionUrl = "http://hl7.org/fhir/StructureDefinition/cqf-library";
 
-    public enum FhirVersion 
-    { 
-        DSTU3("dstu3"), R4("r4"); 
+    public enum FhirVersion
+    {
+        DSTU3("dstu3"), R4("r4");
 
-        private String string;     
-        public String toString() 
-        { 
-            return this.string; 
-        } 
-    
-        private FhirVersion(String string) 
-        { 
-            this.string = string; 
+        private String string;
+        public String toString()
+        {
+            return this.string;
+        }
+
+        private FhirVersion(String string)
+        {
+            this.string = string;
         }
 
         public static FhirVersion parse(String value) {
             switch (value) {
-                case "dstu3": 
+                case "dstu3":
                     return DSTU3;
                 case "r4":
                     return R4;
-                default: 
+                default:
                     throw new RuntimeException("Unable to parse FHIR version value:" + value);
             }
         }
@@ -85,15 +87,15 @@ public class ResourceUtils
       String version = includeVersion ? resource.getMeta().getVersionId() : "";
       setIgId(baseId, resource,  version);
     }
-    
+
     public static void setIgId(String baseId, IBaseResource resource, String version)
     {
       String igId = "";
       String resourceName = resource.getClass().getSimpleName().toLowerCase();
       String versionId = (version == null || version.equals("")) ? "" : "-" + version;
-      
+
       if (resource instanceof org.hl7.fhir.dstu3.model.Bundle || resource instanceof org.hl7.fhir.r4.model.Bundle) {
-        igId = baseId + versionId + "-" + resourceName;        
+        igId = baseId + versionId + "-" + resourceName;
       }
       else {
         igId = resourceName + "-" + baseId + versionId;
@@ -217,7 +219,7 @@ public class ResourceUtils
       return paths;
     }
 
-    private static Map<String, IBaseResource> getR4DepLibraryResources(String path, Map<String, IBaseResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding, Boolean versioned, Logger logger) {      
+    private static Map<String, IBaseResource> getR4DepLibraryResources(String path, Map<String, IBaseResource> dependencyLibraries, FhirContext fhirContext, Encoding encoding, Boolean versioned, Logger logger) {
       List<String> dependencyLibraryPaths = getR4DepLibraryPaths(path, fhirContext, encoding, versioned);
       for (String dependencyLibraryPath : dependencyLibraryPaths) {
         if (dependencyLibraryPath.contains("ModelInfo")) {
@@ -289,7 +291,7 @@ public class ResourceUtils
       Map<String, IBaseResource> valueSetResources = new HashMap<String, IBaseResource>();
         List<String> valueSetDefIDs = getDepELMValueSetDefIDs(cqlContentPath);
       HashSet<String> dependencies = new HashSet<>();
-        
+
       for (String valueSetUrl : valueSetDefIDs) {
           ValueSetsProcessor.getCachedValueSets(fhirContext).entrySet().stream()
           .filter(entry -> entry.getKey().equals(valueSetUrl))
@@ -313,12 +315,12 @@ public class ResourceUtils
         dependencies.removeAll(valueSetResources.keySet());
         for (String valueSetUrl : dependencies) {
           message += valueSetUrl + " MISSING \r\n";
-        }   
+        }
         System.out.println(message);
         throw new Exception(message);
       }
       return valueSetResources;
-    }   
+    }
 
     public static ArrayList<String> getIncludedLibraryNames(String cqlContentPath, Boolean includeVersion) {
       ArrayList<String> includedLibraryNames = new ArrayList<String>();
@@ -349,7 +351,7 @@ public class ResourceUtils
         System.out.println(e.getMessage());
         return includedDefs;
       }
-      
+
       if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
         for (IncludeDef def : elm.getIncludes().getDef()) {
           includedDefs.add(def);
@@ -381,14 +383,14 @@ public class ResourceUtils
       File file = new File(optionsFileName);
       if (file.exists()) {
           options = CqlTranslatorOptionsMapper.fromFile(file.getAbsolutePath());
-          System.out.println(String.format("cql-options loaded from: %s", file.getAbsolutePath()));
+          logger.debug("cql-options loaded from: {}", file.getAbsolutePath());
       }
       else {
           options = CqlTranslatorOptions.defaultOptions();
           if (!options.getFormats().contains(CqlTranslator.Format.XML)) {
               options.getFormats().add(CqlTranslator.Format.XML);
           }
-          System.out.println("cql-options not found. Using default options.");
+          logger.debug("cql-options not found. Using default options.");
       }
 
       return options;
@@ -423,17 +425,17 @@ public class ResourceUtils
       //     translateFile(modelManager, libraryManager, file, options);
       // }
 
-  
+
       // ModelManager modelManager = new ModelManager();
       // GenericLibrarySourceProvider sourceProvider = new GenericLibrarySourceProvider(folder);
       // LibraryManager libraryManager = new LibraryManager(modelManager);
       // libraryManager.getLibrarySourceLoader().registerProvider(sourceProvider);
 
-      CqlTranslator translator = IOUtils.translate(cqlContentPath, modelManager, libraryManager, options);      
-      elm = translator.toELM(); 
+      CqlTranslator translator = IOUtils.translate(cqlContentPath, modelManager, libraryManager, options);
+      elm = translator.toELM();
       cachedElm.put(cqlContentPath, elm);
-      return elm; 
-    }  
+      return elm;
+    }
 
     public static Boolean safeAddResource(String path, Map<String, IBaseResource> resources, FhirContext fhirContext) {
       Boolean added = true;
@@ -452,7 +454,7 @@ public class ResourceUtils
       catch(Exception e) {
           added = false;
           LogUtils.putException(path, e);
-      }  
+      }
       return added;
   }
 
@@ -743,7 +745,7 @@ public class ResourceUtils
       if (base instanceof IPrimitiveType) {
           return path.equals("value") ? ((IPrimitiveType<?>) target).getValue() : target;
       }
-          
+
       BaseRuntimeElementCompositeDefinition<?> definition = resolveRuntimeDefinition(base, fhirContext);
       BaseRuntimeChildDefinition child = definition.getChildByName(path);
       if (child == null) {
@@ -813,7 +815,7 @@ public class ResourceUtils
         BaseRuntimeElementDefinition<?> def = fhirContext.getElementDefinition(ElementName);
         return def;
     }
-    
+
     public static void outputResource(IBaseResource resource, String encoding, FhirContext context, String outputPath) {
         try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding)) {
             writer.write(
@@ -827,7 +829,7 @@ public class ResourceUtils
             throw new RuntimeException(e.getMessage());
         }
     }
-    
+
     public static void outputResourceByName(IBaseResource resource, String encoding, FhirContext context, String outputPath, String name) {
         try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + name + "." + encoding)) {
             writer.write(

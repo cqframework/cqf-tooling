@@ -9,7 +9,7 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.opencds.cqf.tooling.Operation;
 
 import info.bliki.wiki.model.WikiModel;
