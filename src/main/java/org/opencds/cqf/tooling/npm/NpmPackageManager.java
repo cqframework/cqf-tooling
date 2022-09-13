@@ -114,13 +114,12 @@ public class NpmPackageManager {
             pi = pcm.loadPackage(VersionUtilities.packageForVersion(v), v);
         } catch (Exception e) {
             try {
-                logger.warn("First attempt at loading Core Package {}#{} failed with exception type: {} and message: {}", VersionUtilities.packageForVersion(v), v, e.getClass().getSimpleName(), e.getMessage());
+                logger.warn(String.format("First attempt at loading Core Package %s#%s failed", VersionUtilities.packageForVersion(v), v), e);
                 // Appears to be race condition in FHIR core where they are
                 // loading a custom cert provider.
                 pi = pcm.loadPackage(VersionUtilities.packageForVersion(v), v);
             } catch (Exception ex) {
-                logger.error("Second attempt at loading Core Package {}#{} failed with exception type: {} and message: {}", VersionUtilities.packageForVersion(v), v, ex.getClass().getSimpleName(), ex.getMessage());
-                ex.printStackTrace();
+                logger.error(String.format("Second attempt at loading Core Package %s#%s failed", VersionUtilities.packageForVersion(v), v), ex);
                 throw new NpmPackageManagerException("Error loading core package", ex);
             }
         }
