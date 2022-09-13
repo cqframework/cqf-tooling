@@ -64,6 +64,9 @@ public class MeasureProcessor extends BaseProcessor {
     }
 
     protected List<Object> getIdentifiers() {
+        if (identifiers == null) {
+            identifiers = new ArrayList<>();
+        }
         return identifiers;
     }
 

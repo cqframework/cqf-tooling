@@ -19,6 +19,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 
 public class BundleUtils {
 
+    @SafeVarargs
     public static Object bundleArtifacts(String id, List<IBaseResource> resources, FhirContext fhirContext, List<Object>... identifiers) {
         for (IBaseResource resource : resources) {
             if (resource.getIdElement().getIdPart() == null || resource.getIdElement().getIdPart().equals("")) {
@@ -62,8 +63,12 @@ public class BundleUtils {
         org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
         ResourceUtils.setIgId(id, bundle, false);
         bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
-        if (!identifiers.isEmpty()) {
-            bundle.setIdentifier((org.hl7.fhir.r4.model.Identifier) identifiers.get(0));
+        if (identifiers!= null && !identifiers.isEmpty()) {
+            org.hl7.fhir.r4.model.Identifier identifier = (org.hl7.fhir.r4.model.Identifier) identifiers.get(0);
+            if(identifier.hasValue()) {
+                identifier.setValue("bundle-" + identifier.getValue());
+            }
+            bundle.setIdentifier(identifier);
         }
 
         for (IBaseResource resource : resources)
