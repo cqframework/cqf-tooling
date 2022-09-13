@@ -93,12 +93,6 @@
             </dependency>
             <dependency>
                 <groupId>org.opencds.cqf.cql</groupId>
-                <artifactId>evaluator.jaxb-deps</artifactId>
-                <version>${cql-evaluator.version}</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.opencds.cqf.cql</groupId>
                 <artifactId>engine</artifactId>
                 <version>${cql-engine.version}</version>
                 <exclusions>
@@ -163,30 +157,10 @@
 
     <dependencies>
         <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>model-jaxb</artifactId>
-                <version>${cqframework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>elm-jaxb</artifactId>
-                <version>${cqframework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opencds.cqf.cql</groupId>
-                <artifactId>engine.jaxb</artifactId>
-                <version>${cql-engine.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.persistence</groupId>
-                <artifactId>org.eclipse.persistence.moxy</artifactId>
-                <version>2.7.7</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish</groupId>
-                <artifactId>javax.json</artifactId>
-                <version>1.0.4</version>
-            </dependency>
+            <groupId>org.jvnet.jaxb2_commons</groupId>
+            <artifactId>jaxb2-basics</artifactId>
+            <version>0.13.1</version>
+        </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>elm-fhir</artifactId>
