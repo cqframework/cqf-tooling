@@ -22,7 +22,6 @@ public class SpreadsheetHelper {
             FileInputStream spreadsheetStream = new FileInputStream(new File(pathToSpreadsheet));
             return new XSSFWorkbook(spreadsheetStream);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new IllegalArgumentException("Error reading the spreadsheet: " + e.getMessage());
         }
     }
