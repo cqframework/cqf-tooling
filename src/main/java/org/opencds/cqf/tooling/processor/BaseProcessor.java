@@ -23,8 +23,12 @@ import org.opencds.cqf.tooling.exception.IGInitializationException;
 import org.opencds.cqf.tooling.npm.LibraryLoader;
 import org.opencds.cqf.tooling.npm.NpmPackageManager;
 import org.opencds.cqf.tooling.utilities.IGUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BaseProcessor implements IProcessorContext, IWorkerContext.ILoggingService {
+
+    private static final Logger logger = LoggerFactory.getLogger(BaseProcessor.class);
 
     protected String rootDir;
 
@@ -110,14 +114,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
         this.fhirVersion = sourceIg.getFhirVersion().get(0).getCode();
         packageId = sourceIg.getPackageId();
         canonicalBase = determineCanonical(sourceIg.getUrl());
-        try {
-            packageManager = new NpmPackageManager(sourceIg, this.fhirVersion);
-        } catch (IOException e) {
-            String message = String.format("Exceptions occurred loading npm package manager from source Ig: %s",
-                    sourceIg.getName());
-            logMessage(message);
-            throw new IGInitializationException(message, e);
-        }
+        packageManager = new NpmPackageManager(sourceIg, this.fhirVersion);
 
         // Setup binary paths (cql source directories)
         binaryPaths = IGUtils.extractBinaryPaths(rootDir, sourceIg);
@@ -135,14 +132,8 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
             logMessage("fhir-version was not specified in the ini file. Trying FHIR version 4.0.1");
             specifiedFhirVersion = "4.0.1";
         }
-        try {
-            initializeFromIg(rootDir, igPath, specifiedFhirVersion);
-        } catch (Exception e) {
-            String message = String.format("Exceptions occurred initializing refresh from ini file '%s':%s", iniFile,
-                    e.getMessage());
-            logMessage(message);
-            throw new IGInitializationException(message, e);
-        }
+
+        initializeFromIg(rootDir, igPath, specifiedFhirVersion);
     }
 
     private List<String> binaryPaths;
@@ -238,11 +229,11 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
 
     @Override
     public void logMessage(String msg) {
-        System.out.println(msg);
+        logger.info(msg);
     }
 
     @Override
     public void logDebugMessage(IWorkerContext.ILoggingService.LogCategory category, String msg) {
-        logMessage(msg);
+        logger.debug("Category: {} Message: {}", category.name(), msg);
     }
 }

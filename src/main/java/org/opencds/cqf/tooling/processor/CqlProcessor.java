@@ -2,29 +2,27 @@ package org.opencds.cqf.tooling.processor;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.lang.reflect.Array;
 import java.nio.file.Paths;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.CqlTranslatorException;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
 import org.cqframework.cql.cql2elm.DefaultModelInfoProvider;
-import org.cqframework.cql.cql2elm.FhirLibrarySourceProvider;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
-import org.cqframework.cql.cql2elm.NamespaceInfo;
-import org.cqframework.cql.cql2elm.NamespaceManager;
-import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
-import org.cqframework.cql.elm.tracking.TrackBack;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
+import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
+import org.cqframework.cql.elm.tracking.TrackBack;
 import org.fhir.ucum.UcumService;
+import org.hl7.cql.model.NamespaceInfo;
+import org.hl7.cql.model.NamespaceManager;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.context.IWorkerContext.ILoggingService;
@@ -38,7 +36,6 @@ import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
 import org.opencds.cqf.tooling.npm.ILibraryReader;
 import org.opencds.cqf.tooling.npm.NpmLibrarySourceProvider;
 import org.opencds.cqf.tooling.npm.NpmModelInfoProvider;
-
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 public class CqlProcessor {
@@ -311,7 +308,7 @@ public class CqlProcessor {
         }
     }
 
-    public static ValidationMessage.IssueType severityToIssueType(CqlTranslatorException.ErrorSeverity severity) {
+    public static ValidationMessage.IssueType severityToIssueType(CqlCompilerException.ErrorSeverity severity) {
         switch (severity) {
             case Info: return ValidationMessage.IssueType.INFORMATIONAL;
             case Warning:
@@ -320,7 +317,7 @@ public class CqlProcessor {
         }
     }
 
-    public static ValidationMessage.IssueSeverity severityToIssueSeverity(CqlTranslatorException.ErrorSeverity severity) {
+    public static ValidationMessage.IssueSeverity severityToIssueSeverity(CqlCompilerException.ErrorSeverity severity) {
         switch (severity) {
             case Info: return ValidationMessage.IssueSeverity.INFORMATION;
             case Warning: return ValidationMessage.IssueSeverity.WARNING;
@@ -329,7 +326,7 @@ public class CqlProcessor {
         }
     }
 
-    public static ValidationMessage exceptionToValidationMessage(File file, CqlTranslatorException exception) {
+    public static ValidationMessage exceptionToValidationMessage(File file, CqlCompilerException exception) {
         TrackBack tb = exception.getLocator();
         if (tb != null) {
             return new ValidationMessage(ValidationMessage.Source.Publisher, severityToIssueType(exception.getSeverity()),
@@ -354,7 +351,7 @@ public class CqlProcessor {
                     options.getValidateUnits() ? ucumService : null, options);
 
             // record errors and warnings
-            for (CqlTranslatorException exception : translator.getExceptions()) {
+            for (CqlCompilerException exception : translator.getExceptions()) {
                 result.getErrors().add(exceptionToValidationMessage(file, exception));
             }
 
@@ -363,7 +360,7 @@ public class CqlProcessor {
                         String.format("CQL Processing failed with (%d) errors.", translator.getErrors().size()), IssueSeverity.ERROR));
                 logger.logMessage(String.format("Translation failed with (%d) errors; see the error log for more information.", translator.getErrors().size()));
 
-                for (CqlTranslatorException error : translator.getErrors()) {
+                for (CqlCompilerException error : translator.getErrors()) {
                     logger.logMessage(String.format("Error: %s", error.getMessage()));
                 }
             }
@@ -376,15 +373,12 @@ public class CqlProcessor {
                     if (options.getFormats().contains(CqlTranslator.Format.JSON)) {
                         result.setJsonElm(translator.toJson().getBytes());
                     }
-                    if (options.getFormats().contains(CqlTranslator.Format.JXSON)) {
-                        result.setJsonElm(translator.toJxson().getBytes());
-                    }
 
                     // Add the translated library to the library manager (NOTE: This should be a "cacheLibrary" call on the LibraryManager, available in 1.5.3+)
                     // Without this, the data requirements processor will try to load the current library, resulting in a re-translation
-                    TranslatedLibrary translatedLibrary = translator.getTranslatedLibrary();
-                    String libraryPath = NamespaceManager.getPath(translatedLibrary.getIdentifier().getSystem(), translatedLibrary.getIdentifier().getId());
-                    libraryManager.getTranslatedLibraries().put(libraryPath, translatedLibrary);
+                    CompiledLibrary CompiledLibrary = translator.getTranslatedLibrary();
+                    String libraryPath = NamespaceManager.getPath(CompiledLibrary.getIdentifier().getSystem(), CompiledLibrary.getIdentifier().getId());
+                    libraryManager.getCompiledLibraries().put(libraryPath, CompiledLibrary);
 
                     DataRequirementsProcessor drp = new DataRequirementsProcessor();
                     org.hl7.fhir.r5.model.Library requirementsLibrary =

@@ -13,19 +13,27 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
-import org.cqframework.cql.cql2elm.CqlTranslatorException;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 
@@ -475,8 +483,8 @@ public class IOUtils
             throw new IllegalArgumentException("cqlContentPath must be a path to a .cql file");
           }
           
-            // ArrayList<CqlTranslator.Options> options = new ArrayList<>();
-            // options.add(CqlTranslator.Options.EnableDateRangeOptimization);
+            // ArrayList<CqlTranslatorOptions.Options> options = new ArrayList<>();
+            // options.add(CqlTranslatorOptions.Options.EnableDateRangeOptimization);
   
             translator =
                     CqlTranslator.fromFile(
@@ -488,7 +496,7 @@ public class IOUtils
             if (translator.getErrors().size() > 0) {
                 //System.err.println("Translation failed due to errors:");
                 ArrayList<String> errors = new ArrayList<>();
-                for (CqlTranslatorException error : translator.getErrors()) {
+                for (CqlCompilerException error : translator.getErrors()) {
                     TrackBack tb = error.getLocator();
                     String lines = tb == null ? "[n/a]" : String.format("[%d:%d, %d:%d]",
                             tb.getStartLine(), tb.getStartChar(), tb.getEndLine(), tb.getEndChar());

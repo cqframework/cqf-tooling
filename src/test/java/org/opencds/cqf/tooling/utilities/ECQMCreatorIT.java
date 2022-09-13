@@ -13,24 +13,24 @@ import java.util.List;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
-import org.cqframework.cql.cql2elm.FhirLibrarySourceProvider;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
-import org.cqframework.cql.cql2elm.NamespaceInfo;
-import org.cqframework.cql.cql2elm.NamespaceManager;
-import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
+import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
+import org.hl7.cql.model.NamespaceInfo;
+import org.hl7.cql.model.NamespaceManager;
 import org.hl7.fhir.r5.model.DataRequirement;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Measure;
-import org.opencds.cqf.tooling.operation.ExtractMatBundleOperation;
-import org.testng.annotations.Test;
 import org.opencds.cqf.tooling.measure.MeasureRefreshProcessor;
+import org.opencds.cqf.tooling.operation.ExtractMatBundleOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -51,7 +51,7 @@ public class ECQMCreatorIT {
     private Measure refreshMeasure(String primaryLibraryPath, String measurePath) throws IOException {
         CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
         cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
-        cqlTranslatorOptions.getOptions().add(CqlTranslator.Options.EnableAnnotations);
+        cqlTranslatorOptions.getOptions().add(CqlTranslatorOptions.Options.EnableAnnotations);
         // This option performs data analysis, including element reference detection
         cqlTranslatorOptions.setAnalyzeDataRequirements(true);
         // This option collapses duplicate data requirements
@@ -75,9 +75,9 @@ public class ECQMCreatorIT {
 
     private  List<DataRequirement> StartMatOutputTest(String matBundleName, String measureLibraryName){
 
-        System.out.println("Testing " + matBundleName + " " + measureLibraryName);
+        logger.info("Testing {} {}",  matBundleName, measureLibraryName);
 
-        Boolean outputMeasure2File = true; 
+        Boolean outputMeasure2File = true;
         String outputDirectory = "src/test/resources/org/opencds/cqf/tooling/utilities/ecqm-content-r4-2021/output/";
 
         ExtractMatBundleOperation o = new ExtractMatBundleOperation();
@@ -101,7 +101,7 @@ public class ECQMCreatorIT {
                     measWriter.println(measString);
                 }
             }
-            
+
             assertTrue(!drs.isEmpty());
             // TODO: Measure-specific validation of data requirements content
             logger.debug(measString);
@@ -123,10 +123,9 @@ public class ECQMCreatorIT {
                 }
             }
             if (dataRequirementFound){
-                System.out.println("found expected data requirement " + edr );
+                logger.debug("found expected data requirement " + edr );
             }else{
-                System.out.println("unable to find expected data requirement " + edr );
-                assertTrue(false);
+                throw new RuntimeException("unable to find expected data requirement " + edr);
             }
         }
     }
@@ -168,7 +167,7 @@ public class ECQMCreatorIT {
 
         checkExpectedResourcesPresent(drs, edrs);
     }
-    
+
     @Test
     public void TestCMS147FHIR() {
         List<DataRequirement> drs = StartMatOutputTest("CMS147FHIR-v0-0-001-FHIR-4-0-1.json", "PreventiveCareandScreeningInfluenzaImmunizationFHIR");
@@ -198,7 +197,7 @@ public class ECQMCreatorIT {
 
         checkExpectedResourcesPresent(drs, edrs);
     }
-    
+
     @Test
     public void TestCMS125FHIR() {
         List<DataRequirement> drs = StartMatOutputTest("CMS125FHIR-v0-0-004-FHIR-4-0-1.json", "BreastCancerScreeningsFHIR");
@@ -227,7 +226,7 @@ public class ECQMCreatorIT {
 
         checkExpectedResourcesPresent(drs, edrs);
     }
-    
+
     @Test
     public void TestCMS130FHIR() {
         if (FULL_REGRESSION) {
@@ -235,7 +234,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS347FHIR() {
         if (FULL_REGRESSION) {
@@ -243,7 +242,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestHybridHWRFHIR() {
         if (FULL_REGRESSION) {
@@ -251,7 +250,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestHybridHWMFHIR() {
         if (FULL_REGRESSION) {
@@ -259,7 +258,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestSafeUseofOpioidsFHIR() {
         if (FULL_REGRESSION) {
@@ -267,7 +266,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestIPSSwithBPHdxFHIR() {
         if (FULL_REGRESSION) {
@@ -275,7 +274,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestHIVScreeningFHIR() {
         if (FULL_REGRESSION) {
@@ -283,7 +282,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestDEXAScreenProstateFHIR() {
         if (FULL_REGRESSION) {
@@ -293,7 +292,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS249FHIR() {
         if (FULL_REGRESSION) {
@@ -303,7 +302,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS177FHIR() {
         if (FULL_REGRESSION) {
@@ -313,7 +312,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS165FHIR() {
         if (FULL_REGRESSION) {
@@ -321,7 +320,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS161FHIR() {
         if (FULL_REGRESSION) {
@@ -331,7 +330,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS157FHIR() {
         if (FULL_REGRESSION) {
@@ -339,7 +338,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS156FHIR() {
         if (FULL_REGRESSION) {
@@ -349,7 +348,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS155FHIR() {
         if (FULL_REGRESSION) {
@@ -359,7 +358,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS154FHIR() {
         if (FULL_REGRESSION) {
@@ -369,7 +368,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS153FHIR() {
         if (FULL_REGRESSION) {
@@ -379,7 +378,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS149FHIR() {
         if (FULL_REGRESSION) {
@@ -389,7 +388,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS146FHIR() {
         if (FULL_REGRESSION) {
@@ -399,7 +398,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS145FHIR() {
         if (FULL_REGRESSION) {
@@ -409,7 +408,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS144FHIR() {
         if (FULL_REGRESSION) {
@@ -419,7 +418,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS143FHIR() {
         if (FULL_REGRESSION) {
@@ -427,7 +426,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS142FHIR() {
         if (FULL_REGRESSION) {
@@ -443,7 +442,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS138FHIR() {
         if (FULL_REGRESSION) {
@@ -453,7 +452,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS137FHIR() {
         if (FULL_REGRESSION) {
@@ -461,7 +460,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS136FHIR() {
         if (FULL_REGRESSION) {
@@ -469,7 +468,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS135FHIR() {
         if (FULL_REGRESSION) {
@@ -477,7 +476,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS134FHIR() {
         if (FULL_REGRESSION) {
@@ -485,7 +484,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS133FHIR() {
         if (FULL_REGRESSION) {
@@ -493,7 +492,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS131FHIR() {
         if (FULL_REGRESSION) {
@@ -501,7 +500,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS129FHIR() {
         if (FULL_REGRESSION) {
@@ -509,7 +508,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS128FHIR() {
         if (FULL_REGRESSION) {
@@ -517,7 +516,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS127FHIR() {
         if (FULL_REGRESSION) {
@@ -525,7 +524,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS124FHIR() {
         if (FULL_REGRESSION) {
@@ -533,7 +532,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS117FHIR() {
         if (FULL_REGRESSION) {
@@ -541,15 +540,15 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS90FHIR() {
         if (FULL_REGRESSION) {
             List<DataRequirement> drs = StartMatOutputTest("CMS90FHIR-v0-0-005-FHIR-4-0-1.json", "FunctionalStatusAssessmentsforHeartFailureFHIR");
             // TODO: Measure-specific validation of data requirements content
         }
-    }    
-    
+    }
+
     @Test
     public void TestCMS75FHIR() {
         if (FULL_REGRESSION) {
@@ -557,7 +556,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS74FHIR() {
         if (FULL_REGRESSION) {
@@ -565,7 +564,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS72FHIR() {
         if (FULL_REGRESSION) {
@@ -573,7 +572,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS69FHIR() {
         if (FULL_REGRESSION) {
@@ -581,7 +580,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS68FHIR() {
         if (FULL_REGRESSION) {
@@ -589,7 +588,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS66FHIR() {
         if (FULL_REGRESSION) {
@@ -597,7 +596,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS56FHIR() {
         if (FULL_REGRESSION) {
@@ -605,7 +604,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS50FHIR() {
         if (FULL_REGRESSION) {
@@ -613,7 +612,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS22FHIR() {
         if (FULL_REGRESSION) {
@@ -621,7 +620,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestCMS2FHIR() {
         if (FULL_REGRESSION) {
@@ -629,7 +628,7 @@ public class ECQMCreatorIT {
             // TODO: Measure-specific validation of data requirements content
         }
     }
-    
+
     @Test
     public void TestBCG4NonmuscleInvasiveBCaFHIR() {
         if (FULL_REGRESSION) {
@@ -732,7 +731,7 @@ public class ECQMCreatorIT {
         // TODO - translate measure into ELM measure then call creator with that measure
         CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
         cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
-        cqlTranslatorOptions.getOptions().add(CqlTranslator.Options.EnableAnnotations);
+        cqlTranslatorOptions.getOptions().add(CqlTranslatorOptions.Options.EnableAnnotations);
         cqlTranslatorOptions.setCollapseDataRequirements(true);
         String libraryPath = "CompositeMeasures/cql/BCSComponent.cql"; //EXM124-9.0.000.cql";//library-EXM124-9.0.000.json";
         try {
@@ -755,11 +754,11 @@ public class ECQMCreatorIT {
         }
     }
 
-    private static void cacheLibrary(TranslatedLibrary library) {
+    private static void cacheLibrary(CompiledLibrary library) {
         // Add the translated library to the library manager (NOTE: This should be a "cacheLibrary" call on the LibraryManager, available in 1.5.3+)
         // Without this, the data requirements processor will try to load the current library, resulting in a re-translation
         String libraryPath = NamespaceManager.getPath(library.getIdentifier().getSystem(), library.getIdentifier().getId());
-        libraryManager.getTranslatedLibraries().put(libraryPath, library);
+        libraryManager.getCompiledLibraries().put(libraryPath, library);
     }
 
     private static void tearDown() {
@@ -813,7 +812,7 @@ public class ECQMCreatorIT {
         return createTranslator(null, testFileName, options);
     }
 
-    public static CqlTranslator createTranslator(NamespaceInfo namespaceInfo, String testFileName, CqlTranslator.Options... options) throws IOException {
+    public static CqlTranslator createTranslator(NamespaceInfo namespaceInfo, String testFileName, CqlTranslatorOptions.Options... options) throws IOException {
         return createTranslator(namespaceInfo, testFileName, new CqlTranslatorOptions(options));
     }
 

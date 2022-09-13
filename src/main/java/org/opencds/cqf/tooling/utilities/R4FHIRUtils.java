@@ -3,7 +3,7 @@ package org.opencds.cqf.tooling.utilities;
 import java.util.Map;
 
 import org.cqframework.cql.cql2elm.LibraryManager;
-import org.cqframework.cql.cql2elm.model.TranslatedLibrary;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.Code;
 import org.hl7.elm.r1.CodeDef;
 import org.hl7.elm.r1.CodeRef;
@@ -21,7 +21,7 @@ import org.hl7.fhir.r4.model.Coding;
 
 public class R4FHIRUtils {
 
-    public static Coding toCoding(Code code, TranslatedLibrary library, LibraryManager libraryManager) {
+    public static Coding toCoding(Code code, CompiledLibrary library, LibraryManager libraryManager) {
         CodeSystemDef codeSystemDef = resolveCodeSystemRef(code.getSystem(), library, libraryManager);
         Coding coding = new Coding();
         coding.setCode(code.getCode());
@@ -31,7 +31,7 @@ public class R4FHIRUtils {
         return coding;
     }
 
-    public static CodeableConcept toCodeableConcept(Concept concept, TranslatedLibrary library, LibraryManager libraryManager) {
+    public static CodeableConcept toCodeableConcept(Concept concept, CompiledLibrary library, LibraryManager libraryManager) {
         CodeableConcept codeableConcept = new CodeableConcept();
         codeableConcept.setText(concept.getDisplay());
         for (Code code : concept.getCode()) {
@@ -58,7 +58,7 @@ public class R4FHIRUtils {
 
     // TODO: Move to the CQL-to-ELM translator
 
-    public static Concept toConcept(ConceptDef conceptDef, TranslatedLibrary library, LibraryManager libraryManager) {
+    public static Concept toConcept(ConceptDef conceptDef, CompiledLibrary library, LibraryManager libraryManager) {
         Concept concept = new Concept();
         concept.setDisplay(conceptDef.getDisplay());
         for (CodeRef codeRef : conceptDef.getCode()) {
@@ -71,7 +71,7 @@ public class R4FHIRUtils {
         return new Code().withCode(codeDef.getId()).withSystem(codeDef.getCodeSystem()).withDisplay(codeDef.getDisplay());
     }
 
-    public static CodeDef resolveCodeRef(CodeRef codeRef, TranslatedLibrary library, LibraryManager libraryManager) {
+    public static CodeDef resolveCodeRef(CodeRef codeRef, CompiledLibrary library, LibraryManager libraryManager) {
         // If the reference is to another library, resolve to that library
         if (codeRef.getLibraryName() != null) {
             library = resolveLibrary(codeRef.getLibraryName(), library, libraryManager);
@@ -80,7 +80,7 @@ public class R4FHIRUtils {
         return library.resolveCodeRef(codeRef.getName());
     }
 
-    public static ConceptDef resolveConceptRef(ConceptRef conceptRef, TranslatedLibrary library, LibraryManager libraryManager) {
+    public static ConceptDef resolveConceptRef(ConceptRef conceptRef, CompiledLibrary library, LibraryManager libraryManager) {
         // If the reference is to another library, resolve to that library
         if (conceptRef.getLibraryName() != null) {
             library = resolveLibrary(conceptRef.getLibraryName(), library, libraryManager);
@@ -89,7 +89,7 @@ public class R4FHIRUtils {
         return library.resolveConceptRef(conceptRef.getName());
     }
 
-    public static CodeSystemDef resolveCodeSystemRef(CodeSystemRef codeSystemRef, TranslatedLibrary library, LibraryManager libraryManager) {
+    public static CodeSystemDef resolveCodeSystemRef(CodeSystemRef codeSystemRef, CompiledLibrary library, LibraryManager libraryManager) {
         if (codeSystemRef.getLibraryName() != null) {
             library = resolveLibrary(codeSystemRef.getLibraryName(), library, libraryManager);
         }
@@ -97,7 +97,7 @@ public class R4FHIRUtils {
         return library.resolveCodeSystemRef(codeSystemRef.getName());
     }
 
-    public static ValueSetDef resolveValueSetRef(ValueSetRef valueSetRef, TranslatedLibrary library, LibraryManager libraryManager) {
+    public static ValueSetDef resolveValueSetRef(ValueSetRef valueSetRef, CompiledLibrary library, LibraryManager libraryManager) {
         // If the reference is to another library, resolve to that library
         if (valueSetRef.getLibraryName() != null) {
             library = resolveLibrary(valueSetRef.getLibraryName(), library, libraryManager);
@@ -106,7 +106,7 @@ public class R4FHIRUtils {
         return library.resolveValueSetRef(valueSetRef.getName());
     }
 
-    public static ValueSetDef resolveValueSetRef(ValueSetRef valueSetRef, TranslatedLibrary library, Map<String, TranslatedLibrary> translatedLibraries) {
+    public static ValueSetDef resolveValueSetRef(ValueSetRef valueSetRef, CompiledLibrary library, Map<String, CompiledLibrary> translatedLibraries) {
         // If the reference is to another library, resolve to that library
         if (valueSetRef.getLibraryName() != null) {
             library = resolveLibrary(valueSetRef.getLibraryName(), library, translatedLibraries);
@@ -115,25 +115,25 @@ public class R4FHIRUtils {
         return library.resolveValueSetRef(valueSetRef.getName());
     }
 
-    public static TranslatedLibrary resolveLibrary(String localLibraryName, TranslatedLibrary library, LibraryManager libraryManager) {
+    public static CompiledLibrary resolveLibrary(String localLibraryName, CompiledLibrary library, LibraryManager libraryManager) {
         IncludeDef includeDef = library.resolveIncludeRef(localLibraryName);
         return resolveLibrary(libraryManager, new VersionedIdentifier().withId(includeDef.getPath()).withVersion(includeDef.getVersion()));
     }
 
-    public static TranslatedLibrary resolveLibrary(LibraryManager libraryManager, VersionedIdentifier libraryIdentifier) {
-        if (libraryManager.getTranslatedLibraries().containsKey(libraryIdentifier.getId())) {
-            return libraryManager.getTranslatedLibraries().get(libraryIdentifier.getId());
+    public static CompiledLibrary resolveLibrary(LibraryManager libraryManager, VersionedIdentifier libraryIdentifier) {
+        if (libraryManager.getCompiledLibraries().containsKey(libraryIdentifier.getId())) {
+            return libraryManager.getCompiledLibraries().get(libraryIdentifier.getId());
         }
 
         throw new IllegalArgumentException(String.format("Could not resolve reference to translated library %s", libraryIdentifier.getId()));
     }
 
-    public static TranslatedLibrary resolveLibrary(String localLibraryName, TranslatedLibrary library, Map<String, TranslatedLibrary> translatedLibraries) {
+    public static CompiledLibrary resolveLibrary(String localLibraryName, CompiledLibrary library, Map<String, CompiledLibrary> translatedLibraries) {
         IncludeDef includeDef = library.resolveIncludeRef(localLibraryName);
         return resolveLibrary(translatedLibraries, new VersionedIdentifier().withId(includeDef.getPath()).withVersion(includeDef.getVersion()));
     }
 
-    public static TranslatedLibrary resolveLibrary(Map<String, TranslatedLibrary> translatedLibraries, VersionedIdentifier libraryIdentifier) {
+    public static CompiledLibrary resolveLibrary(Map<String, CompiledLibrary> translatedLibraries, VersionedIdentifier libraryIdentifier) {
         if (translatedLibraries.containsKey(libraryIdentifier.getId())) {
             return translatedLibraries.get(libraryIdentifier.getId());
         }

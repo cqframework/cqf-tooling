@@ -49,13 +49,13 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
         if (!conditionCriteriaRels.isEmpty() || conditionCriteriaRels != null) {
 
             conditionCriteriaRels.stream()
-            .filter(rel -> 
+            .filter(rel ->
             rel.getConditionCriteriaPredicateDTOs().isEmpty()
              || rel.getName().toLowerCase().contains("not yet implemented"))
-            .forEach(rel -> logger.warn("Not Yet Implemented: " + rel.getUuid()));
-            
+            .forEach(rel -> logger.info("Not Yet Implemented: " + rel.getUuid()));
+
             conditionCriteriaRels.stream()
-            .filter(rel -> 
+            .filter(rel ->
             !rel.getConditionCriteriaPredicateDTOs().isEmpty()
              && !rel.getName().toLowerCase().contains("not yet implemented"))
             .forEach(rel -> { this.visitor.peek(rel); traverse(rel); });
@@ -121,7 +121,7 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
             criteriaResourceParamDTOExtensionStack.push(predicatePart.getCriteriaResourceParamDTO());
         }
         if (unknownOperatorModeling(predicatePart)) {
-            logger.warn("Unable to determine operator from " + predicatePart.getCriteriaResourceDTO().getUuid());
+            logger.info("Unable to determine operator from " + predicatePart.getCriteriaResourceDTO().getUuid());
             unableToDetermineModeling = true;
             return;
         }
@@ -154,12 +154,12 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
                     }
                 } else if (sourcePredicatePartDTO.getDataInputClassType().equals(DataModelClassType.String)) {
                     if (sourcePredicatePartDTO.getPartAlias() != null && sourcePredicatePartDTO.getPartAlias().equals("an order and only an order")) {
-                        logger.warn("Unable to determine modeling from " + sourcePredicatePartDTO.getUuid());
+                        logger.info("Unable to determine modeling from " + sourcePredicatePartDTO.getUuid());
                         unableToDetermineModeling = true;
                     }
                     break;
                 } else if (unknownConceptModeling(sourcePredicatePartDTO)){
-                    logger.warn("Unable to determine modeling from " + sourcePredicatePartDTO.getUuid());
+                    logger.info("Unable to determine modeling from " + sourcePredicatePartDTO.getUuid());
                     unableToDetermineModeling = true;
                     return;
                 }
@@ -207,7 +207,7 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
         }
         this.visitor.visit(predicatePartConcepts);
     }
-    
+
     private boolean unknownConceptModeling(CriteriaPredicatePartDTO sourcePredicatePartDTO) {
         return sourcePredicatePartDTO.getPredicatePartRelDTOs() != null && !sourcePredicatePartDTO.getPredicatePartRelDTOs().isEmpty()
                     && sourcePredicatePartDTO.getPredicatePartRelDTOs().size() == 1 && sourcePredicatePartDTO.getPredicatePartRelDTOs().get(0).getOpenCdsConceptDTO() == null
@@ -221,7 +221,7 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
 
     private boolean unknownOperatorModeling(ConditionCriteriaPredicatePartDTO predicatePart) {
         return predicatePart.getCriteriaResourceParamDTO() == null && predicatePart.getCriteriaResourceDTO() != null
-            && ((predicatePart.getCriteriaResourceDTO().getResourceType() != null 
+            && ((predicatePart.getCriteriaResourceDTO().getResourceType() != null
                 && !predicatePart.getCriteriaResourceDTO().getResourceType().equals(CriteriaResourceType.Function))
                 || predicatePart.getCriteriaResourceDTO().getResourceType() == null);
     }
