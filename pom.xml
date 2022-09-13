@@ -16,7 +16,7 @@
         <cql-evaluator.version>2.0.0</cql-evaluator.version>
         <cqframework.version>2.1.0</cqframework.version>
         <hapi.version>6.1.1</hapi.version>
-        <core.version>5.6.43</core.version>
+        <core.version>5.6.55</core.version>
     </properties>
 
     <name>cqf-tooling</name>
@@ -259,7 +259,17 @@
         <!-- FHIR Core Dependencies -->
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>org.hl7.fhir.dstu3</artifactId>
+            <version>${core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>org.hl7.fhir.r4</artifactId>
+            <version>${core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>org.hl7.fhir.r5</artifactId>
             <version>${core.version}</version>
         </dependency>
         <dependency>
