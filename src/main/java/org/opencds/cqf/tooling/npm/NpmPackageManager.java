@@ -69,7 +69,7 @@ public class NpmPackageManager {
                 (ImplementationGuide) versionConvertor_40_50.convertResource(FormatUtilities.loadFile(is)), version);
     }
 
-    public NpmPackageManager(ImplementationGuide sourceIg, String version) throws IOException {
+    public NpmPackageManager(ImplementationGuide sourceIg, String version) {
         if (version == null || version.equals("")) {
             throw new IllegalArgumentException("version is required");
         }
@@ -94,8 +94,13 @@ public class NpmPackageManager {
 
         int i = 0;
         for (ImplementationGuide.ImplementationGuideDependsOnComponent dep : sourceIg.getDependsOn()) {
-            loadIg(dep, i);
-            i++;
+            try {
+                loadIg(dep, i);
+                i++;
+            }
+            catch(IOException e) {
+                throw new NpmPackageManagerException(String.format("Error loading IG dependency %s", dep.getId()), e);
+            }
         }
     }
 
@@ -109,12 +114,13 @@ public class NpmPackageManager {
             pi = pcm.loadPackage(VersionUtilities.packageForVersion(v), v);
         } catch (Exception e) {
             try {
-                logger.warn("First attempt at loading Core Package {}#{} failed with message {}", VersionUtilities.packageForVersion(v), v, e.getMessage());
+                logger.warn("First attempt at loading Core Package {}#{} failed with exception type: {} and message: {}", VersionUtilities.packageForVersion(v), v, e.getClass().getSimpleName(), e.getMessage());
                 // Appears to be race condition in FHIR core where they are
                 // loading a custom cert provider.
                 pi = pcm.loadPackage(VersionUtilities.packageForVersion(v), v);
             } catch (Exception ex) {
-                logger.error("Second attempt at loading Core Package {}#{} failed with message {}", VersionUtilities.packageForVersion(v), v, ex.getMessage());
+                logger.error("Second attempt at loading Core Package {}#{} failed with exception type: {} and message: {}", VersionUtilities.packageForVersion(v), v, ex.getClass().getSimpleName(), ex.getMessage());
+                ex.printStackTrace();
                 throw new NpmPackageManagerException("Error loading core package", ex);
             }
         }
