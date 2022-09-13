@@ -12,8 +12,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <cql-engine.version>2.1.0-SNAPSHOT</cql-engine.version>
-        <cql-evaluator.version>2.1.0-SNAPSHOT</cql-evaluator.version>
+        <cql-engine.version>2.0.0</cql-engine.version>
+        <cql-evaluator.version>2.0.0</cql-evaluator.version>
         <cqframework.version>2.1.0</cqframework.version>
         <hapi.version>6.1.1</hapi.version>
         <core.version>5.6.43</core.version>
@@ -142,6 +142,31 @@
                 <artifactId>cql</artifactId>
                 <version>${cqframework.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>elm-jackson</artifactId>
+                <version>${cqframework.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>model-jackson</artifactId>
+                <version>${cqframework.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>elm-jaxb</artifactId>
+                <version>${cqframework.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>info.cqframework</groupId>
+                <artifactId>model-jaxb</artifactId>
+                <version>${cqframework.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.sun.istack</groupId>
                 <artifactId>istack-commons-runtime</artifactId>
@@ -160,11 +185,6 @@
             <groupId>org.jvnet.jaxb2_commons</groupId>
             <artifactId>jaxb2-basics</artifactId>
             <version>0.13.1</version>
-        </dependency>
-        <dependency>
-            <groupId>info.cqframework</groupId>
-            <artifactId>elm-fhir</artifactId>
-            <version>${cqframework.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.xml.stream</groupId>
@@ -363,9 +383,35 @@
 
         <!-- FHIR DAL -->
         <dependency>
-          <groupId>info.cqframework</groupId>
-          <artifactId>cqf-fhir</artifactId>
-          <version>1.5.10-SNAPSHOT</version>
+            <groupId>info.cqframework</groupId>
+            <artifactId>cqf-fhir</artifactId>
+            <version>${cqframework.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>elm-fhir</artifactId>
+            <version>${cqframework.version}</version>
+            <!-- <scope>test</scope> -->
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>elm-jaxb</artifactId>
+            <version>${cqframework.version}</version>
+            <!-- <scope>test</scope> -->
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>model-jaxb</artifactId>
+            <version>${cqframework.version}</version>
+            <!-- <scope>test</scope> -->
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>org.eclipse.persistence.moxy</artifactId>
+            <version>2.7.7</version>
+            <!-- <scope>test</scope> -->
         </dependency>
 
         <!-- test dependencies -->
@@ -399,12 +445,12 @@
             <version>1.3</version>
             <scope>test</scope>
         </dependency>
-         <dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.13</version>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
@@ -447,7 +493,7 @@
                             <arg>-Xlint:-options</arg>
                             <!-- This fixes a warning about Test annotations not being processed as part of compilation - They won't be since they are processed as part of testing-->
                             <arg>-Xlint:-processing</arg>
-                        <!-- <arg>-Werror</arg> -->
+                            <!-- <arg>-Werror</arg> -->
                         </compilerArgs>
                     </configuration>
                 </plugin>

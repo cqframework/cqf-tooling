@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -63,7 +62,7 @@ public class FileFhirDal implements FhirDal {
   public IBaseResource read(IIdType id){
     return resourceTypeDefined(id) ? readResource(getPath(id)) : null;
   }
-  
+
   @Override
   public void update(IBaseResource resource) {
     if (resourceTypeDefined(resource)) {
@@ -85,7 +84,7 @@ public class FileFhirDal implements FhirDal {
 
       if (file.exists()){
         if (!file.delete()){
-          logger.warn(String.format("Could not delete %s :", id.getIdPart()));
+          logger.warn("Could not delete {} :", id.getIdPart());
         }
       }
     }
@@ -98,12 +97,12 @@ public class FileFhirDal implements FhirDal {
     File file = new File(path);
 
     if (!file.exists()){
-      logger.warn(String.format("%s does not exist", file.getName()));
+      logger.warn("{} does not exist", file.getName());
       return null;
     }
 
     if (file.isDirectory()) {
-      logger.warn(String.format("Cannot read a resource from a directory: %s", file.getName()));
+      logger.warn("Cannot read a resource from a directory: {}", file.getName());
       return null;
     }
 
@@ -141,7 +140,7 @@ public class FileFhirDal implements FhirDal {
     if (resource.getIdElement().hasResourceType()){
       return true;
     } else {
-      logger.warn(String.format("ResourceType not defined for: %s", resource.getIdElement().getIdPart()));
+      logger.warn("ResourceType not defined for: {}", resource.getIdElement().getIdPart());
       return false;
     }
   }
@@ -150,14 +149,14 @@ public class FileFhirDal implements FhirDal {
     if (id.hasResourceType()){
       return true;
     } else {
-      logger.warn(String.format("ResourceType not defined for: %s", id.getIdPart()));
+      logger.warn("ResourceType not defined for: {}", id);
       return false;
     }
   }
 
   // TODO: search resource directory / package cache
   @Override
-  public IBaseBundle search(String resourceType, Map<String, List<IQueryParameterType>> searchParameters){
+  public IBaseBundle search(String resourceType, Map<String, List<List<IQueryParameterType>>> searchParameters){
     return null;
   };
 }
