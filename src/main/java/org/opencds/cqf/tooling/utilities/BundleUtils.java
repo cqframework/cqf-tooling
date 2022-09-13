@@ -69,7 +69,7 @@ public class BundleUtils {
         if (identifiers!= null && !identifiers.isEmpty()) {
             org.hl7.fhir.r4.model.Identifier identifier = (org.hl7.fhir.r4.model.Identifier) identifiers.get(0);
             if(identifier.hasValue()) {
-                identifier.setValue("bundle-" + identifier.getValue());
+                identifier.setValue(identifier.getValue() + "-bundle");
             }
             bundle.setIdentifier(identifier);
         }
