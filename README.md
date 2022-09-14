@@ -8,7 +8,7 @@ This tooling provides various useful tools for building CQFramework related cont
 
 ## Usage
 
-Building this project requires Java 9+ and Maven 3.5+. The resulting jar is compatible with Java 8+.
+Building this project requires Java 11+ and Maven 3.8+. The resulting jar is compatible with Java 11+.
 
 Build the project with:
 
@@ -20,7 +20,7 @@ Run a specific operation using (example running VSAC Spreadsheet conversion):
 
 ```bash
 mvn exec:java \
--Dexec.mainClass="org.opencds.cqf.tooling.Main" \
+-Dexec.mainClass="org.opencds.cqf.tooling.cli.Main" \
 -Dexec.args="-VsacXlsxToValueSetBatch \
 -ptsd=src/test/resources/org/opencds/cqf/tooling/terminology \
 -op=target/test/resources/org/opencds/cqf/tooling/terminology/output \
@@ -28,9 +28,9 @@ mvn exec:java \
 -vssrc=cms"
 ```
 
-Executable jars are produced by the CI system on Maven Central: [Download executable jar](https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=org.opencds.cqf&a=tooling&c=jar-with-dependencies&v=LATEST)
+Executable jars are produced by the CI system on Maven Central: [Download executable jar](https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=org.opencds.cqf&a=tooling-cli&v=LATEST)
 
-This can be run with `java -jar tooling-1.4.0-jar-with-dependencies.jar -VsacXlsxToValueSetBatch`
+This can be run with `java -jar tooling-cli-2.0.0.jar -VsacXlsxToValueSetBatch`
 
 Documentation of the various operations is provided in the [Main](src/main/java/org/opencds/cqf/tooling/Main.java) class.
 
@@ -51,7 +51,7 @@ To release a new version of the tooling:
 3. Create a Github Release (which creates a tag at the current commit of master)
    1. Choose the "Auto-generate release notes" option
 4. Travis does the release to Maven
-   1. Ensure binaries are published to https://oss.sonatype.org/#view-repositories;public~browsestorage~org/opencds/cqf/tooling 
+   1. Ensure binaries are published to https://oss.sonatype.org/#view-repositories;public~browsestorage~org/opencds/cqf/tooling
 5. Update master to vNext-SNAPSHOT
 6. Close all issues included in the release
 
