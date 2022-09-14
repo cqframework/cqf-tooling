@@ -1,19 +1,5 @@
 package org.opencds.cqf.tooling.cql_generation.builder;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.cqframework.cql.cql2elm.LibraryBuilder;
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
-import org.hl7.elm.r1.AccessModifier;
-import org.hl7.elm.r1.CodeDef;
-import org.hl7.elm.r1.CodeRef;
-import org.hl7.elm.r1.CodeSystemDef;
-import org.hl7.elm.r1.CodeSystemRef;
-import org.hl7.elm.r1.Expression;
-import org.hl7.elm.r1.IncludeDef;
-import org.hl7.elm.r1.ObjectFactory;
-import org.hl7.elm.r1.ValueSetDef;
-import org.hl7.elm.r1.ValueSetRef;
-
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -23,9 +9,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlSemanticException;
-import org.cqframework.cql.cql2elm.CqlTranslatorException;
 import org.cqframework.cql.cql2elm.DataTypes;
+import org.cqframework.cql.cql2elm.LibraryBuilder;
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.model.QueryContext;
 import org.cqframework.cql.cql2elm.model.invocation.InValueSetInvocation;
 import org.hl7.cql.model.ClassType;
@@ -34,6 +23,7 @@ import org.hl7.cql.model.ListType;
 import org.hl7.cql.model.NamedType;
 import org.hl7.cql.model.TupleType;
 import org.hl7.cql.model.TupleTypeElement;
+import org.hl7.elm.r1.AccessModifier;
 import org.hl7.elm.r1.AggregateClause;
 import org.hl7.elm.r1.AliasRef;
 import org.hl7.elm.r1.AliasedQuerySource;
@@ -42,14 +32,22 @@ import org.hl7.elm.r1.AnyInCodeSystem;
 import org.hl7.elm.r1.AnyInValueSet;
 import org.hl7.elm.r1.BinaryExpression;
 import org.hl7.elm.r1.ByDirection;
+import org.hl7.elm.r1.CodeDef;
+import org.hl7.elm.r1.CodeRef;
+import org.hl7.elm.r1.CodeSystemDef;
+import org.hl7.elm.r1.CodeSystemRef;
 import org.hl7.elm.r1.Contains;
 import org.hl7.elm.r1.Element;
 import org.hl7.elm.r1.Exists;
+import org.hl7.elm.r1.Expression;
 import org.hl7.elm.r1.In;
 import org.hl7.elm.r1.InCodeSystem;
 import org.hl7.elm.r1.InValueSet;
+import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.LetClause;
 import org.hl7.elm.r1.Not;
+import org.hl7.elm.r1.ObjectFactory;
+import org.hl7.elm.r1.Or;
 import org.hl7.elm.r1.Property;
 import org.hl7.elm.r1.Query;
 import org.hl7.elm.r1.RelationshipClause;
@@ -61,13 +59,14 @@ import org.hl7.elm.r1.ToConcept;
 import org.hl7.elm.r1.ToList;
 import org.hl7.elm.r1.Tuple;
 import org.hl7.elm.r1.TupleElement;
+import org.hl7.elm.r1.ValueSetDef;
+import org.hl7.elm.r1.ValueSetRef;
 import org.hl7.elm.r1.Xor;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
-import org.hl7.elm.r1.Or;
 
 // Some of these methods should probably live in LibraryBuilder... possible all
 /**
@@ -499,11 +498,11 @@ public abstract class VmrToModelElmBuilder {
             }
 
             Property property = null;
-            CqlTranslatorException propertyException = null;
+            CqlCompilerException propertyException = null;
             if (retrieve.getCodeProperty() == null) {
                 // ERROR:
                 propertyException = new CqlSemanticException("Retrieve has a terminology target but does not specify a code path and the type of the retrieve does not have a primary code path defined.",
-                    CqlTranslatorException.ErrorSeverity.Error);
+                    CqlCompilerException.ErrorSeverity.Error);
                     libraryBuilder.recordParsingException(propertyException);
             }
             else {
@@ -516,7 +515,7 @@ public abstract class VmrToModelElmBuilder {
                     // ERROR:
                     // WARNING:
                     propertyException = new CqlSemanticException(String.format("Could not resolve code path %s for the type of the retrieve %s.",
-                            retrieve.getCodeProperty(), namedType.getName()), useStrictRetrieveTyping ? CqlTranslatorException.ErrorSeverity.Error : CqlTranslatorException.ErrorSeverity.Warning, e);
+                            retrieve.getCodeProperty(), namedType.getName()), useStrictRetrieveTyping ? CqlCompilerException.ErrorSeverity.Error : CqlCompilerException.ErrorSeverity.Warning, e);
                             libraryBuilder.recordParsingException(propertyException);
                 }
             }
@@ -548,7 +547,7 @@ public abstract class VmrToModelElmBuilder {
                             // ERROR:
                             // WARNING:
                             libraryBuilder.recordParsingException(new CqlSemanticException(String.format("Unexpected membership operator %s in retrieve", in.getClass().getSimpleName()),
-                                    useStrictRetrieveTyping ? CqlTranslatorException.ErrorSeverity.Error : CqlTranslatorException.ErrorSeverity.Warning));
+                                    useStrictRetrieveTyping ? CqlCompilerException.ErrorSeverity.Error : CqlCompilerException.ErrorSeverity.Warning));
                         }
                     }
                     break;
@@ -587,7 +586,7 @@ public abstract class VmrToModelElmBuilder {
                         // ERROR:
                         // WARNING:
                         libraryBuilder.recordParsingException(new CqlSemanticException(String.format("Unknown code comparator % in retrieve", codeComparator),
-                                useStrictRetrieveTyping ? CqlTranslatorException.ErrorSeverity.Error : CqlTranslatorException.ErrorSeverity.Warning));
+                                useStrictRetrieveTyping ? CqlCompilerException.ErrorSeverity.Error : CqlCompilerException.ErrorSeverity.Warning));
                 }
 
                 retrieve.setCodeComparator(codeComparator);
@@ -613,7 +612,7 @@ public abstract class VmrToModelElmBuilder {
                     else {
                         // WARNING:
                         libraryBuilder.recordParsingException(new CqlSemanticException("Terminology target is a list of concepts, but expects a list of codes",
-                                CqlTranslatorException.ErrorSeverity.Warning));
+                                CqlCompilerException.ErrorSeverity.Warning));
                     }
                 }
             }
@@ -630,7 +629,7 @@ public abstract class VmrToModelElmBuilder {
                 // ERROR:
                 // WARNING:
                 libraryBuilder.recordParsingException(new CqlSemanticException("Could not resolve membership operator for terminology target of the retrieve.",
-                        useStrictRetrieveTyping ? CqlTranslatorException.ErrorSeverity.Error : CqlTranslatorException.ErrorSeverity.Warning, e));
+                        useStrictRetrieveTyping ? CqlCompilerException.ErrorSeverity.Error : CqlCompilerException.ErrorSeverity.Warning, e));
             }
         }
 

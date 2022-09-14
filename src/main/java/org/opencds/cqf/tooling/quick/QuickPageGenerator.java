@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.ElementDefinition;
@@ -154,7 +154,8 @@ public class QuickPageGenerator extends Operation {
                                     snapshotElement.getBinding().getStrength().toCode()
                             );
                         }
-                        description = StringEscapeUtils.escapeHtml(description) + binding;
+                        //TODO: check html3 is right
+                        description = StringEscapeUtils.escapeHtml3(description) + binding;
 
                         String type;
                         if (element.hasType()) {
@@ -251,7 +252,8 @@ public class QuickPageGenerator extends Operation {
                 }
                 String card = Integer.toString(element.getMin()) + ".." + element.getMax();
                 String description = element.getDefinition();
-                description = StringEscapeUtils.escapeHtml(description);
+                //TODO: check html3 is right
+                description = StringEscapeUtils.escapeHtml3(description);
                 String type = resolveType(element);
                 if (type.contains("href=''")) {
                     type = type.replace("<a href=''>", "").replace("</a>", "");
