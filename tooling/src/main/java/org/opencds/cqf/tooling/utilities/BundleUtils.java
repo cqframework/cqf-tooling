@@ -19,7 +19,8 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 
 public class BundleUtils {
 
-    public static Object bundleArtifacts(String id, List<IBaseResource> resources, FhirContext fhirContext) {
+    @SafeVarargs
+    public static Object bundleArtifacts(String id, List<IBaseResource> resources, FhirContext fhirContext, List<Object>... identifiers) {
         for (IBaseResource resource : resources) {
             if (resource.getIdElement().getIdPart() == null || resource.getIdElement().getIdPart().equals("")) {
                 ResourceUtils.setIgId(id.replace("-bundle", "-" + UUID.randomUUID()), resource, false);
@@ -31,7 +32,10 @@ public class BundleUtils {
             case DSTU3:
                 return bundleStu3Artifacts(id, resources);
             case R4:
-                return bundleR4Artifacts(id, resources);
+                if(identifiers != null && identifiers.length > 0){
+                    return bundleR4Artifacts(id, resources, identifiers[0]);
+                }
+                return bundleR4Artifacts(id, resources, null);
             default:
                 throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
@@ -57,11 +61,19 @@ public class BundleUtils {
         return bundle;
     }
 
-    public static org.hl7.fhir.r4.model.Bundle bundleR4Artifacts(String id, List<IBaseResource> resources)
+    public static org.hl7.fhir.r4.model.Bundle bundleR4Artifacts(String id, List<IBaseResource> resources, List<Object> identifiers)
     {
         org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
         ResourceUtils.setIgId(id, bundle, false);
         bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
+        if (identifiers!= null && !identifiers.isEmpty()) {
+            org.hl7.fhir.r4.model.Identifier identifier = (org.hl7.fhir.r4.model.Identifier) identifiers.get(0);
+            if(identifier.hasValue()) {
+                identifier.setValue(identifier.getValue() + "-bundle");
+            }
+            bundle.setIdentifier(identifier);
+        }
+
         for (IBaseResource resource : resources)
         {
             String resourceRef = (resource.getIdElement().getResourceType() == null) ? resource.fhirType() + "/" + resource.getIdElement().getIdPart() : resource.getIdElement().getValueAsString();

@@ -65,6 +65,9 @@ public class R4MeasureProcessor extends MeasureProcessor {
         VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
         for (org.hl7.fhir.r5.model.Measure refreshedMeasure : refreshedMeasures) {
             org.hl7.fhir.r4.model.Measure measure = (org.hl7.fhir.r4.model.Measure) versionConvertor_40_50.convertResource(refreshedMeasure);
+            if (measure.hasIdentifier() && !measure.getIdentifier().isEmpty()) {
+                this.getIdentifiers().addAll(measure.getIdentifier());
+            }
             String filePath = null;
             IOUtils.Encoding fileEncoding = null;
             if (fileMap.containsKey(refreshedMeasure.getId()))

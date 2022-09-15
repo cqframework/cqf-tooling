@@ -37,6 +37,7 @@ import ca.uhn.fhir.context.FhirContext;
 public class MeasureProcessor extends BaseProcessor {
     public static final String ResourcePrefix = "measure-";
     public static final String MeasureTestGroupName = "measure";
+    protected List<Object> identifiers;
 
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
@@ -71,7 +72,19 @@ public class MeasureProcessor extends BaseProcessor {
         params.encoding = outputEncoding;
         params.versioned = versioned;
         params.measureOutputDirectory = measureOutputDirectory;
-        return measureProcessor.refreshMeasureContent(params);
+        List<String> contentList = measureProcessor.refreshMeasureContent(params);
+
+        if (!measureProcessor.getIdentifiers().isEmpty()) {
+            this.getIdentifiers().addAll(measureProcessor.getIdentifiers());
+        }
+        return contentList;
+    }
+
+    protected List<Object> getIdentifiers() {
+        if (identifiers == null) {
+            identifiers = new ArrayList<>();
+        }
+        return identifiers;
     }
 
     public void bundleMeasures(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
@@ -186,7 +199,7 @@ public class MeasureProcessor extends BaseProcessor {
 
     private void persistBundle(String igPath, String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, List<IBaseResource> resources, String fhirUri) {
         IOUtils.initializeDirectory(bundleDestPath);
-        Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext);
+        Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext, this.getIdentifiers());
         IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);
 
         BundleUtils.postBundle(encoding, fhirContext, fhirUri, (IBaseResource) bundle);
@@ -211,7 +224,7 @@ public class MeasureProcessor extends BaseProcessor {
             try {     
                 Map<String, IBaseResource> valuesets = ResourceUtils.getDepValueSetResources(cqlLibrarySourcePath, igPath, fhirContext, includeDependencies, includeVersion);      
                 if (!valuesets.isEmpty()) {
-                    Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<IBaseResource>(valuesets.values()), fhirContext);
+                    Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<IBaseResource>(valuesets.values()), fhirContext, this.getIdentifiers());
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  
                 }  
             }  catch (Exception e) {
@@ -224,7 +237,7 @@ public class MeasureProcessor extends BaseProcessor {
             Map<String, IBaseResource> depLibraries = ResourceUtils.getDepLibraryResources(librarySourcePath, fhirContext, encoding, includeVersion, logger);
             if (!depLibraries.isEmpty()) {
                 String depLibrariesID = "library-deps-" + libraryName;
-                Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<IBaseResource>(depLibraries.values()), fhirContext);            
+                Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<IBaseResource>(depLibraries.values()), fhirContext, this.getIdentifiers());
                 IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  
             }        
         }
