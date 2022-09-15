@@ -10,10 +10,10 @@ and if the current date is greater than the valueDuration set in that extension 
 It may be done based on a file name or a directory.
 An example command line would be:
 
-    JAVA -jar tooling-1.4.1-SNAPSHOT-jar-with-dependencies.jar -RollTestsDataDates -v=r4 -ip="$USER_HOME$/sandbox/rollDate/files/"
+    JAVA -jar tooling-cli-2.0.0-jar-with-dependencies.jar -RollTestsDataDates -v=r4 -ip="$USER_HOME$/sandbox/rollDate/files/"
 OR
 
-    JAVA -jar tooling-1.4.1-SNAPSHOT-jar-with-dependencies.jar -RollTestsDataDates -v=r4 -ip="$USER_HOME$/sandbox/rollDate/files/bundle-example-rec-02-true-make-recommendations.json"
+    JAVA -jar tooling-cli-2.0.0-jar-with-dependencies.jar -RollTestsDataDates -v=r4 -ip="$USER_HOME$/sandbox/rollDate/files/bundle-example-rec-02-true-make-recommendations.json"
 
 
 Sample extension:
