@@ -72,7 +72,12 @@ public class MeasureProcessor extends BaseProcessor {
         params.encoding = outputEncoding;
         params.versioned = versioned;
         params.measureOutputDirectory = measureOutputDirectory;
-        return measureProcessor.refreshMeasureContent(params);
+        List<String> contentList = measureProcessor.refreshMeasureContent(params);
+
+        if (!measureProcessor.getIdentifiers().isEmpty()) {
+            this.getIdentifiers().addAll(measureProcessor.getIdentifiers());
+        }
+        return contentList;
     }
 
     protected List<Object> getIdentifiers() {
@@ -158,7 +163,7 @@ public class MeasureProcessor extends BaseProcessor {
 
                 if (shouldPersist) {
                     String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), MeasureTestGroupName), measureName);
-                    persistBundle(igPath, bundleDestPath, measureName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri, getIdentifiers());
+                    persistBundle(igPath, bundleDestPath, measureName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri);
                     bundleFiles(igPath, bundleDestPath, measureName, binaryPaths, measureSourcePath, primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion);
                     bundledMeasures.add(measureSourcePath);
                 }
@@ -192,9 +197,9 @@ public class MeasureProcessor extends BaseProcessor {
         LogUtils.info(message);
     }
 
-    private void persistBundle(String igPath, String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, List<IBaseResource> resources, String fhirUri,  List<Object> identifiers) {
+    private void persistBundle(String igPath, String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, List<IBaseResource> resources, String fhirUri) {
         IOUtils.initializeDirectory(bundleDestPath);
-        Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext, identifiers);
+        Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext, this.getIdentifiers());
         IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);
 
         BundleUtils.postBundle(encoding, fhirContext, fhirUri, (IBaseResource) bundle);
@@ -219,7 +224,7 @@ public class MeasureProcessor extends BaseProcessor {
             try {     
                 Map<String, IBaseResource> valuesets = ResourceUtils.getDepValueSetResources(cqlLibrarySourcePath, igPath, fhirContext, includeDependencies, includeVersion);      
                 if (!valuesets.isEmpty()) {
-                    Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<IBaseResource>(valuesets.values()), fhirContext, getIdentifiers());
+                    Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<IBaseResource>(valuesets.values()), fhirContext, this.getIdentifiers());
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  
                 }  
             }  catch (Exception e) {
@@ -232,7 +237,7 @@ public class MeasureProcessor extends BaseProcessor {
             Map<String, IBaseResource> depLibraries = ResourceUtils.getDepLibraryResources(librarySourcePath, fhirContext, encoding, includeVersion, logger);
             if (!depLibraries.isEmpty()) {
                 String depLibrariesID = "library-deps-" + libraryName;
-                Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<IBaseResource>(depLibraries.values()), fhirContext, getIdentifiers());
+                Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<IBaseResource>(depLibraries.values()), fhirContext, this.getIdentifiers());
                 IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  
             }        
         }
