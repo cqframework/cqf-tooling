@@ -12,7 +12,7 @@ install:
 script:
   - ./scripts/test.sh
 before_cache:
-  - rm -rf $HOME/.m2/repository/org/opencds/cqf/tooling
+  - rm -rf $HOME/.m2/repository/org/opencds/cqf/tooling*
 after_success:
   - ./scripts/deploy.sh
 deploy:
