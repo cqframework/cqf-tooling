@@ -27,9 +27,9 @@ _updateCQGTooling
 ###Command Line and Arguments 
 The operation can be called from the command line:
 ```
-JAVA -jar \sandbox\valuesets\input-cache\tooling-1.3.1-SNAPSHOT-jar-with-dependencies.jar -TemplateToValueSetGenerator -pts="D:\sandbox\valuesets\input\CDC Opioid Terminology Template.xlsx" -op="D:\sandbox\valuesets\output"
+JAVA -jar \sandbox\valuesets\input-cache\tooling-2.1.0-SNAPSHOT.jar -TemplateToValueSetGenerator -pts="D:\sandbox\valuesets\input\CDC Opioid Terminology Template.xlsx" -op="D:\sandbox\valuesets\output"
 ```
-tooling-1.3.1-SNAPSHOT-jar-with-dependencies.jar is the path and actual name of the current version of the cqf-tooling jar. The possible command line arguments are:
+tooling-2.1.0-SNAPSHOT.jar is the path and actual name of the current version of the cqf-tooling jar. The possible command line arguments are:
 
 * -pts Which is the path to the spreadsheet containing the valuesets. i.e. -pts="D:\sandbox\vsac_xlsx\input\CDC Opioid Terminology Template.xlsx"
 * -op Which is the output path directory for operation to put the created valuesets. i.e. -op="D:\sandbox\vsac_xlsx\output"
