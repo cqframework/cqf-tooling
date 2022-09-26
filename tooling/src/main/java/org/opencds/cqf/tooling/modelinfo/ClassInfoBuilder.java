@@ -1315,6 +1315,19 @@ public abstract class ClassInfoBuilder {
                 System.out.println(String.format("WARNING: Derived type for slicing support on primitives not implemented. Ignoring slices of element %s", ed.getId()));
                 slices.getSlices().clear();
             }
+            else if (isSystemTypeName(getTypeName((NamedTypeSpecifier)typeSpecifier)) && slices.getSlices().size() == 1 && slices.getSlices().get(0).getElementType() != null && slices.getSlices().get(0).getElementType().equals("QICore.NotDoneValueSet") && cie != null) {
+                // If the element is a system type and there is one simple slice and the type of that slice is NotDoneValueSet
+                // represent the element as a choice of the type and the slice type
+                // Note that this is potentially a general pattern, but is being done only for the NotDoneValueSet for now
+                NamedTypeSpecifier sliceTypeSpecifier = new NamedTypeSpecifier().withNamespace("System").withName("ValueSet");
+                ChoiceTypeSpecifier cts = new ChoiceTypeSpecifier().withChoice(typeSpecifier, sliceTypeSpecifier);
+                cie.setElementType(null);
+                cie.setElementTypeSpecifier(cts);
+                if (cie.getTarget() != null) {
+                    cie.setTarget(String.format("%s:%s;%s:FHIRHelpers.ToValueSet(%s)", getTypeName((NamedTypeSpecifier)typeSpecifier), cie.getTarget(), getTypeName(sliceTypeSpecifier), slices.getSlices().get(0).getTarget()));
+                }
+                slices.getSlices().clear();
+            }
             else {
                 // The element should be represented as a type with elements for the slices
                 // Construct an element-specific type that is derived from the type of the current element

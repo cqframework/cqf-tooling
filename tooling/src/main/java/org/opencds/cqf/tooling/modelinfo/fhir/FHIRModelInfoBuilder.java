@@ -178,6 +178,14 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
                     "            display: concept.text.value\n" +
                     "        }\n" +
                     "\n" +
+                    "define function ToValueSet(uri: String):\n" +
+                    "    if uri is null then\n" +
+                    "        null\n" +
+                    "    else\n" +
+                    "        System.ValueSet {\n" +
+                    "            id: uri\n" +
+                    "        }\n" +
+                    "\n" +
                     "define function reference(reference String):\n" +
                     "    if reference is null then\n" +
                     "        null\n" +
