@@ -26,7 +26,7 @@
 
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.jaxb-deps</artifactId>
+            <artifactId>evaluator.jackson-deps</artifactId>
             <type>pom</type>
         </dependency>
 
