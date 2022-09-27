@@ -1,25 +1,21 @@
 package org.opencds.cqf.tooling.casereporting.transformer;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.JsonParser;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.UsageContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.parameter.TransformErsdParameters;
-import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 public class ErsdTransformerIT {
 
@@ -28,9 +24,9 @@ public class ErsdTransformerIT {
     @Test
     public void testErsdTransformerPlanDefinitionReplaced() throws Exception {
         TransformErsdParameters params = new TransformErsdParameters();
-        params.pathToBundle = "src/test/resources/org/opencds/cqf/tooling/casereporting/transformer/ErsdBundle.json";
-        params.outputPath = "src/test/resources/org/opencds/cqf/tooling/casereporting/transformer/output";
-        params.pathToV2PlanDefinition = "src/test/resources/org/opencds/cqf/tooling/casereporting/transformer/eRSDv2PlanDefinition/plandefinition-us-ecr-specification.json";
+        params.pathToBundle = "src/test/resources/casereporting/transformer/ErsdBundle.json";
+        params.outputPath = "src/test/resources/casereporting/transformer/output";
+        params.pathToV2PlanDefinition = "src/test/resources/casereporting/transformer/eRSDv2PlanDefinition/plandefinition-us-ecr-specification.json";
 
         ErsdTransformer ersdTransformer = new ErsdTransformer();
         ersdTransformer.transform(params);
@@ -57,8 +53,8 @@ public class ErsdTransformerIT {
     @Test
     public void testErsdTransformerPlanDefinitionNotReplaced() throws Exception {
         TransformErsdParameters params = new TransformErsdParameters();
-        params.pathToBundle = "src/test/resources/org/opencds/cqf/tooling/casereporting/transformer/ErsdBundle.json";
-        params.outputPath = "src/test/resources/org/opencds/cqf/tooling/casereporting/transformer/output";
+        params.pathToBundle = "src/test/resources/casereporting/transformer/ErsdBundle.json";
+        params.outputPath = "src/test/resources/casereporting/transformer/output";
 
         ErsdTransformer ersdTransformer = new ErsdTransformer();
         ersdTransformer.transform(params);
@@ -85,9 +81,9 @@ public class ErsdTransformerIT {
     @Test
     public void testErsdTransformerEmergentPriorityUseContextPreserved() throws Exception {
         TransformErsdParameters params = new TransformErsdParameters();
-        params.pathToBundle = "src/test/resources/org/opencds/cqf/tooling/casereporting/transformer/ErsdBundle.json";
-        params.outputPath = "src/test/resources/org/opencds/cqf/tooling/casereporting/transformer/output";
-        params.pathToV2PlanDefinition = "src/test/resources/org/opencds/cqf/tooling/casereporting/transformer/eRSDv2PlanDefinition/plandefinition-us-ecr-specification.json";
+        params.pathToBundle = "src/test/resources/casereporting/transformer/ErsdBundle.json";
+        params.outputPath = "src/test/resources/casereporting/transformer/output";
+        params.pathToV2PlanDefinition = "src/test/resources/casereporting/transformer/eRSDv2PlanDefinition/plandefinition-us-ecr-specification.json";
 
         ErsdTransformer ersdTransformer = new ErsdTransformer();
         ersdTransformer.transform(params);
