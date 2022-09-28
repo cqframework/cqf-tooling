@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.casereporting.transformer;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.JsonParser;
+import ca.uhn.fhir.parser.XmlParser;
 import ca.uhn.fhir.validation.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.r4.model.*;
@@ -33,7 +34,7 @@ public class ErsdTransformer extends Operation {
     private final String usPhTriggeringValueSetLibraryProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset-library";
     private final String usPhTriggeringValueSetProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset";
 
-    private JsonParser jsonParser;
+//    private JsonParser jsonParser;
 //    private XmlParser xmlParser;
 
     private String version;
@@ -44,7 +45,7 @@ public class ErsdTransformer extends Operation {
         // validator.setValidateAgainstStandardSchema(true);
         // validator.setValidateAgainstStandardSchematron(true);
         validator.registerValidatorModule(module);
-        jsonParser = (JsonParser)ctx.newJsonParser();
+//        jsonParser = (JsonParser)ctx.newJsonParser();
 //        xmlParser = (XmlParser)ctx.newXmlParser();
     }
 
@@ -149,12 +150,12 @@ public class ErsdTransformer extends Operation {
         if (bundleFile.isFile()) {
             try {
                 if (bundleFile.getName().endsWith("json")) {
-                    sourceBundle = (Bundle)jsonParser.parseResource(new FileInputStream(bundleFile));
+                    sourceBundle = (Bundle)((JsonParser)ctx.newJsonParser()).parseResource(new FileInputStream(bundleFile));
                 }
                 else {
-                    throw new IllegalArgumentException("Currently, only JSON is supported for the input bundle.");
+//                    throw new IllegalArgumentException("Currently, only JSON is supported for the input bundle.");
                     //TODO: currently fails due to "Content is not allowed in prolog."
-//                    sourceBundle = (Bundle)xmlParser.parseResource(new FileInputStream(bundleFile));
+                    sourceBundle = (Bundle)((XmlParser)ctx.newXmlParser()).parseResource(new FileInputStream(bundleFile));
                 }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();

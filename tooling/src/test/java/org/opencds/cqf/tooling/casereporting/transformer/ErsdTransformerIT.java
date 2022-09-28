@@ -21,17 +21,11 @@ public class ErsdTransformerIT {
 
     private static final Logger logger = LoggerFactory.getLogger(ErsdTransformerIT.class);
 
-    @Test
-    public void testErsdTransformerPlanDefinitionReplaced() throws Exception {
-        TransformErsdParameters params = new TransformErsdParameters();
-        params.pathToBundle = "src/test/resources/casereporting/transformer/ErsdBundle.json";
-        params.outputPath = "src/test/resources/casereporting/transformer/output";
-        params.pathToV2PlanDefinition = "src/test/resources/casereporting/transformer/eRSDv2PlanDefinition/plandefinition-us-ecr-specification.json";
-
+    private Bundle transformBundle(TransformErsdParameters params, String outputBundleFileName) throws Exception {
         ErsdTransformer ersdTransformer = new ErsdTransformer();
         ersdTransformer.transform(params);
 
-        String expectedOutputFilePath =  params.outputPath + System.getProperty("file.separator") + "rctc-release-2022-03-29-Bundle-rctc.json";
+        String expectedOutputFilePath =  params.outputPath + System.getProperty("file.separator") + outputBundleFileName;
         File bundleFile = new File(expectedOutputFilePath);
         Bundle outputBundle = null;
         if (bundleFile.isFile()) {
@@ -39,13 +33,44 @@ public class ErsdTransformerIT {
             outputBundle = (Bundle) jsonParser.parseResource(new FileInputStream(bundleFile));
         }
 
+        bundleFile.delete();
+        return outputBundle;
+    }
+
+    @Test
+    public void testErsdTransformerPlanDefinitionReplacedJSONInput() throws Exception {
+        TransformErsdParameters params = new TransformErsdParameters();
+        params.pathToBundle = "src/test/resources/casereporting/transformer/ErsdBundle.json";
+        params.outputPath = "src/test/resources/casereporting/transformer/output";
+        params.pathToV2PlanDefinition = "src/test/resources/casereporting/transformer/eRSDv2PlanDefinition/plandefinition-us-ecr-specification.json";
+        String outputBundleFileName = "rctc-release-2022-07-13-Bundle-rctc.json";
+
+        Bundle outputBundle = transformBundle(params, outputBundleFileName);
+
         assertNotNull(outputBundle);
         assertEquals(outputBundle.getEntry().stream().filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition")).count(), 1);
         assertEquals(outputBundle.getEntry().stream()
                 .filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition"))
                 .findFirst().get().getResource().getIdElement().getIdPart(), "plandefinition-us-ecr-specification");
 
-        bundleFile.delete();
+        logger.info("Transform");
+    }
+
+    @Test
+    public void testErsdTransformerPlanDefinitionReplacedXMLInput() throws Exception {
+        TransformErsdParameters params = new TransformErsdParameters();
+        params.pathToBundle = "src/test/resources/casereporting/transformer/ErsdBundle.xml";
+        params.outputPath = "src/test/resources/casereporting/transformer/output";
+        params.pathToV2PlanDefinition = "src/test/resources/casereporting/transformer/eRSDv2PlanDefinition/plandefinition-us-ecr-specification.json";
+        String outputBundleFileName = "rctc-release-2022-07-13-Bundle-rctc.json";
+
+        Bundle outputBundle = transformBundle(params, outputBundleFileName);
+
+        assertNotNull(outputBundle);
+        assertEquals(outputBundle.getEntry().stream().filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition")).count(), 1);
+        assertEquals(outputBundle.getEntry().stream()
+                .filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition"))
+                .findFirst().get().getResource().getIdElement().getIdPart(), "plandefinition-us-ecr-specification");
 
         logger.info("Transform");
     }
@@ -55,25 +80,15 @@ public class ErsdTransformerIT {
         TransformErsdParameters params = new TransformErsdParameters();
         params.pathToBundle = "src/test/resources/casereporting/transformer/ErsdBundle.json";
         params.outputPath = "src/test/resources/casereporting/transformer/output";
+        String outputBundleFileName = "rctc-release-2022-07-13-Bundle-rctc.json";
 
-        ErsdTransformer ersdTransformer = new ErsdTransformer();
-        ersdTransformer.transform(params);
-
-        String expectedOutputFilePath =  params.outputPath + System.getProperty("file.separator") + "rctc-release-2022-03-29-Bundle-rctc.json";
-        File bundleFile = new File(expectedOutputFilePath);
-        Bundle outputBundle = null;
-        if (bundleFile.isFile()) {
-            JsonParser jsonParser = (JsonParser)FhirContext.forR4Cached().newJsonParser();
-            outputBundle = (Bundle) jsonParser.parseResource(new FileInputStream(bundleFile));
-        }
+        Bundle outputBundle = transformBundle(params, outputBundleFileName);
 
         assertNotNull(outputBundle);
         assertEquals(outputBundle.getEntry().stream().filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition")).count(), 1);
         assertEquals(outputBundle.getEntry().stream()
                 .filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition"))
                 .findFirst().get().getResource().getIdElement().getIdPart(), "plandefinition-ersd-skeleton");
-
-        bundleFile.delete();
 
         logger.info("Transform");
     }
@@ -83,18 +98,10 @@ public class ErsdTransformerIT {
         TransformErsdParameters params = new TransformErsdParameters();
         params.pathToBundle = "src/test/resources/casereporting/transformer/ErsdBundle.json";
         params.outputPath = "src/test/resources/casereporting/transformer/output";
+        String outputBundleFileName = "rctc-release-2022-07-13-Bundle-rctc.json";
         params.pathToV2PlanDefinition = "src/test/resources/casereporting/transformer/eRSDv2PlanDefinition/plandefinition-us-ecr-specification.json";
 
-        ErsdTransformer ersdTransformer = new ErsdTransformer();
-        ersdTransformer.transform(params);
-
-        String expectedOutputFilePath =  params.outputPath + System.getProperty("file.separator") + "rctc-release-2022-03-29-Bundle-rctc.json";
-        File bundleFile = new File(expectedOutputFilePath);
-        Bundle outputBundle = null;
-        if (bundleFile.isFile()) {
-            JsonParser jsonParser = (JsonParser)FhirContext.forR4Cached().newJsonParser();
-            outputBundle = (Bundle) jsonParser.parseResource(new FileInputStream(bundleFile));
-        }
+        Bundle outputBundle = transformBundle(params, outputBundleFileName);
 
         assertNotNull(outputBundle);
         ValueSet dxtcValueSet = (ValueSet)outputBundle.getEntry().stream().filter(x -> x.hasResource()
@@ -109,8 +116,6 @@ public class ErsdTransformerIT {
                         && x.hasValueCodeableConcept()
                         && x.getValueCodeableConcept().getCodingFirstRep().getCode().equals("emergent")).findFirst().get();
         assertNotNull(usageContext);
-
-        bundleFile.delete();
 
         logger.info("Transform");
     }
