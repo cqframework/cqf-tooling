@@ -201,6 +201,21 @@ package org.opencds.cqf.tooling.cli;
             - The -protocol can be http or https
             - The -name is the name for the postman collection
 
+        - TransformErsd
+            - command: mvn exec: java -Dexec.args="-TransformErsd (-pathtobundle | -ptb) (-outputpath | -op) [-pathtoplandefinition | -ptpd] [-encoding | -e]"
+            - This Operation transforms a US eCR eRSD version 1 bundle to eRSD version 2
+            - The operation expects -ptb is a path to a file containing the source eRSD v1 bundle
+            - The -op is the output directory for output v2
+            -   The default output path is:
+                    <location of the CQF Tooling jar being invoked> + "src/main/resources/org/opencds/cqf/tooling/casereporting/output"
+            - The -ptpd is the path to a file that contains the eRSD-v2-compliant PlanDefinition that should be used to replace the
+                plan definition in the input eRSD v1 bundle. If the argument is not specified, the PlanDefinition in the input bundle
+                will be preserved.
+            - The -e is the desired output encoding(s) for the output bundle. The supported output encodings are: { "json", "xml" }.
+                The "encoding" argument can be specified multiple times and the transformer will output a bundle for each encoding.
+                So if you want both json and xml bundles, you would specify both -e=json and -e=xml. If no encoding argument
+                is supplied, the transformer will assume "json" as the default and output a single JSON-encoded bundle.
+
         */
 
 public class Main {

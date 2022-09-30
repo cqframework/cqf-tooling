@@ -1,11 +1,13 @@
 package org.opencds.cqf.tooling.cli;
 
 //import org.opencds.cqf.tooling.jsonschema.SchemaGenerator;
+import org.opencds.cqf.tooling.casereporting.transformer.ErsdTransformer;
+import org.opencds.cqf.tooling.dateroller.DataDateRollerOperation;
+import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.TemplateToValueSetGenerator;
 import org.apache.commons.lang3.NotImplementedException;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.acceleratorkit.DTProcessor;
 import org.opencds.cqf.tooling.acceleratorkit.Processor;
-import org.opencds.cqf.tooling.dateroller.DataDateRollerOperation;
 import org.opencds.cqf.tooling.library.r4.LibraryGenerator;
 import org.opencds.cqf.tooling.measure.r4.RefreshR4MeasureOperation;
 import org.opencds.cqf.tooling.measure.stu3.RefreshStu3MeasureOperation;
@@ -121,6 +123,8 @@ class OperationFactory {
                 return new SpreadsheetToCQLOperation();
             case "PostmanCollection":
                 return new PostmanCollectionOperation();
+            case "TransformErsd":
+                return new ErsdTransformer();
             case "RollTestsDataDates":
                 return new DataDateRollerOperation();
             default:
