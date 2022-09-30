@@ -2,16 +2,19 @@ package org.opencds.cqf.tooling.casereporting.transformer;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.JsonParser;
+import ca.uhn.fhir.parser.XmlParser;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.UsageContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.parameter.TransformErsdParameters;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.testng.Assert.assertEquals;
@@ -25,16 +28,43 @@ public class ErsdTransformerIT {
         ErsdTransformer ersdTransformer = new ErsdTransformer();
         ersdTransformer.transform(params);
 
-        String expectedOutputFilePath =  params.outputPath + System.getProperty("file.separator") + outputBundleFileName;
+        String expectedOutputFilePath = java.nio.file.Path.of(params.outputPath, outputBundleFileName).toString();
+
         File bundleFile = new File(expectedOutputFilePath);
         Bundle outputBundle = null;
-        if (bundleFile.isFile()) {
-            JsonParser jsonParser = (JsonParser)FhirContext.forR4Cached().newJsonParser();
-            outputBundle = (Bundle) jsonParser.parseResource(new FileInputStream(bundleFile));
+        if (bundleFile != null) {
+            if (bundleFile.getName().endsWith("json")) {
+                outputBundle = (Bundle)((JsonParser)FhirContext.forR4Cached().newJsonParser()).parseResource(new FileInputStream(bundleFile));
+            }
+            else if (bundleFile.getName().endsWith("xml")) {
+                outputBundle = (Bundle)((XmlParser)FhirContext.forR4Cached().newXmlParser()).parseResource(new FileInputStream(bundleFile));
+            }
         }
 
         bundleFile.delete();
         return outputBundle;
+    }
+
+    @Test
+    public void testOutputFileName() throws Exception {
+        TransformErsdParameters params = new TransformErsdParameters();
+        params.pathToBundle = "src/test/resources/casereporting/transformer/ErsdBundle.json";
+        params.outputPath = "src/test/resources/casereporting/transformer/output";
+        params.outputFileName = "test_file_name";
+        params.pathToV2PlanDefinition = "src/test/resources/casereporting/transformer/eRSDv2PlanDefinition/plandefinition-us-ecr-specification.json";
+        params.outputFileEncodings = new HashSet<>();
+        params.outputFileEncodings.add(IOUtils.Encoding.XML);
+        params.prettyPrintOutput = true;
+
+        Bundle outputBundle = transformBundle(params, "test_file_name.xml");
+
+        assertNotNull(outputBundle);
+        assertEquals(outputBundle.getEntry().stream().filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition")).count(), 1);
+        assertEquals(outputBundle.getEntry().stream()
+                .filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition"))
+                .findFirst().get().getResource().getIdElement().getIdPart(), "plandefinition-us-ecr-specification");
+
+        logger.info("Transform");
     }
 
     @Test

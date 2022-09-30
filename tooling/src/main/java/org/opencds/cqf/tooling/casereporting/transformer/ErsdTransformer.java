@@ -34,9 +34,6 @@ public class ErsdTransformer extends Operation {
     private final String usPhTriggeringValueSetLibraryProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset-library";
     private final String usPhTriggeringValueSetProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset";
 
-//    private JsonParser jsonParser;
-//    private XmlParser xmlParser;
-
     private String version;
 
     public ErsdTransformer() {
@@ -45,8 +42,6 @@ public class ErsdTransformer extends Operation {
         // validator.setValidateAgainstStandardSchema(true);
         // validator.setValidateAgainstStandardSchematron(true);
         validator.registerValidatorModule(module);
-//        jsonParser = (JsonParser)ctx.newJsonParser();
-//        xmlParser = (XmlParser)ctx.newXmlParser();
     }
 
     @Override
@@ -56,7 +51,7 @@ public class ErsdTransformer extends Operation {
 
     private TransformErsdParameters gatherParameters(String[] args) {
         TransformErsdParameters params = new TransformErsdParameters();
-        params.encodings = new HashSet<>();
+        params.outputFileEncodings = new HashSet<>();
 
         params.outputPath = "src/main/resources/org/opencds/cqf/tooling/casereporting/output"; // default
         for (String arg : args) {
@@ -73,21 +68,23 @@ public class ErsdTransformer extends Operation {
 
             switch (flag.replace("-", "").toLowerCase()) {
                 case "outputpath": case "op": params.outputPath = value; break; // -outputpath (-op)
+                case "outputfilename": case "ofn": params.outputFileName = value; break; // -outputfilename (-ofn)
                 case "pathtobundle": case "ptb": params.pathToBundle = value; break; // -pathtobundle (-ptb)
                 case "pathtoplandefinition": case "ptpd": params.pathToV2PlanDefinition = value; break; // -pathtoplandefinition (-ptpd)
                 case "encoding": case "e": // -encoding (-e)
                     IOUtils.Encoding encoding = IOUtils.Encoding.parse(value.toLowerCase());
                     if (encoding == IOUtils.Encoding.JSON || encoding == IOUtils.Encoding.XML) {
-                        params.encodings.add(encoding); break;
+                        params.outputFileEncodings.add(encoding); break;
                     } else {
                         throw new IllegalArgumentException("Invalid encoding: " + value);
                     }
+                case "prettyprintoutput": case "ppo": params.prettyPrintOutput = Boolean.parseBoolean(value); break; // -prettyprintoutput (-ppo)
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
 
-        if (params.encodings.isEmpty()) {
-            params.encodings.add(IOUtils.Encoding.JSON);
+        if (params.outputFileEncodings.isEmpty()) {
+            params.outputFileEncodings.add(IOUtils.Encoding.JSON);
         }
 
         if (params.pathToBundle == null) {
@@ -124,15 +121,15 @@ public class ErsdTransformer extends Operation {
         resolveRelatedArtifacts(sourceBundle, specificationLibrary);
         Bundle specificationBundle = resolveSpecificationBundle(sourceBundle, specificationLibrary);
 
-        if (params.encodings == null) {
-            params.encodings = new HashSet<>();
+        if (params.outputFileEncodings == null) {
+            params.outputFileEncodings = new HashSet<>();
         }
-        if (params.encodings.isEmpty()) {
-            params.encodings.add(IOUtils.Encoding.JSON);
+        if (params.outputFileEncodings.isEmpty()) {
+            params.outputFileEncodings.add(IOUtils.Encoding.JSON);
         }
 
-        for (IOUtils.Encoding encoding: params.encodings) {
-            IOUtils.writeBundle(specificationBundle, params.outputPath, encoding, FhirContext.forR4Cached());
+        for (IOUtils.Encoding encoding: params.outputFileEncodings) {
+            IOUtils.writeBundle(specificationBundle, params.outputPath, encoding, FhirContext.forR4Cached(), params.outputFileName, params.prettyPrintOutput);
         }
     }
 
@@ -152,10 +149,11 @@ public class ErsdTransformer extends Operation {
                 if (bundleFile.getName().endsWith("json")) {
                     sourceBundle = (Bundle)((JsonParser)ctx.newJsonParser()).parseResource(new FileInputStream(bundleFile));
                 }
-                else {
-//                    throw new IllegalArgumentException("Currently, only JSON is supported for the input bundle.");
-                    //TODO: currently fails due to "Content is not allowed in prolog."
+                else if (bundleFile.getName().endsWith("xml")) {
                     sourceBundle = (Bundle)((XmlParser)ctx.newXmlParser()).parseResource(new FileInputStream(bundleFile));
+                }
+                else {
+                    throw new IllegalArgumentException("Unsupported input bundle encoding. Currently, only .json and .xml supported for the input bundle.");
                 }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
