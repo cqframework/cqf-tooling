@@ -19,6 +19,8 @@ public class RefreshIGParameters {
     public ArrayList<String> resourceDirs;
     public Boolean conformant;
     public String measureToRefreshPath;
+    public String planDefinitionToRefreshPath;
     public String libraryOutputPath;
     public String measureOutputPath;
+    public String planDefinitionOutputPath;
 }

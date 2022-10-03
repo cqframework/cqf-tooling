@@ -14,6 +14,7 @@ import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.MeasureProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
+import org.opencds.cqf.tooling.plandefinition.PlanDefinitionProcessor;
 import org.opencds.cqf.tooling.utilities.IGUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
@@ -26,11 +27,13 @@ public class IGProcessor extends BaseProcessor {
 	protected IGBundleProcessor igBundleProcessor;
     protected LibraryProcessor libraryProcessor;
     protected MeasureProcessor measureProcessor;
+    protected PlanDefinitionProcessor planDefinitionProcessor;
 
-    public IGProcessor(IGBundleProcessor igBundleProcessor, LibraryProcessor libraryProcessor, MeasureProcessor measureProcessor) {
+    public IGProcessor(IGBundleProcessor igBundleProcessor, LibraryProcessor libraryProcessor, MeasureProcessor measureProcessor, PlanDefinitionProcessor planDefinitionProcessor) {
         this.igBundleProcessor = igBundleProcessor;
         this.libraryProcessor = libraryProcessor;
         this.measureProcessor = measureProcessor;
+        this.planDefinitionProcessor = planDefinitionProcessor;
     }
     //mega ig method
     public void publishIG(RefreshIGParameters params) {
@@ -123,11 +126,13 @@ public class IGProcessor extends BaseProcessor {
         // Boolean includeDependencies = params.includeDependencies;
         String libraryOutputPath = params.libraryOutputPath;
         String measureOutputPath = params.measureOutputPath;
+        String planDefinitionOutputPath = params.planDefinitionOutputPath;
         Boolean includeTerminology = params.includeTerminology;
         Boolean includePatientScenarios = params.includePatientScenarios;
         Boolean versioned = params.versioned;
         // String fhirUri = params.fhirUri;
         String measureToRefreshPath = params.measureToRefreshPath;
+        String planDefinitionToRefreshPath = params.planDefinitionToRefreshPath;
         ArrayList<String> resourceDirs = params.resourceDirs;
         if (resourceDirs.size() == 0) {
             try {
@@ -157,6 +162,14 @@ public class IGProcessor extends BaseProcessor {
             refreshedMeasureNames = measureProcessor.refreshIgMeasureContent(this, encoding, measureOutputPath, versioned, fhirContext, measureToRefreshPath, params.shouldApplySoftwareSystemStamp);
         }
         refreshedResourcesNames.addAll(refreshedMeasureNames);
+
+        List<String> refreshedPlanDefinitionNames;
+        if (Strings.isNullOrEmpty(planDefinitionOutputPath)) {
+            refreshedPlanDefinitionNames = planDefinitionProcessor.refreshIgPlanDefinitionContent(this, encoding, versioned, fhirContext, planDefinitionToRefreshPath, params.shouldApplySoftwareSystemStamp);
+        } else {
+            refreshedPlanDefinitionNames = planDefinitionProcessor.refreshIgPlanDefinitionContent(this, encoding, planDefinitionOutputPath, versioned, fhirContext, planDefinitionToRefreshPath, params.shouldApplySoftwareSystemStamp);
+        }
+        refreshedResourcesNames.addAll(refreshedPlanDefinitionNames);
 
         if (refreshedResourcesNames.isEmpty()) {
             LogUtils.info("No resources successfully refreshed.");

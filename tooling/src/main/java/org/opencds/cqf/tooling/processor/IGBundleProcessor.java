@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opencds.cqf.tooling.measure.MeasureProcessor;
+import org.opencds.cqf.tooling.plandefinition.PlanDefinitionProcessor;
 import org.opencds.cqf.tooling.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 

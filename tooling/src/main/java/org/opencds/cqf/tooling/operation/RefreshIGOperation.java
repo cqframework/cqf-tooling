@@ -7,7 +7,7 @@ import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.processor.CDSHooksProcessor;
 import org.opencds.cqf.tooling.processor.IGBundleProcessor;
 import org.opencds.cqf.tooling.processor.IGProcessor;
-import org.opencds.cqf.tooling.processor.PlanDefinitionProcessor;
+import org.opencds.cqf.tooling.plandefinition.PlanDefinitionProcessor;
 import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
 import org.opencds.cqf.tooling.questionnaire.QuestionnaireProcessor;
 
@@ -37,7 +37,7 @@ public class RefreshIGOperation extends Operation {
         PlanDefinitionProcessor planDefinitionProcessor = new PlanDefinitionProcessor(libraryProcessor, cdsHooksProcessor);
         QuestionnaireProcessor questionnaireProcessor = new QuestionnaireProcessor(libraryProcessor);
         IGBundleProcessor igBundleProcessor = new IGBundleProcessor(measureProcessor, planDefinitionProcessor, questionnaireProcessor);
-        IGProcessor processor = new IGProcessor(igBundleProcessor, libraryProcessor, measureProcessor);
+        IGProcessor processor = new IGProcessor(igBundleProcessor, libraryProcessor, measureProcessor, planDefinitionProcessor);
         processor.publishIG(params);
     }
 }
