@@ -6,6 +6,7 @@ import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
 import org.hl7.fhir.r5.model.*;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -45,8 +46,9 @@ public class PlanDefinitionRefreshProcessor {
       }
 
       planToUse.getContained().removeIf(resource -> resource.getId().equalsIgnoreCase("effective-data-requirements"));
-//        planToUse.addContained(moduleDefinitionLibrary.setId("effective-data-requirements"));
-//        planToUse.addExtension().setUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements").setValue(new Reference("#effective-data-requirements")).setId("effective-data-requirements");
+      moduleDefinitionLibrary.setExtension(Collections.emptyList());
+      planToUse.addContained(moduleDefinitionLibrary.setId("effective-data-requirements"));
+      planToUse.addExtension().setUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements").setValue(new Reference("#effective-data-requirements")).setId("effective-data-requirements");
       return planToUse;
    }
 
