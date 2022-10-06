@@ -62,7 +62,7 @@ public class ErsdTransformerIT {
         assertEquals(outputBundle.getEntry().stream().filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition")).count(), 1);
         assertEquals(outputBundle.getEntry().stream()
                 .filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition"))
-                .findFirst().get().getResource().getIdElement().getIdPart(), "plandefinition-us-ecr-specification");
+                .findFirst().get().getResource().getIdElement().getIdPart(), "us-ecr-specification");
 
         logger.info("Transform");
     }
@@ -81,7 +81,7 @@ public class ErsdTransformerIT {
         assertEquals(outputBundle.getEntry().stream().filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition")).count(), 1);
         assertEquals(outputBundle.getEntry().stream()
                 .filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition"))
-                .findFirst().get().getResource().getIdElement().getIdPart(), "plandefinition-us-ecr-specification");
+                .findFirst().get().getResource().getIdElement().getIdPart(), "us-ecr-specification");
 
         logger.info("Transform");
     }
@@ -100,7 +100,7 @@ public class ErsdTransformerIT {
         assertEquals(outputBundle.getEntry().stream().filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition")).count(), 1);
         assertEquals(outputBundle.getEntry().stream()
                 .filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition"))
-                .findFirst().get().getResource().getIdElement().getIdPart(), "plandefinition-us-ecr-specification");
+                .findFirst().get().getResource().getIdElement().getIdPart(), "us-ecr-specification");
 
         logger.info("Transform");
     }
