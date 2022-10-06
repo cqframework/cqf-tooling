@@ -1,6 +1,6 @@
 {
   "resourceType": "PlanDefinition",
-  "id": "plandefinition-us-ecr-specification",
+  "id": "us-ecr-specification",
   "meta": {
     "profile": [
       "http://hl7.org/fhir/us/ecr/StructureDefinition/ersd-plandefinition"
@@ -337,7 +337,7 @@
                   }
                 ],
                 "language": "text/fhirpath",
-                "expression": "%encounter.where(period.start + 1 day * %normalReportingDuration >= now()).select(true) and (%conditions.exists() or %encounters.exists() or %immunizations.exists() or %procedures.exists() or %procedureOrders.exists() or %labOrders.exists() or %labTests.exists() or %labResults.exists() or %medicationAdministrations.exists() or %medicationOrders.exists() or %medicationDispenses.exists())"
+                "expression": "%encounter.where(period.start + 1 day * %normalReportingDuration >= now()).select(true) and (%conditions.exists() or %encounters.exists() or %immunizations.exists() or %labOrders.exists() or %labTests.exists() or %labResults.exists() or %medicationAdministrations.exists() or %medicationOrders.exists() or %medicationDispenses.exists())"
               }
             }
           ],
@@ -435,38 +435,6 @@
                 {
                   "path": "code",
                   "valueSet": "http://ersd.aimsplatform.org/fhir/ValueSet/lotc"
-                }
-              ]
-            },
-            {
-              "id": "procedureOrders",
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
-                  "valueString": "ServiceRequest?patient=Patient/{{context.patientId}}"
-                }
-              ],
-              "type": "ServiceRequest",
-              "codeFilter": [
-                {
-                  "path": "code",
-                  "valueSet": "http://ersd.aimsplatform.org/fhir/ValueSet/pctc"
-                }
-              ]
-            },
-            {
-              "id": "procedures",
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
-                  "valueString": "Procedure?patient=Patient/{{context.patientId}}"
-                }
-              ],
-              "type": "Procedure",
-              "codeFilter": [
-                {
-                  "path": "code",
-                  "valueSet": "http://ersd.aimsplatform.org/fhir/ValueSet/pctc"
                 }
               ]
             },
@@ -791,19 +759,6 @@
           "type": "Immunization",
           "profile": [
             "http://hl7.org/fhir/us/core/StructureDefinition/us-core-immunization"
-          ]
-        },
-        {
-          "id": "procdata",
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
-              "valueString": "procedures"
-            }
-          ],
-          "type": "Procedure",
-          "profile": [
-            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
           ]
         },
         {

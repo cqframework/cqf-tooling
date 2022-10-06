@@ -1,5 +1,5 @@
 <PlanDefinition xmlns="http://hl7.org/fhir">
-  <id value="plandefinition-us-ecr-specification"/>
+  <id value="us-ecr-specification"/>
   <meta>
     <profile value="http://hl7.org/fhir/us/ecr/StructureDefinition/ersd-plandefinition"/>
   </meta>
@@ -226,7 +226,7 @@
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="%encounter.where(period.start + 1 day * %normalReportingDuration &gt;= now()).select(true) and (%conditions.exists() or %encounters.exists() or %immunizations.exists() or %procedures.exists() or %procedureOrders.exists() or %labOrders.exists() or %labTests.exists() or %labResults.exists() or %medicationAdministrations.exists() or %medicationOrders.exists() or %medicationDispenses.exists())"/>
+          <expression value="%encounter.where(period.start + 1 day * %normalReportingDuration &gt;= now()).select(true) and (%conditions.exists() or %encounters.exists() or %immunizations.exists() or %labOrders.exists() or %labTests.exists() or %labResults.exists() or %medicationAdministrations.exists() or %medicationOrders.exists() or %medicationDispenses.exists())"/>
         </expression>
       </condition>
       <input id="conditions">
@@ -287,26 +287,6 @@
         <codeFilter>
           <path value="code"/>
           <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/lotc"/>
-        </codeFilter>
-      </input>
-      <input id="procedureOrders">
-        <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
-          <valueString value="ServiceRequest?patient=Patient/{{context.patientId}}"/>
-        </extension>
-        <type value="ServiceRequest"/>
-        <codeFilter>
-          <path value="code"/>
-          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/pctc"/>
-        </codeFilter>
-      </input>
-      <input id="procedures">
-        <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
-          <valueString value="Procedure?patient=Patient/{{context.patientId}}"/>
-        </extension>
-        <type value="Procedure"/>
-        <codeFilter>
-          <path value="code"/>
-          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/pctc"/>
         </codeFilter>
       </input>
       <input id="medicationOrders">
@@ -507,13 +487,6 @@
       </extension>
       <type value="Immunization"/>
       <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-immunization"/>
-    </input>
-    <input id="procdata">
-      <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
-        <valueString value="procedures"/>
-      </extension>
-      <type value="Procedure"/>
-      <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"/>
     </input>
     <input id="labResultdata">
       <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
