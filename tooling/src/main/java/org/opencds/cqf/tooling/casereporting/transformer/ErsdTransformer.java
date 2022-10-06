@@ -33,7 +33,7 @@ public class ErsdTransformer extends Operation {
     private final String usPhSpecificationLibraryProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-specification-library";
     private final String usPhTriggeringValueSetLibraryProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset-library";
     private final String usPhTriggeringValueSetProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset";
-
+    private PlanDefinition v2PlanDefinition;
     private String version;
 
     public ErsdTransformer() {
@@ -101,7 +101,7 @@ public class ErsdTransformer extends Operation {
 
     public void transform(TransformErsdParameters params) {
         Bundle sourceBundle = getAndValidateBundle(params.pathToBundle);
-        PlanDefinition v2PlanDefinition = getV2PlanDefinition(params.pathToV2PlanDefinition);
+        v2PlanDefinition = getV2PlanDefinition(params.pathToV2PlanDefinition);
         if (v2PlanDefinition != null) {
             if (sourceBundle.getEntry().stream().filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition")).count() > 1) {
                 throw new IllegalArgumentException("The input Bundle includes more than one PlanDefinition and you have " +
@@ -352,7 +352,14 @@ public class ErsdTransformer extends Operation {
             )
         );
 
+        // Update Grouping ValueSet references (in useContexts) to PlanDefinition
         List<UsageContext> useContexts = res.getUseContext();
+        useContexts.stream().forEach(uc -> {
+            if (uc.hasValueReference() && uc.getValueReference().hasReference() && uc.getValueReference().getReference().contains("skeleton")) {
+                uc.setValue(new Reference(v2PlanDefinition.getId()));
+            }
+        });
+
         boolean hasPriorityUseContext = false;
         for (UsageContext uc : useContexts) {
             hasPriorityUseContext = uc.getCode().getCode().equalsIgnoreCase("priority");
