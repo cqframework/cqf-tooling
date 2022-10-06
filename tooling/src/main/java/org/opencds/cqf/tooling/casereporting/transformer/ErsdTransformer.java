@@ -354,11 +354,14 @@ public class ErsdTransformer extends Operation {
 
         // Update Grouping ValueSet references (in useContexts) to PlanDefinition
         List<UsageContext> useContexts = res.getUseContext();
-        useContexts.stream().forEach(uc -> {
-            if (uc.hasValueReference() && uc.getValueReference().hasReference() && uc.getValueReference().getReference().contains("skeleton")) {
-                uc.setValue(new Reference(v2PlanDefinition.getId()));
-            }
-        });
+
+        if (v2PlanDefinition != null) {
+            useContexts.stream().forEach(uc -> {
+                if (uc.hasValueReference() && uc.getValueReference().hasReference() && uc.getValueReference().getReference().contains("skeleton")) {
+                    uc.setValue(new Reference(v2PlanDefinition.getId()));
+                }
+            });
+        }
 
         boolean hasPriorityUseContext = false;
         for (UsageContext uc : useContexts) {
