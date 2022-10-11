@@ -1071,15 +1071,24 @@ public abstract class ClassInfoBuilder {
             }
 
             for (ElementDefinition.ElementDefinitionConstraintComponent constraint : ed.getConstraint()) {
-                ConstraintInfo ci = new ConstraintInfo();
-                ci.setName(constraint.getKey());
-                ci.setSeverity(toSeverity(constraint.getSeverity()));
-                ci.setDescription(constraint.getRequirements());
-                ci.setMessage(constraint.getHuman());
-                if (constraint.hasExpression()) {
-                    ci.getExpression().add(new ExpressionInfo().withLanguage("text/fhirpath").withExpression(constraint.getExpression()));
+                if (constraint.getKey() != null) {
+                    // Ignore ele-1 and ext-1 constraints, all elements have them and it is better implemented as a model-level understanding, rather than explicit constraints
+                    switch (constraint.getKey()) {
+                        case "ele-1":
+                        case "ext-1":
+                            continue;
+                    }
+
+                    ConstraintInfo ci = new ConstraintInfo();
+                    ci.setName(constraint.getKey());
+                    ci.setSeverity(toSeverity(constraint.getSeverity()));
+                    ci.setDescription(constraint.getRequirements());
+                    ci.setMessage(constraint.getHuman());
+                    if (constraint.hasExpression()) {
+                        ci.getExpression().add(new ExpressionInfo().withLanguage("text/fhirpath").withExpression(constraint.getExpression()));
+                    }
+                    cie.getConstraint().add(ci);
                 }
-                cie.getConstraint().add(ci);
             }
 
             if (ed.hasMustSupport()) {
@@ -1299,56 +1308,74 @@ public abstract class ClassInfoBuilder {
         if (!ed.hasSliceName() && !(sliceInfo != null && sliceInfo.getSliceRoot().getId().equals(ed.getId())) && (slices.getSlices().size() > 0)) {
 
             if (!(typeSpecifier instanceof NamedTypeSpecifier)) {
-                throw new IllegalArgumentException("Derived type for slicing support only supported for named types");
-            }
-
-            if (!(isClassType(getTypeName((NamedTypeSpecifier)typeSpecifier)))) {
-                throw new IllegalArgumentException("Derived type for slicing support on primitives not implemented");
-            }
-
-            // The element should be represented as a type with elements for the slices
-            // Construct an element-specific type that is derived from the type of the current element
-            // Add the slices to the elements of the new type
-            // However, constructing derived types based on System data types is cumbersome and confusing
-            // So if the element is of a system type, allow the slices to bubble up one level
-            if (!(isSystemTypeName(getTypeName((NamedTypeSpecifier)typeSpecifier)))) {
-                String typeName = capitalizePath(ed.getId().replace(':', '.'));
-                String qualifiedTypeName = getTypeName(modelName, typeName);
-                ClassInfo elementType = null;
-                if (this.typeInfos.containsKey(qualifiedTypeName)) {
-                    System.out.println(String.format("WARNING: Adding slices to existing type %s.", qualifiedTypeName));
-                    elementType = (ClassInfo)typeInfos.get(qualifiedTypeName);
-                }
-                else {
-                    elementType = new ClassInfo().withNamespace(modelName).withName(typeName).withBaseTypeSpecifier(typeSpecifier).withRetrievable(false);
-                    this.typeInfos.put(qualifiedTypeName, elementType);
-                }
-
-                for (ClassInfoElement slice : slices.getSlices()) {
-                    System.out.println(String.format("Adding slice %s to derived type %s", slice.getName(), qualifiedTypeName));
-                    if (elementType.getElement().stream().noneMatch(x -> x.getName().equals(slice.getName()))) {
-                        elementType.getElement().add(slice);
-                    }
-                    else {
-                        System.out.println(String.format("WARNING: Duplicate element %s not added to derived type %s", slice.getName(), qualifiedTypeName));
-                    }
-                }
-                //this.typeInfos.put(qualifiedTypeName, elementType);
+                System.out.println(String.format("WARNING: Derived type for slicing support only support for named types. Ignoring slices of element %s", ed.getId()));
                 slices.getSlices().clear();
-
-                NamedTypeSpecifier nts = new NamedTypeSpecifier();
-                nts.setNamespace(modelName);
-                nts.setName(typeName);
-
-                typeSpecifier = nts;
-
-                if (cie == null) {
-                    cie = new ClassInfoElement().withName(stripPath(stripChoice(ed.getPath()))).withElementType(getTypeName(nts));
-                    // TODO: Consider include metadata here?
+            }
+            else if (!(isClassType(getTypeName((NamedTypeSpecifier)typeSpecifier)))) {
+                System.out.println(String.format("WARNING: Derived type for slicing support on primitives not implemented. Ignoring slices of element %s", ed.getId()));
+                slices.getSlices().clear();
+            }
+            else if (isSystemTypeName(getTypeName((NamedTypeSpecifier)typeSpecifier)) && slices.getSlices().size() == 1 && slices.getSlices().get(0).getElementType() != null && slices.getSlices().get(0).getElementType().equals("QICore.NotDoneValueSet") && cie != null) {
+                // If the element is a system type and there is one simple slice and the type of that slice is NotDoneValueSet
+                // represent the element as a choice of the type and the slice type
+                // Note that this is potentially a general pattern, but is being done only for the NotDoneValueSet for now
+                NamedTypeSpecifier sliceTypeSpecifier = new NamedTypeSpecifier().withNamespace("System").withName("ValueSet");
+                ChoiceTypeSpecifier cts = new ChoiceTypeSpecifier().withChoice(typeSpecifier, sliceTypeSpecifier);
+                cie.setElementType(null);
+                cie.setElementTypeSpecifier(cts);
+                if (cie.getTarget() != null) {
+                    cie.setTarget(String.format("%s:%s;%s:FHIRHelpers.ToValueSet(%s)", getTypeName((NamedTypeSpecifier)typeSpecifier), cie.getTarget(), getTypeName(sliceTypeSpecifier), slices.getSlices().get(0).getTarget()));
                 }
-                else {
-                    cie.setElementType(getTypeName(nts));
-                    cie.setElementTypeSpecifier(null);
+                slices.getSlices().clear();
+            }
+            else {
+                // The element should be represented as a type with elements for the slices
+                // Construct an element-specific type that is derived from the type of the current element
+                // Add the slices to the elements of the new type
+                // However, constructing derived types based on System data types is cumbersome and confusing
+                // So if the element is of a system type, allow the slices to bubble up one level
+                if (!(isSystemTypeName(getTypeName((NamedTypeSpecifier)typeSpecifier)))) {
+                    String typeName = capitalizePath(ed.getId().replace(':', '.'));
+                    String qualifiedTypeName = getTypeName(modelName, typeName);
+                    ClassInfo elementType = null;
+                    if (this.typeInfos.containsKey(qualifiedTypeName)) {
+                        System.out.println(String.format("WARNING: Adding slices to existing type %s.", qualifiedTypeName));
+                        elementType = (ClassInfo) typeInfos.get(qualifiedTypeName);
+                    } else {
+                        elementType = new ClassInfo().withNamespace(modelName).withName(typeName).withBaseTypeSpecifier(typeSpecifier).withRetrievable(false);
+                        this.typeInfos.put(qualifiedTypeName, elementType);
+                    }
+
+                    for (ClassInfoElement slice : slices.getSlices()) {
+                        System.out.println(String.format("Adding slice %s to derived type %s", slice.getName(), qualifiedTypeName));
+                        if (elementType.getElement().stream().noneMatch(x -> x.getName().equals(slice.getName()))) {
+                            elementType.getElement().add(slice);
+                        } else {
+                            System.out.println(String.format("WARNING: Duplicate element %s not added to derived type %s", slice.getName(), qualifiedTypeName));
+                        }
+                    }
+                    //this.typeInfos.put(qualifiedTypeName, elementType);
+                    slices.getSlices().clear();
+
+                    NamedTypeSpecifier nts = new NamedTypeSpecifier();
+                    nts.setNamespace(modelName);
+                    nts.setName(typeName);
+
+                    typeSpecifier = nts;
+
+                    if (cie == null) {
+                        cie = new ClassInfoElement().withName(stripPath(stripChoice(ed.getPath()))).withElementType(getTypeName(nts));
+                        // TODO: Consider include metadata here?
+                    } else {
+                        if (cie.getElementTypeSpecifier() instanceof ListTypeSpecifier) {
+                            ((ListTypeSpecifier)cie.getElementTypeSpecifier()).setElementType(getTypeName(nts));
+                            ((ListTypeSpecifier)cie.getElementTypeSpecifier()).setElementTypeSpecifier(null);
+                        }
+                        else {
+                            cie.setElementType(getTypeName(nts));
+                            cie.setElementTypeSpecifier(null);
+                        }
+                    }
                 }
             }
         }
