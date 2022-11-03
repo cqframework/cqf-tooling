@@ -186,7 +186,7 @@
                   }
                 ],
                 "language": "text/fhirpath",
-                "expression": "%modifiedConditions.exists() or %modifiedLabResults.exists() or %modifiedMedicationOrders.exists()"
+                "expression": "%modifiedConditions.exists() or %modifiedLabResults.exists()"
               }
             }
           ],
@@ -220,22 +220,6 @@
                 {
                   "path": "value",
                   "valueSet": "http://ersd.aimsplatform.org/fhir/ValueSet/sdltc"
-                }
-              ]
-            },
-            {
-              "id": "modifiedMedicationOrders",
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
-                  "valueString": "MedicationRequest?patient=Patient/{{context.patientId}}"
-                }
-              ],
-              "type": "MedicationRequest",
-              "codeFilter": [
-                {
-                  "path": "medication",
-                  "valueSet": "http://ersd.aimsplatform.org/fhir/ValueSet/sdmtc"
                 }
               ]
             }

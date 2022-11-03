@@ -126,7 +126,7 @@
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="%modifiedConditions.exists() or %modifiedLabResults.exists() or %modifiedMedicationOrders.exists()"/>
+          <expression value="%modifiedConditions.exists() or %modifiedLabResults.exists()"/>
         </expression>
       </condition>
       <input id="modifiedConditions">
@@ -147,16 +147,6 @@
         <codeFilter>
           <path value="value"/>
           <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/sdltc"/>
-        </codeFilter>
-      </input>
-      <input id="modifiedMedicationOrders">
-        <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
-          <valueString value="MedicationRequest?patient=Patient/{{context.patientId}}"/>
-        </extension>
-        <type value="MedicationRequest"/>
-        <codeFilter>
-          <path value="medication"/>
-          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/sdmtc"/>
         </codeFilter>
       </input>
       <relatedAction>
