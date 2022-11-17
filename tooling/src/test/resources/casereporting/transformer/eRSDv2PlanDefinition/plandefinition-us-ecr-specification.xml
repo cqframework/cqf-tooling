@@ -88,7 +88,7 @@
       <type value="Encounter"/>
     </input>
     <relatedAction>
-      <actionId value="check-suspected-disorder"/>
+      <actionId value="check-for-immediate-reporting"/>
       <relationship value="before-start"/>
       <offsetDuration>
         <value value="1"/>
@@ -97,7 +97,7 @@
       </offsetDuration>
     </relatedAction>
   </action>
-  <action id="check-suspected-disorder">
+  <action id="check-for-immediate-reporting">
     <description value="This action represents the start of the check suspected disorder reporting workflow in response to the encounter-start event."/>
     <textEquivalent value="Check suspected disorders for immediate reportability and setup jobs for future reportability checks."/>
     <code>
@@ -106,9 +106,9 @@
         <code value="execute-reporting-workflow"/>
       </coding>
     </code>
-    <action id="is-encounter-suspected-disorder">
+    <action id="is-encounter-immediately-reportable">
       <description value="This action represents the check for suspected disorder reportability to create the patients eICR."/>
-      <textEquivalent value="Check Trigger Codes based on Suspected Reportable Value set."/>
+      <textEquivalent value="Check Trigger Codes based on Suspected Reportable and Lab Order Test Names Value set."/>
       <code>
         <coding>
           <system value="http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions"/>
@@ -126,10 +126,10 @@
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="%modifiedConditions.exists() or %modifiedLabResults.exists()"/>
+          <expression value="%suspectedDisorderConditions.exists() or %suspectedDisorderLabOrders.exists()"/>
         </expression>
       </condition>
-      <input id="modifiedConditions">
+      <input id="suspectedDisorderConditions">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
           <valueString value="Condition?patient=Patient/{{context.patientId}}"/>
         </extension>
@@ -139,14 +139,14 @@
           <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/sdtc"/>
         </codeFilter>
       </input>
-      <input id="modifiedLabResults">
+      <input id="suspectedDisorderLabOrders">
         <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension">
-          <valueString value="Observation?patient=Patient/{{context.patientId}}"/>
+          <valueString value="ServiceRequest?patient=Patient/{{context.patientId}}"/>
         </extension>
-        <type value="Observation"/>
+        <type value="ServiceRequest"/>
         <codeFilter>
           <path value="value"/>
-          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/sdltc"/>
+          <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/lotc"/>
         </codeFilter>
       </input>
       <relatedAction>
