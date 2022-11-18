@@ -218,7 +218,7 @@
               "type": "ServiceRequest",
               "codeFilter": [
                 {
-                  "path": "value",
+                  "path": "code",
                   "valueSet": "http://ersd.aimsplatform.org/fhir/ValueSet/lotc"
                 }
               ]

@@ -145,7 +145,7 @@
         </extension>
         <type value="ServiceRequest"/>
         <codeFilter>
-          <path value="value"/>
+          <path value="code"/>
           <valueSet value="http://ersd.aimsplatform.org/fhir/ValueSet/lotc"/>
         </codeFilter>
       </input>
