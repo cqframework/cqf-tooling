@@ -13,6 +13,27 @@
       <expression value="14"/>
     </valueExpression>
   </extension>
+  <extension url="http://hl7.org/fhir/StructureDefinition/variable">
+    <valueExpression>
+      <name value="encounterStartDate"/>
+      <language value="text/fhirpath"/>
+      <expression value="{{context.encounterStartDate}}"/>
+    </valueExpression>
+  </extension>
+  <extension url="http://hl7.org/fhir/StructureDefinition/variable">
+    <valueExpression>
+      <name value="encounterEndDate"/>
+      <language value="text/fhirpath"/>
+      <expression value="{{context.encounterEndDate}}"/>
+    </valueExpression>
+  </extension>
+  <extension url="http://hl7.org/fhir/StructureDefinition/variable">
+    <valueExpression>
+      <name value="lastReportSubmissionDate"/>
+      <language value="text/fhirpath"/>
+      <expression value="{{context.lastReportSubmissionDate}}"/>
+    </valueExpression>
+  </extension>
   <url value="http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification"/>
   <version value="2.0.0"/>
   <name value="US_eCR_Specification"/>
@@ -172,9 +193,15 @@
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="%encounter.where((status = 'in-progress' and period.start + 1 day * %normalReportingDuration &gt;= now()) or (status = 'finished' and period.end + 72 hours &gt;= now())).select(true)"/>
+          <expression value="%inprogressencounter.where((status = 'in-progress' and %encounterStartDate + 1 day * %normalReportingDuration &gt;= now()) or (status = 'finished' and %encounterEndDate + 72 hours &gt;= now())).select(true)"/>
         </expression>
       </condition>
+      <input id="inprogressencounter">
+        <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+          <valueString value="encounter"/>
+        </extension>
+        <type value="Encounter"/>
+      </input>
       <relatedAction>
         <actionId value="check-reportable"/>
         <relationship value="before-start"/>
@@ -185,6 +212,62 @@
           <code value="h"/>
         </offsetDuration>
       </relatedAction>
+    </action>
+    <action id="terminate-late-encounter">
+      <code>
+        <coding>
+          <system value="http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions"/>
+          <code value="terminate-reporting-workflow"/>
+        </coding>
+      </code>
+      <condition>
+        <kind value="applicability"/>
+        <expression>
+          <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternative-expression-extension">
+            <valueExpression>
+              <language value="text/cql-identifier"/>
+              <expression value="Is Encounter Late"/>
+              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|2.1.0"/>
+            </valueExpression>
+          </extension>
+          <language value="text/fhirpath"/>
+          <expression value="%terminatedencounter.where((status = 'in-progress' and %encounterStartDate + 1 day * %normalReportingDuration < now()) or (status = 'finished' and %encounterEndDate + 72 hours < now())).select(true)"/>
+        </expression>
+      </condition>
+      <input id="terminatedencounter">
+        <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+          <valueString value="encounter"/>
+        </extension>
+        <type value="Encounter"/>
+      </input>
+    </action>
+    <action id="is-late-encounter-completed">
+      <code>
+        <coding>
+          <system value="http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions"/>
+          <code value="complete-reporting"/>
+        </coding>
+      </code>
+      <condition>
+        <kind value="applicability"/>
+        <expression>
+          <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternative-expression-extension">
+            <valueExpression>
+              <language value="text/cql-identifier"/>
+              <expression value="Is Encounter Complete"/>
+              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|2.1.0"/>
+            </valueExpression>
+          </extension>
+          <language value="text/fhirpath"/>
+          <expression value="%lateCompletedEncounter.exists(status = 'finished')"/>
+        </expression>
+      </condition>
+      <input id="lateCompletedEncounter">
+        <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+          <valueString value="encounter"/>
+        </extension>
+        <type value="Encounter"/>
+      </input>
     </action>
   </action>
   <action id="check-reportable">
@@ -216,7 +299,7 @@
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="%encounter.where(period.start + 1 day * %normalReportingDuration &gt;= now()).select(true) and (%conditions.exists() or %encounters.exists() or %immunizations.exists() or %labOrders.exists() or %labTests.exists() or %labResults.exists() or %medicationAdministrations.exists() or %medicationOrders.exists() or %medicationDispenses.exists())"/>
+          <expression value="(%encounterStartDate + 1 day * %normalReportingDuration &gt;= now()) and (%conditions.exists() or %encounters.exists() or %immunizations.exists() or %labOrders.exists() or %labTests.exists() or %labResults.exists() or %medicationAdministrations.exists() or %medicationOrders.exists() or %medicationDispenses.exists())"/>
         </expression>
       </condition>
       <input id="conditions">
@@ -352,16 +435,9 @@
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="((%lasteicr.last().entry[2].resource as Bundle).entry.first().resource as Composition).date &lt; now() - 72 hours"/>
+          <expression value="%lastReportSubmissionDate &lt; now() + 72 hours"/>
         </expression>
       </condition>
-      <input id="lasteicr">
-        <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
-          <valueString value="eicrreport"/>
-        </extension>
-        <type value="Bundle"/>
-        <profile value="http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"/>
-      </input>
       <relatedAction>
         <actionId value="create-eicr"/>
         <relationship value="before-start"/>
@@ -385,7 +461,7 @@
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="%inprogressencounter.where(status = 'in-progress' and period.start + 1 day * %normalReportingDuration &gt;= now() or (status = 'finished' and period.end + 72 hours &gt;= now())).exists()"/>
+          <expression value="%inprogressencounter.where(status = 'in-progress' and %encounterStartDate + 1 day * %normalReportingDuration &gt;= now() or (status = 'finished' and %encounterEndDate + 72 hours &gt;= now())).exists()"/>
         </expression>
       </condition>
       <input id="inprogressencounter">
@@ -404,6 +480,34 @@
           <code value="h"/>
         </offsetDuration>
       </relatedAction>
+    </action>
+    <action id="terminate-encounter">
+      <code>
+        <coding>
+          <system value="http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions"/>
+          <code value="terminate-reporting-workflow"/>
+        </coding>
+      </code>
+      <condition>
+        <kind value="applicability"/>
+        <expression>
+          <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternative-expression-extension">
+            <valueExpression>
+              <language value="text/cql-identifier"/>
+              <expression value="Is Encounter Late"/>
+              <reference value="http://ersd.aimsplatform.org/fhir/Library/RuleFilters|2.1.0"/>
+            </valueExpression>
+          </extension>
+          <language value="text/fhirpath"/>
+          <expression value="%termencounter.where((status = 'in-progress' and %encounterStartDate + 1 day * %normalReportingDuration &lt; now()) or (status = 'finished' and %encounterEndDate + 72 hours &lt; now())).select(true)"/>
+        </expression>
+      </condition>
+      <input id="termencounter">
+        <extension url="http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension">
+          <valueString value="encounter"/>
+        </extension>
+        <type value="Encounter"/>
+      </input>
     </action>
     <action id="is-encounter-completed">
       <code>
