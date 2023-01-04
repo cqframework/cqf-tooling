@@ -12,6 +12,7 @@ public class StructureDefinitionBindingObject {
     String bindingValueSetName;
     String mustSupport;
     String codeSystemsURLs;
+    String cardinality;
 
     public String getSdName() {return sdName;}
     public void setSdName(String sdName) {this.sdName = sdName;}
@@ -33,4 +34,11 @@ public class StructureDefinitionBindingObject {
     public void setMustSupport(String mustSupport) {this.mustSupport = mustSupport;}
     public String getCodeSystemsURLs() {return codeSystemsURLs;}
     public void setCodeSystemsURLs(String codeSystemsURLs) {this.codeSystemsURLs = codeSystemsURLs;}
+
+    public String getCardinality(){
+        return cardinality;
+    }
+    public void setCardinality(String cardinality){
+        this.cardinality = cardinality;
+    }
 }

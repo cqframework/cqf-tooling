@@ -24,6 +24,7 @@ public class ProfilesToSpreadsheet extends Operation {
     private String resourcePaths;
     private String modelName;
     private String modelVersion;
+    private boolean snapshotOnly = true;
     private CanonicalResourceAtlas canonicalResourceAtlas;
     private CanonicalResourceAtlas canonicalResourceDependenciesAtlas;
 
@@ -64,6 +65,10 @@ public class ProfilesToSpreadsheet extends Operation {
                 case "modelVersion":
                 case "mv":
                     modelVersion = value;
+                    break;
+                case "snapshotOnly":
+                case "sp":
+                    snapshotOnly = value.equalsIgnoreCase("true");
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown flag: " + flag);
@@ -132,6 +137,8 @@ public class ProfilesToSpreadsheet extends Operation {
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue("Must Support Y/N");
         currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue("Cardinality");
+        currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue("Review Notes");
 
     }
@@ -177,6 +184,9 @@ public class ProfilesToSpreadsheet extends Operation {
         currentCell.setCellValue(bo.getMustSupport());
 
         currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue(bo.getCardinality());
+
+        currentCell = currentRow.createCell(cellCount++);
         if ((null != bo.getBindingStrength() && bo.getBindingStrength().equalsIgnoreCase("required")) ||
                 null != bo.getMustSupport() && bo.getMustSupport().equalsIgnoreCase("Y")) {
             currentCell.setCellValue("Needed");
@@ -189,7 +199,7 @@ public class ProfilesToSpreadsheet extends Operation {
 
         if (null != canonicalResourceAtlas && null != canonicalResourceDependenciesAtlas) {
             StructureDefinitionElementBindingVisitor sdbv = new StructureDefinitionElementBindingVisitor(canonicalResourceAtlas, canonicalResourceDependenciesAtlas);
-            Map<String, StructureDefinitionBindingObject> bindingObjects = sdbv.visitCanonicalAtlasStructureDefinitions(true);
+            Map<String, StructureDefinitionBindingObject> bindingObjects = sdbv.visitCanonicalAtlasStructureDefinitions(snapshotOnly);
             List<StructureDefinitionBindingObject> bindingObjectsList = bindingObjects
                     .values()
                     .stream()

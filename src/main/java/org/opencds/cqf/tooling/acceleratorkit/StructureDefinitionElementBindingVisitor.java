@@ -71,6 +71,10 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
                 sdbo.setSdURL(sdURL);
                 sdbo.setSdVersion(sdVersion);
                 sdbo.setBindingStrength(ed.getBinding().getStrength().toString().toLowerCase());
+                if(ed.hasMin() && ed.hasMin()){
+                    String edCardinality = ed.getMin() + "..." + ed.getMax();
+                    sdbo.setCardinality(edCardinality);
+                }
                 String bindingValueSet = ed.getBinding().getValueSet();
                 String pipeVersion = "";
                 if (bindingValueSet.contains("|")) {
