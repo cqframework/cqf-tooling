@@ -32,6 +32,8 @@ public class ProfilesToSpreadsheet extends Operation {
     private XSSFCellStyle linkStyle;
     private XSSFFont linkFont;
 
+    public static final String separator = System.getProperty("file.separator");
+
     // example call: -ProfilesToSpreadsheet -ip=/Users/bryantaustin/Projects/FHIR-Spec -op=output -rp="4.0.1;US-Core/3.1.0;QI-Core/4.1.0" -sp=true -mn=QICore -mv=4.1.0
     @Override
     public void execute(String[] args) {
@@ -106,7 +108,7 @@ public class ProfilesToSpreadsheet extends Operation {
     }
 
     private void writeSpreadSheet(XSSFWorkbook workBook) {
-        File outputFile = new File(getOutputPath() + File.separator + modelName + modelVersion + ".xlsx");
+        File outputFile = new File(getOutputPath() + separator + modelName + modelVersion + ".xlsx");
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
             workBook.write(fileOutputStream);

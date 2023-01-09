@@ -5,7 +5,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 
 import java.util.List;
 
-public class StructureDefinitionBaseVisitor {
+public abstract class StructureDefinitionBaseVisitor {
 
     public void visitContact(StructureDefinition sd) {
     }
