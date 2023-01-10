@@ -1,6 +1,6 @@
 {
   "resourceType": "PlanDefinition",
-  "id": "plandefinition-us-ecr-specification",
+  "id": "us-ecr-specification",
   "meta": {
     "profile": [
       "http://hl7.org/fhir/us/ecr/StructureDefinition/ersd-plandefinition"
@@ -17,6 +17,33 @@
         "name": "normalReportingDuration",
         "language": "text/fhirpath",
         "expression": "14"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
+      "valueExpression":
+      {
+        "name": "encounterStartDate",
+        "language": "text/fhirpath",
+        "expression": "{{context.encounterStartDate}}"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
+      "valueExpression":
+      {
+        "name": "encounterEndDate",
+        "language": "text/fhirpath",
+        "expression": "{{context.encounterEndDate}}"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
+      "valueExpression":
+      {
+        "name": "lastReportSubmissionDate",
+        "language": "text/fhirpath",
+        "expression": "{{context.lastReportSubmissionDate}}"
       }
     }
   ],
@@ -132,7 +159,7 @@
       ],
       "relatedAction": [
         {
-          "actionId": "check-suspected-disorder",
+          "actionId": "check-for-immediate-reporting",
           "relationship": "before-start",
           "offsetDuration": {
             "value": 1,
@@ -143,7 +170,7 @@
       ]
     },
     {
-      "id": "check-suspected-disorder",
+      "id": "check-for-immediate-reporting",
       "description": "This action represents the start of the check suspected disorder reporting workflow in response to the encounter-start event.",
       "textEquivalent": "Check suspected disorders for immediate reportability and setup jobs for future reportability checks.",
       "code": [
@@ -158,9 +185,9 @@
       ],
       "action": [
         {
-          "id": "is-encounter-suspected-disorder",
+          "id": "is-encounter-immediately-reportable",
           "description": "This action represents the check for suspected disorder reportability to create the patients eICR.",
-          "textEquivalent": "Check Trigger Codes based on Suspected Reportable Value set.",
+          "textEquivalent": "Check Trigger Codes based on Suspected Reportable and Lab Order Test Names Value set.",
           "code": [
             {
               "coding": [
@@ -186,13 +213,13 @@
                   }
                 ],
                 "language": "text/fhirpath",
-                "expression": "%modifiedConditions.exists() or %modifiedLabResults.exists() or %modifiedMedicationOrders.exists()"
+                "expression": "%suspectedDisorderConditions.exists() or %suspectedDisorderLabOrders.exists()"
               }
             }
           ],
           "input": [
             {
-              "id": "modifiedConditions",
+              "id": "suspectedDisorderConditions",
               "extension": [
                 {
                   "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
@@ -208,34 +235,18 @@
               ]
             },
             {
-              "id": "modifiedLabResults",
+              "id": "suspectedDisorderLabOrders",
               "extension": [
                 {
                   "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
-                  "valueString": "Observation?patient=Patient/{{context.patientId}}"
+                  "valueString": "ServiceRequest?patient=Patient/{{context.patientId}}"
                 }
               ],
-              "type": "Observation",
+              "type": "ServiceRequest",
               "codeFilter": [
                 {
-                  "path": "value",
-                  "valueSet": "http://ersd.aimsplatform.org/fhir/ValueSet/sdltc"
-                }
-              ]
-            },
-            {
-              "id": "modifiedMedicationOrders",
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
-                  "valueString": "MedicationRequest?patient=Patient/{{context.patientId}}"
-                }
-              ],
-              "type": "MedicationRequest",
-              "codeFilter": [
-                {
-                  "path": "medication",
-                  "valueSet": "http://ersd.aimsplatform.org/fhir/ValueSet/sdmtc"
+                  "path": "code",
+                  "valueSet": "http://ersd.aimsplatform.org/fhir/ValueSet/lotc"
                 }
               ]
             }
@@ -274,8 +285,22 @@
                   }
                 ],
                 "language": "text/fhirpath",
-                "expression": "%encounter.where((status = 'in-progress' and period.start + 1 day * %normalReportingDuration >= now()) or (status = 'finished' and period.end + 72 hours >= now())).select(true)"
+                "expression": "%inprogressencounter.where((status = 'in-progress' and %encounterStartDate + 1 day * %normalReportingDuration >= now()) or (status = 'finished' and %encounterEndDate + 72 hours >= now())).select(true)"
               }
+            }
+          ],
+          "input":
+          [
+            {
+              "id": "inprogressencounter",
+              "extension":
+              [
+                {
+                  "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+                  "valueString": "encounter"
+                }
+              ],
+              "type": "Encounter"
             }
           ],
           "relatedAction": [
@@ -288,6 +313,94 @@
                 "system": "http://unitsofmeasure.org",
                 "code": "h"
               }
+            }
+          ]
+        },
+        {
+          "id": "terminate-late-encounter",
+          "code": [
+            {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions",
+                  "code": "terminate-reporting-workflow"
+                }
+              ]
+            }
+          ],
+          "condition": [
+            {
+              "kind": "applicability",
+              "expression": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternative-expression-extension",
+                    "valueExpression": {
+                      "language": "text/cql-identifier",
+                      "expression": "Is Encounter Late",
+                      "reference": "http://ersd.aimsplatform.org/fhir/Library/RuleFilters|2.1.0"
+                    }
+                  }
+                ],
+                "language": "text/fhirpath",
+                "expression": "%terminatedencounter.where((status = 'in-progress' and %encounterStartDate + 1 day * %normalReportingDuration < now()) or (status = 'finished' and %encounterEndDate + 72 hours < now())).select(true)"
+              }
+            }
+          ],
+          "input": [
+            {
+              "id": "terminatedencounter",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+                  "valueString": "encounter"
+                }
+              ],
+              "type": "Encounter"
+            }
+          ]
+        },
+        {
+          "id": "is-late-encounter-completed",
+          "code": [
+            {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions",
+                  "code": "complete-reporting"
+                }
+              ]
+            }
+          ],
+          "condition": [
+            {
+              "kind": "applicability",
+              "expression": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternative-expression-extension",
+                    "valueExpression": {
+                      "language": "text/cql-identifier",
+                      "expression": "Is Encounter Complete",
+                      "reference": "http://ersd.aimsplatform.org/fhir/Library/RuleFilters|2.1.0"
+                    }
+                  }
+                ],
+                "language": "text/fhirpath",
+                "expression": "%lateCompletedEncounter.exists(status = 'finished')"
+              }
+            }
+          ],
+          "input": [
+            {
+              "id": "lateCompletedEncounter",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+                  "valueString": "encounter"
+                }
+              ],
+              "type": "Encounter"
             }
           ]
         }
@@ -337,7 +450,7 @@
                   }
                 ],
                 "language": "text/fhirpath",
-                "expression": "%encounter.where(period.start + 1 day * %normalReportingDuration >= now()).select(true) and (%conditions.exists() or %encounters.exists() or %immunizations.exists() or %procedures.exists() or %procedureOrders.exists() or %labOrders.exists() or %labTests.exists() or %labResults.exists() or %medicationAdministrations.exists() or %medicationOrders.exists() or %medicationDispenses.exists())"
+                "expression": "(%encounterStartDate + 1 day * %normalReportingDuration >= now()) and (%conditions.exists() or %encounters.exists() or %immunizations.exists() or %labOrders.exists() or %labTests.exists() or %labResults.exists() or %medicationAdministrations.exists() or %medicationOrders.exists() or %medicationDispenses.exists())"
               }
             }
           ],
@@ -435,38 +548,6 @@
                 {
                   "path": "code",
                   "valueSet": "http://ersd.aimsplatform.org/fhir/ValueSet/lotc"
-                }
-              ]
-            },
-            {
-              "id": "procedureOrders",
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
-                  "valueString": "ServiceRequest?patient=Patient/{{context.patientId}}"
-                }
-              ],
-              "type": "ServiceRequest",
-              "codeFilter": [
-                {
-                  "path": "code",
-                  "valueSet": "http://ersd.aimsplatform.org/fhir/ValueSet/pctc"
-                }
-              ]
-            },
-            {
-              "id": "procedures",
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
-                  "valueString": "Procedure?patient=Patient/{{context.patientId}}"
-                }
-              ],
-              "type": "Procedure",
-              "codeFilter": [
-                {
-                  "path": "code",
-                  "valueSet": "http://ersd.aimsplatform.org/fhir/ValueSet/pctc"
                 }
               ]
             },
@@ -585,23 +666,8 @@
                   }
                 ],
                 "language": "text/fhirpath",
-                "expression": "((%lasteicr.last().entry[2].resource as Bundle).entry.first().resource as Composition).date < now() - 72 hours"
+                "expression": "%lastReportSubmissionDate < now() - 72 hours"
               }
-            }
-          ],
-          "input": [
-            {
-              "id": "lasteicr",
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
-                  "valueString": "eicrreport"
-                }
-              ],
-              "type": "Bundle",
-              "profile": [
-                "http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"
-              ]
             }
           ],
           "relatedAction": [
@@ -638,7 +704,7 @@
                   }
                 ],
                 "language": "text/fhirpath",
-                "expression": "%inprogressencounter.where(status = 'in-progress' and period.start + 1 day * %normalReportingDuration >= now() or (status = 'finished' and period.end + 72 hours >= now())).exists()"
+                "expression": "%inprogressencounter.where(status = 'in-progress' and %encounterStartDate + 1 day * %normalReportingDuration >= now() or (status = 'finished' and %encounterEndDate + 72 hours >= now())).exists()"
               }
             }
           ],
@@ -664,6 +730,50 @@
                 "system": "http://unitsofmeasure.org",
                 "code": "h"
               }
+            }
+          ]
+        },
+        {
+          "id": "terminate-encounter",
+          "code": [
+            {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions",
+                  "code": "terminate-reporting-workflow"
+                }
+              ]
+            }
+          ],
+          "condition": [
+            {
+              "kind": "applicability",
+              "expression": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternative-expression-extension",
+                    "valueExpression": {
+                      "language": "text/cql-identifier",
+                      "expression": "Is Encounter Late",
+                      "reference": "http://ersd.aimsplatform.org/fhir/Library/RuleFilters|2.1.0"
+                    }
+                  }
+                ],
+                "language": "text/fhirpath",
+                "expression": "%termencounter.where((status = 'in-progress' and %encounterStartDate + 1 day * %normalReportingDuration < now()) or (status = 'finished' and %encounterEndDate + 72 hours < now())).select(true)"
+              }
+            }
+          ],
+          "input": [
+            {
+              "id": "termencounter",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+                  "valueString": "encounter"
+                }
+              ],
+              "type": "Encounter"
             }
           ]
         },
@@ -791,19 +901,6 @@
           "type": "Immunization",
           "profile": [
             "http://hl7.org/fhir/us/core/StructureDefinition/us-core-immunization"
-          ]
-        },
-        {
-          "id": "procdata",
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
-              "valueString": "procedures"
-            }
-          ],
-          "type": "Procedure",
-          "profile": [
-            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
           ]
         },
         {

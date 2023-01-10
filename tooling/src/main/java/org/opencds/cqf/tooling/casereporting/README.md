@@ -14,17 +14,20 @@ this expected structure will result in a runtime error. Also, if the input file 
 elements will need to be manually removed before processing. Currently, only JSON is supported for the input file.
 
 ### Invocation and Arguments
-command: mvn exec: java -Dexec.args="-TransformErsd (-pathtobundle | -ptb) (-outputpath | -op) [-pathtoplandefinition | -ptpd] [-encoding | -e]"
+command: mvn exec: java -Dexec.args="-TransformErsd (-pathtobundle | -ptb) (-outputpath | -op) [-outputfilename | -ofn] [-pathtoplandefinition | -ptpd] [-prettyprintoutput | -ppo ] [-encoding | -e]"
 
 The following parameters are supported:
-- The operation expects -ptb is a path to a file containing the source eRSD v1 bundle
-- The -op is the output directory for output v2 bundle
+- **-pathtobundle (-ptb)** - The operation expects -ptb is a path to a file containing the source eRSD v1 bundle
+- **-outputpath (-op)** - The -op is the output directory for output v2 bundle
   - The default output path is:
         <location of the CQF Tooling jar being invoked> + "src/main/resources/org/opencds/cqf/tooling/casereporting/output"
-- The -ptpd is the path to a file that contains the eRSD-v2-compliant PlanDefinition that should be used to replace the 
+- **-outputfilename (-ofn)** - The -ofn is optional and can be used to specify a desired file name for the output bundle file(s). If this argument is not specified, the ID from the RCTC Library in the input bundle will be used as the file name.
+- **-pathtoplandefinition (-ptpd)** - The -ptpd argument is optional. It is used to indicate the path to a file that contains the eRSD-v2-compliant PlanDefinition that should be used to replace the 
   plan definition in the input eRSD v1 bundle. If the argument is not specified, the PlanDefinition in the input bundle
   will be preserved.
-- The -e is the desired output encoding(s) for the output bundle. The supported output encodings are: { "json", "xml" }. 
+- **-canonicalbase (-cb)** - The -cb argument is optional. It is used to specify the canonical base URL that should be used for the RCTC ValueSet Library and the grouping ValueSets. 
+- **-prettyprintoutput (-ppo)** - The -ppo argument is optional. It is used to indicate whether or not the output file should be pretty printed (i.e., formatted). The default is to be unformatted.
+- **-encoding (-e)** - The -e argument is optional. It is for specifying the desired output encoding(s) for the output bundle. The supported output encodings are: { "json", "xml" }. 
   - The "encoding" argument can be specified multiple times and the transformer will output a bundle for each encoding.
   So if you want both json and xml bundles, you would specify both -e=json and -e=xml. If no encoding argument
   is supplied, the transformer will assume "json" as the default and output a single JSON-encoded bundle.

@@ -26,6 +26,7 @@ import java.util.List;
 public class ErsdTransformer extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(ErsdTransformer.class);
     private static final String PUBLISHER = "Association of Public Health Laboratories (APHL)";
+    private static final String RCTCLIBRARYURL = "http://hl7.org/fhir/us/ecr/Library/rctc";
     private FhirContext ctx;
     private FhirValidator validator;
     private IValidatorModule module = new UsPublicHealthValidatorModule();
@@ -33,7 +34,7 @@ public class ErsdTransformer extends Operation {
     private final String usPhSpecificationLibraryProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-specification-library";
     private final String usPhTriggeringValueSetLibraryProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset-library";
     private final String usPhTriggeringValueSetProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset";
-
+    private PlanDefinition v2PlanDefinition;
     private String version;
 
     public ErsdTransformer() {
@@ -101,7 +102,8 @@ public class ErsdTransformer extends Operation {
 
     public void transform(TransformErsdParameters params) {
         Bundle sourceBundle = getAndValidateBundle(params.pathToBundle);
-        PlanDefinition v2PlanDefinition = getV2PlanDefinition(params.pathToV2PlanDefinition);
+        v2PlanDefinition = getV2PlanDefinition(params.pathToV2PlanDefinition);
+
         if (v2PlanDefinition != null) {
             if (sourceBundle.getEntry().stream().filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition")).count() > 1) {
                 throw new IllegalArgumentException("The input Bundle includes more than one PlanDefinition and you have " +
@@ -164,23 +166,24 @@ public class ErsdTransformer extends Operation {
             return null;
         }
 
-        // The structure of the eRSD bundle is a bundle with a single entry - the bundle that contains the artifacts.
-        // We need to ensure that the bundle is structured as expected and then extract that inner bundle to work with.
-        // Rather than requiring the user to trim off that outer bundle as a manual step, we'll just do that here.
-        Bundle sourceArtifactBundle;
-        if (sourceBundle.getEntry().size() == 1
-                && sourceBundle.getEntry().get(0).hasResource()
-                && sourceBundle.getEntry().get(0).getResource().fhirType().equals("Bundle")) {
-            sourceArtifactBundle = (Bundle)sourceBundle.getEntry().get(0).getResource();
-        } else {
-            throw new IllegalArgumentException("The bundle provided is not structured as expected. Expectation is a Bundle with a single entry - another bundle that contains the artifacts.");
-        }
+//        // The structure of the eRSD bundle is a bundle with a single entry - the bundle that contains the artifacts.
+//        // We need to ensure that the bundle is structured as expected and then extract that inner bundle to work with.
+//        // Rather than requiring the user to trim off that outer bundle as a manual step, we'll just do that here.
+//        Bundle sourceArtifactBundle;
+//        if (sourceBundle.getEntry().size() == 1
+//                && sourceBundle.getEntry().get(0).hasResource()
+//                && sourceBundle.getEntry().get(0).getResource().fhirType().equals("Bundle")
+//            ) {
+//            sourceArtifactBundle = (Bundle)sourceBundle.getEntry().get(0).getResource();
+//        } else {
+//            throw new IllegalArgumentException("The bundle provided is not structured as expected. Expectation is a Bundle with a single entry - another bundle that contains the artifacts.");
+//        }
 
         Library rctc =
-            (Library)sourceArtifactBundle.getEntry().stream()
+            (Library)sourceBundle.getEntry().stream()
                 .filter(x -> x.hasResource()
                     && x.getResource().fhirType().equals("Library")
-                    && ((Library)x.getResource()).getUrl().equals("http://hl7.org/fhir/us/ecr/Library/rctc")).findFirst().get().getResource();
+                    && ((Library)x.getResource()).getUrl().equals(RCTCLIBRARYURL)).findFirst().get().getResource();
 
         if (rctc.hasVersion()) {
             this.version = rctc.getVersion();
@@ -188,7 +191,7 @@ public class ErsdTransformer extends Operation {
             throw new IllegalArgumentException("The 'rctc' Library included in the input bundle does not include a version and should");
         }
 
-        return sourceArtifactBundle;
+        return sourceBundle;
     }
 
     private Library createSpecificationLibrary() {
@@ -352,7 +355,17 @@ public class ErsdTransformer extends Operation {
             )
         );
 
+        // Update Grouping ValueSet references (in useContexts) to PlanDefinition
         List<UsageContext> useContexts = res.getUseContext();
+
+        if (v2PlanDefinition != null) {
+            useContexts.stream().forEach(uc -> {
+                if (uc.hasValueReference() && uc.getValueReference().hasReference() && uc.getValueReference().getReference().contains("skeleton")) {
+                    uc.setValue(new Reference(v2PlanDefinition.getId()));
+                }
+            });
+        }
+
         boolean hasPriorityUseContext = false;
         for (UsageContext uc : useContexts) {
             hasPriorityUseContext = uc.getCode().getCode().equalsIgnoreCase("priority");
