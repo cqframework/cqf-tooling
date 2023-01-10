@@ -435,7 +435,7 @@
             </valueExpression>
           </extension>
           <language value="text/fhirpath"/>
-          <expression value="%lastReportSubmissionDate &lt; now() + 72 hours"/>
+          <expression value="%lastReportSubmissionDate &lt; now() - 72 hours"/>
         </expression>
       </condition>
       <relatedAction>

@@ -666,7 +666,7 @@
                   }
                 ],
                 "language": "text/fhirpath",
-                "expression": "%lastReportSubmissionDate < now() + 72 hours"
+                "expression": "%lastReportSubmissionDate < now() - 72 hours"
               }
             }
           ],
