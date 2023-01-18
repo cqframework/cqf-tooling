@@ -1,7 +1,7 @@
 package org.opencds.cqf.tooling.operation;
 
 import org.apache.poi.common.usermodel.HyperlinkType;
-import org.apache.poi.hssf.util.HSSFColor.HSSFColorPredefined;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.*;
 import org.apache.poi.ss.usermodel.CreationHelper;
@@ -13,7 +13,6 @@ import org.opencds.cqf.tooling.terminology.SpreadsheetCreatorHelper;
 import org.opencds.cqf.tooling.utilities.ModelCanonicalAtlasCreator;
 
 
-import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntBinaryOperator;
@@ -30,7 +29,6 @@ public class ProfilesToSpreadsheet extends Operation {
 
     private CreationHelper helper;
     private XSSFCellStyle linkStyle;
-    private XSSFFont linkFont;
 
     public static final String separator = System.getProperty("file.separator");
 
@@ -91,61 +89,35 @@ public class ProfilesToSpreadsheet extends Operation {
         XSSFWorkbook workBook = SpreadsheetCreatorHelper.createWorkbook();
         XSSFSheet firstSheet = workBook.createSheet(WorkbookUtil.createSafeSheetName("Profile Attribute List"));
         helper = workBook.getCreationHelper();
-        linkStyle = workBook.createCellStyle();
-        linkFont = workBook.createFont();
-        linkFont.setUnderline(XSSFFont.U_SINGLE);
-        linkFont.setColor(HSSFColorPredefined.BLUE.getIndex());
-        linkStyle.setFont(linkFont);
+        linkStyle = SpreadsheetCreatorHelper.createLinkStyle(workBook, XSSFFont.U_SINGLE, HSSFColor.HSSFColorPredefined.BLUE.getIndex());
 
         AtomicInteger rowCount = new AtomicInteger(0);
         IntBinaryOperator ibo = (x, y) -> (x + y);
         XSSFRow currentRow = firstSheet.createRow(rowCount.getAndAccumulate(1, ibo));
-        createHeaderRow(currentRow);
+        SpreadsheetCreatorHelper.createHeaderRow(createHeaderNameList(), currentRow);
         bindingObjects.forEach((bindingObject) -> {
-            addRowDataToCurrentSheet(firstSheet, rowCount.getAndAccumulate(1, ibo), bindingObject);
+            addBindingObjectRowDataToCurrentSheet(firstSheet, rowCount.getAndAccumulate(1, ibo), bindingObject);
         });
-        writeSpreadSheet(workBook);
+        SpreadsheetCreatorHelper.writeSpreadSheet(workBook, getOutputPath() + separator + modelName + modelVersion + ".xlsx");
     }
 
-    private void writeSpreadSheet(XSSFWorkbook workBook) {
-        File outputFile = new File(getOutputPath() + separator + modelName + modelVersion + ".xlsx");
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
-            workBook.write(fileOutputStream);
-            fileOutputStream.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private List<String> createHeaderNameList() {
+        List<String> headerNameList = new ArrayList<String>() {{
+            add("QI Core Profile");
+            add("Id");
+            add("Conformance");
+            add("ValueSet");
+            add("ValueSetURL");
+            add("Version");
+            add("Code System URLs");
+            add("Must Support Y/N");
+            add("Cardinality");
+            add("Review Notes");
+        }};
+        return headerNameList;
     }
 
-    private void createHeaderRow(XSSFRow currentRow) {
-        int cellCount = 0;
-        XSSFCell currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue("QI Core Profile");
-        currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue("Id");
-        currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue("Conformance");
-        currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue("ValueSet");
-        currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue("ValueSetURL");
-        currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue("Version");
-        currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue("Code System URLs");
-        currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue("Must Support Y/N");
-        currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue("Cardinality");
-        currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue("Review Notes");
-
-    }
-
-    private void addRowDataToCurrentSheet(XSSFSheet currentSheet, int rowCount, StructureDefinitionBindingObject bo) {
+    private void addBindingObjectRowDataToCurrentSheet(XSSFSheet currentSheet, int rowCount, StructureDefinitionBindingObject bo) {
         XSSFRow currentRow = currentSheet.createRow(rowCount++);
         XSSFHyperlink link = (XSSFHyperlink)helper.createHyperlink(HyperlinkType.URL);
         int cellCount = 0;
