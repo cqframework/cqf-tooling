@@ -18,10 +18,12 @@ public class SpreadsheetCreatorHelper {
         return workBook;
     }
 
-    public static void createHeaderRow(List<String> headerNames, XSSFRow currentRow) {
+    public static void createHeaderRow(XSSFWorkbook workBook, List<String> headerNames, XSSFRow currentRow) {
         AtomicInteger cellCount = new AtomicInteger();
+        XSSFCellStyle boldStyle = createBoldStyle(workBook, XSSFFont.U_SINGLE);
         headerNames.forEach(headerName -> {
             XSSFCell currentCell = currentRow.createCell(cellCount.getAndIncrement());
+            currentCell.setCellStyle(boldStyle);
             currentCell.setCellValue(headerName);
         });
     }
@@ -47,5 +49,14 @@ public class SpreadsheetCreatorHelper {
         linkStyle.setFont(linkFont);
 
         return linkStyle;
+    }
+
+    public static XSSFCellStyle createBoldStyle(XSSFWorkbook workBook, byte xssFontEnum){
+        XSSFCellStyle style = workBook.createCellStyle();
+        XSSFFont font = workBook.createFont();
+        font.setFontHeightInPoints((short) 15);
+        font.setBold(true);
+        style.setFont(font);
+        return style;
     }
 }

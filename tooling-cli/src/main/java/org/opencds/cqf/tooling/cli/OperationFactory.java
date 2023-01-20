@@ -21,6 +21,7 @@ import org.opencds.cqf.tooling.operation.IgBundler;
 import org.opencds.cqf.tooling.operation.PostBundlesInDirOperation;
 import org.opencds.cqf.tooling.operation.PostmanCollectionOperation;
 import org.opencds.cqf.tooling.operation.ProfilesToSpreadsheet;
+import org.opencds.cqf.tooling.operation.QICoreElementsToSpreadsheet;
 import org.opencds.cqf.tooling.operation.RefreshIGOperation;
 import org.opencds.cqf.tooling.operation.RefreshLibraryOperation;
 import org.opencds.cqf.tooling.operation.ScaffoldOperation;
@@ -130,6 +131,8 @@ class OperationFactory {
                 return new DataDateRollerOperation();
             case "ProfilesToSpreadsheet":
                 return new ProfilesToSpreadsheet();
+            case "QICoreElementsToSpreadsheet":
+                return new QICoreElementsToSpreadsheet();
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operationName);
         }

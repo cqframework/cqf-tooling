@@ -2,26 +2,32 @@ package org.opencds.cqf.tooling.operation;
 
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.*;
-import org.opencds.cqf.tooling.acceleratorkit.StructureDefinitionBindingObject;
-import org.opencds.cqf.tooling.acceleratorkit.StructureDefinitionElementBindingVisitor;
+import org.opencds.cqf.tooling.acceleratorkit.StructureDefinitionElementObject;
+import org.opencds.cqf.tooling.acceleratorkit.StructureDefinitionElementVisitor;
 import org.opencds.cqf.tooling.terminology.SpreadsheetCreatorHelper;
 import org.opencds.cqf.tooling.utilities.ModelCanonicalAtlasCreator;
 
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntBinaryOperator;
 import java.util.stream.Collectors;
 
-public class ProfilesToSpreadsheet extends StructureDefinitionToSpreadsheetBase {
+public class QICoreElementsToSpreadsheet extends StructureDefinitionToSpreadsheetBase {
+
+    private int ConstraintColumn = 7;
+    private int ConstraintColumnWidth = 85 * 256;
 
     // example call: -ProfilesToSpreadsheet -ip=/Users/bryantaustin/Projects/FHIR-Spec -op=output -rp="4.0.1;US-Core/3.1.0;QI-Core/4.1.0" -sp=true -mn=QICore -mv=4.1.0
     @Override
     public void execute(String[] args) {
         for (String arg : args) {
-            if (arg.equals("-ProfilesToSpreadsheet"))
+            if (arg.equals("-QICoreElementsToSpreadsheet"))
                 continue;
             String[] flagAndValue = arg.split("=");
             if (flagAndValue.length < 2) {
@@ -63,14 +69,14 @@ public class ProfilesToSpreadsheet extends StructureDefinitionToSpreadsheetBase 
             return;
         }
 
-        List<StructureDefinitionBindingObject> bindingObjects;
-        bindingObjects = getBindingObjects();
-        if (null != bindingObjects && !bindingObjects.isEmpty()) {
-            createOutput(bindingObjects);
+        List<StructureDefinitionElementObject> elementObjects;
+        elementObjects = getElementObjects();
+        if (null != elementObjects && !elementObjects.isEmpty()) {
+            createOutput(elementObjects);
         }
     }
 
-    private void createOutput(List<StructureDefinitionBindingObject> bindingObjects) {
+    private void createOutput(List<StructureDefinitionElementObject> elementObjects) {
         XSSFWorkbook workBook = SpreadsheetCreatorHelper.createWorkbook();
         XSSFSheet firstSheet = workBook.createSheet(WorkbookUtil.createSafeSheetName("Profile Attribute List"));
         helper = workBook.getCreationHelper();
@@ -80,9 +86,11 @@ public class ProfilesToSpreadsheet extends StructureDefinitionToSpreadsheetBase 
         IntBinaryOperator ibo = (x, y) -> (x + y);
         XSSFRow currentRow = firstSheet.createRow(rowCount.getAndAccumulate(1, ibo));
         SpreadsheetCreatorHelper.createHeaderRow(workBook, createHeaderNameList(), currentRow);
-        bindingObjects.forEach((bindingObject) -> {
-            addBindingObjectRowDataToCurrentSheet(firstSheet, rowCount.getAndAccumulate(1, ibo), bindingObject);
+        elementObjects.forEach((elementObject) -> {
+            addElementObjectRowDataToCurrentSheet(workBook, firstSheet, rowCount.getAndAccumulate(1, ibo), elementObject);
         });
+        firstSheet.setColumnWidth(ConstraintColumn, ConstraintColumnWidth);
+//        firstSheet.autoSizeColumn(ConstraintColumn);
         SpreadsheetCreatorHelper.writeSpreadSheet(workBook, getOutputPath() + separator + modelName + modelVersion + ".xlsx");
     }
 
@@ -90,84 +98,70 @@ public class ProfilesToSpreadsheet extends StructureDefinitionToSpreadsheetBase 
         List<String> headerNameList = new ArrayList<String>() {{
             add("QI Core Profile");
             add("Id");
-            add("Conformance");
-            add("ValueSet");
-            add("ValueSetURL");
-            add("Version");
-            add("Code System URLs");
             add("Must Support Y/N");
-            add("Cardinality");
             add("Review Notes");
+            add("Cardinality");
+            add("Type");
+            add("Description");
+            add("Constraints");
         }};
         return headerNameList;
     }
 
-    private void addBindingObjectRowDataToCurrentSheet(XSSFSheet currentSheet, int rowCount, StructureDefinitionBindingObject bo) {
+    private void addElementObjectRowDataToCurrentSheet(XSSFWorkbook workBook, XSSFSheet currentSheet, int rowCount, StructureDefinitionElementObject eo) {
         XSSFRow currentRow = currentSheet.createRow(rowCount++);
-        XSSFHyperlink link = (XSSFHyperlink)helper.createHyperlink(HyperlinkType.URL);
+        XSSFHyperlink link = (XSSFHyperlink) helper.createHyperlink(HyperlinkType.URL);
         int cellCount = 0;
 
         XSSFCell currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue(bo.getSdName());
-        link.setAddress(bo.getSdURL());
+        currentCell.setCellValue(eo.getSdName());
+        link.setAddress(eo.getSdURL());
         currentCell.setHyperlink(link);
         currentCell.setCellStyle(linkStyle);
 
         currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue(bo.getElementId());
+        currentCell.setCellValue(eo.getElementId());
 
         currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue(bo.getBindingStrength());
-        link = (XSSFHyperlink)helper.createHyperlink(HyperlinkType.URL);
-        link.setAddress("http://hl7.org/fhir/R4/terminologies.html#" + bo.getBindingStrength());
-        currentCell.setHyperlink(link);
-        currentCell.setCellStyle(linkStyle);
+        currentCell.setCellValue(eo.getMustSupport());
 
         currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue(bo.getBindingValueSetName());
-
-        currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue(bo.getBindingValueSetURL());
-        link = (XSSFHyperlink)helper.createHyperlink(HyperlinkType.URL);
-        link.setAddress(bo.getBindingValueSetURL());
-        currentCell.setHyperlink(link);
-        currentCell.setCellStyle(linkStyle);
-
-        currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue(bo.getBindingValueSetVersion());
-
-        currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue(bo.getCodeSystemsURLs());
-
-        currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue(bo.getMustSupport());
-
-        currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue(bo.getCardinality());
-
-        currentCell = currentRow.createCell(cellCount++);
-        if ((null != bo.getBindingStrength() && bo.getBindingStrength().equalsIgnoreCase("required")) ||
-                null != bo.getMustSupport() && bo.getMustSupport().equalsIgnoreCase("Y")) {
+        if (null != eo.getMustSupport() && eo.getMustSupport().equalsIgnoreCase("Y")) {
             currentCell.setCellValue("Needed");
         }
+
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue(eo.getCardinality());
+
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue(eo.getElementType());
+
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue(eo.getElementDescription());
+
+        currentCell = currentRow.createCell(cellCount++);
+        currentCell.setCellValue(eo.getConstraint());
+        CellStyle cs = workBook.createCellStyle();
+        cs.setWrapText(true);
+        currentCell.setCellStyle(cs);
     }
 
-    private List<StructureDefinitionBindingObject> getBindingObjects() {
+    private List<StructureDefinitionElementObject> getElementObjects() {
         canonicalResourceAtlas = ModelCanonicalAtlasCreator.createMainCanonicalAtlas(resourcePaths, modelName, modelVersion, inputPath);
         canonicalResourceDependenciesAtlas = ModelCanonicalAtlasCreator.createDependenciesCanonicalAtlas(resourcePaths, modelName, modelVersion, inputPath);
 
         if (null != canonicalResourceAtlas && null != canonicalResourceDependenciesAtlas) {
-            StructureDefinitionElementBindingVisitor sdbv = new StructureDefinitionElementBindingVisitor(canonicalResourceAtlas, canonicalResourceDependenciesAtlas);
-            Map<String, StructureDefinitionBindingObject> bindingObjects = sdbv.visitCanonicalAtlasStructureDefinitions(snapshotOnly);
-            List<StructureDefinitionBindingObject> bindingObjectsList = bindingObjects
+            StructureDefinitionElementVisitor sdbv = new StructureDefinitionElementVisitor(canonicalResourceAtlas, canonicalResourceDependenciesAtlas);
+            Map<String, StructureDefinitionElementObject> elementObjects = sdbv.visitCanonicalAtlasStructureDefinitions(snapshotOnly);
+            List<StructureDefinitionElementObject> elementObjectsList = elementObjects
                     .values()
                     .stream()
                     .collect(Collectors.toList());
 
-            return bindingObjectsList
+            return elementObjectsList
                     .stream()
-                    .sorted(Comparator.comparing(StructureDefinitionBindingObject::getSdName)
-                            .thenComparing(StructureDefinitionBindingObject::getElementId))
+                    .sorted(Comparator.comparing(StructureDefinitionElementObject::getSdName)
+                            .thenComparing(StructureDefinitionElementObject::getElementId))
                     .collect(Collectors.toList());
         }
         return null;
