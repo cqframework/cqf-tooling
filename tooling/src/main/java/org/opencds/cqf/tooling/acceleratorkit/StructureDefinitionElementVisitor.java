@@ -87,10 +87,10 @@ public class StructureDefinitionElementVisitor extends StructureDefinitionBaseVi
             }
             if (ed.getConstraint() != null && ed.getConstraint().size() > 0) {
                 StringBuilder combinedConstraints = new StringBuilder();
-//                combinedConstraints.append(ed.getConstraint().size() + " ");
                 ed.getConstraint().forEach(constraint -> {
                     combinedConstraints.append(constraint.getHuman() + ";\n");
                 });
+                combinedConstraints.replace(combinedConstraints.lastIndexOf(";\n"), combinedConstraints.length(), "");
                 sdeo.setConstraint(combinedConstraints.toString());
             }
             sdeo.setElementId(ed.getId());

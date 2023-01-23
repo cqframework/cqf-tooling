@@ -10,12 +10,11 @@ public class ProfilesToSpreadsheetTest {
     public static final String separator = System.getProperty("file.separator");
     @Test
     public void verifySpreadsheetFromProfile(){
-//        String inputPath = System.getenv("PWD") + "/src/test/resources/org/opencds/cqf/tooling/operation/profiles/FHIR-Spec";
         String inputPath = "/Users/bryantaustin/Projects/FHIR-Spec";
-        String resourcePaths = "QI-Core/4.1.0";
+        String resourcePaths = "QI-Core/4.1.1";
         String operation = "ProfilesToSpreadsheet";
         String modelName="QICore";
-        String modelVersion="4.1.0";
+        String modelVersion="4.1.1";
         String outputPath = "target" + separator + "test-output" + separator + "profileToSpreadsheet" + separator + "QI Core Valueset Analysis 11";//"/Users/bryantaustin/Projects/QI Core Valueset Analysis4";
         String[] args = { "-" + operation, "-ip=" + inputPath, "-op=" + outputPath, "-resourcepaths=" + resourcePaths, "-mn=" + modelName, "-mv=" + modelVersion};
         Operation profilesToSpreadsheet = new ProfilesToSpreadsheet();
