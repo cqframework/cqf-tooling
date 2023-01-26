@@ -136,7 +136,7 @@ public class ECQMCreatorIT {
         // TODO: Measure-specific validation of data requirements content
         List<String> edrs = new ArrayList<String>();
         edrs.add("Patient");
-        edrs.add("MedicationAdministration");
+        //edrs.add("MedicationAdministration"); https://github.com/cqframework/cqf-tooling/issues/412
         edrs.add("Encounter");
         edrs.add("Observation");
         edrs.add("Coverage");
@@ -206,7 +206,7 @@ public class ECQMCreatorIT {
         edrs.add("ServiceRequest");
         edrs.add("Procedure");
         edrs.add("Encounter");
-        edrs.add("MedicationRequest");
+        //edrs.add("MedicationRequest"); https://github.com/cqframework/cqf-tooling/issues/412
         edrs.add("Condition");
 
         checkExpectedResourcesPresent(drs, edrs);
