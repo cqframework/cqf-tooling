@@ -278,14 +278,14 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
+            <groupId>info.cqframework</groupId>
             <artifactId>engine</artifactId>
             <version>${cql-engine.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>engine.fhir</artifactId>
+            <groupId>info.cqframework</groupId>
+            <artifactId>engine-fhir</artifactId>
             <version>${cql-engine.version}</version>
             <scope>test</scope>
         </dependency>

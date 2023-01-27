@@ -119,7 +119,7 @@
                 <type>pom</type>
             </dependency>
             <dependency>
-                <groupId>org.opencds.cqf.cql</groupId>
+                <groupId>info.cqframework</groupId>
                 <artifactId>engine</artifactId>
                 <version>${cql-engine.version}</version>
                 <exclusions>
@@ -130,8 +130,8 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.opencds.cqf.cql</groupId>
-                <artifactId>engine.fhir</artifactId>
+                <groupId>info.cqframework</groupId>
+                <artifactId>engine-fhir</artifactId>
                 <version>${cql-engine.version}</version>
             </dependency>
             <dependency>
