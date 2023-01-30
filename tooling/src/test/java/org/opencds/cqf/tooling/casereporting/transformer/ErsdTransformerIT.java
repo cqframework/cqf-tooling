@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.XmlParser;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.UsageContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.parameter.TransformErsdParameters;
@@ -48,7 +49,7 @@ public class ErsdTransformerIT {
     @Test
     public void testOutputFileName() throws Exception {
         TransformErsdParameters params = new TransformErsdParameters();
-        params.pathToBundle = "src/test/resources/casereporting/transformer/ErsdBundle.json";
+        params.pathToBundle = "src/test/resources/casereporting/transformer/eRSDv1bundle.json";
         params.outputPath = "src/test/resources/casereporting/transformer/output";
         params.outputFileName = "test_file_name";
         params.pathToV2PlanDefinition = "src/test/resources/casereporting/transformer/eRSDv2PlanDefinition/plandefinition-us-ecr-specification.json";
@@ -62,7 +63,7 @@ public class ErsdTransformerIT {
         assertEquals(outputBundle.getEntry().stream().filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition")).count(), 1);
         assertEquals(outputBundle.getEntry().stream()
                 .filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition"))
-                .findFirst().get().getResource().getIdElement().getIdPart(), "plandefinition-us-ecr-specification");
+                .findFirst().get().getResource().getIdElement().getIdPart(), "us-ecr-specification");
 
         logger.info("Transform");
     }
@@ -70,10 +71,10 @@ public class ErsdTransformerIT {
     @Test
     public void testErsdTransformerPlanDefinitionReplacedJSONInput() throws Exception {
         TransformErsdParameters params = new TransformErsdParameters();
-        params.pathToBundle = "src/test/resources/casereporting/transformer/ErsdBundle.json";
+        params.pathToBundle = "src/test/resources/casereporting/transformer/eRSDv1bundle.json";
         params.outputPath = "src/test/resources/casereporting/transformer/output";
         params.pathToV2PlanDefinition = "src/test/resources/casereporting/transformer/eRSDv2PlanDefinition/plandefinition-us-ecr-specification.json";
-        String outputBundleFileName = "rctc-release-2022-07-13-Bundle-rctc.json";
+        String outputBundleFileName = "rctc-release-2022-10-19-Bundle-rctc.json";
 
         Bundle outputBundle = transformBundle(params, outputBundleFileName);
 
@@ -81,7 +82,7 @@ public class ErsdTransformerIT {
         assertEquals(outputBundle.getEntry().stream().filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition")).count(), 1);
         assertEquals(outputBundle.getEntry().stream()
                 .filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition"))
-                .findFirst().get().getResource().getIdElement().getIdPart(), "plandefinition-us-ecr-specification");
+                .findFirst().get().getResource().getIdElement().getIdPart(), "us-ecr-specification");
 
         logger.info("Transform");
     }
@@ -89,10 +90,10 @@ public class ErsdTransformerIT {
     @Test
     public void testErsdTransformerPlanDefinitionReplacedXMLInput() throws Exception {
         TransformErsdParameters params = new TransformErsdParameters();
-        params.pathToBundle = "src/test/resources/casereporting/transformer/ErsdBundle.xml";
+        params.pathToBundle = "src/test/resources/casereporting/transformer/eRSDv1bundle.xml";
         params.outputPath = "src/test/resources/casereporting/transformer/output";
         params.pathToV2PlanDefinition = "src/test/resources/casereporting/transformer/eRSDv2PlanDefinition/plandefinition-us-ecr-specification.json";
-        String outputBundleFileName = "rctc-release-2022-07-13-Bundle-rctc.json";
+        String outputBundleFileName = "rctc-release-2022-10-19-Bundle-rctc.json";
 
         Bundle outputBundle = transformBundle(params, outputBundleFileName);
 
@@ -100,7 +101,7 @@ public class ErsdTransformerIT {
         assertEquals(outputBundle.getEntry().stream().filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition")).count(), 1);
         assertEquals(outputBundle.getEntry().stream()
                 .filter(x -> x.hasResource() && x.getResource().fhirType().equals("PlanDefinition"))
-                .findFirst().get().getResource().getIdElement().getIdPart(), "plandefinition-us-ecr-specification");
+                .findFirst().get().getResource().getIdElement().getIdPart(), "us-ecr-specification");
 
         logger.info("Transform");
     }
@@ -108,9 +109,9 @@ public class ErsdTransformerIT {
     @Test
     public void testErsdTransformerPlanDefinitionNotReplaced() throws Exception {
         TransformErsdParameters params = new TransformErsdParameters();
-        params.pathToBundle = "src/test/resources/casereporting/transformer/ErsdBundle.json";
+        params.pathToBundle = "src/test/resources/casereporting/transformer/eRSDv1bundle.json";
         params.outputPath = "src/test/resources/casereporting/transformer/output";
-        String outputBundleFileName = "rctc-release-2022-07-13-Bundle-rctc.json";
+        String outputBundleFileName = "rctc-release-2022-10-19-Bundle-rctc.json";
 
         Bundle outputBundle = transformBundle(params, outputBundleFileName);
 
@@ -126,9 +127,9 @@ public class ErsdTransformerIT {
     @Test
     public void testErsdTransformerEmergentPriorityUseContextPreserved() throws Exception {
         TransformErsdParameters params = new TransformErsdParameters();
-        params.pathToBundle = "src/test/resources/casereporting/transformer/ErsdBundle.json";
+        params.pathToBundle = "src/test/resources/casereporting/transformer/eRSDv1bundle.json";
         params.outputPath = "src/test/resources/casereporting/transformer/output";
-        String outputBundleFileName = "rctc-release-2022-07-13-Bundle-rctc.json";
+        String outputBundleFileName = "rctc-release-2022-10-19-Bundle-rctc.json";
         params.pathToV2PlanDefinition = "src/test/resources/casereporting/transformer/eRSDv2PlanDefinition/plandefinition-us-ecr-specification.json";
 
         Bundle outputBundle = transformBundle(params, outputBundleFileName);
