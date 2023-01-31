@@ -10,8 +10,7 @@ public class QICoreElementsToSpreadsheetTest {
     public static final String separator = System.getProperty("file.separator");
     @Test
     public void verifySpreadsheetWithDataElementsFromProfile(){
-//        String inputPath = System.getenv("PWD") + "/src/test/resources/org/opencds/cqf/tooling/operation/profiles/FHIR-Spec";
-        String inputPath = "/Users/bryantaustin/Projects/FHIR-Spec";
+        String inputPath = System.getenv("PWD") + "/src/test/resources/org/opencds/cqf/tooling/operation/profiles/FHIR-Spec";
         String resourcePaths = "QI-Core/4.1.0";
         String operation = "QICoreElementsToSpreadsheet";
         String modelName="QICore";

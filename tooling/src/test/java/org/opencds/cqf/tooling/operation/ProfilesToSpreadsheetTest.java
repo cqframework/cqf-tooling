@@ -10,7 +10,7 @@ public class ProfilesToSpreadsheetTest {
     public static final String separator = System.getProperty("file.separator");
     @Test
     public void verifySpreadsheetFromProfile(){
-        String inputPath = "/Users/bryantaustin/Projects/FHIR-Spec";
+        String inputPath = System.getenv("PWD") + "/src/test/resources/org/opencds/cqf/tooling/operation/profiles/FHIR-Spec";
         String resourcePaths = "QI-Core/4.1.1";
         String operation = "ProfilesToSpreadsheet";
         String modelName="QICore";
