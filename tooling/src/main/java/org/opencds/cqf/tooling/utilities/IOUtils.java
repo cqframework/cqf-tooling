@@ -85,13 +85,17 @@ public class IOUtils
         return fileName.replaceAll("_", "-");
     }
 
-    public static byte[] encodeResource(IBaseResource resource, Encoding encoding, FhirContext fhirContext)
+    public static byte[] encodeResource(IBaseResource resource, Encoding encoding, FhirContext fhirContext) {
+        return encodeResource(resource, encoding, fhirContext, false);
+    }
+
+    public static byte[] encodeResource(IBaseResource resource, Encoding encoding, FhirContext fhirContext, boolean prettyPrintOutput)
     {
         if (encoding == Encoding.UNKNOWN) {
             return new byte[] { };
         }
         IParser parser = getParser(encoding, fhirContext);    
-        return parser.setPrettyPrint(true).encodeResourceToString(resource).getBytes();
+        return parser.setPrettyPrint(prettyPrintOutput).encodeResourceToString(resource).getBytes();
     }
 
     public static String getFileContent(File file) {
@@ -119,8 +123,19 @@ public class IOUtils
     	writeResource(resource, path, encoding, fhirContext, true);
     }
     
-    public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext, Boolean versioned) 
-    {
+    public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext, Boolean versioned) {
+        writeResource(resource, path, encoding, fhirContext, true, null, false);
+    }
+
+    public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext, Boolean versioned, String outputFileName) {
+        writeResource(resource, path, encoding, fhirContext, true, outputFileName, false);
+    }
+
+    public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext, Boolean versioned, boolean prettyPrintOutput) {
+        writeResource(resource, path, encoding, fhirContext, true, null, prettyPrintOutput);
+    }
+
+    public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext, Boolean versioned, String outputFileName, boolean prettyPrintOutput) {
         // If the path is to a specific resource file, just re-use that file path/name.
         String outputPath = null;
         File file = new File(path);
@@ -136,7 +151,13 @@ public class IOUtils
                 throw new RuntimeException("Error writing Resource to file: " + e.getMessage());
             }
 
-        	String baseName = resource.getIdElement().getIdPart();
+            String baseName = null;
+            if (outputFileName == null || outputFileName.isBlank()) {
+                baseName = resource.getIdElement().getIdPart();
+            } else {
+                baseName = outputFileName;
+            }
+
         	// Issue 96
         	// If includeVersion is false then just use name and not id for the file baseName
         	if (!versioned) {
@@ -148,7 +169,7 @@ public class IOUtils
 
         try (FileOutputStream writer = new FileOutputStream(outputPath))
         {
-            writer.write(encodeResource(resource, encoding, fhirContext));
+            writer.write(encodeResource(resource, encoding, fhirContext, prettyPrintOutput));
             writer.flush();
         }
         catch (IOException e)
@@ -168,12 +189,24 @@ public class IOUtils
 
     //There's a special operation to write a bundle because I can't find a type that will reference both dstu3 and r4.
     public static void writeBundle(Object bundle, String path, Encoding encoding, FhirContext fhirContext) {
+        writeBundle(bundle, path, encoding, fhirContext, null);
+    }
+
+    public static void writeBundle(Object bundle, String path, Encoding encoding, FhirContext fhirContext, String outputFileName) {
+        writeBundle(bundle, path, encoding, fhirContext, outputFileName, false);
+    }
+
+    public static void writeBundle(Object bundle, String path, Encoding encoding, FhirContext fhirContext, boolean prettyPrintOutput) {
+        writeBundle(bundle, path, encoding, fhirContext, null, prettyPrintOutput);
+    }
+
+    public static void writeBundle(Object bundle, String path, Encoding encoding, FhirContext fhirContext, String outputFileName, boolean prettyPrintOutput) {
         switch (fhirContext.getVersion().getVersion()) {
             case DSTU3:
-                writeResource(((org.hl7.fhir.dstu3.model.Bundle)bundle), path, encoding, fhirContext);
+                writeResource(((org.hl7.fhir.dstu3.model.Bundle)bundle), path, encoding, fhirContext, true, outputFileName, prettyPrintOutput);
                 break;
             case R4:
-                writeResource(((org.hl7.fhir.r4.model.Bundle)bundle), path, encoding, fhirContext);
+                writeResource(((org.hl7.fhir.r4.model.Bundle)bundle), path, encoding, fhirContext, true, outputFileName, prettyPrintOutput);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());

@@ -5,7 +5,7 @@
 
     <groupId>org.opencds.cqf</groupId>
     <artifactId>tooling-parent</artifactId>
-    <version>2.1.0-SNAPSHOT</version>
+    <version>2.3.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -13,7 +13,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <cql-engine.version>2.6.0-SNAPSHOT</cql-engine.version>
-        <cql-evaluator.version>2.0.0</cql-evaluator.version>
+        <cql-evaluator.version>2.6.0-SNAPSHOT</cql-evaluator.version>
         <cqframework.version>2.6.0-SNAPSHOT</cqframework.version>
         <hapi.version>6.0.1</hapi.version>
         <core.version>5.6.36</core.version>
@@ -131,7 +131,7 @@
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
-                <artifactId>engine.fhir</artifactId>
+                <artifactId>engine-fhir</artifactId>
                 <version>${cql-engine.version}</version>
             </dependency>
             <dependency>
@@ -234,11 +234,7 @@
                         <failOnWarning>false</failOnWarning>
                         <showWarnings>true</showWarnings>
                         <compilerArgs>
-                            <arg>-Xlint:all</arg>
-                            <!-- This fixes a boostrapclass path warning which the "release" property fixes on Java 9+ -->
-                            <arg>-Xlint:-options</arg>
-                            <!-- This fixes a warning about Test annotations not being processed as part of compilation - They won't be since they are processed as part of testing-->
-                            <arg>-Xlint:-processing</arg>
+                            <arg>-Xlint:all,-processing</arg>
                             <arg>-Werror</arg>
                         </compilerArgs>
                     </configuration>
@@ -309,7 +305,7 @@
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>
                     <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>1.6.7</version>
+                    <version>1.6.13</version>
                     <extensions>true</extensions>
                     <configuration>
                         <serverId>ossrh</serverId>
@@ -368,24 +364,16 @@
         </pluginManagement>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.1.0</version>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M5</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.1.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.2.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -403,17 +391,14 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-enforcer-plugin</artifactId>
-                        <version>3.1.0</version>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
                     </plugin>
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.7</version>
                     </plugin>
                 </plugins>
             </build>

@@ -63,18 +63,30 @@ public class HookDataDateRoller {
     public void rollPrefetchItemsDates(JsonObject prefetch) {
         JsonObject item;
         for (int i = 1; i <= prefetch.size(); i++) {
+            String itemName = "item" + i;
             try {
-                item = prefetch.getAsJsonObject("item" + i);
+                item = prefetch.getAsJsonObject(itemName);
             } catch (Exception ex) {
+                // the following is simply to preserve the original order - the item is present, but null
+                prefetch.remove(itemName);
+                prefetch.add(itemName, null);
                 continue;
             }
             if(null == item){
                 continue;
             }
-            IBaseResource resource = resourceParser.parseResource(item.getAsJsonObject("resource").toString());
-            if (null == resource) {
+            IBaseResource resource = null;
+            String resourceTypeName = "resourceType";
+            if(item.getAsJsonPrimitive("resourceType") != null){
+                resource = resourceParser.parseResource(item.toString());
+            }
+            if(resource == null && item.getAsJsonObject("resource").toString()!= null){
+                resource = resourceParser.parseResource(item.getAsJsonObject("resource").toString());
+                resourceTypeName = "resource";
+            }
+            if(resource == null){
                 logger.info("This hook did not contain prefetch items");
-                continue;
+                return;
             }
             if (resource.fhirType().equalsIgnoreCase("bundle")) {
                 ResourceDataDateRoller.rollBundleDates(fhirContext, resource);
@@ -82,18 +94,26 @@ public class HookDataDateRoller {
                 ResourceDataDateRoller.rollResourceDates(fhirContext, resource);
             }
             JsonObject response = item.getAsJsonObject("response");
-            item.add("response", response);
-            addUpdatedJsonObject(resource, item, "resource");
-//            addUpdatedJsonObject(resource, prefetch, "item" + i);
+            if(response != null){
+                item.add("response", response);
+            }
+            item = addUpdatedJsonObject(resource, item, resourceTypeName);
+            prefetch.remove(itemName);
+            prefetch.add(itemName, item);
        }
     }
 
-    public void addUpdatedJsonObject(IBaseResource resource, JsonObject objectToAddTo, String objectName){
+    public JsonObject addUpdatedJsonObject(IBaseResource resource, JsonObject objectToAddTo, String objectName){
         JsonObject objectToAdd;
-        objectToAddTo.remove(objectName);
         JsonElement newItem = JsonParser.parseString(resourceParser.setPrettyPrint(true).encodeResourceToString(resource));
+        // handle the new format - no response in items
+        if(objectName.equalsIgnoreCase("resourceType")){
+            return newItem.getAsJsonObject();
+        }
+        // handle the old format - a response followed by the resource
+        objectToAddTo.remove(objectName);
         objectToAdd = newItem.getAsJsonObject();
         objectToAddTo.add(objectName, objectToAdd);
-
+        return objectToAddTo;
     }
 }
