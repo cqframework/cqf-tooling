@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import static org.opencds.cqf.tooling.CqfmSoftwareSystemTest.separator;
 import static org.testng.Assert.assertTrue;
 
-public class dateRollerTest {
+public class DateRollerTest {
 
     private File originalDirectory;
     private File testRootDirectory;
@@ -33,7 +33,7 @@ public class dateRollerTest {
     public void setUp() throws Exception {
         IOUtils.resourceDirectories = new ArrayList<String>();
         IOUtils.clearDevicePaths();
-        originalDirectory = new File(dateRollerTest.class.getResource("/org/opencds/cqf/tooling/operation/dateRoller").getPath());//new File("test" + separator + "resources" + separator + "org.opencds.cqf.tooling" + separator + "operation" + separator + "dateRoller");
+        originalDirectory = new File(DateRollerTest.class.getResource("/org/opencds/cqf/tooling/operation/dateRoller").getPath());//new File("test" + separator + "resources" + separator + "org.opencds.cqf.tooling" + separator + "operation" + separator + "dateRoller");
         testRootDirectory = new File(testFilePathRoot);
         if (testRootDirectory.exists()) {
             FileUtils.cleanDirectory(testRootDirectory);
