@@ -1,0 +1,55 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1104.10",
+  "meta": {
+    "versionId": "12",
+    "lastUpdated": "2020-03-07T01:00:21.000-05:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2>Medicare payer</h2><p>This value set includes codes from the following code systems:</p><ul><li>Include these codes as defined in <code>http://www.nlm.nih.gov/research/umls/sop</code><table class=\"none\"><tr><td><b>Code</b></td><td><b>Display</b></td></tr><tr><td>1</td><td>MEDICARE</td><td/></tr><tr><td>12</td><td>Medicare (Non-managed Care)</td><td/></tr><tr><td>121</td><td>Medicare FFS</td><td/></tr><tr><td>122</td><td>Medicare Drug Benefit</td><td/></tr><tr><td>123</td><td>Medicare Medical Savings Account (MSA)</td><td/></tr><tr><td>129</td><td>Medicare Non-managed Care Other</td><td/></tr><tr><td>14</td><td>Dual Eligibility Medicare/Medicaid Organization</td><td/></tr></table></li></ul></div>"
+  },
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1104.10",
+  "version": "20200307",
+  "name": "Medicare payer",
+  "status": "active",
+  "date": "2020-03-07T01:00:21-05:00",
+  "publisher": "Yale",
+  "compose": {
+    "include": [
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/sop",
+        "concept": [
+          {
+            "code": "1",
+            "display": "MEDICARE"
+          },
+          {
+            "code": "12",
+            "display": "Medicare (Non-managed Care)"
+          },
+          {
+            "code": "121",
+            "display": "Medicare FFS"
+          },
+          {
+            "code": "122",
+            "display": "Medicare Drug Benefit"
+          },
+          {
+            "code": "123",
+            "display": "Medicare Medical Savings Account (MSA)"
+          },
+          {
+            "code": "129",
+            "display": "Medicare Non-managed Care Other"
+          },
+          {
+            "code": "14",
+            "display": "Dual Eligibility Medicare/Medicaid Organization"
+          }
+        ]
+      }
+    ]
+  }
+}

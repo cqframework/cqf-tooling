@@ -1,0 +1,5 @@
+Patient has a diagnosis of-92e09dc6a56dc22c3d35107b34b19e74
+Patient has a problem of-dd627a1a39486aa845dd9269816d1e97
+Group 1-cd822d0894d407462e40ca8dd2976d1b
+Problem has status of-cc081d88166d1ab3b1b147c1dfc5af01
+ConditionCriteriaMet

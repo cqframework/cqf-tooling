@@ -9,7 +9,7 @@
             "name": "CodeLens (Launch) - ExecuteMeasureTestOperation",
             "request": "launch",
             "mainClass": "org.opencds.cqf.tooling.operation.ExecuteMeasureTestOperation",
-            "projectName": "tooling"
+            "projectName": "tooling-cli"
         },
         {
             "type": "java",
@@ -23,7 +23,7 @@
             "name": "CodeLens (Launch) - RefreshIG",
             "request": "launch",
             "mainClass": "org.opencds.cqf.igtools.RefreshIG",
-            "projectName": "tooling"
+            "projectName": "tooling-cli"
         },
         {
             "type": "java",
@@ -35,11 +35,11 @@
             "type": "java",
             "name": "CqlToR4LibraryOperation",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.tooling.Main",
-            "projectName": "tooling",
+            "mainClass": "org.opencds.cqf.tooling.cli.Main",
+            "projectName": "tooling-cli",
             "args": [
                 "-CqlToR4Library",
-                "-ptcql=../connectathon/fhir401/input/pagecontent/cql",
+                "-ptcql=../connectathon/fhir401/input/pagecontent/cql/EXM74-10.2.000.cql",
                 "-op=../connectathon/fhir401/resources/library"
             ]
         },
@@ -47,20 +47,20 @@
             "type": "java",
             "name": "CqlToSTU3LibraryOperation",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.tooling.Main",
-            "projectName": "tooling",
+            "mainClass": "org.opencds.cqf.tooling.cli.Main",
+            "projectName": "tooling-cli",
             "args": [
                 "-CqlToSTU3Library",
-                "-ptcql=../connectathon/fhir3/cql/EXM104_FHIR3-8.1.000.cql",
-                "-op=../connectathon/fhir3/resources/library/test"
+                "-ptcql=../connectathon/fhir3/2020/input/pagecontent/cql/EXM104_FHIR3-8.1.000.cql",
+                "-op=../connectathon/fhir3/2020/input/resources/library/test"
             ]
         },
         {
             "type": "java",
             "name": "APHL eICR FHIR4",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.tooling.Main",
-            "projectName": "tooling",
+            "mainClass": "org.opencds.cqf.tooling.cli.Main",
+            "projectName": "tooling-cli",
             "args": [
                 "-RefreshIG",
                 "-ip=../aphl-ig",
@@ -80,8 +80,8 @@
             "type": "java",
             "name": "DEBUG CQLGenerateFromDrool",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.tooling.Main",
-            "projectName": "tooling",
+            "mainClass": "org.opencds.cqf.tooling.cli.Main",
+            "projectName": "tooling-cli",
             "args": [
                 "-GenerateCQLFromDrool",
                 "-ifp=../CQLGenerationDocs/default.json",
@@ -92,8 +92,8 @@
             "type": "java",
             "name": "VSAC Spreadsheet Directory To ValueSet Resources",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.tooling.Main",
-            "projectName": "tooling",
+            "mainClass": "org.opencds.cqf.tooling.cli.Main",
+            "projectName": "tooling-cli",
             "args": [
                 "-VsacXlsxToValueSetBatch",
                 "-ptsd=../hedis-ig-r4/input/vocabulary/valueset/spreadsheets",
@@ -105,8 +105,8 @@
             "type": "java",
             "name": "Refresh Library Operation",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.tooling.Main",
-            "projectName": "tooling",
+            "mainClass": "org.opencds.cqf.tooling.cli.Main",
+            "projectName": "tooling-cli",
             "args": [
                 "-RefreshLibrary",
                 "-ini=../aphl-ig/ig-structure/ig.ini",
@@ -120,8 +120,8 @@
             "type": "java",
             "name": "Opioid CDS FHIR3",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.tooling.Main",
-            "projectName": "tooling",
+            "mainClass": "org.opencds.cqf.tooling.cli.Main",
+            "projectName": "tooling-cli",
             "args": [
                 "-RefreshIG",
                 "-ip=../opioid-cds",
@@ -141,8 +141,8 @@
             "type": "java",
             "name": "Connectathon FHIR3",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.tooling.Main",
-            "projectName": "tooling",
+            "mainClass": "org.opencds.cqf.tooling.cli.Main",
+            "projectName": "tooling-cli",
             "args": [
                 "-RefreshIG",
                 "-root-dir=/home/jp/repos/connectathon/fhir3",
@@ -158,8 +158,8 @@
             "type": "java",
             "name": "Connectathon FHIR4",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.tooling.Main",
-            "projectName": "tooling",
+            "mainClass": "org.opencds.cqf.tooling.cli.Main",
+            "projectName": "tooling-cli",
             "args": [
                 "-RefreshIG",
                 "-ip=../connectathon/fhir4/",
@@ -174,8 +174,8 @@
             "type": "java",
             "name": "Connectathon FHIR401",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.tooling.Main",
-            "projectName": "tooling",
+            "mainClass": "org.opencds.cqf.tooling.cli.Main",
+            "projectName": "tooling-cli",
             "args": [
                 "-RefreshIG",
                 "-ini=../connectathon/fhir401/ig.ini",
@@ -189,8 +189,8 @@
             "type": "java",
             "name": "Single VSAC ValueSet Spreadsheet Resource Generation",
             "request": "launch",
-            "mainClass": "org.opencds.cqf.tooling.Main",
-            "projectName": "tooling",
+            "mainClass": "org.opencds.cqf.tooling.cli.Main",
+            "projectName": "tooling-cli",
             "args": [
                 "-VsacXlsxToValueSet",
                 "-pts=../valueset-spreadsheet/2.16.840.1.113762.1.4.1108.15.xlsx",
@@ -202,7 +202,7 @@
             "name": "PostBundles to Fhir Uri",
             "request": "launch",
             "mainClass": "jreyno77.com.github.Main",
-            "projectName": "tooling",
+            "projectName": "tooling-cli",
             "args": [
                 "-PostBundlesInDir",
                 "-dp=../hedis-ig-r4/bundles/MRP-FHIR/MRP-FHIR-files",

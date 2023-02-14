@@ -6,13 +6,13 @@ cache:
   timeout: 180
   directories:
     - "$HOME/.m2/repository"
-    - "HOME/.fhir"
+    - "$HOME/.fhir"
 install:
   - ./scripts/install.sh
 script:
   - ./scripts/test.sh
 before_cache:
-  - rm -rf $HOME/.m2/repository/org/opencds/cqf/tooling
+  - rm -rf $HOME/.m2/repository/org/opencds/cqf/tooling*
 after_success:
   - ./scripts/deploy.sh
 deploy:
