@@ -27,13 +27,12 @@ public class DateRollerTest {
 
     private File originalDirectory;
     private File testRootDirectory;
-    private String testFilePathRoot = "target" + separator + "dateRoller";
+    private String testFilePathRoot = "target" + separator + "test-output" + separator + "dateRoller";
 
     @BeforeMethod
     public void setUp() throws Exception {
-        IOUtils.resourceDirectories = new ArrayList<String>();
         IOUtils.clearDevicePaths();
-        originalDirectory = new File(DateRollerTest.class.getResource("/org/opencds/cqf/tooling/operation/dateRoller").getPath());//new File("test" + separator + "resources" + separator + "org.opencds.cqf.tooling" + separator + "operation" + separator + "dateRoller");
+        originalDirectory = new File(DateRollerTest.class.getResource("dateRoller").getPath());//new File("test" + separator + "resources" + separator + "org.opencds.cqf.tooling" + separator + "operation" + separator + "dateRoller");
         testRootDirectory = new File(testFilePathRoot);
         if (testRootDirectory.exists()) {
             FileUtils.cleanDirectory(testRootDirectory);
