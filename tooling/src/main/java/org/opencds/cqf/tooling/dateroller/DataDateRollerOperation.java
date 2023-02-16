@@ -92,35 +92,40 @@ public class DataDateRollerOperation extends Operation {
         fileEncoding = IOUtils.getEncoding(file.getName());
 
         String fileContents = IOUtils.getFileContent(file);
-        if (fileContents.contains("hookInstance")) {
-            if (fileEncoding.equals(IOUtils.Encoding.XML)) {
-                logger.error("Current CDS Hooks specification calls for JSON only. (5/2022)");
-                return;
-            } else if (fileEncoding.equals(IOUtils.Encoding.JSON)) {
-                HookDataDateRoller hookDataDateRoller = new HookDataDateRoller(fhirContext, fileEncoding);
-                JsonObject hook = hookDataDateRoller.rollJSONHookDates(JsonParser.parseString(fileContents).getAsJsonObject());//this should be the whole hook
-                FileWriter fileWriter = null;
-                try {
-                    fileWriter = new FileWriter(file.getAbsolutePath());
-                    Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
-                    gson.toJson(hook, fileWriter);
-                    fileWriter.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+        if(null != fileContents && fileContents.length() > 0) {
+            if (fileContents.contains("hookInstance")) {
+                if (fileEncoding.equals(IOUtils.Encoding.XML)) {
+                    logger.error("Current CDS Hooks specification calls for JSON only. (5/2022)");
+                    return;
+                } else if (fileEncoding.equals(IOUtils.Encoding.JSON)) {
+                    HookDataDateRoller hookDataDateRoller = new HookDataDateRoller(fhirContext, fileEncoding);
+                    JsonObject hook = hookDataDateRoller.rollJSONHookDates(JsonParser.parseString(fileContents).getAsJsonObject());//this should be the whole hook
+                    FileWriter fileWriter = null;
+                    try {
+                        fileWriter = new FileWriter(file.getAbsolutePath());
+                        Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
+                        gson.toJson(hook, fileWriter);
+                        fileWriter.close();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            } else {
+                IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext);
+                if (null != resource) {
+                    String resourceType = resource.fhirType();
+                    if (resourceType.equalsIgnoreCase("Bundle")) {
+                        ResourceDataDateRoller.rollBundleDates(fhirContext, resource);
+                        IOUtils.writeBundle(resource, file.getAbsolutePath(), fileEncoding, fhirContext);
+                    } else {
+                        ResourceDataDateRoller.rollResourceDates(fhirContext, resource);
+                        IOUtils.writeResource(resource, file.getAbsolutePath(), fileEncoding, fhirContext);
+                    }
                 }
             }
-        } else {
-            IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext);
-            if (null != resource) {
-                String resourceType = resource.fhirType();
-                if (resourceType.equalsIgnoreCase("Bundle")) {
-                    ResourceDataDateRoller.rollBundleDates(fhirContext, resource);
-                    IOUtils.writeBundle(resource, file.getAbsolutePath(), fileEncoding, fhirContext);
-                } else {
-                    ResourceDataDateRoller.rollResourceDates(fhirContext, resource);
-                    IOUtils.writeResource(resource, file.getAbsolutePath(), fileEncoding, fhirContext);
-                }
-            }
+        }
+        else{
+            logger.error(String.format("The file %s was either empty or came back null.", file.getAbsolutePath()));
         }
     }
 }
