@@ -14,7 +14,9 @@ public abstract class RefreshGeneratedContentOperation extends Operation {
     private String pathToMeasures; // -ptm
     private String pathToLibraries; // -ptl
     private String operationName;
+
     protected Boolean shouldApplySoftwareSystemStamp; // -ss
+    protected Boolean addBundleTimestamp; // -ts
 
     private String encoding; // -e (json|xml)
 
@@ -23,6 +25,7 @@ public abstract class RefreshGeneratedContentOperation extends Operation {
         this.operationName = operationName;
         this.fhirContext = fhirContext;
         this.shouldApplySoftwareSystemStamp = true;
+        this.addBundleTimestamp = true;
     }
 
     public RefreshGeneratedContentOperation(String outputPath, String operationName, FhirContext fhirContext,
@@ -33,6 +36,7 @@ public abstract class RefreshGeneratedContentOperation extends Operation {
         this.pathToLibraries = pathToLibraries;
         this.pathToMeasures = pathToMeasures;
         this.shouldApplySoftwareSystemStamp = true;
+        this.addBundleTimestamp = true;
     }
 
     @Override
@@ -64,6 +68,10 @@ public abstract class RefreshGeneratedContentOperation extends Operation {
                 case "stamp":
                 case "ss":
                     shouldApplySoftwareSystemStamp = Boolean.parseBoolean(value);
+                    break;
+                case "timestamp":
+                case "ts":
+                    this.addBundleTimestamp = Boolean.parseBoolean(value);
                     break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }

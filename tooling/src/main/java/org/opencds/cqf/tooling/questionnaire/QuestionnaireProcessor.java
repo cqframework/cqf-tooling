@@ -29,7 +29,7 @@ public class QuestionnaireProcessor {
     }
 
     public void bundleQuestionnaires(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
-                                      Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion,
+                                      Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp,
                                       FhirContext fhirContext, String fhirUri, IOUtils.Encoding encoding) {
 
         Map<String, IBaseResource> questionnaires = IOUtils.getQuestionnaires(fhirContext);
@@ -107,8 +107,8 @@ public class QuestionnaireProcessor {
 
                 if (shouldPersist) {
                     String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), QuestionnaireTestGroupName), questionnaireName);
-                    persistBundle(igPath, bundleDestPath, questionnaireName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri);
-                    bundleFiles(igPath, bundleDestPath, primaryLibraryName, binaryPaths, questionnaireSourcePath, primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion);
+                    persistBundle(igPath, bundleDestPath, questionnaireName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri, addBundleTimestamp);
+                    bundleFiles(igPath, bundleDestPath, primaryLibraryName, binaryPaths, questionnaireSourcePath, primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion, addBundleTimestamp);
                     bundledQuestionnaires.add(questionnaireSourcePath);
                 }
             } catch (Exception e) {
@@ -142,9 +142,9 @@ public class QuestionnaireProcessor {
         LogUtils.info(message);
     }
 
-    private void persistBundle(String igPath, String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, List<IBaseResource> resources, String fhirUri) {
+    private void persistBundle(String igPath, String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, List<IBaseResource> resources, String fhirUri, Boolean addBundleTimestamp) {
         IOUtils.initializeDirectory(bundleDestPath);
-        Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext);
+        Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext, addBundleTimestamp);
         IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);
 
         if (fhirUri != null && !fhirUri.equals("")) {
@@ -159,7 +159,7 @@ public class QuestionnaireProcessor {
         }
     }
 
-    private void bundleFiles(String igPath, String bundleDestPath, String libraryName, List<String> binaryPaths, String resourceFocusSourcePath, String librarySourcePath, FhirContext fhirContext, IOUtils.Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios, Boolean includeVersion) {
+    private void bundleFiles(String igPath, String bundleDestPath, String libraryName, List<String> binaryPaths, String resourceFocusSourcePath, String librarySourcePath, FhirContext fhirContext, IOUtils.Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp) {
         String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, FilenameUtils.getBaseName(bundleDestPath) + "-" + IGBundleProcessor.bundleFilesPathElement);
         IOUtils.initializeDirectory(bundleDestFilesPath);
 
@@ -175,7 +175,7 @@ public class QuestionnaireProcessor {
             try {
                 Map<String, IBaseResource> valuesets = ResourceUtils.getDepValueSetResources(cqlLibrarySourcePath, igPath, fhirContext, includeDependencies, includeVersion);
                 if (!valuesets.isEmpty()) {
-                    Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<IBaseResource>(valuesets.values()), fhirContext);
+                    Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<IBaseResource>(valuesets.values()), fhirContext, addBundleTimestamp);
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);
                 }
             }  catch (Exception e) {
@@ -187,7 +187,7 @@ public class QuestionnaireProcessor {
             Map<String, IBaseResource> depLibraries = ResourceUtils.getDepLibraryResources(librarySourcePath, fhirContext, encoding, includeVersion, logger);
             if (!depLibraries.isEmpty()) {
                 String depLibrariesID = "library-deps-" + libraryName;
-                Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<IBaseResource>(depLibraries.values()), fhirContext);
+                Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<IBaseResource>(depLibraries.values()), fhirContext, addBundleTimestamp);
                 IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);
             }
         }

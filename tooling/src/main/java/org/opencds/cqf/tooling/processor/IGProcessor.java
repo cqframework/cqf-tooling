@@ -62,6 +62,7 @@ public class IGProcessor extends BaseProcessor {
         Boolean includeDependencies = params.includeDependencies;
         Boolean includeTerminology = params.includeTerminology;
         Boolean includePatientScenarios = params.includePatientScenarios;
+        Boolean addBundleTimestamp = params.addBundleTimestamp;
         Boolean versioned = params.versioned;
         String fhirUri = params.fhirUri;
         // String measureToRefreshPath = params.measureToRefreshPath;
@@ -98,7 +99,7 @@ public class IGProcessor extends BaseProcessor {
         //package everything
         LogUtils.info("IGProcessor.publishIG - bundleIg");
         igBundleProcessor.bundleIg(refreshedResourcesNames, rootDir, getBinaryPaths(), encoding, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
-        versioned, fhirContext, fhirUri);
+        versioned, addBundleTimestamp, fhirContext, fhirUri);
         //test everything
         //IGTestProcessor.testIg(IGTestParameters);
         //Publish?

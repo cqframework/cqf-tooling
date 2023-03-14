@@ -34,6 +34,7 @@ public class RefreshIGArgumentProcessor {
     public static final String[] LIBRARY_OUTPUT_PATH_OPTIONS = {"libraryOutput", "libraryOutputPath", "lop"};
     public static final String[] MEASURE_OUTPUT_PATH_OPTIONS = {"measureOutput", "measureOutputPath", "mop"};
     public static final String[] SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS = { "ss", "stamp" };
+    public static final String[] SHOULD_ADD_TIMESTAMP_OPTIONS = { "ts", "timestamp" };
 
     @SuppressWarnings("unused")
     public OptionParser build() {
@@ -49,6 +50,7 @@ public class RefreshIGArgumentProcessor {
         OptionSpecBuilder libraryOutputPathBuilder = parser.acceptsAll(asList(LIBRARY_OUTPUT_PATH_OPTIONS),"If omitted, the libraries will overwrite any existing libraries");
         OptionSpecBuilder measureOutputPathBuilder = parser.acceptsAll(asList(MEASURE_OUTPUT_PATH_OPTIONS),"If omitted, the measures will overwrite any existing measures");
         OptionSpecBuilder shouldApplySoftwareSystemStampBuilder = parser.acceptsAll(asList(SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS),"Indicates whether refreshed Measure and Library resources should be stamped with the 'cqf-tooling' stamp via the cqfm-softwaresystem Extension.");
+        OptionSpecBuilder shouldAddTimestampBuilder = parser.acceptsAll(asList(SHOULD_ADD_TIMESTAMP_OPTIONS),"Indicates whether refreshed Bundle should attach timestamp of creation.");
 
         OptionSpec<String> ini = iniBuilder.withRequiredArg().describedAs("Path to the IG ini file");
         OptionSpec<String> rootDir = rootDirBuilder.withOptionalArg().describedAs("Root directory of the IG");
@@ -59,6 +61,7 @@ public class RefreshIGArgumentProcessor {
         OptionSpec<String> libraryOutputPath = libraryOutputPathBuilder.withOptionalArg().describedAs("path to the output directory for updated libraries");
         OptionSpec<String> measureOutputPath = measureOutputPathBuilder.withOptionalArg().describedAs("path to the output directory for updated measures");
         OptionSpec<String> shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStampBuilder.withOptionalArg().describedAs("Indicates whether refreshed Measure and Library resources should be stamped with the 'cqf-tooling' stamp via the cqfm-softwaresystem Extension");
+        OptionSpec<String> shouldAddTimestampOptions = shouldAddTimestampBuilder.withOptionalArg().describedAs("Indicates whether refreshed Bundle should attach timestamp of creation");
 
         //TODO: FHIR user / password (and other auth options)
         OptionSpec<String> fhirUri = fhirUriBuilder.withOptionalArg().describedAs("uri of fhir server");  
@@ -118,6 +121,13 @@ public class RefreshIGArgumentProcessor {
             shouldApplySoftwareSystemStamp = false;
         }
 
+        Boolean addBundleTimestamp = true;
+        String addBundleTimestampValue = (String)options.valueOf(SHOULD_ADD_TIMESTAMP_OPTIONS[0]);
+
+        if ((addBundleTimestampValue != null) && addBundleTimestampValue.equalsIgnoreCase("false")) {
+            addBundleTimestamp = false;
+        }
+
         ArrayList<String> paths = new ArrayList<String>();
         if (resourcePaths != null && !resourcePaths.isEmpty()) {
             paths.addAll(resourcePaths);
@@ -134,6 +144,7 @@ public class RefreshIGArgumentProcessor {
         ip.includePatientScenarios = includePatientScenarios;
         ip.versioned = versioned;
         ip.shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStamp;
+        ip.addBundleTimestamp = addBundleTimestamp;
         ip.resourceDirs = paths;
         ip.fhirUri = fhirUri;
         ip.measureToRefreshPath = measureToRefreshPath;

@@ -15,6 +15,7 @@ public class RefreshIGParameters {
     public Boolean includePatientScenarios;
     public Boolean versioned;
     public Boolean shouldApplySoftwareSystemStamp;
+    public Boolean addBundleTimestamp;
     public String fhirUri;
     public ArrayList<String> resourceDirs;
     public Boolean conformant;

@@ -22,16 +22,16 @@ public class IGBundleProcessor {
     }
 
     public void bundleIg(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Encoding encoding, Boolean includeELM,
-    Boolean includeDependencies, Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned,
+    Boolean includeDependencies, Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned, Boolean addBundleTimestamp,
     FhirContext fhirContext, String fhirUri) {
 
         measureProcessor.bundleMeasures(refreshedLibraryNames, igPath, binaryPaths, includeDependencies, includeTerminology, includePatientScenarios, versioned,
-        fhirContext, fhirUri, encoding);
+                addBundleTimestamp,fhirContext, fhirUri, encoding);
 
         planDefinitionProcessor.bundlePlanDefinitions(refreshedLibraryNames, igPath, binaryPaths, includeDependencies, includeTerminology,
-        includePatientScenarios, versioned, fhirContext, fhirUri, encoding);
+        includePatientScenarios, versioned, addBundleTimestamp, fhirContext, fhirUri, encoding);
 
         questionnaireProcessor.bundleQuestionnaires(refreshedLibraryNames, igPath, binaryPaths, includeDependencies, includeTerminology,
-                includePatientScenarios, versioned, fhirContext, fhirUri, encoding);
+                includePatientScenarios, versioned, addBundleTimestamp, fhirContext, fhirUri, encoding);
     }
 }
