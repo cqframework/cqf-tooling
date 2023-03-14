@@ -86,7 +86,7 @@ package org.opencds.cqf.tooling.cli;
             - See the documentation for CQL to FHIR Library conversion to see which Library elements will be populated
 
         - Refresh Measure(s)
-            - command: mvn exec:java -Dexec.args="[-RefreshStu3Measure|RefreshR4Measure] [-ptm| pathToMeasures] [-ptl|pathToLibraries] (-e|encoding) (-o|-output) (-ss|-stamp) (-ts|-timestamp)"
+            - command: mvn exec:java -Dexec.args="[-RefreshStu3Measure|RefreshR4Measure] [-ptm| pathToMeasures] [-ptl|pathToLibraries] (-e|encoding) (-o|-output) (-ss|-stamp)"
 
         - Refresh Library
             - command: mvn exec:java -Dexec.args"-RefreshLibrary -ini -fv|fhir-version -lp|libraryPath (-ss|-stamp)
