@@ -25,7 +25,7 @@ public abstract class RefreshGeneratedContentOperation extends Operation {
         this.operationName = operationName;
         this.fhirContext = fhirContext;
         this.shouldApplySoftwareSystemStamp = true;
-        this.addBundleTimestamp = true;
+        this.addBundleTimestamp = false;
     }
 
     public RefreshGeneratedContentOperation(String outputPath, String operationName, FhirContext fhirContext,
@@ -36,7 +36,7 @@ public abstract class RefreshGeneratedContentOperation extends Operation {
         this.pathToLibraries = pathToLibraries;
         this.pathToMeasures = pathToMeasures;
         this.shouldApplySoftwareSystemStamp = true;
-        this.addBundleTimestamp = true;
+        this.addBundleTimestamp = false;
     }
 
     @Override

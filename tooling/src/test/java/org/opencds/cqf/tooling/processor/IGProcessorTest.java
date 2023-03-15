@@ -34,7 +34,9 @@ import com.google.gson.Gson;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public class IGProcessorTest extends RefreshTest {
     
@@ -94,7 +96,7 @@ public class IGProcessorTest extends RefreshTest {
         params.includePatientScenarios = true;
 		params.versioned = false;
 		params.shouldApplySoftwareSystemStamp = true;
-		params.addBundleTimestamp = true;
+		params.addBundleTimestamp = true;  //setting this true to test timestamp added in generated bundle
         processor.publishIG(params);
 
 		// determine fhireContext for measure lookup

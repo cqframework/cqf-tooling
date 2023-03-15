@@ -68,7 +68,7 @@ public class QuestionnaireProcessorTest extends RefreshTest {
         Boolean includeTerminology = true;
         Boolean includePatientScenarios = true;
         Boolean versioned = false;
-        Boolean addBundleTimestamp = true;
+        Boolean addBundleTimestamp = false;
 
         IOUtils.resourceDirectories.add(TARGET_PATH + separator + "input" + separator + "resources");
         IOUtils.resourceDirectories.add(TARGET_PATH + separator + "input" + separator + "vocabulary");
