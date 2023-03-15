@@ -1,7 +1,5 @@
 package org.opencds.cqf.tooling.processor;
 
-import static org.testng.Assert.assertTrue;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -12,7 +10,10 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +33,8 @@ import com.google.gson.Gson;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+
+import static org.testng.Assert.*;
 
 public class IGProcessorTest extends RefreshTest {
     
@@ -156,6 +159,7 @@ public class IGProcessorTest extends RefreshTest {
 
 			// map out entries in the resulting single bundle file:
 			Map<?, ?> bundledJson = this.jsonMap(new File(bundledFileResult));
+			testTimestamp(bundledJson);
 			Map<String, String> bundledJsonResourceTypes = new HashMap<>();
 			ArrayList<Map<?, ?>> entryList = (ArrayList<Map<?, ?>>) bundledJson.get(ENTRY);
 			for (Map<?, ?> entry : entryList) {
@@ -168,6 +172,14 @@ public class IGProcessorTest extends RefreshTest {
 
 		}
     }
+
+	private void testTimestamp(Map<?, ?> bundledJson) throws ParseException {
+		String timeStamp = (String)bundledJson.get("timestamp");
+		assertNotNull(timeStamp);
+
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		assertEquals(dateFormat.format(dateFormat.parse(timeStamp)), dateFormat.format(new Date()));
+	}
 
 	private Map<?, ?> jsonMap(File file) {
 		Map<?, ?> map = null;
