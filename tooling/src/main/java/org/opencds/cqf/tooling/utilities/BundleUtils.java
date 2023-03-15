@@ -67,7 +67,7 @@ public class BundleUtils {
         org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
         ResourceUtils.setIgId(id, bundle, false);
         bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
-        if (addBundleTimestamp == null || addBundleTimestamp.booleanValue()) {
+        if (addBundleTimestamp) {
             bundle.setTimestamp((new Date()));
         }
         if (identifiers!= null && !identifiers.isEmpty()) {

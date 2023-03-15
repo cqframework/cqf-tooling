@@ -121,11 +121,11 @@ public class RefreshIGArgumentProcessor {
             shouldApplySoftwareSystemStamp = false;
         }
 
-        Boolean addBundleTimestamp = true;
+        Boolean addBundleTimestamp = false;
         String addBundleTimestampValue = (String)options.valueOf(SHOULD_ADD_TIMESTAMP_OPTIONS[0]);
 
-        if ((addBundleTimestampValue != null) && addBundleTimestampValue.equalsIgnoreCase("false")) {
-            addBundleTimestamp = false;
+        if ((addBundleTimestampValue != null) && addBundleTimestampValue.equalsIgnoreCase("true")) {
+            addBundleTimestamp = true;
         }
 
         ArrayList<String> paths = new ArrayList<String>();
