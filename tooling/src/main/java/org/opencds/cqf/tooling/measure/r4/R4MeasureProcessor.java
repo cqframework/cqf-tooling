@@ -94,7 +94,7 @@ public class R4MeasureProcessor extends MeasureProcessor {
                         outputPath = measureDirectory.getAbsolutePath();
                     }
                 }
-                IOUtils.writeResource(measure, outputPath, fileEncoding, fhirContext, this.versioned);
+                IOUtils.writeResource(measure, outputPath, fileEncoding, fhirContext, this.versioned, true);
                 String refreshedMeasureName;
                 if (this.versioned && refreshedMeasure.getVersion() != null) {
                     refreshedMeasureName = refreshedMeasure.getName() + "-" + refreshedMeasure.getVersion();
