@@ -107,7 +107,7 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.opencds.cqf.cql</groupId>
+                <groupId>info.cqframework</groupId>
                 <artifactId>evaluator.builder</artifactId>
                 <version>${cql-evaluator.version}</version>
             </dependency>

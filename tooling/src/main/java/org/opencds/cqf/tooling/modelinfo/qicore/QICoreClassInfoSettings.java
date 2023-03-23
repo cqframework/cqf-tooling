@@ -138,46 +138,76 @@ class QICoreClassInfoSettings extends ClassInfoSettings {
                 put("AllergyIntolerance", "code");
                 put("Appointment", "serviceType");
                 put("Basic", "code");
+                put("BodyStructure", "location");
                 put("CarePlan", "category");
                 put("CareTeam", "category");
                 put("ChargeItemDefinition", "code");
                 put("Claim", "type");
                 put("ClinicalImpression", "code");
-                put("Communication", "category");
+                put("Communication", "topic");
+                put("CommunicationNotDone", "topic");
                 put("CommunicationRequest", "category");
                 put("Composition", "type");
                 put("Condition", "code");
+                put("ConditionEncounterDiagnosis", "code");
+                put("ConditionProblemsHealthConcerns", "code");
                 put("Consent", "category");
                 put("Coverage", "type");
                 put("DetectedIssue", "category");
                 put("Device", "type");
                 put("DeviceMetric", "type");
-                put("DeviceRequest", "codeCodeableConcept");
+                put("DeviceRequest", "code");
+                put("DeviceNotRequested", "code");
                 put("DeviceUseStatement", "device.code");
                 put("DiagnosticReport", "code");
+                put("DiagnosticReportLab", "code");
+                put("DiagnosticReportNote", "code");
                 put("Encounter", "type");
                 put("EpisodeOfCare", "type");
                 put("ExplanationOfBenefit", "type");
                 put("Flag", "code");
+                put("FamilyMemberHistory", "relationship");
                 put("Goal", "category");
                 put("GuidanceResponse", "module");
                 put("HealthcareService", "type");
+                put("ImagingStudy", "procedureCode");
                 put("Immunization", "vaccineCode");
+                put("ImmunizationEvaluation", "targetDisease");
+                put("ImmunizationNotDone", "vaccineCode");
+                put("ImmunizationRecommendation", "recommendation.vaccineCode");
+                put("LaboratoryResultObservation", "code");
+                put("Location", "type");
                 put("Library", "topic");
                 put("Measure", "topic");
                 put("MeasureReport", "measure.topic");
                 put("Medication", "code");
                 put("MedicationAdministration", "medication");
+                put("MedicationAdministrationNotDone", "medication");
                 put("MedicationDispense", "medication");
+                put("MedicationDispenseNotDone", "medication");
+                put("MedicationDispenseDeclined", "medication");
                 put("MedicationRequest", "medication");
+                put("MedicationNotRequested", "medication");
                 put("MedicationStatement", "medication");
                 put("MessageDefinition", "event");
                 put("Observation", "code");
+                put("ObservationClinicalTestResult", "code");
+                put("ObservationImagingResult", "code");
+                put("ObservationSurvey", "code");
+                put("ObservationNotDone", "code"); // v4.1.1
+                put("ObservationCancelled", "code"); // v5.0.0
                 put("OperationOutcome", "issue.code");
+                put("Organization", "type");
+                // put("Practitioner", ""); // Not clear what the primary code path should be...
+                put("PractitionerRole", "code");
                 put("Procedure", "code");
+                put("ProcedureNotDone", "code");
                 put("ProcedureRequest", "code");
                 put("Questionnaire", "name");
-                put("ReferralRequest", "type");
+                //put("QuestionnaireResponse", ""); // Not clear what the primary code path should be...
+                put("ServiceRequest", "code");
+                put("ServiceNotRequested", "code");
+                put("RelatedPerson", "relationship");
                 put("RiskAssessment", "code");
                 put("SearchParameter", "target");
                 put("Sequence", "type");
@@ -186,6 +216,38 @@ class QICoreClassInfoSettings extends ClassInfoSettings {
                 put("SupplyDelivery", "type");
                 put("SupplyRequest", "category");
                 put("Task", "code");
+                put("TaskNotDone", "code");
+                put("TaskRejected", "code");
+                put("USCoreImplantableDeviceProfile", "type");
+                //put("USCoreLaboratoryResultObservationProfile", "code"); // v4.1.1
+                put("USCorePediatricBMIforAgeObservationProfile", "code");
+                put("USCorePediatricWeightForHeightObservationProfile", "code");
+                put("USCoreObservationSexualOrientationProfile", "code"); // v5.0.0
+                put("USCoreObservationSocialHistoryProfile", "code"); // v5.0.0
+                put("USCoreObservationSDOHAssessment", "code"); // v5.0.0
+                put("USCorePediatricHeadOccipitalFrontalCircumferencePercentileProfile", "code"); // v5.0.0
+                put("USCorePulseOximetryProfile", "code");
+                put("USCoreSmokingStatusProfile", "code");
+                put("observation-bmi", "code");
+                put("USCoreBMIProfile", "code");
+                put("observation-bodyheight", "code");
+                put("USCoreBodyHeightProfile", "code");
+                put("observation-bodytemp", "code");
+                put("USCoreBodyTemperatureProfile", "code");
+                put("observation-bodyweight", "code");
+                put("USCoreBodyWeightProfile", "code");
+                put("observation-bp", "code");
+                put("USCoreBloodPressureProfile", "code");
+                put("observation-headcircum", "code");
+                put("USCoreHeadCircumferenceProfile", "code");
+                put("observation-heartrate", "code");
+                put("USCoreHeartRateProfile", "code");
+                put("observation-oxygensat", "code");
+                put("USCoreOxygenSaturationProfile", "code");
+                put("observation-resprate", "code");
+                put("USCoreRespiratoryRateProfile", "code");
+                put("observation-vitalspanel", "code");
+                put("USCoreVitalSignsProfile", "code");
             }
         };
     }
