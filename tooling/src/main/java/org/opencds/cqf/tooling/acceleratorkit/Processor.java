@@ -3136,6 +3136,10 @@ public class Processor extends Operation {
                         alias = "E";
                         sb.append(String.format(" %s", alias));
                         sb.append(System.lineSeparator());
+                        if (context.equals("Encounter")) {
+                            sb.append(String.format("    where %s.id = EncounterId", alias));
+                            sb.append(System.lineSeparator());
+                        }
                         appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
                         break;
                     case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-condition":
@@ -3148,7 +3152,7 @@ public class Processor extends Operation {
                         sb.append(System.lineSeparator());
                         if (context.equals("Encounter")) {
                             // TODO: Should this contextualize to encounter?
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
+                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
                             sb.append(System.lineSeparator());
                         }
                         appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
@@ -3160,7 +3164,7 @@ public class Processor extends Operation {
                         sb.append(String.format("    where %s.status = 'completed'", alias));
                         sb.append(System.lineSeparator());
                         if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
+                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
                             sb.append(System.lineSeparator());
                         }
                         appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
@@ -3172,7 +3176,7 @@ public class Processor extends Operation {
                         sb.append(String.format("    where %s.status = 'not-done'", alias));
                         sb.append(System.lineSeparator());
                         if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
+                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
                             sb.append(System.lineSeparator());
                         }
                         appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
@@ -3186,7 +3190,7 @@ public class Processor extends Operation {
                         sb.append("      and Coalesce(MR.doNotPerform, false) is false");
                         sb.append(System.lineSeparator());
                         if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
+                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
                             sb.append(System.lineSeparator());
                         }
                         appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
@@ -3200,7 +3204,7 @@ public class Processor extends Operation {
                         sb.append("      and MR.doNotPerform is true");
                         sb.append(System.lineSeparator());
                         if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
+                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
                             sb.append(System.lineSeparator());
                         }
                         appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
@@ -3214,7 +3218,7 @@ public class Processor extends Operation {
                         sb.append(String.format("      and Coalesce(WC.ModifierExtension(%s, 'who-notDone').value, false) is false", alias));
                         sb.append(System.lineSeparator());
                         if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
+                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
                             sb.append(System.lineSeparator());
                         }
                         appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
@@ -3226,7 +3230,7 @@ public class Processor extends Operation {
                         sb.append(String.format("    where WC.ModifierExtension(%s, 'who-notDone').value is true", alias));
                         sb.append(System.lineSeparator());
                         if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
+                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
                             sb.append(System.lineSeparator());
                         }
                         appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
@@ -3238,7 +3242,7 @@ public class Processor extends Operation {
                         sb.append(String.format("    where %s.status in { 'preparation', 'in-progress', 'on-hold', 'completed' }", alias));
                         sb.append(System.lineSeparator());
                         if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
+                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
                             sb.append(System.lineSeparator());
                         }
                         appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
@@ -3250,7 +3254,7 @@ public class Processor extends Operation {
                         sb.append(String.format("    where %s.status = 'not-done'", alias));
                         sb.append(System.lineSeparator());
                         if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
+                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
                             sb.append(System.lineSeparator());
                         }
                         appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
@@ -3264,7 +3268,7 @@ public class Processor extends Operation {
                         sb.append(String.format("      and Coalesce(%s.doNotPerform, false) is false", alias));
                         sb.append(System.lineSeparator());
                         if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
+                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
                             sb.append(System.lineSeparator());
                         }
                         appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
@@ -3278,7 +3282,7 @@ public class Processor extends Operation {
                         sb.append(String.format("      and %s.doNotPerform is true", alias));
                         sb.append(System.lineSeparator());
                         if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
+                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
                             sb.append(System.lineSeparator());
                         }
                         appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
@@ -3382,7 +3386,14 @@ public class Processor extends Operation {
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
 
-        sb.append(String.format("context %s", context != null ? context : "Patient"));
+        // Context is always patient, will simulate Encounter context with parameterization...
+        if (context != null && context.equals("Encounter")) {
+            sb.append("parameter EncounterId String");
+            sb.append(System.lineSeparator());
+            sb.append(System.lineSeparator());
+        }
+        sb.append("context Patient");
+        //sb.append(String.format("context %s", context != null ? context : "Patient"));
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
 
