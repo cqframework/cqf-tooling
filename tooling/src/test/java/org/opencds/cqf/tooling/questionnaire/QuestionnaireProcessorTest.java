@@ -68,6 +68,7 @@ public class QuestionnaireProcessorTest extends RefreshTest {
         Boolean includeTerminology = true;
         Boolean includePatientScenarios = true;
         Boolean versioned = false;
+        Boolean addBundleTimestamp = false;
 
         IOUtils.resourceDirectories.add(TARGET_PATH + separator + "input" + separator + "resources");
         IOUtils.resourceDirectories.add(TARGET_PATH + separator + "input" + separator + "vocabulary");
@@ -76,7 +77,7 @@ public class QuestionnaireProcessorTest extends RefreshTest {
                         "libraryevaluationtest" + separator + "libraryevaluationtest-bundle.json";
 
         questionnaireProcessor.bundleQuestionnaires(refreshedLibraryNames, TARGET_PATH, binaryPaths, includeDependencies, includeTerminology,
-                includePatientScenarios, versioned, fhirContext, null, IOUtils.Encoding.JSON);
+                includePatientScenarios, versioned, addBundleTimestamp, fhirContext, null, IOUtils.Encoding.JSON);
 
         File outputBundleFile = new File(outputBundleFilePath);
 

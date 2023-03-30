@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -20,7 +21,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 public class BundleUtils {
 
     @SafeVarargs
-    public static Object bundleArtifacts(String id, List<IBaseResource> resources, FhirContext fhirContext, List<Object>... identifiers) {
+    public static Object bundleArtifacts(String id, List<IBaseResource> resources, FhirContext fhirContext, Boolean addBundleTimestamp, List<Object>... identifiers) {
         for (IBaseResource resource : resources) {
             if (resource.getIdElement().getIdPart() == null || resource.getIdElement().getIdPart().equals("")) {
                 ResourceUtils.setIgId(id.replace("-bundle", "-" + UUID.randomUUID()), resource, false);
@@ -33,9 +34,9 @@ public class BundleUtils {
                 return bundleStu3Artifacts(id, resources);
             case R4:
                 if(identifiers != null && identifiers.length > 0){
-                    return bundleR4Artifacts(id, resources, identifiers[0]);
+                    return bundleR4Artifacts(id, resources, identifiers[0], addBundleTimestamp);
                 }
-                return bundleR4Artifacts(id, resources, null);
+                return bundleR4Artifacts(id, resources, null, addBundleTimestamp);
             default:
                 throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
@@ -61,11 +62,14 @@ public class BundleUtils {
         return bundle;
     }
 
-    public static org.hl7.fhir.r4.model.Bundle bundleR4Artifacts(String id, List<IBaseResource> resources, List<Object> identifiers)
+    public static org.hl7.fhir.r4.model.Bundle bundleR4Artifacts(String id, List<IBaseResource> resources, List<Object> identifiers, Boolean addBundleTimestamp)
     {
         org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
         ResourceUtils.setIgId(id, bundle, false);
         bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
+        if (addBundleTimestamp) {
+            bundle.setTimestamp((new Date()));
+        }
         if (identifiers!= null && !identifiers.isEmpty()) {
             org.hl7.fhir.r4.model.Identifier identifier = (org.hl7.fhir.r4.model.Identifier) identifiers.get(0);
             if(identifier.hasValue()) {

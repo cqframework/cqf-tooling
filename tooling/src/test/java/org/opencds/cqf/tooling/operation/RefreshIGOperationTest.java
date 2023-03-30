@@ -1,6 +1,7 @@
 package org.opencds.cqf.tooling.operation;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.BufferedReader;
@@ -96,7 +97,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 		String bundledFilesLocation = iniFile.getParent() + separator + "bundles" + separator + "measure" + separator;
 
-		String args[] = { "-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json" };
+		String args[] = { "-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false" };
 
 		// execute refresh using ARGS
         new RefreshIGOperation().execute(args);
@@ -162,6 +163,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 			// map out entries in the resulting single bundle file:
 			Map<?, ?> bundledJson = this.jsonMap(new File(bundledFileResult));
+			assertNull((bundledJson.get("timestamp")));  // argument "-ts=false" should not attach timestamp to bundle
 			Map<String, String> bundledJsonResourceTypes = new HashMap<>();
 			ArrayList<Map<?, ?>> entryList = (ArrayList<Map<?, ?>>) bundledJson.get(ENTRY);
 			for (Map<?, ?> entry : entryList) {

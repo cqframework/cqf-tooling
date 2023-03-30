@@ -25,13 +25,13 @@ public class HookDataDateRoller {
     }
 
     public JsonObject rollJSONHookDates(JsonObject hook) {
-        if (!hook.get("context").isJsonNull()) {
+        if (hook.has("context")) {
             JsonObject context = hook.getAsJsonObject("context");
             this.rollContextDates(context);
             hook.remove("context");
             hook.add("context", context);
         }
-        if (!hook.get("prefetch").isJsonNull()) {
+        if (hook.has("prefetch")) {
             JsonObject prefetch = hook.getAsJsonObject("prefetch");
             this.rollPrefetchItemsDates(prefetch);
             hook.remove("prefetch");
@@ -41,7 +41,7 @@ public class HookDataDateRoller {
     }
 
     public void rollContextDates(JsonObject context) {
-        if (!context.get("draftOrders").isJsonNull()) {
+        if (context.has("draftOrders")) {
             JsonObject draftOrders = context.getAsJsonObject("draftOrders");
             IBaseResource resource = resourceParser.parseResource(draftOrders.toString());
             if (null == resource) {
@@ -69,7 +69,13 @@ public class HookDataDateRoller {
             }else{
                 continue;
             }
-            IBaseResource resource = resourceParser.parseResource(item.getAsJsonObject("resource").toString());
+            IBaseResource resource;
+            if (item.has("resource")) {
+                resource = resourceParser.parseResource(item.getAsJsonObject("resource").toString());
+            }
+            else {
+                resource = resourceParser.parseResource(item.toString());
+            }
             if (null == resource) {
                 logger.info("This hook did not contain prefetch items");
                 continue;
@@ -79,8 +85,10 @@ public class HookDataDateRoller {
             } else {
                 ResourceDataDateRoller.rollResourceDates(fhirContext, resource);
             }
-            JsonObject response = item.getAsJsonObject("response");
-            item.add("response", response);
+            if (item.has("response")) {
+                JsonObject response = item.getAsJsonObject("response");
+                item.add("response", response);
+            }
             addUpdatedJsonObject(resource, item, "resource");
 //            addUpdatedJsonObject(resource, prefetch, "item" + i);
        }

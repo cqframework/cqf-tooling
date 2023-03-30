@@ -105,7 +105,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
                         outputPath = libraryDirectory.getAbsolutePath();
                     }
                 }
-                IOUtils.writeResource(library, outputPath, fileEncoding, fhirContext, this.versioned);
+                IOUtils.writeResource(library, outputPath, fileEncoding, fhirContext, this.versioned, true);
                 IOUtils.updateCachedResource(library, outputPath);
 
                 String refreshedLibraryName;

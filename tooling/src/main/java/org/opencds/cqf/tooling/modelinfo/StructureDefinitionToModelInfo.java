@@ -98,6 +98,20 @@ public class StructureDefinitionToModelInfo extends Operation {
             -modelName="QICore"
             -modelVersion="4.0.0"
 
+        Arguments for producing QICore 5.0.0 Model Info
+            -resourcePaths="4.0.1;US-Core/5.0.1;QI-Core/5.0.0"
+            -modelName="QICore"
+            -modelVersion="5.0.0"
+
+        NOTE: Once the ModelInfo is produced, there is a bug in the Jackson XML deserializer that requires that the xsi:type attribute be the first
+        attribute in an element with polymorphic child elements. In a regex-search/replace, the following command will address this issue on the
+        resulting ModelInfo file:
+
+        From: <typeInfo ([^>]*) xsi:type="ClassInfo">
+        To: <typeInfo xsi:type="ClassInfo" $1>
+
+        In addition, several recursive types do not resolve correctly in the tooling, those need to be cleaned up manually at this point because I don't have time to address it in the tooling.
+
      */
     @Override
     public void execute(String[] args) {
