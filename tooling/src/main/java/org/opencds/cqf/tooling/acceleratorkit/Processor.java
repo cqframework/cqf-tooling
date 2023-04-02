@@ -64,8 +64,9 @@ public class Processor extends Operation {
     private String testCaseInput; // -testcases (-tc) path to a spreadsheet containing test case data
 
     // TODO: These need to be per scope
-    private String dataElementIdentifierSystem = "http://fhir.org/guides/who/anc-cds/Identifier/anc-data-elements";
-    private String activityCodeSystem = "http://fhir.org/guides/who/anc-cds/CodeSystem/anc-activity-codes";
+    private String dataElementIdentifierSystem = "http://fhir.org/guides/nachc/hiv-cds/Identifier/data-elements";
+    private String contentId;
+    private String activityCodeSystem = "http://fhir.org/guides/nachc/hiv-cds/CodeSystem/activity-codes";
     private String projectCodeSystemBase;
 
     private int questionnaireItemLinkIdCounter = 1;
@@ -184,6 +185,8 @@ public class Processor extends Operation {
 
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
 
+        loadConfig(workbook);
+
         // loadFHIRModel();
 
         if (scopes == null) {
@@ -193,6 +196,76 @@ public class Processor extends Operation {
                 processScope(workbook, scope);
             }
         }
+    }
+
+    private void loadConfig(Workbook workbook) {
+        // Load the "CONFIG" page of the spreadsheet if it is present
+        Sheet sheet = workbook.getSheet("CONFIG");
+        if (sheet == null) {
+            System.out.println(String.format("Sheet %s not found in the Workbook, so no processing was done.", "CONFIG"));
+            return;
+        }
+
+        Iterator<Row> it = sheet.rowIterator();
+        while (it.hasNext()) {
+            Row row = it.next();
+            int headerRow = 1;
+            if (row.getRowNum() <= headerRow) {
+                continue;
+            }
+
+            String key = SpreadsheetHelper.getCellAsString(row.getCell(0));
+            String value = SpreadsheetHelper.getCellAsString(row.getCell(1));
+
+            switch (key) {
+                case "publisher": this.publisher = value; break;
+                case "content": this.content = value; break;
+                case "commonLibraryName": this.commonLibraryName = value; break;
+                case "scope": registerScope(value); break;
+                case "supportedCodeSystem": registerCodeSystem(value); break;
+                default:
+                    if (key.endsWith("Profile")) {
+                        registerProfile(key, value);
+                    }
+                    else {
+                        System.out.println(String.format("Unknown configuration key %s", key));
+                    }
+            }
+        }
+    }
+
+    private String publisher;
+    private String content;
+    private String commonLibraryName;
+
+    private void registerScope(String scopeValue) {
+        String[] values = scopeValue.split("\\|");
+        if (values.length != 2) {
+            System.out.println(String.format("Unrecognized format for scope %s. Should be <code>|<url>", scopeValue));
+        }
+
+        scopeCanonicalBaseMap.put(values[0], values[1]);
+    }
+
+    private void registerCodeSystem(String codeSystemValue) {
+        String[] values = codeSystemValue.split("\\|");
+        if (values.length != 2) {
+            System.out.println(String.format("Unrecognized format for code system %s. Should be <code>|<url>", codeSystemValue));
+        }
+
+        supportedCodeSystems.put(values[0], values[1]);
+    }
+
+    Map<String, List<String>> profileMap = new HashMap<String, List<String>>();
+
+    private void registerProfile(String profileKey, String profileUrl) {
+        List<String> profiles = profileMap.get(profileKey);
+        if (profiles == null) {
+            profiles = new ArrayList<String>();
+            profileMap.put(profileKey, profiles);
+        }
+
+        profiles.add(profileUrl);
     }
 
     private void registerCodeSystems() {
@@ -253,6 +326,8 @@ public class Processor extends Operation {
         ensurePath(outputPath);
 
         if (scope != null && scope.length() > 0) {
+            contentId = getContentId(scope);
+            activityCodeSystem = getActivityCodeSystem(scope);
             setCanonicalBase(scopeCanonicalBaseMap.get(scope.toLowerCase()));
         }
 
@@ -271,7 +346,7 @@ public class Processor extends Operation {
         processQuestionnaires();
 
         // process example resources
-        processExamples();
+        processExamples(scope);
 
         // write all resources
         writeExtensions(outputPath);
@@ -669,7 +744,7 @@ public class Processor extends Operation {
 
                 if (codeSystem == null) {
                     String codeSystemName = system.substring(system.indexOf("CodeSystem/") + "CodeSystem/".length());
-                    codeSystem = createCodeSystem(codeSystemName, projectCodeSystemBase, "Extended Codes CodeSystem",
+                    codeSystem = createCodeSystem(codeSystemName, projectCodeSystemBase, String.format("%s Codes", contentId),
                             "Set of codes representing all concepts used in the implementation guide");
                 }
 
@@ -2640,14 +2715,14 @@ public class Processor extends Operation {
     }
 
     // Generate example resources for each profile
-    public void processExamples() {
+    public void processExamples(String scope) {
         ExampleBuilder eb = new ExampleBuilder();
         eb.setAtlas(getAtlas());
-        eb.setPatientContext("anc-patient-example");
-        eb.setEncounterContext("anc-encounter-example");
-        eb.setLocationContext("anc-location-example");
-        eb.setPractitionerContext("anc-practitioner-example");
-        eb.setPractitionerRoleContext("anc-practitionerrole-example");
+        eb.setPatientContext(scope + "-patient-example");
+        eb.setEncounterContext(scope + "-encounter-example");
+        eb.setLocationContext(scope + "-location-example");
+        eb.setPractitionerContext(scope + "-practitioner-example");
+        eb.setPractitionerRoleContext(scope + "-practitionerrole-example");
         for (StructureDefinition sd : profiles) {
             examples.put(sd.getUrl(), eb.build(sd));
         }
@@ -3079,6 +3154,23 @@ public class Processor extends Operation {
         return null;
     }
 
+    private String getContentId(String scope) {
+        if (scope != null) {
+            return scope.toUpperCase();
+        }
+
+        return "ANC";
+    }
+
+    private String getActivityCodeSystem(String scope) {
+        String canonicalBase = scopeCanonicalBaseMap.get(scope);
+        if (canonicalBase == null) {
+            return activityCodeSystem;
+        }
+
+        return canonicalBase + "/CodeSystem/activity-codes";
+    }
+
     private Coding getActivityCoding(CodeableConcept concept) {
         if (concept.hasCoding()) {
             for (Coding c : concept.getCoding()) {
@@ -3152,6 +3244,162 @@ public class Processor extends Operation {
         }
     };
 
+    private boolean isProfileMap(String profileKey, String profile) {
+        List<String> profiles = profileMap.get(profileKey);
+        if (profiles != null) {
+            for (String p : profiles) {
+                if (p.equals(profile)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isPatientProfile(String profile) {
+        switch (profile) {
+            case "http://hl7.org/fhir/StructureDefinition/Patient":
+            case "http://hl7.org/fhir/us/core/StructureDefinition/uscore-patient":
+            case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient":
+            case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-base-patient":
+                return true;
+            default:
+                return isProfileMap("patientProfile", profile);
+        }
+    }
+
+    private boolean isEncounterProfile(String profile) {
+        switch (profile) {
+            case "http://hl7.org/fhir/StructureDefinition/Encounter":
+            case "http://hl7.org/fhir/us/core/StructureDefinition/uscore-encounter":
+            case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter":
+            case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-base-encounter":
+                return true;
+            default:
+                return isProfileMap("encounterProfile", profile);
+        }
+    }
+
+    private boolean isConditionProfile(String profile) {
+        switch (profile) {
+            case "http://hl7.org/fhir/StructureDefinition/Condition":
+            case "http://hl7.org/fhir/us/core/StructureDefinition/uscore-condition":
+            case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition":
+            case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-condition":
+                return true;
+            default:
+                return isProfileMap("conditionProfile", profile);
+        }
+    }
+
+    private boolean isImmunizationProfile(String profile) {
+        switch (profile) {
+            case "http://hl7.org/fhir/StructureDefinition/Immunization":
+            case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-immunization":
+            case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-immunization":
+                return true;
+            default:
+                return isProfileMap("immunizationProfile", profile);
+        }
+    }
+
+    private boolean isImmunizationNotDoneProfile(String profile) {
+        switch (profile) {
+            case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-immunizationnotdone":
+            case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-immunizationnotdone":
+                return true;
+            default:
+                return isProfileMap("immunizationNotDoneProfile", profile);
+        }
+    }
+
+    private boolean isMedicationRequestProfile(String profile) {
+        switch (profile) {
+            case "http://hl7.org/fhir/StructureDefinition/MedicationRequest":
+            case "http://hl7.org/fhir/us/core/StructureDefinition/uscore-medicationrequest":
+            case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-medicationrequest":
+            case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-medicationrequest":
+                return true;
+            default:
+                return isProfileMap("medicationRequestProfile", profile);
+        }
+    }
+
+    private boolean isMedicationNotRequestedProfile(String profile) {
+        switch (profile) {
+            case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-medicationnotrequested":
+            case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-medicationnotrequested":
+                return true;
+            default:
+                return isProfileMap("medicationNotRequestedProfile", profile);
+        }
+    }
+
+    private boolean isObservationProfile(String profile) {
+        switch (profile) {
+            case "http://hl7.org/fhir/StructureDefinition/Observation":
+            case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation":
+            case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-observation":
+                return true;
+            default:
+                return isProfileMap("observationProfile", profile);
+        }
+    }
+
+    private boolean isObservationNotDoneProfile(String profile) {
+        switch (profile) {
+            case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observationnotdone":
+            case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-observationnotdone":
+                return true;
+            default:
+                return isProfileMap("observationNotDoneProfile", profile);
+        }
+    }
+
+    private boolean isProcedureProfile(String profile) {
+        switch (profile) {
+            case "http://hl7.org/fhir/StructureDefinition/Procedure":
+            case "http://hl7.org/fhir/us/core/StructureDefinition/uscore-procedure":
+            case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure":
+            case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-procedure":
+                return true;
+            default:
+                return isProfileMap("procedureProfile", profile);
+        }
+    }
+
+    private boolean isProcedureNotDoneProfile(String profile) {
+        switch (profile) {
+            case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedurenotdone":
+            case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-procedurenotdone":
+                return true;
+            default:
+                return isProfileMap("procedureNotDoneProfile", profile);
+        }
+    }
+
+    private boolean isServiceRequestProfile(String profile) {
+        switch (profile) {
+            case "http://hl7.org/fhir/StructureDefinition/ServiceRequest":
+            case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-servicerequest":
+            case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-servicerequest":
+                return true;
+            default:
+                return isProfileMap("serviceRequestProfile", profile);
+        }
+    }
+
+    private boolean isServiceNotRequestedProfile(String profile) {
+        switch (profile) {
+            case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-servicenotrequested":
+            case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-servicenotrequested":
+                return true;
+            default:
+                return isProfileMap("serviceNotRequestedProfile", profile);
+        }
+    }
+
     private void writeDataElement(StringBuilder sb, StructureDefinition sd, String context) {
         // TODO: Consider writing this to an extension on the structuredefinition instead of to the retrieveInfo like this
         //for (RetrieveInfo retrieve : retrieves) {
@@ -3211,200 +3459,170 @@ public class Processor extends Operation {
 
                 // TODO: Switch on sd.baseDefinition to provide filtering here (e.g. status = 'not-done')
                 String alias;
-                switch (sd.getBaseDefinition()) {
-                    case "http://hl7.org/fhir/StructureDefinition/Patient":
-                    case "http://hl7.org/fhir/us/core/StructureDefinition/uscore-patient":
-                    case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient":
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-base-patient":
-                        alias = "P";
-                        sb.append(String.format(" %s", alias));
+                if (isPatientProfile(sd.getBaseDefinition())) {
+                    alias = "P";
+                    sb.append(String.format(" %s", alias));
+                    sb.append(System.lineSeparator());
+                    appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
+                }
+                else if (isEncounterProfile(sd.getBaseDefinition())) {
+                    alias = "E";
+                    sb.append(String.format(" %s", alias));
+                    sb.append(System.lineSeparator());
+                    sb.append(String.format("    where %s.status = 'finished'", alias));
+                    if (context.equals("Encounter")) {
+                        sb.append(String.format("    and %s.id = EncounterId", alias));
                         sb.append(System.lineSeparator());
-                        appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
-                        break;
-                    case "http://hl7.org/fhir/StructureDefinition/Encounter":
-                    case "http://hl7.org/fhir/us/core/StructureDefinition/uscore-encounter":
-                    case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter":
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-base-encounter":
-                        alias = "E";
-                        sb.append(String.format(" %s", alias));
+                    }
+                    sb.append(System.lineSeparator());
+                    appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
+                }
+                else if (isConditionProfile(sd.getBaseDefinition())) {
+                    alias = "C";
+                    sb.append(String.format(" %s", alias));
+                    sb.append(System.lineSeparator());
+                    sb.append(String.format("    where %s.clinicalStatus in FC.\"Active Condition\"", alias));
+                    sb.append(System.lineSeparator());
+                    sb.append(String.format("      and %s.verificationStatus ~ FC.\"confirmed\"", alias));
+                    sb.append(System.lineSeparator());
+                    if (context.equals("Encounter")) {
+                        // TODO: Should this contextualize to encounter?
+                        sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
                         sb.append(System.lineSeparator());
-                        sb.append(String.format("    where %s.status = 'finished'", alias));
-                        if (context.equals("Encounter")) {
-                            sb.append(String.format("    and %s.id = EncounterId", alias));
-                            sb.append(System.lineSeparator());
-                        }
+                    }
+                    appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
+                }
+                else if (isImmunizationProfile(sd.getBaseDefinition())) {
+                    alias = "I";
+                    sb.append(String.format(" %s", alias));
+                    sb.append(System.lineSeparator());
+                    sb.append(String.format("    where %s.status = 'completed'", alias));
+                    sb.append(System.lineSeparator());
+                    if (context.equals("Encounter")) {
+                        sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
                         sb.append(System.lineSeparator());
-                        appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
-                        break;
-                    case "http://hl7.org/fhir/StructureDefinition/Condition":
-                    case "http://hl7.org/fhir/us/core/StructureDefinition/uscore-condition":
-                    case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition":
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-condition":
-                        alias = "C";
-                        sb.append(String.format(" %s", alias));
+                    }
+                    appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
+                }
+                else if (isImmunizationNotDoneProfile(sd.getBaseDefinition())) {
+                    alias = "IND";
+                    sb.append(String.format(" %s", alias));
+                    sb.append(System.lineSeparator());
+                    sb.append(String.format("    where %s.status = 'not-done'", alias));
+                    sb.append(System.lineSeparator());
+                    if (context.equals("Encounter")) {
+                        sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
                         sb.append(System.lineSeparator());
-                        sb.append(String.format("    where %s.clinicalStatus in FC.\"Active Condition\"", alias));
+                    }
+                    appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
+                }
+                else if (isMedicationRequestProfile(sd.getBaseDefinition())) {
+                    alias = "MR";
+                    sb.append(String.format(" %s", alias));
+                    sb.append(System.lineSeparator());
+                    sb.append("    where MR.status in { 'draft', 'active', 'on-hold', 'completed' }");
+                    sb.append(System.lineSeparator());
+                    sb.append("      and MR.doNotPerform is not true");
+                    sb.append(System.lineSeparator());
+                    if (context.equals("Encounter")) {
+                        sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
                         sb.append(System.lineSeparator());
-                        sb.append(String.format("      and %s.verificationStatus ~ FC.\"confirmed\"", alias));
+                    }
+                    appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
+                }
+                else if (isMedicationNotRequestedProfile(sd.getBaseDefinition())) {
+                    alias = "MR";
+                    sb.append(String.format(" %s", alias));
+                    sb.append(System.lineSeparator());
+                    sb.append("    where MR.status in { 'draft', 'active', 'on-hold', 'completed' }");
+                    sb.append(System.lineSeparator());
+                    sb.append("      and MR.doNotPerform is true");
+                    sb.append(System.lineSeparator());
+                    if (context.equals("Encounter")) {
+                        sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
                         sb.append(System.lineSeparator());
-                        if (context.equals("Encounter")) {
-                            // TODO: Should this contextualize to encounter?
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
-                            sb.append(System.lineSeparator());
-                        }
-                        appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
-                        break;
-                    case "http://hl7.org/fhir/StructureDefinition/Immunization":
-                    case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-immunization":
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-immunization":
-                        alias = "I";
-                        sb.append(String.format(" %s", alias));
+                    }
+                    appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
+                }
+                else if (isObservationProfile(sd.getBaseDefinition())) {
+                    alias = "O";
+                    sb.append(String.format(" %s", alias));
+                    sb.append(System.lineSeparator());
+                    sb.append(String.format("    where %s.status in { 'final', 'amended', 'corrected' }", alias));
+                    sb.append(System.lineSeparator());
+                    // TODO: Remove the who-notDone modifier from the observation, it should follow the QICore pattern of using a status of cancelled, rather than the notdone modifier
+                    //sb.append(String.format("      and Coalesce(WC.ModifierExtension(%s, 'who-notDone').value, false) is false", alias));
+                    //sb.append(System.lineSeparator());
+                    if (context.equals("Encounter")) {
+                        sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
                         sb.append(System.lineSeparator());
-                        sb.append(String.format("    where %s.status = 'completed'", alias));
+                    }
+                    appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
+                }
+                else if (isObservationNotDoneProfile(sd.getBaseDefinition())) {
+                    alias = "OND";
+                    sb.append(String.format(" %s", alias));
+                    sb.append(System.lineSeparator());
+                    sb.append(String.format("    where %s.status = 'cancelled' }", alias));
+                    //sb.append(String.format("    where WC.ModifierExtension(%s, 'who-notDone').value is true", alias));
+                    sb.append(System.lineSeparator());
+                    if (context.equals("Encounter")) {
+                        sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
                         sb.append(System.lineSeparator());
-                        if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
-                            sb.append(System.lineSeparator());
-                        }
-                        appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
-                        break;
-                    case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-immunizationnotdone":
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-immunizationnotdone":
-                        alias = "IND";
-                        sb.append(String.format(" %s", alias));
+                    }
+                    appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
+                }
+                else if (isProcedureProfile(sd.getBaseDefinition())) {
+                    alias = "P";
+                    sb.append(String.format(" %s", alias));
+                    sb.append(System.lineSeparator());
+                    sb.append(String.format("    where %s.status in { 'preparation', 'in-progress', 'on-hold', 'completed' }", alias));
+                    sb.append(System.lineSeparator());
+                    if (context.equals("Encounter")) {
+                        sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
                         sb.append(System.lineSeparator());
-                        sb.append(String.format("    where %s.status = 'not-done'", alias));
+                    }
+                    appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
+                }
+                else if (isProcedureNotDoneProfile(sd.getBaseDefinition())) {
+                    alias = "PND";
+                    sb.append(String.format(" %s", alias));
+                    sb.append(System.lineSeparator());
+                    sb.append(String.format("    where %s.status = 'not-done'", alias));
+                    sb.append(System.lineSeparator());
+                    if (context.equals("Encounter")) {
+                        sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
                         sb.append(System.lineSeparator());
-                        if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
-                            sb.append(System.lineSeparator());
-                        }
-                        appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
-                        break;
-                    case "http://hl7.org/fhir/StructureDefinition/MedicationRequest":
-                    case "http://hl7.org/fhir/us/core/StructureDefinition/uscore-medicationrequest":
-                    case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-medicationrequest":
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-medicationrequest":
-                        alias = "MR";
-                        sb.append(String.format(" %s", alias));
+                    }
+                    appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
+                }
+                else if (isServiceRequestProfile(sd.getBaseDefinition())) {
+                    alias = "SR";
+                    sb.append(String.format(" %s", alias));
+                    sb.append(System.lineSeparator());
+                    sb.append(String.format("    where %s.status in { 'draft', 'active', 'on-hold', 'completed' }", alias));
+                    sb.append(System.lineSeparator());
+                    sb.append(String.format("      and %s.doNotPerform is not true", alias));
+                    sb.append(System.lineSeparator());
+                    if (context.equals("Encounter")) {
+                        sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
                         sb.append(System.lineSeparator());
-                        sb.append("    where MR.status in { 'draft', 'active', 'on-hold', 'completed' }");
+                    }
+                    appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
+                }
+                else if (isServiceNotRequestedProfile(sd.getBaseDefinition())) {
+                    alias = "SNR";
+                    sb.append(String.format(" %s", alias));
+                    sb.append(System.lineSeparator());
+                    sb.append(String.format("    where %s.status in { 'draft', 'active', 'on-hold', 'completed' }", alias));
+                    sb.append(System.lineSeparator());
+                    sb.append(String.format("      and %s.doNotPerform is true", alias));
+                    sb.append(System.lineSeparator());
+                    if (context.equals("Encounter")) {
+                        sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
                         sb.append(System.lineSeparator());
-                        sb.append("      and MR.doNotPerform is not true");
-                        sb.append(System.lineSeparator());
-                        if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
-                            sb.append(System.lineSeparator());
-                        }
-                        appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
-                        break;
-                    case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-medicationnotrequested":
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-medicationnotrequested":
-                        alias = "MR";
-                        sb.append(String.format(" %s", alias));
-                        sb.append(System.lineSeparator());
-                        sb.append("    where MR.status in { 'draft', 'active', 'on-hold', 'completed' }");
-                        sb.append(System.lineSeparator());
-                        sb.append("      and MR.doNotPerform is true");
-                        sb.append(System.lineSeparator());
-                        if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
-                            sb.append(System.lineSeparator());
-                        }
-                        appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
-                        break;
-                    case "http://hl7.org/fhir/StructureDefinition/Observation":
-                    case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation":
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-observation":
-                        alias = "O";
-                        sb.append(String.format(" %s", alias));
-                        sb.append(System.lineSeparator());
-                        sb.append(String.format("    where %s.status in { 'final', 'amended', 'corrected' }", alias));
-                        sb.append(System.lineSeparator());
-                        // TODO: Remove the who-notDone modifier from the observation, it should follow the QICore pattern of using a status of cancelled, rather than the notdone modifier
-                        //sb.append(String.format("      and Coalesce(WC.ModifierExtension(%s, 'who-notDone').value, false) is false", alias));
-                        //sb.append(System.lineSeparator());
-                        if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
-                            sb.append(System.lineSeparator());
-                        }
-                        appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
-                        break;
-                    case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observationnotdone":
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-observationnotdone":
-                        alias = "OND";
-                        sb.append(String.format(" %s", alias));
-                        sb.append(System.lineSeparator());
-                        sb.append(String.format("    where %s.status = 'cancelled' }", alias));
-                        //sb.append(String.format("    where WC.ModifierExtension(%s, 'who-notDone').value is true", alias));
-                        sb.append(System.lineSeparator());
-                        if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
-                            sb.append(System.lineSeparator());
-                        }
-                        appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
-                        break;
-                    case "http://hl7.org/fhir/StructureDefinition/Procedure":
-                    case "http://hl7.org/fhir/us/core/StructureDefinition/uscore-procedure":
-                    case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure":
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-procedure":
-                        alias = "P";
-                        sb.append(String.format(" %s", alias));
-                        sb.append(System.lineSeparator());
-                        sb.append(String.format("    where %s.status in { 'preparation', 'in-progress', 'on-hold', 'completed' }", alias));
-                        sb.append(System.lineSeparator());
-                        if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
-                            sb.append(System.lineSeparator());
-                        }
-                        appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
-                        break;
-                    case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedurenotdone":
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-procedurenotdone":
-                        alias = "PND";
-                        sb.append(String.format(" %s", alias));
-                        sb.append(System.lineSeparator());
-                        sb.append(String.format("    where %s.status = 'not-done'", alias));
-                        sb.append(System.lineSeparator());
-                        if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
-                            sb.append(System.lineSeparator());
-                        }
-                        appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
-                        break;
-                    case "http://hl7.org/fhir/StructureDefinition/ServiceRequest":
-                    case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-servicerequest":
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-servicerequest":
-                        alias = "SR";
-                        sb.append(String.format(" %s", alias));
-                        sb.append(System.lineSeparator());
-                        sb.append(String.format("    where %s.status in { 'draft', 'active', 'on-hold', 'completed' }", alias));
-                        sb.append(System.lineSeparator());
-                        sb.append(String.format("      and %s.doNotPerform is not true", alias));
-                        sb.append(System.lineSeparator());
-                        if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
-                            sb.append(System.lineSeparator());
-                        }
-                        appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
-                        break;
-                    case "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-servicenotrequested":
-                    case "http://fhir.org/guides/who/anc-cds/StructureDefinition/anc-servicenotrequested":
-                        alias = "SNR";
-                        sb.append(String.format(" %s", alias));
-                        sb.append(System.lineSeparator());
-                        sb.append(String.format("    where %s.status in { 'draft', 'active', 'on-hold', 'completed' }", alias));
-                        sb.append(System.lineSeparator());
-                        sb.append(String.format("      and %s.doNotPerform is true", alias));
-                        sb.append(System.lineSeparator());
-                        if (context.equals("Encounter")) {
-                            sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = EncounterId", alias));
-                            sb.append(System.lineSeparator());
-                        }
-                        appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
-                        break;
-                    default:
-                        break;
+                    }
+                    appendReturnClause(sb, fhirElementPath, alias, inContext, useSelector);
                 }
                 sb.append(System.lineSeparator());
                 sb.append(System.lineSeparator());
