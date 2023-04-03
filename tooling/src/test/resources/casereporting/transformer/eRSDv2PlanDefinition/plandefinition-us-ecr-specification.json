@@ -6,9 +6,9 @@
       "http://hl7.org/fhir/us/ecr/StructureDefinition/ersd-plandefinition"
     ]
   },
-  "text": {
-    "status": "extensions",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative: PlanDefinition</b></p><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\">Resource PlanDefinition \"us-ecr-specification\" </p><p style=\"margin-bottom: 0px\">Profile: <a href=\"StructureDefinition-ersd-plandefinition.html\">eRSD PlanDefinition</a></p></div><p><b>Variable</b>: <span title=\"text/fhirpath\"><code>14</code></span>(<b>normalReportingDuration</b>)</p><p><b>url</b>: <code>http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification</code></p><p><b>version</b>: 2.1.0</p><p><b>name</b>: PlanDefinition_eRSD_Instance_Example</p><p><b>title</b>: eRSD PlanDefinition Instance Example</p><p><b>type</b>: Workflow Definition <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-plan-definition-type.html\">PlanDefinitionType</a>#workflow-definition)</span></p><p><b>status</b>: active</p><p><b>experimental</b>: true</p><p><b>date</b>: 2020-07-31 12:32:29-0500</p><p><b>publisher</b>: HL7 Public Health Work Group (http://www.hl7.org/Special/committees/pher/index.cfm)</p><p><b>contact</b>: HL7 International - Public Health: <a href=\"http://www.hl7.org/Special/committees/pher\">http://www.hl7.org/Special/committees/pher</a></p><p><b>description</b>: An example ersd PlanDefinition</p><p><b>jurisdiction</b>: United States of America <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (unknown#US)</span></p><p><b>effectivePeriod</b>: 2020-12-01 --&gt; (ongoing)</p><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the start of the reporting workflow in response to the encounter-start event.</p><p><b>textEquivalent</b>: Start the reporting workflow in response to an encounter-start event</p><p><b>code</b>: Initiate a reporting workflow <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#initiate-reporting-workflow)</span></p><h3>RelatedActions</h3><table class=\"grid\"><tr><td>-</td><td><b>ActionId</b></td><td><b>Relationship</b></td><td><b>Offset[x]</b></td></tr><tr><td>*</td><td>check-suspected-disorder</td><td>before-start</td><td>1 h<span style=\"background: LightGoldenRodYellow\"> (Details: UCUM code h = 'h')</span></td></tr></table></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the start of the check suspected disorder reporting workflow in response to the encounter-start event.</p><p><b>textEquivalent</b>: Check suspected disorders for immediate reportability and setup jobs for future reportability checks.</p><p><b>code</b>: Execute a series of actions to accomplish reporting <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#execute-reporting-workflow)</span></p><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the check for suspected disorder reportability to create the patients eICR.</p><p><b>textEquivalent</b>: Check Trigger Codes based on Suspected Reportable Value set.</p><p><b>code</b>: Evaluate candidate patient's data against trigger codes to determine reportability <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#check-trigger-codes)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>code</b>: Evaluate condition to determine reportability <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#evaluate-condition)</span></p></blockquote></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the check for suspected reportability of the eICR.</p><p><b>textEquivalent</b>: Check Reportability and setup jobs for future reportability checks.</p><p><b>code</b>: Execute a series of actions to accomplish reporting <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#execute-reporting-workflow)</span></p><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the check for reportability to create the patients eICR.</p><p><b>textEquivalent</b>: Check Trigger Codes based on RCTC Value sets.</p><p><b>code</b>: Evaluate candidate patient's data against trigger codes to determine reportability <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#check-trigger-codes)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>code</b>: Evaluate condition to determine reportability <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#evaluate-condition)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>code</b>: Evaluate condition to determine reportability <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#evaluate-condition)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>code</b>: Complete reporting for the patient <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#complete-reporting)</span></p></blockquote></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the creation of the eICR. It subsequently calls validate.</p><p><b>textEquivalent</b>: Create eICR</p><p><b>code</b>: Create a Report containing Patient's data for patients who passed the check-reportability test <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#create-report)</span></p><h3>RelatedActions</h3><table class=\"grid\"><tr><td>-</td><td><b>ActionId</b></td><td><b>Relationship</b></td></tr><tr><td>*</td><td>validate-eicr</td><td>before-start</td></tr></table></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the validation of the eICR. It subsequently calls route-and-send.</p><p><b>textEquivalent</b>: Validate eICR</p><p><b>code</b>: Validate Report against specified profiles and terminologies. <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#validate-report)</span></p><h3>RelatedActions</h3><table class=\"grid\"><tr><td>-</td><td><b>ActionId</b></td><td><b>Relationship</b></td></tr><tr><td>*</td><td>route-and-send-eicr</td><td>before-start</td></tr></table></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the routing and sending of the eICR.</p><p><b>textEquivalent</b>: Route and send eICR</p><p><b>code</b>: Submit the report to specified endpoint <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#submit-report)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the start of the reporting workflow in response to the encounter-modified event</p><p><b>textEquivalent</b>: Start the reporting workflow in response to an encounter-modified event</p><p><b>code</b>: Initiate a reporting workflow <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#initiate-reporting-workflow)</span></p><blockquote><p><b>condition</b></p><p><b>kind</b>: applicability</p></blockquote><h3>RelatedActions</h3><table class=\"grid\"><tr><td>-</td><td><b>ActionId</b></td><td><b>Relationship</b></td></tr><tr><td>*</td><td>create-eicr</td><td>before-start</td></tr></table></blockquote></div>"
+  "text" : {
+    "status" : "extensions",
+    "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\">\n    <table class=\"grid dict\">\n        \n        <tr>\n            <th scope=\"row\"><b>Id: </b></th>\n            <td style=\"padding-left: 4px;\">us-ecr-specification</td>\n        </tr>\n        \n        \n        <tr>\n            <th scope=\"row\"><b>Url: </b></th>\n            <td style=\"padding-left: 4px;\"><a href=\"http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification\">http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification</a></td>\n        </tr>\n        \n        \n        <tr>\n            <th scope=\"row\"><b>Version: </b></th>\n            <td style=\"padding-left: 4px;\">2022.1.0</td>\n        </tr>\n        \n        \n        \n        <tr>\n            <th scope=\"row\"><b>Name: </b></th>\n            <td style=\"padding-left: 4px;\">US_eCR_Specification</td>\n        </tr>\n        \n        \n        <tr>\n            <th scope=\"row\"><b>Title: </b></th>\n            <td style=\"padding-left: 4px;\">US eCR Specification</td>\n        </tr>\n        \n        \n        \n        <tr>\n            <th scope=\"row\"><b>Status: </b></th>\n            <td style=\"padding-left: 4px;\">active</td>\n        </tr>\n        \n        \n        <tr>\n            <th scope=\"row\"><b>Experimental: </b></th>\n            <td style=\"padding-left: 4px;\">true</td>\n        </tr>\n        \n        \n        <tr>\n            <th scope=\"row\"><b>Type: </b></th>\n            <td style=\"padding-left: 4px;\">\n                \n                    \n                        \n                        <p style=\"margin-bottom: 5px;\">\n                            <b>system: </b> <span><a href=\"http://terminology.hl7.org/CodeSystem/plan-definition-type\">http://terminology.hl7.org/CodeSystem/plan-definition-type</a></span>\n                        </p>\n                        \n                        \n                        <p style=\"margin-bottom: 5px;\">\n                            <b>code: </b> <span>workflow-definition</span>\n                        </p>\n                        \n                        \n                        <p style=\"margin-bottom: 5px;\">\n                            <b>display: </b> <span>Workflow Definition</span>\n                        </p>\n                        \n                    \n                \n                \n            </td>\n        </tr>\n        \n        \n        \n        <tr>\n            <th scope=\"row\"><b>Date: </b></th>\n            <td style=\"padding-left: 4px;\">2023-03-31 12:32:29-0500</td>\n        </tr>\n        \n        \n        <tr>\n            <th scope=\"row\"><b>Publisher: </b></th>\n            <td style=\"padding-left: 4px;\">Centers for Disease Control and Prevention (CDC)</td>\n        </tr>\n        \n        \n        <tr>\n            <th scope=\"row\"><b>Description: </b></th>\n            <td style=\"padding-left: 4px;\">An example ersd PlanDefinition</td>\n        </tr>\n        \n        \n        \n        \n        \n        \n        <tr>\n            <th scope=\"row\"><b>Jurisdiction: </b></th>\n            <td style=\"padding-left: 4px;\">US</td>\n        </tr>\n        \n        \n        \n        \n        \n        \n        \n        <tr>\n            <th scope=\"row\"><b>Effective Period: </b></th>\n            <td style=\"padding-left: 4px;\">2020-12-01..</td>\n        </tr>\n        \n        \n        \n        <tr>\n          <th scope=\"row\"><b>Related Artifacts: </b></th>\n          <td style=\"padding-left: 4px;\">\n            \n            \n            \n            <p><b>Dependencies</b></p>\n            <ul>\n              \n                <li><a href=\"http://ersd.aimsplatform.org/fhir/Library/rctc\">http://ersd.aimsplatform.org/fhir/Library/rctc</a></li>\n              \n            </ul>\n            \n            \n            \n            \n            \n          </td>\n        </tr>\n        \n\n        \n        <tr>\n          <th scope=\"row\"><b>Libraries: </b></th>\n          <td style=\"padding-left: 4px;\">\n            <table class=\"grid-dict\">\n              \n                <tr><td><a href=\"http://fhir.org/guides/cdc/opioid-cds/Library/OpioidCDSREC11\">http://fhir.org/guides/cdc/opioid-cds/Library/OpioidCDSREC11</a></td></tr>\n              \n            </table>\n          </td>\n        </tr>\n        \n\n        \n        <tr>\n          <th scope=\"row\"><b>Actions: </b></th>\n          <td style=\"padding-left: 4px;\">\n            <table class=\"grid-dict\">\n              \n                <tr>\n                  <td>\n                    Start the reporting workflow in response to an encounter-start event<br/>\n                    <b>When:</b> <i>named-event:</i> encounter-start<br/>\n                    \n                    <b>Then:</b>\n                    \n                      \n                      \n                    \n                  </td>\n                </tr>\n              \n                <tr>\n                  <td>\n                    Check suspected disorders for immediate reportability and setup jobs for future reportability checks.<br/>\n                    \n                    \n                    <b>Then:</b>\n                    \n                      <table class=\"grid-dict\">\n                        \n                          <tr>\n                            <td>\n                              Check Trigger Codes based on Suspected Reportable and Lab Order Test Names Value set.<br/>\n                              \n                              <b>If:</b> <i>applicability:</i>  <i>(%suspectedDisorderConditions.exists() or %suspectedDisorderLabOrders.exists())</i><br/>\n                              <b>Then:</b>\n                              \n                                \n                                \n                              \n                            </td>\n                          </tr>\n                        \n                          <tr>\n                            <td>\n                              <b> :</b> <br/>\n                              \n                              <b>If:</b> <i>applicability:</i>  <i>(%inprogressencounter.where((status = 'in-progress' and %encounterStartDate + 1 day * %normalReportingDuration &amp;gt;= now()) or (status = 'finished' and %encounterEndDate + 72 hours &amp;gt;= now())).select(true))</i><br/>\n                              <b>Then:</b>\n                              \n                                \n                                \n                              \n                            </td>\n                          </tr>\n                        \n                          <tr>\n                            <td>\n                              <b> :</b> <br/>\n                              \n                              <b>If:</b> <i>applicability:</i>  <i>(%terminatedencounter.where((status = 'in-progress' and %encounterStartDate + 1 day * %normalReportingDuration &amp;lt; now()) or (status = 'finished' and %encounterEndDate + 72 hours &amp;lt; now())).select(true))</i><br/>\n                              <b>Then:</b>\n                              \n                                \n                                \n                              \n                            </td>\n                          </tr>\n                        \n                          <tr>\n                            <td>\n                              <b> :</b> <br/>\n                              \n                              <b>If:</b> <i>applicability:</i>  <i>(%lateCompletedEncounter.exists(status = 'finished'))</i><br/>\n                              <b>Then:</b>\n                              \n                                \n                                \n                              \n                            </td>\n                          </tr>\n                        \n                      </table>\n                    \n                  </td>\n                </tr>\n              \n                <tr>\n                  <td>\n                    Check Reportability and setup jobs for future reportability checks.<br/>\n                    \n                    \n                    <b>Then:</b>\n                    \n                      <table class=\"grid-dict\">\n                        \n                          <tr>\n                            <td>\n                              Check Trigger Codes based on RCTC Value sets.<br/>\n                              \n                              <b>If:</b> <i>applicability:</i>  <i>((%encounterStartDate + 1 day * %normalReportingDuration &amp;gt;= now()) and (%conditions.exists() or %encounters.exists() or %immunizations.exists() or %labOrders.exists() or %labTests.exists() or %labResults.exists() or %medicationAdministrations.exists() or %medicationOrders.exists() or %medicationDispenses.exists()))</i><br/>\n                              <b>Then:</b>\n                              \n                                \n                                \n                              \n                            </td>\n                          </tr>\n                        \n                          <tr>\n                            <td>\n                              <b> :</b> <br/>\n                              \n                              <b>If:</b> <i>applicability:</i>  <i>(%lastReportSubmissionDate &amp;lt; now() - 72 hours)</i><br/>\n                              <b>Then:</b>\n                              \n                                \n                                \n                              \n                            </td>\n                          </tr>\n                        \n                          <tr>\n                            <td>\n                              <b> :</b> <br/>\n                              \n                              <b>If:</b> <i>applicability:</i>  <i>(%inprogressencounter.where(status = 'in-progress' and %encounterStartDate + 1 day * %normalReportingDuration &amp;gt;= now() or (status = 'finished' and %encounterEndDate + 72 hours &amp;gt;= now())).exists())</i><br/>\n                              <b>Then:</b>\n                              \n                                \n                                \n                              \n                            </td>\n                          </tr>\n                        \n                          <tr>\n                            <td>\n                              <b> :</b> <br/>\n                              \n                              <b>If:</b> <i>applicability:</i>  <i>(%termencounter.where((status = 'in-progress' and %encounterStartDate + 1 day * %normalReportingDuration &amp;lt; now()) or (status = 'finished' and %encounterEndDate + 72 hours &amp;lt; now())).select(true))</i><br/>\n                              <b>Then:</b>\n                              \n                                \n                                \n                              \n                            </td>\n                          </tr>\n                        \n                          <tr>\n                            <td>\n                              <b> :</b> <br/>\n                              \n                              <b>If:</b> <i>applicability:</i>  <i>(%completedEncounter.exists(status = 'finished'))</i><br/>\n                              <b>Then:</b>\n                              \n                                \n                                \n                              \n                            </td>\n                          </tr>\n                        \n                      </table>\n                    \n                  </td>\n                </tr>\n              \n                <tr>\n                  <td>\n                    Create eICR<br/>\n                    \n                    \n                    <b>Then:</b>\n                    \n                      \n                      \n                    \n                  </td>\n                </tr>\n              \n                <tr>\n                  <td>\n                    Validate eICR<br/>\n                    \n                    \n                    <b>Then:</b>\n                    \n                      \n                      \n                    \n                  </td>\n                </tr>\n              \n                <tr>\n                  <td>\n                    Route and send eICR<br/>\n                    \n                    \n                    <b>Then:</b>\n                    \n                      \n                      \n                    \n                  </td>\n                </tr>\n              \n                <tr>\n                  <td>\n                    Start the reporting workflow in response to an encounter-modified event<br/>\n                    <b>When:</b> <i>named-event:</i> encounter-modified<br/>\n                    <b>If:</b> <i>applicability:</i>  <i>(%encounter.where(period.start + 1 day * %normalReportingDuration &amp;lt; now()).select(true))</i><br/>\n                    <b>Then:</b>\n                    \n                      \n                      \n                    \n                  </td>\n                </tr>\n              \n            </table>\n          </td>\n        </tr>\n        \n    </table>\n</div>"
   },
   "extension": [
     {
@@ -48,7 +48,7 @@
     }
   ],
   "url": "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "name": "US_eCR_Specification",
   "title": "US eCR Specification",
   "type": {
@@ -62,7 +62,7 @@
   },
   "status": "active",
   "experimental": true,
-  "date": "2020-07-31T12:32:29.858-05:00",
+  "date": "2023-03-31T12:32:29.858-05:00",
   "publisher": "eCR",
   "contact": [
     {
@@ -243,6 +243,22 @@
                 }
               ],
               "type": "ServiceRequest",
+              "codeFilter": [
+                {
+                  "path": "code",
+                  "valueSet": "http://ersd.aimsplatform.org/fhir/ValueSet/lotc"
+                }
+              ]
+            },
+            {
+              "id": "diagnosticOrders",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+                  "valueString": "DiagnosticReport?patient=Patient/{{context.patientId}}"
+                }
+              ],
+              "type": "DiagnosticReport",
               "codeFilter": [
                 {
                   "path": "code",
@@ -616,6 +632,22 @@
               ]
             },
             {
+              "id": "labResultValues",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+                  "valueString": "labTests"
+                }
+              ],
+              "type": "Observation",
+              "codeFilter": [
+                {
+                  "path": "value",
+                  "valueSet": "http://ersd.aimsplatform.org/fhir/ValueSet/lrtc"
+                }
+              ]
+            },
+            {
               "id": "diagnosticResults",
               "extension": [
                 {
@@ -628,6 +660,22 @@
                 {
                   "path": "code",
                   "valueSet": "http://ersd.aimsplatform.org/fhir/ValueSet/ostc"
+                }
+              ]
+            },
+            {
+              "id": "diagnosticResultValues",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+                  "valueString": "diagnosticOrders"
+                }
+              ],
+              "type": "DiagnosticReport",
+              "codeFilter": [
+                {
+                  "path": "code",
+                  "valueSet": "http://ersd.aimsplatform.org/fhir/ValueSet/lrtc"
                 }
               ]
             }
@@ -954,6 +1002,84 @@
           "profile": [
             "http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab"
           ]
+        },
+        {
+          "id": "odhData-loinc",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+              "valueString": "Observation?patient=Patient/{{context.patientId}}&code=http://loinc.org|11295-3"
+            }
+          ],
+          "type": "Observation",
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-social-history"
+          ]
+        },
+        {
+          "id": "odhData-snomed",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+              "valueString": "Observation?patient=Patient/{{context.patientId}}&code=http://snomed.info/sct|224362002,364703007"
+            }
+          ],
+          "type": "Observation",
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-social-history"
+          ]
+        },
+        {
+          "id": "pregnancyObservations",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+              "valueString": "Observation?patient=Patient/{{context.patientId}}&code=http://loinc.org|90767-5"
+            }
+          ],
+          "type": "Observation",
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-social-history"
+          ]
+        },
+        {
+          "id": "pregnancyConditions",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+              "valueString": "Condition?patient=Patient/{{context.patientId}}&code=http://snomed.info/sct|77386006"
+            }
+          ],
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+          ]
+        },
+        {
+          "id": "travelData-loinc",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+              "valueString": "Observation?patient=Patient/{{context.patientId}}&code=http://loinc.org|29762-2"
+            }
+          ],
+          "type": "Observation",
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-social-history"
+          ]
+        },
+        {
+          "id": "travelData-snomed",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+              "valueString": "Observation?patient=Patient/{{context.patientId}}&code=http://snomed.info/sct|161085007,443846001,420008001,46521000175102,34831000175105,161086008"
+            }
+          ],
+          "type": "Observation",
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-social-history"
+          ]
         }
       ],
       "output": [
@@ -1109,6 +1235,28 @@
             "language": "text/fhirpath",
             "expression": "%encounter.where(period.start + 1 day * %normalReportingDuration < now()).select(true)"
           }
+        }
+      ],
+      "input": [
+        {
+          "id": "modifiedPatient",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+              "valueString": "Patient/{{context.patientId}}"
+            }
+          ],
+          "type": "Patient"
+        },
+        {
+          "id": "modifiedEncounter",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+              "valueString": "Encounter/{{context.encounterId}}"
+            }
+          ],
+          "type": "Encounter"
         }
       ],
       "relatedAction": [

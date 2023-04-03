@@ -26,7 +26,7 @@ import java.util.List;
 public class ErsdTransformer extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(ErsdTransformer.class);
     private static final String PUBLISHER = "Association of Public Health Laboratories (APHL)";
-    private static final String RCTCLIBRARYURL = "http://hl7.org/fhir/us/ecr/Library/rctc";
+    private static final String RCTCLIBRARYURL = "http://ersd.aimsplatform.org/fhir/Library/rctc";
     private FhirContext ctx;
     private FhirValidator validator;
     private IValidatorModule module = new UsPublicHealthValidatorModule();
@@ -36,6 +36,7 @@ public class ErsdTransformer extends Operation {
     private final String usPhTriggeringValueSetProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset";
     private PlanDefinition v2PlanDefinition;
     private String version;
+    private Period effectivePeriod;
 
     public ErsdTransformer() {
         ctx = FhirContext.forR4();
@@ -137,9 +138,13 @@ public class ErsdTransformer extends Operation {
 
     private PlanDefinition getV2PlanDefinition(String pathToPlanDefinition) {
         PlanDefinition planDef = null;
+        System.out.println(String.format("PlanDefinitionPath: '%s'", pathToPlanDefinition));
         if (pathToPlanDefinition != null && !pathToPlanDefinition.isEmpty()) {
             planDef = (PlanDefinition)IOUtils.readResource(pathToPlanDefinition, ctx, true);
         }
+
+        planDef.setEffectivePeriod(this.effectivePeriod);
+
         return planDef;
     }
 
@@ -184,6 +189,8 @@ public class ErsdTransformer extends Operation {
                 .filter(x -> x.hasResource()
                     && x.getResource().fhirType().equals("Library")
                     && ((Library)x.getResource()).getUrl().equals(RCTCLIBRARYURL)).findFirst().get().getResource();
+
+        this.effectivePeriod = rctc.getEffectivePeriod();
 
         if (rctc.hasVersion()) {
             this.version = rctc.getVersion();
