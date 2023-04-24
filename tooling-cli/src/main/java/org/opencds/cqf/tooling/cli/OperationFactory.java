@@ -20,6 +20,7 @@ import org.opencds.cqf.tooling.operation.GenerateCQLFromDroolOperation;
 import org.opencds.cqf.tooling.operation.IgBundler;
 import org.opencds.cqf.tooling.operation.PostBundlesInDirOperation;
 import org.opencds.cqf.tooling.operation.PostmanCollectionOperation;
+import org.opencds.cqf.tooling.operation.StripGeneratedContentOperation;
 import org.opencds.cqf.tooling.operation.ProfilesToSpreadsheet;
 import org.opencds.cqf.tooling.operation.QICoreElementsToSpreadsheet;
 import org.opencds.cqf.tooling.operation.RefreshIGOperation;
@@ -39,7 +40,6 @@ import org.opencds.cqf.tooling.terminology.ToJsonValueSetDbOperation;
 import org.opencds.cqf.tooling.terminology.VSACBatchValueSetGenerator;
 import org.opencds.cqf.tooling.terminology.VSACValueSetGenerator;
 import org.opencds.cqf.tooling.terminology.distributable.DistributableValueSetGenerator;
-import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.TemplateToValueSetGenerator;
 
 
 class OperationFactory {
@@ -133,6 +133,8 @@ class OperationFactory {
                 return new ProfilesToSpreadsheet();
             case "QICoreElementsToSpreadsheet":
                 return new QICoreElementsToSpreadsheet();
+            case "StripGeneratedContent":
+                return new StripGeneratedContentOperation();
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operationName);
         }
