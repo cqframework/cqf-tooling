@@ -141,9 +141,8 @@ public class ErsdTransformer extends Operation {
         System.out.println(String.format("PlanDefinitionPath: '%s'", pathToPlanDefinition));
         if (pathToPlanDefinition != null && !pathToPlanDefinition.isEmpty()) {
             planDef = (PlanDefinition)IOUtils.readResource(pathToPlanDefinition, ctx, true);
+            planDef.setEffectivePeriod(this.effectivePeriod);
         }
-
-        planDef.setEffectivePeriod(this.effectivePeriod);
 
         return planDef;
     }
