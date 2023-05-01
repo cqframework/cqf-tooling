@@ -199,16 +199,19 @@
         },
         {
             "type": "java",
-            "name": "PostBundles to Fhir Uri",
+            "name": "Generate ModelInfo",
             "request": "launch",
-            "mainClass": "jreyno77.com.github.Main",
+            "mainClass": "org.opencds.cqf.tooling.cli.Main",
             "projectName": "tooling-cli",
             "args": [
-                "-PostBundlesInDir",
-                "-dp=../hedis-ig-r4/bundles/MRP-FHIR/MRP-FHIR-files",
-                "-fs=http://localhost:8080/cqf-ruler-r4/fhir",
-                "-fv=fhir4",
-                "-e=json"
+                "-GenerateMIs",
+                "-ip=../HL7/FHIR-Spec",
+                "-rp=4.0.1;US-Core/3.1.1;QI-Core/4.1.1",
+                "-mn=QICore",
+                "-mv=4.1.1",
+                "-im=true",
+                "-ucp=true",
+                "-op=./output/modelinfo"
             ]
         }
     ]
