@@ -2365,6 +2365,8 @@ public class Processor extends Operation {
                         Coding codeToBind = codesToBind.toCodings().get(0);
                         // Add the code to the concepts list by the valueset label so it can be used by reference in a retrieve
                         concepts.put(valueSetLabel, codeToBind);
+                        // Add any concept mappings (since we're not creating a value set)
+                        addConceptMappings(codesToBind.getCodes().get(0));
                         // Bind the current element to the code
                         bindCodingToElement(targetElement, dictionaryElement, codeToBind);
                         if (isPrimaryDataElement && isObservationCode) {
