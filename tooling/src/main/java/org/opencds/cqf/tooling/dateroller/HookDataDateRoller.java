@@ -89,8 +89,7 @@ public class HookDataDateRoller {
                 JsonObject response = item.getAsJsonObject("response");
                 item.add("response", response);
             }
-            addUpdatedJsonObject(resource, item, "resource");
-//            addUpdatedJsonObject(resource, prefetch, "item" + i);
+            addUpdatedJsonObject(resource, prefetch, "item" + i);
        }
     }
 
@@ -100,6 +99,5 @@ public class HookDataDateRoller {
         JsonElement newItem = JsonParser.parseString(resourceParser.setPrettyPrint(true).encodeResourceToString(resource));
         objectToAdd = newItem.getAsJsonObject();
         objectToAddTo.add(objectName, objectToAdd);
-
     }
 }
