@@ -3,6 +3,10 @@ package org.opencds.cqf.tooling.cli;
 //import org.opencds.cqf.tooling.jsonschema.SchemaGenerator;
 import org.opencds.cqf.tooling.casereporting.transformer.ErsdTransformer;
 import org.opencds.cqf.tooling.dateroller.DataDateRollerOperation;
+import org.opencds.cqf.tooling.terminology.generate.FhirTxExpansion;
+import org.opencds.cqf.tooling.terminology.generate.LoincHierarchyApi;
+import org.opencds.cqf.tooling.terminology.generate.RxMixApi;
+import org.opencds.cqf.tooling.terminology.generate.ValueSetsFromConfig;
 import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.TemplateToValueSetGenerator;
 import org.apache.commons.lang3.NotImplementedException;
 import org.opencds.cqf.tooling.Operation;
@@ -39,7 +43,6 @@ import org.opencds.cqf.tooling.terminology.ToJsonValueSetDbOperation;
 import org.opencds.cqf.tooling.terminology.VSACBatchValueSetGenerator;
 import org.opencds.cqf.tooling.terminology.VSACValueSetGenerator;
 import org.opencds.cqf.tooling.terminology.distributable.DistributableValueSetGenerator;
-import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.TemplateToValueSetGenerator;
 
 
 class OperationFactory {
@@ -95,6 +98,14 @@ class OperationFactory {
                 return new RefreshStu3MeasureOperation();
             case "RefreshR4Measure":
                 return new RefreshR4MeasureOperation();
+            case "RxMixWorkflowApi":
+                return new RxMixApi();
+            case "FhirTxExpansion":
+                return new FhirTxExpansion();
+            case "LoincHierarchyApi":
+                return new LoincHierarchyApi();
+            case "ValueSetsFromConfig":
+                return new ValueSetsFromConfig();
             case "ScaffoldIG":
                 return new ScaffoldOperation();
             case "TestIG":

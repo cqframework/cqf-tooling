@@ -124,11 +124,11 @@ public class IOUtils
     }
     
     public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext, Boolean versioned) {
-        writeResource(resource, path, encoding, fhirContext, true, null, false);
+        writeResource(resource, path, encoding, fhirContext, true, null, true);
     }
 
     public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext, Boolean versioned, String outputFileName) {
-        writeResource(resource, path, encoding, fhirContext, true, outputFileName, false);
+        writeResource(resource, path, encoding, fhirContext, true, outputFileName, true);
     }
 
     public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext, Boolean versioned, boolean prettyPrintOutput) {
@@ -193,7 +193,7 @@ public class IOUtils
     }
 
     public static void writeBundle(Object bundle, String path, Encoding encoding, FhirContext fhirContext, String outputFileName) {
-        writeBundle(bundle, path, encoding, fhirContext, outputFileName, false);
+        writeBundle(bundle, path, encoding, fhirContext, outputFileName, true);
     }
 
     public static void writeBundle(Object bundle, String path, Encoding encoding, FhirContext fhirContext, boolean prettyPrintOutput) {
