@@ -134,7 +134,7 @@ class QICoreClassInfoSettings extends ClassInfoSettings {
         this.primaryCodePath = new HashMap<String, String>() {
             {
                 put("ActivityDefinition", "topic");
-                put("AdverseEvent", "type");
+                put("AdverseEvent", "event");
                 put("AllergyIntolerance", "code");
                 put("Appointment", "serviceType");
                 put("Basic", "code");
@@ -158,7 +158,7 @@ class QICoreClassInfoSettings extends ClassInfoSettings {
                 put("DeviceMetric", "type");
                 put("DeviceRequest", "code");
                 put("DeviceNotRequested", "code");
-                put("DeviceUseStatement", "device.code");
+                put("DeviceUseStatement", "device.type");
                 put("DiagnosticReport", "code");
                 put("DiagnosticReportLab", "code");
                 put("DiagnosticReportNote", "code");
