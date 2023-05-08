@@ -7,6 +7,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,7 +52,6 @@ public class StripGeneratedContentOperation extends Operation {
 
         for(File file : list) {
             IBaseResource resource = parseAndStripResource(file);
-            System.out.println(resource.getIdElement().getIdPart());
         }
 
     }
@@ -112,7 +112,7 @@ public class StripGeneratedContentOperation extends Operation {
             } else if(file.getName().endsWith(".xml")){
                 theResource = context.newXmlParser().parseResource(new FileReader(file));
             }
-            stripResource(file.getName(), theResource);
+            stripResource(file.getPath().substring(pathToResource.length()), theResource);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
@@ -120,7 +120,6 @@ public class StripGeneratedContentOperation extends Operation {
         catch (Exception e) {
             e.printStackTrace();
             String message = String.format("'%s' will not be included in the resource because the following error occurred: '%s'", file.getName(), e.getMessage());
-            System.out.println(message);
         }
         return theResource;
     }
@@ -486,12 +485,16 @@ public class StripGeneratedContentOperation extends Operation {
         }
         BufferedWriter writer;
         try {
+            File f = new File(String.format("%s%s", getOutputPath(), fileName));
+            if (!f.getParentFile().exists())
+                f.getParentFile().mkdirs();
+            if (!f.exists())
+                f.createNewFile();
             writer = new BufferedWriter(
-                    new FileWriter(String.format("%s/%s", getOutputPath(), fileName)));
-
-        writer.write(output);
-        writer.flush();
-        writer.close();
+                    new FileWriter(String.format("%s%s", getOutputPath(), fileName)));
+            writer.write(output);
+            writer.flush();
+            writer.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
