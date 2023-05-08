@@ -132,6 +132,8 @@ src/main/resources/org/opencds/cqf/tooling/acceleratorkit/output/*
 FHIR-Spec/*
 .flattened-pom.xml
 
+output
+
 core.*
 javacore.*
 jitdump.*
