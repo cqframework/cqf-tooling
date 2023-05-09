@@ -9,6 +9,10 @@
       "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-library-cqfm"
     ]
   },
+  "text" : {
+    "status" : "generated",
+    "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\">\n </div>"
+  },
   "language": "en",
   "extension": [
     {
