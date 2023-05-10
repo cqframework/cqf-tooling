@@ -7,7 +7,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,7 +50,7 @@ public class StripGeneratedContentOperation extends Operation {
         getListOfActionableFiles(res, list);
 
         for(File file : list) {
-            IBaseResource resource = parseAndStripResource(file);
+            parseAndStripResource(file);
         }
 
     }
@@ -104,7 +103,7 @@ public class StripGeneratedContentOperation extends Operation {
         return context;
     }
 
-    private IBaseResource parseAndStripResource(File file) {
+    private void parseAndStripResource(File file) {
         IBaseResource theResource = null;
         try {
             if (file.getName().endsWith(".json")) {
@@ -120,8 +119,8 @@ public class StripGeneratedContentOperation extends Operation {
         catch (Exception e) {
             e.printStackTrace();
             String message = String.format("'%s' will not be included in the resource because the following error occurred: '%s'", file.getName(), e.getMessage());
+            System.out.println(message);
         }
-        return theResource;
     }
 
     private void stripResource(String fileName, IBaseResource resource) {
@@ -185,8 +184,13 @@ public class StripGeneratedContentOperation extends Operation {
         if(library.hasDataRequirement()) {
             library.setDataRequirement(Collections.emptyList());
         }
-        if(library.hasRelatedArtifact()) {
-            library.setRelatedArtifact(Collections.emptyList());
+        if (library.hasRelatedArtifact()) {
+            List<RelatedArtifact> list = library.getRelatedArtifact()
+                    .stream()
+                    .filter(relatedArtifact -> (relatedArtifact.hasType() &&
+                            !(relatedArtifact.getType()== RelatedArtifact.RelatedArtifactType.DEPENDSON)))
+                    .collect(Collectors.toList());
+            library.setRelatedArtifact(list);
         }
 
         if(library.hasExtension()) {
@@ -195,6 +199,7 @@ public class StripGeneratedContentOperation extends Operation {
                     .filter(extension ->
                             !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter"))
                                     && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement"))
+                                    && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem"))
                                     && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode")))
                     .collect(Collectors.toList());
             library.setExtension(list);
@@ -223,6 +228,8 @@ public class StripGeneratedContentOperation extends Operation {
                     .filter(extension ->
                             !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter"))
                                     && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement"))
+                                    && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition"))
+                                    && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem"))
                                     && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode")))
                     .collect(Collectors.toList());
             measure.setExtension(list);
@@ -249,6 +256,7 @@ public class StripGeneratedContentOperation extends Operation {
                     .filter(extension ->
                             !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter"))
                                     && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement"))
+                                    && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem"))
                                     && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode")))
                     .collect(Collectors.toList());
             planDefinition.setExtension(list);
@@ -285,8 +293,13 @@ public class StripGeneratedContentOperation extends Operation {
         if(library.hasDataRequirement()) {
             library.setDataRequirement(Collections.emptyList());
         }
-        if(library.hasRelatedArtifact()) {
-            library.setRelatedArtifact(Collections.emptyList());
+        if (library.hasRelatedArtifact()) {
+            List<org.hl7.fhir.dstu3.model.RelatedArtifact> list = library.getRelatedArtifact()
+                    .stream()
+                    .filter(relatedArtifact -> (relatedArtifact.hasType() &&
+                            !(relatedArtifact.getType()== org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.DEPENDSON)))
+                    .collect(Collectors.toList());
+            library.setRelatedArtifact(list);
         }
 
         if(library.hasExtension()) {
@@ -295,6 +308,7 @@ public class StripGeneratedContentOperation extends Operation {
                     .filter(extension ->
                             !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter"))
                                     && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement"))
+                                    && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem"))
                                     && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode")))
                     .collect(Collectors.toList());
             library.setExtension(list);
@@ -322,8 +336,10 @@ public class StripGeneratedContentOperation extends Operation {
                     .stream()
                     .filter(extension ->
                             !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter"))
-                    && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement"))
-                    && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode")))
+                                    && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement"))
+                                    && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition"))
+                                    && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem"))
+                                    && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode")))
                     .collect(Collectors.toList());
             measure.setExtension(list);
         }
@@ -349,6 +365,7 @@ public class StripGeneratedContentOperation extends Operation {
                     .filter(extension ->
                             !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter"))
                                     && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement"))
+                                    && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem"))
                                     && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode")))
                     .collect(Collectors.toList());
             planDefinition.setExtension(list);
@@ -385,8 +402,13 @@ public class StripGeneratedContentOperation extends Operation {
         if(library.hasDataRequirement()) {
             library.setDataRequirement(Collections.emptyList());
         }
-        if(library.hasRelatedArtifact()) {
-            library.setRelatedArtifact(Collections.emptyList());
+        if (library.hasRelatedArtifact()) {
+            List<org.hl7.fhir.r5.model.RelatedArtifact> list = library.getRelatedArtifact()
+                    .stream()
+                    .filter(relatedArtifact -> (relatedArtifact.hasType() &&
+                            !(relatedArtifact.getType() == org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType.DEPENDSON)))
+                    .collect(Collectors.toList());
+            library.setRelatedArtifact(list);
         }
 
         if(library.hasExtension()) {
@@ -395,6 +417,7 @@ public class StripGeneratedContentOperation extends Operation {
                     .filter(extension ->
                             !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter"))
                                     && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement"))
+                                    && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem"))
                                     && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode")))
                     .collect(Collectors.toList());
             library.setExtension(list);
@@ -423,6 +446,8 @@ public class StripGeneratedContentOperation extends Operation {
                     .filter(extension ->
                             !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter"))
                                     && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement"))
+                                    && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition"))
+                                    && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem"))
                                     && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode")))
                     .collect(Collectors.toList());
             measure.setExtension(list);
@@ -449,6 +474,7 @@ public class StripGeneratedContentOperation extends Operation {
                     .filter(extension ->
                             !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter"))
                                     && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-dataRequirement"))
+                                    && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem"))
                                     && !(extension.hasUrl() && extension.getUrl().equals("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode")))
                     .collect(Collectors.toList());
             planDefinition.setExtension(list);
@@ -484,14 +510,16 @@ public class StripGeneratedContentOperation extends Operation {
             output = context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource);
         }
         BufferedWriter writer;
+        String outFileName = String.format("%s%s", getOutputPath(), fileName);
         try {
-            File f = new File(String.format("%s%s", getOutputPath(), fileName));
-            if (!f.getParentFile().exists())
+            File f = new File(outFileName);
+            if (!f.getParentFile().exists()) {
                 f.getParentFile().mkdirs();
-            if (!f.exists())
+            }
+            if (!f.exists()) {
                 f.createNewFile();
-            writer = new BufferedWriter(
-                    new FileWriter(String.format("%s%s", getOutputPath(), fileName)));
+            }
+            writer = new BufferedWriter(new FileWriter(outFileName));
             writer.write(output);
             writer.flush();
             writer.close();

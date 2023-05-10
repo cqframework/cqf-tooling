@@ -32,7 +32,7 @@ public class StripGeneratedContentOperationTest {
         assertTrue(libraryBeforeStrip.hasText());
         assertTrue(libraryBeforeStrip.hasParameter());
         assertTrue(libraryBeforeStrip.hasDataRequirement());
-        assertTrue(libraryBeforeStrip.hasRelatedArtifact());
+        assertEquals(libraryBeforeStrip.getRelatedArtifact().size(), 46);
 
         String[] args = { "-" + operation, "-ptr=" + inputFilePath, "-op=" + outputPath, "-v=" + version };
         Operation stripGeneratedContentOperation = new StripGeneratedContentOperation();
@@ -41,13 +41,13 @@ public class StripGeneratedContentOperationTest {
         Path path = Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().getPath() +
                 "/../test-output/strip-generated-content");
         Library libraryAfterStrip = (Library)FhirContext.forR4Cached().newJsonParser().parseResource(
-                new FileReader(path.toString()+"/LibraryBreastCancerScreeningFHIR.json"));
+                new FileReader(path + "/LibraryBreastCancerScreeningFHIR.json"));
 
         assertEquals(libraryAfterStrip.getContent().size(), 1);
         assertFalse(libraryAfterStrip.hasText());
         assertFalse(libraryAfterStrip.hasParameter());
         assertFalse(libraryAfterStrip.hasDataRequirement());
-        assertFalse(libraryAfterStrip.hasRelatedArtifact());
+        assertEquals(libraryAfterStrip.getRelatedArtifact().size(), 1);
 
     }
 }
