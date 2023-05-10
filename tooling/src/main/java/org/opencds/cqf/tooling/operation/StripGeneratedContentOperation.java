@@ -210,7 +210,9 @@ public class StripGeneratedContentOperation extends Operation {
                             .stream()
                             .filter(attachment ->
                                     !(attachment.getContentType().equalsIgnoreCase("application/elm+xml"))
-                                            && !(attachment.getContentType().equalsIgnoreCase("application/elm+json")))
+                                            && !(attachment.getContentType().equalsIgnoreCase("application/elm+json"))
+                            && !(attachment.getContentType().equalsIgnoreCase("text/cql") &&
+                                            (StringUtils.isEmpty(attachment.getUrl()) && attachment.getData() != null)))
                             .collect(Collectors.toList());
             library.setContent(attachments);
         }

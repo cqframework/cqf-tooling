@@ -28,7 +28,7 @@ public class StripGeneratedContentOperationTest {
         Library libraryBeforeStrip = (Library)FhirContext.forR4Cached().newJsonParser().parseResource(
                 new FileReader(inputFilePath+"/LibraryBreastCancerScreeningFHIR.json"));
 
-        assertEquals(libraryBeforeStrip.getContent().size(), 3);
+        assertEquals(libraryBeforeStrip.getContent().size(), 4);
         assertTrue(libraryBeforeStrip.hasText());
         assertTrue(libraryBeforeStrip.hasParameter());
         assertTrue(libraryBeforeStrip.hasDataRequirement());
