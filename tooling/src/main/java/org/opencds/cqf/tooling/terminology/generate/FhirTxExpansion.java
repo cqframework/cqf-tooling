@@ -115,7 +115,7 @@ public class FhirTxExpansion extends Operation {
          vs.setExpansion(expansionResult.getExpansion());
       } catch (Exception e) {
          logger.warn("Unable to expand: {}", vs.getId());
-         System.out.println("Unable to expand: " + vs.getId());
+         logger.error(e.getMessage());
          vs = null;
       }
       return vs;
@@ -132,8 +132,10 @@ public class FhirTxExpansion extends Operation {
          }
       }
       ValueSet valueSetToExpand = (ValueSet) IOUtils.readResource(expand.getPathToValueSet(), fhirContext);
+      ValueSet.ValueSetExpansionComponent expansion = valueSetToExpand.getExpansion();
+      valueSetToExpand.setExpansion(null);
       Parameters params = new Parameters().addParameter(new Parameters.ParametersParameterComponent().setName("valueSet").setResource(valueSetToExpand));
-      ValueSet expansionResult = null;
+      ValueSet expansionResult;
       try {
          expansionResult = fhirServer.operation().onType(ValueSet.class)
                  .named("$expand").withParameters(params).returnResourceType(ValueSet.class).execute();
@@ -149,7 +151,10 @@ public class FhirTxExpansion extends Operation {
          }
       } catch (Exception e) {
          logger.warn("Unable to expand: {}", valueSetToExpand.getId());
-         System.out.println("Unable to expand: " + valueSetToExpand.getId());
+         logger.error(e.getMessage());
+         logger.info("Returning original ValueSet");
+         valueSetToExpand.setExpansion(expansion);
+         return valueSetToExpand;
       }
       return expansionResult == null ? null : valueSetToExpand.setExpansion(expansionResult.getExpansion());
    }
@@ -166,7 +171,7 @@ public class FhirTxExpansion extends Operation {
                }
             } catch (Exception e) {
                logger.warn("Unable to resolve FSN for: {}", expansion.getCode());
-               System.out.println("\"Unable to resolve FSN for: " + expansion.getCode());
+               logger.error(e.getMessage());
             }
          }
       }

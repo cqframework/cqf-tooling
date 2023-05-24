@@ -82,28 +82,92 @@ public class RxMixApi extends Operation {
       }
    }
 
-   public void resolve(Config.ValueSets valueSet) {
-      HttpPost request = new HttpPost("https://mor.nlm.nih.gov/RxMix/executeConfig.do");
-      if (valueSet.getRulesText() != null) {
-         List<NameValuePair> formparams = new ArrayList<>();
-         formparams.add(new BasicNameValuePair("xmlConfig", valueSet.getRulesText().getWorkflowXml()));
-         formparams.add(new BasicNameValuePair("inputs", valueSet.getRulesText().getInput()));
-         formparams.add(new BasicNameValuePair("outFormat", "txt"));
-         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
-         request.setEntity(entity);
-         try (CloseableHttpClient client = HttpClients.createDefault()) {
-            String response = client.execute(request, Helper.getDefaultResponseHandler());
-            logger.info("Writing {} to {}", valueSet.getId(), getOutputPath());
-            IOUtils.writeResource(getValueSet(valueSet, getCodes(response, valueSet.getRulesText())),
-                    getOutputPath(), IOUtils.Encoding.JSON, fhirContext);
-         } catch (IOException ioe) {
-            String message = "Error accessing RxMix API: " + ioe.getMessage();
-            logger.error(message);
-            throw new RuntimeException(message);
-         }
-      }
+//   public void resolve(Config.ValueSets valueSet) {
+//      if (valueSet.getRulesText() != null) {
+//         List<HttpPost> requests = new ArrayList<>();
+//         for (String input : valueSet.getRulesText().getInput()) {
+//            HttpPost request = new HttpPost("https://mor.nlm.nih.gov/RxMix/executeConfig.do");
+//            request.setEntity(resolveForm(valueSet.getRulesText().getWorkflowXml(), input));
+//            requests.add(request);
+//         }
+//         try (CloseableHttpClient client = HttpClients.createDefault()) {
+//            List<Coding> codes = new ArrayList<>();
+//            for (HttpPost request : requests) {
+//               String response = client.execute(request, Helper.getDefaultResponseHandler());
+//               codes.addAll(getCodes(response, valueSet.getRulesText()));
+//            }
+//            logger.info("Writing {} to {}", valueSet.getId(), getOutputPath());
+//            IOUtils.writeResource(getValueSet(valueSet, codes), getOutputPath(), IOUtils.Encoding.JSON, fhirContext);
+//         } catch (IOException ioe) {
+//            String message = "Error accessing RxMix API: " + ioe.getMessage();
+//            logger.error(message);
+//            throw new RuntimeException(message);
+//         }
+//      }
+//   }
 
+   public void resolve(Config.ValueSets valueSet) {
+      if (valueSet.getRulesText() != null) {
+         List<Coding> codes = resolveRule(valueSet.getRulesText());
+         if (valueSet.getRulesText().getExcludeRule() != null) {
+            codes = Helper.removeExcludedCodes(codes, resolveRule(valueSet.getRulesText().getExcludeRule()));
+         }
+         logger.info("Writing {} to {}", valueSet.getId(), getOutputPath());
+         IOUtils.writeResource(getValueSet(valueSet, codes), getOutputPath(), IOUtils.Encoding.JSON, fhirContext);
+      }
    }
+
+   public List<Coding> resolveRule(Config.ValueSets.RulesText rule) {
+      List<HttpPost> requests = new ArrayList<>();
+      for (String input : rule.getInput()) {
+         HttpPost request = new HttpPost("https://mor.nlm.nih.gov/RxMix/executeConfig.do");
+         request.setEntity(resolveForm(rule.getWorkflowXml(), input));
+         requests.add(request);
+      }
+      try (CloseableHttpClient client = HttpClients.createDefault()) {
+         List<Coding> codes = new ArrayList<>();
+         for (HttpPost request : requests) {
+            String response = client.execute(request, Helper.getDefaultResponseHandler());
+            codes.addAll(getCodes(response, rule));
+         }
+         return codes;
+      } catch (IOException ioe) {
+         String message = "Error accessing RxMix API: " + ioe.getMessage();
+         logger.error(message);
+         throw new RuntimeException(message);
+      }
+   }
+
+   public UrlEncodedFormEntity resolveForm(String xml, String input) {
+      List<NameValuePair> formparams = new ArrayList<>();
+      formparams.add(new BasicNameValuePair("xmlConfig", xml));
+      formparams.add(new BasicNameValuePair("inputs", input));
+      formparams.add(new BasicNameValuePair("outFormat", "txt"));
+      return new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+   }
+
+//   public void resolve(Config.ValueSets valueSet) {
+//      HttpPost request = new HttpPost("https://mor.nlm.nih.gov/RxMix/executeConfig.do");
+//      if (valueSet.getRulesText() != null) {
+//         List<NameValuePair> formparams = new ArrayList<>();
+//         formparams.add(new BasicNameValuePair("xmlConfig", valueSet.getRulesText().getWorkflowXml()));
+//         formparams.add(new BasicNameValuePair("inputs", valueSet.getRulesText().getInput()));
+//         formparams.add(new BasicNameValuePair("outFormat", "txt"));
+//         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+//         request.setEntity(entity);
+//         try (CloseableHttpClient client = HttpClients.createDefault()) {
+//            String response = client.execute(request, Helper.getDefaultResponseHandler());
+//            logger.info("Writing {} to {}", valueSet.getId(), getOutputPath());
+//            IOUtils.writeResource(getValueSet(valueSet, getCodes(response, valueSet.getRulesText())),
+//                    getOutputPath(), IOUtils.Encoding.JSON, fhirContext);
+//         } catch (IOException ioe) {
+//            String message = "Error accessing RxMix API: " + ioe.getMessage();
+//            logger.error(message);
+//            throw new RuntimeException(message);
+//         }
+//      }
+//
+//   }
 
    public ValueSet getValueSet(Config.ValueSets cvs, List<Coding> codes) {
       ValueSet vs = Helper.boilerPlateValueSet(config, cvs, cmd);
@@ -133,7 +197,7 @@ public class RxMixApi extends Operation {
       List<Coding> codes = new ArrayList<>();
       String[] names = rawResponse.split("\\|name\\|");
       for (String s : names) {
-         if (!s.startsWith("{")) {
+         if (!s.startsWith("{\"")) {
             String[] rxcuis = s.split("\\|RXCUI\\|");
             String description = rxcuis[0];
             if (!containsExcludeFilter(description, rulesText.getExcludeFilter())

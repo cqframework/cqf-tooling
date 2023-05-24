@@ -49,4 +49,11 @@ public class RxMixApiTest {
       String[] args = new String[] { "-ValueSetsFromConfig", "-ptc=/Users/christopherschuler/Documents/workspace/cqframework/igs/opioid-cds-r4/input/vocabulary/valueset/rules-text/opioid-valueset-gen-cofig.json" };
       valueSetsFromConfig.execute(args);
    }
+
+   @Test
+   void testConfigExpandMap() {
+      ValueSetsFromConfig valueSetsFromConfig = new ValueSetsFromConfig();
+      String[] args = new String[] { "-ValueSetsFromConfig", "-ptc=/Users/christopherschuler/Documents/workspace/cqframework/igs/opioid-cds-r4/input/vocabulary/valueset/rules-text/test-config.json" };
+      valueSetsFromConfig.execute(args);
+   }
 }

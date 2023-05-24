@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class LoincHierarchyApi extends Operation {
 
@@ -109,16 +110,21 @@ public class LoincHierarchyApi extends Operation {
          client.getInterceptorService().unregisterAllInterceptors();
          client.registerInterceptor(new BasicAuthInterceptor(
                  valueSet.getHierarchy().getAuth().getUser(), valueSet.getHierarchy().getAuth().getPassword()));
+         List<Coding> codes = new ArrayList<>();
          if (valueSet.getHierarchy().getParents() != null && !valueSet.getHierarchy().getParents().isEmpty()) {
-            IOUtils.writeResource(getValueSet(valueSet, resolveParents(valueSet)), getOutputPath(), IOUtils.Encoding.JSON, fhirContext);
+            codes.addAll(resolveParents(valueSet));
          }
-         else if (valueSet.getHierarchy().getQuery() != null) {
-            IOUtils.writeResource(getValueSet(valueSet, resolveQuery(valueSet)), getOutputPath(), IOUtils.Encoding.JSON, fhirContext);
+         if (valueSet.getHierarchy().getQuery() != null) {
+            codes.addAll(resolveQuery(valueSet));
          }
-         else {
+         if (codes.isEmpty()) {
             String message = "Either parents or query must be present in config";
             logger.error(message);
             throw new RuntimeException(message);
+         }
+         else {
+            System.out.println(codes.stream().map(Coding::getCode).collect(Collectors.toList()));
+            IOUtils.writeResource(getValueSet(valueSet, codes), getOutputPath(), IOUtils.Encoding.JSON, fhirContext);
          }
       }
 
@@ -129,6 +135,13 @@ public class LoincHierarchyApi extends Operation {
       List<String> visited = new ArrayList<>();
       for (var parent : cvs.getHierarchy().getParents()) {
          resolveChildren(parent, cvs.getHierarchy().getProperty(), visited, codes);
+      }
+      if (cvs.getHierarchy().getExcludeParents() != null && !cvs.getHierarchy().getExcludeParents().isEmpty()) {
+         List<Coding> excludedCodes = new ArrayList<>();
+         for (var excludeParent : cvs.getHierarchy().getExcludeParents()) {
+            resolveChildren(excludeParent, cvs.getHierarchy().getProperty(), new ArrayList<>(), excludedCodes);
+         }
+         codes = Helper.removeExcludedCodes(codes, excludedCodes);
       }
       return codes;
    }
@@ -183,6 +196,9 @@ public class LoincHierarchyApi extends Operation {
       if (!hasChild && hasProperties(response, properties)) {
          codes.add(new Coding().setCode(parent).setDisplay(response == null ? null : response.getParameter("display").primitiveValue()).setVersion(version).setSystem(Constants.LOINC_SYSTEM_URL));
       }
+      else if (!hasChild && response != null && !response.hasParameter("property") && parent.startsWith("LP")) {
+         System.out.println("No children provided for part: " + parent);
+      }
    }
 
    public Parameters lookupCode(String code) {
@@ -201,17 +217,19 @@ public class LoincHierarchyApi extends Operation {
    }
 
    public boolean hasProperties(Parameters response, List<Config.ValueSets.Hierarchy.Property> properties) {
-      for (Config.ValueSets.Hierarchy.Property property : properties) {
-         boolean hasMatch = false;
-         for (var paramComponent : response.getParameter()) {
-            String propertyName = ParametersUtil.getParameterPartValueAsString(fhirContext, paramComponent, "code");
-            if (propertyName != null && propertyName.equals(property.getName())
-                    && getPropertyValue(paramComponent).equals(property.getValue())) {
-               hasMatch = true;
+      if (properties != null) {
+         for (Config.ValueSets.Hierarchy.Property property : properties) {
+            boolean hasMatch = false;
+            for (var paramComponent : response.getParameter()) {
+               String propertyName = ParametersUtil.getParameterPartValueAsString(fhirContext, paramComponent, "code");
+               if (propertyName != null && propertyName.equals(property.getName())
+                       && getPropertyValue(paramComponent).equals(property.getValue())) {
+                  hasMatch = true;
+               }
             }
-         }
-         if (!hasMatch) {
-            return false;
+            if (!hasMatch) {
+               return false;
+            }
          }
       }
       return true;
@@ -247,6 +265,28 @@ public class LoincHierarchyApi extends Operation {
    public ValueSet getValueSet(Config.ValueSets cvs, List<Coding> codes) {
       ValueSet vs = Helper.boilerPlateValueSet(config, cvs, cmd);
       vs.addExtension(Constants.RULES_TEXT_EXT_URL, new MarkdownType(cvs.getHierarchy().getNarrative()));
+
+      if (cvs.getHierarchy().getParents() != null && !cvs.getHierarchy().getParents().isEmpty()) {
+         ValueSet.ValueSetComposeComponent compose = new ValueSet.ValueSetComposeComponent();
+         for (var parent : cvs.getHierarchy().getParents()) {
+            ValueSet.ConceptSetComponent include = new ValueSet.ConceptSetComponent().setSystem(Constants.LOINC_SYSTEM_URL);
+            include.addFilter().setProperty("parent").setOp(ValueSet.FilterOperator.EQUAL).setValue(parent);
+            if (cvs.getHierarchy().getProperty() != null && !cvs.getHierarchy().getProperty().isEmpty()) {
+               for (var property : cvs.getHierarchy().getProperty()) {
+                  include.addFilter().setProperty(property.getName()).setOp(ValueSet.FilterOperator.EQUAL).setValue(property.getValue());
+               }
+            }
+            compose.addInclude(include);
+         }
+         if (cvs.getHierarchy().getExcludeParents() != null && !cvs.getHierarchy().getExcludeParents().isEmpty()) {
+            for (var excludeParent : cvs.getHierarchy().getExcludeParents()) {
+               ValueSet.ConceptSetComponent exclude = new ValueSet.ConceptSetComponent().setSystem(Constants.LOINC_SYSTEM_URL);
+               exclude.addFilter().setProperty("parent").setOp(ValueSet.FilterOperator.EQUAL).setValue(excludeParent);
+               compose.addExclude(exclude);
+            }
+         }
+         vs.setCompose(compose);
+      }
 
       ValueSet.ValueSetExpansionComponent expansion = new ValueSet.ValueSetExpansionComponent();
       expansion.setIdentifier(UUID.randomUUID().toString());

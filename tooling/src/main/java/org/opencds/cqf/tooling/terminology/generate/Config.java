@@ -319,11 +319,13 @@ public class Config {
          @JsonProperty(required = true)
          String workflowXml;
          @JsonProperty(required = true)
-         String input;
+         List<String> input;
          @JsonProperty
          List<String> includeFilter;
          @JsonProperty
          List<String> excludeFilter;
+         @JsonProperty
+         RulesText excludeRule;
 
          public String getNarrative() {
             return narrative;
@@ -341,11 +343,11 @@ public class Config {
             this.workflowXml = workflowXml;
          }
 
-         public String getInput() {
+         public List<String> getInput() {
             return input;
          }
 
-         public void setInput(String input) {
+         public void setInput(List<String> input) {
             this.input = input;
          }
 
@@ -364,6 +366,14 @@ public class Config {
          public void setExcludeFilter(List<String> excludeFilter) {
             this.excludeFilter = excludeFilter;
          }
+
+         public RulesText getExcludeRule() {
+            return excludeRule;
+         }
+
+         public void setExcludeRule(RulesText excludeRule) {
+            this.excludeRule = excludeRule;
+         }
       }
 
       static class Hierarchy {
@@ -371,6 +381,8 @@ public class Config {
          String narrative;
          @JsonProperty(required = true)
          List<String> parents;
+         @JsonProperty
+         List<String> excludeParents;
          @JsonProperty
          List<Property> property;
          @JsonProperty
@@ -392,6 +404,14 @@ public class Config {
 
          public void setParents(List<String> parents) {
             this.parents = parents;
+         }
+
+         public List<String> getExcludeParents() {
+            return excludeParents;
+         }
+
+         public void setExcludeParents(List<String> excludeParents) {
+            this.excludeParents = excludeParents;
          }
 
          public List<Property> getProperty() {

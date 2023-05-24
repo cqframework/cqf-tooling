@@ -9,6 +9,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactDetail;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -20,7 +21,9 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class Helper {
@@ -213,5 +216,15 @@ public class Helper {
             throw new ClientProtocolException("Unexpected response status: " + status);
          }
       };
+   }
+
+   public static List<Coding> removeExcludedCodes(List<Coding> codes, List<Coding> excludeCodes) {
+      List<Coding> prunedCodes = new ArrayList<>();
+      for (var code : codes) {
+         if (excludeCodes.stream().noneMatch(x -> x.getCode().equals(code.getCode()))) {
+            prunedCodes.add(code);
+         }
+      }
+      return prunedCodes;
    }
 }

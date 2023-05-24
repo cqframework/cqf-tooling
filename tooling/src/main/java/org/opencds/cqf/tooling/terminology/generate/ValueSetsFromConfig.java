@@ -60,6 +60,7 @@ public class ValueSetsFromConfig extends Operation {
       LoincHierarchyApi loincHierarchyApi = new LoincHierarchyApi(getOutputPath(), config, cmd);
 
       for (var valueSet : config.valueSets) {
+         System.out.println("Processing " + valueSet.getId());
          if (valueSet.getHierarchy() != null) {
             loincHierarchyApi.resolve(valueSet);
          }
