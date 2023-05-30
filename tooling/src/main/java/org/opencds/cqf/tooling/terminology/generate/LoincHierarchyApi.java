@@ -264,7 +264,6 @@ public class LoincHierarchyApi extends Operation {
 
    public ValueSet getValueSet(Config.ValueSets cvs, List<Coding> codes) {
       ValueSet vs = Helper.boilerPlateValueSet(config, cvs, cmd);
-      vs.addExtension(Constants.RULES_TEXT_EXT_URL, new MarkdownType(cvs.getHierarchy().getNarrative()));
 
       if (cvs.getHierarchy().getParents() != null && !cvs.getHierarchy().getParents().isEmpty()) {
          ValueSet.ValueSetComposeComponent compose = new ValueSet.ValueSetComposeComponent();
@@ -286,6 +285,9 @@ public class LoincHierarchyApi extends Operation {
             }
          }
          vs.setCompose(compose);
+      }
+      else {
+         vs.addExtension(Constants.RULES_TEXT_EXT_URL, new MarkdownType(cvs.getHierarchy().getNarrative()));
       }
 
       ValueSet.ValueSetExpansionComponent expansion = new ValueSet.ValueSetExpansionComponent();

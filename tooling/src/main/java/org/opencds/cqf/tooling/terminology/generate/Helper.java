@@ -84,6 +84,10 @@ public class Helper {
             vs.addExtension(Constants.KNOWLEDGE_CAPABILITY_EXT_URL, new CodeType(kc));
          }
       }
+      else {
+         vs.addExtension(Constants.KNOWLEDGE_CAPABILITY_EXT_URL, new CodeType("computable"));
+         vs.addExtension(Constants.KNOWLEDGE_CAPABILITY_EXT_URL, new CodeType("executable"));
+      }
       if (cvs.getKnowledgeRepresentationLevel() != null && !cvs.getKnowledgeRepresentationLevel().isEmpty()) {
          for (String krl : cvs.getKnowledgeRepresentationLevel()) {
             vs.addExtension(Constants.KNOWLEDGE_REPRESENTATION_LEVEL_EXT_URL, new CodeType(krl));
@@ -92,10 +96,13 @@ public class Helper {
       if (cvs.getUsageWarning() != null) {
          vs.addExtension(Constants.USAGE_WARNING_EXT_URL, new StringType(cvs.getUsageWarning()));
       }
+      else {
+         vs.addExtension(Constants.USAGE_WARNING_EXT_URL, new StringType(Constants.DEFAULT_USAGE_WARNING_VALUE));
+      }
 
       // Knowledge Artifact Elements
       vs.setUrl(cvs.getCanonical());
-      vs.setName(cvs.getName());
+      vs.setName(cvs.getName() != null ? cvs.getName() : cvs.getId().replace("-", "_").toUpperCase());
       vs.setTitle(cvs.getTitle());
       if (cvs.getStatus() != null) {
          vs.setStatus(Enumerations.PublicationStatus.fromCode(cvs.getStatus()));
