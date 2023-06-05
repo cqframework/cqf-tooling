@@ -145,6 +145,7 @@ public class LibraryProcessor extends BaseProcessor {
         if (attachment != null) {
             sourceLibrary.getContent().clear();
             sourceLibrary.getContent().add(attachment);
+            setLibraryType(sourceLibrary);
             CqlProcessor.CqlSourceFileInformation info = getCqlProcessor().getFileInformation(attachment.getUrl());
             attachment.setUrlElement(null);
             if (info != null) {
@@ -186,6 +187,12 @@ public class LibraryProcessor extends BaseProcessor {
         return internalRefreshGeneratedContent(libraries);
     }
 
+    private void setLibraryType(Library library) {
+        library.setType(new CodeableConcept().addCoding(
+                new Coding().setCode("logic-library")
+                        .setSystem("http://terminology.hl7.org/CodeSystem/library-type")));
+    }
+
     private List<Library> internalRefreshGeneratedContent(List<Library> sourceLibraries) {
         getCqlProcessor().execute();
 
@@ -208,7 +215,7 @@ public class LibraryProcessor extends BaseProcessor {
                     newLibrary.setVersion(fileInfo.getIdentifier().getVersion());
                     newLibrary.setUrl(String.format("%s/Library/%s", (newLibrary.getName().equals("FHIRHelpers") ? "http://hl7.org/fhir" : canonicalBase), fileInfo.getIdentifier().getId()));
                     newLibrary.setId(newLibrary.getName() + (versioned ? "-" + newLibrary.getVersion() : ""));
-                    newLibrary.setType(new CodeableConcept().addCoding(new Coding().setCode("logic-library").setSystem("http://terminology.hl7.org/CodeSystem/library-type")));
+                    setLibraryType(newLibrary);
                     validateIdAlphaNumeric(newLibrary.getId());
                     List<Attachment> attachments = new ArrayList<Attachment>();
                     Attachment attachment = new Attachment();
