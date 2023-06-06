@@ -2,47 +2,48 @@ package org.opencds.cqf.tooling.dateroller;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HookDataDateRoller {
-    private FhirContext fhirContext;
-    private IOUtils.Encoding fileEncoding;
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private IParser resourceParser;
+    private final FhirContext fhirContext;
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final IParser resourceParser;
+    private static final String CONTEXT = "context";
+    private static final String PREFETCH = "prefetch";
+    private static final String DRAFT_ORDERS = "draftOrders";
 
-    public HookDataDateRoller(FhirContext FHIRContext, IOUtils.Encoding encoding) {
-        fhirContext = FHIRContext;
-        fileEncoding = encoding;
-        resourceParser = DataDateRollerUtils.getParser(fileEncoding, fhirContext);
+    public HookDataDateRoller(FhirContext fhirContext, IOUtils.Encoding encoding) {
+        this.fhirContext = fhirContext;
+        resourceParser = DataDateRollerUtils.getParser(encoding, fhirContext);
     }
 
     public JsonObject rollJSONHookDates(JsonObject hook) {
-        if (hook.has("context")) {
-            JsonObject context = hook.getAsJsonObject("context");
+        if (hook.has(CONTEXT)) {
+            JsonObject context = hook.getAsJsonObject(CONTEXT);
             this.rollContextDates(context);
-            hook.remove("context");
-            hook.add("context", context);
+            hook.remove(CONTEXT);
+            hook.add(CONTEXT, context);
         }
-        if (hook.has("prefetch")) {
-            JsonObject prefetch = hook.getAsJsonObject("prefetch");
+        if (hook.has(PREFETCH)) {
+            JsonObject prefetch = hook.getAsJsonObject(PREFETCH);
             this.rollPrefetchItemsDates(prefetch);
-            hook.remove("prefetch");
-            hook.add("prefetch", prefetch);
+            hook.remove(PREFETCH);
+            hook.add(PREFETCH, prefetch);
+        } else {
+            logger.info("This hook did not contain prefetch items");
         }
         return hook;
     }
 
     public void rollContextDates(JsonObject context) {
-        if (context.has("draftOrders")) {
-            JsonObject draftOrders = context.getAsJsonObject("draftOrders");
+        if (context.has(DRAFT_ORDERS)) {
+            JsonObject draftOrders = context.getAsJsonObject(DRAFT_ORDERS);
             IBaseResource resource = resourceParser.parseResource(draftOrders.toString());
             if (null == resource) {
                 logger.error("This hook draft orders did not contain a resource");
@@ -54,52 +55,44 @@ public class HookDataDateRoller {
                 logger.error("Draft orders should contain a bundle.");
                 return;
             }
-            context.remove("draftOrders");
+            context.remove(DRAFT_ORDERS);
             JsonElement newDraftOrders = JsonParser.parseString(resourceParser.setPrettyPrint(true).encodeResourceToString(resource));
             draftOrders = newDraftOrders.getAsJsonObject();
-            context.add("draftOrders", draftOrders);
+            context.add(DRAFT_ORDERS, draftOrders);
         }
     }
 
     public void rollPrefetchItemsDates(JsonObject prefetch) {
         JsonObject item;
         for (int i = 1; i <= prefetch.size(); i++) {
-            if (!prefetch.get("item" + i).isJsonNull()) {
-                item = prefetch.getAsJsonObject("item" + i);
-            }else{
-                continue;
-            }
-            IBaseResource resource;
-            if (item.has("resource")) {
-                resource = resourceParser.parseResource(item.getAsJsonObject("resource").toString());
+            String itemNo = "item" + i;
+            if (prefetch.has(itemNo)) {
+                if (!prefetch.get(itemNo).isJsonNull()) {
+                    item = prefetch.getAsJsonObject(itemNo);
+                    IBaseResource resource = item.has("resource")
+                            ? resourceParser.parseResource(item.getAsJsonObject("resource").toString())
+                            : resourceParser.parseResource(item.toString());
+                    if (resource != null) {
+                        if (resource.fhirType().equalsIgnoreCase("bundle")) {
+                            ResourceDataDateRoller.rollBundleDates(fhirContext, resource);
+                        } else {
+                            ResourceDataDateRoller.rollResourceDates(fhirContext, resource);
+                        }
+                        if (item.has("response")) {
+                            item.add("response", item.getAsJsonObject("response"));
+                        }
+                        addUpdatedJsonObject(resource, prefetch, itemNo);
+                    }
+                }
             }
             else {
-                resource = resourceParser.parseResource(item.toString());
+                logger.warn("Prefetch is missing {} - setting to null", itemNo);
+                prefetch.add(itemNo, null);
             }
-            if (null == resource) {
-                logger.info("This hook did not contain prefetch items");
-                continue;
-            }
-            if (resource.fhirType().equalsIgnoreCase("bundle")) {
-                ResourceDataDateRoller.rollBundleDates(fhirContext, resource);
-            } else {
-                ResourceDataDateRoller.rollResourceDates(fhirContext, resource);
-            }
-            if (item.has("response")) {
-                JsonObject response = item.getAsJsonObject("response");
-                item.add("response", response);
-            }
-            addUpdatedJsonObject(resource, item, "resource");
-//            addUpdatedJsonObject(resource, prefetch, "item" + i);
        }
     }
 
     public void addUpdatedJsonObject(IBaseResource resource, JsonObject objectToAddTo, String objectName){
-        JsonObject objectToAdd;
-        objectToAddTo.remove(objectName);
-        JsonElement newItem = JsonParser.parseString(resourceParser.setPrettyPrint(true).encodeResourceToString(resource));
-        objectToAdd = newItem.getAsJsonObject();
-        objectToAddTo.add(objectName, objectToAdd);
-
+        objectToAddTo.add(objectName, JsonParser.parseString(resourceParser.setPrettyPrint(true).encodeResourceToString(resource)));
     }
 }
