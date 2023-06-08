@@ -395,7 +395,7 @@ public class ErsdTransformer extends Operation {
         Extension stewardExtension = res.getExtensionByUrl(valueSetStewardExtensionUrl);
         if (stewardExtension != null && stewardExtension.hasValue()) {
             String stewardName = ((ContactDetail) stewardExtension.getValue()).getName();
-            if (!stewardName.isEmpty() && !stewardName.isBlank()) {
+            if (stewardName != null && !stewardName.isEmpty() && !stewardName.isBlank()) {
                 res.setPublisher(stewardName);
             }
         }
