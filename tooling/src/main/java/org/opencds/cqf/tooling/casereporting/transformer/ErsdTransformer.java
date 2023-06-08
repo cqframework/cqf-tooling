@@ -34,6 +34,8 @@ public class ErsdTransformer extends Operation {
     private final String usPhSpecificationLibraryProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-specification-library";
     private final String usPhTriggeringValueSetLibraryProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset-library";
     private final String usPhTriggeringValueSetProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset";
+    private final String valueSetStewardExtensionUrl = "http://hl7.org/fhir/StructureDefinition/valueset-steward";
+
     private PlanDefinition v2PlanDefinition;
     private String version;
     private Period effectivePeriod;
@@ -389,7 +391,15 @@ public class ErsdTransformer extends Operation {
             );
         }
         res.setVersion(this.version);
-        res.setPublisher(PUBLISHER);
+
+        Extension stewardExtension = res.getExtensionByUrl(valueSetStewardExtensionUrl);
+        if (stewardExtension != null && stewardExtension.hasValue()) {
+            String stewardName = ((ContactDetail) stewardExtension.getValue()).getName();
+            if (stewardName != null && !stewardName.isEmpty() && !stewardName.isBlank()) {
+                res.setPublisher(stewardName);
+            }
+        }
+
 
         // Groupers need to have an include per ValueSet in the compose rather than all in one Include together.
         List<String> grouperUrls = new ArrayList<>();
@@ -401,6 +411,8 @@ public class ErsdTransformer extends Operation {
         grouperUrls.add("http://hl7.org/fhir/us/ecr/ValueSet/sdtc");
         String url = res.getUrl();
         if (grouperUrls.contains(url)) {
+            res.setPublisher(PUBLISHER);
+
             ValueSet.ValueSetComposeComponent compose = res.getCompose();
             List<ValueSet.ConceptSetComponent> includes = compose.getInclude();
             if (includes.size() > 1) {
