@@ -23,6 +23,7 @@ import org.hl7.fhir.utilities.IniFile;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.MeasureProcessor;
+import org.opencds.cqf.tooling.operation.RefreshIGOperation;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -39,9 +40,9 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 public class IGProcessorTest extends RefreshTest {
-    
-    private IGProcessor processor;
-    private ByteArrayOutputStream console = new ByteArrayOutputStream();
+
+	private final IGProcessor processor;
+	private final ByteArrayOutputStream console = new ByteArrayOutputStream();
 
 	private final String ID = "id";
 	private final String ENTRY = "entry";
@@ -53,51 +54,59 @@ public class IGProcessorTest extends RefreshTest {
 
 	private final String INI_LOC = "target" + separator + "refreshIG" + separator + "ig.ini";
 
-    public IGProcessorTest() {
-        super(FhirContext.forCached(FhirVersionEnum.R4), "IGProcessorTest");
-        LibraryProcessor libraryProcessor = new LibraryProcessor();
-        MeasureProcessor measureProcessor = new MeasureProcessor();
-        CDSHooksProcessor cdsHooksProcessor = new CDSHooksProcessor();
-        PlanDefinitionProcessor planDefinitionProcessor = new PlanDefinitionProcessor(libraryProcessor, cdsHooksProcessor);
+	public IGProcessorTest() {
+		super(FhirContext.forCached(FhirVersionEnum.R4), "IGProcessorTest");
+		LibraryProcessor libraryProcessor = new LibraryProcessor();
+		MeasureProcessor measureProcessor = new MeasureProcessor();
+		CDSHooksProcessor cdsHooksProcessor = new CDSHooksProcessor();
+		PlanDefinitionProcessor planDefinitionProcessor = new PlanDefinitionProcessor(libraryProcessor, cdsHooksProcessor);
 		QuestionnaireProcessor questionnaireProcessor = new QuestionnaireProcessor(libraryProcessor);
-        IGBundleProcessor igBundleProcessor = new IGBundleProcessor(measureProcessor, planDefinitionProcessor, questionnaireProcessor);
-        processor = new IGProcessor(igBundleProcessor, libraryProcessor, measureProcessor);
-    }
- 
-    @BeforeMethod
-    public void setUp() throws Exception {
-        IOUtils.resourceDirectories = new ArrayList<String>();
-        IOUtils.clearDevicePaths();
-        System.setOut(new PrintStream(this.console));
-        File dir  = new File("target" + separator + "refreshIG");
-        if (dir.exists()) {
-            FileUtils.deleteDirectory(dir);
-        }
-    }
+		IGBundleProcessor igBundleProcessor = new IGBundleProcessor(measureProcessor, planDefinitionProcessor, questionnaireProcessor);
+		processor = new IGProcessor(igBundleProcessor, libraryProcessor, measureProcessor);
+	}
 
-    @Test
+	@BeforeMethod
+	public void setUp() throws Exception {
+		IOUtils.resourceDirectories = new ArrayList<>();
+		IOUtils.clearDevicePaths();
+		System.setOut(new PrintStream(this.console));
+		File dir  = new File("target" + separator + "refreshIG");
+		if (dir.exists()) {
+			FileUtils.deleteDirectory(dir);
+		}
+	}
+
+//	@Test
+//	void refreshOpioidIGTest() {
+//		RefreshIGOperation refreshOperation = new RefreshIGOperation();
+//		String[] args = { "-RefreshIG", "-ini=/Users/christopherschuler/Documents/workspace/cqframework/igs/opioid-cds-r4/ig.ini", "-rp=/Users/christopherschuler/Documents/workspace/cqframework/igs/opioid-cds-r4/input/resources", "-d", "-p", "-t", "-ss=false" };
+//		refreshOperation.execute(args);
+//		String s = "s";
+//	}
+
+	@Test
 	@SuppressWarnings("unchecked")
-    public void testRefreshIG() throws Exception {
-        String targetDirectory = "target" + separator + "refreshIG";
+	public void testRefreshIG() throws Exception {
+		String targetDirectory = "target" + separator + "refreshIG";
 		copyResourcesToTargetDir(targetDirectory, "testfiles/refreshIG");
-        
-        File iniFile = new File(INI_LOC);
-        String iniFileLocation = iniFile.getAbsolutePath();
-        IniFile ini = new IniFile(iniFileLocation);
 
-        String bundledFilesLocation = iniFile.getParent() + separator + "bundles" + separator + "measure" + separator;
-        RefreshIGParameters params = new RefreshIGParameters();
-        params.ini = INI_LOC;
+		File iniFile = new File(INI_LOC);
+		String iniFileLocation = iniFile.getAbsolutePath();
+		IniFile ini = new IniFile(iniFileLocation);
+
+		String bundledFilesLocation = iniFile.getParent() + separator + "bundles" + separator + "measure" + separator;
+		RefreshIGParameters params = new RefreshIGParameters();
+		params.ini = INI_LOC;
 		params.outputEncoding = IOUtils.Encoding.JSON;
-		params.resourceDirs = new ArrayList<String>();
+		params.resourceDirs = new ArrayList<>();
 		params.includeELM = false;
-        params.includeTerminology = true;
-        params.includeDependencies = true;
-        params.includePatientScenarios = true;
+		params.includeTerminology = true;
+		params.includeDependencies = true;
+		params.includePatientScenarios = true;
 		params.versioned = false;
 		params.shouldApplySoftwareSystemStamp = true;
 		params.addBundleTimestamp = true;  //setting this true to test timestamp added in generated bundle
-        processor.publishIG(params);
+		processor.publishIG(params);
 
 		// determine fhireContext for measure lookup
 		FhirContext fhirContext = IGProcessor.getIgFhirContext(getFhirVersion(ini));
@@ -134,8 +143,8 @@ public class IGProcessorTest extends RefreshTest {
 								String parentResourceType = (String) map.get(RESOURCE_TYPE);
 								// if Library, resource will produce a "Measure" in main bundled file:
 								if (parentResourceType.equalsIgnoreCase(LIB_TYPE)) {
-									resourceTypeMap.put(MEASURE_TYPE + "_" + (String) map.get(ID), MEASURE_TYPE);
-									resourceTypeMap.put(LIB_TYPE + "_" + (String) map.get(ID), LIB_TYPE);
+									resourceTypeMap.put(MEASURE_TYPE + "_" + map.get(ID), MEASURE_TYPE);
+									resourceTypeMap.put(LIB_TYPE + "_" + map.get(ID), LIB_TYPE);
 								} else if (parentResourceType.equalsIgnoreCase(BUNDLE_TYPE)) {
 									// file is a bundle type, loop through resources in entry list, build up map of
 									// <id, resourceType>:
@@ -144,7 +153,7 @@ public class IGProcessorTest extends RefreshTest {
 										for (Map<?, ?> entry : entryList) {
 											if (entry.containsKey(RESOURCE)) {
 												Map<?, ?> resourceMap = (Map<?, ?>) entry.get(RESOURCE);
-												resourceTypeMap.put((String) resourceMap.get(RESOURCE_TYPE) + "_" + (String) resourceMap.get(ID),
+												resourceTypeMap.put(resourceMap.get(RESOURCE_TYPE) + "_" + resourceMap.get(ID),
 														(String) resourceMap.get(RESOURCE_TYPE));
 											}
 										}
@@ -154,7 +163,6 @@ public class IGProcessorTest extends RefreshTest {
 						}
 					}
 				}
-
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -166,14 +174,14 @@ public class IGProcessorTest extends RefreshTest {
 			ArrayList<Map<?, ?>> entryList = (ArrayList<Map<?, ?>>) bundledJson.get(ENTRY);
 			for (Map<?, ?> entry : entryList) {
 				Map<?, ?> resourceMap = (Map<?, ?>) entry.get(RESOURCE);
-				bundledJsonResourceTypes.put((String) resourceMap.get(RESOURCE_TYPE) + "_" + (String) resourceMap.get(ID), (String) resourceMap.get(RESOURCE_TYPE));
+				bundledJsonResourceTypes.put(resourceMap.get(RESOURCE_TYPE) + "_" + resourceMap.get(ID), (String) resourceMap.get(RESOURCE_TYPE));
 			}
 
 			// compare mappings of <id, resourceType> to ensure all bundled correctly:
 			assertTrue(mapsAreEqual(resourceTypeMap, bundledJsonResourceTypes));
 
 		}
-    }
+	}
 
 	private void testTimestamp(Map<?, ?> bundledJson) throws ParseException {
 		String timeStamp = (String)bundledJson.get("timestamp");
@@ -211,7 +219,7 @@ public class IGProcessorTest extends RefreshTest {
 
 	private String getFhirVersion(IniFile ini) {
 		String specifiedFhirVersion = ini.getStringProperty("IG", "fhir-version");
-		if (specifiedFhirVersion == null || specifiedFhirVersion == "") {
+		if (specifiedFhirVersion == null || "".equals(specifiedFhirVersion)) {
 
 			// TODO: Should point to global constant:
 			specifiedFhirVersion = "4.0.1";

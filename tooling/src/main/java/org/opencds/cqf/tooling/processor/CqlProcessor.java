@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -20,6 +21,9 @@ import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
 import org.cqframework.cql.elm.tracking.TrackBack;
+import org.cqframework.fhir.npm.ILibraryReader;
+import org.cqframework.fhir.npm.NpmLibrarySourceProvider;
+import org.cqframework.fhir.npm.NpmModelInfoProvider;
 import org.fhir.ucum.UcumService;
 import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.cql.model.NamespaceManager;
@@ -33,9 +37,6 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
-import org.opencds.cqf.tooling.npm.ILibraryReader;
-import org.opencds.cqf.tooling.npm.NpmLibrarySourceProvider;
-import org.opencds.cqf.tooling.npm.NpmModelInfoProvider;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 public class CqlProcessor {
@@ -43,14 +44,14 @@ public class CqlProcessor {
     /**
      * information about a cql file
      */
-    public class CqlSourceFileInformation {
+    public static class CqlSourceFileInformation {
         private VersionedIdentifier identifier;
         private byte[] elm;
         private byte[] jsonElm;
-        private List<ValidationMessage> errors = new ArrayList<>();
-        private List<RelatedArtifact> relatedArtifacts = new ArrayList<>();
-        private List<DataRequirement> dataRequirements = new ArrayList<>();
-        private List<ParameterDefinition> parameters = new ArrayList<>();
+        private final List<ValidationMessage> errors = new ArrayList<>();
+        private final List<RelatedArtifact> relatedArtifacts = new ArrayList<>();
+        private final List<DataRequirement> dataRequirements = new ArrayList<>();
+        private final List<ParameterDefinition> parameters = new ArrayList<>();
         public VersionedIdentifier getIdentifier() {
             return identifier;
         }
@@ -90,14 +91,14 @@ public class CqlProcessor {
      * library in the right order
      *
      */
-    private List<NpmPackage> packages;
+    private final List<NpmPackage> packages;
 
     /**
      * All the file paths cql files might be found in (absolute local file paths)
      *
      * will be at least one error
      */
-    private List<String> folders;
+    private final List<String> folders;
 
     /**
      * Version indepedent reader
@@ -107,12 +108,12 @@ public class CqlProcessor {
     /**
      * use this to write to the standard IG log
      */
-    private ILoggingService logger;
+    private final ILoggingService logger;
 
     /**
      * UcumService used by the translator to validate UCUM units
      */
-    private UcumService ucumService;
+    private final UcumService ucumService;
 
     /**
      * Map of translated files by fully qualified file name.
@@ -126,7 +127,7 @@ public class CqlProcessor {
      * Libraries can specify a namespace, but must use this name to do it
      */
     @SuppressWarnings("unused")
-    private String packageId;
+    private final String packageId;
 
     /**
      * The canonical base of the IG, used to construct a NamespaceInfo for the CQL translator
@@ -134,7 +135,7 @@ public class CqlProcessor {
      * Library resources published in this IG will then have URLs of [canonicalBase]/Library/[libraryName]
      */
     @SuppressWarnings("unused")
-    private String canonicalBase;
+    private final String canonicalBase;
 
     private NamespaceInfo namespaceInfo;
 
@@ -177,7 +178,7 @@ public class CqlProcessor {
     /**
      * Return CqlSourceFileInformation for the given filename
      * @param filename Fully qualified name of the source file
-     * @return
+     * @return CqlSourceFileInformation
      */
     public CqlSourceFileInformation getFileInformation(String filename) {
         if (fileMap == null) {
@@ -211,7 +212,7 @@ public class CqlProcessor {
      * getFileInformation - these have been omitted from the IG, and that's
      * an error
      *
-     * @return
+     * @return validation messages
      */
     public List<ValidationMessage> getGeneralErrors() {
         List<ValidationMessage> result = new ArrayList<>();
@@ -271,7 +272,7 @@ public class CqlProcessor {
 
         // foreach *.cql file
         boolean hadCqlFiles = false;
-        for (File file : new File(folder).listFiles(getCqlFilenameFilter())) {
+        for (File file : Objects.requireNonNull(new File(folder).listFiles(getCqlFilenameFilter()))) {
             hadCqlFiles = true;
             translateFile(modelManager, libraryManager, file, options);
         }
@@ -355,7 +356,7 @@ public class CqlProcessor {
                 result.getErrors().add(exceptionToValidationMessage(file, exception));
             }
 
-            if (translator.getErrors().size() > 0) {
+            if (!translator.getErrors().isEmpty()) {
                 result.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, IssueType.EXCEPTION, file.getName(),
                         String.format("CQL Processing failed with (%d) errors.", translator.getErrors().size()), IssueSeverity.ERROR));
                 logger.logMessage(String.format("Translation failed with (%d) errors; see the error log for more information.", translator.getErrors().size()));
@@ -376,9 +377,9 @@ public class CqlProcessor {
 
                     // Add the translated library to the library manager (NOTE: This should be a "cacheLibrary" call on the LibraryManager, available in 1.5.3+)
                     // Without this, the data requirements processor will try to load the current library, resulting in a re-translation
-                    CompiledLibrary CompiledLibrary = translator.getTranslatedLibrary();
-                    String libraryPath = NamespaceManager.getPath(CompiledLibrary.getIdentifier().getSystem(), CompiledLibrary.getIdentifier().getId());
-                    libraryManager.getCompiledLibraries().put(libraryPath, CompiledLibrary);
+                    CompiledLibrary compiledLibrary = translator.getTranslatedLibrary();
+                    String libraryPath = NamespaceManager.getPath(compiledLibrary.getIdentifier().getSystem(), compiledLibrary.getIdentifier().getId());
+                    libraryManager.getCompiledLibraries().put(libraryPath, compiledLibrary);
 
                     DataRequirementsProcessor drp = new DataRequirementsProcessor();
                     org.hl7.fhir.r5.model.Library requirementsLibrary =
@@ -415,11 +416,6 @@ public class CqlProcessor {
     }
 
     private FilenameFilter getCqlFilenameFilter() {
-        return new FilenameFilter() {
-            @Override
-            public boolean accept(File path, String name) {
-                return name.endsWith(".cql");
-            }
-        };
+        return (path, name) -> name.endsWith(".cql");
     }
 }

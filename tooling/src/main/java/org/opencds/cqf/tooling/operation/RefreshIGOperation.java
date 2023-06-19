@@ -13,9 +13,6 @@ import org.opencds.cqf.tooling.questionnaire.QuestionnaireProcessor;
 
 public class RefreshIGOperation extends Operation {
 
-    public RefreshIGOperation() {    
-    } 
-
     @Override
     public void execute(String[] args) {
     	

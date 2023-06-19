@@ -12,18 +12,16 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
 
-
 public class RefreshLibraryArgumentProcessor {
-    public static final String[] OPERATION_OPTIONS = {"RefreshLibrary"};
-
-    public static final String[] INI = {"ini"};
-    public static final String[] IG_CANONICAL_BASE = {"igcb", "igCanonicalBase"};
-    public static final String[] CQL_PATH_OPTIONS = {"cql", "content", "cqlPath", "cqlContentPath", "contentPath", "cp"};
-    public static final String[] Library_PATH_OPTIONS = {"library", "libraryPath", "resourcePath", "lp", "cp"};
-    public static final String[] Library_Output_DIRECTORY_OPTIONS = {"libraryOutput", "libraryOutputPath", "resourceOutputPath", "lop"};
-    public static final String[] FHIR_VERSION_OPTIONS = {"fv", "fhir-version"};
-    public static final String[] OUTPUT_ENCODING = {"e", "encoding"};
-    public static final String[] VERSIONED_OPTIONS = {"v", "versioned"};
+    static final String[] OPERATION_OPTIONS = {"RefreshLibrary"};
+    static final String[] INI = {"ini"};
+    static final String[] IG_CANONICAL_BASE = {"igcb", "igCanonicalBase"};
+    static final String[] CQL_PATH_OPTIONS = {"cql", "content", "cqlPath", "cqlContentPath", "contentPath", "cp"};
+    static final String[] Library_PATH_OPTIONS = {"library", "libraryPath", "resourcePath", "lp", "cp"};
+    static final String[] Library_Output_DIRECTORY_OPTIONS = {"libraryOutput", "libraryOutputPath", "resourceOutputPath", "lop"};
+    static final String[] FHIR_VERSION_OPTIONS = {"fv", "fhir-version"};
+    static final String[] OUTPUT_ENCODING = {"e", "encoding"};
+    static final String[] VERSIONED_OPTIONS = {"v", "versioned"};
 
     @SuppressWarnings("unused")
     public OptionParser build() {
@@ -76,7 +74,7 @@ public class RefreshLibraryArgumentProcessor {
         if (encoding != null) {
             outputEncodingEnum = Encoding.parse(encoding.toLowerCase());
         }
-        Boolean versioned = options.has(VERSIONED_OPTIONS[0]);
+        boolean versioned = options.has(VERSIONED_OPTIONS[0]);
     
         RefreshLibraryParameters lp = new RefreshLibraryParameters();
         lp.ini = ini;

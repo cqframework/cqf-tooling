@@ -2,13 +2,13 @@ package org.opencds.cqf.tooling.operation;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.cqframework.fhir.utilities.exception.IGInitializationException;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.IniFile;
 import org.opencds.cqf.tooling.RefreshTest;
@@ -51,9 +53,6 @@ public class RefreshIGOperationTest extends RefreshTest {
 	public RefreshIGOperationTest() {
 		super(FhirContext.forCached(FhirVersionEnum.R4));
 	}
-
-	private static final String EXCEPTIONS_OCCURRED_LOADING_IG_FILE = "Exceptions occurred loading IG file";
-	private static final String EXCEPTIONS_OCCURRED_INITIALIZING_REFRESH_FROM_INI_FILE = "Exceptions occurred initializing refresh from ini file";
 	private final String ID = "id";
 	private final String ENTRY = "entry";
 	private final String RESOURCE = "resource";
@@ -64,31 +63,29 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 	private final String INI_LOC = "target" + separator + "refreshIG" + separator + "ig.ini";
 
+	// Store the original standard out before changing it.
+	private final PrintStream originalStdOut = System.out;
+	private ByteArrayOutputStream console = new ByteArrayOutputStream();
 
-    // Store the original standard out before changing it.
-    private final PrintStream originalStdOut = System.out;
-    private ByteArrayOutputStream console = new ByteArrayOutputStream();
-
-    @BeforeMethod
-    public void setUp() throws Exception {
-        IOUtils.resourceDirectories = new ArrayList<String>();
-        IOUtils.clearDevicePaths();
-        System.setOut(new PrintStream(this.console));
-        File dir  = new File("target" + separator + "refreshIG");
-        if (dir.exists()) {
-            FileUtils.deleteDirectory(dir);
-        }
+	@BeforeMethod
+	public void setUp() throws Exception {
+		IOUtils.resourceDirectories = new ArrayList<>();
+		IOUtils.clearDevicePaths();
+		System.setOut(new PrintStream(this.console));
+		File dir  = new File("target" + separator + "refreshIG");
+		if (dir.exists()) {
+			FileUtils.deleteDirectory(dir);
+		}
 
 		deleteTempINI();
-    }
+	}
 
 	/**
-	 * This test breaks down refreshIG's process and can verify multiple bundles
+	 * This test breaks down refreshIG operation's process and can verify multiple bundles
 	 */
 	@SuppressWarnings("unchecked")
 	@Test
-	//TODO: Fix separately, this is blocking a bunch of other higher priority things
-	public void testBundledFiles() throws IOException {
+	void testBundledFiles() throws IOException {
 		copyResourcesToTargetDir("target" + separator + "refreshIG", "testfiles/refreshIG");
 		// build ini object
 		File iniFile = new File(INI_LOC);
@@ -97,12 +94,12 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 		String bundledFilesLocation = iniFile.getParent() + separator + "bundles" + separator + "measure" + separator;
 
-		String args[] = { "-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false" };
+		String[] args = { "-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false" };
 
 		// execute refresh using ARGS
-        new RefreshIGOperation().execute(args);
+		new RefreshIGOperation().execute(args);
 
-		// determine fhireContext for measure lookup
+		// determine fhirContext for measure lookup
 		FhirContext fhirContext = IGProcessor.getIgFhirContext(getFhirVersion(ini));
 
 		// get list of measures resulting from execution
@@ -114,7 +111,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 			// location of single bundled file:
 			final String bundledFileResult = bundledFilesLocation + measureName + separator + measureName
 					+ "-bundle.json";
-			// multiple individual files in sub directory to loop through:
+			// multiple individual files in subdirectory to loop through:
 			final Path dir = Paths
 					.get(bundledFilesLocation + separator + measureName + separator + measureName + "-files");
 
@@ -173,61 +170,74 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 			// compare mappings of <id, resourceType> to ensure all bundled correctly:
 			assertTrue(mapsAreEqual(resourceTypeMap, bundledJsonResourceTypes));
-
 		}
 	}
 
-	//@Test(expectedExceptions = IllegalArgumentException.class)
-	//TODO: Fix separately, this is blocking a bunch of other higher priority things
-	public void testNullArgs() {
+	@Test(expectedExceptions = IllegalArgumentException.class)
+	void testNullArgs() {
 		new RefreshIGOperation().execute(null);
 	}
 
-	//@Test
-	//TODO: Fix separately, this is blocking a bunch of other higher priority things
-	public void testBlankINILoc() {
-		String args[] = { "-RefreshIG", "-ini=", "-t", "-d", "-p" };
+	@Test
+	void testBlankINILoc() {
+		String[] args = { "-RefreshIG", "-ini=", "-t", "-d", "-p" };
 
 		try {
 			new RefreshIGOperation().execute(args);
 		} catch (IllegalArgumentException e) {
-			assertEquals(e.getMessage(), IGProcessor.IG_VERSION_REQUIRED);
-			assertTrue(this.console.toString().indexOf("fhir-version was not specified in the ini file.") != -1);
+			assertEquals(e.getMessage(), IGProcessor.INVALID_INI);
 		}
 	}
 
-
-	//@Test
-	//TODO: Fix separately, this is blocking a bunch of other higher priority things
-	public void testInvalidIgVersion() {
-		Map<String, String> igProperties = new HashMap<String, String>();
+	@Test
+	void testInvalidIgVersion() {
+		Map<String, String> igProperties = new HashMap<>();
 		igProperties.put("ig", "nonsense");
 		igProperties.put("template", "nonsense");
 		igProperties.put("usage-stats-opt-out", "nonsense");
 		igProperties.put("fhir-version", "nonsense");
 
 		File iniFile = this.createTempINI(igProperties);
+		assert iniFile != null;
 
-		String args[] = { "-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t", "-d", "-p" };
+		String[] args = { "-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t", "-d", "-p" };
 
-		if (iniFile != null) {
-			try {
-				new RefreshIGOperation().execute(args);
-			} catch (Exception e) {
-				assertTrue(e.getClass() == IllegalArgumentException.class);
-				assertTrue(this.console.toString().indexOf(EXCEPTIONS_OCCURRED_INITIALIZING_REFRESH_FROM_INI_FILE) != -1);
-				assertTrue(this.console.toString().indexOf("Unknown Version 'nonsense'") != -1);
-
-				assertEquals(e.getMessage(), IGProcessor.IG_VERSION_REQUIRED);
-			}
-			deleteTempINI();
+		try {
+			new RefreshIGOperation().execute(args);
+		} catch (Exception e) {
+			assertSame(e.getClass(), FHIRException.class);
+			assertTrue(e.getMessage().contains("Unknown Version 'nonsense'"));
 		}
+		deleteTempINI();
 	}
 
-	//@Test
+	@Test
+	void testInvalidIgInput() {
+		Map<String, String> igProperties = new HashMap<>();
+		igProperties.put("ig", "nonsense");
+		igProperties.put("template", "nonsense");
+		igProperties.put("usage-stats-opt-out", "nonsense");
+		igProperties.put("fhir-version", "4.0.1");
+
+		File iniFile = this.createTempINI(igProperties);
+		assert iniFile != null;
+
+		String[] args = { "-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t", "-d", "-p" };
+
+		try {
+			new RefreshIGOperation().execute(args);
+		} catch (Exception e) {
+			assertSame(e.getClass(), IGInitializationException.class);
+			assertTrue(e.getMessage().contains("Exceptions occurred loading IG path"));
+		}
+		deleteTempINI();
+	}
+
+
+	@Test
 	//TODO: Fix separately, this is blocking a bunch of other higher priority things
-	public void testInvalidIgInput() {
-		Map<String, String> igProperties = new HashMap<String, String>();
+	void testParamsMissingINI() {
+		Map<String, String> igProperties = new HashMap<>();
 		igProperties.put("ig", "nonsense");
 		igProperties.put("template", "nonsense");
 		igProperties.put("usage-stats-opt-out", "nonsense");
@@ -235,73 +245,44 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 		File iniFile = this.createTempINI(igProperties);
 
-		String args[] = { "-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t", "-d", "-p" };
+		String[] args = { "-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t", "-d", "-p" };
 
-		if (iniFile != null) {
-			try {
-				new RefreshIGOperation().execute(args);
-			} catch (Exception e) {
-				assertTrue(e.getClass() == IllegalArgumentException.class);
-				assertEquals(e.getMessage(), IGProcessor.IG_VERSION_REQUIRED);
-
-				assertTrue(this.console.toString().indexOf(EXCEPTIONS_OCCURRED_LOADING_IG_FILE) != -1);
-				assertTrue(this.console.toString().indexOf(EXCEPTIONS_OCCURRED_INITIALIZING_REFRESH_FROM_INI_FILE) != -1);
-			}
-			deleteTempINI();
+		RefreshIGParameters params = null;
+		try {
+			params = new RefreshIGArgumentProcessor().parseAndConvert(args);
 		}
-	}
-
-
-	//@Test
-	//TODO: Fix separately, this is blocking a bunch of other higher priority things
-	public void testParamsMissingINI() {
-		Map<String, String> igProperties = new HashMap<String, String>();
-		igProperties.put("ig", "nonsense");
-		igProperties.put("template", "nonsense");
-		igProperties.put("usage-stats-opt-out", "nonsense");
-		igProperties.put("fhir-version", "4.0.1");
-
-		File iniFile = this.createTempINI(igProperties);
-
-		String args[] = { "-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t", "-d", "-p" };
-
-        RefreshIGParameters params = null;
-        try {
-            params = new RefreshIGArgumentProcessor().parseAndConvert(args);
-        }
-        catch (Exception e) {
-            System.err.println(e.getMessage());
-            System.exit(1);
-        }
-        MeasureProcessor measureProcessor = new MeasureProcessor();
-        LibraryProcessor libraryProcessor = new LibraryProcessor();
-        CDSHooksProcessor cdsHooksProcessor = new CDSHooksProcessor();
-        PlanDefinitionProcessor planDefinitionProcessor = new PlanDefinitionProcessor(libraryProcessor, cdsHooksProcessor);
+		catch (Exception e) {
+			System.err.println(e.getMessage());
+			System.exit(1);
+		}
+		MeasureProcessor measureProcessor = new MeasureProcessor();
+		LibraryProcessor libraryProcessor = new LibraryProcessor();
+		CDSHooksProcessor cdsHooksProcessor = new CDSHooksProcessor();
+		PlanDefinitionProcessor planDefinitionProcessor = new PlanDefinitionProcessor(libraryProcessor, cdsHooksProcessor);
 		QuestionnaireProcessor questionnaireProcessor = new QuestionnaireProcessor(libraryProcessor);
-        IGBundleProcessor igBundleProcessor = new IGBundleProcessor(measureProcessor, planDefinitionProcessor, questionnaireProcessor);
-        IGProcessor processor = new IGProcessor(igBundleProcessor, libraryProcessor, measureProcessor);
+		IGBundleProcessor igBundleProcessor = new IGBundleProcessor(measureProcessor, planDefinitionProcessor, questionnaireProcessor);
+		IGProcessor processor = new IGProcessor(igBundleProcessor, libraryProcessor, measureProcessor);
 
-        //override ini to be null
-        params.ini = null;
+		//override ini to be null
+		params.ini = null;
 
-
-        try {
+		try {
 			processor.publishIG(params);
 		} catch (Exception e) {
-			assertEquals(e.getClass(), NullPointerException.class);
+			assertEquals(e.getClass(), IllegalArgumentException.class);
+			assertTrue(e.getMessage().contains("Either the ini argument or both igPath and rootDir must be provided"));
 		}
 
-        deleteTempINI();
+		deleteTempINI();
 	}
 
-
-    @AfterMethod
-    public void afterTest() {
+	@AfterMethod
+	public void afterTest() {
 		deleteTempINI();
-        System.setOut(this.originalStdOut);
-        System.out.println(this.console.toString());
-        this.console = new ByteArrayOutputStream();
-    }
+		System.setOut(this.originalStdOut);
+		System.out.println(this.console.toString());
+		this.console = new ByteArrayOutputStream();
+	}
 
 
 	private File createTempINI(Map<String, String> properties) {
@@ -352,7 +333,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 			map = gson.fromJson(reader, Map.class);
 			reader.close();
 		} catch (Exception ex) {
-			// swallow exception if directory doesnt' exist
+			// swallow exception if directory doesn't exist
 			// ex.printStackTrace();
 		}
 		return map;
@@ -372,7 +353,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 	private String getFhirVersion(IniFile ini) {
 		String specifiedFhirVersion = ini.getStringProperty("IG", "fhir-version");
-		if (specifiedFhirVersion == null || specifiedFhirVersion == "") {
+		if (specifiedFhirVersion == null || "".equals(specifiedFhirVersion)) {
 
 			// TODO: Should point to global constant:
 			specifiedFhirVersion = "4.0.1";
@@ -380,17 +361,13 @@ public class RefreshIGOperationTest extends RefreshTest {
 		return specifiedFhirVersion;
 	}
 
-
-
-
-
 	/**
 	 * Quick method to delete all valuesets not belonging to CQL and identify
 	 * anything missing.
 	 *
-	 * @param args
+	 * @param args the operation parameters
 	 */
-	public static void main(String args[]) {
+	public static void main(String[] args) {
 
 		// switch this to true to clean up excess valueset files.
 		boolean deleteExcess = false;
@@ -411,7 +388,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 							if (line.startsWith("valueset")) {
 								valueSetsFound = true;
-								String vs = line.substring(line.lastIndexOf("/") + 1, line.length()).replace("'", "")
+								String vs = line.substring(line.lastIndexOf("/") + 1).replace("'", "")
 										.trim();
 								listOfValueSets.add(vs);
 							} else {
@@ -422,8 +399,6 @@ public class RefreshIGOperationTest extends RefreshTest {
 							}
 
 						}
-					} catch (FileNotFoundException e) {
-						e.printStackTrace();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -448,7 +423,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 					System.out.println("Valueset found not belonging to any cql: " + path);
 
-					if (deleteExcess == true) {
+					if (deleteExcess) {
 						try {
 							Files.delete(path);
 							System.out.println("Deleted " + path);
@@ -473,6 +448,5 @@ public class RefreshIGOperationTest extends RefreshTest {
 				}
 			}
 		}
-
 	}
 }
