@@ -390,7 +390,6 @@ public class ErsdTransformer extends Operation {
                 )
             );
         }
-        res.setVersion(this.version);
 
         Extension stewardExtension = res.getExtensionByUrl(valueSetStewardExtensionUrl);
         if (stewardExtension != null && stewardExtension.hasValue()) {
@@ -411,6 +410,7 @@ public class ErsdTransformer extends Operation {
         grouperUrls.add("http://hl7.org/fhir/us/ecr/ValueSet/sdtc");
         String url = res.getUrl();
         if (grouperUrls.contains(url)) {
+            res.setVersion(this.version);
             res.setPublisher(PUBLISHER);
 
             ValueSet.ValueSetComposeComponent compose = res.getCompose();
