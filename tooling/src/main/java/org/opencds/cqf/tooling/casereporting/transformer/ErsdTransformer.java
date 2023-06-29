@@ -212,7 +212,7 @@ public class ErsdTransformer extends Operation {
         specificationLibrary.setDescription(
                 "Defines the asset-collection library containing the US Public Health specification assets.");
         specificationLibrary.setStatus(PublicationStatus.ACTIVE);
-        specificationLibrary.setExperimental(true);
+        specificationLibrary.setExperimental(false);
         specificationLibrary.setPublisher(PUBLISHER);
         specificationLibrary.setUrl("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary");
         specificationLibrary.setType(new CodeableConcept(
@@ -276,7 +276,7 @@ public class ErsdTransformer extends Operation {
         // });
         // res.setVersion(this.version);
         // res.setPublisher(PUBLISHER);
-        // res.setExperimental(true);
+        // res.setExperimental(false);
         // res.setDescription("Example Description");
         return null;
     }
@@ -365,14 +365,7 @@ public class ErsdTransformer extends Operation {
 
         // Update Grouping ValueSet references (in useContexts) to PlanDefinition
         List<UsageContext> useContexts = res.getUseContext();
-
-        if (v2PlanDefinition != null) {
-            useContexts.stream().forEach(uc -> {
-                if (uc.hasValueReference() && uc.getValueReference().hasReference() && uc.getValueReference().getReference().contains("skeleton")) {
-                    uc.setValue(new Reference(v2PlanDefinition.getId()));
-                }
-            });
-        }
+        res.getUseContext().removeIf(uc -> uc.hasValueReference() && uc.getValueReference().hasReference() && uc.getValueReference().getReference().contains("skeleton"));
 
         boolean hasPriorityUseContext = false;
         for (UsageContext uc : useContexts) {
@@ -431,7 +424,7 @@ public class ErsdTransformer extends Operation {
             compose.getInclude().remove(include);
         }
 
-        res.setExperimental(true);
+        res.setExperimental(false);
         return null;
     }
 
