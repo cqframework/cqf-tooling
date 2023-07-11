@@ -1,36 +1,41 @@
 package org.opencds.cqf.tooling.cli;
 
-import org.opencds.cqf.tooling.casereporting.transformer.ErsdTransformer;
-import org.opencds.cqf.tooling.dateroller.DataDateRollerOperation;
-import org.opencds.cqf.tooling.exception.InvalidOperationArgs;
-import org.opencds.cqf.tooling.exception.OperationNotFound;
-import org.opencds.cqf.tooling.operations.ExecutableOperation;
-import org.opencds.cqf.tooling.operations.OperationParam;
-import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.TemplateToValueSetGenerator;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang3.NotImplementedException;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.acceleratorkit.DTProcessor;
 import org.opencds.cqf.tooling.acceleratorkit.Processor;
+import org.opencds.cqf.tooling.casereporting.transformer.ErsdTransformer;
+import org.opencds.cqf.tooling.dateroller.DataDateRollerOperation;
+import org.opencds.cqf.tooling.exception.InvalidOperationArgs;
+import org.opencds.cqf.tooling.exception.OperationNotFound;
 import org.opencds.cqf.tooling.library.r4.LibraryGenerator;
 import org.opencds.cqf.tooling.measure.r4.RefreshR4MeasureOperation;
 import org.opencds.cqf.tooling.measure.stu3.RefreshStu3MeasureOperation;
 import org.opencds.cqf.tooling.modelinfo.StructureDefinitionToModelInfo;
 import org.opencds.cqf.tooling.operation.BundleResources;
 import org.opencds.cqf.tooling.operation.BundleToResources;
+import org.opencds.cqf.tooling.operation.BundleToTransactionOperation;
 import org.opencds.cqf.tooling.operation.ExecuteMeasureTestOperation;
 import org.opencds.cqf.tooling.operation.ExtractMatBundleOperation;
 import org.opencds.cqf.tooling.operation.GenerateCQLFromDroolOperation;
 import org.opencds.cqf.tooling.operation.IgBundler;
 import org.opencds.cqf.tooling.operation.PostBundlesInDirOperation;
 import org.opencds.cqf.tooling.operation.PostmanCollectionOperation;
-import org.opencds.cqf.tooling.operation.StripGeneratedContentOperation;
 import org.opencds.cqf.tooling.operation.ProfilesToSpreadsheet;
 import org.opencds.cqf.tooling.operation.QICoreElementsToSpreadsheet;
 import org.opencds.cqf.tooling.operation.RefreshIGOperation;
 import org.opencds.cqf.tooling.operation.RefreshLibraryOperation;
 import org.opencds.cqf.tooling.operation.ScaffoldOperation;
+import org.opencds.cqf.tooling.operation.StripGeneratedContentOperation;
 import org.opencds.cqf.tooling.operation.TestIGOperation;
 import org.opencds.cqf.tooling.operation.VmrToFhirOperation;
+import org.opencds.cqf.tooling.operations.ExecutableOperation;
+import org.opencds.cqf.tooling.operations.OperationParam;
 import org.opencds.cqf.tooling.qdm.QdmToQiCore;
 import org.opencds.cqf.tooling.quick.QuickPageGenerator;
 import org.opencds.cqf.tooling.terminology.CMSFlatMultiValueSetGenerator;
@@ -43,14 +48,10 @@ import org.opencds.cqf.tooling.terminology.ToJsonValueSetDbOperation;
 import org.opencds.cqf.tooling.terminology.VSACBatchValueSetGenerator;
 import org.opencds.cqf.tooling.terminology.VSACValueSetGenerator;
 import org.opencds.cqf.tooling.terminology.distributable.DistributableValueSetGenerator;
+import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.TemplateToValueSetGenerator;
 import org.opencds.cqf.tooling.utilities.OperationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
 
 
 class OperationFactory {
@@ -191,6 +192,8 @@ class OperationFactory {
                 throw new NotImplementedException("BundlesToBundle");
             case "BundleToResources":
                 return new BundleToResources();
+            case "MakeTransaction":
+                return new BundleToTransactionOperation();
             case "ExtractMatBundle":
             	return new ExtractMatBundleOperation();
             case "GenerateMIs":
