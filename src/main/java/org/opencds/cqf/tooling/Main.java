@@ -122,6 +122,11 @@ package org.opencds.cqf.tooling;
             - Example: mvn exec:java -Dexec.args="-BundleToResources /Users/christopherschuler/Documents/workspace/Bundles/bundle-1.json json /Users/christopherschuler/Documents/workspace/resources"
             - This tooling decomposes a Bundle entry into separate resource files
             - Accepts Bundles with .json or .xml extensions
+
+        - Bundle transaction - Converts a collection bundle to a transaction bundle
+            - mvn exec:java -Dexec.args="-MakeTransaction [Bundle file path] (output encoding)
+            - This tooling converts a collection bundle to a transaction bundle
+            - Accepts bundles with .json or .xml extensions
             
         - MAT Bundle extraction
         	- mvn exec:java -Dexec.args="[-ExtractMatBundle] [Bundle file path] (-v)

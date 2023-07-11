@@ -79,6 +79,8 @@ class OperationFactory {
                 throw new NotImplementedException("BundlesToBundle");
             case "BundleToResources":
                 throw new NotImplementedException("BundleToResources");
+            case "MakeTransaction":
+                return new BundleToTransactionOperation();
             case "ExtractMatBundle":
             	return new ExtractMatBundleOperation();
             case "GenerateMIs":
