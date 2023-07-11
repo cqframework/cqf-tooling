@@ -327,8 +327,9 @@ public class Processor extends Operation {
 
         if (scope != null && scope.length() > 0) {
             contentId = getContentId(scope);
-            activityCodeSystem = getActivityCodeSystem(scope);
+            activityCodeSystem = getActivityCodeSystem(scope.toLowerCase());
             setCanonicalBase(scopeCanonicalBaseMap.get(scope.toLowerCase()));
+            createActivityCodeSystem(activityCodeSystem);
         }
 
         // process workbook
@@ -562,9 +563,19 @@ public class Processor extends Operation {
         if (activity == null) {
             activity = new Coding().setCode(activityCode).setSystem(activityCodeSystem).setDisplay(activityDisplay);
             activityMap.put(activityCode, activity);
+
+            CodeSystem cs = resolveCodeSystem(activityCodeSystem);
+            addCodeToSystem(cs, activity);
         }
 
         return activity;
+    }
+
+    private void addCodeToSystem(CodeSystem cs, Coding code) {
+        CodeSystem.ConceptDefinitionComponent concept = new CodeSystem.ConceptDefinitionComponent();
+        concept.setCode(code.getCode());
+        concept.setDisplay(code.getDisplay());
+        cs.addConcept(concept);
     }
 
     private String getNextElementId(String activityCode) {
@@ -735,16 +746,9 @@ public class Processor extends Operation {
             }
 
             if (system.startsWith(projectCodeSystemBase)) {
-                CodeSystem codeSystem = null;
-                for (CodeSystem cs : codeSystems) {
-                    if (cs.getUrl().equals(system)) {
-                        codeSystem = cs;
-                    }
-                }
-
+                CodeSystem codeSystem = resolveCodeSystem(system);
                 if (codeSystem == null) {
-                    String codeSystemName = system.substring(system.indexOf("CodeSystem/") + "CodeSystem/".length());
-                    codeSystem = createCodeSystem(codeSystemName, projectCodeSystemBase, String.format("%s Codes", contentId),
+                    codeSystem = createCodeSystem("concept-codes", String.format("%sConceptCodes", contentId), projectCodeSystemBase, String.format("%s Concept Codes", contentId),
                             "Set of codes representing all concepts used in the implementation guide");
                 }
 
@@ -2673,10 +2677,10 @@ public class Processor extends Operation {
     }
 
     @Nonnull
-    private CodeSystem createCodeSystem(String name, String canonicalBase, String title, String description) {
+    private CodeSystem createCodeSystem(String id, String name, String canonicalBase, String title, String description) {
         CodeSystem codeSystem = new CodeSystem();
 
-        codeSystem.setId(toId(name));
+        codeSystem.setId(toId(id));
         codeSystem.setUrl(String.format("%s/CodeSystem/%s", canonicalBase, codeSystem.getId()));
         // TODO: version
         codeSystem.setName(toName(name));
@@ -3171,6 +3175,28 @@ public class Processor extends Operation {
         }
 
         return canonicalBase + "/CodeSystem/activity-codes";
+    }
+
+    private CodeSystem createActivityCodeSystem(String system) {
+        CodeSystem codeSystem = resolveCodeSystem(system);
+
+        if (codeSystem == null) {
+            codeSystem = createCodeSystem("activity-codes", String.format("%sActivityCodes", contentId), projectCodeSystemBase, String.format("%s Activity Codes", contentId),
+                    "Set of codes representing all activities used in the implementation guide");
+        }
+
+        return codeSystem;
+    }
+
+    private CodeSystem resolveCodeSystem(String system) {
+        CodeSystem codeSystem = null;
+        for (CodeSystem cs : codeSystems) {
+            if (cs.getUrl().equals(system)) {
+                codeSystem = cs;
+            }
+        }
+
+        return codeSystem;
     }
 
     private Coding getActivityCoding(CodeableConcept concept) {
