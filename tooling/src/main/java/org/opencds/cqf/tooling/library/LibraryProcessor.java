@@ -11,6 +11,7 @@ import com.google.common.base.Strings;
 
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4b.model.Enumerations;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Attachment;
@@ -212,6 +213,8 @@ public class LibraryProcessor extends BaseProcessor {
                 if (existingLibrary == null) {
                     Library newLibrary = new Library();
                     newLibrary.setName(fileInfo.getIdentifier().getId());
+                    newLibrary.setTitle((newLibrary.getName()));
+                    newLibrary.setDescription(String.format("%s: %s", Enumerations.ResourceTypeEnum.LIBRARY.getDisplay(), newLibrary.getTitle()));
                     newLibrary.setVersion(fileInfo.getIdentifier().getVersion());
                     newLibrary.setUrl(String.format("%s/Library/%s", (newLibrary.getName().equals("FHIRHelpers") ? "http://hl7.org/fhir" : canonicalBase), fileInfo.getIdentifier().getId()));
                     newLibrary.setId(newLibrary.getName() + (versioned ? "-" + newLibrary.getVersion() : ""));
