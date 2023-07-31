@@ -1,16 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
 package org.opencds.cqf.tooling.operation;
 
 import java.io.File;

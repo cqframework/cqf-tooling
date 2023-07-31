@@ -166,7 +166,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
         return cqlProcessor;
     }
 
-    private ImplementationGuide loadSourceIG(String igPath) {
+    private void loadSourceIG(String igPath) {
         try {
             try {
                 sourceIg = (ImplementationGuide) org.hl7.fhir.r5.formats.FormatUtilities.loadFile(igPath);
@@ -189,10 +189,9 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
             throw new IGInitializationException(String.format("error initializing IG from igPath: %s", igPath), e);
         }
 
-        return sourceIg;
     }
 
-    private ImplementationGuide loadSourceIG(String igPath, String specifiedFhirVersion) {
+    private void loadSourceIG(String igPath, String specifiedFhirVersion) {
         try {
             if (VersionUtilities.isR3Ver(specifiedFhirVersion)) {
                 byte[] src = TextFile.fileToBytes(igPath);
@@ -216,7 +215,6 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
             throw new IGInitializationException(message, e);
         }
 
-        return sourceIg;
     }
 
     private String determineCanonical(String url) {

@@ -41,7 +41,7 @@ public class LibraryProcessor extends BaseProcessor {
 
     private static Pattern getPattern() {
         if(pattern == null) {
-            String regex = "^[a-zA-Z]+[a-zA-Z0-9_\\-\\.]*";
+            String regex = "^[a-zA-Z]+[a-zA-Z\\d_\\-.]*";
             pattern = Pattern.compile(regex);
         }
         return pattern;
@@ -92,8 +92,8 @@ public class LibraryProcessor extends BaseProcessor {
     public Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
             Encoding encoding, boolean versioned) {
         String fileName = FilenameUtils.getName(path);
-        boolean prefixed = fileName.toLowerCase().startsWith("library-");
-        Boolean shouldPersist = true;
+        boolean prefixed = fileName.toLowerCase().startsWith(ResourcePrefix);
+        boolean shouldPersist = true;
         try {
             Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding, versioned, logger);
             // String currentResourceID = IOUtils.getTypeQualifiedResourceId(path, fhirContext);
@@ -163,7 +163,7 @@ public class LibraryProcessor extends BaseProcessor {
                 sourceLibrary.getParameter().clear();
                 sourceLibrary.getParameter().addAll(info.getParameters());
             } else {
-                logMessage(String.format("No cql info found for ", fileName));
+                logMessage("No cql info found for " + fileName);
                 //f.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, ValidationMessage.IssueType.NOTFOUND, "Library", "No cql info found for "+f.getName(), ValidationMessage.IssueSeverity.ERROR));
             }
         }
@@ -176,14 +176,14 @@ public class LibraryProcessor extends BaseProcessor {
     }
 
     public List<Library> refreshGeneratedContent(String cqlDirectoryPath, String fhirVersion) {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         File input = new File(cqlDirectoryPath);
         if (input.exists() && input.isDirectory()) {
             result.add(input.getAbsolutePath());
         }
         setBinaryPaths(result);
 
-        List<Library> libraries = new ArrayList<Library>();
+        List<Library> libraries = new ArrayList<>();
         return internalRefreshGeneratedContent(libraries);
     }
 
@@ -217,7 +217,7 @@ public class LibraryProcessor extends BaseProcessor {
                     newLibrary.setId(newLibrary.getName() + (versioned ? "-" + newLibrary.getVersion() : ""));
                     setLibraryType(newLibrary);
                     validateIdAlphaNumeric(newLibrary.getId());
-                    List<Attachment> attachments = new ArrayList<Attachment>();
+                    List<Attachment> attachments = new ArrayList<>();
                     Attachment attachment = new Attachment();
                     attachment.setContentType("application/elm+xml");
                     attachment.setData(fileInfo.getElm());
@@ -228,7 +228,7 @@ public class LibraryProcessor extends BaseProcessor {
             }
         }
 
-        List<Library> resources = new ArrayList<Library>();
+        List<Library> resources = new ArrayList<>();
         for (Library library : sourceLibraries) {
             resources.add(refreshGeneratedContent(library));
         }
@@ -250,6 +250,6 @@ public class LibraryProcessor extends BaseProcessor {
     }
 
     public List<String> refreshLibraryContent(RefreshLibraryParameters params) {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 }

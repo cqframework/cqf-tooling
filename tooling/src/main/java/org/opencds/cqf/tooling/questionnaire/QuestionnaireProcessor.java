@@ -18,30 +18,29 @@ import java.util.List;
 import java.util.Map;
 
 public class QuestionnaireProcessor {
+    private static final Logger logger = LoggerFactory.getLogger(QuestionnaireProcessor.class);
     public static final String ResourcePrefix = "questionnaire-";
     public static final String QuestionnaireTestGroupName = "questionnaire";
     private LibraryProcessor libraryProcessor;
-
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public QuestionnaireProcessor(LibraryProcessor libraryProcessor) {
         this.libraryProcessor = libraryProcessor;
     }
 
-    public void bundleQuestionnaires(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
+    public void bundleQuestionnaires(List<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
                                       Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp,
                                       FhirContext fhirContext, String fhirUri, IOUtils.Encoding encoding) {
 
         Map<String, IBaseResource> questionnaires = IOUtils.getQuestionnaires(fhirContext);
 
-        List<String> bundledQuestionnaires = new ArrayList<String>();
+        List<String> bundledQuestionnaires = new ArrayList<>();
         for (Map.Entry<String, IBaseResource> questionnaireEntry : questionnaires.entrySet()) {
             String questionnaireSourcePath = IOUtils.getQuestionnairePathMap(fhirContext).get(questionnaireEntry.getKey());
 
             // Assumption - File name matches questionnaire.name
             String questionnaireName = FilenameUtils.getBaseName(questionnaireSourcePath).replace(org.opencds.cqf.tooling.questionnaire.QuestionnaireProcessor.ResourcePrefix, "");
             try {
-                Map<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
+                Map<String, IBaseResource> resources = new HashMap<>();
 
                 Boolean shouldPersist = ResourceUtils.safeAddResource(questionnaireSourcePath, resources, fhirContext);
                 if (!resources.containsKey("Questionnaire/" + questionnaireEntry.getKey())) {
@@ -65,9 +64,9 @@ public class QuestionnaireProcessor {
 
                 String primaryLibrarySourcePath = IOUtils.getLibraryPathMap(fhirContext).get(primaryLibrary.getIdElement().getIdPart());
                 String primaryLibraryName = ResourceUtils.getName(primaryLibrary, fhirContext);
-                if (includeVersion) {
+                if (Boolean.TRUE.equals(includeVersion)) {
                     primaryLibraryName = primaryLibraryName + "-" +
-                            fhirContext.newFhirPath().evaluateFirst(primaryLibrary, "version", IBase.class).get().toString();
+                            fhirContext.newFhirPath().evaluateFirst(primaryLibrary, "version", IBase.class).get();
                 }
 
                 shouldPersist = shouldPersist
@@ -81,33 +80,33 @@ public class QuestionnaireProcessor {
                     throw new IllegalArgumentException(String.format("Could not determine CqlLibrarySource path for library %s", primaryLibraryName));
                 }
 
-                if (includeTerminology) {
+                if (Boolean.TRUE.equals(includeTerminology)) {
                     boolean result = ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
-                    if (shouldPersist && !result) {
+                    if (Boolean.TRUE.equals(shouldPersist) && !result) {
                         LogUtils.info("Questionnaire will not be bundled because ValueSet bundling failed.");
                     }
                     shouldPersist = shouldPersist & result;
                 }
 
-                if (includeDependencies) {
+                if (Boolean.TRUE.equals(includeDependencies)) {
                     boolean result = libraryProcessor.bundleLibraryDependencies(primaryLibrarySourcePath, fhirContext, resources, encoding, includeVersion);
-                    if (shouldPersist && !result) {
+                    if (Boolean.TRUE.equals(shouldPersist) && !result) {
                         LogUtils.info("Questionnaire will not be bundled because Library Dependency bundling failed.");
                     }
                     shouldPersist = shouldPersist & result;
                 }
 
-                if (includePatientScenarios) {
+                if (Boolean.TRUE.equals(includePatientScenarios)) {
                     boolean result = TestCaseProcessor.bundleTestCases(igPath, QuestionnaireTestGroupName, primaryLibraryName, fhirContext, resources);
-                    if (shouldPersist && !result) {
+                    if (Boolean.TRUE.equals(shouldPersist) && !result) {
                         LogUtils.info("Questionnaire will not be bundled because Test Case bundling failed.");
                     }
                     shouldPersist = shouldPersist & result;
                 }
 
-                if (shouldPersist) {
+                if (Boolean.TRUE.equals(shouldPersist)) {
                     String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), QuestionnaireTestGroupName), questionnaireName);
-                    persistBundle(igPath, bundleDestPath, questionnaireName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri, addBundleTimestamp);
+                    persistBundle(igPath, bundleDestPath, questionnaireName, encoding, fhirContext, new ArrayList<>(resources.values()), fhirUri, addBundleTimestamp);
                     bundleFiles(igPath, bundleDestPath, primaryLibraryName, binaryPaths, questionnaireSourcePath, primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion, addBundleTimestamp);
                     bundledQuestionnaires.add(questionnaireSourcePath);
                 }
@@ -171,11 +170,11 @@ public class QuestionnaireProcessor {
         String cqlDestPath = FilenameUtils.concat(bundleDestFilesPath, cqlFileName);
         IOUtils.copyFile(cqlLibrarySourcePath, cqlDestPath);
 
-        if (includeTerminology) {
+        if (Boolean.TRUE.equals(includeTerminology)) {
             try {
                 Map<String, IBaseResource> valuesets = ResourceUtils.getDepValueSetResources(cqlLibrarySourcePath, igPath, fhirContext, includeDependencies, includeVersion);
                 if (!valuesets.isEmpty()) {
-                    Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<IBaseResource>(valuesets.values()), fhirContext, addBundleTimestamp);
+                    Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<>(valuesets.values()), fhirContext, addBundleTimestamp);
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);
                 }
             }  catch (Exception e) {
@@ -183,16 +182,16 @@ public class QuestionnaireProcessor {
             }
         }
 
-        if (includeDependencies) {
+        if (Boolean.TRUE.equals(includeDependencies)) {
             Map<String, IBaseResource> depLibraries = ResourceUtils.getDepLibraryResources(librarySourcePath, fhirContext, encoding, includeVersion, logger);
             if (!depLibraries.isEmpty()) {
                 String depLibrariesID = "library-deps-" + libraryName;
-                Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<IBaseResource>(depLibraries.values()), fhirContext, addBundleTimestamp);
+                Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<>(depLibraries.values()), fhirContext, addBundleTimestamp);
                 IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);
             }
         }
 
-        if (includePatientScenarios) {
+        if (Boolean.TRUE.equals(includePatientScenarios)) {
             TestCaseProcessor.bundleTestCaseFiles(igPath, "questionnaire", libraryName, bundleDestFilesPath, fhirContext);
         }
     }

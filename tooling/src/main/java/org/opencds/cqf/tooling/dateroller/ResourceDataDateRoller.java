@@ -9,36 +9,40 @@ import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class ResourceDataDateRoller {
     private static Logger logger = LoggerFactory.getLogger(ResourceDataDateRoller.class);
 
+    private ResourceDataDateRoller() {
+
+    }
+
     public static void rollBundleDates(FhirContext fhirContext, IBaseResource iBaseResource) {
-        switch (fhirContext.getVersion().getVersion().name()) {
-            case "R4":
-                ArrayList<Resource> r4ResourceArrayList = BundleUtils.getR4ResourcesFromBundle((org.hl7.fhir.r4.model.Bundle) iBaseResource);
-                r4ResourceArrayList.forEach(resource -> {
-                    RollDatesR4.rollDatesInResource(resource);
-                });
+        switch (fhirContext.getVersion().getVersion()) {
+            case R4:
+                List<Resource> r4ResourceArrayList = BundleUtils.getR4ResourcesFromBundle((org.hl7.fhir.r4.model.Bundle) iBaseResource);
+                r4ResourceArrayList.forEach(RollDatesR4::rollDatesInResource);
                 break;
-            case "Stu3":
-                ArrayList<org.hl7.fhir.dstu3.model.Resource> stu3resourceArrayList = BundleUtils.getStu3ResourcesFromBundle((org.hl7.fhir.dstu3.model.Bundle) iBaseResource);
-                stu3resourceArrayList.forEach(resource -> {
-                    RollDatesDstu3.rollDatesInResource(resource);
-                });
+            case DSTU3:
+                List<org.hl7.fhir.dstu3.model.Resource> stu3resourceArrayList = BundleUtils.getStu3ResourcesFromBundle((org.hl7.fhir.dstu3.model.Bundle) iBaseResource);
+                stu3resourceArrayList.forEach(RollDatesDstu3::rollDatesInResource);
                 break;
+            default: throw new UnsupportedOperationException("Date Roller not supported for version "
+                    + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
     }
 
     public static void rollResourceDates(FhirContext fhirContext, IBaseResource resource) {
-        switch (fhirContext.getVersion().getVersion().name()) {
-            case "R4":
+        switch (fhirContext.getVersion().getVersion()) {
+            case R4:
                 RollDatesR4.rollDatesInResource(resource);
                 break;
-            case "DSTU3":
+            case DSTU3:
                 RollDatesDstu3.rollDatesInResource(resource);
                 break;
+            default: throw new UnsupportedOperationException("Date Roller not supported for version "
+                    + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
     }
 }

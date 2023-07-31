@@ -4,17 +4,22 @@ import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
-import org.opencds.cqf.tooling.utilities.*;
+import org.opencds.cqf.tooling.utilities.BundleUtils;
+import org.opencds.cqf.tooling.utilities.HttpClientUtils;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
+import org.opencds.cqf.tooling.utilities.LogUtils;
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class PlanDefinitionProcessor {
     public static final String ResourcePrefix = "plandefinition-";
@@ -28,20 +33,20 @@ public class PlanDefinitionProcessor {
         this.cdsHooksProcessor = cdsHooksProcessor;
     }
 
-    public void bundlePlanDefinitions(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
-                                             Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp,
-                                             FhirContext fhirContext, String fhirUri, Encoding encoding) {
+    public void bundlePlanDefinitions(List<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
+                                      Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp,
+                                      FhirContext fhirContext, String fhirUri, Encoding encoding) {
 
         Map<String, IBaseResource> planDefinitions = IOUtils.getPlanDefinitions(fhirContext);
 
-        List<String> bundledPlanDefinitions = new ArrayList<String>();
+        List<String> bundledPlanDefinitions = new ArrayList<>();
         for (Map.Entry<String, IBaseResource> planDefinitionEntry : planDefinitions.entrySet()) {
             String planDefinitionSourcePath = IOUtils.getPlanDefinitionPathMap(fhirContext).get(planDefinitionEntry.getKey());
 
             // Assumption - File name matches planDefinition.name
             String planDefinitionName = FilenameUtils.getBaseName(planDefinitionSourcePath).replace(PlanDefinitionProcessor.ResourcePrefix, "");
             try {
-                Map<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
+                Map<String, IBaseResource> resources = new HashMap<>();
 
                 Boolean shouldPersist = ResourceUtils.safeAddResource(planDefinitionSourcePath, resources, fhirContext);
                 if (!resources.containsKey("PlanDefinition/" + planDefinitionEntry.getKey())) {
@@ -57,18 +62,19 @@ public class PlanDefinitionProcessor {
                     primaryLibrary = IOUtils.getLibraries(fhirContext).get(primaryLibraryUrl);
                 }
 
-                if (primaryLibrary == null)
+                if (primaryLibrary == null) {
                     throw new IllegalArgumentException(String.format("Could not resolve library url %s", primaryLibraryUrl));
+                }
 
                 String primaryLibrarySourcePath = IOUtils.getLibraryPathMap(fhirContext).get(primaryLibrary.getIdElement().getIdPart());
                 String primaryLibraryName = ResourceUtils.getName(primaryLibrary, fhirContext);
-                if (includeVersion) {
+                if (Boolean.TRUE.equals(includeVersion)) {
                     primaryLibraryName = primaryLibraryName + "-" +
-                            fhirContext.newFhirPath().evaluateFirst(primaryLibrary, "version", IBase.class).get().toString();
+                            fhirContext.newFhirPath().evaluateFirst(primaryLibrary, "version", IBase.class).get();
                 }
 
                 shouldPersist = shouldPersist
-                        & ResourceUtils.safeAddResource(primaryLibrarySourcePath, resources, fhirContext);
+                        && ResourceUtils.safeAddResource(primaryLibrarySourcePath, resources, fhirContext);
 
                 String cqlFileName = IOUtils.formatFileName(primaryLibraryName, Encoding.CQL, fhirContext);
 
@@ -78,25 +84,25 @@ public class PlanDefinitionProcessor {
                     throw new IllegalArgumentException(String.format("Could not determine CqlLibrarySource path for library %s", primaryLibraryName));
                 }
 
-                if (includeTerminology) {
+                if (Boolean.TRUE.equals(includeTerminology)) {
                     boolean result = ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
-                    if (shouldPersist && !result) {
+                    if (Boolean.TRUE.equals(shouldPersist) && !result) {
                         LogUtils.info("PlanDefinition will not be bundled because ValueSet bundling failed.");
                     }
-                    shouldPersist = shouldPersist & result;
+                    shouldPersist = shouldPersist && result;
                 }
 
-                if (includeDependencies) {
+                if (Boolean.TRUE.equals(includeDependencies)) {
                     boolean result = libraryProcessor.bundleLibraryDependencies(primaryLibrarySourcePath, fhirContext, resources, encoding, includeVersion);
-                    if (shouldPersist && !result) {
+                    if (Boolean.TRUE.equals(shouldPersist) && !result) {
                         LogUtils.info("PlanDefinition will not be bundled because Library Dependency bundling failed.");
                     }
-                    shouldPersist = shouldPersist & result;
+                    shouldPersist = shouldPersist && result;
                 }
 
-                if (includePatientScenarios) {
+                if (Boolean.TRUE.equals(includePatientScenarios)) {
                     boolean result = TestCaseProcessor.bundleTestCases(igPath, PlanDefinitionTestGroupName, primaryLibraryName, fhirContext, resources);
-                    if (shouldPersist && !result) {
+                    if (Boolean.TRUE.equals(shouldPersist) && !result) {
                         LogUtils.info("PlanDefinition will not be bundled because Test Case bundling failed.");
                     }
                     shouldPersist = shouldPersist & result;
@@ -104,9 +110,9 @@ public class PlanDefinitionProcessor {
 
                 List<String> activityDefinitionPaths =  CDSHooksProcessor.bundleActivityDefinitions(planDefinitionSourcePath, fhirContext, resources, encoding, includeVersion, shouldPersist);
 
-                if (shouldPersist) {
+                if (Boolean.TRUE.equals(shouldPersist)) {
                     String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), PlanDefinitionTestGroupName), planDefinitionName);
-                    persistBundle(igPath, bundleDestPath, planDefinitionName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri, addBundleTimestamp);
+                    persistBundle(igPath, bundleDestPath, planDefinitionName, encoding, fhirContext, new ArrayList<>(resources.values()), fhirUri, addBundleTimestamp);
                     bundleFiles(igPath, bundleDestPath, primaryLibraryName, binaryPaths, planDefinitionSourcePath, primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion, addBundleTimestamp);
                     cdsHooksProcessor.addActivityDefinitionFilesToBundle(igPath, bundleDestPath, activityDefinitionPaths, fhirContext, encoding);
                     bundledPlanDefinitions.add(planDefinitionSourcePath);
@@ -171,11 +177,11 @@ public class PlanDefinitionProcessor {
         String cqlDestPath = FilenameUtils.concat(bundleDestFilesPath, cqlFileName);
         IOUtils.copyFile(cqlLibrarySourcePath, cqlDestPath);
 
-        if (includeTerminology) {
+        if (Boolean.TRUE.equals(includeTerminology)) {
             try {     
-                Map<String, IBaseResource> valuesets = ResourceUtils.getDepValueSetResources(cqlLibrarySourcePath, igPath, fhirContext, includeDependencies, includeVersion);      
+                Map<String, IBaseResource> valuesets = ResourceUtils.getDepValueSetResources(cqlLibrarySourcePath, igPath, fhirContext, includeDependencies, includeVersion);
                 if (!valuesets.isEmpty()) {
-                    Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<IBaseResource>(valuesets.values()), fhirContext, addBundleTimestamp);
+                    Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<>(valuesets.values()), fhirContext, addBundleTimestamp);
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  
                 }  
             }  catch (Exception e) {
@@ -183,16 +189,16 @@ public class PlanDefinitionProcessor {
             }       
         }
         
-        if (includeDependencies) {
+        if (Boolean.TRUE.equals(includeDependencies)) {
             Map<String, IBaseResource> depLibraries = ResourceUtils.getDepLibraryResources(librarySourcePath, fhirContext, encoding, includeVersion, logger);
             if (!depLibraries.isEmpty()) {
                 String depLibrariesID = "library-deps-" + libraryName;
-                Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<IBaseResource>(depLibraries.values()), fhirContext, addBundleTimestamp);
+                Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<>(depLibraries.values()), fhirContext, addBundleTimestamp);
                 IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  
             }        
         }
 
-         if (includePatientScenarios) {
+         if (Boolean.TRUE.equals(includePatientScenarios)) {
             TestCaseProcessor.bundleTestCaseFiles(igPath, "plandefinition", libraryName, bundleDestFilesPath, fhirContext);
         }        
     }

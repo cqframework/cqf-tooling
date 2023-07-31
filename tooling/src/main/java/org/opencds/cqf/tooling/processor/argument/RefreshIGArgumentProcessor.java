@@ -16,11 +16,9 @@ import joptsimple.OptionSpecBuilder;
 
 
 public class RefreshIGArgumentProcessor {
-
     public static final String[] OPERATION_OPTIONS = {"RefreshIG"};
-
     public static final String[] INI_OPTIONS = {"ini"};
-    public static final String[] ROOT_DIR_OPTIONS = {"root-dir"};
+    public static final String[] ROOT_DIR_OPTIONS = {"root-dir", "rd"};
     public static final String[] IG_PATH_OPTIONS = {"ip", "ig-path"};
     public static final String[] IG_OUTPUT_ENCODING = {"e", "encoding"};
     public static final String[] INCLUDE_ELM_OPTIONS = {"elm", "include-elm"};
@@ -89,18 +87,18 @@ public class RefreshIGArgumentProcessor {
         String igPath = (String)options.valueOf(IG_PATH_OPTIONS[0]);
 
         List<String> resourcePaths = ArgUtils.getOptionValues(options, RESOURCE_PATH_OPTIONS[0]);
-            
+
         //could not easily use the built-in default here because it is based on the value of the igPath argument.
         String igEncoding = (String)options.valueOf(IG_OUTPUT_ENCODING[0]);
         Encoding outputEncodingEnum = Encoding.JSON;
         if (igEncoding != null) {
             outputEncodingEnum = Encoding.parse(igEncoding.toLowerCase());
         }
-        Boolean includeELM = options.has(INCLUDE_ELM_OPTIONS[0]);  
-        Boolean includeDependencies = options.has(INCLUDE_DEPENDENCY_LIBRARY_OPTIONS[0]);
-        Boolean includeTerminology = options.has(INCLUDE_TERMINOLOGY_OPTIONS[0]);
-        Boolean includePatientScenarios = options.has(INCLUDE_PATIENT_SCENARIOS_OPTIONS[0]);
-        Boolean versioned = options.has(VERSIONED_OPTIONS[0]);
+        boolean includeELM = options.has(INCLUDE_ELM_OPTIONS[0]);
+        boolean includeDependencies = options.has(INCLUDE_DEPENDENCY_LIBRARY_OPTIONS[0]);
+        boolean includeTerminology = options.has(INCLUDE_TERMINOLOGY_OPTIONS[0]);
+        boolean includePatientScenarios = options.has(INCLUDE_PATIENT_SCENARIOS_OPTIONS[0]);
+        boolean versioned = options.has(VERSIONED_OPTIONS[0]);
         String fhirUri = (String)options.valueOf(FHIR_URI_OPTIONS[0]);
         String measureToRefreshPath = (String)options.valueOf(MEASURE_TO_REFRESH_PATH[0]);
 
@@ -114,21 +112,21 @@ public class RefreshIGArgumentProcessor {
             measureOutputPath = "";
         }
 
-        Boolean shouldApplySoftwareSystemStamp = true;
+        boolean shouldApplySoftwareSystemStamp = true;
         String shouldApplySoftwareSystemStampValue = (String)options.valueOf(SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS[0]);
 
         if ((shouldApplySoftwareSystemStampValue != null) && shouldApplySoftwareSystemStampValue.equalsIgnoreCase("false")) {
             shouldApplySoftwareSystemStamp = false;
         }
 
-        Boolean addBundleTimestamp = false;
+        boolean addBundleTimestamp = false;
         String addBundleTimestampValue = (String)options.valueOf(SHOULD_ADD_TIMESTAMP_OPTIONS[0]);
 
         if ((addBundleTimestampValue != null) && addBundleTimestampValue.equalsIgnoreCase("true")) {
             addBundleTimestamp = true;
         }
 
-        ArrayList<String> paths = new ArrayList<String>();
+        ArrayList<String> paths = new ArrayList<>();
         if (resourcePaths != null && !resourcePaths.isEmpty()) {
             paths.addAll(resourcePaths);
         }

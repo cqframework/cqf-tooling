@@ -31,6 +31,7 @@ import org.hl7.fhir.utilities.IniFile;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.MeasureProcessor;
+import org.opencds.cqf.tooling.operation.ig.NewRefreshIGOperation;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.processor.CDSHooksProcessor;
 import org.opencds.cqf.tooling.processor.IGBundleProcessor;
@@ -233,6 +234,21 @@ public class RefreshIGOperationTest extends RefreshTest {
 		deleteTempINI();
 	}
 
+	@Test
+	void testOpioidIGRefresh() {
+		String[] args = {
+				"-RefreshIG", "-rd=/Users/christopherschuler/Documents/workspace/cqframework/igs/opioid-cds-r4",
+				"-ini=/Users/christopherschuler/Documents/workspace/cqframework/igs/opioid-cds-r4/ig.ini",
+				"-rp=/Users/christopherschuler/Documents/workspace/cqframework/igs/opioid-cds-r4/input/resources",
+				"-t", "-d", "-p", "-ss=false" };
+		new NewRefreshIGOperation().execute(args);
+	}
+
+	@Test
+	void localVSExpandTest() {
+		String[] args = { "-LocalVSExpand" };
+		new LocalValueSetExpand().execute(args);
+	}
 
 	@Test
 	//TODO: Fix separately, this is blocking a bunch of other higher priority things

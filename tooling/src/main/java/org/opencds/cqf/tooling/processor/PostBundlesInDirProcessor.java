@@ -50,13 +50,13 @@ public class PostBundlesInDirProcessor {
             }     
         }
 
-    public static void PostBundlesInDir(PostBundlesInDirParameters params) {
+    public static void postBundlesInDir(PostBundlesInDirParameters params) {
         String fhirUri = params.fhirUri;
         FHIRVersion fhirVersion = params.fhirVersion;
         Encoding encoding = params.encoding;
         FhirContext fhirContext = getFhirContext(fhirVersion);
 
-        List<Map.Entry<String, IBaseResource>> resources = BundleUtils.GetBundlesInDir(params.directoryPath, fhirContext);
+        List<Map.Entry<String, IBaseResource>> resources = BundleUtils.getBundlesInDir(params.directoryPath, fhirContext);
         resources.forEach(entry -> postBundleToFhirUri(fhirUri, encoding, fhirContext, entry.getValue()));
     }
 

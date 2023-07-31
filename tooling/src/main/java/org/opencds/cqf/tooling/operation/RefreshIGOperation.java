@@ -15,11 +15,11 @@ public class RefreshIGOperation extends Operation {
 
     @Override
     public void execute(String[] args) {
-    	
-    	if (args == null) {
-    		throw new IllegalArgumentException();
-    	}
-    	
+
+        if (args == null) {
+            throw new IllegalArgumentException();
+        }
+
         RefreshIGParameters params = null;
         try {
             params = new RefreshIGArgumentProcessor().parseAndConvert(args);

@@ -51,7 +51,7 @@ public class TestCaseProcessor
 
     public static List<IBaseResource> getTestCaseResources(String path, FhirContext fhirContext)
     {
-        List<IBaseResource> resources = new ArrayList<IBaseResource>();
+        List<IBaseResource> resources = new ArrayList<>();
         List<String> testCasePaths = IOUtils.getDirectoryPaths(path, false); 
         for (String testCasePath : testCasePaths) {
             List<String> paths = IOUtils.getFilePaths(testCasePath, true);
@@ -76,7 +76,7 @@ public class TestCaseProcessor
 
     public static Boolean bundleTestCases(String igPath, String contextResourceType, String libraryName, FhirContext fhirContext,
             Map<String, IBaseResource> resources) {
-        Boolean shouldPersist = true;
+        boolean shouldPersist = true;
         String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), contextResourceType), libraryName);
 
         // this is breaking for bundle of a bundle. Replace with individual resources

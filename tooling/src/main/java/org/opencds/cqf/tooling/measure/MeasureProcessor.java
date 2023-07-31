@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 
 public class MeasureProcessor extends BaseProcessor {
+    private static final Logger logger = LoggerFactory.getLogger(MeasureProcessor.class);
     public static final String ResourcePrefix = "measure-";
     public static final String MeasureTestGroupName = "measure";
     protected List<Object> identifiers;
@@ -42,7 +43,6 @@ public class MeasureProcessor extends BaseProcessor {
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
     }
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
     public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, String measureToRefreshPath, Boolean shouldApplySoftwareSystemStamp) {
         return refreshIgMeasureContent(parentContext, outputEncoding, null, versioned, fhirContext, measureToRefreshPath, shouldApplySoftwareSystemStamp);
     }
@@ -87,19 +87,19 @@ public class MeasureProcessor extends BaseProcessor {
         return identifiers;
     }
 
-    public void bundleMeasures(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
+    public void bundleMeasures(List<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
             Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp, FhirContext fhirContext, String fhirUri,
             Encoding encoding) {
         Map<String, IBaseResource> measures = IOUtils.getMeasures(fhirContext);
         //Map<String, IBaseResource> libraries = IOUtils.getLibraries(fhirContext);
 
-        List<String> bundledMeasures = new ArrayList<String>();
+        List<String> bundledMeasures = new ArrayList<>();
         for (Map.Entry<String, IBaseResource> measureEntry : measures.entrySet()) {
             String measureSourcePath = IOUtils.getMeasurePathMap(fhirContext).get(measureEntry.getKey());
             // Assumption - File name matches measure.name
             String measureName = FilenameUtils.getBaseName(measureSourcePath).replace(MeasureProcessor.ResourcePrefix, "");
             try {
-                Map<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
+                Map<String, IBaseResource> resources = new HashMap<>();
 
                 Boolean shouldPersist = ResourceUtils.safeAddResource(measureSourcePath, resources, fhirContext);
                 if (!resources.containsKey("Measure/" + measureEntry.getKey())) {
@@ -115,14 +115,15 @@ public class MeasureProcessor extends BaseProcessor {
                     primaryLibrary = IOUtils.getLibraries(fhirContext).get(primaryLibraryUrl);
                 }
                 
-                if (primaryLibrary == null)
-                	throw new IllegalArgumentException(String.format("Could not resolve library url %s", primaryLibraryUrl));
+                if (primaryLibrary == null) {
+                    throw new IllegalArgumentException(String.format("Could not resolve library url %s", primaryLibraryUrl));
+                }
                 
                 String primaryLibrarySourcePath = IOUtils.getLibraryPathMap(fhirContext).get(primaryLibrary.getIdElement().getIdPart());
                 String primaryLibraryName = ResourceUtils.getName(primaryLibrary, fhirContext);
-                if (includeVersion) {
+                if (Boolean.TRUE.equals(includeVersion)) {
                     primaryLibraryName = primaryLibraryName + "-" + 
-                        fhirContext.newFhirPath().evaluateFirst(primaryLibrary, "version", IBase.class).get().toString();
+                        fhirContext.newFhirPath().evaluateFirst(primaryLibrary, "version", IBase.class).get();
                 }
 
                 shouldPersist = shouldPersist
@@ -136,34 +137,34 @@ public class MeasureProcessor extends BaseProcessor {
                     throw new IllegalArgumentException(String.format("Could not determine CqlLibrarySource path for library %s", primaryLibraryName));
                 }
 
-                if (includeTerminology) {
+                if (Boolean.TRUE.equals(includeTerminology)) {
                     boolean result = ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
-                    if (shouldPersist && !result) {
+                    if (Boolean.TRUE.equals(shouldPersist) && !result) {
                         LogUtils.info("Measure will not be bundled because ValueSet bundling failed.");
                     }
                     shouldPersist = shouldPersist & result;
                 }
 
-                if (includeDependencies) {
+                if (Boolean.TRUE.equals(includeDependencies)) {
                     LibraryProcessor libraryProcessor = new LibraryProcessor();
                     boolean result = libraryProcessor.bundleLibraryDependencies(primaryLibrarySourcePath, fhirContext, resources, encoding, includeVersion);
-                    if (shouldPersist && !result) {
+                    if (Boolean.TRUE.equals(shouldPersist) && !result) {
                         LogUtils.info("Measure will not be bundled because Library Dependency bundling failed.");
                     }
                     shouldPersist = shouldPersist & result;
                 }
 
-                if (includePatientScenarios) {
+                if (Boolean.TRUE.equals(includePatientScenarios)) {
                     boolean result = TestCaseProcessor.bundleTestCases(igPath, MeasureTestGroupName, primaryLibraryName, fhirContext, resources);
-                    if (shouldPersist && !result) {
+                    if (Boolean.TRUE.equals(shouldPersist) && !result) {
                         LogUtils.info("Measure will not be bundled because Test Case bundling failed.");
                     }
                     shouldPersist = shouldPersist & result;
                 }
 
-                if (shouldPersist) {
+                if (Boolean.TRUE.equals(shouldPersist)) {
                     String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), MeasureTestGroupName), measureName);
-                    persistBundle(igPath, bundleDestPath, measureName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri, addBundleTimestamp);
+                    persistBundle(igPath, bundleDestPath, measureName, encoding, fhirContext, new ArrayList<>(resources.values()), fhirUri, addBundleTimestamp);
                     bundleFiles(igPath, bundleDestPath, measureName, binaryPaths, measureSourcePath, primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion, addBundleTimestamp);
                     bundledMeasures.add(measureSourcePath);
                 }
@@ -222,11 +223,11 @@ public class MeasureProcessor extends BaseProcessor {
         String cqlDestPath = FilenameUtils.concat(bundleDestFilesPath, cqlFileName);
         IOUtils.copyFile(cqlLibrarySourcePath, cqlDestPath);
 
-        if (includeTerminology) {  
+        if (Boolean.TRUE.equals(includeTerminology)) {
             try {     
                 Map<String, IBaseResource> valuesets = ResourceUtils.getDepValueSetResources(cqlLibrarySourcePath, igPath, fhirContext, includeDependencies, includeVersion);      
                 if (!valuesets.isEmpty()) {
-                    Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<IBaseResource>(valuesets.values()), fhirContext, addBundleTimestamp, this.getIdentifiers());
+                    Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<>(valuesets.values()), fhirContext, addBundleTimestamp, this.getIdentifiers());
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  
                 }  
             }  catch (Exception e) {
@@ -235,16 +236,16 @@ public class MeasureProcessor extends BaseProcessor {
             }       
         }
         
-        if (includeDependencies) {
+        if (Boolean.TRUE.equals(includeDependencies)) {
             Map<String, IBaseResource> depLibraries = ResourceUtils.getDepLibraryResources(librarySourcePath, fhirContext, encoding, includeVersion, logger);
             if (!depLibraries.isEmpty()) {
                 String depLibrariesID = "library-deps-" + libraryName;
-                Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<IBaseResource>(depLibraries.values()), fhirContext, addBundleTimestamp, this.getIdentifiers());
+                Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<>(depLibraries.values()), fhirContext, addBundleTimestamp, this.getIdentifiers());
                 IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  
             }        
         }
 
-         if (includePatientScenarios) {
+         if (Boolean.TRUE.equals(includePatientScenarios)) {
             TestCaseProcessor.bundleTestCaseFiles(igPath, "measure", libraryName, bundleDestFilesPath, fhirContext);
         }        
     }
@@ -253,7 +254,7 @@ public class MeasureProcessor extends BaseProcessor {
     protected FhirContext fhirContext;
 
     public List<String> refreshMeasureContent(RefreshMeasureParameters params) {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
     protected List<Measure> refreshGeneratedContent(List<Measure> sourceMeasures) {
@@ -262,7 +263,7 @@ public class MeasureProcessor extends BaseProcessor {
 
     private List<Measure> internalRefreshGeneratedContent(List<Measure> sourceMeasures) {
         // for each Measure, refresh the measure based on the primary measure library
-        List<Measure> resources = new ArrayList<Measure>();
+        List<Measure> resources = new ArrayList<>();
         for (Measure measure : sourceMeasures) {
             resources.add(refreshGeneratedContent(measure));
         }
@@ -277,10 +278,10 @@ public class MeasureProcessor extends BaseProcessor {
         if (measure.hasLibrary()) {
             String libraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
             VersionedIdentifier primaryLibraryIdentifier = CanonicalUtils.toVersionedIdentifier(libraryUrl);
-            List<CqlCompilerException> errors = new ArrayList<CqlCompilerException>();
-            CompiledLibrary CompiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, cqlTranslatorOptions, errors);
+            List<CqlCompilerException> errors = new ArrayList<>();
+            CompiledLibrary compiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, cqlTranslatorOptions, errors);
             boolean hasErrors = false;
-            if (errors.size() > 0) {
+            if (!errors.isEmpty()) {
                 for (CqlCompilerException e : errors) {
                     if (e.getSeverity() == CqlCompilerException.ErrorSeverity.Error) {
                         hasErrors = true;
@@ -289,7 +290,7 @@ public class MeasureProcessor extends BaseProcessor {
                 }
             }
             if (!hasErrors) {
-                return processor.refreshMeasure(measure, libraryManager, CompiledLibrary, cqlTranslatorOptions);
+                return processor.refreshMeasure(measure, libraryManager, compiledLibrary, cqlTranslatorOptions);
             }
         }
         return measure;

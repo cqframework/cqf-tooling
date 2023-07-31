@@ -67,7 +67,7 @@ public class IGProcessor extends BaseProcessor {
         Boolean versioned = params.versioned;
         String fhirUri = params.fhirUri;
         // String measureToRefreshPath = params.measureToRefreshPath;
-        ArrayList<String> resourceDirs = new ArrayList<String>();
+        ArrayList<String> resourceDirs = new ArrayList<>();
         for (String resourceDir : params.resourceDirs) {
             if (!Utilities.isAbsoluteFileName(resourceDir)) {
                 try {
@@ -106,7 +106,7 @@ public class IGProcessor extends BaseProcessor {
         //Publish?
     }
 
-    public ArrayList<String> refreshedResourcesNames = new ArrayList<String>();
+    public List<String> refreshedResourcesNames = new ArrayList<>();
     public void refreshIG(RefreshIGParameters params) {
         if (params.ini != null) {
             initializeFromIni(params.ini);
@@ -130,8 +130,8 @@ public class IGProcessor extends BaseProcessor {
         Boolean versioned = params.versioned;
         // String fhirUri = params.fhirUri;
         String measureToRefreshPath = params.measureToRefreshPath;
-        ArrayList<String> resourceDirs = params.resourceDirs;
-        if (resourceDirs.size() == 0) {
+        List<String> resourceDirs = params.resourceDirs;
+        if (resourceDirs.isEmpty()) {
             try {
                 resourceDirs = IGUtils.extractResourcePaths(this.rootDir, this.sourceIg);
             } catch (IOException e) {
@@ -165,7 +165,7 @@ public class IGProcessor extends BaseProcessor {
             return;
         }
 
-        if (includePatientScenarios) {
+        if (Boolean.TRUE.equals(includePatientScenarios)) {
             TestCaseProcessor testCaseProcessor = new TestCaseProcessor();
             testCaseProcessor.refreshTestCases(FilenameUtils.concat(rootDir, IGProcessor.testCasePathElement), encoding, fhirContext, refreshedResourcesNames);
         }
@@ -204,7 +204,7 @@ public class IGProcessor extends BaseProcessor {
     public static final String testCasePathElement = "input/tests/";
     public static final String devicePathElement = "input/resources/device/";
 
-    public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, ArrayList<String> resourcePaths) {
+    public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, List<String> resourcePaths) {
         File directory = new File(getBundlesPath(igPath));
         if (!directory.exists()) {
             directory.mkdir();

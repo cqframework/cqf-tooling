@@ -9,13 +9,10 @@ import org.opencds.cqf.tooling.processor.argument.RefreshLibraryArgumentProcesso
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class RefreshLibraryOperation extends Operation {
-
-    public RefreshLibraryOperation() {    
-    } 
 
     @Override
     public void execute(String[] args) {
@@ -28,7 +25,7 @@ public class RefreshLibraryOperation extends Operation {
             System.exit(1);
         }
 
-        List<String> refreshedLibraryNames = new ArrayList<String>();
+        List<String> refreshedLibraryNames;
         LibraryProcessor libraryProcessor;
 
         switch (params.fhirContext.getVersion().getVersion()) {
@@ -45,7 +42,7 @@ public class RefreshLibraryOperation extends Operation {
                     "Unknown fhir version: " + params.fhirContext.getVersion().getVersion().getFhirVersionString());
         }
 
-        if (refreshedLibraryNames.size() == 0) {
+        if (refreshedLibraryNames.isEmpty()) {
             LogUtils.info("No libraries successfully refreshed.");
             LogUtils.warn(params.cqlContentPath);
         }
@@ -59,19 +56,15 @@ public class RefreshLibraryOperation extends Operation {
     public static List<String> refreshLibraryContent(RefreshLibraryParameters params, LibraryProcessor libraryProcessor) {
         try {
             if(params.libraryPath.isEmpty()) {
-                try {
-                    params.libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(params.cqlContentPath, params.fhirContext);
-                } catch (Exception e) {
-                    LogUtils.putException(params.cqlContentPath, e);
-                    LogUtils.warn(params.cqlContentPath);
-                }
+                params.libraryPath = IOUtils.getLibraryPathAssociatedWithCqlFileName(params.cqlContentPath, params.fhirContext);
             }
             return libraryProcessor.refreshLibraryContent(params);
         } catch (Exception e) {
             LogUtils.putException(params.cqlContentPath, e);
+            LogUtils.warn(params.cqlContentPath);
         }
         LogUtils.warn(params.cqlContentPath);
-        return null;
+        return Collections.emptyList();
     }
 }
 

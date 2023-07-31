@@ -84,4 +84,23 @@ public class CanonicalUtils {
 
         return new VersionedIdentifier().withSystem(base).withId(id).withVersion(version);
     }
+
+    public static VersionedIdentifier toVersionedIdentifierAnyResource(String url) {
+        String version = getVersion(url);
+        if ("".equals(version)) {
+            version = null;
+        }
+        String id = getId(url);
+        String head = getHead(url);
+        String base = null;
+        if (head != null) {
+            base = getHead(head);
+        }
+        if ("".equals(base)) {
+            base = null;
+        }
+
+        return new VersionedIdentifier().withSystem(base).withId(id).withVersion(version);
+    }
+
 }

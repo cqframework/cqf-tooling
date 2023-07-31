@@ -8,7 +8,12 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
 public class ArgUtils {
+
     public static final String[] HELP_OPTIONS = {"h", "help", "?"};
+
+    private ArgUtils() {
+
+    }
 
     public static OptionSet parse(String[] args, OptionParser parser) {
         OptionSet options = parser.parse(args);

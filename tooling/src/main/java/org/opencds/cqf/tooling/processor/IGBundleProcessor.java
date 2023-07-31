@@ -21,7 +21,7 @@ public class IGBundleProcessor {
         this.questionnaireProcessor = questionnaireProcessor;
     }
 
-    public void bundleIg(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Encoding encoding, Boolean includeELM,
+    public void bundleIg(List<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Encoding encoding, Boolean includeELM,
     Boolean includeDependencies, Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned, Boolean addBundleTimestamp,
     FhirContext fhirContext, String fhirUri) {
 

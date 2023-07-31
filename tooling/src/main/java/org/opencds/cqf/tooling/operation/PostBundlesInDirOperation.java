@@ -20,6 +20,6 @@ public class PostBundlesInDirOperation extends Operation {
             System.err.println(e.getMessage());
             System.exit(1);
         }
-        PostBundlesInDirProcessor.PostBundlesInDir(params);
+        PostBundlesInDirProcessor.postBundlesInDir(params);
     }   
 }
