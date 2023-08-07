@@ -1,8 +1,11 @@
 package org.opencds.cqf.tooling.cli;
 
-//import org.opencds.cqf.tooling.jsonschema.SchemaGenerator;
 import org.opencds.cqf.tooling.casereporting.transformer.ErsdTransformer;
 import org.opencds.cqf.tooling.dateroller.DataDateRollerOperation;
+import org.opencds.cqf.tooling.exception.InvalidOperationArgs;
+import org.opencds.cqf.tooling.exception.OperationNotFound;
+import org.opencds.cqf.tooling.operations.ExecutableOperation;
+import org.opencds.cqf.tooling.operations.OperationParam;
 import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.TemplateToValueSetGenerator;
 import org.apache.commons.lang3.NotImplementedException;
 import org.opencds.cqf.tooling.Operation;
@@ -40,9 +43,75 @@ import org.opencds.cqf.tooling.terminology.ToJsonValueSetDbOperation;
 import org.opencds.cqf.tooling.terminology.VSACBatchValueSetGenerator;
 import org.opencds.cqf.tooling.terminology.VSACValueSetGenerator;
 import org.opencds.cqf.tooling.terminology.distributable.DistributableValueSetGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 
 
 class OperationFactory {
+    private static final Logger logger = LoggerFactory.getLogger(OperationFactory.class);
+    private static String operationName;
+    private static Map<String, String> paramMap;
+
+    private OperationFactory() {
+
+    }
+
+    private static void processArgs(String[] args) {
+        paramMap = new HashMap<>();
+        for (int i = 1; i < args.length; ++i) {
+            String[] argAndValue = args[i].split("=", 2);
+            if (argAndValue.length == 2) {
+                paramMap.put(argAndValue[0].replace("-", ""), argAndValue[1]);
+            }
+            else {
+                throw new InvalidOperationArgs(String.format(
+                        "Invalid argument: %s found for operation: %s", args[i], operationName));
+            }
+        }
+    }
+
+    private static ExecutableOperation initialize(ExecutableOperation operation)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        for (Field field : operation.getClass().getDeclaredFields()) {
+            if (field.isAnnotationPresent(OperationParam.class)) {
+                boolean isInitialized = false;
+                for (String alias : field.getAnnotation(OperationParam.class).alias()) {
+                    if (paramMap.containsKey(alias)) {
+                        operation.getClass().getDeclaredMethod(
+                                field.getAnnotation(OperationParam.class).setter(), String.class
+                        ).invoke(operation, paramMap.get(alias));
+                        isInitialized = true;
+                    }
+                }
+                if (!isInitialized) {
+                    if (field.getAnnotation(OperationParam.class).required()) {
+                        throw new InvalidOperationArgs("Missing required argument: " + field.getName());
+                    }
+                    else if (!field.getAnnotation(OperationParam.class).defaultValue().isEmpty()) {
+                        operation.getClass().getDeclaredMethod(
+                                field.getAnnotation(OperationParam.class).setter(), String.class
+                        ).invoke(operation, field.getAnnotation(OperationParam.class).defaultValue());
+                    }
+                }
+            }
+        }
+        return operation;
+    }
+
+    static ExecutableOperation createOperation(String operationName, Class<?> operationClass, String[] args)
+            throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        if (operationClass == null) {
+            throw new OperationNotFound("Unable to resolve operation: " + operationName);
+        }
+        OperationFactory.operationName = operationName;
+        processArgs(args);
+        return initialize((ExecutableOperation) operationClass.getDeclaredConstructor().newInstance());
+    }
 
     static Operation createOperation(String operationName) {
         switch (operationName) {
