@@ -179,6 +179,11 @@ public class IOUtils
         }
     }
 
+    public static <T extends IBaseResource> void writeResources(List<T> resources, String path,
+                                                                Encoding encoding, FhirContext fhirContext) {
+        resources.forEach(resource -> writeResource(resource, path, encoding, fhirContext));
+    }
+
     public static <T extends IBaseResource> void writeResources(Map<String, T> resources, String path, Encoding encoding, FhirContext fhirContext)
     {        
         for (Map.Entry<String, T> set : resources.entrySet())
