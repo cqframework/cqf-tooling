@@ -1,0 +1,29 @@
+{
+  "resourceType": "Patient",
+  "id": "fabiane",
+  "meta": {
+    "profile": [ "http://fhir.org/guides/who/smart-anc-mini/StructureDefinition/anc-patient" ]
+  },
+  "identifier": [ {
+    "value": "fabiane"
+  } ],
+  "name": [ {
+    "family": "Asdf",
+    "given": [ "Fabiane" ]
+  } ],
+  "telecom": [ {
+    "value": "Asdf"
+  } ],
+  "birthDate": "1997-09-27",
+  "address": [ {
+    "line": [ "Asdf" ]
+  } ],
+  "contact": [ {
+    "telecom": [ {
+      "value": "Asdf"
+    } ]
+  } ],
+  "generalPractitioner": [ {
+    "reference": "PractitionerRole/anc-practitionerrole-example"
+  } ]
+}

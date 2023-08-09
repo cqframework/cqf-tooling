@@ -1,0 +1,84 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "anc-b5-de5",
+  "url": "http://fhir.org/guides/who/smart-anc-mini/StructureDefinition/anc-b5-de5",
+  "name": "Specifichealthconcerns",
+  "title": "Specific health concern(s)",
+  "status": "draft",
+  "experimental": false,
+  "description": "If the woman came to the facility with a specific health concern, select the health concern(s) from the list",
+  "useContext": [ {
+    "code": {
+      "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+      "code": "task",
+      "display": "Workflow Task"
+    },
+    "valueCodeableConcept": {
+      "coding": [ {
+        "system": "http://fhir.org/guides/who/smart-anc-mini/CodeSystem/activity-codes",
+        "code": "ANC.B5",
+        "display": "Quick check"
+      } ]
+    }
+  } ],
+  "fhirVersion": "4.0.1",
+  "mapping": [ {
+    "identity": "ANCM"
+  } ],
+  "kind": "resource",
+  "abstract": false,
+  "type": "Observation",
+  "baseDefinition": "http://fhir.org/guides/who/smart-anc-mini/StructureDefinition/anc-observation",
+  "derivation": "constraint",
+  "differential": {
+    "element": [ {
+      "id": "Observation",
+      "path": "Observation",
+      "mustSupport": false
+    }, {
+      "id": "Observation.code",
+      "path": "Observation.code",
+      "short": "Specific health concern(s)",
+      "definition": "If the woman came to the facility with a specific health concern, select the health concern(s) from the list",
+      "comment": "Asked during every contact",
+      "min": 1,
+      "max": "1",
+      "patternCodeableConcept": {
+        "coding": [ {
+          "system": "http://fhir.org/guides/who/smart-anc-mini/CodeSystem/concept-codes",
+          "code": "ANC.B5.DE5",
+          "display": "Specific health concern(s)"
+        } ]
+      },
+      "mustSupport": true,
+      "mapping": [ {
+        "identity": "ANCM",
+        "map": "ANC.B5.DE5"
+      } ]
+    }, {
+      "id": "Observation.value[x]",
+      "path": "Observation.value[x]",
+      "short": "Specific health concern(s)",
+      "definition": "If the woman came to the facility with a specific health concern, select the health concern(s) from the list",
+      "comment": "Asked during every contact",
+      "min": 0,
+      "max": "1",
+      "type": [ {
+        "code": "CodeableConcept"
+      } ],
+      "mustSupport": true,
+      "binding": {
+        "extension": [ {
+          "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+          "valueString": "Specific health concern(s) Codes"
+        } ],
+        "strength": "required",
+        "valueSet": "http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-b5-de6"
+      },
+      "mapping": [ {
+        "identity": "ANCM",
+        "map": "ANC.B5.DE5"
+      } ]
+    } ]
+  }
+}

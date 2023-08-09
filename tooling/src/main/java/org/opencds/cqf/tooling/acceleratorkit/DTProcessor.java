@@ -1,7 +1,6 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
-import static org.opencds.cqf.tooling.utilities.IOUtils.ensurePath;
-
+import ca.uhn.fhir.context.FhirContext;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,7 +12,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -34,7 +32,7 @@ import org.hl7.fhir.r4.model.UsageContext;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
 
-import ca.uhn.fhir.context.FhirContext;
+import static org.opencds.cqf.tooling.utilities.IOUtils.ensurePath;
 
 public class DTProcessor extends Operation {
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
@@ -701,9 +699,11 @@ public class DTProcessor extends Operation {
     }
 
     public void writePlanDefinitionIndex(String outputPath) {
-        String outputFilePath = outputPath + File.separator + "input" + File.separator + "pagecontent"+ File.separator + "PlanDefinitionIndex.md";
+        String outputDirectoryPath = outputPath + File.separator + "input" + File.separator + "pagecontent";
+        String outputFileName = "PlanDefinitionIndex.md";
+        String outputFilePath = outputDirectoryPath + File.separator + outputFileName;
         try {
-            ensurePath(outputFilePath);
+            ensurePath(outputDirectoryPath);
         }
         catch (IOException e) {
             throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);

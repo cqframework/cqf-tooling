@@ -1,0 +1,567 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "LOINC",
+  "url": "http://fhir.org/guides/who/smart-anc-mini/ConceptMap/LOINC",
+  "name": "LOINC",
+  "title": "LOINC",
+  "status": "draft",
+  "experimental": false,
+  "description": "Concept mapping from content extended codes to LOINC",
+  "group": [ {
+    "source": "http://fhir.org/guides/who/smart-anc-mini/CodeSystem/concept-codes",
+    "target": "http://loinc.org",
+    "element": [ {
+      "code": "ANC.B4.DE1",
+      "display": "Pregnancy confirmed",
+      "target": [ {
+        "code": "82810-3",
+        "display": "Pregnancy Status",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE2",
+      "display": "First antenatal care contact",
+      "target": [ {
+        "code": "76423-3",
+        "display": "Date of first visit",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE3",
+      "display": "Scheduled antenatal care contact",
+      "target": [ {
+        "code": "52454-6",
+        "display": "Reason for assessment??Note: There are multiple codes in LOINC with same name ?57200-8 Reason for assessment [CMS Assessment] ?46502-1 Reason for assessment [OASIS]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE4",
+      "display": "Specific complaint related to antenatal care",
+      "target": [ {
+        "code": "52454-6",
+        "display": "Reason for assessment??Note: There are multiple codes in LOINC with same name ?57200-8 Reason for assessment [CMS Assessment] ?46502-1 Reason for assessment [OASIS]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE6",
+      "display": "Abnormal vaginal discharge (physiological) (foul smelling) (curd like)",
+      "target": [ {
+        "code": "70380-1",
+        "display": "I have vaginal discharge in the past 7 days [FACIT]??Note: Multiple options",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE7",
+      "display": "Change in blood pressure - up (hypertension)",
+      "target": [ {
+        "code": "45643-4",
+        "display": "Hypertension [Minimum Data Set]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE8",
+      "display": "Change in blood pressure - down (hypotension)",
+      "target": [ {
+        "code": "45644-2",
+        "display": "Hypotension [Minimum Data Set]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE9",
+      "display": "Constipation",
+      "target": [ {
+        "code": "28235-0",
+        "display": "Constipation [CCC]??Note: There are multiple items in LOINC with regard to constipation",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE10",
+      "display": "Contractions",
+      "target": [ {
+        "code": "56866-7",
+        "display": "Onset of painful contractions",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE11",
+      "display": "Cough",
+      "target": [ {
+        "code": "64439-3",
+        "display": "Over the past 3 months, I have coughed [PhenX]??Note: Trial code",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE12",
+      "display": "Diarrhoea",
+      "target": [ {
+        "code": "45622-8",
+        "display": "Diarrhea [Minimum Data Set]??Note: Multiple options in LOINC",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE13",
+      "display": "Dizziness",
+      "target": [ {
+        "code": "45699-6",
+        "display": "Dizziness or vertigo [Minimum Data Set]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE17",
+      "display": "Fever",
+      "target": [ {
+        "code": "45701-0",
+        "display": "Fever [Minimum Data Set]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE18",
+      "display": "Flu symptoms",
+      "target": [ {
+        "code": "45685-5",
+        "display": "Respiratory infection [Minimum Data Set]",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE20",
+      "display": "Headache",
+      "target": [ {
+        "code": "45715-0",
+        "display": "Headache [Minimum Data Set]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE21",
+      "display": "Heartburn",
+      "target": [ {
+        "code": "70387-6",
+        "display": "I am bothered by reflux or heartburn in the past 7 days [FACIT]",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE22",
+      "display": "Injury",
+      "target": [ {
+        "code": "52587-3",
+        "display": "Trauma-related wound #",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE23",
+      "display": "Jaundice",
+      "target": [ {
+        "code": "70420-5",
+        "display": "I am bothered by jaundice or yellow color to my skin in the past 7 days [FACIT]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE24",
+      "display": "Leg cramps",
+      "target": [ {
+        "code": "70628-3",
+        "display": "I have joint pain or muscle cramps in the past 7 days [FACIT]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE25",
+      "display": "Leg redness",
+      "target": [ {
+        "code": "66530-7",
+        "display": "Redness score Lower extremity – bilateral [PhenX]",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE26",
+      "display": "Mental health - Anxiety",
+      "target": [ {
+        "code": "45665-7",
+        "display": "Anxiety disorder [Minimum Data Set]??Note: There are multiple items in LOINC re anxiety",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE27",
+      "display": "Mental health - Depression",
+      "target": [ {
+        "code": "45666-5",
+        "display": "Depression [Minimum Data Set]??Note: There are multiple items re depression in LOINC",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE28",
+      "display": "Mental health - Other psychological symptoms",
+      "target": [ {
+        "code": "91391-3",
+        "display": "Mental health diagnosis",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE29",
+      "display": "Nausea",
+      "target": [ {
+        "code": "42848-2",
+        "display": "Nausea [CCC]??Note: Multiple options for nausea in LOINC",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE30",
+      "display": "Oedema",
+      "target": [ {
+        "code": "45700-2",
+        "display": "Oedema [Minimum Data Set]??Note: Multiple options in LOINC",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE31",
+      "display": "Pain - Abdominal",
+      "target": [ {
+        "code": "28538-7",
+        "display": "Abdominal pain [HIV-SSC]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE32",
+      "display": "Pain - During urination (dysuria)",
+      "target": [ {
+        "code": "45721-8",
+        "display": "Other pain [Minimum Data Set]",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE33",
+      "display": "Pain - Leg",
+      "target": [ {
+        "code": "45721-8",
+        "display": "Other pain [Minimum Data Set]",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE34",
+      "display": "Pain - Low back",
+      "target": [ {
+        "code": "45712-7",
+        "display": "Back pain [Minimum Data Set]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE35",
+      "display": "Pain - Pelvic",
+      "target": [ {
+        "code": "70842-0",
+        "display": "I have pain in my pelvic area in the past 7 days [FACIT]",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE36",
+      "display": "Pain - Extreme pelvic pain/cannot walk (symphysis pubis dysfunction)",
+      "target": [ {
+        "code": "70842-0",
+        "display": "I have pain in my pelvic area in the past 7 days [FACIT]??Note: Not entirely appropriate, but best fit",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE37",
+      "display": "Pain - Other",
+      "target": [ {
+        "code": "45721-8",
+        "display": "Other pain [Minimum Data Set]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE38",
+      "display": "Pruritus",
+      "target": [ {
+        "code": "64275-1",
+        "display": "Have you ever had an itchy rash which was coming and going for at least 6 months [PhenX]",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE39",
+      "display": "Shortness of breath",
+      "target": [ {
+        "code": "45705-1",
+        "display": "Shortness of breath [Minimum Data Set]??Note: Multiple options in LOINC",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE40",
+      "display": "Tiredness",
+      "target": [ {
+        "code": "70304-1",
+        "display": "I feel tired in the past 7 days [FACIT]??Note: Multiple options in LOINC",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE41",
+      "display": "Vaginal bleeding",
+      "target": [ {
+        "code": "70360-3",
+        "display": "I am bothered by discharge or bleeding from my vagina in the past 7 days [FACIT]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE42",
+      "display": "Visual disturbance",
+      "target": [ {
+        "code": "65727-0",
+        "display": "Visual disturbance description [PhenX]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE43",
+      "display": "Vomiting",
+      "target": [ {
+        "code": "45708-5",
+        "display": "Vomiting [Minimum Data Set]??Note: Multiple options for vomiting in LOINC",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE44",
+      "display": "Other bleeding",
+      "target": [ {
+        "code": "45703-6",
+        "display": "Internal bleeding [Minimum Data Set]",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE45",
+      "display": "Other skin disorder",
+      "target": [ {
+        "code": "45790-3",
+        "display": "Other skin problems – none of above [Minimum Data Set]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE46",
+      "display": "Other types of violence",
+      "target": [ {
+        "code": "67691-6",
+        "display": "Being a victim of crime – violence – assault [PhenX]",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE50",
+      "display": "Bleeding vaginally",
+      "target": [ {
+        "code": "70360-3",
+        "display": "I am bothered by discharge or bleeding from my vagina in the past 7 days [FACIT]",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE52",
+      "display": "Convulsing",
+      "target": [ {
+        "code": "45662-4",
+        "display": "Seizure disorder [Minimum Data Set]",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE53",
+      "display": "Fever",
+      "target": [ {
+        "code": "45701-0",
+        "display": "Fever [Minimum Data Set]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE54",
+      "display": "Imminent delivery",
+      "target": [ {
+        "code": "42840-9",
+        "display": "Delivery risk [CCC]",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE55",
+      "display": "Labour",
+      "target": [ {
+        "code": "73774-2",
+        "display": "Onset of labor [US Standard Certificate of Live Birth]",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE56",
+      "display": "Looks very ill",
+      "target": [ {
+        "code": "70410-6",
+        "display": "I feel ill in the past 7 days [FACIT]",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE57",
+      "display": "Severe headache",
+      "target": [ {
+        "code": "45715-0",
+        "display": "Headache [Minimum Data Set]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE58",
+      "display": "Severe pain",
+      "target": [ {
+        "code": "45721-8",
+        "display": "Other pain [Minimum Data Set]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE59",
+      "display": "Severe vomiting",
+      "target": [ {
+        "code": "45708-5",
+        "display": "Vomiting [Minimum Data Set]??Note: Multiple options for vomiting in LOINC",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE60",
+      "display": "Severe abdominal pain",
+      "target": [ {
+        "code": "28538-7",
+        "display": "Abdominal pain [HIV-SSC]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE62",
+      "display": "Visual disturbance",
+      "target": [ {
+        "code": "65727-0",
+        "display": "Visual disturbance description [PhenX]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.2",
+      "display": "Live birth",
+      "target": [ {
+        "code": "68499-3",
+        "display": "Date last live birth",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.3",
+      "display": "Stillbirth",
+      "target": [ {
+        "code": "75207-1",
+        "display": "Stillbirth indicator [CDC.CS]",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.4",
+      "display": "Miscarriage",
+      "target": [ {
+        "code": "64710-7",
+        "display": "Was your pregnancy a live birth, stillbirth, miscarriage, abortion, or ectopic pregnancy [PhenX]",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.End.5",
+      "display": "Abortion",
+      "target": [ {
+        "code": "64710-7",
+        "display": "Was your pregnancy a live birth, stillbirth, miscarriage, abortion, or ectopic pregnancy [PhenX]",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.End.6",
+      "display": "Death",
+      "target": [ {
+        "code": "81954-0",
+        "display": "Date of death [Date]",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.End.7",
+      "display": "Lost to follow-up",
+      "target": [ {
+        "code": "45237-5",
+        "display": "Date lost to HIV treatment follow-up",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.End.8",
+      "display": "Moved away",
+      "target": [ {
+        "code": "67695-7",
+        "display": "Family moved [PhenX]",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.End.12",
+      "display": "Delivery date",
+      "target": [ {
+        "code": "93857-1",
+        "display": "Date and time of obstetric delivery",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.14",
+      "display": "Health-care facility",
+      "target": [ {
+        "code": "72150-6",
+        "display": "Delivery location",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.End.15",
+      "display": "Home",
+      "target": [ {
+        "code": "72150-6",
+        "display": "Delivery location",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.End.16",
+      "display": "Other (specify)",
+      "target": [ {
+        "code": "72150-6",
+        "display": "Delivery location",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.End.17",
+      "display": "Preterm Birth",
+      "target": [ {
+        "code": "76517-2",
+        "display": "Premature infant",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.End.19",
+      "display": "Normal",
+      "target": [ {
+        "code": "57071-3",
+        "display": "Obstetric delivery method",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.End.20",
+      "display": "Forceps",
+      "target": [ {
+        "code": "57071-3",
+        "display": "Obstetric delivery method",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.End.21",
+      "display": "Vacuum",
+      "target": [ {
+        "code": "57071-3",
+        "display": "Obstetric delivery method",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.End.22",
+      "display": "C-section",
+      "target": [ {
+        "code": "57071-3",
+        "display": "Obstetric delivery method",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.End.23",
+      "display": "Birth weight",
+      "target": [ {
+        "code": "8339-4",
+        "display": "Birth weight measured",
+        "equivalence": "equivalent"
+      } ]
+    } ]
+  } ]
+}

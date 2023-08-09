@@ -1,0 +1,29 @@
+{
+  "resourceType": "Patient",
+  "id": "carla-silveira",
+  "meta": {
+    "profile": [ "http://fhir.org/guides/who/smart-anc-mini/StructureDefinition/anc-patient" ]
+  },
+  "identifier": [ {
+    "value": "carla-silveira"
+  } ],
+  "name": [ {
+    "family": "Asdf",
+    "given": [ "Carla" ]
+  } ],
+  "telecom": [ {
+    "value": "Asdf"
+  } ],
+  "birthDate": "1988-01-04",
+  "address": [ {
+    "line": [ "Asdf" ]
+  } ],
+  "contact": [ {
+    "telecom": [ {
+      "value": "Asdf"
+    } ]
+  } ],
+  "generalPractitioner": [ {
+    "reference": "PractitionerRole/anc-practitionerrole-example"
+  } ]
+}

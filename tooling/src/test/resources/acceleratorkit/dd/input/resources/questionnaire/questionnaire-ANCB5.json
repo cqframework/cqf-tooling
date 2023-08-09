@@ -1,0 +1,61 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "ANCB5",
+  "extension": [ {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "shareable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "computable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability",
+    "valueCode": "publishable"
+  }, {
+    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeRepresentationLevel",
+    "valueCode": "structured"
+  } ],
+  "url": "http://fhir.org/guides/who/smart-anc-mini/Questionnaire/ANCB5",
+  "name": "ANCB5",
+  "title": "ANC.B5 Quick check",
+  "status": "active",
+  "experimental": false,
+  "description": "TODO: description goes here",
+  "useContext": [ {
+    "code": {
+      "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+      "code": "task",
+      "display": "Workflow Task"
+    },
+    "valueCodeableConcept": {
+      "coding": [ {
+        "system": "http://fhir.org/guides/who/smart-anc-mini/CodeSystem/activity-codes",
+        "code": "ANC.B5",
+        "display": "Quick check"
+      } ]
+    }
+  } ],
+  "item": [ {
+    "linkId": "1",
+    "definition": "http://fhir.org/guides/who/smart-anc-mini/StructureDefinition/anc-b4-de1#Observation.value[x]",
+    "text": "Pregnancy has been confirmed",
+    "type": "boolean"
+  }, {
+    "linkId": "2",
+    "definition": "http://fhir.org/guides/who/smart-anc-mini/StructureDefinition/anc-encounter#Encounter.reasonCode",
+    "text": "Records the reason why the woman came to the health-care facility today",
+    "type": "choice",
+    "answerValueSet": "http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-b5-de1-codes-grouper"
+  }, {
+    "linkId": "3",
+    "definition": "http://fhir.org/guides/who/smart-anc-mini/StructureDefinition/anc-b5-de5#Observation.value[x]",
+    "text": "If the woman came to the facility with a specific health concern, select the health concern(s) from the list",
+    "type": "choice",
+    "answerValueSet": "http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-b5-de6"
+  }, {
+    "linkId": "4",
+    "definition": "http://fhir.org/guides/who/smart-anc-mini/StructureDefinition/anc-b5-de48#Observation.value[x]",
+    "text": "Before each contact, the health worker should check whether the woman has any of the danger signs listed here – if yes, she should refer to the hospital urgently; if no, she should continue to the normal contact",
+    "type": "choice",
+    "answerValueSet": "http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-b5-de48-codes-grouper"
+  } ]
+}

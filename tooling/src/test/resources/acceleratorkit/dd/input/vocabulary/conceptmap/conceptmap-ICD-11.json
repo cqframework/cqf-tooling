@@ -1,0 +1,565 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "ICD-11",
+  "url": "http://fhir.org/guides/who/smart-anc-mini/ConceptMap/ICD-11",
+  "name": "ICD-11",
+  "title": "ICD-11",
+  "status": "draft",
+  "experimental": false,
+  "description": "Concept mapping from content extended codes to ICD-11",
+  "group": [ {
+    "source": "http://fhir.org/guides/who/smart-anc-mini/CodeSystem/concept-codes",
+    "target": "http://hl7.org/fhir/sid/icd-11",
+    "element": [ {
+      "code": "ANC.B4.DE1",
+      "display": "Pregnancy confirmed",
+      "target": [ {
+        "code": "XT0S",
+        "display": "Pregnancy",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE6",
+      "display": "Abnormal vaginal discharge (physiological) (foul smelling) (curd like)",
+      "target": [ {
+        "code": "MF3A",
+        "display": "Vaginal discharge",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE7",
+      "display": "Change in blood pressure - up (hypertension)",
+      "target": [ {
+        "code": "BA00.Z",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE8",
+      "display": "Change in blood pressure - down (hypotension)",
+      "target": [ {
+        "code": "BA2Z",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE9",
+      "display": "Constipation",
+      "target": [ {
+        "code": "ME05.0",
+        "display": "Constipation",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE10",
+      "display": "Contractions",
+      "target": [ {
+        "code": "JA8D.Z",
+        "display": "Maternal care related to false labour, unspecified??Note: Default applied",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE11",
+      "display": "Cough",
+      "target": [ {
+        "code": "MD12",
+        "display": "Cough",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE12",
+      "display": "Diarrhoea",
+      "target": [ {
+        "code": "ME05.1",
+        "display": "Diarrhoea",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE13",
+      "display": "Dizziness",
+      "target": [ {
+        "code": "MB48.Z",
+        "display": "Dizziness and giddiness, unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE14",
+      "display": "Intimate partner violence",
+      "target": [ {
+        "code": "QE51.1",
+        "display": "History of spouse or partner violence?Note: QE51.1 is appropriate due to its description (regardless of the 'history' in the code title)?Non-accidental acts of physical force, forced or coerced sexual acts, verbal or symbolic acts, or significant caregiving omissions that result in harm to a spouse or intimate partner or that have a reasonable potential for harm",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE15",
+      "display": "Fetal movements - none",
+      "target": [ {
+        "code": "JA86.Y",
+        "display": "Maternal care for other specified fetal problems",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE16",
+      "display": "Fetal movements - reduced/poor",
+      "target": [ {
+        "code": "JA86.Y",
+        "display": "Maternal care for other specified fetal problems",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE17",
+      "display": "Fever",
+      "target": [ {
+        "code": "MG26",
+        "display": "Fever of other or unknown origin",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE18",
+      "display": "Flu symptoms",
+      "target": [ {
+        "code": "CA07.0",
+        "display": "Post feedback session used a default (URTI) for this item  ??Acute upper respiratory infection, site unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE19",
+      "display": "Fluid loss (leaking)",
+      "target": [ {
+        "code": "JA88.0",
+        "display": "?Oligohydramnios",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE20",
+      "display": "Headache",
+      "target": [ {
+        "code": "MG31.1",
+        "display": "Acute headache, not elsewhere classified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE21",
+      "display": "Heartburn",
+      "target": [ {
+        "code": "MD95",
+        "display": "Heartburn",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE22",
+      "display": "Injury",
+      "target": [ {
+        "code": "ND56.Z",
+        "display": "?Unspecified injury to unspecified part of trunk, limb or body region",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE23",
+      "display": "Jaundice",
+      "target": [ {
+        "code": "ME10.1",
+        "display": "Unspecified jaundice",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE24",
+      "display": "Leg cramps",
+      "target": [ {
+        "code": "MB47.3",
+        "display": "Cramp or spasm",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE25",
+      "display": "Leg redness",
+      "target": [ {
+        "code": "ME64.0",
+        "display": "Erythema",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE26",
+      "display": "Mental health - Anxiety",
+      "target": [ {
+        "code": "6B0Z",
+        "display": "Anxiety or fear-related disorders, unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE27",
+      "display": "Mental health - Depression",
+      "target": [ {
+        "code": "6A7Z",
+        "display": "Depressive disorders, unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE28",
+      "display": "Mental health - Other psychological symptoms",
+      "target": [ {
+        "code": "6E8Z",
+        "display": "Mental, behavioural or neurodevelopmental disorders, unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE29",
+      "display": "Nausea",
+      "target": [ {
+        "code": "MD90.0",
+        "display": "Nausea",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE30",
+      "display": "Oedema",
+      "target": [ {
+        "code": "MG29.0Y",
+        "display": "Other specified localized oedema??Feedback session selected the default for this item to be localized oedema",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE31",
+      "display": "Pain - Abdominal",
+      "target": [ {
+        "code": "MD81.4",
+        "display": "Other and unspecified abdominal pain",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE32",
+      "display": "Pain - During urination (dysuria)",
+      "target": [ {
+        "code": "MF50.7",
+        "display": "Dysuria",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE33",
+      "display": "Pain - Leg",
+      "target": [ {
+        "code": "FB56.4",
+        "display": "Pain in limb",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE34",
+      "display": "Pain - Low back",
+      "target": [ {
+        "code": "ME84.2Z",
+        "display": "Low back pain, unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE35",
+      "display": "Pain - Pelvic",
+      "target": [ {
+        "code": "MD81.11",
+        "display": "Pelvic or perineal pain",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE36",
+      "display": "Pain - Extreme pelvic pain/cannot walk (symphysis pubis dysfunction)",
+      "target": [ {
+        "code": "JA65.7",
+        "display": "Subluxation of symphysis pubis in pregnancy, childbirth or the puerperium",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE37",
+      "display": "Pain - Other",
+      "target": [ {
+        "code": "MG3Z",
+        "display": "Pain, unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE38",
+      "display": "Pruritus",
+      "target": [ {
+        "code": "EC90.Z",
+        "display": "Pruritus, unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE39",
+      "display": "Shortness of breath",
+      "target": [ {
+        "code": "MD11.5",
+        "display": "Dyspnoea",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE40",
+      "display": "Tiredness",
+      "target": [ {
+        "code": "MB22.7",
+        "display": "Tiredness",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE41",
+      "display": "Vaginal bleeding",
+      "target": [ {
+        "code": "JA41.Z",
+        "display": "Antepartum haemorrhage, unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE42",
+      "display": "Visual disturbance",
+      "target": [ {
+        "code": "MC1Y",
+        "display": "Other specified symptoms or signs involving the visual system",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE43",
+      "display": "Vomiting",
+      "target": [ {
+        "code": "MD90.1",
+        "display": "Vomiting",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE44",
+      "display": "Other bleeding",
+      "target": [ {
+        "code": "MG27",
+        "display": "Haemorrhage, not elsewhere classified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE45",
+      "display": "Other skin disorder",
+      "target": [ {
+        "code": "ME67",
+        "display": "Skin disorder of uncertain or unspecified nature",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE46",
+      "display": "Other types of violence",
+      "target": [ {
+        "code": "PF2Z",
+        "display": "Assault, unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE50",
+      "display": "Bleeding vaginally",
+      "target": [ {
+        "code": "JA41.Z",
+        "display": "Antepartum haemorrhage, unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE52",
+      "display": "Convulsing",
+      "target": [ {
+        "code": "8A68.Z",
+        "display": "Type of seizure, unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE53",
+      "display": "Fever",
+      "target": [ {
+        "code": "MG26",
+        "display": "Fever of other or unknown origin",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE54",
+      "display": "Imminent delivery",
+      "target": [ {
+        "code": "JB0Z",
+        "display": "Complications of labour or delivery, unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE55",
+      "display": "Labour",
+      "target": [ {
+        "code": "JB0Z",
+        "display": "Complications of labour or delivery, unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE56",
+      "display": "Looks very ill",
+      "target": [ {
+        "code": "MG48",
+        "display": "Unknown and unspecified causes of morbidity",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE57",
+      "display": "Severe headache",
+      "target": [ {
+        "code": "MG31.1",
+        "display": "Acute headache, not elsewhere classified??Could be postcoordinated to severity XS25",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE58",
+      "display": "Severe pain",
+      "target": [ {
+        "code": "MG3Z",
+        "display": "Pain, unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE59",
+      "display": "Severe vomiting",
+      "target": [ {
+        "code": "MD90.1",
+        "display": "Vomiting",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE60",
+      "display": "Severe abdominal pain",
+      "target": [ {
+        "code": "MD81.4",
+        "display": "Other and unspecified abdominal pain",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE61",
+      "display": "Unconscious",
+      "target": [ {
+        "code": "MB20.1",
+        "display": "Coma",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE62",
+      "display": "Visual disturbance",
+      "target": [ {
+        "code": "MC1Y",
+        "display": "Other specified symptoms or signs involving the visual system",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE51",
+      "display": "Central cyanosis",
+      "target": [ {
+        "code": "ME64.1",
+        "display": "Cyanosis",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.2",
+      "display": "Live birth",
+      "target": [ {
+        "code": "QA46.0",
+        "display": "Single live birth??Default applied",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.3",
+      "display": "Stillbirth",
+      "target": [ {
+        "code": "QA46.1",
+        "display": "Single stillbirth",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.4",
+      "display": "Miscarriage",
+      "target": [ {
+        "code": "QA46.1",
+        "display": "Single stillbirth",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.5",
+      "display": "Abortion",
+      "target": [ {
+        "code": "QA46.1",
+        "display": "Single stillbirth",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.6",
+      "display": "Death",
+      "target": [ {
+        "code": "JB60",
+        "display": "Obstetric death of unspecified cause",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.14",
+      "display": "Health-care facility",
+      "target": [ {
+        "code": "QA47.0Z Singleton, born in hospital, unspecified",
+        "display": "QA47.0Z Singleton, born in hospital, unspecified??Default chosen for this item",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.15",
+      "display": "Home",
+      "target": [ {
+        "code": "QA47.1",
+        "display": "Singleton, born outside hospital??Default chosen for this item",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.16",
+      "display": "Other (specify)",
+      "target": [ {
+        "code": "QA47.1",
+        "display": "Singleton, born outside hospital??Default chosen for this item",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.17",
+      "display": "Preterm Birth",
+      "target": [ {
+        "code": "JB00.1",
+        "display": "Preterm spontaneous labour with preterm delivery",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.19",
+      "display": "Normal",
+      "target": [ {
+        "code": "JB20.Z Single spontaneous delivery, unspecified",
+        "display": "JB20.Z Single spontaneous delivery, unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.20",
+      "display": "Forceps",
+      "target": [ {
+        "code": "JB21",
+        "display": "Single delivery by forceps or vacuum extractor",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.21",
+      "display": "Vacuum",
+      "target": [ {
+        "code": "JB21",
+        "display": "Single delivery by forceps or vacuum extractor",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.22",
+      "display": "C-section",
+      "target": [ {
+        "code": "JB22.Z Single delivery by caesarean section, unspecified",
+        "display": "JB22.Z Single delivery by caesarean section, unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.23",
+      "display": "Birth weight",
+      "target": [ {
+        "code": "KA21.00",
+        "display": "Extremely low birth weight of newborn, 499 g or less",
+        "equivalence": "equivalent"
+      } ]
+    } ]
+  } ]
+}
