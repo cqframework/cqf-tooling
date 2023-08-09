@@ -1,0 +1,263 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "ICF",
+  "url": "http://fhir.org/guides/who/smart-anc-mini/ConceptMap/ICF",
+  "name": "ICF",
+  "title": "ICF",
+  "status": "draft",
+  "experimental": false,
+  "description": "Concept mapping from content extended codes to ICF",
+  "group": [ {
+    "source": "http://fhir.org/guides/who/smart-anc-mini/CodeSystem/concept-codes",
+    "target": "http://hl7.org/fhir/sid/icf-nl",
+    "element": [ {
+      "code": "ANC.A.DE14",
+      "display": "Parents",
+      "target": [ {
+        "code": "e310",
+        "display": "Immediate family?Individuals related by birth, marriage or other relationship recognized by the culture as immediate family, e.g. spouses, partners, parents, siblings, children, foster parents, adoptive parents and grandparents",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.A.DE15",
+      "display": "Siblings",
+      "target": [ {
+        "code": "e310",
+        "display": "Immediate family?Individuals related by birth, marriage or other relationship recognized by the culture as immediate family, e.g. spouses, partners, parents, siblings, children, foster parents, adoptive parents and grandparents",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.A.DE16",
+      "display": "Extended family",
+      "target": [ {
+        "code": "e310?and?e315",
+        "display": "Immediate family?Individuals related by birth, marriage or other relationship recognized by the culture as immediate family, e.g. spouses, partners, parents, siblings, children, foster parents, adoptive parents and grandparents??Extended family?Individuals related through family or marriage or other relationships recognized by the culture as extended family, such as aunts, uncles, nephews and nieces.",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.A.DE17",
+      "display": "Partner",
+      "target": [ {
+        "code": "e310",
+        "display": "Immediate family?Individuals related by birth, marriage or other relationship recognized by the culture as immediate family, e.g. spouses, partners, parents, siblings, children, foster parents, adoptive parents and grandparents",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.A.DE18",
+      "display": "Friend(s)",
+      "target": [ {
+        "code": "e320",
+        "display": "Friends?Individuals who are close and ongoing participants in relationships characterized by trust and mutual support",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE6",
+      "display": "Abnormal vaginal discharge (physiological) (foul smelling) (curd like)",
+      "target": [ {
+        "code": "s63033",
+        "display": "Vaginal canal",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE7",
+      "display": "Change in blood pressure - up (hypertension)",
+      "target": [ {
+        "code": "b420",
+        "display": "Blood pressure functions",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE8",
+      "display": "Change in blood pressure - down (hypotension)",
+      "target": [ {
+        "code": "b420",
+        "display": "Blood pressure functions",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE9",
+      "display": "Constipation",
+      "target": [ {
+        "code": "b525",
+        "display": "Defecation functions",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE10",
+      "display": "Contractions",
+      "target": [ {
+        "code": "b28012",
+        "display": "Pain in stomach or abdomen",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE11",
+      "display": "Cough",
+      "target": [ {
+        "code": "b450",
+        "display": "Additional functions of the respiratory system",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE12",
+      "display": "Diarrhoea",
+      "target": [ {
+        "code": "b525",
+        "display": "Defecation functions",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE13",
+      "display": "Dizziness",
+      "target": [ {
+        "code": "b2401",
+        "display": "Dizziness",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE21",
+      "display": "Heartburn",
+      "target": [ {
+        "code": "b535",
+        "display": "Sensations associated with the digestive system",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE26",
+      "display": "Mental health - Anxiety",
+      "target": [ {
+        "code": "b152",
+        "display": "Emotional functions",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE28",
+      "display": "Mental health - Other psychological symptoms",
+      "target": [ {
+        "code": "d2409",
+        "display": "Handling stress and other psychological demands, unspecified",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE29",
+      "display": "Nausea",
+      "target": [ {
+        "code": "b5350",
+        "display": "Sensation of nausea",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE31",
+      "display": "Pain - Abdominal",
+      "target": [ {
+        "code": "b28012",
+        "display": "Pain in stomach or abdomen",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE34",
+      "display": "Pain - Low back",
+      "target": [ {
+        "code": "b28013",
+        "display": "Pain in back",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE35",
+      "display": "Pain - Pelvic",
+      "target": [ {
+        "code": "b28012",
+        "display": "Pain in stomach or abdomen",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE37",
+      "display": "Pain - Other",
+      "target": [ {
+        "code": "b2800",
+        "display": "Generalized pain",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE38",
+      "display": "Pruritus",
+      "target": [ {
+        "code": "b840",
+        "display": "Sensation related to the skin",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE39",
+      "display": "Shortness of breath",
+      "target": [ {
+        "code": "b460",
+        "display": "Sensations associated with cardiovascular and respiratory functions",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE40",
+      "display": "Tiredness",
+      "target": [ {
+        "code": "b4552",
+        "display": "Fatiguability",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE42",
+      "display": "Visual disturbance",
+      "target": [ {
+        "code": "b21009",
+        "display": "Visual acuity functions, unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE43",
+      "display": "Vomiting",
+      "target": [ {
+        "code": "b5106",
+        "display": "Functions of expelling the contents of the stomach, oesophagus or pharynx",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE45",
+      "display": "Other skin disorder",
+      "target": [ {
+        "code": "b849",
+        "display": "Functions of the skin, other specified and unspecified",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE58",
+      "display": "Severe pain",
+      "target": [ {
+        "code": "b2800",
+        "display": "Generalized pain",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE59",
+      "display": "Severe vomiting",
+      "target": [ {
+        "code": "b5106",
+        "display": "Functions of expelling the contents of the stomach, oesophagus or pharynx",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE60",
+      "display": "Severe abdominal pain",
+      "target": [ {
+        "code": "b28012",
+        "display": "Pain in stomach or abdomen",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE62",
+      "display": "Visual disturbance",
+      "target": [ {
+        "code": "b21009",
+        "display": "Visual acuity functions, unspecified",
+        "equivalence": "equivalent"
+      } ]
+    } ]
+  } ]
+}

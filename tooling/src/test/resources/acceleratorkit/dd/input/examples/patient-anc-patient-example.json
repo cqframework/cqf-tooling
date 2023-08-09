@@ -1,0 +1,29 @@
+{
+  "resourceType": "Patient",
+  "id": "anc-patient-example",
+  "meta": {
+    "profile": [ "http://fhir.org/guides/who/smart-anc-mini/StructureDefinition/anc-patient" ]
+  },
+  "identifier": [ {
+    "value": "Asdf"
+  } ],
+  "name": [ {
+    "family": "Asdf",
+    "given": [ "Asdf" ]
+  } ],
+  "telecom": [ {
+    "value": "Asdf"
+  } ],
+  "birthDate": "2023-08-07",
+  "address": [ {
+    "line": [ "Asdf" ]
+  } ],
+  "contact": [ {
+    "telecom": [ {
+      "value": "Asdf"
+    } ]
+  } ],
+  "generalPractitioner": [ {
+    "reference": "PractitionerRole/ANCM-practitionerrole-example"
+  } ]
+}

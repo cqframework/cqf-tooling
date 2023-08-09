@@ -1,0 +1,171 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "anc-patient",
+  "url": "http://fhir.org/guides/who/smart-anc-mini/StructureDefinition/anc-patient",
+  "name": "ANCPatient",
+  "title": "ANC Patient",
+  "status": "draft",
+  "experimental": false,
+  "description": "ANC Patient",
+  "useContext": [ {
+    "code": {
+      "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+      "code": "task",
+      "display": "Workflow Task"
+    },
+    "valueCodeableConcept": {
+      "coding": [ {
+        "system": "http://fhir.org/guides/who/smart-anc-mini/CodeSystem/activity-codes",
+        "code": "ANC.A4",
+        "display": "Gather client details"
+      } ]
+    }
+  } ],
+  "fhirVersion": "4.0.1",
+  "mapping": [ {
+    "identity": "ANCM"
+  } ],
+  "kind": "resource",
+  "abstract": false,
+  "type": "Patient",
+  "baseDefinition": "http://fhir.org/guides/who/smart-anc-mini/StructureDefinition/anc-base-patient",
+  "derivation": "constraint",
+  "differential": {
+    "element": [ {
+      "id": "Patient",
+      "path": "Patient",
+      "mustSupport": false
+    }, {
+      "id": "Patient.identifier",
+      "path": "Patient.identifier"
+    }, {
+      "id": "Patient.identifier.value",
+      "path": "Patient.identifier.value",
+      "short": "Unique identification",
+      "definition": "Unique identifier generated for new clients or a universal ID, if used in the country",
+      "min": 1,
+      "max": "1",
+      "mustSupport": true,
+      "mapping": [ {
+        "identity": "ANCM",
+        "map": "ANC.A.DE1"
+      } ]
+    }, {
+      "id": "Patient.name",
+      "path": "Patient.name"
+    }, {
+      "id": "Patient.name.given",
+      "path": "Patient.name.given",
+      "short": "First name",
+      "definition": "Client's first name",
+      "min": 1,
+      "max": "1",
+      "mustSupport": true,
+      "mapping": [ {
+        "identity": "ANCM",
+        "map": "ANC.A.DE2"
+      } ]
+    }, {
+      "id": "Patient.name.family",
+      "path": "Patient.name.family",
+      "short": "Last name",
+      "definition": "Client's family name or last name",
+      "min": 1,
+      "max": "1",
+      "mustSupport": true,
+      "mapping": [ {
+        "identity": "ANCM",
+        "map": "ANC.A.DE3"
+      } ]
+    }, {
+      "id": "Patient.birthDate",
+      "path": "Patient.birthDate",
+      "short": "Date of birth",
+      "definition": "The client's date of birth (DOB), if known",
+      "min": 0,
+      "max": "1",
+      "mustSupport": true,
+      "mapping": [ {
+        "identity": "ANCM",
+        "map": "ANC.A.DE5"
+      } ]
+    }, {
+      "id": "Patient.address",
+      "path": "Patient.address"
+    }, {
+      "id": "Patient.address.line",
+      "path": "Patient.address.line",
+      "short": "Address",
+      "definition": "Client's home address or address that the client is consenting to disclose",
+      "comment": "Also unknown",
+      "min": 1,
+      "max": "1",
+      "mustSupport": true,
+      "mapping": [ {
+        "identity": "ANCM",
+        "map": "ANC.A.DE7"
+      } ]
+    }, {
+      "id": "Patient.telecom",
+      "path": "Patient.telecom"
+    }, {
+      "id": "Patient.telecom.value",
+      "path": "Patient.telecom.value",
+      "short": "Mobile phone number",
+      "definition": "Client's mobile phone number",
+      "min": 1,
+      "max": "1",
+      "mustSupport": true,
+      "mapping": [ {
+        "identity": "ANCM",
+        "map": "ANC.A.DE8"
+      } ]
+    }, {
+      "id": "Patient.contact",
+      "path": "Patient.contact"
+    }, {
+      "id": "Patient.contact.name",
+      "path": "Patient.contact.name",
+      "short": "Alternative contact's name",
+      "definition": "Name of an alternative contact, which could be next of kin (e.g. partner, mother, sibling); the alternative contact would be used in the case of an emergency situation",
+      "min": 1,
+      "max": "1",
+      "mustSupport": true,
+      "mapping": [ {
+        "identity": "ANCM",
+        "map": "ANC.A.DE10"
+      } ]
+    }, {
+      "id": "Patient.contact.telecom",
+      "path": "Patient.contact.telecom"
+    }, {
+      "id": "Patient.contact.telecom.value",
+      "path": "Patient.contact.telecom.value",
+      "short": "Alternative contact's phone number",
+      "definition": "Phone number of the alternative contact",
+      "min": 0,
+      "max": "1",
+      "mustSupport": true,
+      "mapping": [ {
+        "identity": "ANCM",
+        "map": "ANC.A.DE11"
+      } ]
+    }, {
+      "id": "Patient.extension:reminder",
+      "path": "Patient.extension",
+      "sliceName": "reminder",
+      "short": "Woman wants to receive reminders during pregnancy",
+      "definition": "Whether or not the woman wants to receive SMS or other messages regarding her ANC contacts and health status during pregnancy",
+      "min": 1,
+      "max": "1",
+      "type": [ {
+        "code": "Extension",
+        "profile": [ "http://fhir.org/guides/who/smart-anc-mini/StructureDefinition/reminder" ]
+      } ],
+      "mapping": [ {
+        "identity": "ANCM",
+        "map": "ANC.A.DE9"
+      } ]
+    } ]
+  }
+}

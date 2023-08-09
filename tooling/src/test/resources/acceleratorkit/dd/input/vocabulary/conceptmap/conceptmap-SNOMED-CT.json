@@ -1,0 +1,686 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "SNOMED-CT",
+  "url": "http://fhir.org/guides/who/smart-anc-mini/ConceptMap/SNOMED-CT",
+  "name": "SNOMED-CT",
+  "title": "SNOMED-CT",
+  "status": "draft",
+  "experimental": false,
+  "description": "Concept mapping from content extended codes to SNOMED-CT",
+  "group": [ {
+    "source": "http://fhir.org/guides/who/smart-anc-mini/CodeSystem/concept-codes",
+    "target": "http://snomed.info/sct",
+    "element": [ {
+      "code": "ANC.A.DE14",
+      "display": "Parents",
+      "target": [ {
+        "code": "224137008",
+        "display": "Lives with parents (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.A.DE15",
+      "display": "Siblings",
+      "target": [ {
+        "code": "160756002",
+        "display": "Lives with relatives (finding)",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.A.DE16",
+      "display": "Extended family",
+      "target": [ {
+        "code": "224141007",
+        "display": "Lives with grandparents (finding)",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.A.DE17",
+      "display": "Partner",
+      "target": [ {
+        "code": "408821002",
+        "display": "Lives with partner (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.A.DE18",
+      "display": "Friend(s)",
+      "target": [ {
+        "code": "224132002",
+        "display": "Lives with friend (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.A.DE19",
+      "display": "No one",
+      "target": [ {
+        "code": "105529008",
+        "display": "Lives alone (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B4.DE1",
+      "display": "Pregnancy confirmed",
+      "target": [ {
+        "code": "77386006",
+        "display": "Pregnant (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE2",
+      "display": "First antenatal care contact",
+      "target": [ {
+        "code": "424441002",
+        "display": "Prenatal initial visit (regime/therapy)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE3",
+      "display": "Scheduled antenatal care contact",
+      "target": [ {
+        "code": "424619006",
+        "display": "Prenatal visit (regime/therapy)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE4",
+      "display": "Specific complaint related to antenatal care",
+      "target": [ {
+        "code": "118189007",
+        "display": "Prenatal finding (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE6",
+      "display": "Abnormal vaginal discharge (physiological) (foul smelling) (curd like)",
+      "target": [ {
+        "code": "289567003",
+        "display": "Vaginal discharge problem (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE7",
+      "display": "Change in blood pressure - up (hypertension)",
+      "target": [ {
+        "code": "38341003",
+        "display": "Hypertensive disorder, systemic arterial (disorder)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE8",
+      "display": "Change in blood pressure - down (hypotension)",
+      "target": [ {
+        "code": "45007003",
+        "display": "Low blood pressure (disorder)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE9",
+      "display": "Constipation",
+      "target": [ {
+        "code": "14760008",
+        "display": "Constipation (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE10",
+      "display": "Contractions",
+      "target": [ {
+        "code": "249123005",
+        "display": "Onset of contractions (observable entity)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE11",
+      "display": "Cough",
+      "target": [ {
+        "code": "49727002",
+        "display": "Cough (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE12",
+      "display": "Diarrhoea",
+      "target": [ {
+        "code": "62315008",
+        "display": "Diarrhea (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE13",
+      "display": "Dizziness",
+      "target": [ {
+        "code": "404640003",
+        "display": "Dizziness (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE14",
+      "display": "Intimate partner violence",
+      "target": [ {
+        "code": "404189009",
+        "display": "Domestic violence (event)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE15",
+      "display": "Fetal movements - none",
+      "target": [ {
+        "code": "249038009",
+        "display": "Fetal movements not palpable (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE16",
+      "display": "Fetal movements - reduced/poor",
+      "target": [ {
+        "code": "276369006",
+        "display": "Reduced fetal movement (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE17",
+      "display": "Fever",
+      "target": [ {
+        "code": "386661006",
+        "display": "Fever (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE18",
+      "display": "Flu symptoms",
+      "target": [ {
+        "code": "54150009",
+        "display": "Upper respiratory infection (disorder)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE19",
+      "display": "Fluid loss (leaking)",
+      "target": [ {
+        "code": "251846002",
+        "display": "Fluid loss (observable entity)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE20",
+      "display": "Headache",
+      "target": [ {
+        "code": "25064002",
+        "display": "Headache (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE21",
+      "display": "Heartburn",
+      "target": [ {
+        "code": "16331000",
+        "display": "Heartburn (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE22",
+      "display": "Injury",
+      "target": [ {
+        "code": "417746004",
+        "display": "Traumatic injury (disorder)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE23",
+      "display": "Jaundice",
+      "target": [ {
+        "code": "18165001",
+        "display": "Jaundice (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE24",
+      "display": "Leg cramps",
+      "target": [ {
+        "code": "1.56399E+16",
+        "display": "Cramp of muscle of bilateral lower limbs (finding)",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE25",
+      "display": "Leg redness",
+      "target": [ {
+        "code": "420356000",
+        "display": "Persistent erythema of skin (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE26",
+      "display": "Mental health - Anxiety",
+      "target": [ {
+        "code": "197480006",
+        "display": "Anxiety disorder (disorder)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE27",
+      "display": "Mental health - Depression",
+      "target": [ {
+        "code": "35489007",
+        "display": "Depressive disorder (disorder)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE28",
+      "display": "Mental health - Other psychological symptoms",
+      "target": [ {
+        "code": "25618008",
+        "display": "Psychological symptom (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE29",
+      "display": "Nausea",
+      "target": [ {
+        "code": "422587007",
+        "display": "Nausea (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE30",
+      "display": "Oedema",
+      "target": [ {
+        "code": "267038008",
+        "display": "Oedema (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE31",
+      "display": "Pain - Abdominal",
+      "target": [ {
+        "code": "21522001",
+        "display": "Abdominal pain (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE32",
+      "display": "Pain - During urination (dysuria)",
+      "target": [ {
+        "code": "49650001",
+        "display": "Dysuria (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE33",
+      "display": "Pain - Leg",
+      "target": [ {
+        "code": "1.22475E+16",
+        "display": "Pain in bilateral lower legs (finding)",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE34",
+      "display": "Pain - Low back",
+      "target": [ {
+        "code": "279039007",
+        "display": "Low back pain (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE35",
+      "display": "Pain - Pelvic",
+      "target": [ {
+        "code": "274671002",
+        "display": "Pelvic and perineal pain (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE36",
+      "display": "Pain - Extreme pelvic pain/cannot walk (symphysis pubis dysfunction)",
+      "target": [ {
+        "code": "703619001",
+        "display": "Pelvic girdle pain (disorder)?Note: Classified to symphysis pubis disorder as per ICD and feedback meeting decision",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE37",
+      "display": "Pain - Other",
+      "target": [ {
+        "code": "22253000",
+        "display": "Pain (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE38",
+      "display": "Pruritus",
+      "target": [ {
+        "code": "418363000",
+        "display": "Itching of skin (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE39",
+      "display": "Shortness of breath",
+      "target": [ {
+        "code": "267036007",
+        "display": "Dyspnea (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE40",
+      "display": "Tiredness",
+      "target": [ {
+        "code": "84229001",
+        "display": "Fatigue (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE41",
+      "display": "Vaginal bleeding",
+      "target": [ {
+        "code": "289530006",
+        "display": "Bleeding from vagina (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE42",
+      "display": "Visual disturbance",
+      "target": [ {
+        "code": "63102001",
+        "display": "Visual disturbance (disorder)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE43",
+      "display": "Vomiting",
+      "target": [ {
+        "code": "422400008",
+        "display": "Vomiting (disorder)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE44",
+      "display": "Other bleeding",
+      "target": [ {
+        "code": "131148009",
+        "display": "Bleeding (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE45",
+      "display": "Other skin disorder",
+      "target": [ {
+        "code": "95320005",
+        "display": "Disorder of skin (disorder)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE46",
+      "display": "Other types of violence",
+      "target": [ {
+        "code": "442084003",
+        "display": "Victim of physical violence (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE47",
+      "display": "Other complaint (specify)",
+      "target": [ {
+        "code": "Not classifiable",
+        "display": "Free text field?Data bucket to be utilized to collect entries",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE49",
+      "display": "No danger signs",
+      "target": [ {
+        "code": "161915001",
+        "display": "No general symptom (situation)",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.B5.DE50",
+      "display": "Bleeding vaginally",
+      "target": [ {
+        "code": "289530006",
+        "display": "Bleeding from vagina (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE52",
+      "display": "Convulsing",
+      "target": [ {
+        "code": "91175000",
+        "display": "Seizure (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE53",
+      "display": "Fever",
+      "target": [ {
+        "code": "386661006",
+        "display": "Fever (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE54",
+      "display": "Imminent delivery",
+      "target": [ {
+        "code": "409049004",
+        "display": "Delivery risk (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE55",
+      "display": "Labour",
+      "target": [ {
+        "code": "249123005",
+        "display": "Onset of contractions (observable entity)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE56",
+      "display": "Looks very ill",
+      "target": [ {
+        "code": "39104002",
+        "display": "Illness (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE57",
+      "display": "Severe headache",
+      "target": [ {
+        "code": "25064002",
+        "display": "Headache (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE58",
+      "display": "Severe pain",
+      "target": [ {
+        "code": "22253000",
+        "display": "Pain (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE59",
+      "display": "Severe vomiting",
+      "target": [ {
+        "code": "422400008",
+        "display": "Vomiting (disorder)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE60",
+      "display": "Severe abdominal pain",
+      "target": [ {
+        "code": "21522001",
+        "display": "Abdominal pain (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE61",
+      "display": "Unconscious",
+      "target": [ {
+        "code": "418107008",
+        "display": "Unconscious (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE62",
+      "display": "Visual disturbance",
+      "target": [ {
+        "code": "63102001",
+        "display": "Visual disturbance (disorder)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.B5.DE51",
+      "display": "Central cyanosis",
+      "target": [ {
+        "code": "95837007",
+        "display": "Central cyanosis (disorder)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.2",
+      "display": "Live birth",
+      "target": [ {
+        "code": "281050002",
+        "display": "Livebirth (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.3",
+      "display": "Stillbirth",
+      "target": [ {
+        "code": "237364002",
+        "display": "Stillbirth (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.4",
+      "display": "Miscarriage",
+      "target": [ {
+        "code": "17369002",
+        "display": "Miscarriage (disorder)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.5",
+      "display": "Abortion",
+      "target": [ {
+        "code": "285409006",
+        "display": "Medical termination of pregnancy (procedure)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.6",
+      "display": "Death",
+      "target": [ {
+        "code": "31868001",
+        "display": "Antepartum maternal death (event)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.7",
+      "display": "Lost to follow-up",
+      "target": [ {
+        "code": "399307001",
+        "display": "Lost to follow-up (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.8",
+      "display": "Moved away",
+      "target": [ {
+        "code": "184081006",
+        "display": "Patient has moved away (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.9",
+      "display": "False pregnancy",
+      "target": [ {
+        "code": "60001007",
+        "display": "Not pregnant (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.10",
+      "display": "Wrong entry",
+      "target": [ {
+        "code": "723510000",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.12",
+      "display": "Delivery date",
+      "target": [ {
+        "code": "184099003",
+        "display": "Date of birth (observable entity)",
+        "equivalence": "relatedto"
+      } ]
+    }, {
+      "code": "ANC.End.14",
+      "display": "Health-care facility",
+      "target": [ {
+        "code": "257622000",
+        "display": "Health-care facility (environment)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.15",
+      "display": "Home",
+      "target": [ {
+        "code": "394778007",
+        "display": "Client's or patient's home (environment)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.17",
+      "display": "Preterm Birth",
+      "target": [ {
+        "code": "1.07612E+16",
+        "display": "Preterm labour with preterm delivery (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.19",
+      "display": "Normal",
+      "target": [ {
+        "code": "48782003",
+        "display": "Delivery normal (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.20",
+      "display": "Forceps",
+      "target": [ {
+        "code": "302383004",
+        "display": "Forceps delivery (procedure)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.21",
+      "display": "Vacuum",
+      "target": [ {
+        "code": "61586001",
+        "display": "Delivery by vacuum extraction (procedure)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.22",
+      "display": "C-section",
+      "target": [ {
+        "code": "200144004",
+        "display": "Deliveries by caesarean (finding)",
+        "equivalence": "equivalent"
+      } ]
+    }, {
+      "code": "ANC.End.23",
+      "display": "Birth weight",
+      "target": [ {
+        "code": "364589006",
+        "display": "Birth weight (observable entity)",
+        "equivalence": "equivalent"
+      } ]
+    } ]
+  } ]
+}

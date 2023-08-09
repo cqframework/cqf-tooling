@@ -1,0 +1,20 @@
+{
+  "resourceType": "ValueSet",
+  "id": "anc-b5-de49",
+  "url": "http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-b5-de49",
+  "name": "DangerSignsNodangersignsCodes",
+  "title": "Danger Signs - No danger signs Codes",
+  "status": "draft",
+  "experimental": false,
+  "description": "Codes representing possible values for the Danger Signs - No danger signs element",
+  "immutable": true,
+  "compose": {
+    "include": [ {
+      "system": "http://fhir.org/guides/who/smart-anc-mini/CodeSystem/concept-codes",
+      "concept": [ {
+        "code": "ANC.B5.DE49",
+        "display": "No danger signs"
+      } ]
+    } ]
+  }
+}

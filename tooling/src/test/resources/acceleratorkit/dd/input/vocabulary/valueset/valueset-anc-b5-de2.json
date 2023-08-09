@@ -1,0 +1,20 @@
+{
+  "resourceType": "ValueSet",
+  "id": "anc-b5-de2",
+  "url": "http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-b5-de2",
+  "name": "FirstAntenatalCareContactCodes",
+  "title": "First Antenatal Care Contact Codes",
+  "status": "draft",
+  "experimental": false,
+  "description": "Codes representing possible values for the First Antenatal Care Contact element",
+  "immutable": true,
+  "compose": {
+    "include": [ {
+      "system": "http://fhir.org/guides/who/smart-anc-mini/CodeSystem/concept-codes",
+      "concept": [ {
+        "code": "ANC.B5.DE2",
+        "display": "First antenatal care contact"
+      } ]
+    } ]
+  }
+}

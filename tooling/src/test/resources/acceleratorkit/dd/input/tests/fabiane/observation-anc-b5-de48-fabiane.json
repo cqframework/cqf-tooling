@@ -1,0 +1,43 @@
+{
+  "resourceType": "Observation",
+  "id": "anc-b5-de48-fabiane",
+  "meta": {
+    "profile": [ "http://fhir.org/guides/who/smart-anc-mini/StructureDefinition/anc-b5-de48" ]
+  },
+  "status": "final",
+  "code": {
+    "coding": [ {
+      "system": "http://example.org/fhir/CodeSystem/example-codes",
+      "code": "example",
+      "display": "Could not resolve binding valueset null"
+    } ]
+  },
+  "subject": {
+    "reference": "Patient/fabiane"
+  },
+  "encounter": {
+    "reference": "Encounter/anc-encounter-fabiane"
+  },
+  "performer": [ {
+    "reference": "PractitionerRole/anc-practitionerrole-example"
+  } ],
+  "valueCodeableConcept": {
+    "coding": [ {
+      "system": "http://fhir.org/guides/who/smart-anc-mini/CodeSystem/concept-codes",
+      "code": "ANC.B5.DE51",
+      "display": "Central cyanosis"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "95837007",
+      "display": "Central cyanosis (disorder)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-11",
+      "code": "ME64.1",
+      "display": "Cyanosis"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icd-10",
+      "code": "R23.0",
+      "display": "Cyanosis"
+    } ]
+  }
+}

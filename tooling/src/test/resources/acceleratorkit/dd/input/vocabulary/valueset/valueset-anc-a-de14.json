@@ -1,0 +1,35 @@
+{
+  "resourceType": "ValueSet",
+  "id": "anc-a-de14",
+  "url": "http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-a-de14",
+  "name": "CohabitantsCodes",
+  "title": "Co-habitants Codes",
+  "status": "draft",
+  "experimental": false,
+  "description": "Codes representing possible values for the Co-habitants element",
+  "immutable": true,
+  "compose": {
+    "include": [ {
+      "system": "http://fhir.org/guides/who/smart-anc-mini/CodeSystem/concept-codes",
+      "concept": [ {
+        "code": "ANC.A.DE14",
+        "display": "Parents"
+      }, {
+        "code": "ANC.A.DE15",
+        "display": "Siblings"
+      }, {
+        "code": "ANC.A.DE16",
+        "display": "Extended family"
+      }, {
+        "code": "ANC.A.DE17",
+        "display": "Partner"
+      }, {
+        "code": "ANC.A.DE18",
+        "display": "Friend(s)"
+      }, {
+        "code": "ANC.A.DE19",
+        "display": "No one"
+      } ]
+    } ]
+  }
+}
