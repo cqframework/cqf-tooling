@@ -685,7 +685,7 @@ public class DTProcessor extends Operation {
     }
 
     public void writePlanDefinitionIndex(String outputPath) {
-        String outputFilePath = outputPath + File.separator + "input" + File.separator + "pagecontent"+ File.separator + "PlanDefinitionIndex.md";
+        String outputFilePath = outputPath + File.separator + "input" + File.separator + "pagecontent";
         try {
             ensurePath(outputFilePath);
         }
@@ -693,7 +693,8 @@ public class DTProcessor extends Operation {
             throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
         }
 
-        try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
+        String outputFile = outputFilePath + File.separator + "PlanDefinitionIndex.md";
+        try (FileOutputStream writer = new FileOutputStream(outputFile)) {
             writer.write(buildPlanDefinitionIndex().getBytes());
             writer.flush();
         }
