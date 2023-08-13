@@ -1,0 +1,39 @@
+{
+  "resourceType": "Observation",
+  "id": "anc-a-de13-example",
+  "meta": {
+    "profile": [ "http://fhir.org/guides/who/smart-anc-mini/StructureDefinition/anc-a-de13" ]
+  },
+  "status": "final",
+  "code": {
+    "coding": [ {
+      "system": "http://example.org/fhir/CodeSystem/example-codes",
+      "code": "example",
+      "display": "Could not resolve binding valueset null"
+    } ]
+  },
+  "subject": {
+    "reference": "Patient/ANCM-patient-example"
+  },
+  "encounter": {
+    "reference": "Encounter/ANCM-encounter-example"
+  },
+  "performer": [ {
+    "reference": "PractitionerRole/ANCM-practitionerrole-example"
+  } ],
+  "valueCodeableConcept": {
+    "coding": [ {
+      "system": "http://fhir.org/guides/who/smart-anc-mini/CodeSystem/concept-codes",
+      "code": "ANC.A.DE14",
+      "display": "Parents"
+    }, {
+      "system": "http://snomed.info/sct",
+      "code": "224137008",
+      "display": "Lives with parents (finding)"
+    }, {
+      "system": "http://hl7.org/fhir/sid/icf-nl",
+      "code": "e310",
+      "display": "Immediate family?Individuals related by birth, marriage or other relationship recognized by the culture as immediate family, e.g. spouses, partners, parents, siblings, children, foster parents, adoptive parents and grandparents"
+    } ]
+  }
+}

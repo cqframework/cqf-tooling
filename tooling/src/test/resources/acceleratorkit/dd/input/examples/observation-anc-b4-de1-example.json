@@ -1,0 +1,25 @@
+{
+  "resourceType": "Observation",
+  "id": "anc-b4-de1-example",
+  "meta": {
+    "profile": [ "http://fhir.org/guides/who/smart-anc-mini/StructureDefinition/anc-b4-de1" ]
+  },
+  "status": "final",
+  "code": {
+    "coding": [ {
+      "system": "http://example.org/fhir/CodeSystem/example-codes",
+      "code": "example",
+      "display": "Could not resolve binding valueset null"
+    } ]
+  },
+  "subject": {
+    "reference": "Patient/ANCM-patient-example"
+  },
+  "encounter": {
+    "reference": "Encounter/ANCM-encounter-example"
+  },
+  "performer": [ {
+    "reference": "PractitionerRole/ANCM-practitionerrole-example"
+  } ],
+  "valueBoolean": true
+}

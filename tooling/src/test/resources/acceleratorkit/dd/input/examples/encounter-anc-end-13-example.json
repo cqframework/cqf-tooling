@@ -1,0 +1,15 @@
+{
+  "resourceType": "Encounter",
+  "id": "anc-end-13-example",
+  "meta": {
+    "profile": [ "http://fhir.org/guides/who/smart-anc-mini/StructureDefinition/anc-end-13" ]
+  },
+  "subject": {
+    "reference": "Patient/ANCM-patient-example"
+  },
+  "location": [ {
+    "location": {
+      "reference": "Location/ANCM-location-example"
+    }
+  } ]
+}

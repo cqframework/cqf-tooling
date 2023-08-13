@@ -1,0 +1,29 @@
+{
+  "resourceType": "Patient",
+  "id": "hellena",
+  "meta": {
+    "profile": [ "http://fhir.org/guides/who/smart-anc-mini/StructureDefinition/anc-patient" ]
+  },
+  "identifier": [ {
+    "value": "hellena"
+  } ],
+  "name": [ {
+    "family": "Asdf",
+    "given": [ "Hellena" ]
+  } ],
+  "telecom": [ {
+    "value": "Asdf"
+  } ],
+  "birthDate": "2002-01-28",
+  "address": [ {
+    "line": [ "Asdf" ]
+  } ],
+  "contact": [ {
+    "telecom": [ {
+      "value": "Asdf"
+    } ]
+  } ],
+  "generalPractitioner": [ {
+    "reference": "PractitionerRole/anc-practitionerrole-example"
+  } ]
+}

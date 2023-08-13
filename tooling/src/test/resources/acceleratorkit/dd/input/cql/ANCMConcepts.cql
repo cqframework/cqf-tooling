@@ -1,0 +1,43 @@
+library ANCMConcepts
+
+// Code Systems
+codesystem "ICD-10": 'http://hl7.org/fhir/sid/icd-10'
+codesystem "SNOMED-CT": 'http://snomed.info/sct'
+codesystem "LOINC": 'http://loinc.org'
+codesystem "RxNorm": 'http://www.nlm.nih.gov/research/umls/rxnorm'
+codesystem "CPT": 'http://www.ama-assn.org/go/cpt'
+codesystem "HCPCS": 'https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets'
+codesystem "CIEL": 'http://hl7.org/fhir/sid/ciel'
+codesystem "ICD-11": 'http://hl7.org/fhir/sid/icd-11'
+codesystem "ICHI": 'https://mitel.dimi.uniud.it/ichi/#http://id.who.int/ichi'
+codesystem "ICF": 'http://hl7.org/fhir/sid/icf-nl'
+codesystem "NDC": 'http://hl7.org/fhir/sid/ndc'
+codesystem "NIDA": 'https://cde.drugabuse.gov'
+codesystem "ANCM Activity Codes": 'http://fhir.org/guides/who/smart-anc-mini/CodeSystem/activity-codes'
+codesystem "ANCM Concept Codes": 'http://fhir.org/guides/who/smart-anc-mini/CodeSystem/concept-codes'
+
+// Value Sets
+valueset "Co-habitants Codes": 'http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-a-de14'
+valueset "First Antenatal Care Contact Codes": 'http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-b5-de2'
+valueset "Scheduled Antenatal Care Contact Codes": 'http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-b5-de3'
+valueset "Reason for coming to facility Codes": 'http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-b5-de4'
+valueset "Reason for coming to facility Codes Grouper": 'http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-b5-de1-codes-grouper'
+valueset "Specific health concern(s) Codes": 'http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-b5-de6'
+valueset "Danger Signs - No danger signs Codes": 'http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-b5-de49'
+valueset "Danger signs Codes": 'http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-b5-de50'
+valueset "Danger Signs - Central cyanosis Codes": 'http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-b5-de51'
+valueset "Danger signs Codes Grouper": 'http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-b5-de48-codes-grouper'
+valueset "Reason for closing ANC record Codes": 'http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-end-2'
+valueset "Place of delivery Codes": 'http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-end-14'
+valueset "Delivery mode Codes": 'http://fhir.org/guides/who/smart-anc-mini/ValueSet/anc-end-19'
+
+// Codes
+code "Co-habitants": 'ANC.A.DE13' from "ANCM Concept Codes" display 'Co-habitants'
+code "Pregnancy confirmed": 'ANC.B4.DE1' from "ANCM Concept Codes" display 'Pregnancy confirmed'
+code "Specific health concern(s)": 'ANC.B5.DE5' from "ANCM Concept Codes" display 'Specific health concern(s)'
+code "Danger signs": 'ANC.B5.DE48' from "ANCM Concept Codes" display 'Danger signs'
+code "Reason for closing ANC record": 'ANC.End.1' from "ANCM Concept Codes" display 'Reason for closing ANC record'
+code "Delivery date": 'ANC.End.12' from "ANCM Concept Codes" display 'Delivery date'
+code "Preterm Birth": 'ANC.End.17' from "ANCM Concept Codes" display 'Preterm Birth'
+code "Delivery mode": 'ANC.End.18' from "ANCM Concept Codes" display 'Delivery mode'
+code "Birth weight": 'ANC.End.23' from "ANCM Concept Codes" display 'Birth weight'

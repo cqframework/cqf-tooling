@@ -1,0 +1,29 @@
+{
+  "resourceType": "Patient",
+  "id": "fatima-3",
+  "meta": {
+    "profile": [ "http://fhir.org/guides/who/smart-anc-mini/StructureDefinition/anc-patient" ]
+  },
+  "identifier": [ {
+    "value": "fatima-3"
+  } ],
+  "name": [ {
+    "family": "Asdf",
+    "given": [ "Fatima" ]
+  } ],
+  "telecom": [ {
+    "value": "Asdf"
+  } ],
+  "birthDate": "1985-08-24",
+  "address": [ {
+    "line": [ "Asdf" ]
+  } ],
+  "contact": [ {
+    "telecom": [ {
+      "value": "Asdf"
+    } ]
+  } ],
+  "generalPractitioner": [ {
+    "reference": "PractitionerRole/anc-practitionerrole-example"
+  } ]
+}
