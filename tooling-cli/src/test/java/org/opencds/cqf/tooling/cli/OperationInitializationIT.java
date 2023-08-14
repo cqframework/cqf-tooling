@@ -14,13 +14,13 @@ public class OperationInitializationIT {
 
    @Test
    void invalidOperationName() {
-      String[] args = new String[]{ "-InvalidOperationName" };
+      String[] args = new String[]{ "-NonexistentOperationName" };
       Assert.assertThrows(OperationNotFound.class, () -> Main.main(args));
    }
 
    @Test
    void InvalidOperationDeclaration() {
-      String[] args = new String[]{ "BundleResources" };
+      String[] args = new String[]{ "BundleResources", "-ptr=some/directory/path" };
       Assert.assertThrows(InvalidOperationArgs.class, () -> Main.main(args));
    }
 
