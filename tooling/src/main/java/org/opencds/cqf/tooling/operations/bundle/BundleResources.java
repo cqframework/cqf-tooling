@@ -27,15 +27,16 @@ public class BundleResources implements ExecutableOperation {
    private String type;
    @OperationParam(alias = { "bid", "bundleid" }, setter = "setBundleId")
    private String bundleId;
-   @OperationParam(alias = { "od", "outputDir" }, setter = "setOutputDirectory")
-   private String outputDirectory;
+   @OperationParam(alias = { "op", "outputPath" }, setter = "setOutputPath",
+           defaultValue = "src/main/resources/org/opencds/cqf/tooling/bundle/output")
+   private String outputPath;
 
    @Override
    public void execute() {
       FhirContext context = FhirContextCache.getContext(version);
       IBaseBundle bundle = bundleResources(context, bundleId, BundleTypeEnum.valueOf(type),
               IOUtils.readResources(IOUtils.getFilePaths(pathToResources, true), context));
-      IOUtils.writeResource(bundle, outputDirectory == null ? pathToResources : outputDirectory,
+      IOUtils.writeResource(bundle, outputPath == null ? pathToResources : outputPath,
               IOUtils.Encoding.parse(encoding), context);
    }
 
@@ -96,11 +97,11 @@ public class BundleResources implements ExecutableOperation {
       this.type = type;
    }
 
-   public String getOutputDirectory() {
-      return outputDirectory;
+   public String getOutputPath() {
+      return outputPath;
    }
 
-   public void setOutputDirectory(String outputDirectory) {
-      this.outputDirectory = outputDirectory;
+   public void setOutputPath(String outputDirectory) {
+      this.outputPath = outputDirectory;
    }
 }

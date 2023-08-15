@@ -49,21 +49,11 @@ public class ScaffoldProcessor extends BaseProcessor {
     }
 
     private void EnsureLibraryPath() {
-        try {
-            IOUtils.ensurePath(igPath + LibraryPath);
-        }
-        catch (IOException ex) {
-            LogUtils.putException("EnsureLibraryPath", ex.getMessage());
-        }
+        IOUtils.ensurePath(igPath + LibraryPath);
     }
 
     private void EnsureMeasurePath() {
-        try {
-            IOUtils.ensurePath(igPath + MeasurePath);
-        }
-        catch (IOException ex) {
-            LogUtils.putException("EnsureMeasurePath", ex.getMessage());
-        }
+        IOUtils.ensurePath(igPath + MeasurePath);
     }
 
     public void createLibrary(String name) {

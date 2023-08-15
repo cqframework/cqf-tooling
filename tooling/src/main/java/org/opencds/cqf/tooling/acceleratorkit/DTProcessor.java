@@ -92,12 +92,7 @@ public class DTProcessor extends Operation {
 
     private void processWorkbook(Workbook workbook) {
         String outputPath = getOutputPath();
-        try {
-            ensurePath(outputPath);
-        }
-        catch (IOException e) {
-            throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
-        }
+        ensurePath(outputPath);
 
         // process workbook
         if (decisionTablePages != null) {
@@ -614,12 +609,7 @@ public class DTProcessor extends Operation {
     private void writeLibraries(String outputPath) {
         if (libraries != null && libraries.size() > 0) {
             String outputFilePath = outputPath + File.separator + "input" + File.separator + "resources" + File.separator + "library";
-            try {
-                ensurePath(outputFilePath);
-            }
-            catch (IOException e) {
-                throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
-            }
+            ensurePath(outputFilePath);
 
             for (Library library : libraries.values()) {
                 writeResource(outputFilePath, library);
@@ -632,12 +622,7 @@ public class DTProcessor extends Operation {
             for (Map.Entry<String, StringBuilder> entry : libraryCQL.entrySet()) {
                 String outputDirectoryPath = outputPath + File.separator + "input" + File.separator + "cql";
                 String outputFilePath = outputDirectoryPath + File.separator + entry.getKey() + ".cql";
-                try {
-                    ensurePath(outputDirectoryPath);
-                }
-                catch (IOException e) {
-                    throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
-                }
+                ensurePath(outputDirectoryPath);
 
                 try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
                     writer.write(entry.getValue().toString().getBytes());
@@ -655,12 +640,7 @@ public class DTProcessor extends Operation {
         if (planDefinitions != null && planDefinitions.size() > 0) {
             for (PlanDefinition planDefinition : planDefinitions.values()) {
                 String outputFilePath = outputPath + File.separator + "input" + File.separator + "resources" + File.separator + "plandefinition";
-                try {
-                    ensurePath(outputFilePath);
-                }
-                catch (IOException e) {
-                    throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
-                }
+                ensurePath(outputFilePath);
                 writeResource(outputFilePath, planDefinition);
             }
         }
@@ -702,12 +682,7 @@ public class DTProcessor extends Operation {
 
     public void writePlanDefinitionIndex(String outputPath) {
         String outputFilePath = outputPath + File.separator + "input" + File.separator + "pagecontent"+ File.separator + "PlanDefinitionIndex.md";
-        try {
-            ensurePath(outputFilePath);
-        }
-        catch (IOException e) {
-            throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
-        }
+        ensurePath(outputFilePath);
 
         try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
             writer.write(buildPlanDefinitionIndex().getBytes());

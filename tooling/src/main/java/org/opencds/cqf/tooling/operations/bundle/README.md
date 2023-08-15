@@ -13,7 +13,7 @@ type specified by the 'encoding' argument to the 'outputpath' directory.
 the new bundle
 - -outputpath | -op (optional) - The directory path to which the generated Bundle file should be written
   - Default output path: src/main/resources/org/opencds/cqf/tooling/bundle/output
-- -version | -v (optional) - FHIR version { dstu2, stu3, r4 }
+- -version | -v (optional) - FHIR version { stu3, r4, r5 }
   - Default version: r4
 - -encoding | -e (optional) - The file format to be used for representing the resulting Bundle { json, xml }
   - Default encoding: json
@@ -30,7 +30,7 @@ This operation decomposes a Bundle entry into separate FHIR resource files.
 - -pathtobundle | -ptb (required) - Path to the bundle to decompose
 - -outputpath | -op (optional) - The directory path to which the resource files should be written
   - Default output path: src/main/resources/org/opencds/cqf/tooling/bundle/output
-- -version | -v (optional) - FHIR version { dstu2, stu3, r4 }
+- -version | -v (optional) - FHIR version { stu3, r4, r5 }
   - Default version: r4
 - -encoding | -e (optional) - The file format to be used for representing the resulting resources { json, xml }
   - Default encoding: json
@@ -43,7 +43,7 @@ TODO: add authentication args
 ### Arguments:
 - -pathtobundles | -ptb (required) - Path to the bundles to load into the FHIR server
 - -fhirserver | -fs (required) - The FHIR server where the $transaction operation is executed 
-- -version | -v (optional) - FHIR version { dstu2, stu3, r4 }
+- -version | -v (optional) - FHIR version { stu3, r4, r5 }
   - Default version: r4
 
 ## BundlesToBundle Operation

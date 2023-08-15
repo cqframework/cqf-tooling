@@ -21,8 +21,9 @@ public class BundleToResources implements ExecutableOperation {
     private String encoding;
     @OperationParam(alias = { "v", "version" }, setter = "setVersion", defaultValue = "r4")
     private String version;
-    @OperationParam(alias = { "od", "outputDir" }, setter = "setOutputDirectory")
-    private String outputDirectory;
+    @OperationParam(alias = { "op", "outputPath" }, setter = "setOutputPath",
+            defaultValue = "src/main/resources/org/opencds/cqf/tooling/bundle/output")
+    private String outputPath;
 
     @Override
     public void execute() {
@@ -33,7 +34,7 @@ public class BundleToResources implements ExecutableOperation {
         }
         if (possibleBundle instanceof IBaseBundle) {
             IOUtils.writeResources(bundleToResources(context, (IBaseBundle) possibleBundle),
-                    outputDirectory == null ? pathToBundle : outputDirectory,
+                    outputPath == null ? pathToBundle : outputPath,
                     IOUtils.Encoding.parse(encoding), context);
         }
         else {
@@ -69,11 +70,11 @@ public class BundleToResources implements ExecutableOperation {
         this.version = version;
     }
 
-    public String getOutputDirectory() {
-        return outputDirectory;
+    public String getOutputPath() {
+        return outputPath;
     }
 
-    public void setOutputDirectory(String outputDirectory) {
-        this.outputDirectory = outputDirectory;
+    public void setOutputPath(String outputDirectory) {
+        this.outputPath = outputDirectory;
     }
 }
