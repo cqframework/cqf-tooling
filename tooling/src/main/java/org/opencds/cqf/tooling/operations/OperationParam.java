@@ -12,4 +12,5 @@ public @interface OperationParam {
    boolean required() default false;
    String setter();
    String defaultValue() default "";
+   String description() default "";
 }

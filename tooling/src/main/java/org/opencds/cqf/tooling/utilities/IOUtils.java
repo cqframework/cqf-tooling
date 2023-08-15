@@ -143,13 +143,7 @@ public class IOUtils
             outputPath = path;
         }
         else {
-            try {
-                ensurePath(path);
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-                throw new RuntimeException("Error writing Resource to file: " + e.getMessage());
-            }
+            ensurePath(path);
 
             String baseName = null;
             if (outputFileName == null || outputFileName.isBlank()) {
@@ -982,13 +976,13 @@ public class IOUtils
         }
     }
 
-    public static void ensurePath(String path) throws IOException {
+    public static void ensurePath(String path) {
         //Creating a File object
         File scopeDir = new File(path);
         //Creating the directory
         if (!scopeDir.exists()) {
             if (!scopeDir.mkdirs()) {
-                throw new IOException("Could not create directory: " + path);
+                throw new IllegalArgumentException("Could not create directory: " + path);
             }
         }
     }
