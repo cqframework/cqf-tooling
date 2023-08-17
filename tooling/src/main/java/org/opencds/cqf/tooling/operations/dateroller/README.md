@@ -51,7 +51,7 @@ Sample extension:
 be updated
 - -pathtorequests (required if -ptres not present) | -ptreq - Path to the directory containing the CDS Hooks request 
 files to be updated
-- -version | -v (optional) - FHIR version { dstu2, stu3, r4 }
+- -version | -v (optional) - FHIR version { stu3, r4, r5 }
     - Default version: r4
 - -encoding | -e (optional) - The file format to be used for representing the resulting resource { json, xml }
     - Default encoding: json
