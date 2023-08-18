@@ -13,11 +13,12 @@ import java.util.List;
 import java.util.Map;
 
 public class ModelCanonicalAtlasCreator {
-
     private static List<ValueSet> valueSets;
     private static List<CodeSystem> codeSystems;
     private static List<StructureDefinition> structureDefinitions;
     private static Map<String, ConceptMap> conceptMaps;
+
+    private ModelCanonicalAtlasCreator() {}
 
     public static CanonicalResourceAtlas createMainCanonicalAtlas (String resourcePaths, String modelName, String modelVersion, String inputPath) {
         String mainResourcePath = getModelResourcePath (resourcePaths, modelName);
@@ -34,18 +35,12 @@ public class ModelCanonicalAtlasCreator {
         Atlas atlas = new Atlas ();
         atlas.loadPaths (inputPath, resourcePath);
         codeSystems = new ArrayList<> ();
-        atlas.getCodeSystems().forEach((key, codeSystem)->{
-            codeSystems.add(codeSystem);
-        });
+        atlas.getCodeSystems().forEach((key, codeSystem) -> codeSystems.add(codeSystem));
         conceptMaps = atlas.getConceptMaps();
         valueSets = new ArrayList<>();
-        atlas.getValueSets().forEach((key, valueSet)->{
-            valueSets.add(valueSet);
-        });
+        atlas.getValueSets().forEach((key, valueSet) -> valueSets.add(valueSet));
         structureDefinitions = new ArrayList<>();
-        atlas.getStructureDefinitions().forEach((key, structureDefinition)->{
-            structureDefinitions.add(structureDefinition);
-        });
+        atlas.getStructureDefinitions().forEach((key, structureDefinition) -> structureDefinitions.add(structureDefinition));
     }
 
     private static CanonicalResourceAtlas getCanonicalAtlas(){
@@ -70,7 +65,7 @@ public class ModelCanonicalAtlasCreator {
         StringBuilder pathsWithoutModel = new StringBuilder();
         for (String path : paths){
             if(!path.contains(modelName)){
-                pathsWithoutModel.append(path + ";");
+                pathsWithoutModel.append(path).append(";");
             }
         }
         return pathsWithoutModel.toString();

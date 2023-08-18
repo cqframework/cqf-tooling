@@ -56,7 +56,7 @@ public class PostBundlesInDirProcessor {
         Encoding encoding = params.encoding;
         FhirContext fhirContext = getFhirContext(fhirVersion);
 
-        List<Map.Entry<String, IBaseResource>> resources = BundleUtils.GetBundlesInDir(params.directoryPath, fhirContext);
+        List<Map.Entry<String, IBaseResource>> resources = BundleUtils.getBundlesInDir(params.directoryPath, fhirContext);
         resources.forEach(entry -> postBundleToFhirUri(fhirUri, encoding, fhirContext, entry.getValue()));
     }
 

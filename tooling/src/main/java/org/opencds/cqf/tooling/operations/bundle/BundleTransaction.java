@@ -8,7 +8,8 @@ import org.opencds.cqf.tooling.operations.Operation;
 import org.opencds.cqf.tooling.operations.OperationParam;
 import org.opencds.cqf.tooling.utilities.FhirContextCache;
 import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.opencds.cqf.tooling.utilities.LogUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -18,11 +19,15 @@ import java.util.stream.Collectors;
 
 @Operation(name = "BundleTransaction")
 public class BundleTransaction implements ExecutableOperation {
-    @OperationParam(alias = { "ptb", "pathtobundles" }, setter = "setPathToBundles", required = true)
+    private static final Logger logger = LoggerFactory.getLogger(BundleTransaction.class);
+    @OperationParam(alias = { "ptb", "pathtobundles" }, setter = "setPathToBundles", required = true,
+            description = "Path to the bundles to load into the FHIR server (required)")
     private String pathToBundles;
-    @OperationParam(alias = { "fs", "fhirServer" }, setter = "setFhirServer", required = true)
+    @OperationParam(alias = { "fs", "fhirServer" }, setter = "setFhirServer", required = true,
+            description = "The FHIR server where the $transaction operation is executed (required)")
     private String fhirServer;
-    @OperationParam(alias = { "v", "version" }, setter = "setVersion", defaultValue = "r4")
+    @OperationParam(alias = { "v", "version" }, setter = "setVersion", defaultValue = "r4",
+            description = "FHIR version { stu3, r4, r5 } (default r4)")
     private String version;
 
     @Override
@@ -45,7 +50,7 @@ public class BundleTransaction implements ExecutableOperation {
                 bundle -> {
                     response.set(client.transaction().withBundle(bundle).execute());
                     responseBundles.add(response.get());
-                    LogUtils.info(IOUtils.encodeResourceAsString(response.get(), IOUtils.Encoding.JSON, fhirContext));
+                    logger.info(IOUtils.encodeResourceAsString(response.get(), IOUtils.Encoding.JSON, fhirContext));
                 }
         );
         return responseBundles;

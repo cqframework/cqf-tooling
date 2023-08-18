@@ -29,15 +29,20 @@ import java.util.List;
 public class ExtractMatBundle implements ExecutableOperation {
    private static final Logger logger = LoggerFactory.getLogger(ExtractMatBundle.class);
 
-   @OperationParam(alias = { "ptb", "pathtobundle" }, setter = "pathToBundle", required = true)
+   @OperationParam(alias = { "ptb", "pathtobundle" }, setter = "pathToBundle", required = true,
+           description = "Path to the exported MAT FHIR Bundle resource (required)")
    private String pathToBundle;
-   @OperationParam(alias = { "e", "encoding" }, setter = "setEncoding", defaultValue = "json")
+   @OperationParam(alias = { "e", "encoding" }, setter = "setEncoding", defaultValue = "json",
+           description = "The file format to be used for representing the resulting extracted FHIR resources { json, xml } (default json)")
    private String encoding;
-   @OperationParam(alias = { "v", "version" }, setter = "setVersion", defaultValue = "r4")
+   @OperationParam(alias = { "v", "version" }, setter = "setVersion", defaultValue = "r4",
+           description = "FHIR version { stu3, r4, r5 } (default r4)")
    private String version;
-   @OperationParam(alias = { "sn", "suppressnarrative" }, setter = "setSuppressNarrative", defaultValue = "true")
-   private String suppressNarrative;
-   @OperationParam(alias = { "op", "outputPath" }, setter = "setOutputPath")
+   @OperationParam(alias = { "sn", "suppressnarrative" }, setter = "setSuppressNarrative", defaultValue = "true",
+           description = "Whether or not to suppress Narratives in extracted Measure resources (default true)")
+   private Boolean suppressNarrative;
+   @OperationParam(alias = { "op", "outputPath" }, setter = "setOutputPath",
+           description = "The directory path to which the generated Bundle file should be written (default parent directory of -ptb)")
    private String outputPath;
 
    private FhirContext fhirContext;
@@ -72,7 +77,7 @@ public class ExtractMatBundle implements ExecutableOperation {
       FhirTerser terser = new FhirTerser(fhirContext);
       for (IBaseResource resource : resources) {
          if (resource.fhirType().equalsIgnoreCase("measure")
-                 && Boolean.parseBoolean(suppressNarrative)) {
+                 && Boolean.TRUE.equals(suppressNarrative)) {
             ResourceUtil.removeNarrative(fhirContext, resource);
          }
          if (resource.fhirType().equalsIgnoreCase("library")) {
@@ -92,7 +97,7 @@ public class ExtractMatBundle implements ExecutableOperation {
       FhirTerser terser = new FhirTerser(fhirContext);
       for (IBaseResource resource : resources) {
          if (resource.fhirType().equalsIgnoreCase("measure")
-                 && Boolean.parseBoolean(suppressNarrative)) {
+                 && Boolean.TRUE.equals(suppressNarrative)) {
             ResourceUtil.removeNarrative(fhirContext, resource);
          }
          if (resource.fhirType().equalsIgnoreCase("library")) {
@@ -197,11 +202,11 @@ public class ExtractMatBundle implements ExecutableOperation {
       this.version = version;
    }
 
-   public String getSuppressNarrative() {
+   public Boolean getSuppressNarrative() {
       return suppressNarrative;
    }
 
-   public void setSuppressNarrative(String suppressNarrative) {
+   public void setSuppressNarrative(Boolean suppressNarrative) {
       this.suppressNarrative = suppressNarrative;
    }
 

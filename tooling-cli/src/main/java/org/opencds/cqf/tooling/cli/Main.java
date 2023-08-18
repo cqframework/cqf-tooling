@@ -221,6 +221,7 @@ package org.opencds.cqf.tooling.cli;
 import org.opencds.cqf.tooling.exception.InvalidOperationArgs;
 import org.opencds.cqf.tooling.exception.InvalidOperationInitialization;
 import org.opencds.cqf.tooling.exception.OperationNotFound;
+import org.opencds.cqf.tooling.operations.ExecutableOperation;
 import org.opencds.cqf.tooling.operations.Operation;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
@@ -259,11 +260,13 @@ public class Main {
         }
 
         try {
-            OperationFactory.createOperation(operation, operationClassMap.get(operation.substring(1)), args).execute();
+            ExecutableOperation executableOperation = OperationFactory.createOperation(
+                    operation, operationClassMap.get(operation.substring(1)), args);
+            if (executableOperation != null) {
+                executableOperation.execute();
+            }
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
             throw new InvalidOperationInitialization(e.getMessage(), e);
         }
-
-//        OperationFactory.createOperation(operation.substring(1)).execute(args);
     }
 }

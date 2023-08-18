@@ -20,8 +20,8 @@ public class IGUtils {
         return canonicalBase;
     }
 
-    public static ArrayList<String> extractResourcePaths(String rootDir, ImplementationGuide sourceIg) throws IOException {
-        ArrayList<String> result = new ArrayList<>();
+    public static List<String> extractResourcePaths(String rootDir, ImplementationGuide sourceIg) throws IOException {
+        List<String> result = new ArrayList<>();
         for (ImplementationGuide.ImplementationGuideDefinitionParameterComponent p : sourceIg.getDefinition().getParameter()) {
             if (p.getCode().equals("path-resource")) {
                 result.add(Utilities.path(rootDir, p.getValue()));

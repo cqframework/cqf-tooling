@@ -5,6 +5,9 @@ import java.util.Objects;
 import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class FhirVersionUtils {
+
+    private FhirVersionUtils() {}
+
     /**
      * This method handles numeric versions (3, 2.0, 4.0.1, etc.) and release versions (R4, DSTU3, etc.)
      * Partial versions are allowed. The minimum compatible version supported by the tooling  returned 

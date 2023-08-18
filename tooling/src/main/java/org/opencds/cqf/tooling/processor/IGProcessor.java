@@ -129,7 +129,7 @@ public class IGProcessor extends BaseProcessor {
         Boolean versioned = params.versioned;
         // String fhirUri = params.fhirUri;
         String measureToRefreshPath = params.measureToRefreshPath;
-        ArrayList<String> resourceDirs = params.resourceDirs;
+        List<String> resourceDirs = params.resourceDirs;
         if (resourceDirs.size() == 0) {
             try {
                 resourceDirs = IGUtils.extractResourcePaths(this.rootDir, this.sourceIg);
@@ -203,7 +203,7 @@ public class IGProcessor extends BaseProcessor {
     public static final String testCasePathElement = "input/tests/";
     public static final String devicePathElement = "input/resources/device/";
     
-    public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, ArrayList<String> resourcePaths) {                
+    public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, List<String> resourcePaths) {
         File directory = new File(getBundlesPath(igPath));
         if (!directory.exists()) {
             directory.mkdir();

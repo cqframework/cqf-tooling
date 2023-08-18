@@ -35,14 +35,18 @@ public class LibraryGenerator implements ExecutableOperation {
    private static final Logger logger = LoggerFactory.getLogger(LibraryGenerator.class);
 
    // TODO: either enable user to pass in translator options as a param or search directory for cql-options.json
-   @OperationParam(alias = { "ptcql", "pathtocqlcontent" }, setter = "setPathToCqlContent", required = true)
+   @OperationParam(alias = { "ptcql", "pathtocqlcontent" }, setter = "setPathToCqlContent", required = true,
+           description = "Path to the directory or file containing the CQL content to be transformed into FHIR Library resources (required)")
    private String pathToCqlContent;
-   @OperationParam(alias = { "e", "encoding" }, setter = "setEncoding", defaultValue = "json")
+   @OperationParam(alias = { "e", "encoding" }, setter = "setEncoding", defaultValue = "json",
+           description = "The file format to be used for representing the resulting FHIR Library { json, xml } (default json)")
    private String encoding;
-   @OperationParam(alias = { "v", "version" }, setter = "setVersion", defaultValue = "r4")
+   @OperationParam(alias = { "v", "version" }, setter = "setVersion", defaultValue = "r4",
+           description = "FHIR version { stu3, r4, r5 } (default r4)")
    private String version;
    @OperationParam(alias = { "op", "outputPath" }, setter = "setOutputPath",
-           defaultValue = "src/main/resources/org/opencds/cqf/tooling/library/output")
+           defaultValue = "src/main/resources/org/opencds/cqf/tooling/library/output",
+           description = "The directory path to which the generated FHIR Library resources should be written (default src/main/resources/org/opencds/cqf/tooling/library/output)")
    private String outputPath;
 
    private FhirContext fhirContext;

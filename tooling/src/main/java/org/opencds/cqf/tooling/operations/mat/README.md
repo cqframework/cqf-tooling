@@ -20,5 +20,7 @@ the following format:
     - Default version: r4
 - -encoding | -e (optional) - The file format to be used for representing the resulting extracted FHIR resources { json, xml }
     - Default encoding: json
+- -suppressnarratives | -sn (optional) - Whether or not to suppress Narratives in extracted Measure resources
+  - Default value: true
 - -outputpath | -op (optional) - The directory path to which the resulting extracted FHIR Library resources should be written
     - Default output path: parent of pathtobundle

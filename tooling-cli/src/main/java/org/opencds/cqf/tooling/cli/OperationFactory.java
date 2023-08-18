@@ -43,6 +43,7 @@ import org.opencds.cqf.tooling.terminology.ToJsonValueSetDbOperation;
 import org.opencds.cqf.tooling.terminology.VSACBatchValueSetGenerator;
 import org.opencds.cqf.tooling.terminology.VSACValueSetGenerator;
 import org.opencds.cqf.tooling.terminology.distributable.DistributableValueSetGenerator;
+import org.opencds.cqf.tooling.utilities.OperationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +57,7 @@ class OperationFactory {
     private static final Logger logger = LoggerFactory.getLogger(OperationFactory.class);
     private static String operationName;
     private static Map<String, String> paramMap;
+    private static boolean showHelpMenu = false;
 
     private OperationFactory() {
 
@@ -64,6 +66,10 @@ class OperationFactory {
     private static void processArgs(String[] args) {
         paramMap = new HashMap<>();
         for (int i = 1; i < args.length; ++i) {
+            if (OperationUtils.isHelpArg(args[i])) {
+                showHelpMenu = true;
+                return;
+            }
             String[] argAndValue = args[i].split("=", 2);
             if (argAndValue.length == 2) {
                 paramMap.put(argAndValue[0].replace("-", ""), argAndValue[1]);
@@ -82,9 +88,11 @@ class OperationFactory {
                 boolean isInitialized = false;
                 for (String alias : field.getAnnotation(OperationParam.class).alias()) {
                     if (paramMap.containsKey(alias)) {
+                        Class<?> paramType = OperationUtils.getParamType(operation,
+                                field.getAnnotation(OperationParam.class).setter());
                         operation.getClass().getDeclaredMethod(
-                                field.getAnnotation(OperationParam.class).setter(), String.class
-                        ).invoke(operation, paramMap.get(alias));
+                                field.getAnnotation(OperationParam.class).setter(), paramType
+                        ).invoke(operation, OperationUtils.mapParamType(paramMap.get(alias), paramType));
                         isInitialized = true;
                     }
                 }
@@ -93,9 +101,12 @@ class OperationFactory {
                         throw new InvalidOperationArgs("Missing required argument: " + field.getName());
                     }
                     else if (!field.getAnnotation(OperationParam.class).defaultValue().isEmpty()) {
+                        Class<?> paramType = OperationUtils.getParamType(operation,
+                                field.getAnnotation(OperationParam.class).setter());
                         operation.getClass().getDeclaredMethod(
-                                field.getAnnotation(OperationParam.class).setter(), String.class
-                        ).invoke(operation, field.getAnnotation(OperationParam.class).defaultValue());
+                                field.getAnnotation(OperationParam.class).setter(), paramType
+                        ).invoke(operation, OperationUtils.mapParamType(
+                                field.getAnnotation(OperationParam.class).defaultValue(), paramType));
                     }
                 }
             }
@@ -110,6 +121,12 @@ class OperationFactory {
         }
         OperationFactory.operationName = operationName;
         processArgs(args);
+        if (showHelpMenu) {
+            logger.info(OperationUtils.getHelpMenu(
+                    (ExecutableOperation) operationClass.getDeclaredConstructor().newInstance()));
+            showHelpMenu = false;
+            return null;
+        }
         return initialize((ExecutableOperation) operationClass.getDeclaredConstructor().newInstance());
     }
 

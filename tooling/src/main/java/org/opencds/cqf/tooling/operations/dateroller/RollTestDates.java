@@ -45,15 +45,20 @@ import java.util.stream.Collectors;
 public class RollTestDates implements ExecutableOperation {
    private static final Logger logger = LoggerFactory.getLogger(RollTestDates.class);
    public static final String DATEROLLER_EXT_URL = "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/dataDateRoller";
-   @OperationParam(alias = { "ptres", "pathtoresources" }, setter = "setPathToResources")
+   @OperationParam(alias = { "ptres", "pathtoresources" }, setter = "setPathToResources",
+           description = "Path to the directory containing the resource files to be updated (required if -ptreq not present)")
    private String pathToResources;
-   @OperationParam(alias = { "ptreq", "pathtorequests" }, setter = "setPathToRequests")
+   @OperationParam(alias = { "ptreq", "pathtorequests" }, setter = "setPathToRequests",
+           description = "Path to the directory containing the CDS Hooks request files to be updated (required if -ptres not present)")
    private String pathToRequests;
-   @OperationParam(alias = { "e", "encoding" }, setter = "setEncoding", defaultValue = "json")
+   @OperationParam(alias = { "e", "encoding" }, setter = "setEncoding", defaultValue = "json",
+           description = "The file format to be used for representing the resulting resource { json, xml } (default json)")
    private String encoding;
-   @OperationParam(alias = { "v", "version" }, setter = "setVersion", defaultValue = "r4")
+   @OperationParam(alias = { "v", "version" }, setter = "setVersion", defaultValue = "r4",
+           description = "FHIR version { stu3, r4, r5 } (default r4)")
    private String version;
-   @OperationParam(alias = { "op", "outputPath" }, setter = "setOutputPath")
+   @OperationParam(alias = { "op", "outputPath" }, setter = "setOutputPath",
+           description = "The file system location where the resulting resources/requests are written (default same as -ptreq or -ptres)")
    private String outputPath;
 
    private FhirContext fhirContext;

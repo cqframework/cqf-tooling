@@ -15,14 +15,18 @@ import java.util.List;
 
 @Operation(name = "BundleToResources")
 public class BundleToResources implements ExecutableOperation {
-    @OperationParam(alias = { "ptb", "pathtobundle" }, setter = "setPathToBundle", required = true)
+    @OperationParam(alias = { "ptb", "pathtobundle" }, setter = "setPathToBundle", required = true,
+            description = "Path to the bundle to decompose (required)")
     private String pathToBundle;
-    @OperationParam(alias = { "e", "encoding" }, setter = "setEncoding", defaultValue = "json")
+    @OperationParam(alias = { "e", "encoding" }, setter = "setEncoding", defaultValue = "json",
+            description = "The file format to be used for representing the resulting resources { json, xml } (default json)")
     private String encoding;
-    @OperationParam(alias = { "v", "version" }, setter = "setVersion", defaultValue = "r4")
+    @OperationParam(alias = { "v", "version" }, setter = "setVersion", defaultValue = "r4",
+            description = "FHIR version { stu3, r4, r5 } (default r4)")
     private String version;
     @OperationParam(alias = { "op", "outputPath" }, setter = "setOutputPath",
-            defaultValue = "src/main/resources/org/opencds/cqf/tooling/bundle/output")
+            defaultValue = "src/main/resources/org/opencds/cqf/tooling/bundle/output",
+            description = "The directory path to which the resource files should be written (default src/main/resources/org/opencds/cqf/tooling/bundle/output)")
     private String outputPath;
 
     @Override

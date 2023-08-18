@@ -206,7 +206,7 @@ public class IGTestProcessor extends BaseProcessor {
 
                 ITestProcessor testProcessor = getResourceTypeTestProcessor(group.getName());
                 List<Map.Entry<String, IBaseResource>> testCasesBundles =
-                    BundleUtils.GetBundlesInDir(testArtifact.getPath(), fhirContext, false);
+                    BundleUtils.getBundlesInDir(testArtifact.getPath(), fhirContext, false);
 
                 for (Map.Entry<String, IBaseResource> testCaseBundleMapEntry : testCasesBundles) {
                     IBaseResource testCaseBundle = testCaseBundleMapEntry.getValue();
@@ -284,7 +284,7 @@ public class IGTestProcessor extends BaseProcessor {
         String contentBundlePath = getPathForContentBundleTestArtifact(groupName, testArtifactName);
         File testArtifactContentBundleDirectory = new File(contentBundlePath);
         if (testArtifactContentBundleDirectory != null && testArtifactContentBundleDirectory.exists()) {
-            List<Map.Entry<String, IBaseResource>> testArtifactContentBundles = BundleUtils.GetBundlesInDir(contentBundlePath, fhirContext, false);
+            List<Map.Entry<String, IBaseResource>> testArtifactContentBundles = BundleUtils.getBundlesInDir(contentBundlePath, fhirContext, false);
 
             // NOTE: Making the assumption that there will be a single bundle for the artifact.
             testArtifactContentBundle = testArtifactContentBundles.get(0);
