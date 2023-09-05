@@ -1,0 +1,180 @@
+package org.opencds.cqf.tooling.operations.codesystem.loinc;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.http.HttpHeaders;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.ValueSet;
+import org.opencds.cqf.tooling.constants.Api;
+import org.opencds.cqf.tooling.constants.Terminology;
+import org.opencds.cqf.tooling.operations.ExecutableOperation;
+import org.opencds.cqf.tooling.operations.Operation;
+import org.opencds.cqf.tooling.operations.OperationParam;
+import org.opencds.cqf.tooling.utilities.FhirContextCache;
+import org.opencds.cqf.tooling.utilities.HttpClientUtils;
+import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.converters.ResourceAndTypeConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+
+@Operation(name = "LoincHierarchy")
+public class HierarchyProcessor implements ExecutableOperation {
+   private static final Logger logger = LoggerFactory.getLogger(HierarchyProcessor.class);
+
+   @OperationParam(alias = { "query", "q" }, setter = "setQuery", required = true,
+           description = "The expression that provides an alternative definition of the content of the value set in some form that is not computable - e.g. instructions that could only be followed by a human.")
+   private String query;
+   @OperationParam(alias = { "username", "user" }, setter = "setUsername", required = true,
+           description = "The LOINC account username.")
+   private String username;
+   @OperationParam(alias = { "password", "pass" }, setter = "setPassword", required = true,
+           description = "The LOINC account password.")
+   private String password;
+   @OperationParam(alias = { "e", "encoding" }, setter = "setEncoding", defaultValue = "json",
+           description = "The file format to be used for representing the resulting FHIR ValueSet { json, xml } (default json)")
+   private String encoding;
+   @OperationParam(alias = { "v", "version" }, setter = "setVersion", defaultValue = "r4",
+           description = "FHIR version { stu3, r4, r5 } (default r4)")
+   private String version;
+   @OperationParam(alias = { "op", "outputpath" }, setter = "setOutputPath",
+           defaultValue = "src/main/resources/org/opencds/cqf/tooling/terminology/output",
+           description = "The directory path to which the generated FHIR ValueSet resource should be written (default src/main/resources/org/opencds/cqf/tooling/terminology/output)")
+   private String outputPath;
+
+   private final List<String> validLoincVersions = Arrays.asList("2.69", "2.70", "2.71", "2.72", "2.73", "2.74", "2.75");
+   // TODO: need a way to retrieve the latest LOINC version programmatically
+   private String loincVersion = "2.75";
+
+   private String loincHierarchyUrl = Api.LOINC_HIERARCHY_QUERY_URL;
+
+   private FhirContext fhirContext;
+
+   @Override
+   public void execute() {
+      fhirContext = FhirContextCache.getContext(version);
+      IOUtils.writeResource(getValueSet(), outputPath, IOUtils.Encoding.valueOf(encoding), fhirContext);
+   }
+
+   public IBaseResource getValueSet() {
+      ValueSet valueSet = new ValueSet().setStatus(Enumerations.PublicationStatus.DRAFT);
+      valueSet.getCompose().addInclude().setSystem(Terminology.LOINC_SYSTEM_URL).setVersion(loincVersion);
+
+      HttpGet request = new HttpGet(loincHierarchyUrl + URLEncoder.encode(query, Charset.defaultCharset()));
+      final String auth = username + ":" + password;
+      final byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.ISO_8859_1));
+      final String authHeader = "Basic " + new String(encodedAuth);
+      request.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+      try (CloseableHttpClient queryClient = HttpClients.createDefault()) {
+         String response = queryClient.execute(request, HttpClientUtils.getDefaultResponseHandler());
+         JsonArray arr = new Gson().fromJson(response, JsonArray.class);
+         for (var obj : arr) {
+            if (obj.isJsonObject()) {
+               var jsonObj = obj.getAsJsonObject();
+               if (jsonObj.has("IsLoinc") && jsonObj.getAsJsonPrimitive("IsLoinc").getAsBoolean()) {
+                  String code = jsonObj.getAsJsonPrimitive("Code").getAsString();
+                  String display = null;
+                  if (display == null) {
+                     display = jsonObj.getAsJsonPrimitive("CodeText").getAsString();
+                  }
+                  valueSet.getCompose().getIncludeFirstRep().addConcept().setCode(code).setDisplay(display);
+               }
+            }
+         }
+      } catch (IOException ioe) {
+         String message = "Error accessing API: " + ioe.getMessage();
+         logger.error(message);
+         throw new RuntimeException(message);
+      }
+
+      return ResourceAndTypeConverter.convertFromR5Resource(fhirContext, valueSet);
+   }
+
+   private IGenericClient loincFhirClient;
+   private IGenericClient getLoincFhirClient() {
+      if (loincFhirClient == null) {
+         loincFhirClient = fhirContext.newRestfulGenericClient(Api.LOINC_FHIR_SERVER_URL);
+         loincFhirClient.getInterceptorService().unregisterAllInterceptors();
+         loincFhirClient.registerInterceptor(new BasicAuthInterceptor(username, password));
+      }
+      return loincFhirClient;
+   }
+
+   public String getQuery() {
+      return query;
+   }
+
+   public void setQuery(String query) {
+      this.query = query;
+   }
+
+   public String getUsername() {
+      return username;
+   }
+
+   public void setUsername(String username) {
+      this.username = username;
+   }
+
+   public String getPassword() {
+      return password;
+   }
+
+   public void setPassword(String password) {
+      this.password = password;
+   }
+
+   public String getEncoding() {
+      return encoding;
+   }
+
+   public void setEncoding(String encoding) {
+      this.encoding = encoding;
+   }
+
+   public String getVersion() {
+      return version;
+   }
+
+   public void setVersion(String version) {
+      this.version = version;
+   }
+
+   public String getOutputPath() {
+      return outputPath;
+   }
+
+   public void setOutputPath(String outputPath) {
+      this.outputPath = outputPath;
+   }
+
+   public void setLoincHierarchyUrl(String loincHierarchyUrl) {
+      this.loincHierarchyUrl = loincHierarchyUrl;
+   }
+
+   public void setFhirContext(FhirContext fhirContext) {
+      this.fhirContext = fhirContext;
+   }
+
+   public void setLoincVersion(String loincVersion) {
+      if (validLoincVersions.contains(loincVersion)) {
+         this.loincVersion = loincVersion;
+      } else {
+         logger.warn("Provided LOINC version {} is not supported. Valid versions include: {}", loincVersion, validLoincVersions);
+      }
+   }
+}

@@ -44,7 +44,7 @@ public class LibraryGenerator implements ExecutableOperation {
    @OperationParam(alias = { "v", "version" }, setter = "setVersion", defaultValue = "r4",
            description = "FHIR version { stu3, r4, r5 } (default r4)")
    private String version;
-   @OperationParam(alias = { "op", "outputPath" }, setter = "setOutputPath",
+   @OperationParam(alias = { "op", "outputpath" }, setter = "setOutputPath",
            defaultValue = "src/main/resources/org/opencds/cqf/tooling/library/output",
            description = "The directory path to which the generated FHIR Library resources should be written (default src/main/resources/org/opencds/cqf/tooling/library/output)")
    private String outputPath;
