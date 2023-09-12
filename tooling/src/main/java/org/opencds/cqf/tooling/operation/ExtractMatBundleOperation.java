@@ -20,7 +20,10 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class ExtractMatBundleOperation extends Operation {
 
-    private String inputFile;
+    public static final String ERROR_BUNDLE_FILE_IS_REQUIRED = "The path to a bundle file is required";
+    public static final String ERROR_DIR_IS_NOT_A_DIRECTORY = "The path specified with -dir is not a directory.";
+    public static final String ERROR_DIR_IS_EMPTY = "The path specified with -dir is empty.";
+    public static final String INFO_EXTRACTION_SUCCESSFUL = "Extraction completed successfully";
     private String version = "r4";
     private FhirContext context;
     private String encoding;
@@ -28,31 +31,25 @@ public class ExtractMatBundleOperation extends Operation {
 
     @Override
     public void execute(String[] args) {
-        boolean isDirFlagPresent = false;
-        String inputDir = null;
 
+        boolean directoryFlagPresent = false;
+        String inputLocation = null;
         //loop through args and prepare approach:
         for (int i = 0; i < args.length; i++) {
+            System.out.println("ExtractMatBundle: " + args[i]);
             if (i == 0 && args[i].equalsIgnoreCase("-ExtractMatBundle")) {
                 continue; //
             }
 
-            if (args[i].equalsIgnoreCase("-dir")) {
-                isDirFlagPresent = true;
-                // The next argument should be the directory path
-                if (i + 1 < args.length) {
-                    inputDir = args[i + 1];
-                    inputDir = inputDir.replace("%20", " "); // TODO: use URI instead?
-                }
+            //position 1 is the location of file or directory. Determine which:
+            if (i == 1) {
+                inputLocation = args[i];
+                inputLocation = inputLocation.replace("%20", " "); // TODO: use URI instead?
                 continue;
             }
 
-            if (i == 1 && !isDirFlagPresent) {
-                inputFile = args[i];
-                inputFile = inputFile.replace("%20", " "); // TODO: use URI instead?
-                if (inputFile == null) {
-                    throw new IllegalArgumentException("The path to a bundle file is required");
-                }
+            if (args[i].equalsIgnoreCase("-dir")) {
+                directoryFlagPresent = true;
                 continue;
             }
 
@@ -85,47 +82,59 @@ public class ExtractMatBundleOperation extends Operation {
                 default:
                     throw new IllegalArgumentException("Unknown flag: " + flag);
             }
+        }//end arg loop
+
+        System.out.println("ExtractMatBundle, inputLocation: " + inputLocation);
+        //determine location is provided by user, if not, throw arugment exception:
+        if (inputLocation == null) {
+            throw new IllegalArgumentException(ERROR_BUNDLE_FILE_IS_REQUIRED);
         }
 
-        //args processed, is this using -dir arg? Treat as group of files, extract each individually,
-        // set inputFile member variable as loop proceeds:
-        if (isDirFlagPresent) {
-            // Process files in the specified directory
-            File inputDirectory = new File(inputDir);
-            if (!inputDirectory.isDirectory()) {
-                throw new IllegalArgumentException("The path specified with -dir is not a directory.");
-            }
+        System.out.println("ExtractMatBundle, directoryFlagPresent: " + directoryFlagPresent);
+        //if -dir was found, treat inputLocation as directory:
+        if (directoryFlagPresent) {
+            File[] filesInDir = getFiles(inputLocation);
 
-            File[] filesInDir = inputDirectory.listFiles();
-            if (filesInDir != null) {
+            System.out.println("ExtractMatBundle, filesInDir.length: " + filesInDir.length);
+            if (filesInDir.length == 0) {
+                throw new IllegalArgumentException(ERROR_DIR_IS_EMPTY);
+            } else {
+
                 for (File file : filesInDir) {
-                    if (file.isFile()) {
-                        inputFile = file.getAbsolutePath();
-                        // Call your existing processing logic for inputFile
-                        processSingleFile();
-                    }
+                    processSingleFile(file.getAbsolutePath());
                 }
             }
-
-            //single file, allow processSingleFile() to run with currently assigned inputFile:
         } else {
-            // Process a single file as before
-            processSingleFile();
+            //single file, allow processSingleFile() to run with currently assigned inputFile:
+            processSingleFile(inputLocation);
         }
 
-        LogUtils.info("Extraction completed successfully");
+        LogUtils.info(INFO_EXTRACTION_SUCCESSFUL);
+    }
+
+    private static File[] getFiles(String inputLocation) {
+        //ensure the input is a directory before trying to return a list of its files:
+        if (!new File(inputLocation).isDirectory()) {
+            throw new IllegalArgumentException(ERROR_DIR_IS_NOT_A_DIRECTORY);
+        }
+        // Process files in the specified directory
+        return new File(inputLocation).listFiles();
     }
 
 
-    private void processSingleFile() {
+    private void processSingleFile(String inputFile) {
+        System.out.println("ExtractMatBundle, processSingleFile, inputFile: " + inputFile);
         LogUtils.info(String.format("Extracting MAT bundle from %s", inputFile));
 
         // Open the file to validate it
         File bundleFile = new File(inputFile);
+
+        System.out.println("ExtractMatBundle, processSingleFile, bundleFile.isDirectory(): " + bundleFile.isDirectory());
         if (bundleFile.isDirectory()) {
-            throw new IllegalArgumentException("The path to a bundle file is required");
+            throw new IllegalArgumentException(ERROR_BUNDLE_FILE_IS_REQUIRED);
         }
 
+        System.out.println("ExtractMatBundle, processSingleFile, version: " + version);
         // Set the FhirContext based on the version specified
         if (version == null) {
             context = FhirContext.forR4Cached();
@@ -142,6 +151,7 @@ public class ExtractMatBundleOperation extends Operation {
             }
         }
 
+
         // Read in the Bundle
         IBaseResource bundle;
         if (bundleFile.getPath().endsWith(".xml")) {
@@ -152,6 +162,8 @@ public class ExtractMatBundleOperation extends Operation {
                 e.printStackTrace();
                 throw new RuntimeException(e.getMessage());
             }
+
+            System.out.println("ExtractMatBundle, processSingleFile, bundle: " + bundle.toString());
         } else if (bundleFile.getPath().endsWith(".json")) {
             encoding = "json";
             try {
@@ -160,24 +172,43 @@ public class ExtractMatBundleOperation extends Operation {
                 e.printStackTrace();
                 throw new RuntimeException(e.getMessage());
             }
+            System.out.println("ExtractMatBundle, processSingleFile, bundle: " + bundle.toString());
+
         } else {
             throw new IllegalArgumentException("The path to a bundle file of type json or xml is required");
         }
 
+
         // Now call the Bundle utilities to extract the bundle
         String outputDir = bundleFile.getAbsoluteFile().getParent();
         if (version.equals("stu3")) {
-            BundleUtils.extractStu3Resources((org.hl7.fhir.dstu3.model.Bundle) bundle, encoding, outputDir,
-                    suppressNarrative);
+            BundleUtils.extractStu3Resources((org.hl7.fhir.dstu3.model.Bundle) bundle, encoding, outputDir, suppressNarrative);
+            System.out.println("ExtractMatBundle, BundleUtils.extractStu3Resources: success");
+
+            try {
+                BundleUtils.extractStu3Resources((org.hl7.fhir.dstu3.model.Bundle) bundle, encoding, outputDir, suppressNarrative);
+                System.out.println("ExtractMatBundle, BundleUtils.extractStu3Resources: success");
+            } catch (Exception e) {
+                System.out.println("ExtractMatBundle, BundleUtils.extractStu3Resources: failure: " + e.getMessage());
+            }
+
         } else if (version.equals("r4")) {
-            BundleUtils.extractR4Resources((org.hl7.fhir.r4.model.Bundle) bundle, encoding, outputDir,
-                    suppressNarrative);
+
+            try {
+                BundleUtils.extractR4Resources((org.hl7.fhir.r4.model.Bundle) bundle, encoding, outputDir, suppressNarrative);
+                System.out.println("ExtractMatBundle, BundleUtils.extractR4Resources: success");
+            } catch (Exception e) {
+                System.out.println("ExtractMatBundle, BundleUtils.extractR4Resources: failure: " + e.getMessage());
+            }
+
         }
 
         // Now move and properly rename the files
         moveAndRenameFiles(outputDir);
+        System.out.println("ExtractMatBundle, moveAndRenameFiles: success");
+        LogUtils.info(INFO_EXTRACTION_SUCCESSFUL);
 
-        LogUtils.info("Extraction completed successfully");
+        System.out.println(INFO_EXTRACTION_SUCCESSFUL);
     }
 
 
@@ -188,6 +219,7 @@ public class ExtractMatBundleOperation extends Operation {
      */
     private void moveAndRenameFiles(String outputDir) {
         File[] extractedFiles = new File(outputDir).listFiles();
+        assert extractedFiles != null;
         for (File extractedFile : extractedFiles) {
             IBaseResource theResource = null;
             if (extractedFile.getPath().endsWith(".xml")) {
@@ -225,8 +257,7 @@ public class ExtractMatBundleOperation extends Operation {
                     theLibrary.setId(resourceName);
 
                     // Forcing the encoding to JSON here to make everything the same in input directory
-                    ResourceUtils.outputResourceByName(theResource, "json", context,
-                            newLibraryDirectory.toString(), resourceName);
+                    ResourceUtils.outputResourceByName(theResource, "json", context, newLibraryDirectory.toString(), resourceName);
 
                     // Now extract the CQL from the library file
                     String cqlFilename = Paths.get(newCqlDirectory.toString(), resourceName) + ".cql";
@@ -239,8 +270,7 @@ public class ExtractMatBundleOperation extends Operation {
                     theMeasure.setId(resourceName);
 
                     // Forcing the encoding to JSON here to make everything the same in input directory
-                    ResourceUtils.outputResourceByName(theResource, "json", context,
-                            newMeasureDirectory.toString(), resourceName);
+                    ResourceUtils.outputResourceByName(theResource, "json", context, newMeasureDirectory.toString(), resourceName);
                 }
             } else if (version == "r4") {
                 if (theResource instanceof org.hl7.fhir.r4.model.Library) {
@@ -251,8 +281,7 @@ public class ExtractMatBundleOperation extends Operation {
                     theLibrary.setId(resourceName);
 
                     // Forcing the encoding to JSON here to make everything the same in input directory
-                    ResourceUtils.outputResourceByName(theResource, "json", context,
-                            newLibraryDirectory.toString(), resourceName);
+                    ResourceUtils.outputResourceByName(theResource, "json", context, newLibraryDirectory.toString(), resourceName);
 
                     // Now extract the CQL from the library file
                     String cqlFilename = Paths.get(newCqlDirectory.toString(), resourceName) + ".cql";
@@ -265,8 +294,7 @@ public class ExtractMatBundleOperation extends Operation {
                     theMeasure.setId(resourceName);
 
                     // Forcing the encoding to JSON here to make everything the same in input directory
-                    ResourceUtils.outputResourceByName(theResource, "json", context,
-                            newMeasureDirectory.toString(), resourceName);
+                    ResourceUtils.outputResourceByName(theResource, "json", context, newMeasureDirectory.toString(), resourceName);
                 }
             }
         }
