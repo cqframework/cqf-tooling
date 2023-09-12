@@ -1,5 +1,13 @@
 package org.opencds.cqf.tooling.operation;
 
+import ca.uhn.fhir.context.FhirContext;
+import org.apache.commons.io.FileUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.utilities.BundleUtils;
+import org.opencds.cqf.tooling.utilities.LogUtils;
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -8,15 +16,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.List;
-
-import org.apache.commons.io.FileUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.tooling.Operation;
-import org.opencds.cqf.tooling.utilities.BundleUtils;
-import org.opencds.cqf.tooling.utilities.LogUtils;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class ExtractMatBundleOperation extends Operation {
 
@@ -122,12 +121,12 @@ public class ExtractMatBundleOperation extends Operation {
     }
 
 
-    private void processSingleFile(String inputFile) {
-        System.out.println("ExtractMatBundle, processSingleFile, inputFile: " + inputFile);
-        LogUtils.info(String.format("Extracting MAT bundle from %s", inputFile));
+    private void processSingleFile(String inputFileLocation) {
+        System.out.println("ExtractMatBundle, processSingleFile, inputFile: " + inputFileLocation);
+        LogUtils.info(String.format("Extracting MAT bundle from %s", inputFileLocation));
 
         // Open the file to validate it
-        File bundleFile = new File(inputFile);
+        File bundleFile = new File(inputFileLocation);
 
         System.out.println("ExtractMatBundle, processSingleFile, bundleFile.isDirectory(): " + bundleFile.isDirectory());
         if (bundleFile.isDirectory()) {
@@ -179,28 +178,29 @@ public class ExtractMatBundleOperation extends Operation {
         }
 
 
+        //sometimes tests leave library or measure files behind so we want to make sure we only iterate over bundle files:
+        if (!(bundle instanceof org.hl7.fhir.dstu3.model.Bundle || bundle instanceof org.hl7.fhir.r4.model.Bundle)){
+            LogUtils.info("Not a recognized bundle: " + inputFileLocation);
+            System.out.println("Not a recognized bundle: " + inputFileLocation);
+            return;
+        }
+
         // Now call the Bundle utilities to extract the bundle
         String outputDir = bundleFile.getAbsoluteFile().getParent();
-        if (version.equals("stu3")) {
-            BundleUtils.extractStu3Resources((org.hl7.fhir.dstu3.model.Bundle) bundle, encoding, outputDir, suppressNarrative);
-            System.out.println("ExtractMatBundle, BundleUtils.extractStu3Resources: success");
-
+        if (version.equals("stu3") && bundle instanceof org.hl7.fhir.dstu3.model.Bundle) {
             try {
                 BundleUtils.extractStu3Resources((org.hl7.fhir.dstu3.model.Bundle) bundle, encoding, outputDir, suppressNarrative);
                 System.out.println("ExtractMatBundle, BundleUtils.extractStu3Resources: success");
             } catch (Exception e) {
                 System.out.println("ExtractMatBundle, BundleUtils.extractStu3Resources: failure: " + e.getMessage());
             }
-
-        } else if (version.equals("r4")) {
-
+        } else if (version.equals("r4") && bundle instanceof org.hl7.fhir.r4.model.Bundle) {
             try {
                 BundleUtils.extractR4Resources((org.hl7.fhir.r4.model.Bundle) bundle, encoding, outputDir, suppressNarrative);
                 System.out.println("ExtractMatBundle, BundleUtils.extractR4Resources: success");
             } catch (Exception e) {
                 System.out.println("ExtractMatBundle, BundleUtils.extractR4Resources: failure: " + e.getMessage());
             }
-
         }
 
         // Now move and properly rename the files
