@@ -23,16 +23,17 @@ public class ExtractMatBundleOperation extends Operation {
     public static final String ERROR_DIR_IS_NOT_A_DIRECTORY = "The path specified with -dir is not a directory.";
     public static final String ERROR_DIR_IS_EMPTY = "The path specified with -dir is empty.";
     public static final String INFO_EXTRACTION_SUCCESSFUL = "Extraction completed successfully";
-    private String version = "r4";
-    private FhirContext context;
-    private String encoding;
-    private boolean suppressNarrative = true;
+
 
     @Override
     public void execute(String[] args) {
 
         boolean directoryFlagPresent = false;
+        boolean suppressNarrative = true;
+
+        String version = "r4";
         String inputLocation = null;
+
         //loop through args and prepare approach:
         for (int i = 0; i < args.length; i++) {
             System.out.println("ExtractMatBundle: " + args[i]);
@@ -62,8 +63,8 @@ public class ExtractMatBundleOperation extends Operation {
             switch (flag.replace("-", "").toLowerCase()) {
                 case "encoding":
                 case "e":
-                    encoding = value.toLowerCase();
-                    break;
+//                    encoding = value.toLowerCase();
+//                    break;
                 case "supressNarrative":
                 case "sn":
                     if (value.equalsIgnoreCase("false")) {
@@ -100,12 +101,12 @@ public class ExtractMatBundleOperation extends Operation {
             } else {
 
                 for (File file : filesInDir) {
-                    processSingleFile(file.getAbsolutePath());
+                    processSingleFile(file.getAbsolutePath(), version, suppressNarrative);
                 }
             }
         } else {
             //single file, allow processSingleFile() to run with currently assigned inputFile:
-            processSingleFile(inputLocation);
+            processSingleFile(inputLocation, version, suppressNarrative);
         }
 
         LogUtils.info(INFO_EXTRACTION_SUCCESSFUL);
@@ -121,7 +122,7 @@ public class ExtractMatBundleOperation extends Operation {
     }
 
 
-    private void processSingleFile(String inputFileLocation) {
+    private void processSingleFile(String inputFileLocation, String version, boolean suppressNarrative) {
         System.out.println("ExtractMatBundle, processSingleFile, inputFile: " + inputFileLocation);
         LogUtils.info(String.format("Extracting MAT bundle from %s", inputFileLocation));
 
@@ -135,6 +136,8 @@ public class ExtractMatBundleOperation extends Operation {
 
         System.out.println("ExtractMatBundle, processSingleFile, version: " + version);
         // Set the FhirContext based on the version specified
+
+        FhirContext context;
         if (version == null) {
             context = FhirContext.forR4Cached();
         } else {
@@ -151,8 +154,9 @@ public class ExtractMatBundleOperation extends Operation {
         }
 
 
-        // Read in the Bundle
+        // Read in the Bundle, override encoding
         IBaseResource bundle;
+        String encoding;
         if (bundleFile.getPath().endsWith(".xml")) {
             encoding = "xml";
             try {
@@ -179,7 +183,7 @@ public class ExtractMatBundleOperation extends Operation {
 
 
         //sometimes tests leave library or measure files behind so we want to make sure we only iterate over bundle files:
-        if (!(bundle instanceof org.hl7.fhir.dstu3.model.Bundle || bundle instanceof org.hl7.fhir.r4.model.Bundle)){
+        if (!(bundle instanceof org.hl7.fhir.dstu3.model.Bundle || bundle instanceof org.hl7.fhir.r4.model.Bundle)) {
             LogUtils.info("Not a recognized bundle: " + inputFileLocation);
             System.out.println("Not a recognized bundle: " + inputFileLocation);
             return;
@@ -204,7 +208,7 @@ public class ExtractMatBundleOperation extends Operation {
         }
 
         // Now move and properly rename the files
-        moveAndRenameFiles(outputDir);
+        moveAndRenameFiles(outputDir, context, version);
         System.out.println("ExtractMatBundle, moveAndRenameFiles: success");
         LogUtils.info(INFO_EXTRACTION_SUCCESSFUL);
 
@@ -217,7 +221,7 @@ public class ExtractMatBundleOperation extends Operation {
      *
      * @param outputDir
      */
-    private void moveAndRenameFiles(String outputDir) {
+    private void moveAndRenameFiles(String outputDir, FhirContext context, String version) {
         File[] extractedFiles = new File(outputDir).listFiles();
         assert extractedFiles != null;
         for (File extractedFile : extractedFiles) {
