@@ -22,9 +22,11 @@ public class ExtractMatBundleOperation extends Operation {
     public static final String ERROR_BUNDLE_FILE_IS_REQUIRED = "The path to a bundle file is required";
     public static final String ERROR_DIR_IS_NOT_A_DIRECTORY = "The path specified with -dir is not a directory.";
     public static final String ERROR_DIR_IS_EMPTY = "The path specified with -dir is empty.";
+    public static final String ERROR_BUNDLE_LOCATION_NONEXISTENT = "The path specified for the bundle doesn't exist on your system.";
     public static final String INFO_EXTRACTION_SUCCESSFUL = "Extraction completed successfully";
     public static final String VERSION_R4 = "r4";
     public static final String VERSION_STU3 = "stu3";
+    public static final String ERROR_NOT_JSON_OR_XML = "The path to a bundle file of type json or xml is required.";
 
 
     @Override
@@ -82,18 +84,21 @@ public class ExtractMatBundleOperation extends Operation {
             }
         }//end arg loop
 
-        //determine location is provided by user, if not, throw arugment exception:
+        //determine location is provided by user, if not, throw argument exception:
         if (inputLocation == null) {
             throw new IllegalArgumentException(ERROR_BUNDLE_FILE_IS_REQUIRED);
         } else {
+            File bundleFile = new File(inputLocation);
+            if (!bundleFile.exists()){
+                throw new IllegalArgumentException(ERROR_BUNDLE_LOCATION_NONEXISTENT);
+            }
             if (directoryFlagPresent) {
                 //ensure the input is a directory before trying to return a list of its files:
-                if (!new File(inputLocation).isDirectory()) {
+                if (!bundleFile.isDirectory()) {
                     throw new IllegalArgumentException(ERROR_DIR_IS_NOT_A_DIRECTORY);
                 }
             } else {
-                File bundleFile = new File(inputLocation);
-                if (!bundleFile.exists() || bundleFile.isDirectory()) {
+                if (bundleFile.isDirectory()) {
                     throw new IllegalArgumentException(ERROR_BUNDLE_FILE_IS_REQUIRED);
                 }
             }
@@ -117,7 +122,7 @@ public class ExtractMatBundleOperation extends Operation {
     }
 
 
-    private void processSingleFile(File bundleFile, String version, boolean suppressNarrative) {
+    void processSingleFile(File bundleFile, String version, boolean suppressNarrative) {
         String inputFileLocation = bundleFile.getAbsolutePath();
 
         LogUtils.info(String.format("Extracting MAT bundle from %s", inputFileLocation));
@@ -169,7 +174,7 @@ public class ExtractMatBundleOperation extends Operation {
             }
 
         } else {
-            throw new IllegalArgumentException("The path to a bundle file of type json or xml is required");
+            throw new IllegalArgumentException(ERROR_NOT_JSON_OR_XML);
         }
 
         //sometimes tests leave library or measure files behind so we want to make sure we only iterate over bundle files:
@@ -180,6 +185,11 @@ public class ExtractMatBundleOperation extends Operation {
 
         //call the Bundle utilities to extract the bundle
         String outputDir = bundleFile.getAbsoluteFile().getParent();
+        //ensure output path assigned by user is utilized:
+        if (!getOutputPath().isEmpty()){
+            outputDir = getOutputPath();
+        }
+
         BundleUtils.extractResources(bundle, encoding, outputDir, suppressNarrative, version);
 
         //move and properly rename the files
