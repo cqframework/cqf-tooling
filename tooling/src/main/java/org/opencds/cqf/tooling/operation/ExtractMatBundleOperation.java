@@ -1,5 +1,13 @@
 package org.opencds.cqf.tooling.operation;
 
+import ca.uhn.fhir.context.FhirContext;
+import org.apache.commons.io.FileUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.utilities.BundleUtils;
+import org.opencds.cqf.tooling.utilities.LogUtils;
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -9,273 +17,311 @@ import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.tooling.Operation;
-import org.opencds.cqf.tooling.utilities.BundleUtils;
-import org.opencds.cqf.tooling.utilities.LogUtils;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
-
-import ca.uhn.fhir.context.FhirContext;
-
 public class ExtractMatBundleOperation extends Operation {
 
-	private String inputFile;
-	private String version = "r4";
-	private FhirContext context;
-	private String encoding;
-	private boolean suppressNarrative = true;
-	
-	@Override
-	public void execute(String[] args) {
+    public static final String ERROR_BUNDLE_FILE_IS_REQUIRED = "The path to a bundle file is required";
+    public static final String ERROR_DIR_IS_NOT_A_DIRECTORY = "The path specified with -dir is not a directory.";
+    public static final String ERROR_DIR_IS_EMPTY = "The path specified with -dir is empty.";
+    public static final String INFO_EXTRACTION_SUCCESSFUL = "Extraction completed successfully";
+    public static final String VERSION_R4 = "r4";
+    public static final String VERSION_STU3 = "stu3";
 
-		for (int i = 0; i < args.length;i++) {
-			if(i == 0 && args[i].equalsIgnoreCase("-ExtractMatBundle")){
-				continue;		//
-			} 
-			if(i == 1){
-				inputFile = args[i];
-                                inputFile = inputFile.replace("%20", " "); // TODO: use URI instead?
-				if (inputFile == null) {
-					throw new IllegalArgumentException("The path to a bundle file is required");
-				}
-				continue;
-			}
 
-			String[] flagAndValue = args[i].split("=");
-			if (flagAndValue.length < 2) {
-				throw new IllegalArgumentException("Invalid argument: " + args[i]);
-			}
-			String flag = flagAndValue[0];
-			String value = flagAndValue[1];
+    @Override
+    public void execute(String[] args) {
 
-			switch (flag.replace("-", "").toLowerCase()) {
-				case "encoding":
-				case "e":
-					encoding = value.toLowerCase();
-					break;
-				case "supressNarrative":
-				case "sn":
-					if(value.equalsIgnoreCase("false")) {
-						suppressNarrative = false;
-					}
-					break;
-				case "outputpath":
-				case "op":
-					setOutputPath(value);
-					break; // -outputpath (-op)
-				case "version": case "v":
-					version = value;
-					break;
-				default: throw new IllegalArgumentException("Unknown flag: " + flag);
-			}
-		}
+        boolean directoryFlagPresent = false;
+        boolean suppressNarrative = true;
 
-		LogUtils.info(String.format("Extracting MAT bundle from %s", inputFile));
+        String version = VERSION_R4;
+        String inputLocation = null;
 
-		// Open the file to validate it
-        File bundleFile = new File(inputFile);
-        if (bundleFile.isDirectory()) {
-        	throw new IllegalArgumentException("The path to a bundle file is required");
+        //loop through args and prepare approach:
+        for (int i = 0; i < args.length; i++) {
+            if (i == 0 && args[i].equalsIgnoreCase("-ExtractMatBundle")) {
+                continue; //
+            } else if (i == 0 && !args[i].equalsIgnoreCase("-ExtractMatBundle")) {
+                throw new IllegalArgumentException("Insufficient argument structure. " +
+                        "Usage Example: mvn exec:java -Dexec.args=\"-ExtractMatBundle " +
+                        "/Development/ecqm-content-r4/bundles/mat/EXM124/EXM124.json -v=r4");
+            }
+
+            //position 1 is the location of file or directory. Determine which:
+            if (i == 1) {
+                inputLocation = args[i];
+                inputLocation = inputLocation.replace("%20", " "); // TODO: use URI instead?
+                continue;
+            }
+
+            if (args[i].equalsIgnoreCase("-dir")) {
+                directoryFlagPresent = true;
+                continue;
+            }
+
+            String[] flagAndValue = args[i].split("=");
+            if (flagAndValue.length < 2) {
+                throw new IllegalArgumentException("Invalid argument: " + args[i]);
+            }
+            String flag = flagAndValue[0];
+            String value = flagAndValue[1];
+
+            switch (flag.replace("-", "").toLowerCase()) {
+                case "sn":
+                    if (value.equalsIgnoreCase("false")) {
+                        suppressNarrative = false;
+                    }
+                    break;
+                case "op":
+                    setOutputPath(value);
+                    break;
+                case "v":
+                    version = value;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown flag: " + flag);
+            }
+        }//end arg loop
+
+        //determine location is provided by user, if not, throw arugment exception:
+        if (inputLocation == null) {
+            throw new IllegalArgumentException(ERROR_BUNDLE_FILE_IS_REQUIRED);
+        } else {
+            if (directoryFlagPresent) {
+                //ensure the input is a directory before trying to return a list of its files:
+                if (!new File(inputLocation).isDirectory()) {
+                    throw new IllegalArgumentException(ERROR_DIR_IS_NOT_A_DIRECTORY);
+                }
+            } else {
+                File bundleFile = new File(inputLocation);
+                if (!bundleFile.exists() || bundleFile.isDirectory()) {
+                    throw new IllegalArgumentException(ERROR_BUNDLE_FILE_IS_REQUIRED);
+                }
+            }
         }
-        
+
+        //if -dir was found, treat inputLocation as directory:
+        if (directoryFlagPresent) {
+            File[] filesInDir = new File(inputLocation).listFiles();
+            if (filesInDir == null || filesInDir.length == 0) {
+                throw new IllegalArgumentException(ERROR_DIR_IS_EMPTY);
+            } else {
+                for (File file : filesInDir) {
+                    processSingleFile(file, version, suppressNarrative);
+                }
+            }
+        } else {
+            //single file, allow processSingleFile() to run with currently assigned inputFile:
+            processSingleFile(new File(inputLocation), version, suppressNarrative);
+        }
+        LogUtils.info(INFO_EXTRACTION_SUCCESSFUL);
+    }
+
+
+    private void processSingleFile(File bundleFile, String version, boolean suppressNarrative) {
+        String inputFileLocation = bundleFile.getAbsolutePath();
+
+        LogUtils.info(String.format("Extracting MAT bundle from %s", inputFileLocation));
+
         // Set the FhirContext based on the version specified
+        FhirContext context;
         if (version == null) {
             context = FhirContext.forR4Cached();
-        }
-        else {
+            version = VERSION_R4;
+        } else {
             switch (version.toLowerCase()) {
-                case "stu3":
+                case VERSION_STU3:
                     context = FhirContext.forDstu3Cached();
                     break;
-                case "r4":
+                case VERSION_R4:
                     context = FhirContext.forR4Cached();
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown fhir version: " + version);
             }
         }
-        
-        // Read in the Bundle
+
+
+        // Read in the Bundle, override encoding
         IBaseResource bundle;
+        String encoding;
         if (bundleFile.getPath().endsWith(".xml")) {
-        	encoding = "xml";
-            try {
-                bundle = context.newXmlParser().parseResource(new FileReader(bundleFile));
+            encoding = "xml";
+            try (FileReader reader = new FileReader(bundleFile)) {
+                bundle = context.newXmlParser().parseResource(reader);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
                 throw new RuntimeException(e.getMessage());
-            }
-        }
-        else if (bundleFile.getPath().endsWith(".json")) {
-        	encoding = "json";
-            try {
-                bundle = context.newJsonParser().parseResource(new FileReader(bundleFile));
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
                 throw new RuntimeException(e.getMessage());
             }
+
+        } else if (bundleFile.getPath().endsWith(".json")) {
+            encoding = "json";
+            try (FileReader reader = new FileReader(bundleFile)) {
+                bundle = context.newJsonParser().parseResource(reader);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e.getMessage());
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e.getMessage());
+            }
+
+        } else {
+            throw new IllegalArgumentException("The path to a bundle file of type json or xml is required");
         }
-        else {
-        	throw new IllegalArgumentException("The path to a bundle file of type json or xml is required");
+
+        //sometimes tests leave library or measure files behind so we want to make sure we only iterate over bundle files:
+        if (!(bundle instanceof org.hl7.fhir.dstu3.model.Bundle || bundle instanceof org.hl7.fhir.r4.model.Bundle)) {
+            LogUtils.info("Not a recognized bundle: " + inputFileLocation);
+            return;
         }
-        
-        // Now call the Bundle utilities to extract the bundle
+
+        //call the Bundle utilities to extract the bundle
         String outputDir = bundleFile.getAbsoluteFile().getParent();
-        if (version == "stu3") {
-        	BundleUtils.extractStu3Resources((org.hl7.fhir.dstu3.model.Bundle)bundle, encoding, outputDir, suppressNarrative);
-        } else if (version == "r4") {
-        	BundleUtils.extractR4Resources((org.hl7.fhir.r4.model.Bundle)bundle, encoding, outputDir, suppressNarrative);
-        }
-        
-        // Now move and properly rename the files
-        moveAndRenameFiles(outputDir);
+        BundleUtils.extractResources(bundle, encoding, outputDir, suppressNarrative, version);
+
+        //move and properly rename the files
+        moveAndRenameFiles(outputDir, context, version);
+        LogUtils.info(INFO_EXTRACTION_SUCCESSFUL);
+    }
 
 
-        LogUtils.info("Extraction completed successfully");
-	}
-	
-	/**
-	 * Iterates through the files and properly renames and moves them to the proper place
-	 * 
-	 * @param outputDir
-	 */
-	private void moveAndRenameFiles(String outputDir) {
-		File[] extractedFiles = new File(outputDir).listFiles();
+    /**
+     * Iterates through the files and properly renames and moves them to the proper place
+     *
+     * @param outputDir
+     */
+    private void moveAndRenameFiles(String outputDir, FhirContext context, String version) {
+        File[] extractedFiles = new File(outputDir).listFiles();
+        assert extractedFiles != null;
         for (File extractedFile : extractedFiles) {
-        	IBaseResource theResource = null;
-        	if (extractedFile.getPath().endsWith(".xml")) {
-        		try {
+            IBaseResource theResource = null;
+            if (extractedFile.getPath().endsWith(".xml")) {
+                try {
                     theResource = context.newXmlParser().parseResource(new FileReader(extractedFile));
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                     throw new RuntimeException(e.getMessage());
-                } 
-        	}
-        	else if (extractedFile.getPath().endsWith(".json")) {
-        		try {
+                }
+            } else if (extractedFile.getPath().endsWith(".json")) {
+                try {
                     theResource = context.newJsonParser().parseResource(new FileReader(extractedFile));
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                     throw new RuntimeException(e.getMessage());
-                } 
-        	}
-        	
-        	// The extractor code names them using the resource type and ID
-        	// We want to name them without the resource type, use name, and if needed version
-        	String resourceName;
-        	Path newOutputDirectory = Paths.get(outputDir.substring(0, outputDir.indexOf("bundles")), "input");
-        	Path newLibraryDirectory = Paths.get(newOutputDirectory.toString(), "resources/library");
-        	newLibraryDirectory.toFile().mkdirs();
-        	Path newCqlDirectory = Paths.get(newOutputDirectory.toString(), "cql");
-        	newCqlDirectory.toFile().mkdirs();
-        	Path newMeasureDirectory = Paths.get(newOutputDirectory.toString(), "resources/measure");
-        	newMeasureDirectory.toFile().mkdirs();
-        	if (version == "stu3) ") {
-        		if (theResource instanceof org.hl7.fhir.dstu3.model.Library) {
-        			org.hl7.fhir.dstu3.model.Library theLibrary = (org.hl7.fhir.dstu3.model.Library)theResource;
-        			resourceName = theLibrary.getName();
+                }
+            }
 
-					// Set the id to the name regardless of what it is now for publishing
-					theLibrary.setId(resourceName);
+            // The extractor code names them using the resource type and ID
+            // We want to name them without the resource type, use name, and if needed version
+            String resourceName;
+            Path newOutputDirectory = Paths.get(outputDir.substring(0, outputDir.indexOf("bundles")), "input");
+            Path newLibraryDirectory = Paths.get(newOutputDirectory.toString(), "resources/library");
+            newLibraryDirectory.toFile().mkdirs();
+            Path newCqlDirectory = Paths.get(newOutputDirectory.toString(), "cql");
+            newCqlDirectory.toFile().mkdirs();
+            Path newMeasureDirectory = Paths.get(newOutputDirectory.toString(), "resources/measure");
+            newMeasureDirectory.toFile().mkdirs();
+            if (version == "stu3) ") {
+                if (theResource instanceof org.hl7.fhir.dstu3.model.Library) {
+                    org.hl7.fhir.dstu3.model.Library theLibrary = (org.hl7.fhir.dstu3.model.Library) theResource;
+                    resourceName = theLibrary.getName();
 
-        			// Forcing the encoding to JSON here to make everything the same in input directory
-        			ResourceUtils.outputResourceByName(theResource, "json", context,
-        					newLibraryDirectory.toString(), resourceName);
-        			
-        			// Now extract the CQL from the library file
-        			String cqlFilename = Paths.get(newCqlDirectory.toString(), resourceName) + ".cql";
-        			extractStu3CQL(theLibrary, cqlFilename);
-        		}
-        		else if (theResource instanceof org.hl7.fhir.dstu3.model.Measure) {
-					org.hl7.fhir.dstu3.model.Measure theMeasure = (org.hl7.fhir.dstu3.model.Measure)theResource;
-					resourceName = theMeasure.getName();
+                    // Set the id to the name regardless of what it is now for publishing
+                    theLibrary.setId(resourceName);
 
-					// Set the id to the name regardless of what it is now for publishing
-					theMeasure.setId(resourceName);
-        			
-        			// Forcing the encoding to JSON here to make everything the same in input directory
-        			ResourceUtils.outputResourceByName(theResource, "json", context,
-        					newMeasureDirectory.toString(), resourceName);
-        		}
-        	}
-        	else if (version == "r4") {
-        		if (theResource instanceof org.hl7.fhir.r4.model.Library) {
-        			org.hl7.fhir.r4.model.Library theLibrary = (org.hl7.fhir.r4.model.Library)theResource;
-        			resourceName = theLibrary.getName();
+                    // Forcing the encoding to JSON here to make everything the same in input directory
+                    ResourceUtils.outputResourceByName(theResource, "json", context, newLibraryDirectory.toString(), resourceName);
 
-					// Set the id to the name regardless of what it is now for publishing
-					theLibrary.setId(resourceName);
-        			
-        			// Forcing the encoding to JSON here to make everything the same in input directory
-        			ResourceUtils.outputResourceByName(theResource, "json", context,
-        					newLibraryDirectory.toString(), resourceName);
-        			
-        			// Now extract the CQL from the library file
-        			String cqlFilename = Paths.get(newCqlDirectory.toString(), resourceName) + ".cql";
-        			extractR4CQL(theLibrary, cqlFilename);
-        		}
-        		else if (theResource instanceof org.hl7.fhir.r4.model.Measure) {
-					org.hl7.fhir.r4.model.Measure theMeasure = (org.hl7.fhir.r4.model.Measure)theResource;
-        			resourceName = theMeasure.getName();
+                    // Now extract the CQL from the library file
+                    String cqlFilename = Paths.get(newCqlDirectory.toString(), resourceName) + ".cql";
+                    extractStu3CQL(theLibrary, cqlFilename);
+                } else if (theResource instanceof org.hl7.fhir.dstu3.model.Measure) {
+                    org.hl7.fhir.dstu3.model.Measure theMeasure = (org.hl7.fhir.dstu3.model.Measure) theResource;
+                    resourceName = theMeasure.getName();
 
-					// Set the id to the name regardless of what it is now for publishing
-					theMeasure.setId(resourceName);
+                    // Set the id to the name regardless of what it is now for publishing
+                    theMeasure.setId(resourceName);
 
-        			// Forcing the encoding to JSON here to make everything the same in input directory
-        			ResourceUtils.outputResourceByName(theResource, "json", context,
-        					newMeasureDirectory.toString(), resourceName);
-        		}
-        	}
+                    // Forcing the encoding to JSON here to make everything the same in input directory
+                    ResourceUtils.outputResourceByName(theResource, "json", context, newMeasureDirectory.toString(), resourceName);
+                }
+            } else if (version == VERSION_R4) {
+                if (theResource instanceof org.hl7.fhir.r4.model.Library) {
+                    org.hl7.fhir.r4.model.Library theLibrary = (org.hl7.fhir.r4.model.Library) theResource;
+                    resourceName = theLibrary.getName();
+
+                    // Set the id to the name regardless of what it is now for publishing
+                    theLibrary.setId(resourceName);
+
+                    // Forcing the encoding to JSON here to make everything the same in input directory
+                    ResourceUtils.outputResourceByName(theResource, "json", context, newLibraryDirectory.toString(), resourceName);
+
+                    // Now extract the CQL from the library file
+                    String cqlFilename = Paths.get(newCqlDirectory.toString(), resourceName) + ".cql";
+                    extractR4CQL(theLibrary, cqlFilename);
+                } else if (theResource instanceof org.hl7.fhir.r4.model.Measure) {
+                    org.hl7.fhir.r4.model.Measure theMeasure = (org.hl7.fhir.r4.model.Measure) theResource;
+                    resourceName = theMeasure.getName();
+
+                    // Set the id to the name regardless of what it is now for publishing
+                    theMeasure.setId(resourceName);
+
+                    // Forcing the encoding to JSON here to make everything the same in input directory
+                    ResourceUtils.outputResourceByName(theResource, "json", context, newMeasureDirectory.toString(), resourceName);
+                }
+            }
         }
-	}
-	
-	/**
-	 * Looks at the content of the Library passed in and if the type is texl/cql extracts it and decodes
-	 * it and writes it to the filename passed in
-	 * 
-	 * @param theLibrary
-	 * @param cqlFilename
-	 */
-	private void extractStu3CQL(org.hl7.fhir.dstu3.model.Library theLibrary, String cqlFilename) {
-		List<org.hl7.fhir.dstu3.model.Attachment> contents = theLibrary.getContent();
-		for (org.hl7.fhir.dstu3.model.Attachment content : contents) {
-			if (content.getContentType().equals("text/cql")) {
-				byte[] encodedBytes = content.getData();
-				String encodedString = Base64.getEncoder().encodeToString(encodedBytes);
-				byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
-				try {
-					FileUtils.writeByteArrayToFile(new File(cqlFilename), decodedBytes);
-				} catch (IOException e) {
-					e.printStackTrace();
-					throw new RuntimeException(e.getMessage());
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Looks at the content of the Library passed in and if the type is texl/cql extracts it and decodes
-	 * it and writes it to the filename passed in
-	 * 
-	 * @param theLibrary
-	 * @param cqlFilename
-	 */
-	private void extractR4CQL(org.hl7.fhir.r4.model.Library theLibrary, String cqlFilename) {
-		List<org.hl7.fhir.r4.model.Attachment> contents = theLibrary.getContent();
-		for (org.hl7.fhir.r4.model.Attachment content : contents) {
-			if (content.getContentType().equals("text/cql")) {
-				byte[] encodedBytes = content.getData();
-				String encodedString = Base64.getEncoder().encodeToString(encodedBytes);
-				byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
-				try {
-					FileUtils.writeByteArrayToFile(new File(cqlFilename), decodedBytes);
-				} catch (IOException e) {
-					e.printStackTrace();
-					throw new RuntimeException(e.getMessage());
-				}
-			}
-		}
-	}
+    }
+
+    /**
+     * Looks at the content of the Library passed in and if the type is texl/cql extracts it and decodes
+     * it and writes it to the filename passed in
+     *
+     * @param theLibrary
+     * @param cqlFilename
+     */
+    private void extractStu3CQL(org.hl7.fhir.dstu3.model.Library theLibrary, String cqlFilename) {
+        List<org.hl7.fhir.dstu3.model.Attachment> contents = theLibrary.getContent();
+        for (org.hl7.fhir.dstu3.model.Attachment content : contents) {
+            if (content.getContentType().equals("text/cql")) {
+                byte[] encodedBytes = content.getData();
+                String encodedString = Base64.getEncoder().encodeToString(encodedBytes);
+                byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
+                try {
+                    FileUtils.writeByteArrayToFile(new File(cqlFilename), decodedBytes);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e.getMessage());
+                }
+            }
+        }
+    }
+
+    /**
+     * Looks at the content of the Library passed in and if the type is texl/cql extracts it and decodes
+     * it and writes it to the filename passed in
+     *
+     * @param theLibrary
+     * @param cqlFilename
+     */
+    private void extractR4CQL(org.hl7.fhir.r4.model.Library theLibrary, String cqlFilename) {
+        List<org.hl7.fhir.r4.model.Attachment> contents = theLibrary.getContent();
+        for (org.hl7.fhir.r4.model.Attachment content : contents) {
+            if (content.getContentType().equals("text/cql")) {
+                byte[] encodedBytes = content.getData();
+                String encodedString = Base64.getEncoder().encodeToString(encodedBytes);
+                byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
+                try {
+                    FileUtils.writeByteArrayToFile(new File(cqlFilename), decodedBytes);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e.getMessage());
+                }
+            }
+        }
+    }
 
 }
