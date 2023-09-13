@@ -18,11 +18,13 @@ import java.util.Base64;
 import java.util.List;
 
 public class ExtractMatBundleOperation extends Operation {
-
+    public static final String ERROR_BUNDLE_OUTPUT_INVALID = "When specifying the output folder using -op for ExtractMatBundle, the output directory name must contain the word 'bundle' (all lowercase.)";
     public static final String ERROR_BUNDLE_FILE_IS_REQUIRED = "The path to a bundle file is required";
     public static final String ERROR_DIR_IS_NOT_A_DIRECTORY = "The path specified with -dir is not a directory.";
+    public static final String ERROR_OP_IS_NOT_A_DIRECTORY = "The path specified with -op is not a directory.";
     public static final String ERROR_DIR_IS_EMPTY = "The path specified with -dir is empty.";
     public static final String ERROR_BUNDLE_LOCATION_NONEXISTENT = "The path specified for the bundle doesn't exist on your system.";
+    public static final String ERROR_OUTPUT_LOCATION_NONEXISTENT = "The path specified for the output folder doesn't exist on your system.";
     public static final String INFO_EXTRACTION_SUCCESSFUL = "Extraction completed successfully";
     public static final String VERSION_R4 = "r4";
     public static final String VERSION_STU3 = "stu3";
@@ -74,6 +76,15 @@ public class ExtractMatBundleOperation extends Operation {
                     }
                     break;
                 case "op":
+                    File userSuppliedOutputDir = new File(value);
+                    if (!userSuppliedOutputDir.exists()) {
+                        throw new IllegalArgumentException(ERROR_OUTPUT_LOCATION_NONEXISTENT);
+                    } else if (!userSuppliedOutputDir.isDirectory()) {
+                        throw new IllegalArgumentException(ERROR_OP_IS_NOT_A_DIRECTORY);
+                    } else if (!value.toLowerCase().contains("bundle")) {
+                        throw new IllegalArgumentException(ERROR_BUNDLE_OUTPUT_INVALID);
+                    }
+
                     setOutputPath(value);
                     break;
                 case "v":
@@ -89,7 +100,7 @@ public class ExtractMatBundleOperation extends Operation {
             throw new IllegalArgumentException(ERROR_BUNDLE_FILE_IS_REQUIRED);
         } else {
             File bundleFile = new File(inputLocation);
-            if (!bundleFile.exists()){
+            if (!bundleFile.exists()) {
                 throw new IllegalArgumentException(ERROR_BUNDLE_LOCATION_NONEXISTENT);
             }
             if (directoryFlagPresent) {
@@ -186,7 +197,7 @@ public class ExtractMatBundleOperation extends Operation {
         //call the Bundle utilities to extract the bundle
         String outputDir = bundleFile.getAbsoluteFile().getParent();
         //ensure output path assigned by user is utilized:
-        if (!getOutputPath().isEmpty()){
+        if (!getOutputPath().isEmpty()) {
             outputDir = getOutputPath();
         }
 
