@@ -23,6 +23,8 @@ public class ExtractMatBundleOperation extends Operation {
     public static final String ERROR_DIR_IS_NOT_A_DIRECTORY = "The path specified with -dir is not a directory.";
     public static final String ERROR_DIR_IS_EMPTY = "The path specified with -dir is empty.";
     public static final String INFO_EXTRACTION_SUCCESSFUL = "Extraction completed successfully";
+    public static final String VERSION_R4 = "r4";
+    public static final String VERSION_STU3 = "stu3";
 
 
     @Override
@@ -31,14 +33,17 @@ public class ExtractMatBundleOperation extends Operation {
         boolean directoryFlagPresent = false;
         boolean suppressNarrative = true;
 
-        String version = "r4";
+        String version = VERSION_R4;
         String inputLocation = null;
 
         //loop through args and prepare approach:
         for (int i = 0; i < args.length; i++) {
-            System.out.println("ExtractMatBundle: " + args[i]);
             if (i == 0 && args[i].equalsIgnoreCase("-ExtractMatBundle")) {
                 continue; //
+            } else if (i == 0 && !args[i].equalsIgnoreCase("-ExtractMatBundle")) {
+                throw new IllegalArgumentException("Insufficient argument structure. " +
+                        "Usage Example: mvn exec:java -Dexec.args=\"-ExtractMatBundle " +
+                        "/Development/ecqm-content-r4/bundles/mat/EXM124/EXM124.json -v=r4");
             }
 
             //position 1 is the location of file or directory. Determine which:
@@ -61,21 +66,14 @@ public class ExtractMatBundleOperation extends Operation {
             String value = flagAndValue[1];
 
             switch (flag.replace("-", "").toLowerCase()) {
-                case "encoding":
-                case "e":
-//                    encoding = value.toLowerCase();
-//                    break;
-                case "supressNarrative":
                 case "sn":
                     if (value.equalsIgnoreCase("false")) {
                         suppressNarrative = false;
                     }
                     break;
-                case "outputpath":
                 case "op":
                     setOutputPath(value);
-                    break; // -outputpath (-op)
-                case "version":
+                    break;
                 case "v":
                     version = value;
                     break;
@@ -84,68 +82,57 @@ public class ExtractMatBundleOperation extends Operation {
             }
         }//end arg loop
 
-        System.out.println("ExtractMatBundle, inputLocation: " + inputLocation);
         //determine location is provided by user, if not, throw arugment exception:
         if (inputLocation == null) {
             throw new IllegalArgumentException(ERROR_BUNDLE_FILE_IS_REQUIRED);
+        } else {
+            if (directoryFlagPresent) {
+                //ensure the input is a directory before trying to return a list of its files:
+                if (!new File(inputLocation).isDirectory()) {
+                    throw new IllegalArgumentException(ERROR_DIR_IS_NOT_A_DIRECTORY);
+                }
+            } else {
+                File bundleFile = new File(inputLocation);
+                if (!bundleFile.exists() || bundleFile.isDirectory()) {
+                    throw new IllegalArgumentException(ERROR_BUNDLE_FILE_IS_REQUIRED);
+                }
+            }
         }
 
-        System.out.println("ExtractMatBundle, directoryFlagPresent: " + directoryFlagPresent);
         //if -dir was found, treat inputLocation as directory:
         if (directoryFlagPresent) {
-            File[] filesInDir = getFiles(inputLocation);
-
-            System.out.println("ExtractMatBundle, filesInDir.length: " + filesInDir.length);
-            if (filesInDir.length == 0) {
+            File[] filesInDir = new File(inputLocation).listFiles();
+            if (filesInDir == null || filesInDir.length == 0) {
                 throw new IllegalArgumentException(ERROR_DIR_IS_EMPTY);
             } else {
-
                 for (File file : filesInDir) {
-                    processSingleFile(file.getAbsolutePath(), version, suppressNarrative);
+                    processSingleFile(file, version, suppressNarrative);
                 }
             }
         } else {
             //single file, allow processSingleFile() to run with currently assigned inputFile:
-            processSingleFile(inputLocation, version, suppressNarrative);
+            processSingleFile(new File(inputLocation), version, suppressNarrative);
         }
-
         LogUtils.info(INFO_EXTRACTION_SUCCESSFUL);
     }
 
-    private static File[] getFiles(String inputLocation) {
-        //ensure the input is a directory before trying to return a list of its files:
-        if (!new File(inputLocation).isDirectory()) {
-            throw new IllegalArgumentException(ERROR_DIR_IS_NOT_A_DIRECTORY);
-        }
-        // Process files in the specified directory
-        return new File(inputLocation).listFiles();
-    }
 
+    private void processSingleFile(File bundleFile, String version, boolean suppressNarrative) {
+        String inputFileLocation = bundleFile.getAbsolutePath();
 
-    private void processSingleFile(String inputFileLocation, String version, boolean suppressNarrative) {
-        System.out.println("ExtractMatBundle, processSingleFile, inputFile: " + inputFileLocation);
         LogUtils.info(String.format("Extracting MAT bundle from %s", inputFileLocation));
 
-        // Open the file to validate it
-        File bundleFile = new File(inputFileLocation);
-
-        System.out.println("ExtractMatBundle, processSingleFile, bundleFile.isDirectory(): " + bundleFile.isDirectory());
-        if (bundleFile.isDirectory()) {
-            throw new IllegalArgumentException(ERROR_BUNDLE_FILE_IS_REQUIRED);
-        }
-
-        System.out.println("ExtractMatBundle, processSingleFile, version: " + version);
         // Set the FhirContext based on the version specified
-
         FhirContext context;
         if (version == null) {
             context = FhirContext.forR4Cached();
+            version = VERSION_R4;
         } else {
             switch (version.toLowerCase()) {
-                case "stu3":
+                case VERSION_STU3:
                     context = FhirContext.forDstu3Cached();
                     break;
-                case "r4":
+                case VERSION_R4:
                     context = FhirContext.forR4Cached();
                     break;
                 default:
@@ -159,60 +146,45 @@ public class ExtractMatBundleOperation extends Operation {
         String encoding;
         if (bundleFile.getPath().endsWith(".xml")) {
             encoding = "xml";
-            try {
-                bundle = context.newXmlParser().parseResource(new FileReader(bundleFile));
+            try (FileReader reader = new FileReader(bundleFile)) {
+                bundle = context.newXmlParser().parseResource(reader);
             } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e.getMessage());
+            } catch (IOException e) {
                 e.printStackTrace();
                 throw new RuntimeException(e.getMessage());
             }
 
-            System.out.println("ExtractMatBundle, processSingleFile, bundle: " + bundle.toString());
         } else if (bundleFile.getPath().endsWith(".json")) {
             encoding = "json";
-            try {
-                bundle = context.newJsonParser().parseResource(new FileReader(bundleFile));
+            try (FileReader reader = new FileReader(bundleFile)) {
+                bundle = context.newJsonParser().parseResource(reader);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
                 throw new RuntimeException(e.getMessage());
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e.getMessage());
             }
-            System.out.println("ExtractMatBundle, processSingleFile, bundle: " + bundle.toString());
 
         } else {
             throw new IllegalArgumentException("The path to a bundle file of type json or xml is required");
         }
 
-
         //sometimes tests leave library or measure files behind so we want to make sure we only iterate over bundle files:
         if (!(bundle instanceof org.hl7.fhir.dstu3.model.Bundle || bundle instanceof org.hl7.fhir.r4.model.Bundle)) {
             LogUtils.info("Not a recognized bundle: " + inputFileLocation);
-            System.out.println("Not a recognized bundle: " + inputFileLocation);
             return;
         }
 
-        // Now call the Bundle utilities to extract the bundle
+        //call the Bundle utilities to extract the bundle
         String outputDir = bundleFile.getAbsoluteFile().getParent();
-        if (version.equals("stu3") && bundle instanceof org.hl7.fhir.dstu3.model.Bundle) {
-            try {
-                BundleUtils.extractStu3Resources((org.hl7.fhir.dstu3.model.Bundle) bundle, encoding, outputDir, suppressNarrative);
-                System.out.println("ExtractMatBundle, BundleUtils.extractStu3Resources: success");
-            } catch (Exception e) {
-                System.out.println("ExtractMatBundle, BundleUtils.extractStu3Resources: failure: " + e.getMessage());
-            }
-        } else if (version.equals("r4") && bundle instanceof org.hl7.fhir.r4.model.Bundle) {
-            try {
-                BundleUtils.extractR4Resources((org.hl7.fhir.r4.model.Bundle) bundle, encoding, outputDir, suppressNarrative);
-                System.out.println("ExtractMatBundle, BundleUtils.extractR4Resources: success");
-            } catch (Exception e) {
-                System.out.println("ExtractMatBundle, BundleUtils.extractR4Resources: failure: " + e.getMessage());
-            }
-        }
+        BundleUtils.extractResources(bundle, encoding, outputDir, suppressNarrative, version);
 
-        // Now move and properly rename the files
+        //move and properly rename the files
         moveAndRenameFiles(outputDir, context, version);
-        System.out.println("ExtractMatBundle, moveAndRenameFiles: success");
         LogUtils.info(INFO_EXTRACTION_SUCCESSFUL);
-
-        System.out.println(INFO_EXTRACTION_SUCCESSFUL);
     }
 
 
@@ -276,7 +248,7 @@ public class ExtractMatBundleOperation extends Operation {
                     // Forcing the encoding to JSON here to make everything the same in input directory
                     ResourceUtils.outputResourceByName(theResource, "json", context, newMeasureDirectory.toString(), resourceName);
                 }
-            } else if (version == "r4") {
+            } else if (version == VERSION_R4) {
                 if (theResource instanceof org.hl7.fhir.r4.model.Library) {
                     org.hl7.fhir.r4.model.Library theLibrary = (org.hl7.fhir.r4.model.Library) theResource;
                     resourceName = theLibrary.getName();
