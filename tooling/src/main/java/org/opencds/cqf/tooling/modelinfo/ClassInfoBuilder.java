@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
 public abstract class ClassInfoBuilder {
     protected Map<String, StructureDefinition> structureDefinitions;
     protected Map<String, TypeInfo> typeInfos = new HashMap<String, TypeInfo>();
+    protected Map<String, TypeInfo> builtTypeInfos = new HashMap<String, TypeInfo>();
     protected Map<String, String> typeTargets = new HashMap<String, String>();
     protected Set<String> requiredBindingTypeNames = new HashSet<String>();
     protected ClassInfoSettings settings;
@@ -46,9 +47,18 @@ public abstract class ClassInfoBuilder {
         }
     }
 
+    public void loadTypeInfos(Map<String, TypeInfo> typeInfos) {
+        this.typeInfos.putAll(typeInfos);
+    }
+
+    protected void putTypeInfo(String key, TypeInfo typeInfo) {
+        typeInfos.put(key, typeInfo);
+        builtTypeInfos.put(key, typeInfo);
+    }
+
     public Map<String, TypeInfo> build() {
         this.innerBuild();
-        return this.getTypeInfos();
+        return this.builtTypeInfos;
     }
 
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
@@ -661,7 +671,7 @@ public abstract class ClassInfoBuilder {
                 } else
                     return null;
             } else {
-                return this.buildTypeSpecifier(this.resolveMappedTypeName(modelName, typeRef));
+                return this.buildTypeSpecifier(this.resolveMappedTypeName(this.settings.flattenHierarchy ? modelName : "FHIR", typeRef));
             }
         } catch (Exception e) {
             System.out.println("Error building type specifier for " + modelName + "."
@@ -824,7 +834,7 @@ public abstract class ClassInfoBuilder {
                 String qualifiedTypeName = getTypeName(modelName, typeName);
                 if (!this.typeInfos.containsKey(qualifiedTypeName)) {
                     ClassInfo sliceType = new ClassInfo().withNamespace(modelName).withName(typeName).withBaseType(qualifiedBaseTypeName).withRetrievable(false);
-                    this.typeInfos.put(qualifiedTypeName, sliceType);
+                    putTypeInfo(qualifiedTypeName, sliceType);
                 }
 
                 NamedTypeSpecifier nts = new NamedTypeSpecifier();
@@ -869,13 +879,13 @@ public abstract class ClassInfoBuilder {
                         ClassInfo info = new ClassInfo().withName(typeName).withNamespace(modelName).withLabel(null).withBaseType(modelName + ".Element")
                                 .withRetrievable(false).withElement(elements).withPrimaryCodePath(null);
 
-                        this.typeInfos.put(this.getTypeName(modelName, typeName), info);
+                        putTypeInfo(this.getTypeName(modelName, typeName), info);
                     }
                     else {
                         ClassInfo info = new ClassInfo().withName(typeName).withNamespace(modelName).withBaseType("System.String")
                                 .withRetrievable(false);
 
-                        this.typeInfos.put(this.getTypeName(modelName, typeName), info);
+                        putTypeInfo(this.getTypeName(modelName, typeName), info);
                     }
                 }
 
@@ -1228,7 +1238,7 @@ public abstract class ClassInfoBuilder {
                         .withBaseType(modelName + (isBackboneElement(typeDefinition) ? ".BackboneElement" : ".Element"))
                         .withRetrievable(false).withElement(elements).withPrimaryCodePath(null);
 
-                this.typeInfos.put(this.getTypeName(modelName, typeName), componentClassInfo);
+                putTypeInfo(this.getTypeName(modelName, typeName), componentClassInfo);
 
                 typeSpecifier = this.buildTypeSpecifier(modelName, typeName);
                 // Elements have been added to the type of the element
@@ -1343,7 +1353,7 @@ public abstract class ClassInfoBuilder {
                         elementType = (ClassInfo) typeInfos.get(qualifiedTypeName);
                     } else {
                         elementType = new ClassInfo().withNamespace(modelName).withName(typeName).withBaseTypeSpecifier(typeSpecifier).withRetrievable(false);
-                        this.typeInfos.put(qualifiedTypeName, elementType);
+                        putTypeInfo(qualifiedTypeName, elementType);
                     }
 
                     for (ClassInfoElement slice : slices.getSlices()) {
@@ -1354,7 +1364,7 @@ public abstract class ClassInfoBuilder {
                             System.out.println(String.format("WARNING: Duplicate element %s not added to derived type %s", slice.getName(), qualifiedTypeName));
                         }
                     }
-                    //this.typeInfos.put(qualifiedTypeName, elementType);
+                    //putTypeInfo(qualifiedTypeName, elementType);
                     slices.getSlices().clear();
 
                     NamedTypeSpecifier nts = new NamedTypeSpecifier();
@@ -1408,14 +1418,14 @@ public abstract class ClassInfoBuilder {
             }
         }
 
-        this.typeInfos.put(qualifiedTypeName, info);
+        putTypeInfo(qualifiedTypeName, info);
 
         AtomicReference<Integer> index = new AtomicReference<Integer>(1);
         List<ClassInfoElement> elements = new ArrayList<>();
         String path = sd.getType(); // Type is used to navigate the elements, regardless of the baseDefinition
         String id = path; // Id starts with the Type
         // TODO: Switch to differential here, but several of the primitive types declare "value" elements of type string when this happens? (positiveInt, markdown, among others)
-        List<ElementDefinition> eds = sd.getSnapshot().getElement();
+        List<ElementDefinition> eds = this.settings.flattenHierarchy ? sd.getSnapshot().getElement() : sd.getDifferential().getElement();
         SliceList elementSlices = null;
 
         while (index.get() < eds.size()) {
@@ -1438,12 +1448,15 @@ public abstract class ClassInfoBuilder {
             }
         }
 
+        boolean isFlattening = sd.getKind() == StructureDefinitionKind.RESOURCE && this.settings.flattenHierarchy;
         String baseDefinition = sd.getBaseDefinition();
-        String baseTypeName = sd.getKind() == StructureDefinitionKind.RESOURCE
-                ? resolveBaseTypeName(sd.getType()) : resolveTypeName(baseDefinition);
+        String baseTypeName = isFlattening ? resolveBaseTypeName(sd.getType()) : resolveTypeName(baseDefinition);
 
         if (baseTypeName != null && !this.typeInfos.containsKey(baseTypeName)) {
-            StructureDefinition baseSd = this.structureDefinitions.get(unQualify(baseTypeName));
+            StructureDefinition baseSd = isFlattening ? this.structureDefinitions.get(unQualify(baseTypeName)) : this.structureDefinitions.get(getTail(baseDefinition));
+            if (baseSd == null) {
+                throw new IllegalArgumentException(String.format("Could not resolve structure definition for %s", baseTypeName));
+            }
             buildClassInfo(modelName, baseSd);
         }
 

@@ -11,6 +11,7 @@ public class ClassInfoSettings {
     public String modelName;
     public String modelPrefix;
     public String helpersLibraryName;
+    public boolean flattenHierarchy = true;
     public boolean useCQLPrimitives = false;
     public boolean includeMetaData = true;
     public boolean createSliceElements = false;

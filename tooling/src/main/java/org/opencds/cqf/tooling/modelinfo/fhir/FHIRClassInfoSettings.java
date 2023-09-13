@@ -11,7 +11,7 @@ class FHIRClassInfoSettings extends ClassInfoSettings {
 
     public FHIRClassInfoSettings() {
         this.modelName = "FHIR";
-        this.modelPrefix = "";
+        this.modelPrefix = "FHIR";
         this.helpersLibraryName = "FHIRHelpers";
         this.codeableTypes = new HashSet<String>() {
             {
@@ -52,21 +52,33 @@ class FHIRClassInfoSettings extends ClassInfoSettings {
 
         this.cqlTypeMappings = new HashMap<String, String>() {
             {
+                put("FHIR.xsd:base64Binary", "System.String");
                 put("FHIR.base64Binary", "System.String");
+                put("FHIR.xsd:boolean", "System.Boolean");
                 put("FHIR.boolean", "System.Boolean");
                 put("FHIR.code", "System.String");
+                put("FHIR.xsd:gYear OR xsd:gYearMonth OR xsd:date", "System.Date");
+                put("FHIR.xsd:date", "System.Date");
                 put("FHIR.date", "System.Date");
+                put("FHIR.xsd:gYear OR xsd:gYearMonth OR xsd:date OR xsd:dateTime", "System.DateTime");
                 put("FHIR.dateTime", "System.DateTime");
+                put("FHIR.xsd:decimal OR xsd:double", "System.Decimal");
                 put("FHIR.decimal", "System.Decimal");
                 put("FHIR.id", "System.String");
                 put("FHIR.instant", "System.DateTime");
+                put("FHIR.xsd:int", "System.Integer");
                 put("FHIR.integer", "System.Integer");
                 put("FHIR.markdown", "System.String");
                 put("FHIR.oid", "System.String");
+                put("FHIR.xsd:positiveInteger", "System.Integer");
                 put("FHIR.positiveInt", "System.Integer");
+                put("FHIR.xsd:string", "System.String");
                 put("FHIR.string", "System.String");
+                put("FHIR.xsd:time", "System.Time");
                 put("FHIR.time", "System.Time");
+                put("FHIR.xsd:nonNegativeInteger", "System.Integer");
                 put("FHIR.unsignedInt", "System.Integer");
+                put("FHIR.xsd:anyURI", "System.String");
                 put("FHIR.uri", "System.String");
                 put("FHIR.url", "System.String");
                 put("FHIR.uuid", "System.String");

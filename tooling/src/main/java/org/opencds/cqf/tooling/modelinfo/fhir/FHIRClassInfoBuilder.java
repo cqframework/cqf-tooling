@@ -29,8 +29,8 @@ public class FHIRClassInfoBuilder extends ClassInfoBuilder {
                 && !x.getUrl().equals("http://hl7.org/fhir/StructureDefinition/elementdefinition-de")));
 
         System.out.println("Building Resources");
-        this.buildFor("FHIR", (x -> x.getKind() == StructureDefinitionKind.RESOURCE
-                && (!x.hasDerivation() || x.getDerivation() == TypeDerivationRule.SPECIALIZATION)));
+        this.buildFor("FHIR", (x -> x.getKind() == StructureDefinitionKind.RESOURCE));
+                //&& (!x.hasDerivation() || x.getDerivation() == TypeDerivationRule.SPECIALIZATION)));
     }
 
     @Override

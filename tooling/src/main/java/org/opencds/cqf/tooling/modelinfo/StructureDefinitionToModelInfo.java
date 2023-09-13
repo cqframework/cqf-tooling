@@ -16,6 +16,7 @@ import org.hl7.elm_modelinfo.r1.ClassInfo;
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.elm_modelinfo.r1.TypeInfo;
+import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.modelinfo.fhir.FHIRClassInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.fhir.FHIRModelInfoBuilder;
@@ -36,6 +37,7 @@ public class StructureDefinitionToModelInfo extends Operation {
     private String resourcePaths;
     private String modelName;
     private String modelVersion;
+    private boolean flattenHierarchy = true;
     private boolean useCQLPrimitives = false;
     private boolean includeMetadata = true;
 
@@ -48,7 +50,8 @@ public class StructureDefinitionToModelInfo extends Operation {
           [-resourcePaths | -rp]
           [-modelName | -mn]
           [-modelVersion | -mv]
-          (-useCqlPrimitives | ucp)
+          (-flattenHierarchy | -fh)
+          (-useCqlPrimitives | -ucp)
           (-includeMetadata | -im)
           (-outputpath | -op)
         "
@@ -103,6 +106,24 @@ public class StructureDefinitionToModelInfo extends Operation {
             -modelName="QICore"
             -modelVersion="5.0.0"
 
+        Arguments for producing FHIR 4.0.1 Simple Model Info (FHIR with cqlPrimitives)
+            -resourcePaths="4.0.1"
+            -modelName="FHIR4"
+            -modelVersion="4.0.1-simple"
+            -useCqlPrimitives=true
+            -flattenHierarchy=false
+            -includeMetadata=true
+
+        Arguments for producing USCore 3.1.1 Simple Model Info
+            -resourcePaths="4.0.1;US-Core/3.1.1"
+            -modelName="USCore"
+            -modelVersion="3.1.1-simple"
+            -useCqlPrimitives=true
+            -flattenHierarchy=false
+            -includeMetadata=true
+
+        Arguments for producing USCore3 Model Info (USCore with FHIR4)
+
         NOTE: Once the ModelInfo is produced, there is a bug in the Jackson XML deserializer that requires that the xsi:type attribute be the first
         attribute in an element with polymorphic child elements. In a regex-search/replace, the following command will address this issue on the
         resulting ModelInfo file:
@@ -135,6 +156,7 @@ public class StructureDefinitionToModelInfo extends Operation {
                 // Yes, would need to be an extension definition on the ImplementationGuide...
                 case "modelname": case "mn": modelName = value; break; // -modelname (-mn)
                 case "modelversion": case "mv": modelVersion = value; break; // -modelversion (-mv)
+                case "flattenHierarchy": case "fh": flattenHierarchy = value.toLowerCase().equals("true") ? true : false; break;
                 case "usecqlprimitives": case "ucp": useCQLPrimitives = value.toLowerCase().equals("true") ? true : false; break;
                 case "includemetadata": case "im": includeMetadata = value.toLowerCase().equals("true") ? true : false; break;
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
@@ -156,22 +178,15 @@ public class StructureDefinitionToModelInfo extends Operation {
         ModelInfo mi;
 
         if (modelName.equals("FHIR")) {
-            ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(atlas.getStructureDefinitions());
-            ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
-            ciBuilder.settings.includeMetaData = this.includeMetadata;
-            Map<String, TypeInfo> typeInfos = ciBuilder.build();
-            ciBuilder.afterBuild();
+            Map<String, TypeInfo> typeInfos = buildFHIRTypeInfos(atlas);
 
             String fhirHelpersPath = this.getOutputPath() + "/" + modelName + "Helpers-" + modelVersion + ".cql";
             miBuilder = new FHIRModelInfoBuilder(modelVersion, typeInfos, atlas, fhirHelpersPath);
             mi = miBuilder.build();
         }
         else if (modelName.equals("USCore")) {
-            ClassInfoBuilder ciBuilder = new USCoreClassInfoBuilder(atlas.getStructureDefinitions());
-            ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
-            ciBuilder.settings.includeMetaData = this.includeMetadata;
-            Map<String, TypeInfo> typeInfos = ciBuilder.build();
-            ciBuilder.afterBuild();
+            Map<String, TypeInfo> fhirTypeInfos = !flattenHierarchy ? buildFHIRTypeInfos(atlas) : null;
+            Map<String, TypeInfo> typeInfos = buildUSCoreTypeInfos(atlas, fhirTypeInfos);
 
             String helpersPath = this.getOutputPath() + "/" + modelName + "Helpers-" + modelVersion + ".cql";
             miBuilder = new USCoreModelInfoBuilder(modelVersion, typeInfos, atlas, helpersPath);
@@ -179,8 +194,16 @@ public class StructureDefinitionToModelInfo extends Operation {
         }
         else if (modelName.equals("QICore")) {
             ClassInfoBuilder ciBuilder = new QICoreClassInfoBuilder(atlas.getStructureDefinitions());
+            ciBuilder.settings.flattenHierarchy = this.flattenHierarchy;
             ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
             ciBuilder.settings.includeMetaData = this.includeMetadata;
+
+            if (!this.flattenHierarchy) {
+                Map<String, TypeInfo> fhirTypeInfos = buildFHIRTypeInfos(atlas);
+                Map<String, TypeInfo> usCoreTypeInfos = buildUSCoreTypeInfos(atlas, fhirTypeInfos);
+                ciBuilder.loadTypeInfos(fhirTypeInfos);
+                ciBuilder.loadTypeInfos(usCoreTypeInfos);
+            }
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             ciBuilder.afterBuild();
 
@@ -190,6 +213,7 @@ public class StructureDefinitionToModelInfo extends Operation {
         }
         else if (modelName.equals("QUICK")) {
             ClassInfoBuilder ciBuilder = new QuickClassInfoBuilder(atlas.getStructureDefinitions());
+            ciBuilder.settings.flattenHierarchy = this.flattenHierarchy;
             ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
             ciBuilder.settings.includeMetaData = this.includeMetadata;
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
@@ -201,6 +225,7 @@ public class StructureDefinitionToModelInfo extends Operation {
         else {
             //should blowup
             ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(atlas.getStructureDefinitions());
+            ciBuilder.settings.flattenHierarchy = this.flattenHierarchy;
             ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
             ciBuilder.settings.includeMetaData = this.includeMetadata;
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
@@ -232,6 +257,31 @@ public class StructureDefinitionToModelInfo extends Operation {
             System.err.println("error" + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private Map<String, TypeInfo> buildFHIRTypeInfos(Atlas atlas) {
+        ClassInfoBuilder ciBuilder = new FHIRClassInfoBuilder(atlas.getStructureDefinitions());
+        ciBuilder.settings.flattenHierarchy = this.flattenHierarchy;
+        ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
+        ciBuilder.settings.includeMetaData = this.includeMetadata;
+        Map<String, TypeInfo> typeInfos = ciBuilder.build();
+        ciBuilder.afterBuild();
+        return typeInfos;
+    }
+
+    private Map<String, TypeInfo> buildUSCoreTypeInfos(Atlas atlas, Map<String, TypeInfo> fhirTypeInfos) {
+        ClassInfoBuilder ciBuilder = new USCoreClassInfoBuilder(atlas.getStructureDefinitions());
+        ciBuilder.settings.flattenHierarchy = this.flattenHierarchy;
+        ciBuilder.settings.useCQLPrimitives = this.useCQLPrimitives;
+        ciBuilder.settings.includeMetaData = this.includeMetadata;
+
+        if (!this.flattenHierarchy) {
+            ciBuilder.loadTypeInfos(fhirTypeInfos);
+        }
+
+        Map<String, TypeInfo> typeInfos = ciBuilder.build();
+        ciBuilder.afterBuild();
+        return typeInfos;
     }
 
     private void writeOutput(String fileName, String content) throws IOException {

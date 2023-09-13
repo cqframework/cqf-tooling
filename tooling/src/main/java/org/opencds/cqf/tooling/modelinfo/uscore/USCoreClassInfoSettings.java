@@ -24,10 +24,33 @@ class USCoreClassInfoSettings extends ClassInfoSettings {
             }
         };
 
-        this.urlToModel.put("http://hl7.org/fhir", "USCore");
+        //if (this.flattenHierarchy) {
+        //    this.urlToModel.put("http://hl7.org/fhir", "USCore");
+        //}
 
         this.primitiveTypeMappings = new HashMap<String, String>() {
             {
+                put("FHIR.base64Binary", "System.String");
+                put("FHIR.boolean", "System.Boolean");
+                put("FHIR.canonical", "System.String");
+                put("FHIR.code", "System.String");
+                put("FHIR.date", "System.Date");
+                put("FHIR.dateTime", "System.DateTime");
+                put("FHIR.decimal", "System.Decimal");
+                put("FHIR.id", "System.String");
+                put("FHIR.instant", "System.DateTime");
+                put("FHIR.integer", "System.Integer");
+                put("FHIR.markdown", "System.String");
+                put("FHIR.oid", "System.String");
+                put("FHIR.positiveInt", "System.Integer");
+                put("FHIR.string", "System.String");
+                put("FHIR.time", "System.Time");
+                put("FHIR.unsignedInt", "System.Integer");
+                put("FHIR.uri", "System.String");
+                put("FHIR.url", "System.String");
+                put("FHIR.uuid", "System.String");
+                put("FHIR.xhtml", "System.String");
+
                 put("USCore.base64Binary", "System.String");
                 put("USCore.boolean", "System.Boolean");
                 put("USCore.canonical", "System.String");
@@ -53,6 +76,55 @@ class USCoreClassInfoSettings extends ClassInfoSettings {
 
         this.cqlTypeMappings = new HashMap<String, String>() {
             {
+                put("FHIR.xsd:base64Binary", "System.String");
+                put("FHIR.base64Binary", "System.String");
+                put("FHIR.xsd:boolean", "System.Boolean");
+                put("FHIR.boolean", "System.Boolean");
+                put("FHIR.canonical", "System.String");
+                put("FHIR.xsd:token", "System.String");
+                put("FHIR.code", "System.String");
+                put("FHIR.xsd:gYear OR xsd:gYearMonth OR xsd:date", "System.Date");
+                put("FHIR.xsd:date", "System.Date");
+                put("FHIR.date", "System.Date");
+                put("FHIR.xsd:gYear OR xsd:gYearMonth OR xsd:date OR xsd:dateTime", "System.DateTime");
+                put("FHIR.dateTime", "System.DateTime");
+                put("FHIR.xsd:decimal OR xsd:double", "System.Decimal");
+                put("FHIR.decimal", "System.Decimal");
+                put("FHIR.id", "System.String");
+                put("FHIR.xsd:dateTime", "System.DateTime");
+                put("FHIR.instant", "System.DateTime");
+                put("FHIR.xsd:int", "System.Integer");
+                put("FHIR.integer", "System.Integer");
+                put("FHIR.markdown", "System.String");
+                put("FHIR.oid", "System.String");
+                put("FHIR.xsd:positiveInteger", "System.Integer");
+                put("FHIR.positiveInt", "System.Integer");
+                put("FHIR.xsd:string", "System.String");
+                put("FHIR.string", "System.String");
+                put("FHIR.xsd:time", "System.Time");
+                put("FHIR.time", "System.Time");
+                put("FHIR.xsd:nonNegativeInteger", "System.Integer");
+                put("FHIR.unsignedInt", "System.Integer");
+                put("FHIR.xsd:anyURI", "System.String");
+                put("FHIR.uri", "System.String");
+                put("FHIR.url", "System.String");
+                put("FHIR.uuid", "System.String");
+                put("FHIR.xhtml:div", "System.String");
+                put("FHIR.xhtml", "System.String");
+                put("FHIR.Coding", "System.Code");
+                put("FHIR.CodeableConcept", "System.Concept");
+                put("FHIR.Period", "Interval<System.DateTime>");
+                put("FHIR.Range", "Interval<System.Quantity>");
+                put("FHIR.Quantity", "System.Quantity");
+                put("FHIR.Age", "System.Quantity");
+                put("FHIR.Distance", "System.Quantity");
+                put("FHIR.SimpleQuantity", "System.Quantity");
+                put("FHIR.Duration", "System.Quantity");
+                put("FHIR.Count", "System.Quantity");
+                put("FHIR.MoneyQuantity", "System.Quantity");
+                put("FHIR.Money", "System.Decimal");
+                put("FHIR.Ratio", "System.Ratio");
+
                 put("USCore.xsd:base64Binary", "System.String");
                 put("USCore.base64Binary", "System.String");
                 put("USCore.xsd:boolean", "System.Boolean");
