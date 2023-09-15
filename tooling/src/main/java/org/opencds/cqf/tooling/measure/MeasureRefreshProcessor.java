@@ -78,8 +78,11 @@ public class MeasureRefreshProcessor {
     private void setEffectiveDataRequirements(Measure measureToUse, Library moduleDefinitionLibrary) {
     	
     	moduleDefinitionLibrary.setId("effective-data-requirements");
-    	
-    	int delIndex = -1;
+
+        // Name should be usable as machine-processable identifier
+        moduleDefinitionLibrary.setName("EffectiveDataRequirements");
+
+        int delIndex = -1;
     	for (Resource res : measureToUse.getContained()) {
     		if (res instanceof Library && ((Library)res).getId().equalsIgnoreCase("effective-data-requirements")) {
     			delIndex = measureToUse.getContained().indexOf(res);

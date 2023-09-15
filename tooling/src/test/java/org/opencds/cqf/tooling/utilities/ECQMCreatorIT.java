@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
 
 
@@ -650,6 +651,7 @@ public class ECQMCreatorIT {
         try {
             Measure measure = refreshMeasure("CompositeMeasures/cql/BCSComponent.cql", "CompositeMeasures/resources/BCSComponent-v0-0-001-FHIR-4-0-1.xml");
             assertTrue(null != measure);
+            assertEquals("EffectiveDataRequirements", ((Library) measure.getContained().get(0)).getName());
             logger.debug(measureToString(measure));
         } catch (IOException ioException) {
             ioException.printStackTrace();
@@ -661,6 +663,7 @@ public class ECQMCreatorIT {
         try {
             Measure measure = refreshMeasure("CompositeMeasures/cql/CCSComponent.cql", "CompositeMeasures/resources/CCSComponent-v0-0-001-FHIR-4-0-1.xml");
             assertTrue(null != measure);
+            assertEquals("EffectiveDataRequirements", ((Library) measure.getContained().get(0)).getName());
             logger.debug(measureToString(measure));
         } catch (IOException ioException) {
             ioException.printStackTrace();
@@ -672,6 +675,7 @@ public class ECQMCreatorIT {
         try {
             Measure measure = refreshMeasure("CompositeMeasures/cql/HBPComponent.cql", "CompositeMeasures/resources/HBPComponent-v0-0-001-FHIR-4-0-1.xml");
             assertTrue(null != measure);
+            assertEquals("EffectiveDataRequirements", ((Library) measure.getContained().get(0)).getName());
             logger.debug(measureToString(measure));
         } catch (IOException ioException) {
             ioException.printStackTrace();
@@ -683,6 +687,7 @@ public class ECQMCreatorIT {
         try {
             Measure measure = refreshMeasure("CompositeMeasures/cql/PVSComponent.cql", "CompositeMeasures/resources/PVSComponent-v0-0-001-FHIR-4-0-1.xml");
             assertTrue(null != measure);
+            assertEquals("EffectiveDataRequirements", ((Library) measure.getContained().get(0)).getName());
             logger.debug(measureToString(measure));
         } catch (IOException ioException) {
             ioException.printStackTrace();
@@ -694,6 +699,7 @@ public class ECQMCreatorIT {
         try {
             Measure measure = refreshMeasure("CompositeMeasures/cql/TSCComponent.cql", "CompositeMeasures/resources/TSCComponent-v0-0-001-FHIR-4-0-1.xml");
             assertTrue(null != measure);
+            assertEquals("EffectiveDataRequirements", ((Library) measure.getContained().get(0)).getName());
             logger.debug(measureToString(measure));
         } catch (IOException ioException) {
             ioException.printStackTrace();
@@ -706,6 +712,7 @@ public class ECQMCreatorIT {
         try {
             Measure measure = refreshMeasure("CompositeMeasures/cql/EXM124-9.0.000.cql", "/ecqm/resources/measure-EXM124-9.0.000.json");
             assertTrue(null != measure);
+            assertEquals("EffectiveDataRequirements", ((Library) measure.getContained().get(0)).getName());
             logger.debug(measureToString(measure));
         } catch (IOException ioException) {
             ioException.printStackTrace();
