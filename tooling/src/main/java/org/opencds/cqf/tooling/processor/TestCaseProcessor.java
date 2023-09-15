@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling.processor;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +10,9 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import org.apache.commons.io.FilenameUtils;
+import org.hl7.fhir.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
@@ -31,22 +35,69 @@ public class TestCaseProcessor
             List<String> testArtifactPaths = IOUtils.getDirectoryPaths(group, false);
             for (String testArtifactPath : testArtifactPaths) {
                 List<String> testCasePaths = IOUtils.getDirectoryPaths(testArtifactPath, false);
-                for (String testCasePath : testCasePaths) {
-                    try {
-                        List<String> paths = IOUtils.getFilePaths(testCasePath, true);
-                        List<IBaseResource> resources = IOUtils.readResources(paths, fhirContext);
-                        ensureIds(testCasePath, resources);
-                        Object bundle = BundleUtils.bundleArtifacts(getId(FilenameUtils.getName(testCasePath)), resources, fhirContext, false);
-                        IOUtils.writeBundle(bundle, testArtifactPath, encoding, fhirContext);
-                    } catch (Exception e) {
-                        LogUtils.putException(testCasePath, e);
+
+                Group testGroup = new Group();
+
+                // For each test case we need to create a group
+                if (!testCasePaths.isEmpty()) {
+                    String measureName = IOUtils.getMeasureTestDirectory(testCasePaths.get(0));
+                    testGroup.setId(measureName);
+                    testGroup.setActive(true);
+                    testGroup.setType(Group.GroupType.PERSON);
+                    testGroup.setActual(true);
+
+                    testGroup.addExtension("http://hl7.org/fhir/StructureDefinition/artifact-testArtifact",
+                            new CanonicalType("http://ecqi.healthit.gov/ecqms/Measure/DischargedonAntithromboticTherapyFHIR"));
+
+                    for (String testCasePath : testCasePaths) {
+                        try {
+                            List<String> paths = IOUtils.getFilePaths(testCasePath, true);
+                            List<IBaseResource> resources = IOUtils.readResources(paths, fhirContext);
+                            ensureIds(testCasePath, resources);
+
+                            // Loop through resources and any that are patients need to be added to the test Group
+                            // Handle individual resources when they exist
+                            for (IBaseResource resource : resources) {
+                                if (resource.fhirType() == "Patient") {
+                                    org.hl7.fhir.r4.model.Patient patient = (org.hl7.fhir.r4.model.Patient) resource;
+                                    addPatientToGroup(testGroup, patient);
+                                }
+
+                                // Handle bundled resources when that is how they are provided
+                                if (resource.fhirType() == "Bundle") {
+                                    Bundle bundle = (org.hl7.fhir.r4.model.Bundle) resource;
+                                    ArrayList<Resource> bundleResources = BundleUtils.getR4ResourcesFromBundle(bundle);
+                                    for (IBaseResource bundleResource : bundleResources) {
+                                        if (bundleResource.fhirType() == "Patient") {
+                                            org.hl7.fhir.r4.model.Patient patient = (org.hl7.fhir.r4.model.Patient) bundleResource;
+                                            addPatientToGroup(testGroup, patient);
+                                        }
+                                    }
+                                }
+                            }
+
+                            Object bundle = BundleUtils.bundleArtifacts(getId(FilenameUtils.getName(testCasePath)), resources, fhirContext, false);
+                            IOUtils.writeBundle(bundle, testArtifactPath, encoding, fhirContext);
+                        } catch (Exception e) {
+                            LogUtils.putException(testCasePath, e);
+                        } finally {
+                            LogUtils.warn(testCasePath);
+                        }
                     }
-                    finally {
-                        LogUtils.warn(testCasePath);
-                    }
+
+                    // Need to output the Group
+                    IOUtils.writeResource(testGroup, testArtifactPath, encoding, fhirContext, true, "Group-" + measureName);
                 }
             }
         }
+    }
+
+    private void addPatientToGroup(Group group, org.hl7.fhir.r4.model.Patient patient) {
+        IdType idType = patient.getIdElement();
+        Group.GroupMemberComponent member = group.addMember();
+        Reference patientRef = new Reference();
+        patientRef.setReference("Patient/" + idType.getIdPart());
+        member.setEntity(patientRef);
     }
 
     public static List<IBaseResource> getTestCaseResources(String path, FhirContext fhirContext)

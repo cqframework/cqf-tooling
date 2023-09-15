@@ -23,7 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -1033,6 +1035,15 @@ public class IOUtils
         }
         System.out.println("The file " + fileDirPath + libraryName + " is not the right type of file.");
         return false;
+    }
+
+    // Assumes the tests are structured as .../input/tests/measure/{MeasureName}/{TestName} and will extract
+    // the measure name
+    public static String getMeasureTestDirectory(String pathString) {
+        Path path = Paths.get(pathString);
+        String[] testDirs = StreamSupport.stream(path.spliterator(), false).map(Path::toString).toArray(String[]::new);
+        String testDir = testDirs[testDirs.length - 2];
+        return testDir;
     }
 
 }
