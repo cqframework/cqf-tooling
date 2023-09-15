@@ -9,6 +9,8 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.api.IFhirVersion;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -30,24 +32,31 @@ public class TestCaseProcessor
     {
         System.out.println("Refreshing tests");
         List<String> resourceTypeTestGroups = IOUtils.getDirectoryPaths(path, false);
+        IFhirVersion version = fhirContext.getVersion();
 
         for (String group : resourceTypeTestGroups) {
             List<String> testArtifactPaths = IOUtils.getDirectoryPaths(group, false);
             for (String testArtifactPath : testArtifactPaths) {
                 List<String> testCasePaths = IOUtils.getDirectoryPaths(testArtifactPath, false);
 
-                Group testGroup = new Group();
+                org.hl7.fhir.r4.model.Group testGroup = null;
+
+                if (version.getVersion() == FhirVersionEnum.R4) {
+                    testGroup = new org.hl7.fhir.r4.model.Group();
+                    testGroup.setActive(true);
+                    testGroup.setType(Group.GroupType.PERSON);
+                    testGroup.setActual(true);
+                }
 
                 // For each test case we need to create a group
                 if (!testCasePaths.isEmpty()) {
                     String measureName = IOUtils.getMeasureTestDirectory(testCasePaths.get(0));
-                    testGroup.setId(measureName);
-                    testGroup.setActive(true);
-                    testGroup.setType(Group.GroupType.PERSON);
-                    testGroup.setActual(true);
+                    if (testGroup != null) {
+                        testGroup.setId(measureName);
 
-                    testGroup.addExtension("http://hl7.org/fhir/StructureDefinition/artifact-testArtifact",
-                            new CanonicalType("http://ecqi.healthit.gov/ecqms/Measure/DischargedonAntithromboticTherapyFHIR"));
+                        testGroup.addExtension("http://hl7.org/fhir/StructureDefinition/artifact-testArtifact",
+                                new CanonicalType("http://ecqi.healthit.gov/ecqms/Measure/" + measureName));
+                    }
 
                     for (String testCasePath : testCasePaths) {
                         try {
@@ -58,19 +67,20 @@ public class TestCaseProcessor
                             // Loop through resources and any that are patients need to be added to the test Group
                             // Handle individual resources when they exist
                             for (IBaseResource resource : resources) {
-                                if (resource.fhirType() == "Patient") {
+                                if ((resource.fhirType() == "Patient") && (version.getVersion() == FhirVersionEnum.R4)) {
                                     org.hl7.fhir.r4.model.Patient patient = (org.hl7.fhir.r4.model.Patient) resource;
-                                    addPatientToGroup(testGroup, patient);
+                                    addPatientToGroupR4(testGroup, patient);
                                 }
 
                                 // Handle bundled resources when that is how they are provided
-                                if (resource.fhirType() == "Bundle") {
-                                    Bundle bundle = (org.hl7.fhir.r4.model.Bundle) resource;
-                                    ArrayList<Resource> bundleResources = BundleUtils.getR4ResourcesFromBundle(bundle);
+                                if ((resource.fhirType() == "Bundle") && (version.getVersion() == FhirVersionEnum.R4)) {
+                                    org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle) resource;
+                                    ArrayList<org.hl7.fhir.r4.model.Resource> bundleResources =
+                                            BundleUtils.getR4ResourcesFromBundle(bundle);
                                     for (IBaseResource bundleResource : bundleResources) {
                                         if (bundleResource.fhirType() == "Patient") {
                                             org.hl7.fhir.r4.model.Patient patient = (org.hl7.fhir.r4.model.Patient) bundleResource;
-                                            addPatientToGroup(testGroup, patient);
+                                            addPatientToGroupR4(testGroup, patient);
                                         }
                                     }
                                 }
@@ -85,18 +95,26 @@ public class TestCaseProcessor
                         }
                     }
 
-                    // Need to output the Group
-                    IOUtils.writeResource(testGroup, testArtifactPath, encoding, fhirContext, true, "Group-" + measureName);
+                    // Need to output the Group if it exists
+                    if (testGroup != null) {
+                        IOUtils.writeResource(testGroup, testArtifactPath, encoding, fhirContext, true,
+                                "Group-" + measureName);
+                    }
                 }
             }
         }
     }
 
-    private void addPatientToGroup(Group group, org.hl7.fhir.r4.model.Patient patient) {
+    private void addPatientToGroupR4(Group group, org.hl7.fhir.r4.model.Patient patient) {
         IdType idType = patient.getIdElement();
-        Group.GroupMemberComponent member = group.addMember();
-        Reference patientRef = new Reference();
+        org.hl7.fhir.r4.model.Group.GroupMemberComponent member = group.addMember();
+        org.hl7.fhir.r4.model.Reference patientRef = new Reference();
         patientRef.setReference("Patient/" + idType.getIdPart());
+
+        // Get name for display value
+        org.hl7.fhir.r4.model.HumanName name = patient.getName().get(0);
+        patientRef.setDisplay(name.getNameAsSingleString());
+
         member.setEntity(patientRef);
     }
 
