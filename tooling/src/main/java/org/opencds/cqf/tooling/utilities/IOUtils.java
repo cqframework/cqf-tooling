@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.util.BundleBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.io.FileUtils;
@@ -36,6 +38,7 @@ import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.tracking.TrackBack;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
@@ -328,6 +331,19 @@ public class IOUtils {
             logger.error(e.getMessage());
             throw new RuntimeException(String.format("Error reading resource from path %s: %s", path, e));
         }
+    }
+
+    public static IBaseBundle bundleResourcesInDirectory(String directoryPath, FhirContext fhirContext, Boolean recursive) {
+        BundleBuilder builder = new BundleBuilder(fhirContext);
+        Iterator<File> fileIterator = FileUtils.iterateFiles(new File(directoryPath), new String[]{ "xml", "json" }, recursive);
+        while (fileIterator.hasNext()) {
+            builder.addCollectionEntry(readResource(fileIterator.next().getAbsolutePath(), fhirContext));
+        }
+        return builder.getBundle();
+    }
+
+    public static boolean isDirectory(String path) {
+        return FileUtils.isDirectory(new File(path));
     }
 
     public static List<String> getFilePaths(String directoryPath, Boolean recursive) {
