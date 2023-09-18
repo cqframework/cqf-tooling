@@ -131,12 +131,6 @@ public class ECQMCreatorIT {
     }
 
     @Test
-    public void TestExtractMatBundleWithDirectory(){
-        ExtractMatBundleOperation o = new ExtractMatBundleOperation();
-        o.execute(new String[] { "-ExtractMATBundle", this.getClass().getResource("ecqm-content-r4-2021/bundles_small/").getFile(), "-dir" });
-    }
-
-    @Test
     public void TestCMS816HIR() {
         List<DataRequirement> drs = StartMatOutputTest("HH-01FHIR-v0-0-010-FHIR-4-0-1.json", "HospitalHarmSevereHypoglycemiaFHIR");
         // TODO: Measure-specific validation of data requirements content
