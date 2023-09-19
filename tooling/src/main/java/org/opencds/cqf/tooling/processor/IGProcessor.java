@@ -20,8 +20,13 @@ import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IGProcessor extends BaseProcessor {
+
+    private static Logger logger = LoggerFactory.getLogger(IGProcessor.class);
+
     public static final String IG_VERSION_REQUIRED = "igVersion required";
 	protected IGBundleProcessor igBundleProcessor;
     protected LibraryProcessor libraryProcessor;
@@ -243,7 +248,7 @@ public class IGProcessor extends BaseProcessor {
     private static void checkForDirectory(String igPath, String pathElement) {
         File directory = new File(FilenameUtils.concat(igPath, pathElement));
         if (!directory.exists()) {
-            System.out.println("No directory found by convention for: " + directory.getName());
+            logger.info("No directory found by convention for: " + directory.getName());
         }
         else {
             // TODO: This is a concept different from "resource directories". It is expected elsewhere (e.g., IOUtils.setupActivityDefinitionPaths)

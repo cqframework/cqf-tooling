@@ -9,8 +9,12 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.r4.model.StructureDefinition.TypeDerivationRule;
 import org.opencds.cqf.tooling.modelinfo.ClassInfoBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FHIRClassInfoBuilder extends ClassInfoBuilder {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public FHIRClassInfoBuilder(Map<String, StructureDefinition> structureDefinitions) {
         super(new FHIRClassInfoSettings(), structureDefinitions);
@@ -19,16 +23,16 @@ public class FHIRClassInfoBuilder extends ClassInfoBuilder {
     @Override
     protected void innerBuild() {
         if (!this.settings.useCQLPrimitives) {
-            System.out.println("Building Primitives");
+            logger.info("Building Primitives");
             this.buildFor("FHIR", (x -> x.getKind() == StructureDefinitionKind.PRIMITIVETYPE));
         }
 
-        System.out.println("Building ComplexTypes");
+        logger.info("Building ComplexTypes");
         this.buildFor("FHIR", (x -> (x.getKind() == StructureDefinitionKind.COMPLEXTYPE && (x.getBaseDefinition() == null
                 || !x.getBaseDefinition().equals("http://hl7.org/fhir/StructureDefinition/Extension")))
                 && !x.getUrl().equals("http://hl7.org/fhir/StructureDefinition/elementdefinition-de")));
 
-        System.out.println("Building Resources");
+        logger.info("Building Resources");
         this.buildFor("FHIR", (x -> x.getKind() == StructureDefinitionKind.RESOURCE
                 && (!x.hasDerivation() || x.getDerivation() == TypeDerivationRule.SPECIALIZATION)));
     }

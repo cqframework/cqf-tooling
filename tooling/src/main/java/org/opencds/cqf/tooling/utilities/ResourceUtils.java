@@ -316,7 +316,7 @@ public class ResourceUtils
         for (String valueSetUrl : dependencies) {
           message += valueSetUrl + " MISSING \r\n";
         }
-        System.out.println(message);
+        logger.error(message);
         throw new Exception(message);
       }
       return valueSetResources;
@@ -347,8 +347,8 @@ public class ResourceUtils
       try {
         elm = getElmFromCql(cqlContentPath);
       } catch (Exception e) {
-        System.out.println("error processing cql: ");
-        System.out.println(e.getMessage());
+        logger.error("error processing cql: ");
+        logger.error(e.getMessage());
         return includedDefs;
       }
 
@@ -366,7 +366,7 @@ public class ResourceUtils
       try {
         elm = getElmFromCql(cqlContentPath);
       } catch (Exception e) {
-        System.out.println("error translating cql: ");
+        logger.error("error translating cql: ");
         return valueSetDefs;
       }
       if (elm.getValueSets() != null && !elm.getValueSets().getDef().isEmpty()) {

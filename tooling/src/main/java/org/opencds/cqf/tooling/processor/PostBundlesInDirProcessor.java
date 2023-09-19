@@ -10,9 +10,13 @@ import org.opencds.cqf.tooling.utilities.HttpClientUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PostBundlesInDirProcessor {
-    
+    private static Logger logger = LoggerFactory.getLogger(PostBundlesInDirProcessor.class);
+
+
     public enum FHIRVersion {
         FHIR3("fhir3"), FHIR4("fhir4");
 
@@ -64,9 +68,9 @@ public class PostBundlesInDirProcessor {
         if (fhirUri != null && !fhirUri.equals("")) {  
             try {
                 HttpClientUtils.post(fhirUri, bundle, encoding, fhirContext);
-                System.out.println("Resource successfully posted to FHIR server (" + fhirUri + "): " + bundle.getIdElement().getIdPart());
+                logger.info("Resource successfully posted to FHIR server (" + fhirUri + "): " + bundle.getIdElement().getIdPart());
             } catch (Exception e) {
-                System.out.println(bundle.getIdElement().getIdPart() + e);             
+                logger.error(bundle.getIdElement().getIdPart() + e);
             }  
         }
     }

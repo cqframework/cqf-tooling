@@ -22,8 +22,12 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ResourceLoader {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public Map<String, StructureDefinition> loadPaths(String basePath, String resourcePaths) {
 
@@ -31,11 +35,11 @@ public class ResourceLoader {
 
         String[] paths = resourcePaths.split(";");
         for (String path : paths) {
-            System.out.println("Reading " + path + " StructureDefinitions");
+            logger.info("Reading " + path + " StructureDefinitions");
             resources.addAll(this.readStructureDefFromFolder(Paths.get(basePath, path).toString()));
         }
 
-        System.out.println("Indexing StructureDefinitions by Id");
+        logger.info("Indexing StructureDefinitions by Id");
         return this.indexResources(resources);
     }
 
@@ -56,7 +60,7 @@ public class ResourceLoader {
             if (!resourcesById.containsKey(id)) {
                 resourcesById.put(id, sd);
             } else {
-                System.out.println("Duplicate url found for: " + sd.getUrl());
+                logger.info("Duplicate url found for: " + sd.getUrl());
             }
         }
 

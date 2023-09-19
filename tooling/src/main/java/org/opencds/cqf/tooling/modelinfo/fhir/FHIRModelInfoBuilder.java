@@ -15,8 +15,12 @@ import org.opencds.cqf.tooling.modelinfo.Atlas;
 import org.opencds.cqf.tooling.modelinfo.ContextInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.ModelInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.SearchInfoBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FHIRModelInfoBuilder extends ModelInfoBuilder {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     private String fhirHelpersPath;
     private SearchInfoBuilder searchInfoBuilder;
     private ContextInfoBuilder contextInfoBuilder;
@@ -324,7 +328,7 @@ public class FHIRModelInfoBuilder extends ModelInfoBuilder {
             pw.close();
         }
         catch (Exception e) {
-            System.out.println("Unable to write FileHelpers");
+            logger.error("Unable to write FileHelpers");
         }
     }
 

@@ -35,8 +35,13 @@ import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DTProcessor extends Operation {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
     private String encoding = "json"; // -encoding (-e)
 
@@ -125,10 +130,10 @@ public class DTProcessor extends Operation {
     private void processDecisionTablePage(Workbook workbook, String page) {
         Sheet sheet = workbook.getSheet(page);
         if (sheet == null) {
-            System.out.println(String.format("Sheet %s not found in the Workbook, so no processing was done.", page));
+            logger.info(String.format("Sheet %s not found in the Workbook, so no processing was done.", page));
         }
         else {
-            System.out.println(String.format("Processing Sheet %s.", page));
+            logger.info(String.format("Processing Sheet %s.", page));
             processDecisionTableSheet(workbook, sheet);
         }
     }

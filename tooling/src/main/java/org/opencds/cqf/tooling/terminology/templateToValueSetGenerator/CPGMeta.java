@@ -2,11 +2,16 @@ package org.opencds.cqf.tooling.terminology.templateToValueSetGenerator;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.Date;
 
 public class CPGMeta {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
     private String id;
     private String version;
     private String name;
@@ -97,8 +102,8 @@ public class CPGMeta {
                 ValueSet tempVs = fhirContext.newXmlParser().parseResource(ValueSet.class, "<ValueSet>" + compose + "</ValueSet>");
                 vs.setCompose(tempVs.getCompose());
             } catch (Exception e) {
-                System.out.println("An error occurred in the compose for the sheet with id: " + this.id);
-                e.printStackTrace();
+                logger.info("An error occurred in the compose for the sheet with id: " + this.id);
+                logger.error(e.getMessage());
             }
         }
 

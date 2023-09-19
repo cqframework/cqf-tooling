@@ -15,16 +15,20 @@ import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestCaseProcessor
 {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
     public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext) {
         refreshTestCases(path, encoding, fhirContext, null);
     }
 
     public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, @Nullable List<String> refreshedResourcesNames)
     {
-        System.out.println("Refreshing tests");
+        logger.info("Refreshing tests");
         List<String> resourceTypeTestGroups = IOUtils.getDirectoryPaths(path, false);
 
         for (String group : resourceTypeTestGroups) {

@@ -33,8 +33,12 @@ import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Atlas {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public Atlas() {
         resources = new HashMap<>();
@@ -116,7 +120,7 @@ public class Atlas {
     public void loadPaths(String basePath, String resourcePaths) {
         String[] paths = resourcePaths.split(";");
         for (String path : paths) {
-            System.out.println("Reading " + path + " Conformance Resources");
+            logger.info("Reading " + path + " Conformance Resources");
             readConformanceResourcesFromFolder(Paths.get(basePath, path).toString());
         }
     }
@@ -139,7 +143,7 @@ public class Atlas {
             if (!resourcesById.containsKey(id)) {
                 resourcesById.put(id, sd);
             } else {
-                System.out.println("Duplicate url found for: " + sd.getUrl());
+                logger.info("Duplicate url found for: " + sd.getUrl());
             }
         }
 
@@ -154,11 +158,11 @@ public class Atlas {
                 capabilityStatements.put(id, capabilityStatement);
             }
             else {
-                System.out.println("Duplicate CapabilityStatement with id " + id);
+                logger.info("Duplicate CapabilityStatement with id " + id);
             }
         }
         else {
-            System.out.println("Duplicate url found for: " + capabilityStatement.getUrl());
+            logger.info("Duplicate url found for: " + capabilityStatement.getUrl());
         }
     }
 
@@ -170,11 +174,11 @@ public class Atlas {
                 compartmentDefinitions.put(id, compartmentDefinition);
             }
             else {
-                System.out.println("Duplicate CompartmentDefinition with id " + id);
+                logger.info("Duplicate CompartmentDefinition with id " + id);
             }
         }
         else {
-            System.out.println("Duplicate url found for: " + compartmentDefinition.getUrl());
+            logger.info("Duplicate url found for: " + compartmentDefinition.getUrl());
         }
     }
 
@@ -186,11 +190,11 @@ public class Atlas {
                 structureDefinitions.put(id, structureDefinition);
             }
             else {
-                System.out.println("Duplicate StructureDefinition with id " + id);
+                logger.info("Duplicate StructureDefinition with id " + id);
             }
         }
         else {
-            System.out.println("Duplicate url found for: " + structureDefinition.getUrl());
+            logger.info("Duplicate url found for: " + structureDefinition.getUrl());
         }
     }
 
@@ -202,11 +206,11 @@ public class Atlas {
                 operationDefinitions.put(id, operationDefinition);
             }
             else {
-                System.out.println("Duplicate OperationDefinition with id " + id);
+                logger.info("Duplicate OperationDefinition with id " + id);
             }
         }
         else {
-            System.out.println("Duplicate url found for: " + operationDefinition.getUrl());
+            logger.info("Duplicate url found for: " + operationDefinition.getUrl());
         }
     }
 
@@ -218,11 +222,11 @@ public class Atlas {
                 searchParameters.put(id, searchParameter);
             }
             else {
-                System.out.println("Duplicate SearchParameter with id " + id);
+                logger.info("Duplicate SearchParameter with id " + id);
             }
         }
         else {
-            System.out.println("Duplicate url found for: " + searchParameter.getUrl());
+            logger.info("Duplicate url found for: " + searchParameter.getUrl());
         }
     }
 
@@ -234,11 +238,11 @@ public class Atlas {
                 implementationGuides.put(id, implementationGuide);
             }
             else {
-                System.out.println("Duplicate ImplementationGuide with id " + id);
+                logger.info("Duplicate ImplementationGuide with id " + id);
             }
         }
         else {
-            System.out.println("Duplicate url found for: " + implementationGuide.getUrl());
+            logger.info("Duplicate url found for: " + implementationGuide.getUrl());
         }
     }
 
@@ -250,11 +254,11 @@ public class Atlas {
                 codeSystems.put(id, codeSystem);
             }
             else {
-                System.out.println("Duplicate CodeSystem with id " + id);
+                logger.info("Duplicate CodeSystem with id " + id);
             }
         }
         else {
-            System.out.println("Duplicate url found for: " + codeSystem.getUrl());
+            logger.info("Duplicate url found for: " + codeSystem.getUrl());
         }
     }
 
@@ -266,11 +270,11 @@ public class Atlas {
                 valueSets.put(id, valueSet);
             }
             else {
-                System.out.println("Duplicate ValueSet with id " + id);
+                logger.info("Duplicate ValueSet with id " + id);
             }
         }
         else {
-            System.out.println("Duplicate url found for: " + valueSet.getUrl());
+            logger.info("Duplicate url found for: " + valueSet.getUrl());
         }
     }
 
@@ -282,11 +286,11 @@ public class Atlas {
                 conceptMaps.put(id, conceptMap);
             }
             else {
-                System.out.println("Duplicate ConceptMap with id " + id);
+                logger.info("Duplicate ConceptMap with id " + id);
             }
         }
         else {
-            System.out.println("Duplicate url found for: " + conceptMap.getUrl());
+            logger.info("Duplicate url found for: " + conceptMap.getUrl());
         }
     }
 
@@ -298,11 +302,11 @@ public class Atlas {
                 namingSystems.put(id, namingSystem);
             }
             else {
-                System.out.println("Duplicate NamingSystem with id " + id);
+                logger.info("Duplicate NamingSystem with id " + id);
             }
         }
         else {
-            System.out.println("Duplicate url found for: " + namingSystem.getUrl());
+            logger.info("Duplicate url found for: " + namingSystem.getUrl());
         }
     }
 
@@ -338,7 +342,7 @@ public class Atlas {
             indexNamingSystem((NamingSystem)resource);
         }
         else {
-            System.out.println("Resource with id " + resource.getIdElement().toString() + " skipped");
+            logger.info("Resource with id " + resource.getIdElement().toString() + " skipped");
         }
     }
 

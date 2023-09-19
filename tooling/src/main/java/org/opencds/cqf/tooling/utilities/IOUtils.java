@@ -41,10 +41,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.parser.IParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IOUtils 
-{        
-    
+{
+    private static Logger logger = LoggerFactory.getLogger(IOUtils.class);
+
     public enum Encoding 
     { 
         CQL("cql"), JSON("json"), XML("xml"), UNKNOWN(""); 
@@ -390,7 +393,7 @@ public class IOUtils
         try {
             directories = Arrays.asList(Optional.ofNullable(parentDirectory.listFiles()).<NoSuchElementException>orElseThrow(() -> new NoSuchElementException()));
         } catch (Exception e) {
-            System.out.println("No paths found for the Directory " + path + ":");
+            logger.error("No paths found for the Directory " + path + ":");
             return directoryPaths;
         }
         
@@ -683,7 +686,7 @@ public class IOUtils
                     resources.put(path, IOUtils.readResource(path, fhirContext, true));
                 } catch (Exception e) {
                     if (path.toLowerCase().contains("valuesets") || path.toLowerCase().contains("valueset")) {
-                        System.out.println("Error reading in Terminology from path: " + path + "\n" + e);
+                        logger.error("Error reading in Terminology from path: " + path + "\n" + e);
                     }
                 }
             }
@@ -755,7 +758,7 @@ public class IOUtils
                     resources.put(path, resource);
                 } catch (Exception e) {
                     if(path.toLowerCase().contains("library")) {
-                        System.out.println("Error reading in Library from path: " + path + "\n" + e);
+                        logger.error("Error reading in Library from path: " + path + "\n" + e);
                     }
                 }
             }
@@ -806,7 +809,7 @@ public class IOUtils
                     resources.put(path, resource);
                 } catch (Exception e) {
                     if(path.toLowerCase().contains("measure")) {
-                        System.out.println("Error reading in Measure from path: " + path + "\n" + e);
+                        logger.error("Error reading in Measure from path: " + path + "\n" + e);
                     }
                 }
             }
@@ -881,7 +884,7 @@ public class IOUtils
                 try {
                     resources.put(path, IOUtils.readResource(path, fhirContext, true));
                 } catch (Exception e) {
-                    System.out.println(String.format("Error setting PlanDefinition paths while reading resource at: '%s'. Error: %s", path, e.getMessage()));
+                    logger.error(String.format("Error setting PlanDefinition paths while reading resource at: '%s'. Error: %s", path, e.getMessage()));
                 }
             }
             RuntimeResourceDefinition planDefinitionDefinition = ResourceUtils.getResourceDefinition(fhirContext, "PlanDefinition");
@@ -929,7 +932,7 @@ public class IOUtils
                 try {
                     resources.put(path, IOUtils.readResource(path, fhirContext, true));
                 } catch (Exception e) {
-                    System.out.println(String.format("Error setting Questionnaire paths while reading resource at: '%s'. Error: %s", path, e.getMessage()));
+                    logger.error(String.format("Error setting Questionnaire paths while reading resource at: '%s'. Error: %s", path, e.getMessage()));
                 }
             }
             RuntimeResourceDefinition questionnaireDefinition = ResourceUtils.getResourceDefinition(fhirContext, "Questionnaire");
@@ -948,7 +951,7 @@ public class IOUtils
     private static HashSet<String> activityDefinitionPaths = new LinkedHashSet<String>();
     public static HashSet<String> getActivityDefinitionPaths(FhirContext fhirContext) {
         if (activityDefinitionPaths.isEmpty()) {
-            System.out.println("Reading activitydefinitions");
+            logger.info("Reading activitydefinitions");
             setupActivityDefinitionPaths(fhirContext);
         }
         return activityDefinitionPaths;
@@ -1011,7 +1014,7 @@ public class IOUtils
                     resources.put(path, IOUtils.readResource(path, fhirContext, true));
                 } catch (Exception e) {
                     if(path.toLowerCase().contains("device")) {
-                        System.out.println("Error reading in Device from path: " + path + "\n" + e);
+                        logger.error("Error reading in Device from path: " + path + "\n" + e);
                     }
                 }
             }
@@ -1031,7 +1034,7 @@ public class IOUtils
                 fileExtension.equalsIgnoreCase("json")){
             return true;
         }
-        System.out.println("The file " + fileDirPath + libraryName + " is not the right type of file.");
+        logger.info("The file " + fileDirPath + libraryName + " is not the right type of file.");
         return false;
     }
 

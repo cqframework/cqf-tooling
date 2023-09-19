@@ -5,13 +5,15 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.testcase.TestCaseOld;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 
 public class Helper {
 
-
+    private static Logger logger = LoggerFactory.getLogger(Helper.class);
 
 
     // Assumption made:
@@ -41,12 +43,12 @@ public class Helper {
         if (ret.contains("FALSE")) return "false";
 
         String[] tmp = ret.split("=");
-        System.out.println(inputCell.getStringCellValue());
+        logger.info(inputCell.getStringCellValue());
         String name = ret.split("=")[0];
         String condition = ret.split(" = ")[1];
 
 
-        System.out.println(String.format("%s RET RET RET", ret));
+        logger.info(String.format("%s RET RET RET", ret));
         return name;
     }
 

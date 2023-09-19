@@ -8,8 +8,11 @@ import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.opencds.cqf.tooling.modelinfo.Atlas;
 import org.opencds.cqf.tooling.modelinfo.ContextInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.ModelInfoBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QICoreModelInfoBuilder extends ModelInfoBuilder {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     private String helpersPath;
     private ContextInfoBuilder contextInfoBuilder;
 
@@ -137,7 +140,7 @@ public class QICoreModelInfoBuilder extends ModelInfoBuilder {
             pw.close();
         }
         catch (Exception e) {
-            System.out.println("Unable to write QICoreHelpers");
+            logger.error("Unable to write QICoreHelpers");
         }
     }
 

@@ -57,7 +57,7 @@ public class LibraryProcessor extends BaseProcessor {
         return refreshIgLibraryContent(parentContext, outputEncoding, null, versioned, fhirContext, shouldApplySoftwareSystemStamp);
     }
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
-        System.out.println("Refreshing libraries...");
+        logger.info("Refreshing libraries...");
         // ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
 
         LibraryProcessor libraryProcessor;

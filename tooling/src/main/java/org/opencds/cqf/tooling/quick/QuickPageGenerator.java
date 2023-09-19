@@ -20,8 +20,12 @@ import org.jsoup.nodes.Element;
 import org.opencds.cqf.tooling.Operation;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QuickPageGenerator extends Operation {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     // Assuming R4
     private FhirContext context = FhirContext.forR4Cached();
@@ -68,7 +72,7 @@ public class QuickPageGenerator extends Operation {
      */
     private void processQiCoreProfiles() throws IOException, FHIRException {
         for (Map.Entry<String, StructureDefinition> entrySet : atlas.getQicoreProfiles().entrySet()) {
-            System.out.println("Processing the " + entrySet.getKey() + " profile...");
+            logger.info("Processing the " + entrySet.getKey() + " profile...");
 
             // Initialize HTML page
             HtmlBuilder html = new HtmlBuilder(entrySet.getKey(), atlas);
@@ -207,7 +211,7 @@ public class QuickPageGenerator extends Operation {
                             html.buildRow(mustSupport, isModifier, qicoreExtension, field, card, type, description);
                         }
 
-                        System.out.println(
+                        logger.info(
                                 String.format("Field: %s, Card: %s, Type: %s, Description: %s", field, card, type, description)
                         );
                     }

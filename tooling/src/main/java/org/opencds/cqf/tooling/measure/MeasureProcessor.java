@@ -49,7 +49,7 @@ public class MeasureProcessor extends BaseProcessor {
 
     public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, String measureOutputDirectory, Boolean versioned, FhirContext fhirContext, String measureToRefreshPath, Boolean shouldApplySoftwareSystemStamp) {
 
-        System.out.println("Refreshing measures...");
+        logger.info("Refreshing measures...");
 
         MeasureProcessor measureProcessor;
         switch (fhirContext.getVersion().getVersion()) {
