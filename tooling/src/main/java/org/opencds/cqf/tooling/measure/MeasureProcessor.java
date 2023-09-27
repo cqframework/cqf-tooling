@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling.measure;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -163,6 +165,7 @@ public class MeasureProcessor extends BaseProcessor {
 
                 if (shouldPersist) {
                     String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), MeasureTestGroupName), measureName);
+
                     persistBundle(igPath, bundleDestPath, measureName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri, addBundleTimestamp);
                     bundleFiles(igPath, bundleDestPath, measureName, binaryPaths, measureSourcePath, primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion, addBundleTimestamp);
                     bundledMeasures.add(measureSourcePath);
@@ -198,11 +201,34 @@ public class MeasureProcessor extends BaseProcessor {
     }
 
     private void persistBundle(String igPath, String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, List<IBaseResource> resources, String fhirUri, Boolean addBundleTimestamp) {
+        //Check for test files in bundleDestPath + "-files", loop through if exists,
+        // find all files that start with "tests-", post to fhir server following same folder structure:
+        persistTestFiles(bundleDestPath, libraryName, encoding, fhirContext, fhirUri);
+
         IOUtils.initializeDirectory(bundleDestPath);
         Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext, addBundleTimestamp, this.getIdentifiers());
         IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);
 
         BundleUtils.postBundle(encoding, fhirContext, fhirUri, (IBaseResource) bundle);
+    }
+
+    private void persistTestFiles(String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, String fhirUri){
+
+        String filesLoc = bundleDestPath + File.separator + libraryName + "-files";
+        File directory = new File(filesLoc);
+        if (directory.exists()) {
+            String filesPostLoc = fhirUri + "/" + libraryName + "-files";
+            File[] filesInDir = directory.listFiles();
+            if (!(filesInDir == null || filesInDir.length == 0)) {
+                for (File file : filesInDir) {
+                    if (file.getName().toLowerCase().startsWith("tests-")){
+                        IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext, true);
+                        BundleUtils.postBundle(encoding, fhirContext, fhirUri, resource);
+                    }
+                }
+            }
+
+        }
     }
 
     private void bundleFiles(String igPath, String bundleDestPath, String libraryName, List<String> binaryPaths, String resourceFocusSourcePath,
