@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 
@@ -163,7 +164,9 @@ public class BundleToResources extends Operation {
     
     // Output
     public void output(IBaseResource resource, FhirContext context) {
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding)) {
+        try (FileOutputStream writer = new FileOutputStream(
+                FilenameUtils.concat(getOutputPath(),
+                        resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding))) {
             writer.write(
                 encoding.equals("json")
                     ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()

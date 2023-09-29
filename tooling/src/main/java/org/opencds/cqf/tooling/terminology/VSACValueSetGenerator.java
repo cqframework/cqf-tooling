@@ -1,5 +1,6 @@
 package org.opencds.cqf.tooling.terminology;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Instant;
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -297,7 +299,7 @@ public class VSACValueSetGenerator extends Operation {
                         : encoding.toLowerCase().startsWith("j")
                                 ? FhirContext.forDstu3Cached().newJsonParser()
                                 : FhirContext.forDstu3Cached().newXmlParser();
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + fileName)) {
+        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(getOutputPath(), fileName))) {
             writer.write(parser.setPrettyPrint(true).encodeResourceToString(vs).getBytes());
             writer.flush();
         } catch (IOException e) {

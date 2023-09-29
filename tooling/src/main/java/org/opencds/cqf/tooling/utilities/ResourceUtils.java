@@ -375,7 +375,7 @@ public class ResourceUtils {
    }
 
    public static CqlTranslatorOptions getTranslatorOptions(String folder) {
-      String optionsFileName = folder + File.separator + "cql-options.json";
+      String optionsFileName = FilenameUtils.concat(folder,"cql-options.json");
       CqlTranslatorOptions options;
       File file = new File(optionsFileName);
       if (file.exists()) {
@@ -846,7 +846,8 @@ public class ResourceUtils {
    }
 
    public static void outputResource(IBaseResource resource, String encoding, FhirContext context, String outputPath) {
-      try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding)) {
+      try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(outputPath,
+              resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding))) {
          writer.write(
                  encoding.equals("json")
                          ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
@@ -860,7 +861,8 @@ public class ResourceUtils {
    }
 
    public static void outputResourceByName(IBaseResource resource, String encoding, FhirContext context, String outputPath, String name) {
-      try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + name + "." + encoding)) {
+      try (FileOutputStream writer = new FileOutputStream(
+              FilenameUtils.concat(outputPath, name + "." + encoding))) {
          writer.write(
                  encoding.equals("json")
                          ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()

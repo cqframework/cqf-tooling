@@ -12,6 +12,7 @@ import java.util.Map;
 // import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 
+import org.apache.commons.io.FilenameUtils;
 import org.hl7.elm_modelinfo.r1.ClassInfo;
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
@@ -162,7 +163,8 @@ public class StructureDefinitionToModelInfo extends Operation {
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             ciBuilder.afterBuild();
 
-            String fhirHelpersPath = this.getOutputPath() + "/" + modelName + "Helpers-" + modelVersion + ".cql";
+            String fhirHelpersPath = FilenameUtils.concat(this.getOutputPath(),
+                    modelName + "Helpers-" + modelVersion + ".cql");
             miBuilder = new FHIRModelInfoBuilder(modelVersion, typeInfos, atlas, fhirHelpersPath);
             mi = miBuilder.build();
         }
@@ -173,7 +175,8 @@ public class StructureDefinitionToModelInfo extends Operation {
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             ciBuilder.afterBuild();
 
-            String helpersPath = this.getOutputPath() + "/" + modelName + "Helpers-" + modelVersion + ".cql";
+            String helpersPath = FilenameUtils.concat(this.getOutputPath(),
+                    modelName + "Helpers-" + modelVersion + ".cql");
             miBuilder = new USCoreModelInfoBuilder(modelVersion, typeInfos, atlas, helpersPath);
             mi = miBuilder.build();
         }
@@ -184,7 +187,8 @@ public class StructureDefinitionToModelInfo extends Operation {
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             ciBuilder.afterBuild();
 
-            String helpersPath = this.getOutputPath() + "/" + modelName + "Helpers-" + modelVersion + ".cql";
+            String helpersPath = FilenameUtils.concat(this.getOutputPath(),
+                    modelName + "Helpers-" + modelVersion + ".cql");
             miBuilder = new QICoreModelInfoBuilder(modelVersion, typeInfos, atlas, helpersPath);
             mi = miBuilder.build();
         }
@@ -235,7 +239,7 @@ public class StructureDefinitionToModelInfo extends Operation {
     }
 
     private void writeOutput(String fileName, String content) throws IOException {
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + fileName)) {
+        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(getOutputPath(), fileName))) {
             writer.write(content.getBytes());
             writer.flush();
         }

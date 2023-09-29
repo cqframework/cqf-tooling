@@ -1,5 +1,6 @@
 package org.opencds.cqf.tooling.operation;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.util.WorkbookUtil;
@@ -83,7 +84,8 @@ public class ProfilesToSpreadsheet extends StructureDefinitionToSpreadsheetBase 
         bindingObjects.forEach((bindingObject) -> {
             addBindingObjectRowDataToCurrentSheet(firstSheet, rowCount.getAndAccumulate(1, ibo), bindingObject);
         });
-        SpreadsheetCreatorHelper.writeSpreadSheet(workBook, getOutputPath() + separator + modelName + modelVersion + ".xlsx");
+        SpreadsheetCreatorHelper.writeSpreadSheet(workBook,
+                FilenameUtils.concat(getOutputPath(), modelName + modelVersion + ".xlsx"));
     }
 
     private List<String> createHeaderNameList() {

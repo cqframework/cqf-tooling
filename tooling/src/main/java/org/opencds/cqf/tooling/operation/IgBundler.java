@@ -31,6 +31,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -157,12 +158,12 @@ public class IgBundler extends Operation
                 if (resources.isJsonArray()) {
                     for (final JsonElement path : resources.getAsJsonArray()) {
                         if (path.isJsonPrimitive()) {
-                            resourcePaths.add(pathToIg + "/" + path.getAsString());
+                            resourcePaths.add(FilenameUtils.concat(pathToIg, path.getAsString()));
                             outputBundles.put(path.getAsString(), null);
                         }
                     }
                 } else {
-                    resourcePaths.add(pathToIg + "/" + resources.getAsString());
+                    resourcePaths.add(FilenameUtils.concat(pathToIg, resources.getAsString()));
                 }
             }
         }
@@ -247,7 +248,7 @@ public class IgBundler extends Operation
     private void outputBundles() {
         for (final Map.Entry<String, IBaseResource> set : outputBundles.entrySet()) {
             try (FileOutputStream writer = new FileOutputStream(
-                    getOutputPath() + "/" + set.getKey() + "." + encoding)) {
+                    FilenameUtils.concat(getOutputPath(), set.getKey() + "." + encoding))) {
                 writer.write(encoding.equals("json")
                         ? jsonParser.setPrettyPrint(true).encodeResourceToString(set.getValue()).getBytes()
                         : xmlParser.setPrettyPrint(true).encodeResourceToString(set.getValue()).getBytes());

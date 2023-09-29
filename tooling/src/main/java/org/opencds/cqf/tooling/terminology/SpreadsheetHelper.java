@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
@@ -164,7 +165,7 @@ public class SpreadsheetHelper {
                         : encoding.toLowerCase().startsWith("j")
                         ? FhirContext.forDstu3Cached().newJsonParser()
                         : FhirContext.forDstu3Cached().newXmlParser();
-        try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + fileName)) {
+        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(outputPath, fileName))) {
             writer.write(parser.setPrettyPrint(true).encodeResourceToString(vs).getBytes());
             writer.flush();
         } catch (IOException e) {

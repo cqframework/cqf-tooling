@@ -1,5 +1,6 @@
 package org.opencds.cqf.tooling.operation;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -91,7 +92,8 @@ public class QICoreElementsToSpreadsheet extends StructureDefinitionToSpreadshee
         });
         firstSheet.setColumnWidth(ConstraintColumn, ConstraintColumnWidth);
 //        firstSheet.autoSizeColumn(ConstraintColumn);
-        SpreadsheetCreatorHelper.writeSpreadSheet(workBook, getOutputPath() + separator + modelName + modelVersion + ".xlsx");
+        SpreadsheetCreatorHelper.writeSpreadSheet(workBook,
+                FilenameUtils.concat(getOutputPath(), modelName + modelVersion + ".xlsx"));
     }
 
     private List<String> createHeaderNameList() {

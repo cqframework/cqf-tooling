@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -138,7 +139,7 @@ public class SpreadsheetToCQLOperation extends Operation {
             result.append(System.lineSeparator());
         }
 
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + File.separator + spreadsheetName + ".cql")) {
+        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(getOutputPath(),spreadsheetName + ".cql"))) {
             writer.write(result.toString().getBytes());
             writer.flush();
         } catch (IOException e) {

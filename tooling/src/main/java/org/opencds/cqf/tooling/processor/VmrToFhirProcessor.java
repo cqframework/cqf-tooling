@@ -12,6 +12,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -58,7 +59,7 @@ public class VmrToFhirProcessor {
 
     private static void writeOutput(String fhirOutputPath, FhirContext context, Patient patient, List<IAnyResource> resources,
             BundleBuilder bundleBuilder) {
-        File outputDirectory = new File(fhirOutputPath + "/" + patient.getIdElement().getIdPart());
+        File outputDirectory = new File(FilenameUtils.concat(fhirOutputPath, patient.getIdElement().getIdPart()));
         if (!outputDirectory.isDirectory()) {
             outputDirectory.mkdirs();
         }

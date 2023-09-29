@@ -1,5 +1,6 @@
 package org.opencds.cqf.tooling.terminology.distributable;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Instant;
@@ -9,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -281,7 +283,8 @@ public class DistributableValueSetGenerator extends Operation {
 
     private void output(List<ValueSet> valueSets) {
         for (ValueSet valueSet : valueSets) {
-            try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + "valueset-" + valueSet.getId() + "." + encoding)) {
+            try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(getOutputPath(),
+                    "valueset-" + valueSet.getId() + "." + encoding))) {
                 writer.write(
                         encoding.equals("json")
                                 ? fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet).getBytes()

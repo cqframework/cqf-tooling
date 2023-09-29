@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.cdsframework.dto.CdsCodeDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicateDTO;
 import org.cdsframework.dto.ConditionCriteriaPredicatePartConceptDTO;
@@ -114,8 +115,7 @@ public class HtmlFileVisitor implements Visitor {
     @Override
     public ElmContext visit(List<ConditionDTO> rootNode) {
         htmlStrings.entrySet().stream().forEach(entry -> {
-            // Dont like this concat
-            String filePath = outputDirectoryPath.concat("/" + entry.getKey() + ".html");
+            String filePath = FilenameUtils.concat(outputDirectoryPath, entry.getKey() + ".html");
             File file = new File(filePath);
             String content = "<html><head><title>" + entry.getKey() + "</title></head><body><p>" + entry.getValue()
                     + "</p></body></html>";

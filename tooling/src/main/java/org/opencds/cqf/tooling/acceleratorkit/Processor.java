@@ -15,6 +15,7 @@ import java.util.NoSuchElementException;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -2574,7 +2575,8 @@ public class Processor extends Operation {
 
     /* Write Methods */
     public void writeResource(String path, Resource resource) {
-        String outputFilePath = path + "/" + resource.getResourceType().toString().toLowerCase() + "-" + resource.getIdElement().getIdPart() + "." + encoding;
+        String outputFilePath = FilenameUtils.concat(path,
+                resource.getResourceType().toString().toLowerCase() + "-" + resource.getIdElement().getIdPart() + "." + encoding);
         try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
             writer.write(
                 encoding.equals("json")
@@ -2976,7 +2978,8 @@ public class Processor extends Operation {
         }
 
         ensureCqlPath(scopePath);
-        try (FileOutputStream writer = new FileOutputStream(getCqlPath(scopePath) + "/" + scope + "Concepts.cql")) {
+        try (FileOutputStream writer = new FileOutputStream(
+                FilenameUtils.concat(getCqlPath(scopePath),scope + "Concepts.cql"))) {
             writer.write(sb.toString().getBytes());
             writer.flush();
         }
@@ -3420,7 +3423,8 @@ public class Processor extends Operation {
         }
 
         ensureCqlPath(scopePath);
-        try (FileOutputStream writer = new FileOutputStream(getCqlPath(scopePath) + "/" + scope + (context.equals("Encounter") ? "Contact" : "") + "DataElements.cql")) {
+        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(getCqlPath(scopePath),
+                scope + (context.equals("Encounter") ? "Contact" : "") + "DataElements.cql"))) {
             writer.write(sb.toString().getBytes());
             writer.flush();
         }
@@ -3429,7 +3433,8 @@ public class Processor extends Operation {
             throw new IllegalArgumentException("Error writing concepts library source");
         }
 
-        try (FileOutputStream writer = new FileOutputStream(getCqlPath(scopePath) + "/" + scope + "DataElementsByActivity.md")) {
+        try (FileOutputStream writer = new FileOutputStream(
+                FilenameUtils.concat(getCqlPath(scopePath), scope + "DataElementsByActivity.md"))) {
             writer.write(activityIndex.toString().getBytes());
             writer.flush();
         }

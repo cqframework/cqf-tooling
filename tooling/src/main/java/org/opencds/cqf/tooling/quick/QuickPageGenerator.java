@@ -1,5 +1,6 @@
 package org.opencds.cqf.tooling.quick;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -491,7 +493,7 @@ public class QuickPageGenerator extends Operation {
      * @throws IOException
      */
     private void writeHtmlFile(String fileName, String html) throws IOException {
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + fileName)) {
+        try (FileOutputStream writer = new FileOutputStream(FilenameUtils.concat(getOutputPath(), fileName))) {
             writer.write(html.getBytes());
             writer.flush();
         }

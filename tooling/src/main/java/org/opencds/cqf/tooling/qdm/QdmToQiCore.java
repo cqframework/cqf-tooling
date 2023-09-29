@@ -1,6 +1,7 @@
 package org.opencds.cqf.tooling.qdm;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,6 +10,7 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opencds.cqf.tooling.Operation;
 
@@ -172,7 +174,8 @@ public class QdmToQiCore extends Operation {
     }
 
     private void writeOutput(String fileName, String content) throws IOException {
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + fileName + ".html")) {
+        try (FileOutputStream writer = new FileOutputStream(
+                FilenameUtils.concat(getOutputPath(),fileName + ".html"))) {
             writer.write(content.getBytes());
             writer.flush();
         }

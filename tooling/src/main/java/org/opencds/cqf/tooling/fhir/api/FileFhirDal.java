@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.cqframework.fhir.api.FhirDal;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -46,7 +47,7 @@ public class FileFhirDal implements FhirDal {
     if (resourceTypeDefined(resource)){
 
       //ensure resource type directory exists
-      String typePath = this.resourceDir + "/" + resource.getIdElement().getResourceType();
+      String typePath = FilenameUtils.concat(this.resourceDir, resource.getIdElement().getResourceType());
       String path = getPath(resource);
 
       File typeDir = new File(typePath);
@@ -129,11 +130,13 @@ public class FileFhirDal implements FhirDal {
   }
 
   private String getPath(IBaseResource resource){
-    return this.resourceDir + "/" + resource.getIdElement().getResourceType() + "/" + resource.getIdElement().getIdPart() + "." + this.encoding.toString();
+    return FilenameUtils.concat(FilenameUtils.concat(this.resourceDir, resource.getIdElement().getResourceType()),
+            (resource.getIdElement().getIdPart() + "." + this.encoding.toString()));
   }
 
   private String getPath(IIdType id){
-    return this.resourceDir + "/" + id.getResourceType() + "/" + id.getIdPart() + "." + this.encoding.toString();
+    return FilenameUtils.concat(FilenameUtils.concat(this.resourceDir, id.getResourceType()),
+            (id.getIdPart() + "." + this.encoding.toString()));
   }
 
   private boolean resourceTypeDefined(IBaseResource resource){

@@ -217,6 +217,12 @@
                 <artifactId>FastInfoset</artifactId>
                 <version>1.2.18</version>
             </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.11.0</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

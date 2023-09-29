@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 
@@ -192,7 +193,7 @@ public class BundleResources extends Operation {
     public void output(IBaseResource resource, FhirContext context) {
         String fileNameBase = getOutputPath() + getOutputPath().substring(getOutputPath().lastIndexOf(File.separator));
         if (bundleId != null && !bundleId.isEmpty()) {
-            fileNameBase = getOutputPath() + File.separator + bundleId;
+            fileNameBase = FilenameUtils.concat(getOutputPath(), bundleId);
         }
 
         try (FileOutputStream writer = new FileOutputStream(fileNameBase + "-bundle." + encoding)) {
