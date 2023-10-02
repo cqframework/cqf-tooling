@@ -175,7 +175,10 @@ public class ExtractMatBundleOperation extends Operation {
         		if (theResource instanceof org.hl7.fhir.dstu3.model.Library) {
         			org.hl7.fhir.dstu3.model.Library theLibrary = (org.hl7.fhir.dstu3.model.Library)theResource;
         			resourceName = theLibrary.getName();
-        			
+
+					// Set the id to the name regardless of what it is now for publishing
+					theLibrary.setId(resourceName);
+
         			// Forcing the encoding to JSON here to make everything the same in input directory
         			ResourceUtils.outputResourceByName(theResource, "json", context,
         					newLibraryDirectory.toString(), resourceName);
@@ -185,7 +188,11 @@ public class ExtractMatBundleOperation extends Operation {
         			extractStu3CQL(theLibrary, cqlFilename);
         		}
         		else if (theResource instanceof org.hl7.fhir.dstu3.model.Measure) {
-        			resourceName = ((org.hl7.fhir.dstu3.model.Measure)theResource).getName();
+					org.hl7.fhir.dstu3.model.Measure theMeasure = (org.hl7.fhir.dstu3.model.Measure)theResource;
+					resourceName = theMeasure.getName();
+
+					// Set the id to the name regardless of what it is now for publishing
+					theMeasure.setId(resourceName);
         			
         			// Forcing the encoding to JSON here to make everything the same in input directory
         			ResourceUtils.outputResourceByName(theResource, "json", context,
@@ -196,6 +203,9 @@ public class ExtractMatBundleOperation extends Operation {
         		if (theResource instanceof org.hl7.fhir.r4.model.Library) {
         			org.hl7.fhir.r4.model.Library theLibrary = (org.hl7.fhir.r4.model.Library)theResource;
         			resourceName = theLibrary.getName();
+
+					// Set the id to the name regardless of what it is now for publishing
+					theLibrary.setId(resourceName);
         			
         			// Forcing the encoding to JSON here to make everything the same in input directory
         			ResourceUtils.outputResourceByName(theResource, "json", context,
@@ -206,8 +216,12 @@ public class ExtractMatBundleOperation extends Operation {
         			extractR4CQL(theLibrary, cqlFilename);
         		}
         		else if (theResource instanceof org.hl7.fhir.r4.model.Measure) {
-        			resourceName = ((org.hl7.fhir.r4.model.Measure)theResource).getName();
-        			
+					org.hl7.fhir.r4.model.Measure theMeasure = (org.hl7.fhir.r4.model.Measure)theResource;
+        			resourceName = theMeasure.getName();
+
+					// Set the id to the name regardless of what it is now for publishing
+					theMeasure.setId(resourceName);
+
         			// Forcing the encoding to JSON here to make everything the same in input directory
         			ResourceUtils.outputResourceByName(theResource, "json", context,
         					newMeasureDirectory.toString(), resourceName);
