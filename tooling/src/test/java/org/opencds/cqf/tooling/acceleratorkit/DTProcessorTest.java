@@ -1,7 +1,6 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
 import static org.testng.Assert.assertNotNull;
-import static org.testng.AssertJUnit.assertEquals;
 
 import org.testng.annotations.Test;
 
@@ -11,13 +10,18 @@ public class DTProcessorTest extends BaseProcessorTest{
     //default
     private String[] fileTypes = new String[]{"json"};
 
+    static final String dtGeneratedInputDirectory = separator + "out" + separator + "dt" +
+            separator + "input" + separator;
+    static final String dtGeneratedOutputDirectory = separator + "dt" + separator + "input" + separator;
+
+    static final String resourcePathInputDirectory = resourcesPath + dtGeneratedInputDirectory;
+    static final String resourcePathOutputDirectory = resourcesPath + dtGeneratedOutputDirectory;
+
     @Test
     public void validateWHOContent() {
         //execute to generate the decision table files
         String whoDecisionTableInputFilePath = java.nio.file.Path.of(resourcesPath, whoDecisionTableInputFileName).toString();
         assertNotNull(whoDecisionTableInputFilePath);
-        //StringBuilder expectedWhoDecisionTableInputFileName = new StringBuilder(resourcesPath).append("/").append(whoDecisionTableInputFileName);
-        //assertEquals(whoDecisionTableInputFilePath, expectedWhoDecisionTableInputFileName.toString());
 
         String[] args = new String[]{"-ProcessDecisionTables", "-dtpf=ANC.DT",
                 "-pts=" + whoDecisionTableInputFilePath, "-op=" + resourcesPath + "/out/dt"};
@@ -32,14 +36,17 @@ public class DTProcessorTest extends BaseProcessorTest{
     }
 
     private void compareCql() {
-        compareFiles(resourcesPath + "/out/dt/input/cql", resourcesPath + "/dt/input/cql");
+        compareFiles(resourcePathInputDirectory + "cql",
+                resourcePathOutputDirectory + "cql");
     }
 
     private void comparePageContent() {
-        compareFiles(resourcesPath + "/out/dt/input/pagecontent", resourcesPath + "/dt/input/pagecontent");
+        compareFiles(resourcePathInputDirectory + "pagecontent",
+                resourcePathOutputDirectory + "pagecontent");
     }
 
     private void compareResources() {
-        compareFiles(resourcesPath + "/out/dt/input/resources", resourcesPath + "/dt/input/resources");
+        compareFiles(resourcePathInputDirectory + "resources",
+                resourcePathOutputDirectory + "resources");
     }
 }

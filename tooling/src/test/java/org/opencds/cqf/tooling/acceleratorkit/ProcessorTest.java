@@ -1,7 +1,6 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
 import static org.testng.Assert.assertNotNull;
-import static org.testng.AssertJUnit.assertEquals;
 
 import org.testng.annotations.Test;
 
@@ -10,22 +9,21 @@ public class ProcessorTest extends BaseProcessorTest{
     static final String whoInputFileName = "WHO-ANC-mini.xlsx";
     static final String testCasesFileName = "ANC Test Cases-mini.xlsx";
     static final String dataDictionarySheets = "ANC.A. Registration,ANC.B5 Quick check,ANC.End End";
-    //default
-    private String[] fileTypes = new String[]{"json", "cql", "md"};
+
+    static final String ddGeneratedInputDirectory = separator + "out" + separator + "dd" +
+                                                    separator + "input" + separator;
+    static final String ddGeneratedOutputDirectory = separator + "dd" + separator + "input" + separator;
+
+    static final String resourcePathInputDirectory = resourcesPath + ddGeneratedInputDirectory;
+    static final String resourcePathOutputDirectory = resourcesPath + ddGeneratedOutputDirectory;
 
     @Test
     public void validateWHOContent(){
        String whoInputFilePath = java.nio.file.Path.of(resourcesPath, whoInputFileName).toString();
        assertNotNull(whoInputFilePath);
-       // This test seems to be testing java.nio.file.Path.of functionality, I don't think we're testing that right?
-       //StringBuilder expectedFilePath = new StringBuilder(resourcesPath).append("/").append(whoInputFileName);
-       //assertEquals(whoInputFilePath, expectedFilePath.toString());
 
         String whoTestCaseInputFilePath = java.nio.file.Path.of(resourcesPath, testCasesFileName).toString();
         assertNotNull(whoTestCaseInputFilePath);
-
-        //StringBuilder expectedWhoTestCaseFilePath = new StringBuilder(resourcesPath).append("/").append(testCasesFileName);
-        //assertEquals(whoTestCaseInputFilePath, expectedWhoTestCaseFilePath.toString());
 
         String[] args = {"-ProcessAcceleratorKit", "-s=ANCM", "-pts="+whoInputFilePath,
                 "-dep="+dataDictionarySheets, "-op="+resourcesPath+"/out/dd", "-tc="+whoTestCaseInputFilePath};
@@ -50,32 +48,38 @@ public class ProcessorTest extends BaseProcessorTest{
     }
 
     private void compareProfilesStructureDefinitions() {
-        compareFiles(resourcesPath+"/out/dd/input/profiles", resourcesPath+"/dd/input/profiles");
+        compareFiles(resourcePathInputDirectory+"profiles",
+                resourcePathOutputDirectory+"profiles");
     }
 
     private void compareCql() {
-        compareFiles(resourcesPath + "/out/dd/input/cql", resourcesPath + "/dd/input/cql");
+        compareFiles(resourcePathInputDirectory + "cql",
+                resourcePathOutputDirectory + "cql");
     }
 
     private void compareExamples() {
-        compareFiles(resourcesPath + "/out/dd/input/examples", resourcesPath + "/dd/input/examples");
+        compareFiles(resourcePathInputDirectory + "examples",
+                resourcePathOutputDirectory + "examples");
     }
 
     private void compareExtensions() {
-        compareFiles(resourcesPath + "/out/dd/input/extensions", resourcesPath + "/dd/input/extensions");
+        compareFiles(resourcePathInputDirectory + "extensions",
+                resourcePathOutputDirectory + "extensions");
     }
 
     private void compareResources() {
-        compareFiles(resourcesPath + "/out/dd/input/resources", resourcesPath + "/dd/input/resources");
+        compareFiles(resourcePathInputDirectory + "resources",
+                resourcePathOutputDirectory + "resources");
     }
 
     private void compareTests() {
-        compareFiles(resourcesPath + "/out/dd/input/tests", resourcesPath + "/dd/input/tests");
+        compareFiles(resourcePathInputDirectory + "tests",
+                resourcePathOutputDirectory + "tests");
     }
 
     private void compareVocabulary() {
-        String vocabularyInputPath = resourcesPath + "/out/dd/input/vocabulary";
-        String vocabularyComparePath = resourcesPath + "/dd/input/vocabulary";
+        String vocabularyInputPath = resourcePathInputDirectory + "vocabulary";
+        String vocabularyComparePath = resourcePathOutputDirectory + "vocabulary";
         compareFiles(vocabularyInputPath, vocabularyComparePath);
     }
 

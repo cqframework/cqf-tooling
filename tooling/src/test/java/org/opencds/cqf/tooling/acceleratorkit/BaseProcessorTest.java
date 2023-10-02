@@ -16,6 +16,7 @@ import org.opencds.cqf.tooling.acceleratorkit.util.FilesBase;
 import org.testng.annotations.AfterClass;
 
 public class BaseProcessorTest {
+    static final String separator = System.getProperty("file.separator");
     static final String resourcesPath = "src/test/resources/acceleratorkit";
 
     @AfterClass
