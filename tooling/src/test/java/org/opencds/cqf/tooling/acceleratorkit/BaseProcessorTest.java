@@ -1,5 +1,9 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
+import org.opencds.cqf.tooling.acceleratorkit.util.FilesBase;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,13 +12,11 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.opencds.cqf.tooling.acceleratorkit.util.FilesBase;
 
 import static org.testng.AssertJUnit.assertEquals;
 
 public class BaseProcessorTest {
+    static final String separator = System.getProperty("file.separator");
     static final String resourcesPath = "src/test/resources/acceleratorkit";
 
     @After
