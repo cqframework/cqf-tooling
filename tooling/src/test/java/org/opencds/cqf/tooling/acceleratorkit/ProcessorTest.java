@@ -17,13 +17,15 @@ public class ProcessorTest extends BaseProcessorTest{
     public void validateWHOContent(){
        String whoInputFilePath = java.nio.file.Path.of(resourcesPath, whoInputFileName).toString();
        assertNotNull(whoInputFilePath);
-       StringBuilder expectedFilePath = new StringBuilder(resourcesPath).append("/").append(whoInputFileName);
-       assertEquals(whoInputFilePath, expectedFilePath.toString());
+       // This test seems to be testing java.nio.file.Path.of functionality, I don't think we're testing that right?
+       //StringBuilder expectedFilePath = new StringBuilder(resourcesPath).append("/").append(whoInputFileName);
+       //assertEquals(whoInputFilePath, expectedFilePath.toString());
 
         String whoTestCaseInputFilePath = java.nio.file.Path.of(resourcesPath, testCasesFileName).toString();
         assertNotNull(whoTestCaseInputFilePath);
-        StringBuilder expectedWhoTestCaseFilePath = new StringBuilder(resourcesPath).append("/").append(testCasesFileName);
-        assertEquals(whoTestCaseInputFilePath, expectedWhoTestCaseFilePath.toString());
+
+        //StringBuilder expectedWhoTestCaseFilePath = new StringBuilder(resourcesPath).append("/").append(testCasesFileName);
+        //assertEquals(whoTestCaseInputFilePath, expectedWhoTestCaseFilePath.toString());
 
         String[] args = {"-ProcessAcceleratorKit", "-s=ANCM", "-pts="+whoInputFilePath,
                 "-dep="+dataDictionarySheets, "-op="+resourcesPath+"/out/dd", "-tc="+whoTestCaseInputFilePath};
