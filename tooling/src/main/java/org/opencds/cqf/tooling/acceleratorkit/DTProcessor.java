@@ -359,7 +359,7 @@ public class DTProcessor extends Operation {
             currentAction.getCondition().add(newCondition);
         }
         else if (newCondition != null) {
-            currentCondition.getExpression().setDescription(String.format("(%s)\n  OR (%s)", currentCondition.getExpression().getDescription(), newCondition.getExpression().getDescription()));
+            currentCondition.getExpression().setDescription(String.format("(%s)%n  OR (%s)", currentCondition.getExpression().getDescription(), newCondition.getExpression().getDescription()));
         }
     }
 
@@ -470,7 +470,7 @@ public class DTProcessor extends Operation {
             else {
                 for (String conditionValue : conditionValues) {
                     if (applicabilityCondition.length() > 0) {
-                        applicabilityCondition.append(String.format("\n  AND "));
+                        applicabilityCondition.append(String.format("%n  AND "));
                     }
                     applicabilityCondition.append("(");
                     applicabilityCondition.append(conditionValue);

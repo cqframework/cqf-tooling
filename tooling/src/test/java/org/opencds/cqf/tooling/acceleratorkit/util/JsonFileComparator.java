@@ -30,7 +30,9 @@ public class JsonFileComparator extends FilesComparator{
                 Map<String, Object> compareMap = JsonFlatMapper.flatten(objectMapper.readValue(compareFile, type));
                 MapDifference<String, Object> difference = Maps.difference(inputMap,
                                                                     compareMap);
-                assertEquals(difference.entriesDiffering().size(), 0);
+                if (difference.entriesDiffering().size() != 0) {
+                    assertEquals(difference.entriesDiffering().size(), 0);
+                }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
