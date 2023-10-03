@@ -72,8 +72,7 @@
                 "-t",
                 "-d",
                 "-p",
-                "-ini=../hedis/ig.ini",
-                "-cdsig"
+                "-ini=../hedis/ig.ini"
             ]
         },
         {
