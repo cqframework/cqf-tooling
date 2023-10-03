@@ -2,12 +2,15 @@ package org.opencds.cqf.tooling.operation;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.tooling.Operation;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class StripGeneratedContentOperation extends Operation {
@@ -512,7 +515,7 @@ public class StripGeneratedContentOperation extends Operation {
             output = context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource);
         }
         BufferedWriter writer;
-        String outFileName = String.format("%s%s", getOutputPath(), fileName);
+        String outFileName = getOutputPath() + System.getProperty("file.separator") + fileName;
         try {
             File f = new File(outFileName);
             if (!f.getParentFile().exists()) {

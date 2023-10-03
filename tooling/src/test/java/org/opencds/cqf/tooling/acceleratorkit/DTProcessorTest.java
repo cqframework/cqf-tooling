@@ -1,6 +1,8 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -16,6 +18,8 @@ public class DTProcessorTest extends BaseProcessorTest{
 
     static final String resourcePathInputDirectory = resourcesPath + dtGeneratedInputDirectory;
     static final String resourcePathOutputDirectory = resourcesPath + dtGeneratedOutputDirectory;
+
+    static final Logger logger = LoggerFactory.getLogger(DTProcessorTest.class);
 
     @Test
     public void validateWHOContent() {
@@ -38,15 +42,18 @@ public class DTProcessorTest extends BaseProcessorTest{
     private void compareCql() {
         compareFiles(resourcePathInputDirectory + "cql",
                 resourcePathOutputDirectory + "cql");
+        logger.info("End of CQL comparision");
     }
 
     private void comparePageContent() {
         compareFiles(resourcePathInputDirectory + "pagecontent",
                 resourcePathOutputDirectory + "pagecontent");
+        logger.info("End of Page Content comparision");
     }
 
     private void compareResources() {
         compareFiles(resourcePathInputDirectory + "resources",
                 resourcePathOutputDirectory + "resources");
+        logger.info("End of Resources comparision");
     }
 }
