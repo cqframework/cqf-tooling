@@ -17,7 +17,6 @@ import java.util.Locale;
 
 public class DataDateRollerOperation extends Operation {
     private FhirContext fhirContext;
-    public static final String separator = System.getProperty("file.separator");
     public String fhirVersion;
     private IOUtils.Encoding fileEncoding;
     private Logger logger = LoggerFactory.getLogger(this.getClass());

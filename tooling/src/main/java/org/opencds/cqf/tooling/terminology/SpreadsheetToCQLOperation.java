@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
 import org.cqframework.cql.cql2elm.StringEscapeUtils;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 public class SpreadsheetToCQLOperation extends Operation {
 
@@ -138,7 +139,7 @@ public class SpreadsheetToCQLOperation extends Operation {
             result.append(System.lineSeparator());
         }
 
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + File.separator + spreadsheetName + ".cql")) {
+        try (FileOutputStream writer = new FileOutputStream(IOUtils.concatFilePath(getOutputPath(),spreadsheetName + ".cql"))) {
             writer.write(result.toString().getBytes());
             writer.flush();
         } catch (IOException e) {

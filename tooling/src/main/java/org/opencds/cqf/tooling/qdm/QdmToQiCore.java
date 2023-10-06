@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import info.bliki.wiki.model.WikiModel;
 
@@ -172,7 +173,8 @@ public class QdmToQiCore extends Operation {
     }
 
     private void writeOutput(String fileName, String content) throws IOException {
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + fileName + ".html")) {
+        try (FileOutputStream writer = new FileOutputStream(
+                IOUtils.concatFilePath(getOutputPath(),fileName + ".html"))) {
             writer.write(content.getBytes());
             writer.flush();
         }

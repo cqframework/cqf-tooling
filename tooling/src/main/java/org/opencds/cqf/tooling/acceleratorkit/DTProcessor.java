@@ -33,6 +33,7 @@ import org.hl7.fhir.r4.model.TriggerDefinition;
 import org.hl7.fhir.r4.model.UsageContext;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 
@@ -608,7 +609,7 @@ public class DTProcessor extends Operation {
 
     private void writeLibraries(String outputPath) {
         if (libraries != null && libraries.size() > 0) {
-            String outputFilePath = outputPath + File.separator + "input" + File.separator + "resources" + File.separator + "library";
+            String outputFilePath = IOUtils.concatFilePath(outputPath, "input", "resources", "library");
             ensurePath(outputFilePath);
 
             for (Library library : libraries.values()) {
@@ -620,8 +621,9 @@ public class DTProcessor extends Operation {
     private void writeLibraryCQL(String outputPath) {
         if (libraryCQL != null && libraryCQL.size() > 0) {
             for (Map.Entry<String, StringBuilder> entry : libraryCQL.entrySet()) {
-                String outputDirectoryPath = outputPath + File.separator + "input" + File.separator + "cql";
-                String outputFilePath = outputDirectoryPath + File.separator + entry.getKey() + ".cql";
+                String outputDirectoryPath = IOUtils.concatFilePath(outputPath, "input", "cql");
+                String outputFilePath = IOUtils.concatFilePath(outputDirectoryPath,
+                        entry.getKey() + ".cql");
                 ensurePath(outputDirectoryPath);
 
                 try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
@@ -639,7 +641,8 @@ public class DTProcessor extends Operation {
     private void writePlanDefinitions(String outputPath) {
         if (planDefinitions != null && planDefinitions.size() > 0) {
             for (PlanDefinition planDefinition : planDefinitions.values()) {
-                String outputFilePath = outputPath + File.separator + "input" + File.separator + "resources" + File.separator + "plandefinition";
+                String outputFilePath = IOUtils.concatFilePath(outputPath,
+                        "input", "resources", "plandefinition");
                 ensurePath(outputFilePath);
                 writeResource(outputFilePath, planDefinition);
             }
@@ -648,7 +651,8 @@ public class DTProcessor extends Operation {
 
     /* Write Methods */
     public void writeResource(String path, Resource resource) {
-        String outputFilePath = path + File.separator + resource.getResourceType().toString().toLowerCase() + "-" + resource.getIdElement().getIdPart() + "." + encoding;
+        String outputFilePath = IOUtils.concatFilePath(path,
+                resource.getResourceType().toString().toLowerCase() + "-" + resource.getIdElement().getIdPart() + "." + encoding);
         try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
             writer.write(
                     encoding.equals("json")
@@ -681,7 +685,8 @@ public class DTProcessor extends Operation {
     }
 
     public void writePlanDefinitionIndex(String outputPath) {
-        String outputFilePath = outputPath + File.separator + "input" + File.separator + "pagecontent"+ File.separator + "PlanDefinitionIndex.md";
+        String outputFilePath = IOUtils.concatFilePath(outputPath,
+                "input", "pagecontent", "PlanDefinitionIndex.md");
         ensurePath(outputFilePath);
 
         try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {

@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -163,7 +164,9 @@ public class BundleToResources extends Operation {
     
     // Output
     public void output(IBaseResource resource, FhirContext context) {
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding)) {
+        try (FileOutputStream writer = new FileOutputStream(
+                IOUtils.concatFilePath(getOutputPath(),
+                        resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding))) {
             writer.write(
                 encoding.equals("json")
                     ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()

@@ -1035,4 +1035,11 @@ public class IOUtils {
         return false;
     }
 
+    public static String concatFilePath(String basePath, String... pathsToAppend) {
+        String filePath = basePath;
+        for (String pathToAppend: pathsToAppend) {
+            filePath = FilenameUtils.concat(filePath, pathToAppend);
+        }
+        return filePath;
+    }
 }

@@ -174,7 +174,7 @@ public class ResourceUtils {
                   String name = relatedArtifact.getResource().getReference().split("Library/")[1];
                   dependencyLibraryName = IOUtils.formatFileName(name.split("\\|")[0], encoding, fhirContext);
                }
-               String dependencyLibraryPath = FilenameUtils.concat(directoryPath, prefix + dependencyLibraryName);
+               String dependencyLibraryPath = IOUtils.concatFilePath(directoryPath, prefix + dependencyLibraryName);
                IOUtils.putAllInListIfAbsent(getStu3DepLibraryPaths(dependencyLibraryPath, fhirContext, encoding, versioned), paths);
                IOUtils.putInListIfAbsent(dependencyLibraryPath, paths);
             }
@@ -213,7 +213,7 @@ public class ResourceUtils {
                   String name = relatedArtifact.getResource().split("Library/")[1];
                   dependencyLibraryName = IOUtils.formatFileName(name.split("\\|")[0], encoding, fhirContext);
                }
-               String dependencyLibraryPath = FilenameUtils.concat(directoryPath, prefix + dependencyLibraryName);
+               String dependencyLibraryPath = IOUtils.concatFilePath(directoryPath, prefix + dependencyLibraryName);
                IOUtils.putInListIfAbsent(dependencyLibraryPath, paths);
             }
          }
@@ -375,7 +375,7 @@ public class ResourceUtils {
    }
 
    public static CqlTranslatorOptions getTranslatorOptions(String folder) {
-      String optionsFileName = folder + File.separator + "cql-options.json";
+      String optionsFileName = IOUtils.concatFilePath(folder,"cql-options.json");
       CqlTranslatorOptions options;
       File file = new File(optionsFileName);
       if (file.exists()) {
@@ -846,7 +846,8 @@ public class ResourceUtils {
    }
 
    public static void outputResource(IBaseResource resource, String encoding, FhirContext context, String outputPath) {
-      try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding)) {
+      try (FileOutputStream writer = new FileOutputStream(IOUtils.concatFilePath(outputPath,
+              resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding))) {
          writer.write(
                  encoding.equals("json")
                          ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
@@ -860,7 +861,8 @@ public class ResourceUtils {
    }
 
    public static void outputResourceByName(IBaseResource resource, String encoding, FhirContext context, String outputPath, String name) {
-      try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + name + "." + encoding)) {
+      try (FileOutputStream writer = new FileOutputStream(
+              IOUtils.concatFilePath(outputPath, name + "." + encoding))) {
          writer.write(
                  encoding.equals("json")
                          ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()

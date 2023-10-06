@@ -24,6 +24,7 @@ import org.opencds.cqf.tooling.cql_generation.drool.visitor.DroolToElmVisitor;
 import org.opencds.cqf.tooling.cql_generation.drool.visitor.DroolToElmVisitor.CQLTYPES;
 import org.opencds.cqf.tooling.cql_generation.drool.visitor.ElmToCqlVisitor;
 import org.opencds.cqf.tooling.cql_generation.drool.visitor.Visitor;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,7 +116,8 @@ public class DroolCqlGenerator implements CqlGenerator {
                 VersionedIdentifier vi = new VersionedIdentifier();
                 vi.setId(getIdFromSource(cql));
                 vi.setVersion(getVersionFromSource(cql));
-                File outputFile = new File(outpuDirectory.getAbsolutePath() + "/" + vi.getId() + "-" + vi.getVersion() + ".cql");
+                File outputFile = new File(IOUtils.concatFilePath(outpuDirectory.getAbsolutePath(),
+                        vi.getId() + "-" + vi.getVersion() + ".cql"));
                 IOUtil.writeToFile(outputFile, cql);
             } else {
                 throw new IllegalArgumentException("Output directory is not a directory: " + outpuDirectory.getAbsolutePath());
@@ -130,7 +132,8 @@ public class DroolCqlGenerator implements CqlGenerator {
             try {
                 String elm = serializer.convertToXml(modelBuilder.of.createLibrary(entry.getValue()), serializer.getJaxbContext());
                 if (outpuDirectory.isDirectory()) {
-                    File outputFile = new File(outpuDirectory.getAbsolutePath() + "/" + entry.getKey() + ".xml");
+                    File outputFile = new File(IOUtils.concatFilePath(outpuDirectory.getAbsolutePath(),
+                            entry.getKey() + ".xml"));
                     IOUtil.writeToFile(outputFile, elm);
                 } else {
                     throw new IllegalArgumentException("Output directory is not a directory: " + outpuDirectory.getAbsolutePath());
