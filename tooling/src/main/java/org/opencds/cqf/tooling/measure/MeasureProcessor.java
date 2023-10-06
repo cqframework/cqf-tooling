@@ -42,14 +42,14 @@ public class MeasureProcessor extends BaseProcessor {
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
     }
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(MeasureProcessor.class);
     public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, String measureToRefreshPath, Boolean shouldApplySoftwareSystemStamp) {
         return refreshIgMeasureContent(parentContext, outputEncoding, null, versioned, fhirContext, measureToRefreshPath, shouldApplySoftwareSystemStamp);
     }
 
     public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, String measureOutputDirectory, Boolean versioned, FhirContext fhirContext, String measureToRefreshPath, Boolean shouldApplySoftwareSystemStamp) {
 
-        System.out.println("Refreshing measures...");
+        logger.info("Refreshing measures...");
 
         MeasureProcessor measureProcessor;
         switch (fhirContext.getVersion().getVersion()) {

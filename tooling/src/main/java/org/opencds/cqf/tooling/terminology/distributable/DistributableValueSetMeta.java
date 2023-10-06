@@ -13,8 +13,11 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DistributableValueSetMeta {
+    private static final Logger logger = LoggerFactory.getLogger(DistributableValueSetMeta.class);
 
     private String id;
     private String version;
@@ -81,7 +84,7 @@ public class DistributableValueSetMeta {
                 vs.setCompose(tempVs.getCompose());
             } catch (Exception e) {
                 //
-                System.out.println("Error parsing compose for: " + vs.getId());
+                logger.error("Error parsing compose for: {}", vs.getId());
             }
         }
 

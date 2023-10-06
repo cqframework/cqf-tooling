@@ -25,8 +25,12 @@ import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
 import org.opencds.cqf.tooling.terminology.distributable.OrganizationalMetaData;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TemplateToValueSetGenerator extends Operation {
+
+    private static final Logger logger = LoggerFactory.getLogger(TemplateToValueSetGenerator.class);
 
     private FhirContext fhirContext;
 
@@ -298,7 +302,7 @@ public class TemplateToValueSetGenerator extends Operation {
                     if (cpgMeta.getTitle().equals("only fill this out"))
                         continue;
                 } catch (NullPointerException e) {
-                    System.out.println("cpg instance had null title");
+                    logger.error("cpg instance had null title");
                 }
 
                 vs = cpgMeta.populate(fhirContext, outputVersion);
@@ -322,7 +326,7 @@ public class TemplateToValueSetGenerator extends Operation {
                 }
                 valueSets.add(vs);
             } else {
-                System.out.println("Workbook does NOT contain a sheet named " + entrySet.getKey());
+                logger.info("Workbook does NOT contain a sheet named {}", entrySet.getKey());
             }
         }
         return valueSets;
