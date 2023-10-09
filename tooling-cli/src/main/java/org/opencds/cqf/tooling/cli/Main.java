@@ -124,7 +124,7 @@ package org.opencds.cqf.tooling.cli;
             - Accepts Bundles with .json or .xml extensions
 
         - MAT Bundle extraction
-        	- mvn exec:java -Dexec.args="[-ExtractMatBundle] [Bundle file path] (-v)
+        	- mvn exec:java -Dexec.args="[-ExtractMatBundle] [Bundle file path] (-v) (-dir)
         	- Example: mvn exec:java -Dexec.args="-ExtractMatBundle /Users/mholck/Development/ecqm-content-r4/bundles/mat/EXM124/EXM124.json -v=r4"
         	- This tooling extracts out the resources and CQL from a MAT export bundle and puts them in the appropriate directories
         	- Accepts Bundles with .json or .xml extensions
