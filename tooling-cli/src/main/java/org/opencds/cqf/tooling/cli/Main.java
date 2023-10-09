@@ -130,7 +130,8 @@ package org.opencds.cqf.tooling.cli;
         	- Accepts Bundles with .json or .xml extensions
         	- version = FHIR version { stu3, r4 }
                 Default version: r4
-
+            - dir = Directory indicator. To process the input location as a directory of files, the input should point to a valid directory
+                    and the -dir flag should be present in the arguments list.
         - Generate StructureDefinitions from ModelInfo
             - command: mvn exec:java -Dexec.args="[-GenerateSDs] [path to modelinfo xml] (-outputpath | -op) (-encoding | -e)"
             - TODO
