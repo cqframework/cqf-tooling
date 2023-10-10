@@ -18,17 +18,20 @@ import java.util.Base64;
 import java.util.List;
 
 public class ExtractMatBundleOperation extends Operation {
-    public static final String ERROR_BUNDLE_OUTPUT_INVALID = "When specifying the output folder using -op for ExtractMatBundle, the output directory name must contain the word 'bundle' (all lowercase.)";
-    public static final String ERROR_BUNDLE_FILE_IS_REQUIRED = "The path to a bundle file is required";
-    public static final String ERROR_DIR_IS_NOT_A_DIRECTORY = "The path specified with -dir is not a directory.";
-    public static final String ERROR_OP_IS_NOT_A_DIRECTORY = "The path specified with -op is not a directory.";
-    public static final String ERROR_DIR_IS_EMPTY = "The path specified with -dir is empty.";
-    public static final String ERROR_BUNDLE_LOCATION_NONEXISTENT = "The path specified for the bundle doesn't exist on your system.";
-    public static final String ERROR_OUTPUT_LOCATION_NONEXISTENT = "The path specified for the output folder doesn't exist on your system.";
-    public static final String INFO_EXTRACTION_SUCCESSFUL = "Extraction completed successfully";
-    public static final String VERSION_R4 = "r4";
-    public static final String VERSION_STU3 = "stu3";
-    public static final String ERROR_NOT_JSON_OR_XML = "The path to a bundle file of type json or xml is required.";
+    private static final String ERROR_BUNDLE_OUTPUT_INVALID = "When specifying the output folder using -op for ExtractMatBundle, the output directory name must contain the word 'bundle' (all lowercase.)";
+    private static final String ERROR_BUNDLE_FILE_IS_REQUIRED = "The path to a bundle file is required";
+    private static final String ERROR_DIR_IS_NOT_A_DIRECTORY = "The path specified with -dir is not a directory.";
+    private static final String ERROR_OP_IS_NOT_A_DIRECTORY = "The path specified with -op is not a directory.";
+    private static final String ERROR_DIR_IS_EMPTY = "The path specified with -dir is empty.";
+    private static final String ERROR_BUNDLE_LOCATION_NONEXISTENT = "The path specified for the bundle doesn't exist on your system.";
+    private static final String ERROR_OUTPUT_LOCATION_NONEXISTENT = "The path specified for the output folder doesn't exist on your system.";
+    private static final String INFO_EXTRACTION_SUCCESSFUL = "Extraction completed successfully";
+    private static final String VERSION_R4 = "r4";
+    private static final String VERSION_STU3 = "stu3";
+    private static final String ERROR_NOT_JSON_OR_XML = "The path to a bundle file of type json or xml is required.";
+    private static final String ERROR_NOT_VALID = "Unable to translate the file. The resource appears invalid.";
+    private static final String ERROR_NOT_VALID_BUNDLE = "Not a recognized transaction Bundle: ";
+
 
 
     @Override
@@ -122,7 +125,19 @@ public class ExtractMatBundleOperation extends Operation {
                 throw new IllegalArgumentException(ERROR_DIR_IS_EMPTY);
             } else {
                 for (File file : filesInDir) {
-                    processSingleFile(file, version, suppressNarrative);
+                    //process only 1 layer of subdirectories (should they exist)
+                    if (file.isDirectory()) {
+                        File[] filesInSubDir = file.listFiles();
+                        if (filesInSubDir == null || filesInSubDir.length == 0) {
+                            continue;
+                        }else{
+                            for (File subDirFile : filesInSubDir) {
+                                processSingleFile(subDirFile, version, suppressNarrative);
+                            }
+                        }
+                    }else {
+                        processSingleFile(file, version, suppressNarrative);
+                    }
                 }
             }
         } else {
@@ -164,34 +179,46 @@ public class ExtractMatBundleOperation extends Operation {
             encoding = "xml";
             try (FileReader reader = new FileReader(bundleFile)) {
                 bundle = context.newXmlParser().parseResource(reader);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                throw new RuntimeException(e.getMessage());
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new RuntimeException(e.getMessage());
+            } catch (Exception e) {
+                LogUtils.info(ERROR_NOT_VALID + "\n" + inputFileLocation);
+                return;
             }
 
         } else if (bundleFile.getPath().endsWith(".json")) {
             encoding = "json";
             try (FileReader reader = new FileReader(bundleFile)) {
                 bundle = context.newJsonParser().parseResource(reader);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                throw new RuntimeException(e.getMessage());
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new RuntimeException(e.getMessage());
+            } catch (Exception e) {
+                LogUtils.info(ERROR_NOT_VALID + "\n" + inputFileLocation);
+                return;
             }
 
         } else {
-            throw new IllegalArgumentException(ERROR_NOT_JSON_OR_XML);
+            LogUtils.info(ERROR_NOT_JSON_OR_XML + "\n" + inputFileLocation);
+            return;
         }
 
         //sometimes tests leave library or measure files behind so we want to make sure we only iterate over bundle files:
         if (!(bundle instanceof org.hl7.fhir.dstu3.model.Bundle || bundle instanceof org.hl7.fhir.r4.model.Bundle)) {
-            LogUtils.info("Not a recognized bundle: " + inputFileLocation);
+            LogUtils.info(ERROR_NOT_VALID_BUNDLE + inputFileLocation);
             return;
+        }
+
+        //ensure the xml and json files are transaction Bundle types:
+        if (bundle instanceof org.hl7.fhir.dstu3.model.Bundle) {
+            org.hl7.fhir.dstu3.model.Bundle dstu3Bundle = (org.hl7.fhir.dstu3.model.Bundle) bundle;
+            if (!dstu3Bundle.getType().equals(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION)) {
+
+                throw new IllegalArgumentException("Invalid Bundle type in " + encoding + " file: " + inputFileLocation);
+
+            }
+        } else if (bundle instanceof org.hl7.fhir.r4.model.Bundle) {
+            org.hl7.fhir.r4.model.Bundle r4Bundle = (org.hl7.fhir.r4.model.Bundle) bundle;
+            if (!r4Bundle.getType().equals(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION)) {
+                throw new IllegalArgumentException("Invalid Bundle type in " + encoding + " file: " + inputFileLocation);
+            }
+        } else {
+            throw new IllegalArgumentException("Not a recognized bundle in " + encoding + "file: " + inputFileLocation);
         }
 
         //call the Bundle utilities to extract the bundle
