@@ -20,6 +20,7 @@ import org.opencds.cqf.tooling.operations.codesystem.loinc.HierarchyProcessor;
 import org.opencds.cqf.tooling.operations.codesystem.rxnorm.RxMixWorkflowProcessor;
 import org.opencds.cqf.tooling.operations.valueset.expansion.FhirTxExpansion;
 import org.opencds.cqf.tooling.utilities.FhirContextCache;
+import org.opencds.cqf.tooling.utilities.IDUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.converters.ResourceAndTypeConverter;
 import org.slf4j.Logger;
@@ -108,6 +109,8 @@ public class ConfigValueSetGenerator implements ExecutableOperation {
 
    private ValueSet updateValueSet(ValueSet vsToUpdate, Config.ValueSets configMetaData, CommonMetaData commonMetaData) {
       ValueSet updatedValueSet = new ValueSet();
+
+      IDUtils.validateId(configMetaData.getId());
 
       // metadata
       updatedValueSet.setId(configMetaData.getId());

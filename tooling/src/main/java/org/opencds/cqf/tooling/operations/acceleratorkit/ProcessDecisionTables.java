@@ -22,6 +22,7 @@ import org.opencds.cqf.tooling.operations.ExecutableOperation;
 import org.opencds.cqf.tooling.operations.Operation;
 import org.opencds.cqf.tooling.operations.OperationParam;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
+import org.opencds.cqf.tooling.utilities.IDUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -154,6 +155,7 @@ public class ProcessDecisionTables implements ExecutableOperation {
       }
       String decisionIdentifier = decisionTitle.substring(0, index);
       String decisionId = decisionIdentifier.replace(".", "");
+      IDUtils.validateId(decisionId);
 
       planDefinition.setTitle(decisionTitle);
 
@@ -301,6 +303,7 @@ public class ProcessDecisionTables implements ExecutableOperation {
 
    private void generateLibrary(PlanDefinition planDefinition) {
       String id = planDefinition.getIdElement().getIdPart();
+      IDUtils.validateId(id);
 
       Library library = new Library();
       library.getIdentifier().add(planDefinition.getIdentifierFirstRep());

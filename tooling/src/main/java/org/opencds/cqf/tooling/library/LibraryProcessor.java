@@ -22,6 +22,7 @@ import org.opencds.cqf.tooling.library.r4.R4LibraryProcessor;
 import org.opencds.cqf.tooling.library.stu3.STU3LibraryProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.processor.*;
+import org.opencds.cqf.tooling.utilities.IDUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.slf4j.Logger;
@@ -36,21 +37,6 @@ public class LibraryProcessor extends BaseProcessor {
     public static final String ResourcePrefix = "library-";   
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
-    }
-    private static Pattern pattern;
-
-    private static Pattern getPattern() {
-        if(pattern == null) {
-            String regex = "^[a-zA-Z]+[a-zA-Z0-9_\\-\\.]*";
-            pattern = Pattern.compile(regex);
-        }
-        return pattern;
-    }
-
-    public static void validateIdAlphaNumeric(String id) {
-        if(!getPattern().matcher(id).find()) {
-            throw new RuntimeException("The library id format is invalid.");
-        }
     }
     
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
@@ -216,7 +202,7 @@ public class LibraryProcessor extends BaseProcessor {
                     newLibrary.setUrl(String.format("%s/Library/%s", (newLibrary.getName().equals("FHIRHelpers") ? "http://hl7.org/fhir" : canonicalBase), fileInfo.getIdentifier().getId()));
                     newLibrary.setId(newLibrary.getName() + (versioned ? "-" + newLibrary.getVersion() : ""));
                     setLibraryType(newLibrary);
-                    validateIdAlphaNumeric(newLibrary.getId());
+                    IDUtils.validateId(newLibrary.getId());
                     List<Attachment> attachments = new ArrayList<Attachment>();
                     Attachment attachment = new Attachment();
                     attachment.setContentType("application/elm+xml");

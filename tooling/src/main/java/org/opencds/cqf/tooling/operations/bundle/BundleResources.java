@@ -10,6 +10,7 @@ import org.opencds.cqf.tooling.operations.Operation;
 import org.opencds.cqf.tooling.operations.OperationParam;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.FhirContextCache;
+import org.opencds.cqf.tooling.utilities.IDUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +70,9 @@ public class BundleResources implements ExecutableOperation {
          resourcesToBundle.forEach(builder::addTransactionUpdateEntry);
       }
       IBaseBundle bundle = builder.getBundle();
-      bundle.setId(bundleId == null ? UUID.randomUUID().toString() : bundleId);
+      bundleId = bundleId == null ? UUID.randomUUID().toString() : bundleId;
+      IDUtils.validateId(bundleId);
+      bundle.setId(bundleId);
       return bundle;
    }
 

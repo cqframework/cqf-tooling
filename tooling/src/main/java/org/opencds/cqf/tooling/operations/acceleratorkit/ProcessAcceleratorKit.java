@@ -36,6 +36,7 @@ import org.opencds.cqf.tooling.operations.ExecutableOperation;
 import org.opencds.cqf.tooling.operations.Operation;
 import org.opencds.cqf.tooling.operations.OperationParam;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
+import org.opencds.cqf.tooling.utilities.IDUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1107,7 +1108,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
    private Questionnaire createQuestionnaireForPage(Sheet sheet) {
       Questionnaire questionnaire = new Questionnaire();
       Coding activityCoding = getActivityCoding(sheet.getSheetName());
-      questionnaire.setId(toUpperId(activityCoding.getCode()));
+      questionnaire.setId(IDUtils.toUpperId(activityCoding.getCode()));
 
       questionnaire.getExtension().add(
               new Extension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability", new CodeType("shareable")));
@@ -1334,7 +1335,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
 
       // If custom profile is specified, search for if it exists already.
       String customProfileIdRaw = element.getCustomProfileId();
-      String profileId = toId(customProfileIdRaw != null && !customProfileIdRaw.isEmpty() ? customProfileIdRaw : element.getId());
+      String profileId = IDUtils.toId(customProfileIdRaw != null && !customProfileIdRaw.isEmpty() ? customProfileIdRaw : element.getId());
       for (StructureDefinition profile : profiles) {
          if (profile.getId().equals(profileId)) {
             sd = profile;
@@ -1648,29 +1649,6 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
       return activity;
    }
 
-   private String toUpperId(String name) {
-      if (name == null || name.isEmpty()) {
-         throw new IllegalArgumentException("Name cannot be null or empty");
-      }
-
-      if (name.endsWith(".")) {
-         name = name.substring(0, name.lastIndexOf("."));
-      }
-
-      return name.trim()
-              // remove these characters
-              .replace("(", "").replace(")", "").replace("[", "").replace("]", "").replace("\n", "")
-              .replace(":", "")
-              .replace(",", "")
-              .replace("_", "")
-              .replace("/", "")
-              .replace(" ", "")
-              .replace(".", "")
-              .replace("-", "")
-              .replace(">", "")
-              .replace("<", "");
-   }
-
    private String getActivityID(Row row, HashMap<String, Integer> colIds) {
       return SpreadsheetHelper.getCellAsString(row, getColId(colIds, "ActivityID"));
    }
@@ -1815,30 +1793,6 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
       return codes;
    }
 
-   private String toId(String name) {
-      if (name == null || name.isEmpty()) {
-         throw new IllegalArgumentException("Name cannot be null or empty");
-      }
-
-      if (name.endsWith(".")) {
-         name = name.substring(0, name.lastIndexOf("."));
-      }
-
-      return name.toLowerCase().trim()
-              // remove these characters
-              .replace("(", "").replace(")", "").replace("[", "").replace("]", "").replace("\n", "")
-              // replace these with ndash
-              .replace(":", "-")
-              .replace(",", "-")
-              .replace("_", "-")
-              .replace("/", "-")
-              .replace(" ", "-")
-              .replace(".", "-")
-              // remove multiple ndash
-              .replace("----", "-").replace("---", "-").replace("--", "-").replace(">", "greater-than")
-              .replace("<", "less-than");
-   }
-
    @Nonnull
    private StructureDefinition createProfileStructureDefinition(DictionaryElement element, String customProfileId) {
       DictionaryFhirElementPath elementPath = element.getFhirElementPath();
@@ -1943,7 +1897,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
               element.getDataElementName());
 
       // Search for extension and use it if it exists already.
-      String extensionId = toId(extensionName);
+      String extensionId = IDUtils.toId(extensionName);
       if (extensionId.length() > 0) {
          for (StructureDefinition existingExtension : extensions) {
             if (existingExtension.getId().equals(existingExtension)) {
@@ -2322,7 +2276,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
    }
 
    private String toName(String name) {
-      String result = toUpperId(name);
+      String result = IDUtils.toUpperId(name);
       if (result.isEmpty()) {
          return result;
       }
@@ -2518,7 +2472,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
       // Observation.code is special case - if mapping is Observation.value[x] with a non-bindable type, we'll still need
       // to allow for binding of Observation.code (the primary code path)
       if (isBindableType(dictionaryElement) || targetElement.getPath().equals("Observation.code")) {
-         String valueSetId = toId(dictionaryElement.getId());
+         String valueSetId = IDUtils.toId(dictionaryElement.getId());
          String valueSetLabel = dictionaryElement.getLabel();
          String valueSetName = null;
 
@@ -2749,7 +2703,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
    private CodeSystem createCodeSystem(String name, String canonicalBase, String title, String description) {
       CodeSystem codeSystem = new CodeSystem();
 
-      codeSystem.setId(toId(name));
+      codeSystem.setId(IDUtils.toId(name));
       codeSystem.setUrl(String.format("%s/CodeSystem/%s", canonicalBase, codeSystem.getId()));
       // TODO: version
       codeSystem.setName(toName(name));
@@ -2943,7 +2897,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
       if (id == null) {
          id = valueSetName;
       }
-      return toId(id);
+      return IDUtils.toId(id);
    }
 
    @Nonnull
@@ -3036,7 +2990,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
    }
 
    private void bindQuestionnaireItemAnswerValueSet(DictionaryElement dictionaryElement, ValueSet valueSetToBind) {
-      questionnaires.stream().filter(q -> q.getId().equalsIgnoreCase(toUpperId(getActivityCoding(
+      questionnaires.stream().filter(q -> q.getId().equalsIgnoreCase(IDUtils.toUpperId(getActivityCoding(
               dictionaryElement.getPage()).getCode()))).findFirst().flatMap(questionnaire -> questionnaire.getItem()
               .stream().filter(i -> i.getText().equalsIgnoreCase(dictionaryElement.getLabel())).findFirst())
               .ifPresent(questionnaireItem -> questionnaireItem.setAnswerValueSet(valueSetToBind.getUrl()));
@@ -3139,6 +3093,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
       ConceptMap cm = conceptMaps.get(systemUrl);
       if (cm == null) {
          String codeSystemLabel = getCodeSystemLabel(systemUrl);
+         IDUtils.validateId(codeSystemLabel);
          if (codeSystemLabel != null) {
             cm = new ConceptMap();
             cm.setId(codeSystemLabel);
@@ -3193,7 +3148,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
       }
       activityIndex.append(newLine).append(newLine);
       if (activityCoding != null) {
-         String questionnaireId = toUpperId(activityCoding.getCode());
+         String questionnaireId = IDUtils.toUpperId(activityCoding.getCode());
          activityIndex.append(String.format("Data elements for this activity can be collected using the [%s](Questionnaire-%s.html)", questionnaireId, questionnaireId));
          activityIndex.append(newLine).append(newLine);
       }

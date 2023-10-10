@@ -23,6 +23,7 @@ import org.opencds.cqf.tooling.operations.ExecutableOperation;
 import org.opencds.cqf.tooling.operations.Operation;
 import org.opencds.cqf.tooling.operations.OperationParam;
 import org.opencds.cqf.tooling.utilities.FhirContextCache;
+import org.opencds.cqf.tooling.utilities.IDUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,7 +116,7 @@ public class LibraryGenerator implements ExecutableOperation {
 
       Library elmLibrary = cqlTranslator.toELM();
 
-      library.setId(nameToId(elmLibrary.getIdentifier().getId(), elmLibrary.getIdentifier().getVersion()));
+      library.setId(IDUtils.libraryNameToId(elmLibrary.getIdentifier().getId(), elmLibrary.getIdentifier().getVersion()));
       FhirTerser terser = new FhirTerser(fhirContext);
 
       // basic metadata information
@@ -146,13 +147,8 @@ public class LibraryGenerator implements ExecutableOperation {
       return library;
    }
 
-   private String nameToId(String name, String version) {
-      String nameAndVersion = "library-" + name + "-" + version;
-      return nameAndVersion.replace("_", "-");
-   }
-
    private String getIncludedLibraryId(IncludeDef def) {
-      return nameToId(getIncludedLibraryName(def), def.getVersion());
+      return IDUtils.libraryNameToId(getIncludedLibraryName(def), def.getVersion());
    }
 
    private String getIncludedLibraryName(IncludeDef def) {

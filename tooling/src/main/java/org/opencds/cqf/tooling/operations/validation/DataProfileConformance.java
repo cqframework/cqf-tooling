@@ -24,6 +24,7 @@ import org.opencds.cqf.tooling.operations.ExecutableOperation;
 import org.opencds.cqf.tooling.operations.Operation;
 import org.opencds.cqf.tooling.operations.OperationParam;
 import org.opencds.cqf.tooling.utilities.FhirContextCache;
+import org.opencds.cqf.tooling.utilities.IDUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.NpmUtils;
 import org.slf4j.Logger;
@@ -107,6 +108,7 @@ public class DataProfileConformance implements ExecutableOperation {
    }
    private void tagResourceWithValidationResult(IBaseResource resource, ValidationResult result) {
       String id = UUID.randomUUID().toString();
+      IDUtils.validateId(id);
 
       // create validation-result extension
       ExtensionUtil.addExtension(fhirContext, resource, Validation.VALIDATION_RESULT_EXTENSION_URL, "Reference", "#" + id);
