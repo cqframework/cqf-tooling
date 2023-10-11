@@ -97,10 +97,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 		String bundledFilesLocation = iniFile.getParent() + separator + "bundles" + separator + "measure" + separator;
 
-		//used to test POST when url is provided. Contact evan.chicoine@icf.com for instruction on how to locally run a python server
-		//String args[] = { "-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false", "-fs=https://localhost:8080/fhir"};
-
-		String args[] = { "-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false"};
+		String args[] = { "-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false" };
 
 		// execute refresh using ARGS
         new RefreshIGOperation().execute(args);
