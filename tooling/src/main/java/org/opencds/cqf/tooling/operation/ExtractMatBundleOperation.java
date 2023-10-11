@@ -238,8 +238,10 @@ public class ExtractMatBundleOperation extends Operation {
 
         //call the Bundle utilities to extract the bundle
         String outputDir = bundleFile.getAbsoluteFile().getParent();
+
+
         //ensure output path assigned by user is utilized:
-        if (!getOutputPath().isEmpty()) {
+        if (getOutputPath() != null && !getOutputPath().isEmpty()) {
             outputDir = getOutputPath();
         }
 
