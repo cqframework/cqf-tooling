@@ -231,6 +231,33 @@ public class ExtractMatBundleOperationTest {
         }
         File[] files = emptyDir.listFiles();
         assertNotNull(files);
-        assertEquals(41, files.length);
+        assertEquals(40, files.length);
+    }
+
+    @Test
+    public void TestExtractMatBundleWithDuplicateBundleXmlJson() throws IOException {
+        ClassLoader classLoader = getClass().getClassLoader();
+        String resourcePath = "org/opencds/cqf/tooling/operation/ExtractMatBundle/bundles_duplicate/";
+        URL resourceUrl = classLoader.getResource(resourcePath);
+        if (resourceUrl == null) {
+            throw new IllegalArgumentException("Resource not found: " + resourcePath);
+        }
+
+        File emptyDir = tempFolder.newFolder("bundles");
+        Thread executionThread = new Thread(new Runnable() {
+            public void run() {
+                operation.execute(new String[]{"-ExtractMATBundle", resourceUrl.getFile(), "-dir", "-op=" + emptyDir.getAbsolutePath()});
+            }
+        });
+
+        executionThread.start();
+        try {
+            executionThread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        File[] files = emptyDir.listFiles();
+        assertNotNull(files);
+        assertEquals(8, files.length);
     }
 }

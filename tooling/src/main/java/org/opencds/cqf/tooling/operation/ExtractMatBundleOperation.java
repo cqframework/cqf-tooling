@@ -3,6 +3,7 @@ package org.opencds.cqf.tooling.operation;
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
@@ -14,7 +15,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Iterator;
 import java.util.List;
 
 public class ExtractMatBundleOperation extends Operation {
@@ -31,11 +34,13 @@ public class ExtractMatBundleOperation extends Operation {
     private static final String ERROR_NOT_JSON_OR_XML = "The path to a bundle file of type json or xml is required.";
     private static final String ERROR_NOT_VALID = "Unable to translate the file. The resource appears invalid.";
     private static final String ERROR_NOT_VALID_BUNDLE = "Not a recognized transaction Bundle: ";
+    public static final String INFO_RESOURCE_ALREADY_PROCESSED = "This Resource has already been processed: ";
 
-
+    private List<String> processedBundleCollection;
 
     @Override
     public void execute(String[] args) {
+        processedBundleCollection = new ArrayList<>();
 
         boolean directoryFlagPresent = false;
         boolean suppressNarrative = true;
@@ -130,12 +135,12 @@ public class ExtractMatBundleOperation extends Operation {
                         File[] filesInSubDir = file.listFiles();
                         if (filesInSubDir == null || filesInSubDir.length == 0) {
                             continue;
-                        }else{
+                        } else {
                             for (File subDirFile : filesInSubDir) {
                                 processSingleFile(subDirFile, version, suppressNarrative);
                             }
                         }
-                    }else {
+                    } else {
                         processSingleFile(file, version, suppressNarrative);
                     }
                 }
@@ -145,8 +150,8 @@ public class ExtractMatBundleOperation extends Operation {
             processSingleFile(new File(inputLocation), version, suppressNarrative);
         }
         LogUtils.info(INFO_EXTRACTION_SUCCESSFUL);
+        LogUtils.info("Successfully extracted the following resources: " + processedBundleCollection);
     }
-
 
     void processSingleFile(File bundleFile, String version, boolean suppressNarrative) {
         String inputFileLocation = bundleFile.getAbsolutePath();
@@ -204,21 +209,31 @@ public class ExtractMatBundleOperation extends Operation {
             return;
         }
 
+        IBaseResource processedBundle;
+
         //ensure the xml and json files are transaction Bundle types:
         if (bundle instanceof org.hl7.fhir.dstu3.model.Bundle) {
-            org.hl7.fhir.dstu3.model.Bundle dstu3Bundle = (org.hl7.fhir.dstu3.model.Bundle) bundle;
-            if (!dstu3Bundle.getType().equals(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION)) {
-
-                throw new IllegalArgumentException("Invalid Bundle type in " + encoding + " file: " + inputFileLocation);
-
+            if (!((org.hl7.fhir.dstu3.model.Bundle) bundle).getType().equals(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION)) {
+                LogUtils.info("Invalid Bundle type in " + encoding + " file: " + inputFileLocation);
+                return;
+            } else {
+                //Bundle is a valid transaction Bundle, now ensure its entries aren't duplicate to what has been
+                //processed already:
+                processedBundle = processDSTU3BundleResources((org.hl7.fhir.dstu3.model.Bundle) bundle);
             }
+
         } else if (bundle instanceof org.hl7.fhir.r4.model.Bundle) {
-            org.hl7.fhir.r4.model.Bundle r4Bundle = (org.hl7.fhir.r4.model.Bundle) bundle;
-            if (!r4Bundle.getType().equals(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION)) {
-                throw new IllegalArgumentException("Invalid Bundle type in " + encoding + " file: " + inputFileLocation);
+            if (!((org.hl7.fhir.r4.model.Bundle) bundle).getType().equals(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION)) {
+                LogUtils.info("Invalid Bundle type in " + encoding + " file: " + inputFileLocation);
+                return;
+            } else {
+                //Bundle is a valid transaction Bundle, now ensure its entries aren't duplicate to what has been
+                //processed already:
+                processedBundle = processR4BundleResources((org.hl7.fhir.r4.model.Bundle) bundle);
             }
         } else {
-            throw new IllegalArgumentException("Not a recognized bundle in " + encoding + "file: " + inputFileLocation);
+            LogUtils.info("Not a recognized bundle in " + encoding + "file: " + inputFileLocation);
+            return;
         }
 
         //call the Bundle utilities to extract the bundle
@@ -228,11 +243,63 @@ public class ExtractMatBundleOperation extends Operation {
             outputDir = getOutputPath();
         }
 
-        BundleUtils.extractResources(bundle, encoding, outputDir, suppressNarrative, version);
+        BundleUtils.extractResources(processedBundle, encoding, outputDir, suppressNarrative, version);
 
         //move and properly rename the files
         moveAndRenameFiles(outputDir, context, version);
         LogUtils.info(INFO_EXTRACTION_SUCCESSFUL);
+    }
+
+    /**
+     * This method returns an Bundle instance where certain entries are stripped should their resource ID turn up in our
+     * collection of processed resource IDs
+     *
+     * @param bundle
+     * @return
+     */
+    private org.hl7.fhir.dstu3.model.Bundle processDSTU3BundleResources(org.hl7.fhir.dstu3.model.Bundle bundle) {
+        Iterator<org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent> entryIterator = bundle.getEntry().iterator();
+
+        while (entryIterator.hasNext()) {
+            org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry = entryIterator.next();
+            if (entry.hasResource() && entry.getResource().hasIdElement()) {
+                String resourceID = entry.getResource().getIdElement().getIdPart();
+                if (processedBundleCollection.contains(resourceID)) {
+                    LogUtils.info(INFO_RESOURCE_ALREADY_PROCESSED + resourceID);
+                    entryIterator.remove();
+                } else {
+                    processedBundleCollection.add(resourceID);
+                }
+            }
+        }
+
+        return bundle; // No need for a separate bundleInput variable
+    }
+
+    /**
+     * This method returns an Bundle instance where certain entries are stripped should their resource ID turn up in our
+     * collection of processed resource IDs
+     *
+     * @param bundle
+     * @return
+     */
+    private org.hl7.fhir.r4.model.Bundle processR4BundleResources(org.hl7.fhir.r4.model.Bundle bundle) {
+        Iterator<org.hl7.fhir.r4.model.Bundle.BundleEntryComponent> entryIterator = bundle.getEntry().iterator();
+
+        while (entryIterator.hasNext()) {
+            org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry = entryIterator.next();
+            if (entry.hasResource() && entry.getResource().hasId()) {
+                String resourceID = entry.getResource().getId();
+                if (processedBundleCollection.contains(resourceID)) {
+                    LogUtils.info(INFO_RESOURCE_ALREADY_PROCESSED + resourceID);
+                    entryIterator.remove();
+                } else {
+                    processedBundleCollection.add(resourceID);
+                }
+            }
+        }
+
+        return bundle; // No need for a separate bundleInput variable
     }
 
 
