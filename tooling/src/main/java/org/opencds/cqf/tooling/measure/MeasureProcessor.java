@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling.measure;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -88,8 +90,8 @@ public class MeasureProcessor extends BaseProcessor {
     }
 
     public void bundleMeasures(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
-            Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp, FhirContext fhirContext, String fhirUri,
-            Encoding encoding) {
+                               Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp, FhirContext fhirContext, String fhirUri,
+                               Encoding encoding) {
         Map<String, IBaseResource> measures = IOUtils.getMeasures(fhirContext);
         //Map<String, IBaseResource> libraries = IOUtils.getLibraries(fhirContext);
 
@@ -114,15 +116,15 @@ public class MeasureProcessor extends BaseProcessor {
                 else {
                     primaryLibrary = IOUtils.getLibraries(fhirContext).get(primaryLibraryUrl);
                 }
-                
+
                 if (primaryLibrary == null)
-                	throw new IllegalArgumentException(String.format("Could not resolve library url %s", primaryLibraryUrl));
-                
+                    throw new IllegalArgumentException(String.format("Could not resolve library url %s", primaryLibraryUrl));
+
                 String primaryLibrarySourcePath = IOUtils.getLibraryPathMap(fhirContext).get(primaryLibrary.getIdElement().getIdPart());
                 String primaryLibraryName = ResourceUtils.getName(primaryLibrary, fhirContext);
                 if (includeVersion) {
-                    primaryLibraryName = primaryLibraryName + "-" + 
-                        fhirContext.newFhirPath().evaluateFirst(primaryLibrary, "version", IBase.class).get().toString();
+                    primaryLibraryName = primaryLibraryName + "-" +
+                            fhirContext.newFhirPath().evaluateFirst(primaryLibrary, "version", IBase.class).get().toString();
                 }
 
                 shouldPersist = shouldPersist
@@ -163,6 +165,7 @@ public class MeasureProcessor extends BaseProcessor {
 
                 if (shouldPersist) {
                     String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), MeasureTestGroupName), measureName);
+
                     persistBundle(igPath, bundleDestPath, measureName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri, addBundleTimestamp);
                     bundleFiles(igPath, bundleDestPath, measureName, binaryPaths, measureSourcePath, primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion, addBundleTimestamp);
                     bundledMeasures.add(measureSourcePath);
@@ -198,6 +201,10 @@ public class MeasureProcessor extends BaseProcessor {
     }
 
     private void persistBundle(String igPath, String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, List<IBaseResource> resources, String fhirUri, Boolean addBundleTimestamp) {
+        //Check for test files in bundleDestPath + "-files", loop through if exists,
+        // find all files that start with "tests-", post to fhir server following same folder structure:
+        persistTestFiles(bundleDestPath, libraryName, encoding, fhirContext, fhirUri);
+
         IOUtils.initializeDirectory(bundleDestPath);
         Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext, addBundleTimestamp, this.getIdentifiers());
         IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);
@@ -205,9 +212,28 @@ public class MeasureProcessor extends BaseProcessor {
         BundleUtils.postBundle(encoding, fhirContext, fhirUri, (IBaseResource) bundle);
     }
 
+    private void persistTestFiles(String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, String fhirUri){
+
+        String filesLoc = bundleDestPath + File.separator + libraryName + "-files";
+        File directory = new File(filesLoc);
+        if (directory.exists()) {
+            String filesPostLoc = fhirUri + "/" + libraryName + "-files";
+            File[] filesInDir = directory.listFiles();
+            if (!(filesInDir == null || filesInDir.length == 0)) {
+                for (File file : filesInDir) {
+                    if (file.getName().toLowerCase().startsWith("tests-")){
+                        IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext, true);
+                        BundleUtils.postBundle(encoding, fhirContext, fhirUri, resource);
+                    }
+                }
+            }
+
+        }
+    }
+
     private void bundleFiles(String igPath, String bundleDestPath, String libraryName, List<String> binaryPaths, String resourceFocusSourcePath,
-         String librarySourcePath, FhirContext fhirContext, Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios,
-         Boolean includeVersion, Boolean addBundleTimestamp) {
+                             String librarySourcePath, FhirContext fhirContext, Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios,
+                             Boolean includeVersion, Boolean addBundleTimestamp) {
         String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, libraryName + "-" + IGBundleProcessor.bundleFilesPathElement);
         IOUtils.initializeDirectory(bundleDestFilesPath);
 
@@ -222,31 +248,31 @@ public class MeasureProcessor extends BaseProcessor {
         String cqlDestPath = FilenameUtils.concat(bundleDestFilesPath, cqlFileName);
         IOUtils.copyFile(cqlLibrarySourcePath, cqlDestPath);
 
-        if (includeTerminology) {  
-            try {     
-                Map<String, IBaseResource> valuesets = ResourceUtils.getDepValueSetResources(cqlLibrarySourcePath, igPath, fhirContext, includeDependencies, includeVersion);      
+        if (includeTerminology) {
+            try {
+                Map<String, IBaseResource> valuesets = ResourceUtils.getDepValueSetResources(cqlLibrarySourcePath, igPath, fhirContext, includeDependencies, includeVersion);
                 if (!valuesets.isEmpty()) {
                     Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<IBaseResource>(valuesets.values()), fhirContext, addBundleTimestamp, this.getIdentifiers());
-                    IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  
-                }  
+                    IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);
+                }
             }  catch (Exception e) {
                 e.printStackTrace();
                 LogUtils.putException(libraryName, e.getMessage());
-            }       
+            }
         }
-        
+
         if (includeDependencies) {
             Map<String, IBaseResource> depLibraries = ResourceUtils.getDepLibraryResources(librarySourcePath, fhirContext, encoding, includeVersion, logger);
             if (!depLibraries.isEmpty()) {
                 String depLibrariesID = "library-deps-" + libraryName;
                 Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<IBaseResource>(depLibraries.values()), fhirContext, addBundleTimestamp, this.getIdentifiers());
-                IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);  
-            }        
+                IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);
+            }
         }
 
-         if (includePatientScenarios) {
+        if (includePatientScenarios) {
             TestCaseProcessor.bundleTestCaseFiles(igPath, "measure", libraryName, bundleDestFilesPath, fhirContext);
-        }        
+        }
     }
 
     protected boolean versioned;
