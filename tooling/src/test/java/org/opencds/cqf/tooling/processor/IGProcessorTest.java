@@ -198,14 +198,14 @@ public class IGProcessorTest extends RefreshTest {
 	}
 
 	private boolean mapsAreEqual(Map<String, String> map1, Map<String, String> map2) {
-		System.out.println("#TEST INFO: COMPARING " + map1.getClass() + "(" + map1.size() + ") AND " + map2.getClass()
-				+ "(" + map2.size() + ")");
+//		System.out.println("#TEST INFO: COMPARING " + map1.getClass() + "(" + map1.size() + ") AND " + map2.getClass()
+//				+ "(" + map2.size() + ")");
 
 		if (map1.size() != map2.size()) {
 			return false;
 		}
 		boolean comparison = map1.entrySet().stream().allMatch(e -> e.getValue().equals(map2.get(e.getKey())));
-		System.out.println("#TEST INFO: MATCH: " + comparison);
+//		System.out.println("#TEST INFO: MATCH: " + comparison);
 		return comparison;
 	}
 
