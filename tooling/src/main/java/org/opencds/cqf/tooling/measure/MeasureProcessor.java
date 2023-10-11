@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
+import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
@@ -278,7 +279,7 @@ public class MeasureProcessor extends BaseProcessor {
             String libraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
             VersionedIdentifier primaryLibraryIdentifier = CanonicalUtils.toVersionedIdentifier(libraryUrl);
             List<CqlCompilerException> errors = new ArrayList<CqlCompilerException>();
-            CompiledLibrary CompiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, cqlTranslatorOptions, errors);
+            CompiledLibrary CompiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, errors);
             boolean hasErrors = false;
             if (errors.size() > 0) {
                 for (CqlCompilerException e : errors) {
@@ -289,7 +290,7 @@ public class MeasureProcessor extends BaseProcessor {
                 }
             }
             if (!hasErrors) {
-                return processor.refreshMeasure(measure, libraryManager, CompiledLibrary, cqlTranslatorOptions);
+                return processor.refreshMeasure(measure, libraryManager, CompiledLibrary, cqlTranslatorOptions.getCqlCompilerOptions());
             }
         }
         return measure;

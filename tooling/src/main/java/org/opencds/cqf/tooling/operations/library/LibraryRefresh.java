@@ -62,10 +62,10 @@ public class LibraryRefresh implements ExecutableOperation {
 
       try {
          modelManager = new ModelManager();
-         libraryManager = new LibraryManager(modelManager);
+         translatorOptions = ResourceUtils.getTranslatorOptions(pathToCql);
+         libraryManager = new LibraryManager(modelManager, translatorOptions.getCqlCompilerOptions());
          libraryManager.getLibrarySourceLoader().registerProvider(new DefaultLibrarySourceProvider(Paths.get(pathToCql)));
          libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
-         translatorOptions = ResourceUtils.getTranslatorOptions(pathToCql);
          refreshLibrary(libraryToRefresh);
 
          if (outputPath == null) {
@@ -84,9 +84,10 @@ public class LibraryRefresh implements ExecutableOperation {
 
       try {
          String cql = new String(libraryManager.getLibrarySourceLoader().getLibrarySource(ResourceUtils.getIdentifier(libraryToRefresh, fhirContext)).readAllBytes());
-         CqlTranslator translator = CqlTranslator.fromText(cql, modelManager, libraryManager, null, translatorOptions);
+         CqlTranslator translator = CqlTranslator.fromText(cql, libraryManager);
          DataRequirementsProcessor drp = new DataRequirementsProcessor();
-         Library drLibrary = drp.gatherDataRequirements(libraryManager, translator.getTranslatedLibrary(), translatorOptions, null, true, false);
+         Library drLibrary = drp.gatherDataRequirements(libraryManager, translator.getTranslatedLibrary(),
+                 translatorOptions.getCqlCompilerOptions(), null, true, false);
 
          r5LibraryToRefresh.setDate(new Date());
          refreshContent(r5LibraryToRefresh, cql, translator.toXml(), translator.toJson());

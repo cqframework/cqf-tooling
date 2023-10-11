@@ -543,7 +543,7 @@ public class IOUtils {
                 throw new IllegalArgumentException("cqlContentPath must be a path to a .cql file");
             }
 
-            translator = CqlTranslator.fromFile(cqlFile, modelManager, libraryManager, null, options);
+            translator = CqlTranslator.fromFile(cqlFile, libraryManager);
 
             if (!translator.getErrors().isEmpty()) {
                 ArrayList<String> errors = new ArrayList<>();

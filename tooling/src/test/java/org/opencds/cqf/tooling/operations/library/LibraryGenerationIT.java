@@ -11,20 +11,20 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class LibraryGenerationIT {
-   private final ModelManager modelManager = new ModelManager();
-   private final LibraryManager libraryManager = new LibraryManager(modelManager);
    private final DataRequirementsProcessor dataRequirementsProcessor = new DataRequirementsProcessor();
-   CqlTranslatorOptions options = CqlTranslatorOptions.defaultOptions();
+   private final CqlTranslatorOptions options = CqlTranslatorOptions.defaultOptions();
 
    @Test
    void testSimpleDSTU3LibraryGeneration() {
+      ModelManager modelManager = new ModelManager();
+      LibraryManager libraryManager = new LibraryManager(modelManager, options.getCqlCompilerOptions());
+
       LibraryGenerator libraryGenerator = new LibraryGenerator();
       libraryGenerator.setFhirContext(FhirContext.forDstu3Cached());
-      CqlTranslator translator = CqlTranslator.fromText(DSTU3PartialFhirHelpers, modelManager, libraryManager,
-              options.getOptions().toArray(new CqlTranslatorOptions.Options[]{}));
+      CqlTranslator translator = CqlTranslator.fromText(DSTU3PartialFhirHelpers, libraryManager);
       IBaseResource library = libraryGenerator.resolveFhirLibrary(translator,
               dataRequirementsProcessor.gatherDataRequirements(libraryManager, translator.getTranslatedLibrary(),
-                      options, null, false), R4PartialFhirHelpers);
+                      options.getCqlCompilerOptions(), null, false), R4PartialFhirHelpers);
       Assert.assertTrue(library instanceof org.hl7.fhir.dstu3.model.Library);
       org.hl7.fhir.dstu3.model.Library r4Library = (org.hl7.fhir.dstu3.model.Library) library;
       Assert.assertTrue(r4Library.hasId());
@@ -39,13 +39,15 @@ public class LibraryGenerationIT {
 
    @Test
    void testSimpleR4LibraryGeneration() {
+      ModelManager modelManager = new ModelManager();
+      LibraryManager libraryManager = new LibraryManager(modelManager, options.getCqlCompilerOptions());
+
       LibraryGenerator libraryGenerator = new LibraryGenerator();
       libraryGenerator.setFhirContext(FhirContext.forR4Cached());
-      CqlTranslator translator = CqlTranslator.fromText(R4PartialFhirHelpers, modelManager, libraryManager,
-              options.getOptions().toArray(new CqlTranslatorOptions.Options[]{}));
+      CqlTranslator translator = CqlTranslator.fromText(R4PartialFhirHelpers, libraryManager);
       IBaseResource library = libraryGenerator.resolveFhirLibrary(translator,
               dataRequirementsProcessor.gatherDataRequirements(libraryManager, translator.getTranslatedLibrary(),
-                      options, null, false), R4PartialFhirHelpers);
+                      options.getCqlCompilerOptions(), null, false), R4PartialFhirHelpers);
       Assert.assertTrue(library instanceof org.hl7.fhir.r4.model.Library);
       org.hl7.fhir.r4.model.Library r4Library = (org.hl7.fhir.r4.model.Library) library;
       Assert.assertTrue(r4Library.hasId());
@@ -60,13 +62,15 @@ public class LibraryGenerationIT {
 
    @Test
    void testSimpleR5LibraryGeneration() {
+      ModelManager modelManager = new ModelManager();
+      LibraryManager libraryManager = new LibraryManager(modelManager, options.getCqlCompilerOptions());
+
       LibraryGenerator libraryGenerator = new LibraryGenerator();
       libraryGenerator.setFhirContext(FhirContext.forR5Cached());
-      CqlTranslator translator = CqlTranslator.fromText(R4PartialFhirHelpers, modelManager, libraryManager,
-              options.getOptions().toArray(new CqlTranslatorOptions.Options[]{}));
+      CqlTranslator translator = CqlTranslator.fromText(R4PartialFhirHelpers, libraryManager);
       IBaseResource library = libraryGenerator.resolveFhirLibrary(translator,
               dataRequirementsProcessor.gatherDataRequirements(libraryManager, translator.getTranslatedLibrary(),
-                      options, null, false), R4PartialFhirHelpers);
+                      options.getCqlCompilerOptions(), null, false), R4PartialFhirHelpers);
       Assert.assertTrue(library instanceof org.hl7.fhir.r5.model.Library);
       org.hl7.fhir.r5.model.Library r4Library = (org.hl7.fhir.r5.model.Library) library;
       Assert.assertTrue(r4Library.hasId());

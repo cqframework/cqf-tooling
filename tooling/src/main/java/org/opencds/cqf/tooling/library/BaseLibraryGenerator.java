@@ -186,16 +186,7 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
 
     private CqlTranslator translate(File cqlFile) {
         try {
-            ArrayList<CqlTranslatorOptions.Options> options = new ArrayList<>();
-            options.add(CqlTranslatorOptions.Options.EnableDateRangeOptimization);
-
-            CqlTranslator translator =
-                CqlTranslator.fromFile(
-                    cqlFile,
-                    modelManager,
-                    libraryManager,
-                    options.toArray(new CqlTranslatorOptions.Options[0])
-                );
+            CqlTranslator translator = CqlTranslator.fromFile(cqlFile, libraryManager);
 
             if (translator.getErrors().size() > 0) {
                 System.err.println("Translation failed due to errors:");

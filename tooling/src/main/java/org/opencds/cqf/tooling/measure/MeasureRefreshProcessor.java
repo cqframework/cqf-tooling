@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
@@ -19,7 +20,7 @@ import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.Resource;
 
 public class MeasureRefreshProcessor {
-    public Measure refreshMeasure(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary CompiledLibrary, CqlTranslatorOptions options) {
+    public Measure refreshMeasure(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary CompiledLibrary, CqlCompilerOptions options) {
         
     	Library moduleDefinitionLibrary = getModuleDefinitionLibrary(measureToUse, libraryManager, CompiledLibrary, options);
         
@@ -44,7 +45,7 @@ public class MeasureRefreshProcessor {
         return measureToUse;
     }
 
-    private Library getModuleDefinitionLibrary(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary CompiledLibrary, CqlTranslatorOptions options){
+    private Library getModuleDefinitionLibrary(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary CompiledLibrary, CqlCompilerOptions options){
         Set<String> expressionList = getExpressions(measureToUse);
         DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
         return dqReqTrans.gatherDataRequirements(libraryManager, CompiledLibrary, options, expressionList, true);

@@ -84,4 +84,9 @@ public class NpmPackageManagerTests implements IWorkerContext.ILoggingService {
     public void logDebugMessage(IWorkerContext.ILoggingService.LogCategory category, String msg) {
         logMessage(msg);
     }
+
+    @Override
+    public boolean isDebugLogging() {
+        return false;
+    }
 }

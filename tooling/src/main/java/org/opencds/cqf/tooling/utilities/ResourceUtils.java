@@ -384,9 +384,7 @@ public class ResourceUtils {
       }
       else {
          options = CqlTranslatorOptions.defaultOptions();
-         if (!options.getFormats().contains(CqlTranslator.Format.XML)) {
-            options.getFormats().add(CqlTranslator.Format.XML);
-         }
+         options.getFormats().add(CqlTranslatorOptions.Format.XML);
          logger.debug("cql-options not found. Using default options.");
       }
 

@@ -24,6 +24,7 @@ import org.opencds.cqf.tooling.operations.Operation;
 import org.opencds.cqf.tooling.operations.OperationParam;
 import org.opencds.cqf.tooling.utilities.FhirContextCache;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,13 +51,15 @@ public class LibraryGenerator implements ExecutableOperation {
    private String outputPath;
 
    private FhirContext fhirContext;
+   private CqlTranslatorOptions translatorOptions = CqlTranslatorOptions.defaultOptions();
    private final DataRequirementsProcessor dataRequirementsProcessor = new DataRequirementsProcessor();
 
    @Override
    public void execute() {
       fhirContext = FhirContextCache.getContext(version);
+      translatorOptions = ResourceUtils.getTranslatorOptions(pathToCqlContent);
       ModelManager modelManager = new ModelManager();
-      LibraryManager libraryManager = new LibraryManager(modelManager);
+      LibraryManager libraryManager = new LibraryManager(modelManager, translatorOptions.getCqlCompilerOptions());
       File cqlContent = new File(pathToCqlContent);
       LibrarySourceProvider librarySourceProvider = new DefaultLibrarySourceProvider(cqlContent.isDirectory() ?
               cqlContent.toPath() : cqlContent.getParentFile().toPath());
@@ -67,24 +70,22 @@ public class LibraryGenerator implements ExecutableOperation {
          if (cqlFiles != null) {
             for (File cqlFile : cqlFiles) {
                if (cqlFile.getAbsolutePath().endsWith("cql")) {
-                  processCqlFile(cqlFile, modelManager, libraryManager);
+                  processCqlFile(cqlFile, libraryManager);
                }
             }
          }
       }
       else {
-         processCqlFile(cqlContent, modelManager, libraryManager);
+         processCqlFile(cqlContent, libraryManager);
       }
    }
 
-   private void processCqlFile(File cqlFile, ModelManager modelManager, LibraryManager libraryManager) {
+   private void processCqlFile(File cqlFile, LibraryManager libraryManager) {
       if (cqlFile.getAbsolutePath().endsWith("cql")) {
          try {
-            CqlTranslator translator = CqlTranslator.fromFile(cqlFile, modelManager, libraryManager,
-                    CqlTranslatorOptions.defaultOptions().getOptions().toArray(
-                            new CqlTranslatorOptions.Options[]{}));
+            CqlTranslator translator = CqlTranslator.fromFile(cqlFile, libraryManager);
             org.hl7.fhir.r5.model.Library dataReqLibrary = dataRequirementsProcessor.gatherDataRequirements(
-                    libraryManager, translator.getTranslatedLibrary(), CqlTranslatorOptions.defaultOptions(),
+                    libraryManager, translator.getTranslatedLibrary(), translatorOptions.getCqlCompilerOptions(),
                     null, false);
             IOUtils.writeResource(resolveFhirLibrary(translator, dataReqLibrary, IOUtils.getFileContent(cqlFile)),
                     outputPath, IOUtils.Encoding.valueOf(encoding), fhirContext);

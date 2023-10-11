@@ -485,10 +485,21 @@ public class Config {
       }
 
       static class Hierarchy {
+         @JsonProperty
+         String narrative;
          @JsonProperty(required = true)
          String query;
-         @JsonProperty(required = true)
+//         @JsonProperty(required = true)
+         @JsonProperty
          Auth auth;
+
+         public String getNarrative() {
+            return narrative;
+         }
+
+         public void setNarrative(String narrative) {
+            this.narrative = narrative;
+         }
 
          public String getQuery() {
             return query;
