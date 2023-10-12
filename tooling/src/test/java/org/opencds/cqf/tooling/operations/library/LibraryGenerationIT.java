@@ -35,6 +35,7 @@ public class LibraryGenerationIT {
       Assert.assertTrue(r4Library.hasType());
       Assert.assertTrue(r4Library.hasContent());
       Assert.assertEquals(r4Library.getContent().size(), 3);
+      Assert.assertEquals(libraryManager.getCompiledLibraries().size(), 1);
    }
 
    @Test
@@ -58,6 +59,7 @@ public class LibraryGenerationIT {
       Assert.assertTrue(r4Library.hasType());
       Assert.assertTrue(r4Library.hasContent());
       Assert.assertEquals(r4Library.getContent().size(), 3);
+      Assert.assertEquals(libraryManager.getCompiledLibraries().size(), 1);
    }
 
    @Test
@@ -81,6 +83,7 @@ public class LibraryGenerationIT {
       Assert.assertTrue(r4Library.hasType());
       Assert.assertTrue(r4Library.hasContent());
       Assert.assertEquals(r4Library.getContent().size(), 3);
+      Assert.assertEquals(libraryManager.getCompiledLibraries().size(), 1);
    }
 
    private final String DSTU3PartialFhirHelpers = "library FHIRHelpers version '1.8'\n" +
