@@ -275,7 +275,7 @@ public class ExtractMatBundleOperation extends Operation {
             }
         }
 
-        return bundle; // No need for a separate bundleInput variable
+        return bundle;
     }
 
     /**
@@ -301,7 +301,7 @@ public class ExtractMatBundleOperation extends Operation {
             }
         }
 
-        return bundle; // No need for a separate bundleInput variable
+        return bundle;
     }
 
 
