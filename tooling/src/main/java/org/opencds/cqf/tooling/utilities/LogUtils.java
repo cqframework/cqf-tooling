@@ -22,6 +22,7 @@ public class LogUtils {
     }
 
     public static void info(String message) {
+        System.out.println(message);
         ourLog.info(message);
     }
 

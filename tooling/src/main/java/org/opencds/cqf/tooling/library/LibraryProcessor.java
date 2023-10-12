@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Strings;
@@ -33,14 +36,16 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class LibraryProcessor extends BaseProcessor {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    public static final String ResourcePrefix = "library-";   
+    public static final String ResourcePrefix = "library-";
+
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
     }
+
     private static Pattern pattern;
 
     private static Pattern getPattern() {
-        if(pattern == null) {
+        if (pattern == null) {
             String regex = "^[a-zA-Z]+[a-zA-Z0-9_\\-\\.]*";
             pattern = Pattern.compile(regex);
         }
@@ -48,14 +53,15 @@ public class LibraryProcessor extends BaseProcessor {
     }
 
     public static void validateIdAlphaNumeric(String id) {
-        if(!getPattern().matcher(id).find()) {
+        if (!getPattern().matcher(id).find()) {
             throw new RuntimeException("The library id format is invalid.");
         }
     }
-    
+
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
         return refreshIgLibraryContent(parentContext, outputEncoding, null, versioned, fhirContext, shouldApplySoftwareSystemStamp);
     }
+
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
         System.out.println("Refreshing libraries...");
         // ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
@@ -90,24 +96,55 @@ public class LibraryProcessor extends BaseProcessor {
     }
 
     public Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
-            Encoding encoding, boolean versioned) {
+                                             Encoding encoding, boolean versioned) {
         String fileName = FilenameUtils.getName(path);
         boolean prefixed = fileName.toLowerCase().startsWith("library-");
         Boolean shouldPersist = true;
+
+        List<Future<?>> futures = new ArrayList<>();
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+
         try {
             Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding, versioned, logger);
             // String currentResourceID = IOUtils.getTypeQualifiedResourceId(path, fhirContext);
             for (IBaseResource resource : dependencies.values()) {
-                resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
 
-                // NOTE: Assuming dependency library will be in directory of dependent.
-                String dependencyPath = IOUtils.getResourceFileName(IOUtils.getResourceDirectory(path), resource, encoding, fhirContext, versioned, prefixed);
-                bundleLibraryDependencies(dependencyPath, fhirContext, resources, encoding, versioned);
+
+                Future<?> future = executorService.submit(() -> {
+                    try {
+                        resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
+
+                        // NOTE: Assuming dependency library will be in directory of dependent.
+                        String dependencyPath = IOUtils.getResourceFileName(IOUtils.getResourceDirectory(path), resource, encoding, fhirContext, versioned, prefixed);
+                        bundleLibraryDependencies(dependencyPath, fhirContext, resources, encoding, versioned);
+
+                        //end for
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+
+                futures.add(future);
+
             }
         } catch (Exception e) {
             shouldPersist = false;
-            LogUtils.putException(path, e);
+            LogUtils.info("Error in bundleLibraryDependencies: " + path + ", " + e.getMessage());
         }
+
+        //wait for all tasks to complete:
+        for (Future<?> future : futures) {
+            try {
+                future.get(); // This will block until the task is complete
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        executorService.shutdown();
+
         return shouldPersist;
     }
 
