@@ -1,15 +1,20 @@
 package org.opencds.cqf.tooling.terminology;
 
+import com.google.gson.JsonObject;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
+import org.hl7.fhir.utilities.json.JsonTrackingParser;
 import org.opencds.cqf.tooling.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Iterator;
 
 public class SpreadsheetValidateVSandCS extends Operation {
@@ -32,6 +37,9 @@ public class SpreadsheetValidateVSandCS extends Operation {
     @Override
     public void execute(String[] args) {
         setOutputPath("src/main/resources/org/opencds/cqf/tooling/terminology/output"); // default
+        String userName = "";
+        String password = "";
+
         for (String arg : args) {
             if (arg.equals("-SpreadsheetValidateVSandCS")) continue;
             String[] flagAndValue = arg.split("=");
@@ -58,6 +66,14 @@ public class SpreadsheetValidateVSandCS extends Operation {
                 case "uts":
                     urlToTestServer = value;
                     break; // -urltotestserver (-uts)
+                case "userName":
+                case "un":
+                    userName = value;
+                    break; // -userName (-un)
+                case "password":
+                case "pw":
+                    password = value;
+                    break; // -password (-pw)
                 default:
                     throw new IllegalArgumentException("Unknown flag: " + flag);
             }
@@ -66,10 +82,11 @@ public class SpreadsheetValidateVSandCS extends Operation {
         if (pathToSpreadsheet == null) {
             throw new IllegalArgumentException("The path to the spreadsheet is required");
         }
-        validateSpreadsheet();
+        validateSpreadsheet(userName, password);
     }
 
-    private void validateSpreadsheet() {
+    private void validateSpreadsheet(String userName, String password) {
+        int firstSheet = 0;
         int idCellNumber = 1;
         int valueSetCellNumber = 3;
         int valueSetURLCellNumber = 4;
@@ -78,27 +95,48 @@ public class SpreadsheetValidateVSandCS extends Operation {
 
         spreadsheetName = new File(pathToSpreadsheet).getName();
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
-        for (int s = 0; s < workbook.getNumberOfSheets(); s++) {
-            Sheet sheet = workbook.getSheetAt(s);
+        Sheet sheet = workbook.getSheetAt(firstSheet);
 
-            Iterator<Row> rows = sheet.rowIterator();
-            Row header = null;
-            while (rows.hasNext()) {
-                Row row = rows.next();
+        Iterator<Row> rows = sheet.rowIterator();
+        Row header = null;
+        while (rows.hasNext()) {
+            Row row = rows.next();
 
-                if (header == null && hasHeader) {
-                    header = row;
-                    continue;
-                }
+            if (header == null && hasHeader) {
+                header = row;
+                continue;
+            }
 //                Iterator<Cell> cells = row.cellIterator();
 //                Cell cell = cells.next();
+            try {
                 String id = row.getCell(idCellNumber).getStringCellValue();
                 String valueSetName = row.getCell(valueSetCellNumber).getStringCellValue();
                 String valueSetURL = row.getCell(valueSetURLCellNumber).getStringCellValue();
                 String version = row.getCell(versionCellNumber).getStringCellValue();
                 String codeSystemURL = row.getCell(codeSystemURLCellNumber).getStringCellValue();
-                logger.info(valueSetURL);
+                validateRow(id, valueSetName, valueSetURL, version, codeSystemURL, userName, password);
+            } catch (Exception ex) {
+                System.out.println("Row " + row.getRowNum() + " has an empty cell.");
+                logger.debug("Row " + row.getRowNum() + " has an empty cell.");
             }
         }
+    }
+
+    private void validateRow(String id, String valueSetName, String valueSetURL, String version, String codeSystemURL, String userName, String password){
+        /*
+        Get valueset from server, Get package from NPM, run validate with ResourceValidator code
+        Get codesystem from server, Get package from NPM???, validate with ResourceValidator code
+         */
+        urlToTestServer
+    }
+
+    /*
+    From NpmPackageManager
+     */
+    private JsonObject fetchJson(String source) throws IOException {
+        URL url = new URL(source + "?nocache=" + System.currentTimeMillis());
+        HttpURLConnection c = (HttpURLConnection) url.openConnection();
+        c.setInstanceFollowRedirects(true);
+        return JsonTrackingParser.parseJson(c.getInputStream());
     }
 }
