@@ -312,13 +312,13 @@ public class ResourceUtils {
       }
 
       if (dependencies.size() != valueSetResources.size()) {
-         String message = (dependencies.size() - valueSetResources.size()) + " missing ValueSets: \r\n";
-         dependencies.removeAll(valueSetResources.keySet());
-         for (String valueSetUrl : dependencies) {
-            message += valueSetUrl + " MISSING \r\n";
-         }
-         System.out.println(message);
-         throw new Exception(message);
+        String message = (dependencies.size() - valueSetResources.size()) + " missing ValueSets: \r\n";
+        dependencies.removeAll(valueSetResources.keySet());
+        for (String valueSetUrl : dependencies) {
+          message += valueSetUrl + " MISSING \r\n";
+        }
+        logger.error(message);
+        throw new Exception(message);
       }
       return valueSetResources;
    }
@@ -348,9 +348,9 @@ public class ResourceUtils {
       try {
          elm = getElmFromCql(cqlContentPath);
       } catch (Exception e) {
-         System.out.println("error processing cql: ");
-         System.out.println(e.getMessage());
-         return includedDefs;
+        logger.error("error processing cql: ");
+        logger.error(e.getMessage());
+        return includedDefs;
       }
 
       if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
@@ -365,8 +365,8 @@ public class ResourceUtils {
       try {
          elm = getElmFromCql(cqlContentPath);
       } catch (Exception e) {
-         System.out.println("error translating cql: ");
-         return valueSetDefs;
+        logger.error("error translating cql: ");
+        return valueSetDefs;
       }
       if (elm.getValueSets() != null && !elm.getValueSets().getDef().isEmpty()) {
          valueSetDefs.addAll(elm.getValueSets().getDef());
@@ -384,9 +384,7 @@ public class ResourceUtils {
       }
       else {
          options = CqlTranslatorOptions.defaultOptions();
-         if (!options.getFormats().contains(CqlTranslator.Format.XML)) {
-            options.getFormats().add(CqlTranslator.Format.XML);
-         }
+         options.getFormats().add(CqlTranslatorOptions.Format.XML);
          logger.debug("cql-options not found. Using default options.");
       }
 

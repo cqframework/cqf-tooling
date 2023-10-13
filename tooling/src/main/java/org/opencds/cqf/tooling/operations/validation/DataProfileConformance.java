@@ -118,16 +118,8 @@ public class DataProfileConformance implements ExecutableOperation {
    }
 
    public void setGeneralValidator() {
-      NpmPackage npmPackage;
-      NpmUtils.PackageLoaderValidationSupport validationSupport = new NpmUtils.PackageLoaderValidationSupport(fhirContext);
-      for (String packageUrl : getPackageUrlsList()) {
-         try {
-            npmPackage = NpmPackage.fromUrl(packageUrl);
-            validationSupport.loadPackage(npmPackage);
-         } catch (IOException e) {
-            logger.warn("Encountered an issue when attempting to resolve package from URL: {}", packageUrl, e);
-         }
-      }
+      NpmUtils.PackageLoaderValidationSupport validationSupport =
+              NpmUtils.getNpmPackageLoaderValidationSupport(fhirContext, getPackageUrlsList());
 
       populateProfileMap(validationSupport.fetchAllNonBaseStructureDefinitions());
 

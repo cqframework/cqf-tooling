@@ -57,11 +57,11 @@ public class LoincHierarchyProcessorIT {
 
       IBaseResource returnVs = hierarchyProcessor.getValueSet();
       Assert.assertTrue(returnVs instanceof ValueSet);
-      Assert.assertTrue(((ValueSet) returnVs).hasCompose());
-      Assert.assertTrue(((ValueSet) returnVs).getCompose().hasInclude());
-      Assert.assertTrue(((ValueSet) returnVs).getCompose().getIncludeFirstRep().hasSystem());
-      Assert.assertEquals(((ValueSet) returnVs).getCompose().getIncludeFirstRep().getSystem(), Terminology.LOINC_SYSTEM_URL);
-      Assert.assertEquals(((ValueSet) returnVs).getCompose().getIncludeFirstRep().getConcept().size(), 41);
+      Assert.assertTrue(((ValueSet) returnVs).hasExpansion());
+      Assert.assertTrue(((ValueSet) returnVs).getExpansion().hasContains());
+      Assert.assertTrue(((ValueSet) returnVs).getExpansion().getContainsFirstRep().hasSystem());
+      Assert.assertEquals(((ValueSet) returnVs).getExpansion().getContainsFirstRep().getSystem(), Terminology.LOINC_SYSTEM_URL);
+      Assert.assertEquals(((ValueSet) returnVs).getExpansion().getContains().size(), 41);
    }
 
    @Test
@@ -73,11 +73,11 @@ public class LoincHierarchyProcessorIT {
 
       IBaseResource returnVs = hierarchyProcessor.getValueSet();
       Assert.assertTrue(returnVs instanceof ValueSet);
-      Assert.assertTrue(((ValueSet) returnVs).hasCompose());
-      Assert.assertTrue(((ValueSet) returnVs).getCompose().hasInclude());
-      Assert.assertTrue(((ValueSet) returnVs).getCompose().getIncludeFirstRep().hasSystem());
-      Assert.assertEquals(((ValueSet) returnVs).getCompose().getIncludeFirstRep().getSystem(), Terminology.LOINC_SYSTEM_URL);
-      Assert.assertEquals(((ValueSet) returnVs).getCompose().getIncludeFirstRep().getConcept().size(), 19);
+      Assert.assertTrue(((ValueSet) returnVs).hasExpansion());
+      Assert.assertTrue(((ValueSet) returnVs).getExpansion().hasContains());
+      Assert.assertTrue(((ValueSet) returnVs).getExpansion().getContainsFirstRep().hasSystem());
+      Assert.assertEquals(((ValueSet) returnVs).getExpansion().getContainsFirstRep().getSystem(), Terminology.LOINC_SYSTEM_URL);
+      Assert.assertEquals(((ValueSet) returnVs).getExpansion().getContains().size(), 19);
    }
 
    private final String COCAINE_URINE_QUERY_RESPONSE = "[\n" +

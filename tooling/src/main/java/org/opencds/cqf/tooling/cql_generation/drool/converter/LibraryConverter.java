@@ -21,11 +21,10 @@ import org.slf4j.MarkerFactory;
  */
 public class LibraryConverter {
 
-    private Logger logger;
+    private static final Logger logger = LoggerFactory.getLogger(LibraryConverter.class);
     private Map<String, Marker> markers = new HashMap<String, Marker>();
 
     public LibraryConverter() {
-        logger = LoggerFactory.getLogger(this.getClass());
         markers.put("Library", MarkerFactory.getMarker("Library"));
     }
 
@@ -47,7 +46,7 @@ public class LibraryConverter {
             logger.error(markers.get("Library"), "conditionCriteriaRel.getCriteriaDTO() was null.");
             throw new RuntimeException("Unable to infer library name for condition " + conditionDTO.getUuid().toString());
         }
-        logger.debug("Resolving context for library " + libraryName);
+        logger.debug("Resolving context for library {}", libraryName);
         return resolveContext(libraryName, header, modelBuilder);
     }
 
@@ -69,7 +68,7 @@ public class LibraryConverter {
             logger.error(markers.get("Library"), "conditionCriteriaRel.getCriteriaDTO() was null.");
             throw new RuntimeException("Unable to infer library name for condition " + conditionCriteriaRel.getUuid().toString());
         }
-        logger.debug("Resolving context for library " + libraryName);
+        logger.debug("Resolving context for library {}", libraryName);
         return resolveContext(libraryName, header, modelBuilder);
     }
 
@@ -81,11 +80,11 @@ public class LibraryConverter {
                         .replaceAll("TEST", "").replaceAll("TEST2", "").replaceAll("TEST3", "")
                         .replaceAll("TESTExample-Daryl", "").replaceAll("[()]", "");
             } else {
-                logger.info("Descriptive name was too long, generating library name for " + libraryName);
+                logger.info("Descriptive name was too long, generating library name for {}", libraryName);
                 libraryName = "GeneratedCql" + libraryIndex;
             }
         } catch (Exception e) {
-            logger.error(markers.get("Library"), "Could not infer library name for " + libraryName);
+            logger.error(markers.get("Library"), "Could not infer library name for {}", libraryName);
             libraryName = "ErrorWhileGenerated" + libraryIndex;
         }
         return libraryName;

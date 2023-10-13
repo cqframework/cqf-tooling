@@ -26,12 +26,16 @@ import org.opencds.cqf.tooling.modelinfo.quick.QuickModelInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.uscore.USCoreClassInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.uscore.USCoreModelInfoBuilder;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 
 public class StructureDefinitionToModelInfo extends Operation {
+
+    private static final Logger logger = LoggerFactory.getLogger(StructureDefinitionToModelInfo.class);
 
     private String inputPath;
     private String resourcePaths;
@@ -233,7 +237,7 @@ public class StructureDefinitionToModelInfo extends Operation {
             String fileName = modelName.toLowerCase() + "-" + "modelinfo" + "-" + modelVersion + ".xml";
             writeOutput(fileName, sw.toString());
         } catch (Exception e) {
-            System.err.println("error" + e.getMessage());
+            logger.error("error: {}", e.getMessage());
             e.printStackTrace();
         }
     }

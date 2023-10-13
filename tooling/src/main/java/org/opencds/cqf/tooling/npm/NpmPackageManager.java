@@ -19,7 +19,6 @@ import org.hl7.fhir.utilities.VersionUtilities;
 import org.hl7.fhir.utilities.json.JsonTrackingParser;
 import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
-import org.hl7.fhir.utilities.npm.ToolsVersion;
 import org.opencds.cqf.tooling.exception.NpmPackageManagerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +84,7 @@ public class NpmPackageManager {
         try {
             // userMode indicates whether the packageCache is within the working directory
             // or in the user home
-            pcm = new FilesystemPackageCacheManager(true, ToolsVersion.TOOLS_VERSION);
+            pcm = new FilesystemPackageCacheManager(true);
         } catch (IOException e) {
             throw new NpmPackageManagerException("error creating the FilesystemPackageCacheManager", e);
         }

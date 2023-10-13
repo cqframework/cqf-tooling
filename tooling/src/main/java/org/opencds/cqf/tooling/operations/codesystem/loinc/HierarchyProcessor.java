@@ -12,6 +12,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.opencds.cqf.tooling.constants.Api;
 import org.opencds.cqf.tooling.constants.Terminology;
@@ -30,6 +31,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Operation(name = "LoincHierarchy")
@@ -39,10 +41,16 @@ public class HierarchyProcessor implements ExecutableOperation {
    @OperationParam(alias = { "query", "q" }, setter = "setQuery", required = true,
            description = "The expression that provides an alternative definition of the content of the value set in some form that is not computable - e.g. instructions that could only be followed by a human.")
    private String query;
-   @OperationParam(alias = { "username", "user" }, setter = "setUsername", required = true,
+   @OperationParam(alias = { "id" }, setter = "setId", required = true,
+           description = "The id for the generated FHIR ValueSet resource.")
+   private String id;
+   @OperationParam(alias = { "narrative", "n" }, setter = "setId",
+           description = "The narrative to populate the rulesText extension. If not present, the query will be used instead.")
+   private String narrative;
+   @OperationParam(alias = { "username", "user" }, setter = "setUsername", defaultValue = "cschuler",
            description = "The LOINC account username.")
    private String username;
-   @OperationParam(alias = { "password", "pass" }, setter = "setPassword", required = true,
+   @OperationParam(alias = { "password", "pass" }, setter = "setPassword", defaultValue = "knight",
            description = "The LOINC account password.")
    private String password;
    @OperationParam(alias = { "e", "encoding" }, setter = "setEncoding", defaultValue = "json",
@@ -56,9 +64,9 @@ public class HierarchyProcessor implements ExecutableOperation {
            description = "The directory path to which the generated FHIR ValueSet resource should be written (default src/main/resources/org/opencds/cqf/tooling/terminology/output)")
    private String outputPath;
 
-   private final List<String> validLoincVersions = Arrays.asList("2.69", "2.70", "2.71", "2.72", "2.73", "2.74", "2.75");
+   private final List<String> validLoincVersions = Arrays.asList("2.69", "2.70", "2.71", "2.72", "2.73", "2.74", "2.75", "2.76");
    // TODO: need a way to retrieve the latest LOINC version programmatically
-   private String loincVersion = "2.75";
+   private String loincVersion = "2.76";
 
    private String loincHierarchyUrl = Api.LOINC_HIERARCHY_QUERY_URL;
 
@@ -67,12 +75,15 @@ public class HierarchyProcessor implements ExecutableOperation {
    @Override
    public void execute() {
       fhirContext = FhirContextCache.getContext(version);
-      IOUtils.writeResource(getValueSet(), outputPath, IOUtils.Encoding.valueOf(encoding), fhirContext);
+      IOUtils.writeResource(getValueSet(), outputPath, IOUtils.Encoding.parse(encoding), fhirContext);
    }
 
    public IBaseResource getValueSet() {
+      logger.info("Generating FHIR {} ValueSet resource with id {} for query: {}", version, id, query);
       ValueSet valueSet = new ValueSet().setStatus(Enumerations.PublicationStatus.DRAFT);
-      valueSet.getCompose().addInclude().setSystem(Terminology.LOINC_SYSTEM_URL).setVersion(loincVersion);
+      valueSet.setId(id);
+      valueSet.addExtension(Terminology.RULES_TEXT_EXT_URL, new StringType(narrative == null ? query : narrative));
+      valueSet.getExpansion().setTimestamp(new Date());
 
       HttpGet request = new HttpGet(loincHierarchyUrl + URLEncoder.encode(query, Charset.defaultCharset()));
       final String auth = username + ":" + password;
@@ -87,11 +98,9 @@ public class HierarchyProcessor implements ExecutableOperation {
                var jsonObj = obj.getAsJsonObject();
                if (jsonObj.has("IsLoinc") && jsonObj.getAsJsonPrimitive("IsLoinc").getAsBoolean()) {
                   String code = jsonObj.getAsJsonPrimitive("Code").getAsString();
-                  String display = null;
-                  if (display == null) {
-                     display = jsonObj.getAsJsonPrimitive("CodeText").getAsString();
-                  }
-                  valueSet.getCompose().getIncludeFirstRep().addConcept().setCode(code).setDisplay(display);
+                  String display = jsonObj.getAsJsonPrimitive("CodeText").getAsString();
+                  valueSet.getExpansion().addContains().setVersion(loincVersion)
+                          .setSystem(Terminology.LOINC_SYSTEM_URL).setCode(code).setDisplay(display);
                }
             }
          }
@@ -101,6 +110,8 @@ public class HierarchyProcessor implements ExecutableOperation {
          throw new RuntimeException(message);
       }
 
+      valueSet.getExpansion().setTotal(valueSet.getExpansion().getContains().size());
+      logger.info("Successfully generated ValueSet resource at location {}", outputPath);
       return ResourceAndTypeConverter.convertFromR5Resource(fhirContext, valueSet);
    }
 
@@ -120,6 +131,22 @@ public class HierarchyProcessor implements ExecutableOperation {
 
    public void setQuery(String query) {
       this.query = query;
+   }
+
+   public String getId() {
+      return id;
+   }
+
+   public void setId(String id) {
+      this.id = id;
+   }
+
+   public String getNarrative() {
+      return narrative;
+   }
+
+   public void setNarrative(String narrative) {
+      this.narrative = narrative;
    }
 
    public String getUsername() {

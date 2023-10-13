@@ -543,7 +543,7 @@ public class IOUtils {
                 throw new IllegalArgumentException("cqlContentPath must be a path to a .cql file");
             }
 
-            translator = CqlTranslator.fromFile(cqlFile, modelManager, libraryManager, null, options);
+            translator = CqlTranslator.fromFile(cqlFile, libraryManager);
 
             if (!translator.getErrors().isEmpty()) {
                 ArrayList<String> errors = new ArrayList<>();
@@ -692,7 +692,7 @@ public class IOUtils {
                     resources.put(path, IOUtils.readResource(path, fhirContext, true));
                 } catch (Exception e) {
                     if (path.toLowerCase().contains("valuesets") || path.toLowerCase().contains("valueset")) {
-                        logger.error("Error reading in Terminology from path: {} \n {}", path, e);
+                        logger.error("Error reading in Terminology from path: {} \n {}", path, e.getMessage());
                     }
                 }
             }
@@ -763,7 +763,7 @@ public class IOUtils {
                     resources.put(path, resource);
                 } catch (Exception e) {
                     if(path.toLowerCase().contains("library")) {
-                        logger.error("Error reading in Library from path: {} \n {}", path, e);
+                        logger.error("Error reading in Library from path: {} \n {}", path, e.getMessage());
                     }
                 }
             }
@@ -813,7 +813,7 @@ public class IOUtils {
                     resources.put(path, resource);
                 } catch (Exception e) {
                     if(path.toLowerCase().contains("measure")) {
-                        logger.error("Error reading in Measure from path: {} \n {}", path, e);
+                        logger.error("Error reading in Measure from path: {} \n {}", path, e.getMessage());
                     }
                 }
             }
@@ -1011,7 +1011,7 @@ public class IOUtils {
                     resources.put(path, IOUtils.readResource(path, fhirContext, true));
                 } catch (Exception e) {
                     if(path.toLowerCase().contains("device")) {
-                        logger.error("Error reading in Device from path: {} \n {}", path, e);
+                        logger.error("Error reading in Device from path: {} \n {}", path, e.getMessage());
                     }
                 }
             }

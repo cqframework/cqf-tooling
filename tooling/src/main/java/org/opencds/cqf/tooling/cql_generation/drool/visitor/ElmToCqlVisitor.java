@@ -20,7 +20,7 @@ import com.google.common.base.Strings;
  * @since 2021-04-05
  */
 public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(ElmToCqlVisitor.class);
     private boolean useSpaces = true;
 
     public boolean getUseSpaces() {
@@ -268,7 +268,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
     }
 
     private void newConstruct(String section) {
-        logger.debug("Adding new construct: " + section);
+        logger.debug("Adding new construct: {}", section);
         resetIndentLevel();
         newLine();
         addToSection(section);

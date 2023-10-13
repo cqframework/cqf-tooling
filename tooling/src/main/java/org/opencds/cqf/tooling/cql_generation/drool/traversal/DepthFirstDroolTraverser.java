@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(DepthFirstDroolTraverser.class);
     private Stack<CriteriaResourceParamDTO> criteriaResourceParamDTOExtensionStack = new Stack<CriteriaResourceParamDTO>();
     private Boolean unableToDetermineModeling = false;
     public DepthFirstDroolTraverser(Visitor visitor) {
@@ -52,7 +52,7 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
             .filter(rel ->
             rel.getConditionCriteriaPredicateDTOs().isEmpty()
              || rel.getName().toLowerCase().contains("not yet implemented"))
-            .forEach(rel -> logger.info("Not Yet Implemented: " + rel.getUuid()));
+            .forEach(rel -> logger.info("Not Yet Implemented: {}", rel.getUuid()));
 
             conditionCriteriaRels.stream()
             .filter(rel ->
@@ -121,7 +121,7 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
             criteriaResourceParamDTOExtensionStack.push(predicatePart.getCriteriaResourceParamDTO());
         }
         if (unknownOperatorModeling(predicatePart)) {
-            logger.info("Unable to determine operator from " + predicatePart.getCriteriaResourceDTO().getUuid());
+            logger.info("Unable to determine operator from {}", predicatePart.getCriteriaResourceDTO().getUuid());
             unableToDetermineModeling = true;
             return;
         }
@@ -154,12 +154,12 @@ public class DepthFirstDroolTraverser<T> extends DroolTraverser<Visitor> {
                     }
                 } else if (sourcePredicatePartDTO.getDataInputClassType().equals(DataModelClassType.String)) {
                     if (sourcePredicatePartDTO.getPartAlias() != null && sourcePredicatePartDTO.getPartAlias().equals("an order and only an order")) {
-                        logger.info("Unable to determine modeling from " + sourcePredicatePartDTO.getUuid());
+                        logger.info("Unable to determine modeling from {}", sourcePredicatePartDTO.getUuid());
                         unableToDetermineModeling = true;
                     }
                     break;
                 } else if (unknownConceptModeling(sourcePredicatePartDTO)){
-                    logger.info("Unable to determine modeling from " + sourcePredicatePartDTO.getUuid());
+                    logger.info("Unable to determine modeling from {}", sourcePredicatePartDTO.getUuid());
                     unableToDetermineModeling = true;
                     return;
                 }

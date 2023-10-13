@@ -70,7 +70,7 @@ public class ConfigValueSetGenerator implements ExecutableOperation {
 
       fhirContext = FhirContextCache.getContext(version);
       generateValueSets(config).forEach(
-              vs -> IOUtils.writeResource(vs, outputPath, IOUtils.Encoding.valueOf(encoding), fhirContext)
+              vs -> IOUtils.writeResource(vs, outputPath, IOUtils.Encoding.parse(encoding), fhirContext)
       );
    }
 
@@ -100,13 +100,13 @@ public class ConfigValueSetGenerator implements ExecutableOperation {
             continue;
          }
          valueSets.add(ResourceAndTypeConverter.convertFromR5Resource(
-                 fhirContext, updateValueSet(vs, valueSet, commonMetaData)));
+                 fhirContext, updateValueSet(vs, config, valueSet, commonMetaData)));
       }
 
       return valueSets;
    }
 
-   private ValueSet updateValueSet(ValueSet vsToUpdate, Config.ValueSets configMetaData, CommonMetaData commonMetaData) {
+   private ValueSet updateValueSet(ValueSet vsToUpdate, Config config, Config.ValueSets configMetaData, CommonMetaData commonMetaData) {
       ValueSet updatedValueSet = new ValueSet();
 
       // metadata
@@ -129,7 +129,12 @@ public class ConfigValueSetGenerator implements ExecutableOperation {
 
       // extensions
       updatedValueSet.setExtension(vsToUpdate.getExtension());
-      if (commonMetaData != null && commonMetaData.getAuthor() != null) {
+      if (config.getAuthor() != null) {
+         updatedValueSet.addExtension(Terminology.VS_AUTHOR_EXT_URL, new ContactDetail()
+                 .setName(config.getAuthor().getName()).setTelecom(Collections.singletonList(
+                         new ContactPoint().setSystem(ContactPoint.ContactPointSystem.fromCode(
+                                 config.getAuthor().getContactType())).setValue(config.getAuthor().contactValue))));
+      } else if (commonMetaData != null && commonMetaData.getAuthor() != null) {
          updatedValueSet.addExtension(Terminology.VS_AUTHOR_EXT_URL, commonMetaData.getAuthor());
       } else if (commonMetaData != null && commonMetaData.getContact() != null) {
          for (var contact : commonMetaData.getContact()) {
@@ -205,12 +210,16 @@ public class ConfigValueSetGenerator implements ExecutableOperation {
       hierarchyProcessor.setVersion(version);
       hierarchyProcessor.setEncoding(encoding);
       hierarchyProcessor.setQuery(hierarchy.getQuery());
-      if (hierarchyProcessor.getUsername() == null) {
-         hierarchyProcessor.setUsername(hierarchy.getAuth().getUser());
-      }
-      if (hierarchyProcessor.getPassword() == null) {
-         hierarchyProcessor.setPassword(hierarchy.getAuth().getPassword());
-      }
+      hierarchyProcessor.setNarrative(hierarchy.getNarrative());
+      // TODO: remove after demo, uncomment block below and make Config.java auth required
+      hierarchyProcessor.setUsername("cschuler");
+      hierarchyProcessor.setPassword("knight");
+//      if (hierarchyProcessor.getUsername() == null) {
+//         hierarchyProcessor.setUsername(hierarchy.getAuth().getUser());
+//      }
+//      if (hierarchyProcessor.getPassword() == null) {
+//         hierarchyProcessor.setPassword(hierarchy.getAuth().getPassword());
+//      }
    }
 
    private void prepareRxMixWorkflowProcessor(Config.ValueSets.RulesText rulesText) {
