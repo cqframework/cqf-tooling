@@ -17,7 +17,6 @@ public abstract class StructureDefinitionToSpreadsheetBase extends Operation {
     protected CreationHelper helper;
     protected XSSFCellStyle linkStyle;
 
-    public static final String separator = System.getProperty("file.separator");
     protected boolean isParameterListComplete() {
         if (null == inputPath || inputPath.length() < 1 ||
                 null == modelName || modelName.length() < 1 ||

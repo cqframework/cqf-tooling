@@ -3,12 +3,12 @@ package org.opencds.cqf.tooling.common;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
 
 public abstract class BaseCqfmSoftwareSystemHelper {
-    public static final String separator = System.getProperty("file.separator");
     private String rootDir;
     protected String getRootDir() {
         return this.rootDir;
@@ -18,7 +18,8 @@ public abstract class BaseCqfmSoftwareSystemHelper {
     private static String cqfToolingDeviceName = "cqf-tooling";
 //    private static String cqfToolingDeviceReferenceID = "#" + cqfToolingDeviceName;
     private static String cqfmSoftwareSystemExtensionUrl = "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem";
-    protected static String devicePath = separator + "input" + separator + "resources" + separator + "device";
+    protected static String devicePath = IOUtils.concatFilePath(File.separator,
+            "input", "resources", "device");
 
     protected String getCqfToolingDeviceName() { return cqfToolingDeviceName; }
 //    protected String getCqfToolingDeviceReferenceID() { return cqfToolingDeviceReferenceID; }

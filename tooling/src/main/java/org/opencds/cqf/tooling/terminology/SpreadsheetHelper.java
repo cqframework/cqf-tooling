@@ -14,6 +14,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 public class SpreadsheetHelper {
 
@@ -164,7 +165,7 @@ public class SpreadsheetHelper {
                         : encoding.toLowerCase().startsWith("j")
                         ? FhirContext.forDstu3Cached().newJsonParser()
                         : FhirContext.forDstu3Cached().newXmlParser();
-        try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + fileName)) {
+        try (FileOutputStream writer = new FileOutputStream(IOUtils.concatFilePath(outputPath, fileName))) {
             writer.write(parser.setPrettyPrint(true).encodeResourceToString(vs).getBytes());
             writer.flush();
         } catch (IOException e) {

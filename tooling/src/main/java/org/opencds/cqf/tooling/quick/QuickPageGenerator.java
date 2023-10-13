@@ -18,6 +18,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.slf4j.Logger;
@@ -495,7 +496,7 @@ public class QuickPageGenerator extends Operation {
      * @throws IOException
      */
     private void writeHtmlFile(String fileName, String html) throws IOException {
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + fileName)) {
+        try (FileOutputStream writer = new FileOutputStream(IOUtils.concatFilePath(getOutputPath(), fileName))) {
             writer.write(html.getBytes());
             writer.flush();
         }

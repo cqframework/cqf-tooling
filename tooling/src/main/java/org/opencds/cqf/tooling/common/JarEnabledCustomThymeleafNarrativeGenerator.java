@@ -62,7 +62,7 @@ public class JarEnabledCustomThymeleafNarrativeGenerator extends BaseThymeleafNa
 			String cpName = name.substring("classpath:".length());
 			try (InputStream resource =  Thread.currentThread().getContextClassLoader().getResourceAsStream(cpName)) {
 				if (resource == null) {
-					try (InputStream resource2 =Thread.currentThread().getContextClassLoader().getResourceAsStream("/" + cpName)) {
+					try (InputStream resource2 =Thread.currentThread().getContextClassLoader().getResourceAsStream(File.separator + cpName)) {
 						if (resource2 == null) {
 							throw new IOException("Can not find '" + cpName + "' on classpath");
 						}

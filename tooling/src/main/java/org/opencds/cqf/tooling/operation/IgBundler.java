@@ -35,6 +35,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -157,12 +158,12 @@ public class IgBundler extends Operation
                 if (resources.isJsonArray()) {
                     for (final JsonElement path : resources.getAsJsonArray()) {
                         if (path.isJsonPrimitive()) {
-                            resourcePaths.add(pathToIg + "/" + path.getAsString());
+                            resourcePaths.add(IOUtils.concatFilePath(pathToIg, path.getAsString()));
                             outputBundles.put(path.getAsString(), null);
                         }
                     }
                 } else {
-                    resourcePaths.add(pathToIg + "/" + resources.getAsString());
+                    resourcePaths.add(IOUtils.concatFilePath(pathToIg, resources.getAsString()));
                 }
             }
         }
@@ -247,7 +248,7 @@ public class IgBundler extends Operation
     private void outputBundles() {
         for (final Map.Entry<String, IBaseResource> set : outputBundles.entrySet()) {
             try (FileOutputStream writer = new FileOutputStream(
-                    getOutputPath() + "/" + set.getKey() + "." + encoding)) {
+                    IOUtils.concatFilePath(getOutputPath(), set.getKey() + "." + encoding))) {
                 writer.write(encoding.equals("json")
                         ? jsonParser.setPrettyPrint(true).encodeResourceToString(set.getValue()).getBytes()
                         : xmlParser.setPrettyPrint(true).encodeResourceToString(set.getValue()).getBytes());

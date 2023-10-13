@@ -25,6 +25,7 @@ import org.opencds.cqf.tooling.modelinfo.quick.QuickClassInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.quick.QuickModelInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.uscore.USCoreClassInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.uscore.USCoreModelInfoBuilder;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,7 +167,8 @@ public class StructureDefinitionToModelInfo extends Operation {
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             ciBuilder.afterBuild();
 
-            String fhirHelpersPath = this.getOutputPath() + "/" + modelName + "Helpers-" + modelVersion + ".cql";
+            String fhirHelpersPath = IOUtils.concatFilePath(this.getOutputPath(),
+                    modelName + "Helpers-" + modelVersion + ".cql");
             miBuilder = new FHIRModelInfoBuilder(modelVersion, typeInfos, atlas, fhirHelpersPath);
             mi = miBuilder.build();
         }
@@ -177,7 +179,8 @@ public class StructureDefinitionToModelInfo extends Operation {
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             ciBuilder.afterBuild();
 
-            String helpersPath = this.getOutputPath() + "/" + modelName + "Helpers-" + modelVersion + ".cql";
+            String helpersPath = IOUtils.concatFilePath(this.getOutputPath(),
+                    modelName + "Helpers-" + modelVersion + ".cql");
             miBuilder = new USCoreModelInfoBuilder(modelVersion, typeInfos, atlas, helpersPath);
             mi = miBuilder.build();
         }
@@ -188,7 +191,8 @@ public class StructureDefinitionToModelInfo extends Operation {
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             ciBuilder.afterBuild();
 
-            String helpersPath = this.getOutputPath() + "/" + modelName + "Helpers-" + modelVersion + ".cql";
+            String helpersPath = IOUtils.concatFilePath(this.getOutputPath(),
+                    modelName + "Helpers-" + modelVersion + ".cql");
             miBuilder = new QICoreModelInfoBuilder(modelVersion, typeInfos, atlas, helpersPath);
             mi = miBuilder.build();
         }
@@ -239,7 +243,7 @@ public class StructureDefinitionToModelInfo extends Operation {
     }
 
     private void writeOutput(String fileName, String content) throws IOException {
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + fileName)) {
+        try (FileOutputStream writer = new FileOutputStream(IOUtils.concatFilePath(getOutputPath(), fileName))) {
             writer.write(content.getBytes());
             writer.flush();
         }

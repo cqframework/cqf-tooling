@@ -19,6 +19,7 @@ import org.cdsframework.dto.DataInputNodeDTO;
 import org.cdsframework.dto.OpenCdsConceptDTO;
 import org.opencds.cqf.tooling.cql_generation.IOUtil;
 import org.opencds.cqf.tooling.cql_generation.context.ElmContext;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 /**
  * Generates html files from an RCKMS Drool Object graph.
@@ -114,8 +115,7 @@ public class HtmlFileVisitor implements Visitor {
     @Override
     public ElmContext visit(List<ConditionDTO> rootNode) {
         htmlStrings.entrySet().stream().forEach(entry -> {
-            // Dont like this concat
-            String filePath = outputDirectoryPath.concat("/" + entry.getKey() + ".html");
+            String filePath = IOUtils.concatFilePath(outputDirectoryPath, entry.getKey() + ".html");
             File file = new File(filePath);
             String content = "<html><head><title>" + entry.getKey() + "</title></head><body><p>" + entry.getValue()
                     + "</p></body></html>";

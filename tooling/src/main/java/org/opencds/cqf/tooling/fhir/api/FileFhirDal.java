@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.tooling.parameter.FileFhirPlatformParameters;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,7 @@ public class FileFhirDal implements FhirDal {
     if (resourceTypeDefined(resource)){
 
       //ensure resource type directory exists
-      String typePath = this.resourceDir + "/" + resource.getIdElement().getResourceType();
+      String typePath = IOUtils.concatFilePath(this.resourceDir, resource.getIdElement().getResourceType());
       String path = getPath(resource);
 
       File typeDir = new File(typePath);
@@ -127,11 +128,13 @@ public class FileFhirDal implements FhirDal {
   }
 
   private String getPath(IBaseResource resource){
-    return this.resourceDir + "/" + resource.getIdElement().getResourceType() + "/" + resource.getIdElement().getIdPart() + "." + this.encoding.toString();
+    return IOUtils.concatFilePath(this.resourceDir, resource.getIdElement().getResourceType(),
+            resource.getIdElement().getIdPart() + "." + this.encoding.toString());
   }
 
   private String getPath(IIdType id){
-    return this.resourceDir + "/" + id.getResourceType() + "/" + id.getIdPart() + "." + this.encoding.toString();
+    return IOUtils.concatFilePath(this.resourceDir, id.getResourceType(),
+            id.getIdPart() + "." + this.encoding.toString());
   }
 
   private boolean resourceTypeDefined(IBaseResource resource){
