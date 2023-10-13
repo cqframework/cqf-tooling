@@ -4,7 +4,6 @@ import org.opencds.cqf.tooling.exception.InvalidIdException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class IDUtils {
@@ -12,22 +11,22 @@ public class IDUtils {
     private static final Logger logger = LoggerFactory.getLogger(IDUtils.class);
 
     // regex defined https://www.hl7.org/fhir/datatypes.html#id
-    private static final String regex = "[A-Za-z0-9\\-\\.]{1,64}";
+    private static final String fhirRegex = "[A-Za-z0-9\\-\\.]{1,64}";
 
     private static Pattern idPattern;
 
     private static Pattern getIdPattern() {
         if(idPattern == null) {
-            idPattern = Pattern.compile(regex);
+            idPattern = Pattern.compile(fhirRegex);
         }
         return idPattern;
     }
 
-    // validateId checks that the provided id matches the defined regex pattern.
-    // throws an exception if not.
+    // validateId checks that the provided id matches the fhir defined regex pattern & contains letters to satisfy
+    // requirements for HAPI server. An InvalidIdException is thrown if these conditions are not met.
     public static void validateId(String id){
-        if(!getIdPattern().matcher(id).find()) {
-            logger.error("Provided id: {} does not match specified regex: {}", id, regex);
+        if (!getIdPattern().matcher(id).find() || !id.matches(".*[a-zA-z]+.*") || id.length() > 64) {
+            logger.error("Provided id: {} is not an alphanumeric string matching regex: {}", id, fhirRegex);
             throw new InvalidIdException("The provided id does not meet the constraints.");
         }
     }

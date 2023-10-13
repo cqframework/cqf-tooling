@@ -2,7 +2,7 @@ package org.opencds.cqf.tooling.exception;
 
 public class InvalidIdException extends RuntimeException {
 
-    static final long serialVersionUid = 1l;
+    static final long serialVersionUID = 1l;
 
     public InvalidIdException() {super();}
 
