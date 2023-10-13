@@ -42,11 +42,15 @@ import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Bryn on 8/18/2019.
  */
 public class Processor extends Operation {
+
+    private static final Logger logger = LoggerFactory.getLogger(Processor.class);
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
     private String encoding = "json"; // -encoding (-e)
     private String scopes; // -scopes (-s)
@@ -906,7 +910,7 @@ public class Processor extends Operation {
     private void processDataElementPage(Workbook workbook, String page, String scope) {
         Sheet sheet = workbook.getSheet(page);
         if (sheet == null) {
-            System.out.println(String.format("Sheet %s not found in the Workbook, so no processing was done.", page));
+            logger.info(String.format("Sheet %s not found in the Workbook, so no processing was done.", page));
         }
 
         questionnaireItemLinkIdCounter = 1;
@@ -1143,7 +1147,7 @@ public class Processor extends Operation {
         }
 
         if (typeString == null || typeString.isEmpty()) {
-            System.out.println(String.format("Could not determine type for Data Element: %s.", dataElement.getDataElementLabel()));
+            logger.info(String.format("Could not determine type for Data Element: %s.", dataElement.getDataElementLabel()));
             return type;
         }
 
@@ -1188,7 +1192,7 @@ public class Processor extends Operation {
                 type = Questionnaire.QuestionnaireItemType.QUANTITY;
                 break;
             default:
-                System.out.println(String.format("Questionnaire Item Type not mapped: %s.", typeString));
+                logger.info(String.format("Questionnaire Item Type not mapped: %s.", typeString));
         }
 
         return type;
@@ -1204,7 +1208,7 @@ public class Processor extends Operation {
         if (questionnaireItemType != null) {
             questionnaireItem.setType(questionnaireItemType);
         } else {
-            System.out.println(String.format("Unable to determine questionnaire item type for item '%s'.", dataElement.getDataElementLabel()));
+            logger.info(String.format("Unable to determine questionnaire item type for item '%s'.", dataElement.getDataElementLabel()));
         }
 
         questionnaire.getItem().add(questionnaireItem);
@@ -2036,7 +2040,7 @@ public class Processor extends Operation {
             ensureChoicesDataElement(element, sd);
 
         } catch (Exception e) {
-            System.out.println(String.format("Error ensuring element for '%s'. Error: %s ", element.getLabel(), e));
+            logger.error(String.format("Error ensuring element for '%s'. Error: %s ", element.getLabel(), e));
         }
     }
 

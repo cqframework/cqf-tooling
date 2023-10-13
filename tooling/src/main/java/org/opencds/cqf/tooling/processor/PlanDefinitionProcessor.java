@@ -21,7 +21,7 @@ public class PlanDefinitionProcessor {
     public static final String PlanDefinitionTestGroupName = "plandefinition";
     private LibraryProcessor libraryProcessor;
     private CDSHooksProcessor cdsHooksProcessor;
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(PlanDefinitionProcessor.class);
 
     public PlanDefinitionProcessor(LibraryProcessor libraryProcessor, CDSHooksProcessor cdsHooksProcessor) {
         this.libraryProcessor = libraryProcessor;

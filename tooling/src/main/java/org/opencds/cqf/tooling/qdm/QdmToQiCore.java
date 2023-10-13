@@ -13,8 +13,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.opencds.cqf.tooling.Operation;
 
 import info.bliki.wiki.model.WikiModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QdmToQiCore extends Operation {
+
+    private static final Logger logger = LoggerFactory.getLogger(QdmToQiCore.class);
 
     private final String[] typeURLS = {
             "Adverse_Event_(QDM)", "Allergy/Intolerance_(QDM)", "Assessment_(QDM)",
@@ -45,7 +49,7 @@ public class QdmToQiCore extends Operation {
             try {
                 url = new URL(fullURL);
             } catch (MalformedURLException e) {
-                System.err.println("Encountered the following malformed URL: " + fullURL);
+                logger.error("Encountered the following malformed URL: {}", fullURL);
                 e.printStackTrace();
                 return;
             }
@@ -54,7 +58,7 @@ public class QdmToQiCore extends Operation {
             try {
                 content = getCleanContent(getPageContent(url));
             } catch (IOException e) {
-                System.err.println("Encountered the following exception while scraping content from " + fullURL + ": " + e.getMessage());
+                logger.error("Encountered the following exception while scraping content from {} : {}", fullURL, e.getMessage());
                 e.printStackTrace();
                 return;
             }
@@ -85,7 +89,7 @@ public class QdmToQiCore extends Operation {
             try {
                 writeOutput(fileName, html);
             } catch (IOException e) {
-                System.err.println("Encountered the following exception while creating file " + fileName + ".html: " + e.getMessage());
+                logger.error("Encountered the following exception while creating file {}.html: {}", fileName, e.getMessage());
                 e.printStackTrace();
                 return;
             }

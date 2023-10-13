@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * @since   2021-02-24 
  */
 public class DroolCqlGenerator implements CqlGenerator {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(DroolCqlGenerator.class);
     private CQLTYPES type;
     private File cqlOutput;
 

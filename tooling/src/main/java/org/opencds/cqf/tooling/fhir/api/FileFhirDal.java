@@ -24,21 +24,19 @@ public class FileFhirDal implements FhirDal {
   protected final String resourceDir;
   protected final EncodingEnum encoding;
   protected final FhirContext fhirContext;
-  private Logger logger;
+  private static final Logger logger = LoggerFactory.getLogger(FileFhirDal.class);
 
 
   public FileFhirDal(String resourceDir){
     this.resourceDir = resourceDir;
     this.encoding = EncodingEnum.JSON;
     this.fhirContext = FhirContext.forR4();
-    this.logger = LoggerFactory.getLogger(this.getClass());
   }
 
   public FileFhirDal(FileFhirPlatformParameters params){
     this.resourceDir = params.resourceDir;
     this.encoding = params.encoding;
     this.fhirContext = params.fhirContext;
-    this.logger = LoggerFactory.getLogger(this.getClass());
   }
 
   @Override
