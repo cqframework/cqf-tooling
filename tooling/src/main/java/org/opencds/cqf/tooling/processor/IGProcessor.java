@@ -23,7 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class IGProcessor extends BaseProcessor {
     public static final String IG_VERSION_REQUIRED = "igVersion required";
-	protected IGBundleProcessor igBundleProcessor;
+    protected IGBundleProcessor igBundleProcessor;
     protected LibraryProcessor libraryProcessor;
     protected MeasureProcessor measureProcessor;
 
@@ -99,7 +99,7 @@ public class IGProcessor extends BaseProcessor {
         //package everything
         LogUtils.info("IGProcessor.publishIG - bundleIg");
         igBundleProcessor.bundleIg(refreshedResourcesNames, rootDir, getBinaryPaths(), encoding, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
-        versioned, addBundleTimestamp, fhirContext, fhirUri);
+                versioned, addBundleTimestamp, fhirContext, fhirUri);
         //test everything
         //IGTestProcessor.testIg(IGTestParameters);
         //Publish?
@@ -168,8 +168,6 @@ public class IGProcessor extends BaseProcessor {
             TestCaseProcessor testCaseProcessor = new TestCaseProcessor();
             testCaseProcessor.refreshTestCases(FilenameUtils.concat(rootDir, IGProcessor.testCasePathElement), encoding, fhirContext, refreshedResourcesNames);
         }
-
-        LogUtils.info("refreshIG END");
     }
 
     public static FhirContext getIgFhirContext(String igVersion)
@@ -190,9 +188,9 @@ public class IGProcessor extends BaseProcessor {
 
             default:
                 throw new IllegalArgumentException("Unknown IG version: " + igVersion);
-        }     
+        }
     }
-    
+
     public static final String bundlePathElement = "bundles/";
     public static String getBundlesPath(String igPath) {
         return FilenameUtils.concat(igPath, bundlePathElement);
@@ -204,12 +202,12 @@ public class IGProcessor extends BaseProcessor {
     public static final String valuesetsPathElement = "input/vocabulary/valueset/";
     public static final String testCasePathElement = "input/tests/";
     public static final String devicePathElement = "input/resources/device/";
-    
-    public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, ArrayList<String> resourcePaths) {                
+
+    public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, ArrayList<String> resourcePaths) {
         File directory = new File(getBundlesPath(igPath));
         if (!directory.exists()) {
             directory.mkdir();
-        }        
+        }
         if (resourcePaths.isEmpty()) {
             ensureDirectory(igPath, IGProcessor.cqlLibraryPathElement);
             ensureDirectory(igPath, IGProcessor.libraryPathElement);
