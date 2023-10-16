@@ -37,6 +37,8 @@ public class QuestionnaireProcessor {
 
         List<String> bundledQuestionnaires = new ArrayList<String>();
 
+        Map<String, String> failedExceptionMessages = new HashMap<>();
+
         //let OS handle threading:
         ExecutorService executorService = Executors.newCachedThreadPool();
 
@@ -44,10 +46,8 @@ public class QuestionnaireProcessor {
         List<Callable<Void>> tasks = new ArrayList<>();
         try {
             for (Map.Entry<String, IBaseResource> questionnaireEntry : questionnaires.entrySet()) {
-                LogUtils.info("bundleQuestionnaires, collecting task: " + questionnaireEntry.getKey());
 
                 tasks.add(() -> {
-                    LogUtils.info("bundleQuestionnaires, task running: " + questionnaireEntry.getKey());
                     String questionnaireSourcePath = IOUtils.getQuestionnairePathMap(fhirContext).get(questionnaireEntry.getKey());
 
                     // Assumption - File name matches questionnaire.name
@@ -123,9 +123,8 @@ public class QuestionnaireProcessor {
                             bundledQuestionnaires.add(questionnaireSourcePath);
                         }
                     } catch (Exception e) {
-                        LogUtils.putException(questionnaireName, e);
-                    } finally {
-                        LogUtils.warn(questionnaireName);
+                        LogUtils.putException(questionnaireSourcePath, e);
+                        failedExceptionMessages.put(questionnaireSourcePath, e.getMessage());
                     }
 
                     LogUtils.info("bundleQuestionnaires, task completed: " + questionnaireEntry.getKey());
@@ -169,12 +168,18 @@ public class QuestionnaireProcessor {
             message += "\r\n     " + notBundled + " REFRESHED";
         }
 
+        //attempt to give some kind of informational message:
         failedQuestionnaires.removeAll(bundledQuestionnaires);
-        failedQuestionnaires.removeAll(questionnairePathLibraryNames);
+        failedQuestionnaires.removeAll(bundledQuestionnaires);
         message += "\r\n" + failedQuestionnaires.size() + " Questionnaires failed refresh:";
         for (String failed : failedQuestionnaires) {
-            message += "\r\n     " + failed + " FAILED";
+            if (failedExceptionMessages.containsKey(failed)) {
+                message += "\r\n     " + failed + " FAILED: " + failedExceptionMessages.get(failed);
+            } else {
+                message += "\r\n     " + failed + " FAILED";
+            }
         }
+
 
         LogUtils.info(message);
 

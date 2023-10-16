@@ -13,18 +13,109 @@ import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class HttpClientUtils {
-    public static void post(String fhirServerUrl, IBaseResource resource, Encoding encoding, FhirContext fhirContext) throws IOException {
-        LogUtils.info("Calling POST on " + encoding.toString() + " resource " + resource.getIdElement().toString());
+    private static final List<String> failedPOSTcalls = new ArrayList<>();
+    private static final List<String> successfulPOSTcalls = new ArrayList<>();
+    private static final List<Callable<Void>> tasks = new ArrayList<>();
+    private static int counter = 0;
 
-        // Create a new ExecutorService for each POST request
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private static void reportProgress() {
+        counter++;
+        double percentage = (double) counter / tasks.size() * 100;
+        System.out.print("\rPOST: " + String.format("%.2f%%", percentage) + " done. ");
+    }
 
+    public static boolean hasPostTasksInQueue() {
+        return !tasks.isEmpty();
+    }
+
+    public static void postTaskCollection() {
+        //let OS handle threading:
+        ExecutorService executorService = Executors.newCachedThreadPool();
         try {
-            executorService.submit(() -> {
+
+            LogUtils.info(tasks.size() + " POST calls to be made. Starting now. Please wait...");
+            double percentage = (double) 0;
+            System.out.print("\rPOST: " + String.format("%.2f%%", percentage) + " done. ");
+            List<Future<Void>> futures = new ArrayList<>();
+            for (Callable<Void> task : tasks) {
+                futures.add(executorService.submit(task));
+            }
+
+            // Wait for all tasks to complete
+            for (Future<Void> future : futures) {
+                try {
+                    future.get();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // Create a custom comparator to sort based on the numeric value
+            Comparator<String> customComparator = new Comparator<String>() {
+                @Override
+                public int compare(String s1, String s2) {
+                    int value1 = extractValue(s1);
+                    int value2 = extractValue(s2);
+                    return Integer.compare(value1, value2);
+                }
+
+                private int extractValue(String s) {
+                    // Split the string and extract the numeric part at the beginning
+                    String[] parts = s.split(" ");
+                    if (parts.length > 0) {
+                        try {
+                            return Integer.parseInt(parts[0]);
+                        } catch (NumberFormatException e) {
+                            // Handle parsing error here (e.g., default value)
+                            return 0;
+                        }
+                    }
+                    return 0;
+                }
+            };
+            LogUtils.info("Processing results...");
+            successfulPOSTcalls.sort(customComparator);
+            failedPOSTcalls.sort(customComparator);
+
+
+
+            StringBuilder message = new StringBuilder();
+            message.append("\r\n").append(successfulPOSTcalls.size()).append(" resources successfully posted.");
+            for (String successPost : successfulPOSTcalls) {
+                message.append("\n").append(successPost);
+            }
+            LogUtils.info(message.toString());
+
+            message = new StringBuilder();
+            message.append("\r\n").append(failedPOSTcalls.size()).append(" resources failed to post.");
+            for (String failedPost : failedPOSTcalls) {
+                message.append("\n").append(failedPost);
+            }
+            LogUtils.info(message.toString());
+
+        } finally {
+            // Shutdown the executor when you're done, even if an exception occurs
+            executorService.shutdown();
+        }
+    }
+
+    public static void post(String fhirServerUrl, IBaseResource resource, Encoding encoding, FhirContext fhirContext) throws IOException {
+        try {
+
+            final int currentTaskIndex = tasks.size() + 1;
+
+            Callable<Void> task = () -> {
+//                LogUtils.info(currentTaskIndex + " out of " + tasks.size() + " - Calling POST on " + encoding.toString() + " resource " + resource.getIdElement().toString());
                 try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
                     HttpPost post = new HttpPost(fhirServerUrl);
                     post.addHeader("content-type", "application/" + encoding.toString());
@@ -41,25 +132,30 @@ public class HttpClientUtils {
                     }
 
                     if (responseMessage.contains("error")) {
-                        // Handle the error and provide feedback to the user
-                        LogUtils.info("Error posting resource to FHIR server (" + fhirServerUrl + "). Resource was not posted : " + resource.getIdElement().getIdPart());
-                        // You can extract and handle the error code from the responseMessage here
+                        failedPOSTcalls.add(currentTaskIndex + " out of " + tasks.size() + " - Error posting resource to FHIR server (" + fhirServerUrl + "). Resource was not posted : " + resource.getIdElement().getIdPart());
                     } else {
-                        LogUtils.info("Resource successfully posted to FHIR server: " + resource.getIdElement().getIdPart());
+                        successfulPOSTcalls.add(currentTaskIndex + " out of " + tasks.size() + " - Resource successfully posted to FHIR server: " + resource.getIdElement().getIdPart());
                     }
                 } catch (IOException e) {
                     // Handle the exception appropriately, e.g., log, rethrow, or provide user feedback
-                    LogUtils.putException("Error while making the POST request: " +  e.getMessage(), e);
+                    failedPOSTcalls.add(currentTaskIndex + " out of " + tasks.size() + " - Error while making the POST request: " + e.getMessage());
                 } catch (Exception e) {
                     // Handle other exceptions, e.g., log, rethrow, or provide user feedback
-                    LogUtils.putException("Error during POST request execution: " + e.getMessage(), e);
+                    failedPOSTcalls.add(currentTaskIndex + " out of " + tasks.size() + " - Error during POST request execution: " + e.getMessage());
                 }
-            });
+
+
+                //task requires return statement
+                reportProgress();
+                return null;
+
+            };
+
+            tasks.add(task);
         } catch (Exception e) {
             // Handle the exception appropriately, e.g., log, rethrow, or provide user feedback
             LogUtils.putException("Error while submitting the POST request: " + e.getMessage(), e);
-        } finally {
-            executorService.shutdown();
+
         }
     }
 

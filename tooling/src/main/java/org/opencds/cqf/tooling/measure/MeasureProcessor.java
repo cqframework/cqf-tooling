@@ -1,6 +1,7 @@
 package org.opencds.cqf.tooling.measure;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -107,7 +108,7 @@ public class MeasureProcessor extends BaseProcessor {
         //let OS handle threading:
         ExecutorService executorService = Executors.newCachedThreadPool();
 
-        Map<String, String> failedMeasureExceptionMessages = new HashMap<>();
+        Map<String, String> failedExceptionMessages = new HashMap<>();
 
         //build list of tasks via for loop:
         List<Callable<Void>> tasks = new ArrayList<>();
@@ -118,18 +119,13 @@ public class MeasureProcessor extends BaseProcessor {
                     continue;
                 }
 
-//                LogUtils.info("bundleMeasures, collecting task: " + measureEntry.getKey());
                 tasks.add(() -> {
-
-//                    LogUtils.info("bundleMeasures, task running: " + measureEntry.getKey());
                     String measureSourcePath = IOUtils.getMeasurePathMap(fhirContext).get(measureEntry.getKey());
-                    LogUtils.info ("Measure processing: " + measureSourcePath);
                     //check if measureSourcePath has been processed before:
-                    if(processedMeasures.contains(measureSourcePath)) {
-                        LogUtils.info ("Measure processed already: " + measureSourcePath);
+                    if (processedMeasures.contains(measureSourcePath)) {
+                        LogUtils.info("Measure processed already: " + measureSourcePath);
                         return null;
                     }
-
 
                     // Assumption - File name matches measure.name
                     String measureName = FilenameUtils.getBaseName(measureSourcePath).replace(MeasureProcessor.ResourcePrefix, "");
@@ -205,19 +201,16 @@ public class MeasureProcessor extends BaseProcessor {
 
                     } catch (Exception e) {
                         LogUtils.putException(measureName, e);
-                        failedMeasureExceptionMessages.put(measureSourcePath, e.getMessage());
-
-                    } finally {
-                        LogUtils.warn(measureName);
+                        failedExceptionMessages.put(measureSourcePath, e.getMessage());
                     }
 
-                    LogUtils.info("bundleMeasures, " + measureEntry.getKey() + " processed.");
+
 
                     processedMeasures.add(measureSourcePath);
 
                     synchronized (this) {
                         double percentage = (double) processedMeasures.size() / totalMeasures * 100;
-                        LogUtils.info("\rBundle Measures Progress: " + String.format("%.2f%%", percentage) + "\r");
+                        LogUtils.info("Bundle Measures Progress: " + String.format("%.2f%%", percentage) + " PROCESSED: " + measureEntry.getKey());
                     }
                     //task requires return statement
                     return null;
@@ -251,7 +244,8 @@ public class MeasureProcessor extends BaseProcessor {
         }
 
         List<String> measurePathLibraryNames = new ArrayList<>(IOUtils.getMeasurePaths(fhirContext));
-
+        //gather which measures didn't make it
+        ArrayList<String> failedMeasures = new ArrayList<>(measurePathLibraryNames);
 
         measurePathLibraryNames.removeAll(bundledMeasures);
         measurePathLibraryNames.retainAll(refreshedLibraryNames);
@@ -261,27 +255,25 @@ public class MeasureProcessor extends BaseProcessor {
         }
 
 
-        //attempt to give some kind of informational message for failed measures:
-        ArrayList<String> failedMeasures = new ArrayList<>(measurePathLibraryNames);
+        //attempt to give some kind of informational message:
         failedMeasures.removeAll(bundledMeasures);
         failedMeasures.removeAll(measurePathLibraryNames);
         message += "\r\n" + failedMeasures.size() + " Measures failed refresh:";
-        for (String failedMeasure : failedMeasures){
-            if (failedMeasureExceptionMessages.containsKey(failedMeasure)){
-                message += "\r\n     " + failedMeasure + " FAILED: " + failedMeasureExceptionMessages.get(failedMeasure);
-            }else{
-                message += "\r\n     " + failedMeasure + " FAILED";
+        for (String failed : failedMeasures) {
+            if (failedExceptionMessages.containsKey(failed)) {
+                message += "\r\n     " + failed + " FAILED: " + failedExceptionMessages.get(failed);
+            } else {
+                message += "\r\n     " + failed + " FAILED";
             }
         }
 
         LogUtils.info(message);
-
     }
 
     private void persistBundle(String igPath, String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, List<IBaseResource> resources, String fhirUri, Boolean addBundleTimestamp) {
         //Check for test files in bundleDestPath + "-files", loop through if exists,
         // find all files that start with "tests-", post to fhir server following same folder structure:
-//        persistTestFiles(bundleDestPath, libraryName, encoding, fhirContext, fhirUri);
+        persistTestFiles(bundleDestPath, libraryName, encoding, fhirContext, fhirUri);
 
         IOUtils.initializeDirectory(bundleDestPath);
         Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext, addBundleTimestamp, this.getIdentifiers());
@@ -290,25 +282,45 @@ public class MeasureProcessor extends BaseProcessor {
         BundleUtils.postBundle(encoding, fhirContext, fhirUri, (IBaseResource) bundle);
     }
 
+//    private void persistTestFiles(String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, String fhirUri) {
+//
+//        String filesLoc = bundleDestPath + File.separator + libraryName + "-files";
+//        File directory = new File(filesLoc);
+//        if (directory.exists()) {
+//            File[] filesInDir = directory.listFiles();
+//            if (!(filesInDir == null || filesInDir.length == 0)) {
+//                for (File file : filesInDir) {
+//                    if (file.getName().toLowerCase().startsWith("tests-")) {
+//                        IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext, true);
+//                        BundleUtils.postBundle(encoding, fhirContext, fhirUri, resource);
+//                    }
+//                }
+//            }
+//
+//        }
+//    }
     private void persistTestFiles(String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, String fhirUri) {
-
         String filesLoc = bundleDestPath + File.separator + libraryName + "-files";
         File directory = new File(filesLoc);
-        if (directory.exists()) {
-            String filesPostLoc = fhirUri + "/" + libraryName + "-files";
-            File[] filesInDir = directory.listFiles();
-            if (!(filesInDir == null || filesInDir.length == 0)) {
+
+        if (directory.exists() && directory.isDirectory()) {
+            File[] filesInDir = directory.listFiles(new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String name) {
+                    return name.toLowerCase().startsWith("tests-");
+                }
+            });
+
+            if (filesInDir != null) {
                 for (File file : filesInDir) {
-                    if (file.getName().toLowerCase().startsWith("tests-")) {
-                        IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext, true);
+                    IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext, true);
+                    if (resource != null) {
                         BundleUtils.postBundle(encoding, fhirContext, fhirUri, resource);
                     }
                 }
             }
-
         }
     }
-
     private void bundleFiles(String igPath, String bundleDestPath, String libraryName, List<String> binaryPaths, String resourceFocusSourcePath,
                              String librarySourcePath, FhirContext fhirContext, Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios,
                              Boolean includeVersion, Boolean addBundleTimestamp) {

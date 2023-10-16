@@ -1,46 +1,23 @@
 package org.opencds.cqf.tooling.utilities;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.parser.IParser;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.cqframework.cql.cql2elm.CqlCompilerException;
-import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
-import org.cqframework.cql.cql2elm.LibraryManager;
-import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.cql2elm.*;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.parser.IParser;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class IOUtils
 {
@@ -71,6 +48,7 @@ public class IOUtils
             return ENCODING_MAP.getOrDefault(lowerValue, UNKNOWN);
         }
 
+        //Map lookup works slightly faster than switch:
         private static final Map<String, Encoding> ENCODING_MAP = new HashMap<>();
         static {
             ENCODING_MAP.put("cql", CQL);
@@ -213,17 +191,36 @@ public class IOUtils
         }
     }
 
+    private static final Map<String, String> alreadyCopied = new HashMap<>();
+
     public static boolean copyFile(String inputPath, String outputPath) {
+        if (inputPath == null || outputPath == null) {
+            throw new IllegalArgumentException("InputPath and outputPath cannot be null.");
+        }
+
+        String key = inputPath + ":" + outputPath;
+        if (alreadyCopied.containsKey(key)) {
+            // File already copied to destination
+            return false;
+        }
+
         try {
             Path src = Paths.get(inputPath);
             Path dest = Paths.get(outputPath);
             Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
-            return true; // Return true to indicate success.
+            alreadyCopied.put(key, outputPath);
+            return true;
+            // Log successful copy here if needed
+        } catch (FileAlreadyExistsException e) {
+            // Handle the case when the file already exists in the destination.
+            // Log or handle as needed
+            return false;
         } catch (IOException e) {
-            // Handle the exception or log it as needed.
             e.printStackTrace();
-            return false; // Return false to indicate failure.
+            throw new RuntimeException("Error copying file: " + e.getMessage());
         }
+
+
     }
 
     public static String getTypeQualifiedResourceId(String path, FhirContext fhirContext) {
@@ -259,7 +256,52 @@ public class IOUtils
     }
 
     //users should always check for null
+//    private static Map<String, IBaseResource> cachedResources = new LinkedHashMap<String, IBaseResource>();
+//    public static IBaseResource readResource(String path, FhirContext fhirContext, Boolean safeRead)
+//    {
+//        Encoding encoding = getEncoding(path);
+//        if (encoding == Encoding.UNKNOWN || encoding == Encoding.CQL) {
+//            return null;
+//        }
+//
+//        IBaseResource resource = cachedResources.get(path);
+//        if (resource != null) {
+//            return resource;
+//        }
+//
+//        try
+//        {
+//            IParser parser = getParser(encoding, fhirContext);
+//            File file = new File(path);
+//
+//            if (file.exists() && file.isDirectory()) {
+//                throw new IllegalArgumentException(String.format("Cannot read a resource from a directory: %s", path));
+//            }
+//
+//            // if (!file.exists()) {
+//            //     String[] paths = file.getParent().split("\\\\");
+//            //     file = new File(Paths.get(file.getParent(), paths[paths.length - 1] + "-" + file.getName()).toString());
+//            // }
+//
+//            if (safeRead) {
+//                if (!file.exists()) {
+//                    return null;
+//                }
+//            }
+//            try (FileReader reader = new FileReader(file)){
+//                resource = parser.parseResource(reader);
+//            }
+//            cachedResources.put(path, resource);
+//        }
+//        catch (Exception e)
+//        {
+//            throw new RuntimeException(String.format("Error reading resource from path %s: %s", path, e.getMessage()), e);
+//        }
+//        return resource;
+//    }
+
     private static Map<String, IBaseResource> cachedResources = new LinkedHashMap<String, IBaseResource>();
+
     public static IBaseResource readResource(String path, FhirContext fhirContext, boolean safeRead) {
         Encoding encoding = getEncoding(path);
         if (encoding == Encoding.UNKNOWN || encoding == Encoding.CQL) {
@@ -271,31 +313,25 @@ public class IOUtils
             return resource;
         }
 
+        IParser parser = getParser(encoding, fhirContext); // Initialize the parser
         File file = new File(path);
 
-        if (file.exists() && file.isDirectory()) {
-            throw new IllegalArgumentException(String.format("Cannot read a resource from a directory: %s", path));
-        }
-
-        if (safeRead && !file.exists()) {
-            return null;
-        }
-
-        try {
-            IParser parser = getParser(encoding, fhirContext);
-
-            try (FileReader reader = new FileReader(file)) {
-                resource = parser.parseResource(reader);
+        if (!file.exists() || file.isDirectory()) {
+            if (safeRead) {
+                return null;
             }
+            throw new IllegalArgumentException(String.format("Invalid file path: %s", path));
+        }
 
+        try (FileReader reader = new FileReader(file)) {
+            resource = parser.parseResource(reader);
             cachedResources.put(path, resource);
-        } catch (IOException e) {
-            // Handle specific exceptions or rethrow as a more specific checked exception
+        } catch (Exception e) {
             throw new RuntimeException(String.format("Error reading resource from path %s: %s", path, e.getMessage()), e);
         }
-
         return resource;
     }
+
 
 
     public static void updateCachedResource(IBaseResource updatedResource, String path){
@@ -318,16 +354,36 @@ public class IOUtils
         return resources;
     }
 
+//    public static List<String> getFilePaths(String directoryPath, Boolean recursive)
+//    {
+//        List<String> filePaths = new ArrayList<String>();
+//        File inputDir = new File(directoryPath);
+//        ArrayList<File> files = inputDir.isDirectory() ? new ArrayList<File>(Arrays.asList(Optional.ofNullable(inputDir.listFiles()).<NoSuchElementException>orElseThrow(() -> new NoSuchElementException()))) : new ArrayList<File>();
+//
+//        for (File file : files) {
+//            if (file.isDirectory()) {
+//                //note: this is not the same as anding recursive to isDirectory as that would result in directories being added to the list if the request is not recursive.
+//                if (recursive) {
+//                    filePaths.addAll(getFilePaths(file.getPath(), recursive));
+//                }
+//            }
+//            else {
+//                filePaths.add(file.getPath());
+//            }
+//        }
+//        return filePaths;
+//    }
 
     private static final Map<String, List<String>> cachedFilePaths = new HashMap<>();
 
     public static List<String> getFilePaths(String directoryPath, boolean recursive) {
         List<String> filePaths = new ArrayList<>();
-        if (IOUtils.cachedFilePaths.containsKey(directoryPath)  ){
+        if (IOUtils.cachedFilePaths.containsKey(directoryPath)) {
             filePaths = IOUtils.cachedFilePaths.get(directoryPath);
             return filePaths;
         }
         try {
+            //Files.walk has performance benefit over for loop:
             Files.walk(Paths.get(directoryPath))
                     .filter(path -> !Files.isDirectory(path) || (recursive && Files.isDirectory(path)))
                     .map(Path::toString)
@@ -381,12 +437,36 @@ public class IOUtils
         return file.getParent();
     }
 
+//    public static List<String> getDirectoryPaths(String path, Boolean recursive)
+//    {
+//        List<String> directoryPaths = new ArrayList<String>();
+//        List<File> directories = new ArrayList<File>();
+//        File parentDirectory = new File(path);
+//        try {
+//            directories = Arrays.asList(Optional.ofNullable(parentDirectory.listFiles()).<NoSuchElementException>orElseThrow(() -> new NoSuchElementException()));
+//        } catch (Exception e) {
+//            System.out.println("No paths found for the Directory " + path + ":");
+//            return directoryPaths;
+//        }
+//
+//
+//        for (File directory : directories) {
+//            if (directory.isDirectory()) {
+//                if (recursive) {
+//                    directoryPaths.addAll(getDirectoryPaths(directory.getPath(), recursive));
+//                }
+//                directoryPaths.add(directory.getPath());
+//            }
+//        }
+//        return directoryPaths;
+//    }
+
     private static final Map<String, List<String>> cachedDirectoryPaths = new HashMap<>();
 
     public static List<String> getDirectoryPaths(String path, boolean recursive) {
         List<String> directoryPaths = new ArrayList<>();
 
-        if (IOUtils.cachedDirectoryPaths.containsKey(path)  ){
+        if (IOUtils.cachedDirectoryPaths.containsKey(path)) {
             directoryPaths = IOUtils.cachedDirectoryPaths.get(path);
             return directoryPaths;
         }
@@ -840,6 +920,32 @@ public class IOUtils
         }
         return measureReportPaths;
     }
+
+//    private static void setupMeasureReportPaths(FhirContext fhirContext) {
+//        HashMap<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
+//        for(String dir : resourceDirectories) {
+//            for(String path : IOUtils.getFilePaths(dir, true))
+//            {
+//                try {
+//                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+//                } catch (Exception e) {
+//                    //TODO: handle exception
+//                }
+//            }
+//            //TODO: move these to ResourceUtils
+//            RuntimeResourceDefinition measureReportDefinition = ResourceUtils.getResourceDefinition(fhirContext, "MeasureReport");
+//            String measureReportClassName = measureReportDefinition.getImplementingClass().getName();
+//            resources.entrySet().stream()
+//                    .filter(entry -> entry.getValue() != null)
+//                    .filter(entry ->  measureReportClassName.equals(entry.getValue().getClass().getName()))
+//                    .forEach(entry -> measureReportPaths.add(entry.getKey()));
+//        }
+//    }
+
+    /**
+     * Uses Arrays.stream().parallel() for performance gain
+     * @param fhirContext
+     */
     private static void setupMeasureReportPaths(FhirContext fhirContext) {
         HashMap<String, IBaseResource> resources = new LinkedHashMap<>();
         RuntimeResourceDefinition measureReportDefinition = ResourceUtils.getResourceDefinition(fhirContext, "MeasureReport");
@@ -870,7 +976,6 @@ public class IOUtils
                             .forEach(entry -> measureReportPaths.add(entry.getKey()));
                 });
     }
-
 
     private static HashSet<String> planDefinitionPaths = new LinkedHashSet<String>();
     public static HashSet<String> getPlanDefinitionPaths(FhirContext fhirContext) {
