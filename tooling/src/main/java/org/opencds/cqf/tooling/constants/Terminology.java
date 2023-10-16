@@ -6,6 +6,7 @@ public class Terminology {
 
    public static final String CPG_COMPUTABLE_VS_PROFILE_URL = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-computablevalueset";
    public static final String CPG_EXECUTABLE_VS_PROFILE_URL = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-executablevalueset";
+   public static final String CPG_PUBLISHABLE_VS_PROFILE_URL = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-publishablevalueset";
    public static final String RXNORM_SYSTEM_URL = "http://www.nlm.nih.gov/research/umls/rxnorm";
    public static final String LOINC_SYSTEM_URL = "http://loinc.org";
    public static final String RULES_TEXT_EXT_URL = "http://hl7.org/fhir/StructureDefinition/valueset-rules-text";

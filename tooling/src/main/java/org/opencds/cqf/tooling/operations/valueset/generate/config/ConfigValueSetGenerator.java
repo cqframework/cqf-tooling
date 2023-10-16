@@ -106,7 +106,7 @@ public class ConfigValueSetGenerator implements ExecutableOperation {
       return valueSets;
    }
 
-   private ValueSet updateValueSet(ValueSet vsToUpdate, Config config, Config.ValueSets configMetaData, CommonMetaData commonMetaData) {
+   public ValueSet updateValueSet(ValueSet vsToUpdate, Config config, Config.ValueSets configMetaData, CommonMetaData commonMetaData) {
       ValueSet updatedValueSet = new ValueSet();
 
       // metadata
@@ -125,11 +125,13 @@ public class ConfigValueSetGenerator implements ExecutableOperation {
       updatedValueSet.setCopyright(configMetaData.getCopyright() == null && commonMetaData != null ? commonMetaData.getCopyright() : configMetaData.getCopyright());
       if (configMetaData.getProfiles() != null) {
          configMetaData.getProfiles().forEach(profile -> updatedValueSet.getMeta().addProfile(profile));
+      } else if (vsToUpdate.getMeta().hasProfile()) {
+         updatedValueSet.getMeta().setProfile(vsToUpdate.getMeta().getProfile());
       }
 
       // extensions
       updatedValueSet.setExtension(vsToUpdate.getExtension());
-      if (config.getAuthor() != null) {
+      if (config != null && config.getAuthor() != null) {
          updatedValueSet.addExtension(Terminology.VS_AUTHOR_EXT_URL, new ContactDetail()
                  .setName(config.getAuthor().getName()).setTelecom(Collections.singletonList(
                          new ContactPoint().setSystem(ContactPoint.ContactPointSystem.fromCode(

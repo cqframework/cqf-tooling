@@ -120,7 +120,7 @@ public class Config {
       }
    }
 
-   static class ValueSets {
+   public static class ValueSets {
       @JsonProperty(required = true)
       String id;
       @JsonProperty(required = true)
@@ -484,7 +484,7 @@ public class Config {
          }
       }
 
-      static class Hierarchy {
+      public static class Hierarchy {
          @JsonProperty
          String narrative;
          @JsonProperty(required = true)

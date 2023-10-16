@@ -11,6 +11,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.ValueSet;
@@ -19,6 +20,7 @@ import org.opencds.cqf.tooling.constants.Terminology;
 import org.opencds.cqf.tooling.operations.ExecutableOperation;
 import org.opencds.cqf.tooling.operations.Operation;
 import org.opencds.cqf.tooling.operations.OperationParam;
+import org.opencds.cqf.tooling.operations.valueset.generate.config.ConfigValueSetGenerator;
 import org.opencds.cqf.tooling.utilities.FhirContextCache;
 import org.opencds.cqf.tooling.utilities.HttpClientUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -33,6 +35,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
+import static org.opencds.cqf.tooling.operations.valueset.generate.config.Config.ValueSets;
 
 @Operation(name = "LoincHierarchy")
 public class HierarchyProcessor implements ExecutableOperation {
@@ -80,9 +84,35 @@ public class HierarchyProcessor implements ExecutableOperation {
 
    public IBaseResource getValueSet() {
       logger.info("Generating FHIR {} ValueSet resource with id {} for query: {}", version, id, query);
+      ValueSet valueSet = processValueSet();
+      logger.info("Successfully generated ValueSet resource at location {}", outputPath);
+      return ResourceAndTypeConverter.convertFromR5Resource(fhirContext, valueSet);
+   }
+
+   public IBaseResource getValueSet(ValueSets config) {
+      this.id = config.getId();
+      if (config.getHierarchy() != null) {
+         this.query = config.getHierarchy().getQuery();
+      } else {
+         String message = "The Hierarchy element of the configuration must be present";
+         logger.error(message);
+         throw new RuntimeException(message);
+      }
+      logger.info("Generating FHIR {} ValueSet resource with id {} for query: {}", version, id, query);
+      ValueSet computableVS = processValueSet();
+      ConfigValueSetGenerator generator = new ConfigValueSetGenerator();
+      ValueSet publishableVS = generator.updateValueSet(computableVS, null, config, null);
+      publishableVS.getMeta().addProfile(Terminology.CPG_PUBLISHABLE_VS_PROFILE_URL);
+      logger.info("Successfully generated ValueSet resource at location {}", outputPath);
+      return ResourceAndTypeConverter.convertFromR5Resource(fhirContext, publishableVS);
+   }
+
+   private ValueSet processValueSet() {
       ValueSet valueSet = new ValueSet().setStatus(Enumerations.PublicationStatus.DRAFT);
       valueSet.setId(id);
-      valueSet.addExtension(Terminology.RULES_TEXT_EXT_URL, new StringType(narrative == null ? query : narrative));
+      valueSet.getMeta().addProfile(Terminology.CPG_COMPUTABLE_VS_PROFILE_URL);
+      valueSet.getMeta().addProfile(Terminology.CPG_EXECUTABLE_VS_PROFILE_URL);
+      valueSet.addExtension(Terminology.RULES_TEXT_EXT_URL, new StringType(narrative == null ? defaultQuery() : narrative));
       valueSet.getExpansion().setTimestamp(new Date());
 
       HttpGet request = new HttpGet(loincHierarchyUrl + URLEncoder.encode(query, Charset.defaultCharset()));
@@ -111,8 +141,11 @@ public class HierarchyProcessor implements ExecutableOperation {
       }
 
       valueSet.getExpansion().setTotal(valueSet.getExpansion().getContains().size());
-      logger.info("Successfully generated ValueSet resource at location {}", outputPath);
-      return ResourceAndTypeConverter.convertFromR5Resource(fhirContext, valueSet);
+      return valueSet;
+   }
+
+   private String defaultQuery() {
+      return String.format("Step 1: go to https://loinc.org/tree/%nStep 2: use query %s%nStep 3: export the results to CSV%nStep 4: Filter results by properties defined in query", query);
    }
 
    private IGenericClient loincFhirClient;
