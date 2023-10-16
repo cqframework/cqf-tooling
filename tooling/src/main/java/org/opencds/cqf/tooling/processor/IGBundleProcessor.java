@@ -10,7 +10,7 @@ import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import ca.uhn.fhir.context.FhirContext;
 
 public class IGBundleProcessor {
-    public static final String bundleFilesPathElement = "files/";
+    public static final String bundleFilesPathElement = "files/";  
     MeasureProcessor measureProcessor;
     PlanDefinitionProcessor planDefinitionProcessor;
     QuestionnaireProcessor questionnaireProcessor;
@@ -22,14 +22,14 @@ public class IGBundleProcessor {
     }
 
     public void bundleIg(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Encoding encoding, Boolean includeELM,
-                         Boolean includeDependencies, Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned, Boolean addBundleTimestamp,
-                         FhirContext fhirContext, String fhirUri) {
+    Boolean includeDependencies, Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned, Boolean addBundleTimestamp,
+    FhirContext fhirContext, String fhirUri) {
 
         measureProcessor.bundleMeasures(refreshedLibraryNames, igPath, binaryPaths, includeDependencies, includeTerminology, includePatientScenarios, versioned,
                 addBundleTimestamp,fhirContext, fhirUri, encoding);
 
         planDefinitionProcessor.bundlePlanDefinitions(refreshedLibraryNames, igPath, binaryPaths, includeDependencies, includeTerminology,
-                includePatientScenarios, versioned, addBundleTimestamp, fhirContext, fhirUri, encoding);
+        includePatientScenarios, versioned, addBundleTimestamp, fhirContext, fhirUri, encoding);
 
         questionnaireProcessor.bundleQuestionnaires(refreshedLibraryNames, igPath, binaryPaths, includeDependencies, includeTerminology,
                 includePatientScenarios, versioned, addBundleTimestamp, fhirContext, fhirUri, encoding);
