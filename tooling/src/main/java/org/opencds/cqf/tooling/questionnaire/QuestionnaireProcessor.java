@@ -32,7 +32,7 @@ public class QuestionnaireProcessor {
     public void bundleQuestionnaires(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
                                      Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp,
                                      FhirContext fhirContext, String fhirUri, IOUtils.Encoding encoding) {
-        LogUtils.info("bundleQuestionnaires START");
+
         Map<String, IBaseResource> questionnaires = IOUtils.getQuestionnaires(fhirContext);
 
         List<String> bundledQuestionnaires = new ArrayList<String>();
@@ -178,7 +178,6 @@ public class QuestionnaireProcessor {
 
         LogUtils.info(message);
 
-        LogUtils.info("bundleQuestionnaires END");
     }
 
     private void persistBundle(String igPath, String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, List<IBaseResource> resources, String fhirUri, Boolean addBundleTimestamp) {

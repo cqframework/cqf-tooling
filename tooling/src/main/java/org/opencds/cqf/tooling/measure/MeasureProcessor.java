@@ -92,17 +92,9 @@ public class MeasureProcessor extends BaseProcessor {
         return identifiers;
     }
 
-    private String lastProcessingChr = "";
-
-    private String getLastProcessingChr() {
-        this.lastProcessingChr = this.lastProcessingChr + ".";
-        return this.lastProcessingChr;
-    }
-
     public void bundleMeasures(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
                                Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp, FhirContext fhirContext, String fhirUri,
                                Encoding encoding) {
-        LogUtils.info("bundleMeasures START");
         Map<String, IBaseResource> measures = IOUtils.getMeasures(fhirContext);
         //Map<String, IBaseResource> libraries = IOUtils.getLibraries(fhirContext);
 
@@ -115,6 +107,8 @@ public class MeasureProcessor extends BaseProcessor {
         //let OS handle threading:
         ExecutorService executorService = Executors.newCachedThreadPool();
 
+        Map<String, String> failedMeasureExceptionMessages = new HashMap<>();
+
         //build list of tasks via for loop:
         List<Callable<Void>> tasks = new ArrayList<>();
         try {
@@ -124,12 +118,12 @@ public class MeasureProcessor extends BaseProcessor {
                     continue;
                 }
 
-                LogUtils.info("bundleMeasures, collecting task: " + measureEntry.getKey());
+//                LogUtils.info("bundleMeasures, collecting task: " + measureEntry.getKey());
                 tasks.add(() -> {
 
-                    LogUtils.info("bundleMeasures, task running: " + measureEntry.getKey());
+//                    LogUtils.info("bundleMeasures, task running: " + measureEntry.getKey());
                     String measureSourcePath = IOUtils.getMeasurePathMap(fhirContext).get(measureEntry.getKey());
-
+                    LogUtils.info ("Measure processing: " + measureSourcePath);
                     //check if measureSourcePath has been processed before:
                     if(processedMeasures.contains(measureSourcePath)) {
                         LogUtils.info ("Measure processed already: " + measureSourcePath);
@@ -211,6 +205,8 @@ public class MeasureProcessor extends BaseProcessor {
 
                     } catch (Exception e) {
                         LogUtils.putException(measureName, e);
+                        failedMeasureExceptionMessages.put(measureSourcePath, e.getMessage());
+
                     } finally {
                         LogUtils.warn(measureName);
                     }
@@ -255,7 +251,8 @@ public class MeasureProcessor extends BaseProcessor {
         }
 
         List<String> measurePathLibraryNames = new ArrayList<>(IOUtils.getMeasurePaths(fhirContext));
-        ArrayList<String> failedMeasures = new ArrayList<>(measurePathLibraryNames);
+
+
         measurePathLibraryNames.removeAll(bundledMeasures);
         measurePathLibraryNames.retainAll(refreshedLibraryNames);
         message += "\r\n" + measurePathLibraryNames.size() + " Measures refreshed, but not bundled (due to issues):";
@@ -263,16 +260,21 @@ public class MeasureProcessor extends BaseProcessor {
             message += "\r\n     " + notBundled + " REFRESHED";
         }
 
+
+        //attempt to give some kind of informational message for failed measures:
+        ArrayList<String> failedMeasures = new ArrayList<>(measurePathLibraryNames);
         failedMeasures.removeAll(bundledMeasures);
         failedMeasures.removeAll(measurePathLibraryNames);
         message += "\r\n" + failedMeasures.size() + " Measures failed refresh:";
-        for (String failed : failedMeasures) {
-            message += "\r\n     " + failed + " FAILED";
+        for (String failedMeasure : failedMeasures){
+            if (failedMeasureExceptionMessages.containsKey(failedMeasure)){
+                message += "\r\n     " + failedMeasure + " FAILED: " + failedMeasureExceptionMessages.get(failedMeasure);
+            }else{
+                message += "\r\n     " + failedMeasure + " FAILED";
+            }
         }
 
         LogUtils.info(message);
-
-        LogUtils.info("bundleMeasures END");
 
     }
 

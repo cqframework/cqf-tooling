@@ -32,7 +32,6 @@ public class PlanDefinitionProcessor {
     public void bundlePlanDefinitions(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
                                       Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp,
                                       FhirContext fhirContext, String fhirUri, Encoding encoding) {
-        LogUtils.info("bundlePlanDefinitions START");
 
         Map<String, IBaseResource> planDefinitions = IOUtils.getPlanDefinitions(fhirContext);
 
@@ -181,7 +180,6 @@ public class PlanDefinitionProcessor {
         }
 
         LogUtils.info(message);
-        LogUtils.info("bundlePlanDefinitions END");
     }
 
     private void persistBundle(String igPath, String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, List<IBaseResource> resources, String fhirUri, Boolean addBundleTimestamp) {
