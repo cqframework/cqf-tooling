@@ -42,42 +42,42 @@ import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.parser.IParser;
 
-public class IOUtils 
-{        
-    
-    public enum Encoding 
-    { 
-        CQL("cql"), JSON("json"), XML("xml"), UNKNOWN(""); 
-  
-        private String string; 
-    
-        public String toString() 
-        { 
-            return this.string; 
-        } 
-    
-        private Encoding(String string) 
-        { 
-            this.string = string; 
+public class IOUtils
+{
+
+    public enum Encoding
+    {
+        CQL("cql"), JSON("json"), XML("xml"), UNKNOWN("");
+
+        private String string;
+
+        public String toString()
+        {
+            return this.string;
+        }
+
+        private Encoding(String string)
+        {
+            this.string = string;
         }
 
         public static Encoding parse(String value) {
             if (value == null) {
                 return UNKNOWN;
             }
-            
-            switch (value.trim().toLowerCase()) {
-                case "cql":
-                    return CQL;
-                case "json": 
-                    return JSON;
-                case "xml":
-                    return XML;
-                default: 
-                    return UNKNOWN;
-            }
+
+            String lowerValue = value.trim().toLowerCase();
+
+            return ENCODING_MAP.getOrDefault(lowerValue, UNKNOWN);
         }
-    } 
+
+        private static final Map<String, Encoding> ENCODING_MAP = new HashMap<>();
+        static {
+            ENCODING_MAP.put("cql", CQL);
+            ENCODING_MAP.put("json", JSON);
+            ENCODING_MAP.put("xml", XML);
+        }
+    }
 
     public static ArrayList<String> resourceDirectories = new ArrayList<String>();
 
@@ -94,7 +94,7 @@ public class IOUtils
         if (encoding == Encoding.UNKNOWN) {
             return new byte[] { };
         }
-        IParser parser = getParser(encoding, fhirContext);    
+        IParser parser = getParser(encoding, fhirContext);
         return parser.setPrettyPrint(prettyPrintOutput).encodeResourceToString(resource).getBytes();
     }
 
@@ -108,21 +108,21 @@ public class IOUtils
     }
 
 
-    public static String encodeResourceAsString(IBaseResource resource, Encoding encoding, FhirContext fhirContext) 
+    public static String encodeResourceAsString(IBaseResource resource, Encoding encoding, FhirContext fhirContext)
     {
         if (encoding == Encoding.UNKNOWN) {
             return "";
         }
-        IParser parser = getParser(encoding, fhirContext);  
+        IParser parser = getParser(encoding, fhirContext);
         return parser.setPrettyPrint(true).encodeResourceToString(resource).toString();
     }
 
     // Issue 96 - adding second signature to allow for passing versioned
-    public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext) 
+    public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext)
     {
-    	writeResource(resource, path, encoding, fhirContext, true);
+        writeResource(resource, path, encoding, fhirContext, true);
     }
-    
+
     public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext, Boolean versioned) {
         writeResource(resource, path, encoding, fhirContext, true, null, true);
     }
@@ -158,12 +158,12 @@ public class IOUtils
                 baseName = outputFileName;
             }
 
-        	// Issue 96
-        	// If includeVersion is false then just use name and not id for the file baseName
-        	if (!versioned) {
-        		// Assumes that the id will be a string with - separating the version number
-        		// baseName = baseName.split("-")[0];
-        	}
+            // Issue 96
+            // If includeVersion is false then just use name and not id for the file baseName
+            if (!versioned) {
+                // Assumes that the id will be a string with - separating the version number
+                // baseName = baseName.split("-")[0];
+            }
             outputPath = FilenameUtils.concat(path, formatFileName(baseName, encoding, fhirContext));
         }
 
@@ -180,7 +180,7 @@ public class IOUtils
     }
 
     public static <T extends IBaseResource> void writeResources(Map<String, T> resources, String path, Encoding encoding, FhirContext fhirContext)
-    {        
+    {
         for (Map.Entry<String, T> set : resources.entrySet())
         {
             writeResource(set.getValue(), path, encoding, fhirContext);
@@ -213,15 +213,16 @@ public class IOUtils
         }
     }
 
-    public static void copyFile(String inputPath, String outputPath) {
-        try  {
+    public static boolean copyFile(String inputPath, String outputPath) {
+        try {
             Path src = Paths.get(inputPath);
             Path dest = Paths.get(outputPath);
             Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
-        }
-        catch (IOException e) {
+            return true; // Return true to indicate success.
+        } catch (IOException e) {
+            // Handle the exception or log it as needed.
             e.printStackTrace();
-            throw new RuntimeException("Error copying file: " + e.getMessage());
+            return false; // Return false to indicate failure.
         }
     }
 
@@ -256,51 +257,46 @@ public class IOUtils
     public static IBaseResource readResource(String path, FhirContext fhirContext) {
         return readResource(path, fhirContext, false);
     }
-    
+
     //users should always check for null
     private static Map<String, IBaseResource> cachedResources = new LinkedHashMap<String, IBaseResource>();
-    public static IBaseResource readResource(String path, FhirContext fhirContext, Boolean safeRead) 
-    {        
+    public static IBaseResource readResource(String path, FhirContext fhirContext, boolean safeRead) {
         Encoding encoding = getEncoding(path);
         if (encoding == Encoding.UNKNOWN || encoding == Encoding.CQL) {
             return null;
         }
 
-        IBaseResource resource = cachedResources.get(path);     
+        IBaseResource resource = cachedResources.get(path);
         if (resource != null) {
             return resource;
-        } 
+        }
 
-        try
-        {
+        File file = new File(path);
+
+        if (file.exists() && file.isDirectory()) {
+            throw new IllegalArgumentException(String.format("Cannot read a resource from a directory: %s", path));
+        }
+
+        if (safeRead && !file.exists()) {
+            return null;
+        }
+
+        try {
             IParser parser = getParser(encoding, fhirContext);
-            File file = new File(path);
 
-            if (file.exists() && file.isDirectory()) {
-                throw new IllegalArgumentException(String.format("Cannot read a resource from a directory: %s", path));
-            }
-
-            // if (!file.exists()) {
-            //     String[] paths = file.getParent().split("\\\\");
-            //     file = new File(Paths.get(file.getParent(), paths[paths.length - 1] + "-" + file.getName()).toString());
-            // }
-
-            if (safeRead) {
-                if (!file.exists()) {
-                    return null;
-                }
-            }
-            try (FileReader reader = new FileReader(file)){
+            try (FileReader reader = new FileReader(file)) {
                 resource = parser.parseResource(reader);
             }
+
             cachedResources.put(path, resource);
-        }
-        catch (Exception e)
-        {
+        } catch (IOException e) {
+            // Handle specific exceptions or rethrow as a more specific checked exception
             throw new RuntimeException(String.format("Error reading resource from path %s: %s", path, e.getMessage()), e);
         }
+
         return resource;
     }
+
 
     public static void updateCachedResource(IBaseResource updatedResource, String path){
         if(null != cachedResources.get(path)){
@@ -309,7 +305,7 @@ public class IOUtils
 
     }
 
-    public static List<IBaseResource> readResources(List<String> paths, FhirContext fhirContext) 
+    public static List<IBaseResource> readResources(List<String> paths, FhirContext fhirContext)
     {
         List<IBaseResource> resources = new ArrayList<>();
         for (String path : paths)
@@ -322,23 +318,26 @@ public class IOUtils
         return resources;
     }
 
-    public static List<String> getFilePaths(String directoryPath, Boolean recursive)
-    {
-        List<String> filePaths = new ArrayList<String>();
-        File inputDir = new File(directoryPath);
-        ArrayList<File> files = inputDir.isDirectory() ? new ArrayList<File>(Arrays.asList(Optional.ofNullable(inputDir.listFiles()).<NoSuchElementException>orElseThrow(() -> new NoSuchElementException()))) : new ArrayList<File>();
-       
-        for (File file : files) {
-            if (file.isDirectory()) {
-                //note: this is not the same as anding recursive to isDirectory as that would result in directories being added to the list if the request is not recursive.
-                if (recursive) {
-                    filePaths.addAll(getFilePaths(file.getPath(), recursive));
-                }
-            }
-            else {
-               filePaths.add(file.getPath());
-            }
+
+    private static final Map<String, List<String>> cachedFilePaths = new HashMap<>();
+
+    public static List<String> getFilePaths(String directoryPath, boolean recursive) {
+        List<String> filePaths = new ArrayList<>();
+        if (IOUtils.cachedFilePaths.containsKey(directoryPath)  ){
+            filePaths = IOUtils.cachedFilePaths.get(directoryPath);
+            return filePaths;
         }
+        try {
+            Files.walk(Paths.get(directoryPath))
+                    .filter(path -> !Files.isDirectory(path) || (recursive && Files.isDirectory(path)))
+                    .map(Path::toString)
+                    .forEach(filePaths::add);
+        } catch (IOException e) {
+            // Handle the exception
+            e.printStackTrace();
+        }
+
+        cachedFilePaths.put(directoryPath, filePaths);
         return filePaths;
     }
 
@@ -348,10 +347,10 @@ public class IOUtils
         // Issue 96
         // Handle no version on filename but still in id
         if (!versioned && resourceVersion != null) {
-        	int index = filename.indexOf(resourceVersion);
-        	if (index > 0) {
-        		filename = filename.substring(0, index - 1);
-        	}
+            int index = filename.indexOf(resourceVersion);
+            if (index > 0) {
+                filename = filename.substring(0, index - 1);
+            }
         } else if (versioned && resourceVersion != null) {
             int index = filename.indexOf(resourceVersion);
             if (index < 0) {
@@ -362,7 +361,7 @@ public class IOUtils
         String resourceType = resource.fhirType().toLowerCase();
         // Cannot read from here it isn't always set
         //String resourceType = resource.getIdElement().getResourceType().toLowerCase();
-        
+
         String result = Paths.get(resourcePath, resourceType, (prefixed ? (resourceType + "-") : "") + filename) + getFileExtension(encoding);
         return result;
     }
@@ -382,27 +381,37 @@ public class IOUtils
         return file.getParent();
     }
 
-    public static List<String> getDirectoryPaths(String path, Boolean recursive)
-    {
-        List<String> directoryPaths = new ArrayList<String>();
-        List<File> directories = new ArrayList<File>();
-        File parentDirectory = new File(path);
-        try {
-            directories = Arrays.asList(Optional.ofNullable(parentDirectory.listFiles()).<NoSuchElementException>orElseThrow(() -> new NoSuchElementException()));
-        } catch (Exception e) {
-            System.out.println("No paths found for the Directory " + path + ":");
+    private static final Map<String, List<String>> cachedDirectoryPaths = new HashMap<>();
+
+    public static List<String> getDirectoryPaths(String path, boolean recursive) {
+        List<String> directoryPaths = new ArrayList<>();
+
+        if (IOUtils.cachedDirectoryPaths.containsKey(path)  ){
+            directoryPaths = IOUtils.cachedDirectoryPaths.get(path);
             return directoryPaths;
         }
-        
-       
-        for (File directory : directories) {
-            if (directory.isDirectory()) {
-                if (recursive) {
-                    directoryPaths.addAll(getDirectoryPaths(directory.getPath(), recursive));
+
+
+        File parentDirectory = new File(path);
+
+        if (!parentDirectory.exists() || !parentDirectory.isDirectory()) {
+            System.out.println("No paths found for the Directory " + path);
+            return directoryPaths;
+        }
+
+        File[] directories = parentDirectory.listFiles();
+
+        if (directories != null) {
+            for (File directory : directories) {
+                if (directory.isDirectory()) {
+                    if (recursive) {
+                        directoryPaths.addAll(getDirectoryPaths(directory.getPath(), recursive));
+                    }
+                    directoryPaths.add(directory.getPath());
                 }
-                directoryPaths.add(directory.getPath());
             }
         }
+        cachedDirectoryPaths.put(path, directoryPaths);
         return directoryPaths;
     }
 
@@ -426,7 +435,7 @@ public class IOUtils
                 Files.delete(file); // this will work because it's always a File
                 return FileVisitResult.CONTINUE;
             }
- 
+
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
                 Files.delete(dir); //this will work because Files in the directory are already deleted
@@ -441,14 +450,14 @@ public class IOUtils
     }
 
     //users should protect against Encoding.UNKNOWN or Enconding.CQL
-    private static IParser getParser(Encoding encoding, FhirContext fhirContext) 
+    private static IParser getParser(Encoding encoding, FhirContext fhirContext)
     {
         switch (encoding) {
-            case XML: 
+            case XML:
                 return fhirContext.newXmlParser();
             case JSON:
                 return fhirContext.newJsonParser();
-            default: 
+            default:
                 throw new RuntimeException("Unknown encoding type: " + encoding.toString());
         }
     }
@@ -490,20 +499,20 @@ public class IOUtils
             if (dependencyLibraries.contains(getIdFromFileName(cqlFile.getName().replace(".cql", "")))) {
                 dependencyCqlFiles.add(cqlFile);
                 dependencyLibraries.remove(getIdFromFileName(cqlFile.getName().replace(".cql", "")));
-            }  
+            }
         }
 
         if (dependencyLibraries.size() != 0) {
             String message = (dependencyLibraries.size()) + " included cql Libraries not found: ";
-            
+
             for (String includedLibrary : dependencyLibraries) {
-              message += "\r\n" + includedLibrary + " MISSING";
-            }        
+                message += "\r\n" + includedLibrary + " MISSING";
+            }
             throw new Exception(message);
-          }
+        }
         return dependencyCqlFiles;
-    } 
-  
+    }
+
     private static Map<String, CqlTranslator> cachedTranslator = new LinkedHashMap<String, CqlTranslator>();
     public static CqlTranslator translate(String cqlContentPath, ModelManager modelManager, LibraryManager libraryManager, CqlTranslatorOptions options) {
         CqlTranslator translator = cachedTranslator.get(cqlContentPath);
@@ -511,14 +520,14 @@ public class IOUtils
             return translator;
         }
         try {
-          File cqlFile = new File(cqlContentPath);
-          if(!cqlFile.getName().endsWith(".cql")) {
-            throw new IllegalArgumentException("cqlContentPath must be a path to a .cql file");
-          }
-          
+            File cqlFile = new File(cqlContentPath);
+            if(!cqlFile.getName().endsWith(".cql")) {
+                throw new IllegalArgumentException("cqlContentPath must be a path to a .cql file");
+            }
+
             // ArrayList<CqlTranslatorOptions.Options> options = new ArrayList<>();
             // options.add(CqlTranslatorOptions.Options.EnableDateRangeOptimization);
-  
+
             translator =
                     CqlTranslator.fromFile(
                             cqlFile,
@@ -579,13 +588,13 @@ public class IOUtils
             default:
                 igVersionToken = "";
         }
-        String result = baseName + getFileExtension(encoding); 
+        String result = baseName + getFileExtension(encoding);
         if (encoding == Encoding.CQL) {
             result = result.replace("-" + igVersionToken, "_" + igVersionToken);
         }
 
         return result;
-    }    
+    }
 
     public static List<String> putAllInListIfAbsent(List<String> values, List<String> list)
     {
@@ -613,10 +622,10 @@ public class IOUtils
             // NOTE: A bit of a hack, but we need to support both xml and json encodings for existing resources and the long-term strategy is
             // to revisit this and change the approach to use the references rather than file name matching, so this should be good for the near-term.
             if (path.endsWith(libraryFileName.replaceAll(".cql", ".json"))
-                || path.endsWith(libraryFileName.replaceAll(".cql", ".xml"))
-                || path.endsWith(fileName.replaceAll(".cql", ".json"))
-                || path.endsWith(fileName.replaceAll(".cql", ".xml")))
-                {
+                    || path.endsWith(libraryFileName.replaceAll(".cql", ".xml"))
+                    || path.endsWith(fileName.replaceAll(".cql", ".json"))
+                    || path.endsWith(fileName.replaceAll(".cql", ".xml")))
+            {
                 libraryPath = path;
                 break;
             }
@@ -632,7 +641,7 @@ public class IOUtils
         }
         return cqlLibraryPaths;
     }
-    private static void setupCqlLibraryPaths() {  
+    private static void setupCqlLibraryPaths() {
         //need to add a error report for bad resource paths
         for(String dir : resourceDirectories) {
             List<String> filePaths = IOUtils.getFilePaths(dir, true);
@@ -695,13 +704,13 @@ public class IOUtils
             String conceptClassName = conceptDefinition.getImplementingClass().getName();
             String codingClassName = codingDefinition.getImplementingClass().getName();
             resources.entrySet().stream()
-                .filter(entry -> entry.getValue() != null)
-                .filter(entry ->  
-                    valuesetClassName.equals(entry.getValue().getClass().getName())
-                    || conceptClassName.equals(entry.getValue().getClass().getName())
-                    || codingClassName.equals(entry.getValue().getClass().getName())
-                )
-                .forEach(entry -> terminologyPaths.add(entry.getKey()));
+                    .filter(entry -> entry.getValue() != null)
+                    .filter(entry ->
+                            valuesetClassName.equals(entry.getValue().getClass().getName())
+                                    || conceptClassName.equals(entry.getValue().getClass().getName())
+                                    || codingClassName.equals(entry.getValue().getClass().getName())
+                    )
+                    .forEach(entry -> terminologyPaths.add(entry.getKey()));
         }
     }
 
@@ -725,10 +734,10 @@ public class IOUtils
         if (libraryPathMap.isEmpty()) {
             setupLibraryPaths(fhirContext);
         }
-        LogUtils.info(String.format("libraryUrlMap Size: %d", libraryPathMap.size()));
-        for (Map.Entry<String, IBaseResource> e : libraryUrlMap.entrySet()) {
-            LogUtils.info(String.format("libraryUrlMap Entry: %s", e.getKey()));
-        }
+//        LogUtils.info(String.format("libraryUrlMap Size: %d", libraryPathMap.size()));
+//        for (Map.Entry<String, IBaseResource> e : libraryUrlMap.entrySet()) {
+//            LogUtils.info(String.format("libraryUrlMap Entry: %s", e.getKey()));
+//        }
         return libraryUrlMap;
     }
     private static Map<String, String> libraryPathMap = new LinkedHashMap<String, String>();
@@ -764,14 +773,14 @@ public class IOUtils
             String libraryClassName = libraryDefinition.getImplementingClass().getName();
             // BaseRuntimeChildDefinition urlElement = libraryDefinition.getChildByNameOrThrowDataFormatException("url");
             resources.entrySet().stream()
-                .filter(entry -> entry.getValue() != null)
-                .filter(entry ->  libraryClassName.equals(entry.getValue().getClass().getName()))
-                .forEach(entry -> {
-                    libraryPaths.add(entry.getKey());
-                    libraries.put(entry.getValue().getIdElement().getIdPart(), entry.getValue());
-                    libraryPathMap.put(entry.getValue().getIdElement().getIdPart(), entry.getKey());
-                    libraryUrlMap.put(ResourceUtils.getUrl(entry.getValue(), fhirContext), entry.getValue());
-                });
+                    .filter(entry -> entry.getValue() != null)
+                    .filter(entry ->  libraryClassName.equals(entry.getValue().getClass().getName()))
+                    .forEach(entry -> {
+                        libraryPaths.add(entry.getKey());
+                        libraries.put(entry.getValue().getIdElement().getIdPart(), entry.getValue());
+                        libraryPathMap.put(entry.getValue().getIdElement().getIdPart(), entry.getKey());
+                        libraryUrlMap.put(ResourceUtils.getUrl(entry.getValue(), fhirContext), entry.getValue());
+                    });
         }
     }
 
@@ -814,13 +823,13 @@ public class IOUtils
             RuntimeResourceDefinition measureDefinition = ResourceUtils.getResourceDefinition(fhirContext, "Measure");
             String measureClassName = measureDefinition.getImplementingClass().getName();
             resources.entrySet().stream()
-                .filter(entry -> entry.getValue() != null)
-                .filter(entry ->  measureClassName.equals(entry.getValue().getClass().getName()))
-                .forEach(entry -> {
-                    measurePaths.add(entry.getKey());
-                    measures.put(entry.getValue().getIdElement().getIdPart(), entry.getValue());
-                    measurePathMap.put(entry.getValue().getIdElement().getIdPart(), entry.getKey());
-                });
+                    .filter(entry -> entry.getValue() != null)
+                    .filter(entry ->  measureClassName.equals(entry.getValue().getClass().getName()))
+                    .forEach(entry -> {
+                        measurePaths.add(entry.getKey());
+                        measures.put(entry.getValue().getIdElement().getIdPart(), entry.getValue());
+                        measurePathMap.put(entry.getValue().getIdElement().getIdPart(), entry.getKey());
+                    });
         }
     }
 
@@ -832,27 +841,38 @@ public class IOUtils
         return measureReportPaths;
     }
     private static void setupMeasureReportPaths(FhirContext fhirContext) {
-        HashMap<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
-        for(String dir : resourceDirectories) {
-            for(String path : IOUtils.getFilePaths(dir, true))
-            {
-                try {
-                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
-                } catch (Exception e) {
-                    //TODO: handle exception
-                }
-            }
-            //TODO: move these to ResourceUtils
-            RuntimeResourceDefinition measureReportDefinition = ResourceUtils.getResourceDefinition(fhirContext, "MeasureReport");
-            String measureReportClassName = measureReportDefinition.getImplementingClass().getName();
-            resources.entrySet().stream()
-                .filter(entry -> entry.getValue() != null)
-                .filter(entry ->  measureReportClassName.equals(entry.getValue().getClass().getName()))
-                .forEach(entry -> measureReportPaths.add(entry.getKey()));
-        }
+        HashMap<String, IBaseResource> resources = new LinkedHashMap<>();
+        RuntimeResourceDefinition measureReportDefinition = ResourceUtils.getResourceDefinition(fhirContext, "MeasureReport");
+        String measureReportClassName = measureReportDefinition.getImplementingClass().getName();
+
+        String[] resourceDirectoriesArray = resourceDirectories.toArray(new String[0]);
+
+        Arrays.stream(resourceDirectoriesArray)
+                .parallel()
+                .forEach(dir -> {
+                    List<String> filePaths = IOUtils.getFilePaths(dir, true);
+                    Map<String, IBaseResource> directoryResources = new HashMap<>();
+
+                    for (String path : filePaths) {
+                        try {
+                            IBaseResource resource = IOUtils.readResource(path, fhirContext, true);
+                            if (resource != null) {
+                                directoryResources.put(path, resource);
+                            }
+                        } catch (Exception e) {
+                            // Handle exception
+                        }
+                    }
+
+                    directoryResources.entrySet()
+                            .stream()
+                            .filter(entry -> measureReportClassName.equals(entry.getValue().getClass().getName()))
+                            .forEach(entry -> measureReportPaths.add(entry.getKey()));
+                });
     }
 
-	private static HashSet<String> planDefinitionPaths = new LinkedHashSet<String>();
+
+    private static HashSet<String> planDefinitionPaths = new LinkedHashSet<String>();
     public static HashSet<String> getPlanDefinitionPaths(FhirContext fhirContext) {
         if (planDefinitionPaths.isEmpty()) {
             setupPlanDefinitionPaths(fhirContext);
@@ -887,13 +907,13 @@ public class IOUtils
             RuntimeResourceDefinition planDefinitionDefinition = ResourceUtils.getResourceDefinition(fhirContext, "PlanDefinition");
             String planDefinitionClassName = planDefinitionDefinition.getImplementingClass().getName();
             resources.entrySet().stream()
-                .filter(entry -> entry.getValue() != null)
-                .filter(entry ->  planDefinitionClassName.equals(entry.getValue().getClass().getName()))
-                .forEach(entry -> {
-                    planDefinitionPaths.add(entry.getKey());
-                    planDefinitions.put(entry.getValue().getIdElement().getIdPart(), entry.getValue());
-                    planDefinitionPathMap.put(entry.getValue().getIdElement().getIdPart(), entry.getKey());
-                });
+                    .filter(entry -> entry.getValue() != null)
+                    .filter(entry ->  planDefinitionClassName.equals(entry.getValue().getClass().getName()))
+                    .forEach(entry -> {
+                        planDefinitionPaths.add(entry.getKey());
+                        planDefinitions.put(entry.getValue().getIdElement().getIdPart(), entry.getValue());
+                        planDefinitionPathMap.put(entry.getValue().getIdElement().getIdPart(), entry.getKey());
+                    });
         }
     }
 
@@ -971,9 +991,9 @@ public class IOUtils
             RuntimeResourceDefinition activityDefinitionDefinition = ResourceUtils.getResourceDefinition(fhirContext, "ActivityDefinition");
             String activityDefinitionClassName = activityDefinitionDefinition.getImplementingClass().getName();
             resources.entrySet().stream()
-                .filter(entry -> entry.getValue() != null)
-                .filter(entry ->  activityDefinitionClassName.equals(entry.getValue().getClass().getName()))
-                .forEach(entry -> activityDefinitionPaths.add(entry.getKey()));
+                    .filter(entry -> entry.getValue() != null)
+                    .filter(entry ->  activityDefinitionClassName.equals(entry.getValue().getClass().getName()))
+                    .forEach(entry -> activityDefinitionPaths.add(entry.getKey()));
         }
     }
 
@@ -1019,9 +1039,9 @@ public class IOUtils
             RuntimeResourceDefinition deviceDefinition = ResourceUtils.getResourceDefinition(fhirContext, "Device");
             String deviceClassName = deviceDefinition.getImplementingClass().getName();
             resources.entrySet().stream()
-                .filter(entry -> entry.getValue() != null)
-                .filter(entry ->  deviceClassName.equals(entry.getValue().getClass().getName()))
-                .forEach(entry -> devicePaths.add(entry.getKey()));
+                    .filter(entry -> entry.getValue() != null)
+                    .filter(entry ->  deviceClassName.equals(entry.getValue().getClass().getName()))
+                    .forEach(entry -> devicePaths.add(entry.getKey()));
         }
     }
 

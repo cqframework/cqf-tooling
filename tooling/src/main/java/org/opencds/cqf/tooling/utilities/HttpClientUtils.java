@@ -42,22 +42,25 @@ public class HttpClientUtils {
 
                     if (responseMessage.contains("error")) {
                         // Handle the error and provide feedback to the user
-                        LogUtils.info("Error posting resource to FHIR server (" + fhirServerUrl + "). Resource was not posted : "
-                                + resource.getIdElement().getIdPart());
+                        LogUtils.info("Error posting resource to FHIR server (" + fhirServerUrl + "). Resource was not posted : " + resource.getIdElement().getIdPart());
                         // You can extract and handle the error code from the responseMessage here
                     } else {
                         LogUtils.info("Resource successfully posted to FHIR server: " + resource.getIdElement().getIdPart());
                     }
+                } catch (IOException e) {
+                    // Handle the exception appropriately, e.g., log, rethrow, or provide user feedback
+                    LogUtils.putException("Error while making the POST request: " +  e.getMessage(), e);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    // Handle other exceptions, e.g., log, rethrow, or provide user feedback
+                    LogUtils.putException("Error during POST request execution: " + e.getMessage(), e);
                 }
             });
         } catch (Exception e) {
-            e.printStackTrace();
-
+            // Handle the exception appropriately, e.g., log, rethrow, or provide user feedback
+            LogUtils.putException("Error while submitting the POST request: " + e.getMessage(), e);
+        } finally {
+            executorService.shutdown();
         }
-
-        executorService.shutdown();
     }
 
 

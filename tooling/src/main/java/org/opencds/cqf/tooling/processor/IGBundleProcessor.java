@@ -27,38 +27,34 @@ public class IGBundleProcessor {
                          Boolean includeDependencies, Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned, Boolean addBundleTimestamp,
                          FhirContext fhirContext, String fhirUri) {
 
-        ExecutorService executorService = Executors.newFixedThreadPool(3);
-
-        List<Future<?>> futures = new ArrayList<>();
+//        ExecutorService executorService = Executors.newCachedThreadPool();
 //
-        futures.add(executorService.submit(() -> {
+//        List<Future<?>> futures = new ArrayList<>();
+//
+//        futures.add(executorService.submit(() -> {
             measureProcessor.bundleMeasures(refreshedLibraryNames, igPath, binaryPaths, includeDependencies, includeTerminology, includePatientScenarios, versioned,
                     addBundleTimestamp, fhirContext, fhirUri, encoding);
-        }));
+//        }));
 
-        futures.add(executorService.submit(() -> {
+//        futures.add(executorService.submit(() -> {
             planDefinitionProcessor.bundlePlanDefinitions(refreshedLibraryNames, igPath, binaryPaths, includeDependencies, includeTerminology,
                     includePatientScenarios, versioned, addBundleTimestamp, fhirContext, fhirUri, encoding);
-        }));
+//        }));
 
-        futures.add(executorService.submit(() -> {
+//        futures.add(executorService.submit(() -> {
             questionnaireProcessor.bundleQuestionnaires(refreshedLibraryNames, igPath, binaryPaths, includeDependencies, includeTerminology,
                     includePatientScenarios, versioned, addBundleTimestamp, fhirContext, fhirUri, encoding);
-        }));
+//        }));
 
-        // Wait for all tasks to complete
-        for (Future<?> future : futures) {
-            try {
-                future.get(); // This will block until the task is complete
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        // All tasks have completed
-        System.out.println("All tasks are done.");
-
-        // Shutdown the executor when you're done
-        executorService.shutdown();
+//        // Wait for all tasks to complete
+//        for (Future<?> future : futures) {
+//            try {
+//                future.get(); // wait for tasks to complete
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        executorService.shutdown();
     }
 }

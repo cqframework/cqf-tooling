@@ -168,6 +168,8 @@ public class IGProcessor extends BaseProcessor {
             TestCaseProcessor testCaseProcessor = new TestCaseProcessor();
             testCaseProcessor.refreshTestCases(FilenameUtils.concat(rootDir, IGProcessor.testCasePathElement), encoding, fhirContext, refreshedResourcesNames);
         }
+
+        LogUtils.info("refreshIG END");
     }
 
     public static FhirContext getIgFhirContext(String igVersion)

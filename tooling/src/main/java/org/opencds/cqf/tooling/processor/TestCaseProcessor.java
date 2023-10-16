@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
 
@@ -103,38 +107,80 @@ public class TestCaseProcessor
     }
 
     //TODO: the bundle needs to have -expectedresults added too
+
+    private static final List<String> processedBundleTestCaseList = new ArrayList<>();
     public static void bundleTestCaseFiles(String igPath, String contextResourceType, String libraryName, String destPath, FhirContext fhirContext) {
         String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), contextResourceType), libraryName);
-        List<String> testCasePaths = IOUtils.getFilePaths(igTestCasePath, false);
-        for (String testPath : testCasePaths) {
-            String bundleTestDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testPath));
-            IOUtils.copyFile(testPath, bundleTestDestPath);
 
-            List<String> testCaseDirectories = IOUtils.getDirectoryPaths(igTestCasePath, false);
-            for (String testCaseDirectory : testCaseDirectories) {
+        if (TestCaseProcessor.processedBundleTestCaseList.contains(igTestCasePath)){
+//            LogUtils.info("bundleTestCaseFiles already processed " + igTestCasePath);
+            return;
+        }
+
+        List<String> testCasePaths = IOUtils.getFilePaths(igTestCasePath, false);
+        int totalTasks = testCasePaths.size(); // Total number of tasks
+        ExecutorService executor = Executors.newFixedThreadPool(4); // Adjust the number of threads as needed
+        AtomicInteger completedTasks = new AtomicInteger(0);
+        List<Runnable> tasks = new ArrayList<>();
+
+        for (String testPath : testCasePaths) {
+            tasks.add(() -> {
+                String bundleTestDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testPath));
+//                LogUtils.info("bundleTestCaseFiles  IOUtils.copyFile copying " + testPath + "\nto " + bundleTestDestPath);
+                IOUtils.copyFile(testPath, bundleTestDestPath);
+
+                String testCaseDirectory = FilenameUtils.getFullPathNoEndSeparator(testPath);
                 List<String> testContentPaths = IOUtils.getFilePaths(testCaseDirectory, false);
+
                 for (String testContentPath : testContentPaths) {
                     Optional<String> matchingMeasureReportPath = IOUtils.getMeasureReportPaths(fhirContext).stream()
-                        .filter(path -> path.equals(testContentPath))
-                        .findFirst();
+                            .filter(path -> path.equals(testContentPath))
+                            .findFirst();
+
                     if (matchingMeasureReportPath.isPresent()) {
                         IBaseResource measureReport = IOUtils.readResource(testContentPath, fhirContext);
-                        if (!measureReport.getIdElement().getIdPart().startsWith("measurereport") || !measureReport.getIdElement().getIdPart().endsWith("-expectedresults")) {
+
+                        if (measureReport.getIdElement().getIdPart().startsWith("measurereport") && !measureReport.getIdElement().getIdPart().endsWith("-expectedresults")) {
                             Object measureReportStatus = ResourceUtils.resolveProperty(measureReport, "status", fhirContext);
                             String measureReportStatusValue = ResourceUtils.resolveProperty(measureReportStatus, "value", fhirContext).toString();
+
                             if (measureReportStatusValue.equals("COMPLETE")) {
                                 String expectedResultsId = FilenameUtils.getBaseName(testContentPath) + (FilenameUtils.getBaseName(testContentPath).endsWith("-expectedresults") ? "" : "-expectedresults");
                                 measureReport.setId(expectedResultsId);
                             }
+
+                            IOUtils.writeResource(measureReport, destPath, IOUtils.Encoding.JSON, fhirContext);
+                        } else {
+                            String bundleTestContentDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testContentPath));
+//                            LogUtils.info("bundleTestCaseFiles  IOUtils.copyFile copying " + testContentPath + "\nto " + bundleTestContentDestPath);
+                            IOUtils.copyFile(testContentPath, bundleTestContentDestPath);
                         }
-                        IOUtils.writeResource(measureReport, destPath, IOUtils.Encoding.JSON, fhirContext);
-                    }
-                    else {
-                        String bundleTestContentDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testContentPath));
-                        IOUtils.copyFile(testContentPath, bundleTestContentDestPath);
                     }
                 }
-            }            
+
+                // Increment the completed tasks count
+                int completed = completedTasks.incrementAndGet();
+
+                processedBundleTestCaseList.add(igTestCasePath);
+
+                // Calculate and log the percentage completion
+                double percentage = ((double) completed / totalTasks) * 100;
+
+                if (percentage == 100){
+//                    LogUtils.info(String.format(igTestCasePath + " Progress: %.2f%% (%d/%d)", percentage, completed, totalTasks));
+                    LogUtils.info(String.format(totalTasks + " files successfully processed for " + igTestCasePath));
+                }
+
+            });
+        }
+
+        tasks.forEach(executor::submit);
+
+        executor.shutdown();
+        try {
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 }

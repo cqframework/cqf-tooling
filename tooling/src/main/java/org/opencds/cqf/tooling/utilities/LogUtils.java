@@ -12,7 +12,6 @@ public class LogUtils {
     private static final Map<String, String> resourceWarnings = new LinkedHashMap<String, String>();
 
     public static void putException(String id, Exception e) {
-        e.printStackTrace();
         resourceWarnings.put(LocalDateTime.now().toString() + ": " + id,
                 e.getMessage() == null ? e.toString() : e.getMessage());
     }
