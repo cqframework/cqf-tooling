@@ -1,13 +1,22 @@
 package org.opencds.cqf.tooling.terminology;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import com.google.gson.JsonObject;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.utilities.json.JsonTrackingParser;
+import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.terminology.fhirservice.FhirTerminologyClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +28,8 @@ import java.util.Iterator;
 
 public class SpreadsheetValidateVSandCS extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(SpreadsheetValidateVSandCS.class);
+
+    private FhirContext fhirContext;
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
     private String urlToTestServer; // -urltotestserver (-uts)
     private boolean hasHeader = true; // -hasheader (-hh)
@@ -36,6 +47,7 @@ public class SpreadsheetValidateVSandCS extends Operation {
 
     @Override
     public void execute(String[] args) {
+        fhirContext = FhirContext.forR4Cached();
         setOutputPath("src/main/resources/org/opencds/cqf/tooling/terminology/output"); // default
         String userName = "";
         String password = "";
@@ -96,6 +108,9 @@ public class SpreadsheetValidateVSandCS extends Operation {
         spreadsheetName = new File(pathToSpreadsheet).getName();
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
         Sheet sheet = workbook.getSheetAt(firstSheet);
+        // this might need to move yet again
+        Endpoint endpoint = new Endpoint().setAddress(urlToTestServer);
+        FhirTerminologyClient fhirClient = new FhirTerminologyClient(fhirContext, endpoint, userName, password);
 
         Iterator<Row> rows = sheet.rowIterator();
         Row header = null;
@@ -114,20 +129,29 @@ public class SpreadsheetValidateVSandCS extends Operation {
                 String valueSetURL = row.getCell(valueSetURLCellNumber).getStringCellValue();
                 String version = row.getCell(versionCellNumber).getStringCellValue();
                 String codeSystemURL = row.getCell(codeSystemURLCellNumber).getStringCellValue();
-                validateRow(id, valueSetName, valueSetURL, version, codeSystemURL, userName, password);
-            } catch (Exception ex) {
-                System.out.println("Row " + row.getRowNum() + " has an empty cell.");
-                logger.debug("Row " + row.getRowNum() + " has an empty cell.");
+                validateRow(id, valueSetName, valueSetURL, version, codeSystemURL, fhirClient, row.getRowNum());
+            } catch (NullPointerException | ConfigurationException ex) {
+                if(ex instanceof NullPointerException){
+                    System.out.println("Row " + row.getRowNum() + " has an empty cell.");
+                    logger.debug("Row: " + row.getRowNum() + " might have an empty cell.");
+                }else if(ex instanceof ConfigurationException){
+                    logger.debug(((ConfigurationException) ex).getMessage());
+                    logger.debug(((ConfigurationException) ex).toString());
+                }
             }
         }
     }
 
-    private void validateRow(String id, String valueSetName, String valueSetURL, String version, String codeSystemURL, String userName, String password){
+    private void validateRow(String id, String valueSetName, String valueSetURL, String version, String codeSystemURL, FhirTerminologyClient fhirClient, int rowNum){
         /*
         Get valueset from server, Get package from NPM, run validate with ResourceValidator code
         Get codesystem from server, Get package from NPM???, validate with ResourceValidator code
          */
-        urlToTestServer
+        String serverUrl = urlToTestServer + "ValueSet/?url=" + valueSetURL;
+        Parameters returnParams = fhirClient.validateCodeInValueSet(serverUrl, "test", "test", "test");
+        if(returnParams == null){
+            System.out.println("Row: " + rowNum + " No entry found for:  " + valueSetURL);
+        }
     }
 
     /*
