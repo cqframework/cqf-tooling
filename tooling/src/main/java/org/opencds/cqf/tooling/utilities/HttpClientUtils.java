@@ -2,6 +2,8 @@ package org.opencds.cqf.tooling.utilities;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -35,71 +37,63 @@ public class HttpClientUtils {
     }
 
     public static void postTaskCollection() {
-        //let OS handle threading:
-        ExecutorService executorService = Executors.newCachedThreadPool();
-        try {
 
-            LogUtils.info(tasks.size() + " POST calls to be made. Starting now. Please wait...");
-            double percentage = (double) 0;
-            System.out.print("\rPOST: " + String.format("%.2f%%", percentage) + " done. ");
-            List<Future<Void>> futures = new ArrayList<>();
-            for (Callable<Void> task : tasks) {
-                futures.add(executorService.submit(task));
+        LogUtils.info(tasks.size() + " POST calls to be made. Starting now. Please wait...");
+        double percentage = (double) 0;
+        System.out.print("\rPOST: " + String.format("%.2f%%", percentage) + " done. ");
+
+        //sequential processing instead of multithreaded, for stability:
+        for (Callable<Void> task : tasks) {
+            try {
+                task.call();  // Execute the task directly
+            } catch (Exception e) {
+                e.printStackTrace();
+                LogUtils.putException("postTaskCollection", e);
+                LogUtils.info("POST task " + tasks.indexOf(task) + " of " + tasks.size() + " encountered an error while starting. Stopping...");
+                return;
             }
-
-            // Wait for all tasks to complete
-            for (Future<Void> future : futures) {
-                try {
-                    future.get();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            // Create a custom comparator to sort based on the numeric value
-            Comparator<String> postResultMessageComparator = new Comparator<String>() {
-                @Override
-                public int compare(String s1, String s2) {
-                    int value1 = extractValue(s1);
-                    int value2 = extractValue(s2);
-                    return Integer.compare(value1, value2);
-                }
-
-                private int extractValue(String s) {
-                    String[] parts = s.split(" ");
-                    if (parts.length > 0) {
-                        try {
-                            return Integer.parseInt(parts[0]);
-                        } catch (NumberFormatException e) {
-                            return 0;
-                        }
-                    }
-                    return 0;
-                }
-            };
-            LogUtils.info("Processing results...");
-            successfulPOSTcalls.sort(postResultMessageComparator);
-            failedPOSTcalls.sort(postResultMessageComparator);
-
-
-            StringBuilder message = new StringBuilder();
-            message.append("\r\n").append(successfulPOSTcalls.size()).append(" resources successfully posted.");
-            for (String successPost : successfulPOSTcalls) {
-                message.append("\n").append(successPost);
-            }
-            LogUtils.info(message.toString());
-
-            message = new StringBuilder();
-            message.append("\r\n").append(failedPOSTcalls.size()).append(" resources failed to post.");
-            for (String failedPost : failedPOSTcalls) {
-                message.append("\n").append(failedPost);
-            }
-            LogUtils.info(message.toString());
-
-        } finally {
-            // Shutdown the executor when you're done, even if an exception occurs
-            executorService.shutdown();
         }
+
+        // Create a custom comparator to sort based on the numeric value
+        Comparator<String> postResultMessageComparator = new Comparator<String>() {
+            @Override
+            public int compare(String s1, String s2) {
+                int value1 = extractValue(s1);
+                int value2 = extractValue(s2);
+                return Integer.compare(value1, value2);
+            }
+
+            private int extractValue(String s) {
+                String[] parts = s.split(" ");
+                if (parts.length > 0) {
+                    try {
+                        return Integer.parseInt(parts[0]);
+                    } catch (NumberFormatException e) {
+                        return 0;
+                    }
+                }
+                return 0;
+            }
+        };
+        LogUtils.info("Processing results...");
+        successfulPOSTcalls.sort(postResultMessageComparator);
+        failedPOSTcalls.sort(postResultMessageComparator);
+
+
+        StringBuilder message = new StringBuilder();
+        message.append("\r\n").append(successfulPOSTcalls.size()).append(" resources successfully posted.");
+        for (String successPost : successfulPOSTcalls) {
+            message.append("\n").append(successPost);
+        }
+        LogUtils.info(message.toString());
+
+        message = new StringBuilder();
+        message.append("\r\n").append(failedPOSTcalls.size()).append(" resources failed to post.");
+        for (String failedPost : failedPOSTcalls) {
+            message.append("\n").append(failedPost);
+        }
+        LogUtils.info(message.toString());
+
     }
 
     public static void post(String fhirServerUrl, IBaseResource resource, Encoding encoding, FhirContext fhirContext) throws IOException {
@@ -111,22 +105,32 @@ public class HttpClientUtils {
             final StringEntity input = new StringEntity(resourceString);
             post.setEntity(input);
 
+            // Configure the request timeout
+            RequestConfig requestConfig = RequestConfig.custom()
+                    .setSocketTimeout(60000)
+                    .setConnectTimeout(60000)
+                    .build();
+            post.setConfig(requestConfig);
+
             final int currentTaskIndex = tasks.size() + 1;
 
             Callable<Void> task = () -> {
 //                LogUtils.info(currentTaskIndex + " out of " + tasks.size() + " - Calling POST on " + encoding.toString() + " resource " + resource.getIdElement().toString());
                 try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
                     HttpResponse response = httpClient.execute(post);
-                    BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-                    StringBuilder responseMessage = new StringBuilder();
-                    String line = "";
-                    while ((line = rd.readLine()) != null) {
-                        responseMessage.append(line);
-                    }
-                    if (responseMessage.toString().contains("error")) {
-                        failedPOSTcalls.add(currentTaskIndex + " out of " + tasks.size() + " - Error posting resource to FHIR server (" + fhirServerUrl + "). Resource was not posted : " + resource.getIdElement().getIdPart());
-                    } else {
+
+                    StatusLine statusLine = response.getStatusLine();
+                    int statusCode = statusLine.getStatusCode(); // Get the HTTP status code (e.g., 200, 404, 500, etc.)
+                    String reasonPhrase = statusLine.getReasonPhrase(); // Get the reason phrase (e.g., OK, Not Found, Internal Server Error, etc.)
+                    String httpVersion = statusLine.getProtocolVersion().toString(); // Get the HTTP version (e.g., HTTP/1.1)
+
+                    if (statusCode >= 200 && statusCode < 300) {
+                        //status codes in the 200 range indicate success
                         successfulPOSTcalls.add(currentTaskIndex + " out of " + tasks.size() + " - Resource successfully posted to FHIR server: " + resource.getIdElement().getIdPart());
+                    } else {
+                        String detailedMessage = "HTTP Status: " + statusCode + " " + reasonPhrase + " (HTTP Version: " + httpVersion + ")";
+                        failedPOSTcalls.add(currentTaskIndex + " out of " + tasks.size() + " - Error posting resource to FHIR server (" + fhirServerUrl
+                                + ") " + resource.getIdElement().getIdPart() + ": " + detailedMessage);
                     }
                 } catch (IOException e) {
                     failedPOSTcalls.add(currentTaskIndex + " out of " + tasks.size() + " - Error while making the POST request: " + e.getMessage());
