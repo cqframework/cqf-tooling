@@ -17,21 +17,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 public class HttpClientUtils {
-    private static final List<String> failedPOSTcalls = new ArrayList<>();
-    private static final List<String> successfulPOSTcalls = new ArrayList<>();
+    private static final List<String> failedPOSTcalls = new CopyOnWriteArrayList<>();
+    private static final List<String> successfulPOSTcalls = new CopyOnWriteArrayList<>();
     private static final List<Callable<Void>> tasks = new ArrayList<>();
     private static int counter = 0;
 
     private static void reportProgress() {
         counter++;
         double percentage = (double) counter / tasks.size() * 100;
-        System.out.print("\rPOST: " + String.format("%.2f%%", percentage) + " done. ");
+        System.out.print("\rPOST calls: " + String.format("%.2f%%", percentage) + " processed. ");
     }
 
     public static boolean hasPostTasksInQueue() {
@@ -125,13 +122,13 @@ public class HttpClientUtils {
                     post.setEntity(input);
                     HttpResponse response = httpClient.execute(post);
                     BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-                    String responseMessage = "";
+                    StringBuilder responseMessage = new StringBuilder();
                     String line = "";
                     while ((line = rd.readLine()) != null) {
-                        responseMessage += line;
+                        responseMessage.append(line);
                     }
 
-                    if (responseMessage.contains("error")) {
+                    if (responseMessage.toString().contains("error")) {
                         failedPOSTcalls.add(currentTaskIndex + " out of " + tasks.size() + " - Error posting resource to FHIR server (" + fhirServerUrl + "). Resource was not posted : " + resource.getIdElement().getIdPart());
                     } else {
                         successfulPOSTcalls.add(currentTaskIndex + " out of " + tasks.size() + " - Resource successfully posted to FHIR server: " + resource.getIdElement().getIdPart());

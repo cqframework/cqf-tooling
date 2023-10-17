@@ -88,7 +88,7 @@ public class MeasureProcessor extends BaseProcessor {
 
     protected List<Object> getIdentifiers() {
         if (identifiers == null) {
-            identifiers = new ArrayList<>();
+            identifiers = new CopyOnWriteArrayList<>();
         }
         return identifiers;
     }
@@ -96,31 +96,41 @@ public class MeasureProcessor extends BaseProcessor {
     public void bundleMeasures(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
                                Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp, FhirContext fhirContext, String fhirUri,
                                Encoding encoding) {
+
+
+
         Map<String, IBaseResource> measures = IOUtils.getMeasures(fhirContext);
         //Map<String, IBaseResource> libraries = IOUtils.getLibraries(fhirContext);
 
-        List<String> bundledMeasures = new ArrayList<String>();
+        List<String> bundledMeasures = new CopyOnWriteArrayList<>();
 
         //for keeping track of progress:
-        List<String> processedMeasures = new ArrayList<String>();
+        List<String> processedMeasures = new CopyOnWriteArrayList<>();
+
+        Map<String, String> failedExceptionMessages = new ConcurrentHashMap<>();
+
         int totalMeasures = measures.size();
 
         //let OS handle threading:
         ExecutorService executorService = Executors.newCachedThreadPool();
 
-        Map<String, String> failedExceptionMessages = new HashMap<>();
-
         //build list of tasks via for loop:
         List<Callable<Void>> tasks = new ArrayList<>();
         try {
+            final Map<String, IBaseResource> libraryUrlMap = IOUtils.getLibraryUrlMap(fhirContext);
+            final Map<String, IBaseResource> libraries = IOUtils.getLibraries(fhirContext);
+            final Map<String, String> libraryPathMap = IOUtils.getLibraryPathMap(fhirContext);
+
             for (Map.Entry<String, IBaseResource> measureEntry : measures.entrySet()) {
 
                 if (measureEntry.getKey() == null || measureEntry.getKey().equalsIgnoreCase("null")) {
                     continue;
                 }
 
+                final String measureSourcePath = IOUtils.getMeasurePathMap(fhirContext).get(measureEntry.getKey());
+
                 tasks.add(() -> {
-                    String measureSourcePath = IOUtils.getMeasurePathMap(fhirContext).get(measureEntry.getKey());
+
                     //check if measureSourcePath has been processed before:
                     if (processedMeasures.contains(measureSourcePath)) {
                         LogUtils.info("Measure processed already: " + measureSourcePath);
@@ -140,15 +150,15 @@ public class MeasureProcessor extends BaseProcessor {
                         String primaryLibraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
                         IBaseResource primaryLibrary;
                         if (primaryLibraryUrl.startsWith("http")) {
-                            primaryLibrary = IOUtils.getLibraryUrlMap(fhirContext).get(primaryLibraryUrl);
+                            primaryLibrary = libraryUrlMap.get(primaryLibraryUrl);
                         } else {
-                            primaryLibrary = IOUtils.getLibraries(fhirContext).get(primaryLibraryUrl);
+                            primaryLibrary = libraries.get(primaryLibraryUrl);
                         }
 
                         if (primaryLibrary == null)
                             throw new IllegalArgumentException(String.format("Could not resolve library url %s", primaryLibraryUrl));
 
-                        String primaryLibrarySourcePath = IOUtils.getLibraryPathMap(fhirContext).get(primaryLibrary.getIdElement().getIdPart());
+                        String primaryLibrarySourcePath = libraryPathMap.get(primaryLibrary.getIdElement().getIdPart());
                         String primaryLibraryName = ResourceUtils.getName(primaryLibrary, fhirContext);
                         if (includeVersion) {
                             primaryLibraryName = primaryLibraryName + "-" +
@@ -232,7 +242,8 @@ public class MeasureProcessor extends BaseProcessor {
                     e.printStackTrace();
                 }
             }
-
+        } catch (Exception e) {
+            LogUtils.putException("bundleMeasures", e);
         } finally {
             // Shutdown the executor when you're done, even if an exception occurs
             executorService.shutdown();
@@ -369,7 +380,7 @@ public class MeasureProcessor extends BaseProcessor {
     protected FhirContext fhirContext;
 
     public List<String> refreshMeasureContent(RefreshMeasureParameters params) {
-        return new ArrayList<String>();
+        return new CopyOnWriteArrayList<>();
     }
 
     protected List<Measure> refreshGeneratedContent(List<Measure> sourceMeasures) {
@@ -378,7 +389,7 @@ public class MeasureProcessor extends BaseProcessor {
 
     private List<Measure> internalRefreshGeneratedContent(List<Measure> sourceMeasures) {
         // for each Measure, refresh the measure based on the primary measure library
-        List<Measure> resources = new ArrayList<Measure>();
+        List<Measure> resources = new CopyOnWriteArrayList<>();
         for (Measure measure : sourceMeasures) {
             resources.add(refreshGeneratedContent(measure));
         }

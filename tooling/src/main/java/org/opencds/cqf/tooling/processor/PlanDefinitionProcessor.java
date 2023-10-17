@@ -35,9 +35,9 @@ public class PlanDefinitionProcessor {
 
         Map<String, IBaseResource> planDefinitions = IOUtils.getPlanDefinitions(fhirContext);
 
-        List<String> bundledPlanDefinitions = new ArrayList<String>();
+        List<String> bundledPlanDefinitions = new CopyOnWriteArrayList<>();
 
-        Map<String, String> failedExceptionMessages = new HashMap<>();
+        Map<String, String> failedExceptionMessages = new ConcurrentHashMap<>();
 
         //let OS handle threading:
         ExecutorService executorService = Executors.newCachedThreadPool();
@@ -45,6 +45,11 @@ public class PlanDefinitionProcessor {
         //build list of tasks via for loop:
         List<Callable<Void>> tasks = new ArrayList<>();
         try {
+
+            final Map<String, IBaseResource> libraryUrlMap = IOUtils.getLibraryUrlMap(fhirContext);
+            final Map<String, IBaseResource> libraries = IOUtils.getLibraries(fhirContext);
+            final Map<String, String> libraryPathMap = IOUtils.getLibraryPathMap(fhirContext);
+
             for (Map.Entry<String, IBaseResource> planDefinitionEntry : planDefinitions.entrySet()) {
                 tasks.add(() -> {
                     String planDefinitionSourcePath = IOUtils.getPlanDefinitionPathMap(fhirContext).get(planDefinitionEntry.getKey());
@@ -61,15 +66,15 @@ public class PlanDefinitionProcessor {
                         String primaryLibraryUrl = ResourceUtils.getPrimaryLibraryUrl(planDefinition, fhirContext);
                         IBaseResource primaryLibrary;
                         if (primaryLibraryUrl.startsWith("http")) {
-                            primaryLibrary = IOUtils.getLibraryUrlMap(fhirContext).get(primaryLibraryUrl);
+                            primaryLibrary = libraryUrlMap.get(primaryLibraryUrl);
                         } else {
-                            primaryLibrary = IOUtils.getLibraries(fhirContext).get(primaryLibraryUrl);
+                            primaryLibrary = libraries.get(primaryLibraryUrl);
                         }
 
                         if (primaryLibrary == null)
                             throw new IllegalArgumentException(String.format("Could not resolve library url %s", primaryLibraryUrl));
 
-                        String primaryLibrarySourcePath = IOUtils.getLibraryPathMap(fhirContext).get(primaryLibrary.getIdElement().getIdPart());
+                        String primaryLibrarySourcePath = libraryPathMap.get(primaryLibrary.getIdElement().getIdPart());
                         String primaryLibraryName = ResourceUtils.getName(primaryLibrary, fhirContext);
                         if (includeVersion) {
                             primaryLibraryName = primaryLibraryName + "-" +
@@ -147,6 +152,8 @@ public class PlanDefinitionProcessor {
                     e.printStackTrace();
                 }
             }
+        } catch (Exception e) {
+            LogUtils.putException("bundlePlanDefinitions", e);
         } finally {
             // Shutdown the executor when you're done, even if an exception occurs
             executorService.shutdown();

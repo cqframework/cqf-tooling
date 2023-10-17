@@ -10,6 +10,8 @@ import org.cqframework.cql.cql2elm.*;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.Utilities;
+import org.opencds.cqf.tooling.common.ConcurrentLinkedHashMap;
+import org.opencds.cqf.tooling.common.ConcurrentLinkedHashSet;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 
 import java.io.*;
@@ -193,7 +195,7 @@ public class IOUtils
 
     private static final Map<String, String> alreadyCopied = new HashMap<>();
 
-    public static boolean copyFile(String inputPath, String outputPath) {
+    public static void copyFile(String inputPath, String outputPath) {
         if (inputPath == null || outputPath == null) {
             throw new IllegalArgumentException("InputPath and outputPath cannot be null.");
         }
@@ -201,7 +203,7 @@ public class IOUtils
         String key = inputPath + ":" + outputPath;
         if (alreadyCopied.containsKey(key)) {
             // File already copied to destination
-            return false;
+            return;
         }
 
         try {
@@ -209,17 +211,10 @@ public class IOUtils
             Path dest = Paths.get(outputPath);
             Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
             alreadyCopied.put(key, outputPath);
-            return true;
-            // Log successful copy here if needed
-        } catch (FileAlreadyExistsException e) {
-            // Handle the case when the file already exists in the destination.
-            // Log or handle as needed
-            return false;
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Error copying file: " + e.getMessage());
         }
-
 
     }
 
@@ -256,7 +251,7 @@ public class IOUtils
     }
 
     //users should always check for null
-//    private static Map<String, IBaseResource> cachedResources = new LinkedHashMap<String, IBaseResource>();
+//    private static final Map<String, IBaseResource> cachedResources = new LinkedHashMap<String, IBaseResource>();
 //    public static IBaseResource readResource(String path, FhirContext fhirContext, Boolean safeRead)
 //    {
 //        Encoding encoding = getEncoding(path);
@@ -300,7 +295,7 @@ public class IOUtils
 //        return resource;
 //    }
 
-    private static Map<String, IBaseResource> cachedResources = new LinkedHashMap<String, IBaseResource>();
+    private static final Map<String, IBaseResource> cachedResources = new ConcurrentLinkedHashMap<String, IBaseResource>();
 
     public static IBaseResource readResource(String path, FhirContext fhirContext, boolean safeRead) {
         Encoding encoding = getEncoding(path);
@@ -593,7 +588,7 @@ public class IOUtils
         return dependencyCqlFiles;
     }
 
-    private static Map<String, CqlTranslator> cachedTranslator = new LinkedHashMap<String, CqlTranslator>();
+    private static final Map<String, CqlTranslator> cachedTranslator = new ConcurrentLinkedHashMap<String, CqlTranslator>();
     public static CqlTranslator translate(String cqlContentPath, ModelManager modelManager, LibraryManager libraryManager, CqlTranslatorOptions options) {
         CqlTranslator translator = cachedTranslator.get(cqlContentPath);
         if (translator != null) {
@@ -714,8 +709,8 @@ public class IOUtils
         return libraryPath;
     }
 
-    private static HashSet<String> cqlLibraryPaths = new LinkedHashSet<String>();
-    public static HashSet<String> getCqlLibraryPaths() {
+    private static final Set<String> cqlLibraryPaths = new ConcurrentLinkedHashSet<String>();
+    public static Set<String> getCqlLibraryPaths() {
         if (cqlLibraryPaths.isEmpty()) {
             setupCqlLibraryPaths();
         }
@@ -756,8 +751,8 @@ public class IOUtils
         return cqlLibrarySourcePath;
     }
 
-    private static HashSet<String> terminologyPaths = new LinkedHashSet<String>();
-    public static HashSet<String> getTerminologyPaths(FhirContext fhirContext) {
+    private static final Set<String> terminologyPaths = new ConcurrentLinkedHashSet<String>();
+    public static Set<String> getTerminologyPaths(FhirContext fhirContext) {
         if (terminologyPaths.isEmpty()) {
             setupTerminologyPaths(fhirContext);
         }
@@ -802,14 +797,14 @@ public class IOUtils
         return library;
     }
 
-    private static HashSet<String> libraryPaths = new LinkedHashSet<String>();
-    public static HashSet<String> getLibraryPaths(FhirContext fhirContext) {
+    private static final Set<String> libraryPaths = new ConcurrentLinkedHashSet<String>();
+    public static Set<String> getLibraryPaths(FhirContext fhirContext) {
         if (libraryPaths.isEmpty()) {
             setupLibraryPaths(fhirContext);
         }
         return libraryPaths;
     }
-    private static Map<String, IBaseResource> libraryUrlMap = new LinkedHashMap<String, IBaseResource>();
+    private static final Map<String, IBaseResource> libraryUrlMap = new ConcurrentLinkedHashMap<String, IBaseResource>();
     public static Map<String, IBaseResource> getLibraryUrlMap(FhirContext fhirContext) {
         if (libraryPathMap.isEmpty()) {
             setupLibraryPaths(fhirContext);
@@ -820,14 +815,14 @@ public class IOUtils
 //        }
         return libraryUrlMap;
     }
-    private static Map<String, String> libraryPathMap = new LinkedHashMap<String, String>();
+    private static final Map<String, String> libraryPathMap = new ConcurrentLinkedHashMap<String, String>();
     public static Map<String, String> getLibraryPathMap(FhirContext fhirContext) {
         if (libraryPathMap.isEmpty()) {
             setupLibraryPaths(fhirContext);
         }
         return libraryPathMap;
     }
-    private static Map<String, IBaseResource> libraries = new LinkedHashMap<String, IBaseResource>();
+    private static final Map<String, IBaseResource> libraries = new ConcurrentLinkedHashMap<String, IBaseResource>();
     public static Map<String, IBaseResource> getLibraries(FhirContext fhirContext) {
         if (libraries.isEmpty()) {
             setupLibraryPaths(fhirContext);
@@ -864,21 +859,21 @@ public class IOUtils
         }
     }
 
-    private static HashSet<String> measurePaths = new LinkedHashSet<String>();
-    public static HashSet<String> getMeasurePaths(FhirContext fhirContext) {
+    private static final Set<String> measurePaths = new ConcurrentLinkedHashSet<String>();
+    public static Set<String> getMeasurePaths(FhirContext fhirContext) {
         if (measurePaths.isEmpty()) {
             setupMeasurePaths(fhirContext);
         }
         return measurePaths;
     }
-    private static Map<String, String> measurePathMap = new LinkedHashMap<String, String>();
+    private static final Map<String, String> measurePathMap = new ConcurrentLinkedHashMap<String, String>();
     public static Map<String, String> getMeasurePathMap(FhirContext fhirContext) {
         if (measurePathMap.isEmpty()) {
             setupMeasurePaths(fhirContext);
         }
         return measurePathMap;
     }
-    private static Map<String, IBaseResource> measures = new LinkedHashMap<String, IBaseResource>();
+    private static final Map<String, IBaseResource> measures = new ConcurrentLinkedHashMap<String, IBaseResource>();
     public static Map<String, IBaseResource> getMeasures(FhirContext fhirContext) {
         if (measures.isEmpty()) {
             setupMeasurePaths(fhirContext);
@@ -913,8 +908,8 @@ public class IOUtils
         }
     }
 
-    private static HashSet<String> measureReportPaths = new LinkedHashSet<String>();
-    public static HashSet<String> getMeasureReportPaths(FhirContext fhirContext) {
+    private static final Set<String> measureReportPaths = new ConcurrentLinkedHashSet<String>();
+    public static Set<String> getMeasureReportPaths(FhirContext fhirContext) {
         if (measureReportPaths.isEmpty()) {
             setupMeasureReportPaths(fhirContext);
         }
@@ -977,21 +972,21 @@ public class IOUtils
                 });
     }
 
-    private static HashSet<String> planDefinitionPaths = new LinkedHashSet<String>();
-    public static HashSet<String> getPlanDefinitionPaths(FhirContext fhirContext) {
+    private static final Set<String> planDefinitionPaths = new ConcurrentLinkedHashSet<String>();
+    public static Set<String> getPlanDefinitionPaths(FhirContext fhirContext) {
         if (planDefinitionPaths.isEmpty()) {
             setupPlanDefinitionPaths(fhirContext);
         }
         return planDefinitionPaths;
     }
-    private static Map<String, String> planDefinitionPathMap = new LinkedHashMap<String, String>();
+    private static final Map<String, String> planDefinitionPathMap = new ConcurrentLinkedHashMap<String, String>();
     public static Map<String, String> getPlanDefinitionPathMap(FhirContext fhirContext) {
         if (planDefinitionPathMap.isEmpty()) {
             setupPlanDefinitionPaths(fhirContext);
         }
         return planDefinitionPathMap;
     }
-    private static Map<String, IBaseResource> planDefinitions = new LinkedHashMap<String, IBaseResource>();
+    private static final Map<String, IBaseResource> planDefinitions = new ConcurrentLinkedHashMap<String, IBaseResource>();
     public static Map<String, IBaseResource> getPlanDefinitions(FhirContext fhirContext) {
         if (planDefinitions.isEmpty()) {
             setupPlanDefinitionPaths(fhirContext);
@@ -1022,15 +1017,15 @@ public class IOUtils
         }
     }
 
-    private static HashSet<String> questionnairePaths = new LinkedHashSet<String>();
-    public static HashSet<String> getQuestionnairePaths(FhirContext fhirContext) {
+    private static final Set<String> questionnairePaths = new ConcurrentLinkedHashSet<String>();
+    public static Set<String> getQuestionnairePaths(FhirContext fhirContext) {
         if (questionnairePaths.isEmpty()) {
             setupQuestionnairePaths(fhirContext);
         }
         return questionnairePaths;
     }
 
-    private static Map<String, String> questionnairePathMap = new LinkedHashMap<String, String>();
+    private static final Map<String, String> questionnairePathMap = new ConcurrentLinkedHashMap<String, String>();
     public static Map<String, String> getQuestionnairePathMap(FhirContext fhirContext) {
         if (questionnairePathMap.isEmpty()) {
             setupQuestionnairePaths(fhirContext);
@@ -1038,7 +1033,7 @@ public class IOUtils
         return questionnairePathMap;
     }
 
-    private static Map<String, IBaseResource> questionnaires = new LinkedHashMap<String, IBaseResource>();
+    private static final Map<String, IBaseResource> questionnaires = new ConcurrentLinkedHashMap<String, IBaseResource>();
     public static Map<String, IBaseResource> getQuestionnaires(FhirContext fhirContext) {
         if (questionnaires.isEmpty()) {
             setupQuestionnairePaths(fhirContext);
@@ -1070,8 +1065,8 @@ public class IOUtils
         }
     }
 
-    private static HashSet<String> activityDefinitionPaths = new LinkedHashSet<String>();
-    public static HashSet<String> getActivityDefinitionPaths(FhirContext fhirContext) {
+    private static final Set<String> activityDefinitionPaths = new ConcurrentLinkedHashSet<String>();
+    public static Set<String> getActivityDefinitionPaths(FhirContext fhirContext) {
         if (activityDefinitionPaths.isEmpty()) {
             System.out.println("Reading activitydefinitions");
             setupActivityDefinitionPaths(fhirContext);
@@ -1113,8 +1108,8 @@ public class IOUtils
         }
     }
 
-    private static HashSet<String> devicePaths;
-    public static HashSet<String> getDevicePaths(FhirContext fhirContext) {
+    private static Set<String> devicePaths;
+    public static Set<String> getDevicePaths(FhirContext fhirContext) {
         if (devicePaths == null) {
             setupDevicePaths(fhirContext);
         }
@@ -1127,7 +1122,7 @@ public class IOUtils
     }
 
     private static void setupDevicePaths(FhirContext fhirContext) {
-        devicePaths = new LinkedHashSet<String>();
+        devicePaths = new ConcurrentLinkedHashSet<String>();
         HashMap<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
         for(String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true))

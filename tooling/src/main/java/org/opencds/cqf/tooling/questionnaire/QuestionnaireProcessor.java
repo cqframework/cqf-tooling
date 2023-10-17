@@ -35,9 +35,9 @@ public class QuestionnaireProcessor {
 
         Map<String, IBaseResource> questionnaires = IOUtils.getQuestionnaires(fhirContext);
 
-        List<String> bundledQuestionnaires = new ArrayList<String>();
+        List<String> bundledQuestionnaires = new CopyOnWriteArrayList<>();
 
-        Map<String, String> failedExceptionMessages = new HashMap<>();
+        Map<String, String> failedExceptionMessages = new ConcurrentHashMap<>();
 
         //let OS handle threading:
         ExecutorService executorService = Executors.newCachedThreadPool();
@@ -45,6 +45,11 @@ public class QuestionnaireProcessor {
         //build list of tasks via for loop:
         List<Callable<Void>> tasks = new ArrayList<>();
         try {
+
+            final Map<String, IBaseResource> libraryUrlMap = IOUtils.getLibraryUrlMap(fhirContext);
+            final Map<String, IBaseResource> libraries = IOUtils.getLibraries(fhirContext);
+            final Map<String, String> libraryPathMap = IOUtils.getLibraryPathMap(fhirContext);
+
             for (Map.Entry<String, IBaseResource> questionnaireEntry : questionnaires.entrySet()) {
 
                 tasks.add(() -> {
@@ -66,15 +71,15 @@ public class QuestionnaireProcessor {
 
                         IBaseResource primaryLibrary;
                         if (primaryLibraryUrl.startsWith("http")) {
-                            primaryLibrary = IOUtils.getLibraryUrlMap(fhirContext).get(primaryLibraryUrl);
+                            primaryLibrary = libraryUrlMap.get(primaryLibraryUrl);
                         } else {
-                            primaryLibrary = IOUtils.getLibraries(fhirContext).get(primaryLibraryUrl);
+                            primaryLibrary = libraries.get(primaryLibraryUrl);
                         }
 
                         if (primaryLibrary == null)
                             throw new IllegalArgumentException(String.format("Could not resolve library url %s", primaryLibraryUrl));
 
-                        String primaryLibrarySourcePath = IOUtils.getLibraryPathMap(fhirContext).get(primaryLibrary.getIdElement().getIdPart());
+                        String primaryLibrarySourcePath = libraryPathMap.get(primaryLibrary.getIdElement().getIdPart());
                         String primaryLibraryName = ResourceUtils.getName(primaryLibrary, fhirContext);
                         if (includeVersion) {
                             primaryLibraryName = primaryLibraryName + "-" +
@@ -148,6 +153,9 @@ public class QuestionnaireProcessor {
                     e.printStackTrace();
                 }
             }
+
+        } catch (Exception e) {
+            LogUtils.putException("bundleQuestionnaires", e);
         } finally {
             // Shutdown the executor when you're done, even if an exception occurs
             executorService.shutdown();
