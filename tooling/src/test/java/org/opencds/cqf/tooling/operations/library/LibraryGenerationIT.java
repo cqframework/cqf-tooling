@@ -4,11 +4,19 @@ import ca.uhn.fhir.context.FhirContext;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LibraryGenerationIT {
    private final DataRequirementsProcessor dataRequirementsProcessor = new DataRequirementsProcessor();
@@ -61,6 +69,38 @@ public class LibraryGenerationIT {
       Assert.assertEquals(r4Library.getContent().size(), 3);
       Assert.assertEquals(libraryManager.getCompiledLibraries().size(), 1);
    }
+
+   @Test
+   void testR4LibraryGenerationDependenciesCompiled() throws IOException {
+      ModelManager modelManager = new ModelManager();
+      LibraryManager libraryManager = new LibraryManager(modelManager, options.getCqlCompilerOptions());
+      LibraryGenerator libraryGenerator = new LibraryGenerator();
+      libraryGenerator.setFhirContext(FhirContext.forR4Cached());
+      String cql = Files.readString(Paths.get(
+              "./src/test/resources/org/opencds/cqf/tooling/r4/input/pagecontent/cql/SimpleLibrary.cql"));
+      List<String> cqlStrings = new ArrayList<>();
+      cqlStrings.add(R4PartialFhirHelpers);
+      cqlStrings.add(cql);
+      LibrarySourceProvider librarySourceProvider = new InMemoryLibrarySourceProvider(cqlStrings);
+      libraryManager.getLibrarySourceLoader().registerProvider(librarySourceProvider);
+      CqlTranslator translator = CqlTranslator.fromText(cql, libraryManager);
+      IBaseResource library = libraryGenerator.resolveFhirLibrary(translator,
+              dataRequirementsProcessor.gatherDataRequirements(libraryManager, translator.getTranslatedLibrary(),
+                      options.getCqlCompilerOptions(), null, false), cql);
+      Assert.assertTrue(library instanceof org.hl7.fhir.r4.model.Library);
+      org.hl7.fhir.r4.model.Library r4Library = (org.hl7.fhir.r4.model.Library) library;
+      Assert.assertTrue(r4Library.hasId());
+      Assert.assertTrue(r4Library.hasName());
+      Assert.assertTrue(r4Library.hasVersion());
+      Assert.assertTrue(r4Library.hasExperimental());
+      Assert.assertTrue(r4Library.hasStatus());
+      Assert.assertTrue(r4Library.hasType());
+      Assert.assertTrue(r4Library.hasContent());
+      Assert.assertEquals(r4Library.getContent().size(), 3);
+      Assert.assertEquals(libraryManager.getCompiledLibraries().size(), 2);
+   }
+
+
 
    @Test
    void testSimpleR5LibraryGeneration() {
