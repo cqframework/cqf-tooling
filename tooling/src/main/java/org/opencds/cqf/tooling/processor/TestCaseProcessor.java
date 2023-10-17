@@ -292,19 +292,21 @@ public class TestCaseProcessor {
     public static void bundleTestCaseFiles(String igPath, String contextResourceType, String libraryName, String destPath, FhirContext fhirContext) {
         String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), contextResourceType), libraryName);
         List<String> testCasePaths = IOUtils.getFilePaths(igTestCasePath, false);
+        Set<String> measureReportPaths = IOUtils.getMeasureReportPaths(fhirContext);
+        List<String> testCaseDirectories = IOUtils.getDirectoryPaths(igTestCasePath, false);
+
         int tracker = 0;
         for (String testPath : testCasePaths) {
             String bundleTestDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testPath));
             IOUtils.copyFile(testPath, bundleTestDestPath);
             tracker++;
-            List<String> testCaseDirectories = IOUtils.getDirectoryPaths(igTestCasePath, false);
             for (String testCaseDirectory : testCaseDirectories) {
                 List<String> testContentPaths = IOUtils.getFilePaths(testCaseDirectory, false);
                 for (String testContentPath : testContentPaths) {
                     // Copy the file if it hasn't been copied before
                     if (copiedFilePaths.add(testContentPath)) {
 
-                        Optional<String> matchingMeasureReportPath = IOUtils.getMeasureReportPaths(fhirContext).stream()
+                        Optional<String> matchingMeasureReportPath = measureReportPaths.stream()
                                 .filter(path -> path.equals(testContentPath))
                                 .findFirst();
                         if (matchingMeasureReportPath.isPresent()) {

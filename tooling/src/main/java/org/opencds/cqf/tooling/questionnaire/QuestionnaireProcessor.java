@@ -162,34 +162,34 @@ public class QuestionnaireProcessor {
         }
 
 
-        String message = "\r\n" + bundledQuestionnaires.size() + " Questionnaires successfully bundled:";
+        StringBuilder message = new StringBuilder("\r\n" + bundledQuestionnaires.size() + " Questionnaires successfully bundled:");
         for (String bundledQuestionnaire : bundledQuestionnaires) {
-            message += "\r\n     " + bundledQuestionnaire + " BUNDLED";
+            message.append("\r\n     ").append(bundledQuestionnaire).append(" BUNDLED");
         }
 
         List<String> questionnairePathLibraryNames = new ArrayList<>(IOUtils.getQuestionnairePaths(fhirContext));
         ArrayList<String> failedQuestionnaires = new ArrayList<>(questionnairePathLibraryNames);
         questionnairePathLibraryNames.removeAll(bundledQuestionnaires);
         questionnairePathLibraryNames.retainAll(refreshedLibraryNames);
-        message += "\r\n" + questionnairePathLibraryNames.size() + " Questionnaires refreshed, but not bundled (due to issues):";
+        message.append("\r\n").append(questionnairePathLibraryNames.size()).append(" Questionnaires refreshed, but not bundled (due to issues):");
         for (String notBundled : questionnairePathLibraryNames) {
-            message += "\r\n     " + notBundled + " REFRESHED";
+            message.append("\r\n     ").append(notBundled).append(" REFRESHED");
         }
 
         //attempt to give some kind of informational message:
         failedQuestionnaires.removeAll(bundledQuestionnaires);
         failedQuestionnaires.removeAll(bundledQuestionnaires);
-        message += "\r\n" + failedQuestionnaires.size() + " Questionnaires failed refresh:";
+        message.append("\r\n").append(failedQuestionnaires.size()).append(" Questionnaires failed refresh:");
         for (String failed : failedQuestionnaires) {
             if (failedExceptionMessages.containsKey(failed)) {
-                message += "\r\n     " + failed + " FAILED: " + failedExceptionMessages.get(failed);
+                message.append("\r\n     ").append(failed).append(" FAILED: ").append(failedExceptionMessages.get(failed));
             } else {
-                message += "\r\n     " + failed + " FAILED";
+                message.append("\r\n     ").append(failed).append(" FAILED");
             }
         }
 
 
-        LogUtils.info(message);
+        LogUtils.info(message.toString());
 
     }
 

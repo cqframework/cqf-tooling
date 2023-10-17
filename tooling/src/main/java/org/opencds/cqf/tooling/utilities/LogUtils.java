@@ -43,12 +43,11 @@ public class LogUtils {
         if (resourceWarnings.isEmpty()) {
             return;
         }
-        String exceptionMessage = "";
+        StringBuilder exceptionMessage = new StringBuilder();
         for (Map.Entry<String, String> resourceException : resourceWarnings.entrySet()) {
             String resourceExceptionMessage = truncateMessage(resourceException.getValue());
             String resource = FilenameUtils.getBaseName(stripTimestamp(resourceException.getKey()));
-            exceptionMessage += "\r\n          Resource could not be processed: " + resource
-                    + "\r\n                    " + resourceExceptionMessage;
+            exceptionMessage.append("\r\n          Resource could not be processed: ").append(resource).append("\r\n                    ").append(resourceExceptionMessage);
         }
         ourLog.warn(libraryName + " could not be processed: " + exceptionMessage);
         resourceWarnings.clear();

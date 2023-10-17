@@ -14,7 +14,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.*;
@@ -58,7 +57,7 @@ public class HttpClientUtils {
             }
 
             // Create a custom comparator to sort based on the numeric value
-            Comparator<String> customComparator = new Comparator<String>() {
+            Comparator<String> postResultMessageComparator = new Comparator<String>() {
                 @Override
                 public int compare(String s1, String s2) {
                     int value1 = extractValue(s1);
@@ -67,13 +66,11 @@ public class HttpClientUtils {
                 }
 
                 private int extractValue(String s) {
-                    // Split the string and extract the numeric part at the beginning
                     String[] parts = s.split(" ");
                     if (parts.length > 0) {
                         try {
                             return Integer.parseInt(parts[0]);
                         } catch (NumberFormatException e) {
-                            // Handle parsing error here (e.g., default value)
                             return 0;
                         }
                     }
@@ -81,9 +78,8 @@ public class HttpClientUtils {
                 }
             };
             LogUtils.info("Processing results...");
-            successfulPOSTcalls.sort(customComparator);
-            failedPOSTcalls.sort(customComparator);
-
+            successfulPOSTcalls.sort(postResultMessageComparator);
+            failedPOSTcalls.sort(postResultMessageComparator);
 
 
             StringBuilder message = new StringBuilder();
@@ -108,18 +104,18 @@ public class HttpClientUtils {
 
     public static void post(String fhirServerUrl, IBaseResource resource, Encoding encoding, FhirContext fhirContext) throws IOException {
         try {
+            final HttpPost post = new HttpPost(fhirServerUrl);
+            post.addHeader("content-type", "application/" + encoding.toString());
+
+            final String resourceString = IOUtils.encodeResourceAsString(resource, encoding, fhirContext);
+            final StringEntity input = new StringEntity(resourceString);
+            post.setEntity(input);
 
             final int currentTaskIndex = tasks.size() + 1;
 
             Callable<Void> task = () -> {
 //                LogUtils.info(currentTaskIndex + " out of " + tasks.size() + " - Calling POST on " + encoding.toString() + " resource " + resource.getIdElement().toString());
                 try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
-                    HttpPost post = new HttpPost(fhirServerUrl);
-                    post.addHeader("content-type", "application/" + encoding.toString());
-
-                    String resourceString = IOUtils.encodeResourceAsString(resource, encoding, fhirContext);
-                    StringEntity input = new StringEntity(resourceString);
-                    post.setEntity(input);
                     HttpResponse response = httpClient.execute(post);
                     BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
                     StringBuilder responseMessage = new StringBuilder();
@@ -127,32 +123,24 @@ public class HttpClientUtils {
                     while ((line = rd.readLine()) != null) {
                         responseMessage.append(line);
                     }
-
                     if (responseMessage.toString().contains("error")) {
                         failedPOSTcalls.add(currentTaskIndex + " out of " + tasks.size() + " - Error posting resource to FHIR server (" + fhirServerUrl + "). Resource was not posted : " + resource.getIdElement().getIdPart());
                     } else {
                         successfulPOSTcalls.add(currentTaskIndex + " out of " + tasks.size() + " - Resource successfully posted to FHIR server: " + resource.getIdElement().getIdPart());
                     }
                 } catch (IOException e) {
-                    // Handle the exception appropriately, e.g., log, rethrow, or provide user feedback
                     failedPOSTcalls.add(currentTaskIndex + " out of " + tasks.size() + " - Error while making the POST request: " + e.getMessage());
                 } catch (Exception e) {
-                    // Handle other exceptions, e.g., log, rethrow, or provide user feedback
                     failedPOSTcalls.add(currentTaskIndex + " out of " + tasks.size() + " - Error during POST request execution: " + e.getMessage());
                 }
-
-
                 //task requires return statement
                 reportProgress();
                 return null;
-
             };
 
             tasks.add(task);
         } catch (Exception e) {
-            // Handle the exception appropriately, e.g., log, rethrow, or provide user feedback
             LogUtils.putException("Error while submitting the POST request: " + e.getMessage(), e);
-
         }
     }
 
@@ -163,13 +151,13 @@ public class HttpClientUtils {
 
             HttpResponse response = httpClient.execute(get);
             BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-            String responseMessage = "";
+            StringBuilder responseMessage = new StringBuilder();
             String line = "";
             while ((line = rd.readLine()) != null) {
-                responseMessage += line;
+                responseMessage.append(line);
             }
 
-            return responseMessage;
+            return responseMessage.toString();
         }
     }
 }

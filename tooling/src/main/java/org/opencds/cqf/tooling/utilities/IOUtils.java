@@ -115,49 +115,76 @@ public class IOUtils
         writeResource(resource, path, encoding, fhirContext, true, null, prettyPrintOutput);
     }
 
+//    public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext, Boolean versioned, String outputFileName, boolean prettyPrintOutput) {
+//        // If the path is to a specific resource file, just re-use that file path/name.
+//        String outputPath = null;
+//        File file = new File(path);
+//        if (file.isFile()) {
+//            outputPath = path;
+//        }
+//        else {
+//            try {
+//                ensurePath(path);
+//            }
+//            catch (IOException e) {
+//                e.printStackTrace();
+//                throw new RuntimeException("Error writing Resource to file: " + e.getMessage());
+//            }
+//
+//            String baseName = null;
+//            if (outputFileName == null || outputFileName.isBlank()) {
+//                baseName = resource.getIdElement().getIdPart();
+//            } else {
+//                baseName = outputFileName;
+//            }
+//
+//            // Issue 96
+//            // If includeVersion is false then just use name and not id for the file baseName
+//            if (!versioned) {
+//                // Assumes that the id will be a string with - separating the version number
+//                // baseName = baseName.split("-")[0];
+//            }
+//            outputPath = FilenameUtils.concat(path, formatFileName(baseName, encoding, fhirContext));
+//        }
+//
+//        try (FileOutputStream writer = new FileOutputStream(outputPath))
+//        {
+//            writer.write(encodeResource(resource, encoding, fhirContext, prettyPrintOutput));
+//            writer.flush();
+//        }
+//        catch (IOException e)
+//        {
+//            e.printStackTrace();
+//            throw new RuntimeException("Error writing Resource to file: " + e.getMessage());
+//        }
+//    }
+
     public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext, Boolean versioned, String outputFileName, boolean prettyPrintOutput) {
-        // If the path is to a specific resource file, just re-use that file path/name.
-        String outputPath = null;
+        String outputPath;
         File file = new File(path);
+
         if (file.isFile()) {
             outputPath = path;
-        }
-        else {
-            try {
-                ensurePath(path);
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-                throw new RuntimeException("Error writing Resource to file: " + e.getMessage());
-            }
-
-            String baseName = null;
-            if (outputFileName == null || outputFileName.isBlank()) {
-                baseName = resource.getIdElement().getIdPart();
-            } else {
-                baseName = outputFileName;
-            }
-
-            // Issue 96
-            // If includeVersion is false then just use name and not id for the file baseName
+        } else {
             if (!versioned) {
-                // Assumes that the id will be a string with - separating the version number
-                // baseName = baseName.split("-")[0];
+                // If not versioned, use the resource ID for the base name
+                outputFileName = resource.getIdElement().getIdPart();
+            } else if (outputFileName == null || outputFileName.isBlank()) {
+                outputFileName = resource.getIdElement().getIdPart();
             }
-            outputPath = FilenameUtils.concat(path, formatFileName(baseName, encoding, fhirContext));
+
+            outputPath = FilenameUtils.concat(path, formatFileName(outputFileName, encoding, fhirContext));
         }
 
-        try (FileOutputStream writer = new FileOutputStream(outputPath))
-        {
-            writer.write(encodeResource(resource, encoding, fhirContext, prettyPrintOutput));
-            writer.flush();
-        }
-        catch (IOException e)
-        {
+        try (FileOutputStream writer = new FileOutputStream(outputPath)) {
+            byte[] encodedResource = encodeResource(resource, encoding, fhirContext, prettyPrintOutput);
+            writer.write(encodedResource);
+        } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Error writing Resource to file: " + e.getMessage());
         }
     }
+
 
     public static <T extends IBaseResource> void writeResources(Map<String, T> resources, String path, Encoding encoding, FhirContext fhirContext)
     {
@@ -577,13 +604,13 @@ public class IOUtils
             }
         }
 
-        if (dependencyLibraries.size() != 0) {
-            String message = (dependencyLibraries.size()) + " included cql Libraries not found: ";
+        if (!dependencyLibraries.isEmpty()) {
+            StringBuilder message = new StringBuilder((dependencyLibraries.size()) + " included cql Libraries not found: ");
 
             for (String includedLibrary : dependencyLibraries) {
-                message += "\r\n" + includedLibrary + " MISSING";
+                message.append("\r\n").append(includedLibrary).append(" MISSING");
             }
-            throw new Exception(message);
+            throw new Exception(message.toString());
         }
         return dependencyCqlFiles;
     }

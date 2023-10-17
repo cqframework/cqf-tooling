@@ -20,9 +20,9 @@ import java.util.stream.Collectors;
 public class PlanDefinitionProcessor {
     public static final String ResourcePrefix = "plandefinition-";
     public static final String PlanDefinitionTestGroupName = "plandefinition";
-    private LibraryProcessor libraryProcessor;
-    private CDSHooksProcessor cdsHooksProcessor;
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final LibraryProcessor libraryProcessor;
+    private final CDSHooksProcessor cdsHooksProcessor;
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public PlanDefinitionProcessor(LibraryProcessor libraryProcessor, CDSHooksProcessor cdsHooksProcessor) {
         this.libraryProcessor = libraryProcessor;
@@ -159,33 +159,33 @@ public class PlanDefinitionProcessor {
             executorService.shutdown();
         }
 
-        String message = "\r\n" + bundledPlanDefinitions.size() + " PlanDefinitions successfully bundled:";
+        StringBuilder message = new StringBuilder("\r\n" + bundledPlanDefinitions.size() + " PlanDefinitions successfully bundled:");
         for (String bundledPlanDefinition : bundledPlanDefinitions) {
-            message += "\r\n     " + bundledPlanDefinition + " BUNDLED";
+            message.append("\r\n     ").append(bundledPlanDefinition).append(" BUNDLED");
         }
 
         List<String> planDefinitionPathLibraryNames = new ArrayList<>(IOUtils.getPlanDefinitionPaths(fhirContext));
         ArrayList<String> failedPlanDefinitions = new ArrayList<>(planDefinitionPathLibraryNames);
         planDefinitionPathLibraryNames.removeAll(bundledPlanDefinitions);
         planDefinitionPathLibraryNames.retainAll(refreshedLibraryNames);
-        message += "\r\n" + planDefinitionPathLibraryNames.size() + " PlanDefinitions refreshed, but not bundled (due to issues):";
+        message.append("\r\n").append(planDefinitionPathLibraryNames.size()).append(" PlanDefinitions refreshed, but not bundled (due to issues):");
         for (String notBundled : planDefinitionPathLibraryNames) {
-            message += "\r\n     " + notBundled + " REFRESHED";
+            message.append("\r\n     ").append(notBundled).append(" REFRESHED");
         }
 
         //attempt to give some kind of informational message:
         failedPlanDefinitions.removeAll(bundledPlanDefinitions);
         failedPlanDefinitions.removeAll(planDefinitionPathLibraryNames);
-        message += "\r\n" + failedPlanDefinitions.size() + " PlanDefinitions failed refresh:";
+        message.append("\r\n").append(failedPlanDefinitions.size()).append(" PlanDefinitions failed refresh:");
         for (String failed : failedPlanDefinitions) {
             if (failedExceptionMessages.containsKey(failed)) {
-                message += "\r\n     " + failed + " FAILED: " + failedExceptionMessages.get(failed);
+                message.append("\r\n     ").append(failed).append(" FAILED: ").append(failedExceptionMessages.get(failed));
             } else {
-                message += "\r\n     " + failed + " FAILED";
+                message.append("\r\n     ").append(failed).append(" FAILED");
             }
         }
 
-        LogUtils.info(message);
+        LogUtils.info(message.toString());
     }
 
     private void persistBundle(String igPath, String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, List<IBaseResource> resources, String fhirUri, Boolean addBundleTimestamp) {

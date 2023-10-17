@@ -1,14 +1,6 @@
 package org.opencds.cqf.tooling.measure;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.*;
-
+import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
@@ -22,21 +14,19 @@ import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.r4.R4MeasureProcessor;
 import org.opencds.cqf.tooling.measure.stu3.STU3MeasureProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshMeasureParameters;
-import org.opencds.cqf.tooling.processor.BaseProcessor;
-import org.opencds.cqf.tooling.processor.IGBundleProcessor;
-import org.opencds.cqf.tooling.processor.IGProcessor;
-import org.opencds.cqf.tooling.processor.TestCaseProcessor;
-import org.opencds.cqf.tooling.processor.ValueSetsProcessor;
-import org.opencds.cqf.tooling.utilities.BundleUtils;
-import org.opencds.cqf.tooling.utilities.CanonicalUtils;
-import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.processor.*;
+import org.opencds.cqf.tooling.utilities.*;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
-import org.opencds.cqf.tooling.utilities.LogUtils;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.*;
 
 public class MeasureProcessor extends BaseProcessor {
     public static final String ResourcePrefix = "measure-";
@@ -47,7 +37,7 @@ public class MeasureProcessor extends BaseProcessor {
         return ResourcePrefix + baseId;
     }
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, String measureToRefreshPath, Boolean shouldApplySoftwareSystemStamp) {
         return refreshIgMeasureContent(parentContext, outputEncoding, null, versioned, fhirContext, measureToRefreshPath, shouldApplySoftwareSystemStamp);
@@ -249,9 +239,9 @@ public class MeasureProcessor extends BaseProcessor {
             executorService.shutdown();
         }
 
-        String message = "\r\n" + bundledMeasures.size() + " Measures successfully bundled:";
+        StringBuilder message = new StringBuilder("\r\n" + bundledMeasures.size() + " Measures successfully bundled:");
         for (String bundledMeasure : bundledMeasures) {
-            message += "\r\n     " + bundledMeasure + " BUNDLED";
+            message.append("\r\n     ").append(bundledMeasure).append(" BUNDLED");
         }
 
         List<String> measurePathLibraryNames = new ArrayList<>(IOUtils.getMeasurePaths(fhirContext));
@@ -260,25 +250,25 @@ public class MeasureProcessor extends BaseProcessor {
 
         measurePathLibraryNames.removeAll(bundledMeasures);
         measurePathLibraryNames.retainAll(refreshedLibraryNames);
-        message += "\r\n" + measurePathLibraryNames.size() + " Measures refreshed, but not bundled (due to issues):";
+        message.append("\r\n").append(measurePathLibraryNames.size()).append(" Measures refreshed, but not bundled (due to issues):");
         for (String notBundled : measurePathLibraryNames) {
-            message += "\r\n     " + notBundled + " REFRESHED";
+            message.append("\r\n     ").append(notBundled).append(" REFRESHED");
         }
 
 
         //attempt to give some kind of informational message:
         failedMeasures.removeAll(bundledMeasures);
         failedMeasures.removeAll(measurePathLibraryNames);
-        message += "\r\n" + failedMeasures.size() + " Measures failed refresh:";
+        message.append("\r\n").append(failedMeasures.size()).append(" Measures failed refresh:");
         for (String failed : failedMeasures) {
             if (failedExceptionMessages.containsKey(failed)) {
-                message += "\r\n     " + failed + " FAILED: " + failedExceptionMessages.get(failed);
+                message.append("\r\n     ").append(failed).append(" FAILED: ").append(failedExceptionMessages.get(failed));
             } else {
-                message += "\r\n     " + failed + " FAILED";
+                message.append("\r\n     ").append(failed).append(" FAILED");
             }
         }
 
-        LogUtils.info(message);
+        LogUtils.info(message.toString());
     }
 
     private void persistBundle(String igPath, String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, List<IBaseResource> resources, String fhirUri, Boolean addBundleTimestamp) {
@@ -380,7 +370,7 @@ public class MeasureProcessor extends BaseProcessor {
     protected FhirContext fhirContext;
 
     public List<String> refreshMeasureContent(RefreshMeasureParameters params) {
-        return new CopyOnWriteArrayList<>();
+        return new ArrayList<>();
     }
 
     protected List<Measure> refreshGeneratedContent(List<Measure> sourceMeasures) {
@@ -389,7 +379,7 @@ public class MeasureProcessor extends BaseProcessor {
 
     private List<Measure> internalRefreshGeneratedContent(List<Measure> sourceMeasures) {
         // for each Measure, refresh the measure based on the primary measure library
-        List<Measure> resources = new CopyOnWriteArrayList<>();
+        List<Measure> resources = new ArrayList<>();
         for (Measure measure : sourceMeasures) {
             resources.add(refreshGeneratedContent(measure));
         }

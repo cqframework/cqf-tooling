@@ -290,14 +290,13 @@ public class ResourceUtils
     public static Map<String, IBaseResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext, boolean includeDependencies, Boolean includeVersion) throws Exception {
       Map<String, IBaseResource> valueSetResources = new HashMap<String, IBaseResource>();
         List<String> valueSetDefIDs = getDepELMValueSetDefIDs(cqlContentPath);
-      HashSet<String> dependencies = new HashSet<>();
 
-      for (String valueSetUrl : valueSetDefIDs) {
+        for (String valueSetUrl : valueSetDefIDs) {
           ValueSetsProcessor.getCachedValueSets(fhirContext).entrySet().stream()
           .filter(entry -> entry.getKey().equals(valueSetUrl))
           .forEach(entry -> valueSetResources.put(entry.getKey(), entry.getValue()));
       }
-      dependencies.addAll(valueSetDefIDs);
+        HashSet<String> dependencies = new HashSet<>(valueSetDefIDs);
 
       if (includeDependencies) {
          List<String> dependencyCqlPaths = IOUtils.getDependencyCqlPaths(cqlContentPath, includeVersion);
@@ -311,13 +310,13 @@ public class ResourceUtils
       }
 
       if (dependencies.size() != valueSetResources.size()) {
-        String message = (dependencies.size() - valueSetResources.size()) + " missing ValueSets: \r\n";
+        StringBuilder message = new StringBuilder((dependencies.size() - valueSetResources.size()) + " missing ValueSets: \r\n");
         dependencies.removeAll(valueSetResources.keySet());
         for (String valueSetUrl : dependencies) {
-          message += valueSetUrl + " MISSING \r\n";
+          message.append(valueSetUrl).append(" MISSING \r\n");
         }
         System.out.println(message);
-        throw new Exception(message);
+        throw new Exception(message.toString());
       }
       return valueSetResources;
     }
@@ -353,9 +352,7 @@ public class ResourceUtils
       }
 
       if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
-        for (IncludeDef def : elm.getIncludes().getDef()) {
-          includedDefs.add(def);
-        }
+          includedDefs.addAll(elm.getIncludes().getDef());
       }
       return includedDefs;
     }
@@ -370,9 +367,7 @@ public class ResourceUtils
         return valueSetDefs;
       }
       if (elm.getValueSets() != null && !elm.getValueSets().getDef().isEmpty()) {
-        for (ValueSetDef def : elm.getValueSets().getDef()) {
-          valueSetDefs.add(def);
-        }
+          valueSetDefs.addAll(elm.getValueSets().getDef());
       }
       return valueSetDefs;
     }
