@@ -50,6 +50,10 @@ public class LibraryGenerator implements ExecutableOperation {
            description = "The directory path to which the generated FHIR Library resources should be written (default src/main/resources/org/opencds/cqf/tooling/library/output)")
    private String outputPath;
 
+   @OperationParam(alias = {"numid", "numericidallowed"}, setter = "setNumericIdAllowed", defaultValue = "false",
+           description = "Determines if we want to allow numeric IDs (This overrides default HAPI behaviour")
+   private String numericIdAllowed;
+
    private FhirContext fhirContext;
    private final DataRequirementsProcessor dataRequirementsProcessor = new DataRequirementsProcessor();
 
@@ -116,7 +120,8 @@ public class LibraryGenerator implements ExecutableOperation {
 
       Library elmLibrary = cqlTranslator.toELM();
 
-      library.setId(IDUtils.libraryNameToId(elmLibrary.getIdentifier().getId(), elmLibrary.getIdentifier().getVersion()));
+      library.setId(IDUtils.libraryNameToId(elmLibrary.getIdentifier().getId(),
+              elmLibrary.getIdentifier().getVersion(), IsNumericIdAllowed()));
       FhirTerser terser = new FhirTerser(fhirContext);
 
       // basic metadata information
@@ -148,7 +153,7 @@ public class LibraryGenerator implements ExecutableOperation {
    }
 
    private String getIncludedLibraryId(IncludeDef def) {
-      return IDUtils.libraryNameToId(getIncludedLibraryName(def), def.getVersion());
+      return IDUtils.libraryNameToId(getIncludedLibraryName(def), def.getVersion(), IsNumericIdAllowed());
    }
 
    private String getIncludedLibraryName(IncludeDef def) {
@@ -185,6 +190,14 @@ public class LibraryGenerator implements ExecutableOperation {
 
    public void setOutputPath(String outputPath) {
       this.outputPath = outputPath;
+   }
+
+   public boolean IsNumericIdAllowed() {
+      return Boolean.parseBoolean(numericIdAllowed);
+   }
+
+   public void setNumericIdAllowed(String numericIdAllowed) {
+      this.numericIdAllowed = numericIdAllowed;
    }
 
    public FhirContext getFhirContext() {

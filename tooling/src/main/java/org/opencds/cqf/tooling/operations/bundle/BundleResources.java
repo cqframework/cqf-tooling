@@ -71,7 +71,7 @@ public class BundleResources implements ExecutableOperation {
       }
       IBaseBundle bundle = builder.getBundle();
       bundleId = bundleId == null ? UUID.randomUUID().toString() : bundleId;
-      IDUtils.validateId(bundleId);
+      IDUtils.validateId(bundleId, false);
       bundle.setId(bundleId);
       return bundle;
    }

@@ -57,6 +57,10 @@ public class ProcessDecisionTables implements ExecutableOperation {
            defaultValue = "src/main/resources/org/opencds/cqf/tooling/acceleratorkit/output")
    private String outputPath;
 
+   @OperationParam(alias = {"numid", "numericidallowed"}, setter = "setNumericIdAllowed", defaultValue = "false",
+           description = "Determines if we want to allow numeric IDs (This overrides default HAPI behaviour")
+   private String numericIdAllowed;
+
    private static final String CANONICAL_BASE = "http://fhir.org/guides/who/anc-cds";
    private final String newLine = System.lineSeparator();
 
@@ -155,7 +159,7 @@ public class ProcessDecisionTables implements ExecutableOperation {
       }
       String decisionIdentifier = decisionTitle.substring(0, index);
       String decisionId = decisionIdentifier.replace(".", "");
-      IDUtils.validateId(decisionId);
+      IDUtils.validateId(decisionId, isNumericIdAllowed());
 
       planDefinition.setTitle(decisionTitle);
 
@@ -303,7 +307,7 @@ public class ProcessDecisionTables implements ExecutableOperation {
 
    private void generateLibrary(PlanDefinition planDefinition) {
       String id = planDefinition.getIdElement().getIdPart();
-      IDUtils.validateId(id);
+      IDUtils.validateId(id, isNumericIdAllowed());
 
       Library library = new Library();
       library.getIdentifier().add(planDefinition.getIdentifierFirstRep());
@@ -714,5 +718,13 @@ public class ProcessDecisionTables implements ExecutableOperation {
 
    public void setOutputPath(String outputPath) {
       this.outputPath = outputPath;
+   }
+
+   public boolean isNumericIdAllowed() {
+      return Boolean.parseBoolean(numericIdAllowed);
+   }
+
+   public void setNumericIdAllowed(String numericIdAllowed) {
+      this.numericIdAllowed = numericIdAllowed;
    }
 }

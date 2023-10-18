@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import com.google.common.base.Strings;
 
@@ -202,7 +201,7 @@ public class LibraryProcessor extends BaseProcessor {
                     newLibrary.setUrl(String.format("%s/Library/%s", (newLibrary.getName().equals("FHIRHelpers") ? "http://hl7.org/fhir" : canonicalBase), fileInfo.getIdentifier().getId()));
                     newLibrary.setId(newLibrary.getName() + (versioned ? "-" + newLibrary.getVersion() : ""));
                     setLibraryType(newLibrary);
-                    IDUtils.validateId(newLibrary.getId());
+                    IDUtils.validateId(newLibrary.getId(), false);
                     List<Attachment> attachments = new ArrayList<Attachment>();
                     Attachment attachment = new Attachment();
                     attachment.setContentType("application/elm+xml");

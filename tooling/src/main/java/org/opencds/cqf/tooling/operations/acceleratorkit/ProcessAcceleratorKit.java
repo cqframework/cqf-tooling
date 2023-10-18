@@ -74,6 +74,10 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
            defaultValue = "src/main/resources/org/opencds/cqf/tooling/acceleratorkit/output")
    private String outputPath;
 
+   @OperationParam(alias = {"numid", "numericidallowed"}, setter = "setNumericIdAllowed", defaultValue = "false",
+           description = "Determines if we want to allow numeric IDs (This overrides default HAPI behaviour")
+   private String numericIdAllowed;
+
    private static final String activityCodeSystem = "http://fhir.org/guides/who/anc-cds/CodeSystem/anc-activity-codes";
    private String projectCodeSystemBase;
 
@@ -1108,7 +1112,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
    private Questionnaire createQuestionnaireForPage(Sheet sheet) {
       Questionnaire questionnaire = new Questionnaire();
       Coding activityCoding = getActivityCoding(sheet.getSheetName());
-      questionnaire.setId(IDUtils.toUpperId(activityCoding.getCode()));
+      questionnaire.setId(IDUtils.toUpperId(activityCoding.getCode(), isNumericIdAllowed()));
 
       questionnaire.getExtension().add(
               new Extension("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-knowledgeCapability", new CodeType("shareable")));
@@ -1335,7 +1339,8 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
 
       // If custom profile is specified, search for if it exists already.
       String customProfileIdRaw = element.getCustomProfileId();
-      String profileId = IDUtils.toId(customProfileIdRaw != null && !customProfileIdRaw.isEmpty() ? customProfileIdRaw : element.getId());
+      String profileId = IDUtils.toId(customProfileIdRaw != null && !customProfileIdRaw.isEmpty() ?
+              customProfileIdRaw : element.getId(), isNumericIdAllowed());
       for (StructureDefinition profile : profiles) {
          if (profile.getId().equals(profileId)) {
             sd = profile;
@@ -1897,7 +1902,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
               element.getDataElementName());
 
       // Search for extension and use it if it exists already.
-      String extensionId = IDUtils.toId(extensionName);
+      String extensionId = IDUtils.toId(extensionName, isNumericIdAllowed());
       if (extensionId.length() > 0) {
          for (StructureDefinition existingExtension : extensions) {
             if (existingExtension.getId().equals(existingExtension)) {
@@ -2276,7 +2281,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
    }
 
    private String toName(String name) {
-      String result = IDUtils.toUpperId(name);
+      String result = IDUtils.toUpperId(name, isNumericIdAllowed());
       if (result.isEmpty()) {
          return result;
       }
@@ -2472,7 +2477,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
       // Observation.code is special case - if mapping is Observation.value[x] with a non-bindable type, we'll still need
       // to allow for binding of Observation.code (the primary code path)
       if (isBindableType(dictionaryElement) || targetElement.getPath().equals("Observation.code")) {
-         String valueSetId = IDUtils.toId(dictionaryElement.getId());
+         String valueSetId = IDUtils.toId(dictionaryElement.getId(), isNumericIdAllowed());
          String valueSetLabel = dictionaryElement.getLabel();
          String valueSetName = null;
 
@@ -2703,7 +2708,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
    private CodeSystem createCodeSystem(String name, String canonicalBase, String title, String description) {
       CodeSystem codeSystem = new CodeSystem();
 
-      codeSystem.setId(IDUtils.toId(name));
+      codeSystem.setId(IDUtils.toId(name, isNumericIdAllowed()));
       codeSystem.setUrl(String.format("%s/CodeSystem/%s", canonicalBase, codeSystem.getId()));
       // TODO: version
       codeSystem.setName(toName(name));
@@ -2897,7 +2902,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
       if (id == null) {
          id = valueSetName;
       }
-      return IDUtils.toId(id);
+      return IDUtils.toId(id, isNumericIdAllowed());
    }
 
    @Nonnull
@@ -2991,7 +2996,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
 
    private void bindQuestionnaireItemAnswerValueSet(DictionaryElement dictionaryElement, ValueSet valueSetToBind) {
       questionnaires.stream().filter(q -> q.getId().equalsIgnoreCase(IDUtils.toUpperId(getActivityCoding(
-              dictionaryElement.getPage()).getCode()))).findFirst().flatMap(questionnaire -> questionnaire.getItem()
+              dictionaryElement.getPage()).getCode(), isNumericIdAllowed()))).findFirst().flatMap(questionnaire -> questionnaire.getItem()
               .stream().filter(i -> i.getText().equalsIgnoreCase(dictionaryElement.getLabel())).findFirst())
               .ifPresent(questionnaireItem -> questionnaireItem.setAnswerValueSet(valueSetToBind.getUrl()));
    }
@@ -3093,7 +3098,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
       ConceptMap cm = conceptMaps.get(systemUrl);
       if (cm == null) {
          String codeSystemLabel = getCodeSystemLabel(systemUrl);
-         IDUtils.validateId(codeSystemLabel);
+         IDUtils.validateId(codeSystemLabel, isNumericIdAllowed());
          if (codeSystemLabel != null) {
             cm = new ConceptMap();
             cm.setId(codeSystemLabel);
@@ -3148,7 +3153,7 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
       }
       activityIndex.append(newLine).append(newLine);
       if (activityCoding != null) {
-         String questionnaireId = IDUtils.toUpperId(activityCoding.getCode());
+         String questionnaireId = IDUtils.toUpperId(activityCoding.getCode(), isNumericIdAllowed());
          activityIndex.append(String.format("Data elements for this activity can be collected using the [%s](Questionnaire-%s.html)", questionnaireId, questionnaireId));
          activityIndex.append(newLine).append(newLine);
       }
@@ -3265,6 +3270,14 @@ public class ProcessAcceleratorKit implements ExecutableOperation {
 
    public void setOutputPath(String outputPath) {
       this.outputPath = outputPath;
+   }
+
+   public boolean isNumericIdAllowed() {
+      return Boolean.parseBoolean(numericIdAllowed);
+   }
+
+   public void setNumericIdAllowed(String numericIdAllowed) {
+      this.numericIdAllowed = numericIdAllowed;
    }
 
    public void setCanonicalBase(String value) {

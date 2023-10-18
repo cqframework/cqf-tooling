@@ -60,6 +60,11 @@ public class DataProfileConformance implements ExecutableOperation {
            description = "The directory path to which the FHIR OperationOutcome should be written (default is to replace existing resources within the IG)")
    private String outputPath;
 
+   @OperationParam(alias = {"numid", "numericidallowed"}, setter = "setNumericIdAllowed", defaultValue = "false",
+           description = "Determines if we want to allow numeric IDs (This overrides default HAPI behaviour")
+   private String numericIdAllowed;
+
+
    private FhirContext fhirContext;
    private FhirValidator validator;
 
@@ -108,7 +113,7 @@ public class DataProfileConformance implements ExecutableOperation {
    }
    private void tagResourceWithValidationResult(IBaseResource resource, ValidationResult result) {
       String id = UUID.randomUUID().toString();
-      IDUtils.validateId(id);
+      IDUtils.validateId(id, isNumericIdAllowed());
 
       // create validation-result extension
       ExtensionUtil.addExtension(fhirContext, resource, Validation.VALIDATION_RESULT_EXTENSION_URL, "Reference", "#" + id);
@@ -215,5 +220,13 @@ public class DataProfileConformance implements ExecutableOperation {
 
    public void setValidator(FhirValidator validator) {
       this.validator = validator;
+   }
+
+   public boolean isNumericIdAllowed() {
+      return Boolean.parseBoolean(numericIdAllowed);
+   }
+
+   public void setNumericIdAllowed(String numericIdAllowed) {
+      this.numericIdAllowed = numericIdAllowed;
    }
 }

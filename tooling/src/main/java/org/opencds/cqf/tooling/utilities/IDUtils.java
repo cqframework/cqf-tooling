@@ -22,16 +22,34 @@ public class IDUtils {
         return idPattern;
     }
 
-    // validateId checks that the provided id matches the fhir defined regex pattern & contains letters to satisfy
-    // requirements for HAPI server. An InvalidIdException is thrown if these conditions are not met.
-    public static void validateId(String id){
-        if (!getIdPattern().matcher(id).find() || !id.matches(".*[a-zA-z]+.*") || id.length() > 64) {
-            logger.error("Provided id: {} is not an alphanumeric string matching regex: {}", id, fhirRegex);
-            throw new InvalidIdException("The provided id does not meet the constraints.");
+    // validateId determines which validation strategy to use for the provided id based on the boolean parameter.
+    public static void validateId(String id, boolean allowNumericIds) {
+        if (allowNumericIds) {
+            validateIdPattern(id);
+        } else {
+            validateIdAlphanumeric(id);
         }
     }
 
-    public static String toId(String name) {
+    // validateIdAlphanumeric checks that the provided id matches the fhir defined regex pattern & contains letters to
+    // satisfy requirements for HAPI server. An InvalidIdException is thrown if these conditions are not met.
+    private static void validateIdAlphanumeric(String id){
+        if (!getIdPattern().matcher(id).find() || !id.matches(".*[a-zA-z]+.*") || id.length() > 64) {
+            logger.error("Provided id: {} is not an alphanumeric string matching regex: {}", id, fhirRegex);
+            throw new InvalidIdException("The provided id is not an alphanumeric string matching regex pattern.");
+        }
+    }
+
+    // validateIdPattern checks that the provided id matches the fhir defined regex pattern. This allows ids to be numeric
+    // which overrides default HAPI Server behaviour. An InvalidIdException is thrown if these conditions are not met.
+    private static void validateIdPattern(String id){
+        if (!getIdPattern().matcher(id).find() || id.length() > 64) {
+            logger.error("Provided id: {} does not match regex: {}", id, fhirRegex);
+            throw new InvalidIdException("The provided id does not match regex pattern.");
+        }
+    }
+
+    public static String toId(String name, boolean allowNumericId) {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Name cannot be null or empty");
         }
@@ -54,11 +72,11 @@ public class IDUtils {
                 .replace("----", "-").replace("---", "-").replace("--", "-").replace(">", "greater-than")
                 .replace("<", "less-than");
 
-        validateId(name);
+        validateId(name, allowNumericId);
         return name;
     }
 
-    public static String toUpperId(String name) {
+    public static String toUpperId(String name, boolean allowNumericId) {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Name cannot be null or empty");
         }
@@ -80,14 +98,14 @@ public class IDUtils {
                 .replace(">", "")
                 .replace("<", "");
 
-        validateId(name);
+        validateId(name, allowNumericId);
         return name;
     }
 
-    public static String libraryNameToId(String name, String version) {
+    public static String libraryNameToId(String name, String version, boolean allowNumericId) {
         String nameAndVersion = "library-" + name + "-" + version;
         nameAndVersion = nameAndVersion.replace("_", "-");
-        validateId(nameAndVersion);
+        validateId(nameAndVersion, allowNumericId);
         return nameAndVersion;
     }
 }

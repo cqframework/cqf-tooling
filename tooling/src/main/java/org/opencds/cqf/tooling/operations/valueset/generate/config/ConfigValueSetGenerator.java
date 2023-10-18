@@ -51,6 +51,10 @@ public class ConfigValueSetGenerator implements ExecutableOperation {
            description = "The directory path to which the generated FHIR ValueSet resources should be written (default src/main/resources/org/opencds/cqf/tooling/terminology/output)")
    private String outputPath;
 
+   @OperationParam(alias = {"numid", "numericidallowed"}, setter = "setNumericIdAllowed", defaultValue = "false",
+           description = "Determines if we want to allow numeric IDs (This overrides default HAPI behaviour")
+   private String numericIdAllowed;
+
    private FhirContext fhirContext;
 
    private final HierarchyProcessor hierarchyProcessor = new HierarchyProcessor();
@@ -110,7 +114,7 @@ public class ConfigValueSetGenerator implements ExecutableOperation {
    private ValueSet updateValueSet(ValueSet vsToUpdate, Config.ValueSets configMetaData, CommonMetaData commonMetaData) {
       ValueSet updatedValueSet = new ValueSet();
 
-      IDUtils.validateId(configMetaData.getId());
+      IDUtils.validateId(configMetaData.getId(), isNumericIdAllowed());
 
       // metadata
       updatedValueSet.setId(configMetaData.getId());
@@ -272,6 +276,14 @@ public class ConfigValueSetGenerator implements ExecutableOperation {
 
    public void setFhirContext(FhirContext fhirContext) {
       this.fhirContext = fhirContext;
+   }
+
+   public boolean isNumericIdAllowed() {
+      return Boolean.parseBoolean(numericIdAllowed);
+   }
+
+   public void setNumericIdAllowed(String numericIdAllowed) {
+      this.numericIdAllowed = numericIdAllowed;
    }
 
    static class CommonMetaData {
