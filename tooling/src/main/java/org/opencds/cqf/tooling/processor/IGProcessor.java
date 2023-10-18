@@ -14,7 +14,6 @@ import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.MeasureProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
-import org.opencds.cqf.tooling.utilities.HttpClientUtils;
 import org.opencds.cqf.tooling.utilities.IGUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
@@ -35,9 +34,6 @@ public class IGProcessor extends BaseProcessor {
     }
     //mega ig method
     public void publishIG(RefreshIGParameters params) {
-
-        HttpClientUtils.setPostThreadMaxCount(params.postThreadMaxCount);
-
         requireNonNull(params.includeDependencies, "includeDependencies can not be null");
         requireNonNull(params.includeELM, "includeELM can not be null");
         requireNonNull(params.includePatientScenarios, "includePatientScenarios can not be null");
