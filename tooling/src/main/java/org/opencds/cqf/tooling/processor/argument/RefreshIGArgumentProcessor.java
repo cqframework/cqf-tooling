@@ -16,6 +16,7 @@ import joptsimple.OptionSpecBuilder;
 
 
 public class RefreshIGArgumentProcessor {
+    private static final int MAX_POST_THREAD_COUNT_DEFAULT = 199;
 
     public static final String[] OPERATION_OPTIONS = {"RefreshIG"};
 
@@ -35,6 +36,7 @@ public class RefreshIGArgumentProcessor {
     public static final String[] MEASURE_OUTPUT_PATH_OPTIONS = {"measureOutput", "measureOutputPath", "mop"};
     public static final String[] SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS = { "ss", "stamp" };
     public static final String[] SHOULD_ADD_TIMESTAMP_OPTIONS = { "ts", "timestamp" };
+    public static final String[] POST_THREAD_MAX_COUNT = {"ptc", "post-thread-count"};
 
     @SuppressWarnings("unused")
     public OptionParser build() {
@@ -51,6 +53,7 @@ public class RefreshIGArgumentProcessor {
         OptionSpecBuilder measureOutputPathBuilder = parser.acceptsAll(asList(MEASURE_OUTPUT_PATH_OPTIONS),"If omitted, the measures will overwrite any existing measures");
         OptionSpecBuilder shouldApplySoftwareSystemStampBuilder = parser.acceptsAll(asList(SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS),"Indicates whether refreshed Measure and Library resources should be stamped with the 'cqf-tooling' stamp via the cqfm-softwaresystem Extension.");
         OptionSpecBuilder shouldAddTimestampBuilder = parser.acceptsAll(asList(SHOULD_ADD_TIMESTAMP_OPTIONS),"Indicates whether refreshed Bundle should attach timestamp of creation.");
+        OptionSpecBuilder postThreadMaxCountBuilder = parser.acceptsAll(asList(FHIR_URI_OPTIONS),"If omitted the final bundle will not be loaded to a FHIR server.");
 
         OptionSpec<String> ini = iniBuilder.withRequiredArg().describedAs("Path to the IG ini file");
         OptionSpec<String> rootDir = rootDirBuilder.withOptionalArg().describedAs("Root directory of the IG");
@@ -62,6 +65,8 @@ public class RefreshIGArgumentProcessor {
         OptionSpec<String> measureOutputPath = measureOutputPathBuilder.withOptionalArg().describedAs("path to the output directory for updated measures");
         OptionSpec<String> shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStampBuilder.withOptionalArg().describedAs("Indicates whether refreshed Measure and Library resources should be stamped with the 'cqf-tooling' stamp via the cqfm-softwaresystem Extension");
         OptionSpec<String> shouldAddTimestampOptions = shouldAddTimestampBuilder.withOptionalArg().describedAs("Indicates whether refreshed Bundle should attach timestamp of creation");
+        OptionSpec<String> postThreadMaxCount = postThreadMaxCountBuilder.withOptionalArg().describedAs("Maximum number of simultaneous post commands in process");
+
 
         //TODO: FHIR user / password (and other auth options)
         OptionSpec<String> fhirUri = fhirUriBuilder.withOptionalArg().describedAs("uri of fhir server");  
@@ -109,6 +114,16 @@ public class RefreshIGArgumentProcessor {
             libraryOutputPath = "";
         }
 
+        String postThreadMaxCountVal = (String)options.valueOf(POST_THREAD_MAX_COUNT[0]);
+        int postThreadMaxCount = MAX_POST_THREAD_COUNT_DEFAULT;
+        if (postThreadMaxCountVal != null) {
+            try {
+                postThreadMaxCount = Integer.valueOf(postThreadMaxCountVal);
+            }catch (Exception e){
+                //do nothing, value was not an integer
+            }
+        }
+
         String measureOutputPath = (String)options.valueOf(MEASURE_OUTPUT_PATH_OPTIONS[0]);
         if (measureOutputPath == null) {
             measureOutputPath = "";
@@ -150,7 +165,7 @@ public class RefreshIGArgumentProcessor {
         ip.measureToRefreshPath = measureToRefreshPath;
         ip.libraryOutputPath = libraryOutputPath;
         ip.measureOutputPath = measureOutputPath;
-       
+        ip.postThreadMaxCount = postThreadMaxCount;
         return ip;
     }
 }
