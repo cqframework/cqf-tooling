@@ -203,7 +203,7 @@ public class IGProcessor extends BaseProcessor {
     public static final String testCasePathElement = "input/tests/";
     public static final String devicePathElement = "input/resources/device/";
     
-    public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, ArrayList<String> resourcePaths) {                
+    public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, List<String> resourcePaths) {
         File directory = new File(getBundlesPath(igPath));
         if (!directory.exists()) {
             directory.mkdir();
