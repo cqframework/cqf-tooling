@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.utilities;
 
 import static org.opencds.cqf.tooling.utilities.CanonicalUtils.getTail;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -817,13 +818,26 @@ public class ResourceUtils
     }
 
     public static void outputResource(IBaseResource resource, String encoding, FhirContext context, String outputPath) {
-        try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding)) {
-            writer.write(
+        try (FileOutputStream writer = new FileOutputStream(outputPath + "/" +
+                resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() +
+                "." + encoding);
+             //swapping out FileOutputStream for BufferedOutputStream for reduced system calls,
+             //reduced disk access, optimized network i/o, efficient disk writing, and improved write performance
+             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(writer);) {
+
+            String encodedResource =
                 encoding.equals("json")
-                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-            );
-            writer.flush();
+                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource)
+                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource);
+
+            bufferedOutputStream.write(encodedResource.getBytes());
+
+//            writer.write(
+//                encoding.equals("json")
+//                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+//                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+//            );
+//            writer.flush();
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());

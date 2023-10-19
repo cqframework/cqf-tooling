@@ -176,9 +176,15 @@ public class IOUtils
             outputPath = FilenameUtils.concat(path, formatFileName(outputFileName, encoding, fhirContext));
         }
 
-        try (FileOutputStream writer = new FileOutputStream(outputPath)) {
+        try (FileOutputStream writer = new FileOutputStream(outputPath);
+             //swapping out FileOutputStream for BufferedOutputStream for reduced system calls,
+             //reduced disk access, optimized network i/o, efficient disk writing, and improved write performance
+             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(writer)) {
+
             byte[] encodedResource = encodeResource(resource, encoding, fhirContext, prettyPrintOutput);
-            writer.write(encodedResource);
+            bufferedOutputStream.write(encodedResource);
+
+//            writer.write(encodedResource);
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Error writing Resource to file: " + e.getMessage());

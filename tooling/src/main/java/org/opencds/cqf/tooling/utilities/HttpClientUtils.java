@@ -25,19 +25,11 @@ public class HttpClientUtils {
     private static Map<IBaseResource, Callable<Void>> tasks = new ConcurrentHashMap<>();
     private static int counter = 0;
 
-    //this value was chosen as it is exactly half the default max thread count for a tomcat server configuration and we don't want to overload the server:
-    private static final int MAX_POST_COUNT = 199;
-
-    //as tasks get ran, they are added here, unless the list is maxed out. When a response is met in the task,
-    //the callable void removes itself from the pool and the task call loop proceeds, resulting in a max # of posts running
-    //and waiting at any given time.
-    private static final List<IBaseResource> runningPostTaskList = new CopyOnWriteArrayList<>();
-
 
     private static void reportProgress() {
         counter++;
         double percentage = (double) counter / tasks.size() * 100;
-        System.out.print("\rPOST calls: " + String.format("%.2f%%", percentage) + " processed. Thread pool size: " + runningPostTaskList.size() + " ");
+        System.out.print("\rPOST calls: " + String.format("%.2f%%", percentage) + " processed. ");
     }
 
     public static boolean hasPostTasksInQueue() {
@@ -97,9 +89,6 @@ public class HttpClientUtils {
                             postPojo);
                 }
 
-                // Response received in one form or another, remove from postPool
-                runningPostTaskList.remove(resource);
-
                 reportProgress();
 
                 return null; // task requires a return statement
@@ -113,35 +102,15 @@ public class HttpClientUtils {
 
 
     public static void postTaskCollection() {
-        //two threads seems to be best at handling parallel post requests, so if one request hangs the
-        //process can still continue with other requests, and server won't be overloaded:
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
-
-        try {
 
             LogUtils.info(tasks.size() + " POST calls to be made. Starting now. Please wait...");
             double percentage = (double) 0;
             System.out.print("\rPOST: " + String.format("%.2f%%", percentage) + " done. ");
 
-            //the postPool array will always have a maximum # of tasks defined by MAX_POST_COUNT
-            //which can be adjusted if server issues are met.
-            List<Future<Void>> futures = new ArrayList<>();
-            List<IBaseResource> resources = new ArrayList<>(tasks.keySet());
-            for (int i = 0; i < resources.size(); i++) {
-                IBaseResource thisResource = resources.get(i);
-                if (runningPostTaskList.size() < MAX_POST_COUNT) {
-                    runningPostTaskList.add(thisResource);
-                    futures.add(executorService.submit(tasks.get(thisResource)));
-                } else {
-                    //restart this loop until space opens up in the runningPostTaskList for a new task
-                    i = i - 1;
-                }
-            }
-
-            // Wait for all tasks to complete
-            for (Future<Void> future : futures) {
+            for (Callable<Void> task : tasks.values()) {
                 try {
-                    future.get();
+                    task.call();
+                    Thread.sleep(100);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -173,7 +142,7 @@ public class HttpClientUtils {
             StringBuilder message;
 
 
-            //retry the failed POSTs once, using straight forward sequential processing:
+            //retry the failed POSTs once
             if (!failedPostCalls.isEmpty()){
                 LogUtils.info(failedPostCalls.size() + " tasks failed to POST. Retrying.");
                 Map<String, POSTInfoPojo> failedPostCallList = new ConcurrentHashMap<>(failedPostCalls);
@@ -195,7 +164,7 @@ public class HttpClientUtils {
                 for (Callable<Void> task : tasks.values()){
                     try {
                         task.call();
-                        Thread.sleep(50);
+                        Thread.sleep(100);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -220,10 +189,7 @@ public class HttpClientUtils {
                 printSuccessList(postResultMessageComparator);
             }
 
-        } finally {
-            // Shutdown the executor when you're done, even if an exception occurs
-            executorService.shutdown();
-        }
+
 
     }
 
