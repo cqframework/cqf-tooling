@@ -65,8 +65,12 @@ public class IGTestProcessor extends BaseProcessor {
 
         @Override
         public String toString() {
+            StringBuilder builder = new StringBuilder();
 
-            return (testPassed ? "PASSED - " : "FAILED - ") + resourceTypeGroup + " " + testArtifactName + " " + testCaseID + (!testPassed && message != null && !message.isEmpty() ? " with message: " + message : "");
+            builder.append((testPassed ? "PASSED - " : "FAILED - ") + resourceTypeGroup + " " + testArtifactName + " " + testCaseID +
+                    (!testPassed && message != null && !message.isEmpty() ? " with message: " + message : ""));
+
+            return builder.toString();
         }
 
     }
