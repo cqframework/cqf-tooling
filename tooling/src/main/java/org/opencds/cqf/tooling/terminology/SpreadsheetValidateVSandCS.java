@@ -2,19 +2,14 @@ package org.opencds.cqf.tooling.terminology;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import com.google.gson.JsonObject;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.utilities.json.JsonTrackingParser;
-import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.fhirservice.FhirTerminologyClient;
 import org.slf4j.Logger;
@@ -24,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.Iterator;
 
 public class SpreadsheetValidateVSandCS extends Operation {
@@ -31,8 +27,12 @@ public class SpreadsheetValidateVSandCS extends Operation {
 
     private FhirContext fhirContext;
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
-    private String urlToTestServer; // -urltotestserver (-uts)
+    private String urlToTestServer; // -urltotestserver (-uts)  server to validate
     private boolean hasHeader = true; // -hasheader (-hh)
+    private String jarPath;  // -jarPath (-jp)  path to validator_cli.jar, including jar name
+    private String pathToIG; // -pathToIG (-ptig) path to IG - files installed using "npm --registry https://packages.simplifier.net install hl7.fhir.us.qicore@4.1.1" (or other package)
+    private String fhirVersion = "4.0.1";
+
 
     // The file name of the input spreadsheet
     private String spreadsheetName;
@@ -70,6 +70,10 @@ public class SpreadsheetValidateVSandCS extends Operation {
                 case "hh":
                     hasHeader = Boolean.valueOf(value);
                     break; // -hasheader (-hh)
+                case "jarPath":
+                case "jp":
+                    jarPath = Paths.get(value).toAbsolutePath().toString();
+                    break; // -jarPath (-jp)
                 case "outputpath":
                 case "op":
                     setOutputPath(value);
@@ -86,6 +90,14 @@ public class SpreadsheetValidateVSandCS extends Operation {
                 case "pw":
                     password = value;
                     break; // -password (-pw)
+                case "pathToIG":
+                case "ptig":
+                    pathToIG = value;
+                    break; // -pathToIG (-ptig)
+                case "fhirVersion":
+                case "fv":
+                    fhirVersion = value;
+                    break; // -fhirversion (-fv)
                 default:
                     throw new IllegalArgumentException("Unknown flag: " + flag);
             }
@@ -125,11 +137,11 @@ public class SpreadsheetValidateVSandCS extends Operation {
 //                Cell cell = cells.next();
             try {
                 String id = row.getCell(idCellNumber).getStringCellValue();
-                String valueSetName = row.getCell(valueSetCellNumber).getStringCellValue();
+//                String valueSetName = row.getCell(valueSetCellNumber).getStringCellValue();
                 String valueSetURL = row.getCell(valueSetURLCellNumber).getStringCellValue();
                 String version = row.getCell(versionCellNumber).getStringCellValue();
                 String codeSystemURL = row.getCell(codeSystemURLCellNumber).getStringCellValue();
-                validateRow(id, valueSetName, valueSetURL, version, codeSystemURL, fhirClient, row.getRowNum());
+                validateRow(id, valueSetURL, version, codeSystemURL, fhirClient, row.getRowNum());
             } catch (NullPointerException | ConfigurationException ex) {
                 if(ex instanceof NullPointerException){
                     System.out.println("Row " + row.getRowNum() + " has an empty cell.");
@@ -142,13 +154,13 @@ public class SpreadsheetValidateVSandCS extends Operation {
         }
     }
 
-    private void validateRow(String id, String valueSetName, String valueSetURL, String version, String codeSystemURL, FhirTerminologyClient fhirClient, int rowNum){
+    private void validateRow(String id, String valueSetURL, String version, String codeSystemURL, FhirTerminologyClient fhirClient, int rowNum){
         /*
         Get valueset from server, Get package from NPM, run validate with ResourceValidator code
         Get codesystem from server, Get package from NPM???, validate with ResourceValidator code
          */
         String serverUrl = urlToTestServer + "ValueSet/?url=" + valueSetURL;
-        Parameters returnParams = fhirClient.validateCodeInValueSet(serverUrl, "test", "test", "test");
+        Parameters returnParams = fhirClient.validateValueSet(serverUrl, pathToIG, jarPath, getOutputPath(), fhirVersion);
         if(returnParams == null){
             System.out.println("Row: " + rowNum + " No entry found for:  " + valueSetURL);
         }

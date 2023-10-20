@@ -145,6 +145,11 @@
             <version>${hapi.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-client</artifactId>
+            <version>${hapi.version}</version>
+        </dependency>
         <!-- StructureDef to ModelInfo -->
         <dependency>
             <groupId>com.google.code.gson</groupId>

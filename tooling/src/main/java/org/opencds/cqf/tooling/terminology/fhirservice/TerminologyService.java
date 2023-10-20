@@ -36,6 +36,8 @@ public interface TerminologyService {
 
     // https://hl7.org/fhir/valueset-operation-validate-code.html
     // TODO: Define ValidateResult class
+
+    Parameters validateValueSet(String url, String pathToIG, String jarPath, String outputPath, String fhirVersion);
     Parameters validateCodeInValueSet(String url, String code, String systemUrl, String display);
     Parameters validateCodingInValueSet(String url, Coding code);
     Parameters validateCodeableConceptInValueSet(String url, CodeableConcept concept);
