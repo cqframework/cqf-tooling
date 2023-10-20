@@ -298,12 +298,14 @@ public class TestCaseProcessor {
         int tracker = 0;
         for (String testPath : testCasePaths) {
             String bundleTestDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testPath));
-            IOUtils.copyFile(testPath, bundleTestDestPath);
-            tracker++;
+            if (IOUtils.copyFile(testPath, bundleTestDestPath)) {
+                tracker++;
+            }
+
             for (String testCaseDirectory : testCaseDirectories) {
                 List<String> testContentPaths = IOUtils.getFilePaths(testCaseDirectory, false);
                 for (String testContentPath : testContentPaths) {
-                    // Copy the file if it hasn't been copied before
+                    // Copy the file if it hasn't been copied before (Set.add returns false if the Set already contains this entry)
                     if (copiedFilePaths.add(testContentPath)) {
 
                         Optional<String> matchingMeasureReportPath = measureReportPaths.stream()
@@ -322,8 +324,9 @@ public class TestCaseProcessor {
                             IOUtils.writeResource(measureReport, destPath, IOUtils.Encoding.JSON, fhirContext);
                         } else {
                             String bundleTestContentDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testContentPath));
-                            IOUtils.copyFile(testContentPath, bundleTestContentDestPath);
-                            tracker++;
+                            if (IOUtils.copyFile(testContentPath, bundleTestContentDestPath)) {
+                                tracker++;
+                            }
                         }
                     }
                 }

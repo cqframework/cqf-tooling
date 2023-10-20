@@ -228,7 +228,7 @@ public class IOUtils
 
     private static final Map<String, String> alreadyCopied = new HashMap<>();
 
-    public static void copyFile(String inputPath, String outputPath) {
+    public static boolean copyFile(String inputPath, String outputPath) {
         if (inputPath == null || outputPath == null) {
             throw new IllegalArgumentException("InputPath and outputPath cannot be null.");
         }
@@ -236,7 +236,7 @@ public class IOUtils
         String key = inputPath + ":" + outputPath;
         if (alreadyCopied.containsKey(key)) {
             // File already copied to destination
-            return;
+            return false;
         }
 
         try {
@@ -244,9 +244,12 @@ public class IOUtils
             Path dest = Paths.get(outputPath);
             Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
             alreadyCopied.put(key, outputPath);
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException("Error copying file: " + e.getMessage());
+            LogUtils.putException("IOUtils.copyFile(" + inputPath + ", " + outputPath + "): ",
+                    new RuntimeException("Error copying file: " + e.getMessage()));
+            return false;
         }
 
     }
@@ -406,8 +409,9 @@ public class IOUtils
 
     public static List<String> getFilePaths(String directoryPath, boolean recursive) {
         List<String> filePaths = new ArrayList<>();
-        if (IOUtils.cachedFilePaths.containsKey(directoryPath)) {
-            filePaths = IOUtils.cachedFilePaths.get(directoryPath);
+        String key = directoryPath + ":" + recursive;
+        if (IOUtils.cachedFilePaths.containsKey(key)) {
+            filePaths = IOUtils.cachedFilePaths.get(key);
             return filePaths;
         }
         try {
@@ -421,7 +425,7 @@ public class IOUtils
             e.printStackTrace();
         }
 
-        cachedFilePaths.put(directoryPath, filePaths);
+        cachedFilePaths.put(key, filePaths);
         return filePaths;
     }
 
@@ -493,9 +497,9 @@ public class IOUtils
 
     public static List<String> getDirectoryPaths(String path, boolean recursive) {
         List<String> directoryPaths = new ArrayList<>();
-
-        if (IOUtils.cachedDirectoryPaths.containsKey(path)) {
-            directoryPaths = IOUtils.cachedDirectoryPaths.get(path);
+        String key = path + ":" + recursive;
+        if (IOUtils.cachedDirectoryPaths.containsKey(key)) {
+            directoryPaths = IOUtils.cachedDirectoryPaths.get(key);
             return directoryPaths;
         }
 
@@ -519,7 +523,7 @@ public class IOUtils
                 }
             }
         }
-        cachedDirectoryPaths.put(path, directoryPaths);
+        cachedDirectoryPaths.put(key, directoryPaths);
         return directoryPaths;
     }
 
