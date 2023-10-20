@@ -227,8 +227,14 @@ public class IOUtils
     }
 
     private static final Map<String, String> alreadyCopied = new HashMap<>();
-
+    public static int getTestsCounter() {
+        return testsCounter;
+    }
+    private static int testsCounter = 0;
     public static boolean copyFile(String inputPath, String outputPath) {
+
+
+
         if (inputPath == null || outputPath == null) {
             throw new IllegalArgumentException("InputPath and outputPath cannot be null.");
         }
@@ -243,6 +249,12 @@ public class IOUtils
             Path src = Paths.get(inputPath);
             Path dest = Paths.get(outputPath);
             Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
+
+            if (inputPath.toLowerCase().contains("tests-")){
+                testsCounter++;
+//                System.out.println("Total tests-*: " + testsCounter + ": " + inputPath);
+            }
+
             alreadyCopied.put(key, outputPath);
             return true;
         } catch (IOException e) {

@@ -93,10 +93,11 @@ public class PlanDefinitionProcessor {
                         }
 
                         if (includeTerminology) {
+                            //ValueSetsProcessor.bundleValueSets modified to throw Exception so we can collect it and report it in the final "report"
                             boolean result = ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
-                            if (shouldPersist && !result) {
-                                LogUtils.info("PlanDefinition will not be bundled because ValueSet bundling failed.");
-                            }
+//                            if (shouldPersist && !result) {
+//                                LogUtils.info("PlanDefinition will not be bundled because ValueSet bundling failed.");
+//                            }
                             shouldPersist = shouldPersist & result;
                         }
 

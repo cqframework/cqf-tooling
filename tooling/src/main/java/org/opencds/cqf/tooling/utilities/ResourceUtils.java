@@ -312,13 +312,12 @@ public class ResourceUtils
       }
 
       if (dependencies.size() != valueSetResources.size()) {
-        String message = (dependencies.size() - valueSetResources.size()) + " missing ValueSets: \r\n";
+        StringBuilder message = new StringBuilder((dependencies.size() - valueSetResources.size()) + " missing ValueSets: \r\n");
         dependencies.removeAll(valueSetResources.keySet());
         for (String valueSetUrl : dependencies) {
-          message += valueSetUrl + " MISSING \r\n";
+          message.append(valueSetUrl).append(" MISSING \r\n");
         }
-        System.out.println(message);
-        throw new Exception(message);
+        throw new Exception(message.toString());
       }
       return valueSetResources;
     }
@@ -348,8 +347,10 @@ public class ResourceUtils
       try {
         elm = getElmFromCql(cqlContentPath);
       } catch (Exception e) {
-        System.out.println("error processing cql: ");
-        System.out.println(e.getMessage());
+//        System.out.println("error processing cql: ");
+//        System.out.println(e.getMessage());
+
+          LogUtils.putException("getIncludedDefs", e);
         return includedDefs;
       }
 
@@ -367,7 +368,8 @@ public class ResourceUtils
       try {
         elm = getElmFromCql(cqlContentPath);
       } catch (Exception e) {
-        System.out.println("error translating cql: ");
+//        System.out.println("error translating cql: ");
+          LogUtils.putException("getValueSetDefs", e);
         return valueSetDefs;
       }
       if (elm.getValueSets() != null && !elm.getValueSets().getDef().isEmpty()) {
