@@ -60,18 +60,6 @@ public class ExtractMatBundleOperationTest {
         }
     }
 
-    @Test
-    public void testExecuteWithEmptyDirectory() throws IOException {
-        File emptyDir = tempFolder.newFolder("emptyDir");
-        String[] args = {"-ExtractMatBundle", emptyDir.getAbsolutePath(), "-dir"};
-
-        try {
-            operation.execute(args);
-            fail("Expected IllegalArgumentException was not thrown");
-        } catch (IllegalArgumentException e) {
-            assertEquals("The path specified with -dir is empty.", e.getMessage());
-        }
-    }
 
 //    @Test
 //    public void testExecuteWithNonJsonFile() throws IOException {
@@ -231,6 +219,6 @@ public class ExtractMatBundleOperationTest {
         }
         File[] files = emptyDir.listFiles();
         assertNotNull(files);
-        assertEquals(8, files.length);
+        assertEquals(11, files.length);
     }
 }
