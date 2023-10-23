@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.*;
 
 public class ExtractMatBundleOperation extends Operation {
     private static final String ERROR_BUNDLE_OUTPUT_INVALID = "When specifying the output folder using -op for ExtractMatBundle, the output directory name must contain the word 'bundle' (all lowercase.)";
@@ -40,6 +41,7 @@ public class ExtractMatBundleOperation extends Operation {
 
     @Override
     public void execute(String[] args) {
+
         processedBundleCollection = new ArrayList<>();
 
         boolean directoryFlagPresent = false;
@@ -123,34 +125,69 @@ public class ExtractMatBundleOperation extends Operation {
             }
         }
 
-        //if -dir was found, treat inputLocation as directory:
-        if (directoryFlagPresent) {
-            File[] filesInDir = new File(inputLocation).listFiles();
-            if (filesInDir == null || filesInDir.length == 0) {
-                throw new IllegalArgumentException(ERROR_DIR_IS_EMPTY);
-            } else {
-                for (File file : filesInDir) {
-                    //process only 1 layer of subdirectories (should they exist)
-                    if (file.isDirectory()) {
-                        File[] filesInSubDir = file.listFiles();
-                        if (filesInSubDir == null || filesInSubDir.length == 0) {
-                            continue;
-                        } else {
-                            for (File subDirFile : filesInSubDir) {
-                                processSingleFile(subDirFile, version, suppressNarrative);
-                            }
+        List<Callable<Void>> tasks = new ArrayList<>();
+
+
+        ExecutorService executorService = Executors.newCachedThreadPool();
+
+        try {
+            //if -dir was found, treat inputLocation as directory:
+            if (directoryFlagPresent) {
+                File[] filesInDir = new File(inputLocation).listFiles();
+                if (filesInDir != null) {
+                    //use recursive calls to build up task list:
+                    tasks.addAll(processFilesInDir(filesInDir, version, suppressNarrative));
+
+                    // Submit tasks and obtain futures
+                    List<Future<Void>> futures = new ArrayList<>();
+                    for (Callable<Void> task : tasks) {
+                        futures.add(executorService.submit(task));
+                    }
+
+                    // Wait for all tasks to complete
+                    for (Future<Void> future : futures) {
+                        try {
+                            future.get();
+                        } catch (Exception e) {
+                            LogUtils.putException("ExtractMatBundleOperation.execute", e);
                         }
-                    } else {
-                        processSingleFile(file, version, suppressNarrative);
                     }
                 }
+            } else {
+                //single file, allow processSingleFile() to run with currently assigned inputFile:
+                processSingleFile(new File(inputLocation), version, suppressNarrative);
             }
-        } else {
-            //single file, allow processSingleFile() to run with currently assigned inputFile:
-            processSingleFile(new File(inputLocation), version, suppressNarrative);
+
+
+        } finally {
+            executorService.shutdown();
         }
-        LogUtils.info(INFO_EXTRACTION_SUCCESSFUL);
         LogUtils.info("Successfully extracted the following resources: " + processedBundleCollection);
+    }
+
+    /**
+     * This method uses paralellism to deploy multiple threads and speed up ExtractMatBundleOperation on entire directories
+     *
+     * @param filesInDir
+     * @param version
+     * @param suppressNarrative
+     */
+    private List<Callable<Void>> processFilesInDir(File[] filesInDir, String version, boolean suppressNarrative) {
+        List<Callable<Void>> tasks = new ArrayList<>();
+        if (filesInDir != null) {
+            for (File file : filesInDir) {
+                //process only 1 layer of subdirectories (should they exist)
+                if (file.isDirectory()) {
+                    tasks.addAll(processFilesInDir(file.listFiles(), version, suppressNarrative));
+                } else {
+                    tasks.add(() -> {
+                        processSingleFile(file, version, suppressNarrative);
+                        return null;
+                    });
+                }
+            }
+        }
+        return tasks;
     }
 
     void processSingleFile(File bundleFile, String version, boolean suppressNarrative) {
@@ -172,7 +209,8 @@ public class ExtractMatBundleOperation extends Operation {
                     context = FhirContext.forR4Cached();
                     break;
                 default:
-                    throw new IllegalArgumentException("Unknown fhir version: " + version);
+                    LogUtils.putException("processSingleFile", new IllegalArgumentException("Unknown fhir version: " + version));
+                    return;
             }
         }
 
@@ -249,7 +287,7 @@ public class ExtractMatBundleOperation extends Operation {
 
         //move and properly rename the files
         moveAndRenameFiles(outputDir, context, version);
-        LogUtils.info(INFO_EXTRACTION_SUCCESSFUL);
+        LogUtils.info(INFO_EXTRACTION_SUCCESSFUL + ": " + inputFileLocation);
     }
 
     /**
@@ -318,16 +356,18 @@ public class ExtractMatBundleOperation extends Operation {
             if (extractedFile.getPath().endsWith(".xml")) {
                 try {
                     theResource = context.newXmlParser().parseResource(new FileReader(extractedFile));
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e.getMessage());
+                } catch (Exception e) {
+//                    e.printStackTrace();
+                    LogUtils.putException("moveAndRenameFiles", new RuntimeException(e.getMessage()));
+                    continue;
                 }
             } else if (extractedFile.getPath().endsWith(".json")) {
                 try {
                     theResource = context.newJsonParser().parseResource(new FileReader(extractedFile));
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e.getMessage());
+                } catch (Exception e) {
+//                    e.printStackTrace();
+                    LogUtils.putException("moveAndRenameFiles", new RuntimeException(e.getMessage()));
+                    continue;
                 }
             }
 
