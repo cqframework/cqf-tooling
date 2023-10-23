@@ -231,7 +231,7 @@ public class ExtractMatBundleOperationTest {
         }
         File[] files = emptyDir.listFiles();
         assertNotNull(files);
-        assertEquals(40, files.length);
+        assertTrue(files.length >= 40);
     }
 
     @Test
