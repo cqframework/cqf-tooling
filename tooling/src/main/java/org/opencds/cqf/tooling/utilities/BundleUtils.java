@@ -45,7 +45,7 @@ public class BundleUtils {
             case DSTU3:
                 return bundleStu3Artifacts(id, resources);
             case R4:
-                if(identifiers != null && identifiers.length > 0){
+                if (identifiers != null && identifiers.length > 0) {
                     return bundleR4Artifacts(id, resources, identifiers[0], addBundleTimestamp);
                 }
                 return bundleR4Artifacts(id, resources, null, addBundleTimestamp);
@@ -54,53 +54,49 @@ public class BundleUtils {
         }
     }
 
-    public static org.hl7.fhir.dstu3.model.Bundle bundleStu3Artifacts(String id, List<IBaseResource> resources)
-    {
+    public static org.hl7.fhir.dstu3.model.Bundle bundleStu3Artifacts(String id, List<IBaseResource> resources) {
         org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
         ResourceUtils.setIgId(id, bundle, false);
         bundle.setType(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION);
-        for (IBaseResource resource : resources)
-        {
+        for (IBaseResource resource : resources) {
             bundle.addEntry(
-            new org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent()
-                .setResource((org.hl7.fhir.dstu3.model.Resource) resource)
-                .setRequest(
-                    new org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent()
-                        .setMethod(org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.PUT)
-                        .setUrl(((org.hl7.fhir.dstu3.model.Resource) resource).getId())
-                )
+                    new org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent()
+                            .setResource((org.hl7.fhir.dstu3.model.Resource) resource)
+                            .setRequest(
+                                    new org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent()
+                                            .setMethod(org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.PUT)
+                                            .setUrl(((org.hl7.fhir.dstu3.model.Resource) resource).getId())
+                            )
             );
         }
         return bundle;
     }
 
-    public static org.hl7.fhir.r4.model.Bundle bundleR4Artifacts(String id, List<IBaseResource> resources, List<Object> identifiers, Boolean addBundleTimestamp)
-    {
+    public static org.hl7.fhir.r4.model.Bundle bundleR4Artifacts(String id, List<IBaseResource> resources, List<Object> identifiers, Boolean addBundleTimestamp) {
         org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
         ResourceUtils.setIgId(id, bundle, false);
         bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
         if (Boolean.TRUE.equals(addBundleTimestamp)) {
             bundle.setTimestamp((new Date()));
         }
-        if (identifiers!= null && !identifiers.isEmpty()) {
+        if (identifiers != null && !identifiers.isEmpty()) {
             org.hl7.fhir.r4.model.Identifier identifier = (org.hl7.fhir.r4.model.Identifier) identifiers.get(0);
-            if(identifier.hasValue()) {
+            if (identifier.hasValue()) {
                 identifier.setValue(identifier.getValue() + "-bundle");
             }
             bundle.setIdentifier(identifier);
         }
 
-        for (IBaseResource resource : resources)
-        {
+        for (IBaseResource resource : resources) {
             String resourceRef = (resource.getIdElement().getResourceType() == null) ? resource.fhirType() + "/" + resource.getIdElement().getIdPart() : resource.getIdElement().getValueAsString();
             bundle.addEntry(
-            new org.hl7.fhir.r4.model.Bundle.BundleEntryComponent()
-                .setResource((org.hl7.fhir.r4.model.Resource) resource)
-                .setRequest(
-                    new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent()
-                        .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
-                        .setUrl(resourceRef)
-                )
+                    new org.hl7.fhir.r4.model.Bundle.BundleEntryComponent()
+                            .setResource((org.hl7.fhir.r4.model.Resource) resource)
+                            .setRequest(
+                                    new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent()
+                                            .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
+                                            .setUrl(resourceRef)
+                            )
             );
         }
         return bundle;
@@ -152,49 +148,59 @@ public class BundleUtils {
     }
 
     public static void stampDstu3BundleEntriesWithSoftwareSystems(org.hl7.fhir.dstu3.model.Bundle bundle, List<CqfmSoftwareSystem> softwareSystems, FhirContext fhirContext, String rootDir) {
-        for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry: bundle.getEntry()) {
+        for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
             org.hl7.fhir.dstu3.model.Resource resource = entry.getResource();
             if ((resource.fhirType().equals("Library")) || (resource.fhirType().equals("Measure"))) {
                 org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper cqfmSoftwareSystemHelper = new org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper(rootDir);
-                cqfmSoftwareSystemHelper.ensureSoftwareSystemExtensionAndDevice((org.hl7.fhir.dstu3.model.DomainResource)resource, softwareSystems, fhirContext);
+                cqfmSoftwareSystemHelper.ensureSoftwareSystemExtensionAndDevice((org.hl7.fhir.dstu3.model.DomainResource) resource, softwareSystems, fhirContext);
             }
         }
     }
 
     public static void stampR4BundleEntriesWithSoftwareSystems(org.hl7.fhir.r4.model.Bundle bundle, List<CqfmSoftwareSystem> softwareSystems, FhirContext fhirContext, String rootDir) {
-        for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry: bundle.getEntry()) {
+        for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
             org.hl7.fhir.r4.model.Resource resource = entry.getResource();
             if ((resource.fhirType().equals("Library")) || ((resource.fhirType().equals("Measure")))) {
                 org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper cqfmSoftwareSystemHelper = new org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper(rootDir);
-                cqfmSoftwareSystemHelper.ensureSoftwareSystemExtensionAndDevice((org.hl7.fhir.r4.model.DomainResource)resource, softwareSystems, fhirContext);
+                cqfmSoftwareSystemHelper.ensureSoftwareSystemExtensionAndDevice((org.hl7.fhir.r4.model.DomainResource) resource, softwareSystems, fhirContext);
             }
         }
     }
 
     public static void extractStu3Resources(org.hl7.fhir.dstu3.model.Bundle bundle, String encoding, String outputPath, boolean suppressNarrative) {
-    	FhirContext context = FhirContext.forDstu3Cached();
-    	for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+        FhirContext context = FhirContext.forDstu3Cached();
+        for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
             org.hl7.fhir.dstu3.model.Resource entryResource = entry.getResource();
             if (entryResource != null) {
-                if(entryResource.fhirType().equals("Measure") && suppressNarrative){
-                    ((org.hl7.fhir.dstu3.model.Measure)entryResource).setText(null);
+                if (entryResource.fhirType().equals("Measure") && suppressNarrative) {
+                    ((org.hl7.fhir.dstu3.model.Measure) entryResource).setText(null);
                 }
-    			ResourceUtils.outputResource(entryResource, encoding, context, outputPath);
-    		}
-    	}
+                ResourceUtils.outputResource(entryResource, encoding, context, outputPath);
+            }
+        }
     }
 
     public static void extractR4Resources(org.hl7.fhir.r4.model.Bundle bundle, String encoding, String outputPath, boolean suppressNarrative) {
-    	FhirContext context = FhirContext.forR4Cached();
-    	for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+        FhirContext context = FhirContext.forR4Cached();
+        for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
             org.hl7.fhir.r4.model.Resource entryResource = entry.getResource();
-    		if (entryResource != null) {
-    		    if(entryResource.fhirType().equals("Measure") && suppressNarrative){
-                    ((org.hl7.fhir.r4.model.Measure)entryResource).setText(null);
+            if (entryResource != null) {
+                if (entryResource.fhirType().equals("Measure") && suppressNarrative) {
+                    ((org.hl7.fhir.r4.model.Measure) entryResource).setText(null);
                 }
-     			ResourceUtils.outputResource(entryResource, encoding, context, outputPath);
-    		}
-    	}
+                ResourceUtils.outputResource(entryResource, encoding, context, outputPath);
+            }
+        }
+    }
+
+    public static void extractResources(Object bundle, String encoding, String outputDir, boolean suppressNarrative, String version) {
+        if (version.equals("stu3") && bundle instanceof org.hl7.fhir.dstu3.model.Bundle) {
+            BundleUtils.extractStu3Resources((org.hl7.fhir.dstu3.model.Bundle) bundle, encoding, outputDir, suppressNarrative);
+        } else if (version.equals("r4") && bundle instanceof org.hl7.fhir.r4.model.Bundle) {
+            BundleUtils.extractR4Resources((org.hl7.fhir.r4.model.Bundle) bundle, encoding, outputDir, suppressNarrative);
+        }else{
+            throw new IllegalArgumentException("Invalid bundle/version: " + bundle + "/" + version);
+        }
     }
 
     public static List<Resource> getR4ResourcesFromBundle(Bundle bundle){
