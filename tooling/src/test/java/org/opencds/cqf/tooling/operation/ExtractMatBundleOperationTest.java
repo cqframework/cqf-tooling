@@ -205,7 +205,7 @@ public class ExtractMatBundleOperationTest {
         operation.execute(new String[]{"-ExtractMATBundle", resourceUrl.getFile(), "-dir", "-op=" + emptyDir.getAbsolutePath()});
         File[] files = emptyDir.listFiles();
         assertNotNull(files);
-        assertTrue(files.length >= 40);
+        assertEquals(41, files.length);
     }
 
     @Test
