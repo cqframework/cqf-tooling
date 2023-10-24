@@ -824,8 +824,8 @@ public class ResourceUtils
         String resourceFileLocation = outputPath + separator +
                 resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() +
                 "." + encoding;
-        if (outputResourceTracker.containsKey(resourceFileLocation)){
-            LogUtils.info("This resource has already been processed: " + resourceFileLocation);
+        if (outputResourceTracker.containsKey(resource.getIdElement().getResourceType())){
+            LogUtils.info("This resource has already been processed: " + resource.getIdElement().getResourceType());
             return;
         }
 
