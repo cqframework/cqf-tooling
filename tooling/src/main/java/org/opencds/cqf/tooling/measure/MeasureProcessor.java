@@ -10,6 +10,7 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Measure;
+import org.opencds.cqf.tooling.common.ThreadUtils;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.r4.R4MeasureProcessor;
 import org.opencds.cqf.tooling.measure.stu3.STU3MeasureProcessor;
@@ -26,7 +27,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MeasureProcessor extends BaseProcessor {
     public static final String ResourcePrefix = "measure-";
@@ -88,7 +91,6 @@ public class MeasureProcessor extends BaseProcessor {
                                Encoding encoding) {
 
 
-
         Map<String, IBaseResource> measures = IOUtils.getMeasures(fhirContext);
         //Map<String, IBaseResource> libraries = IOUtils.getLibraries(fhirContext);
 
@@ -100,9 +102,6 @@ public class MeasureProcessor extends BaseProcessor {
         Map<String, String> failedExceptionMessages = new ConcurrentHashMap<>();
 
         int totalMeasures = measures.size();
-
-        //let OS handle threading:
-        ExecutorService executorService = Executors.newCachedThreadPool();
 
         //build list of tasks via for loop:
         List<Callable<Void>> tasks = new ArrayList<>();
@@ -139,7 +138,7 @@ public class MeasureProcessor extends BaseProcessor {
                         IBaseResource measure = resources.get("Measure/" + measureEntry.getKey());
                         String primaryLibraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
                         IBaseResource primaryLibrary;
-                        if (primaryLibraryUrl.startsWith("http")) {
+                        if (primaryLibraryUrl != null && primaryLibraryUrl.startsWith("http")) {
                             primaryLibrary = libraryUrlMap.get(primaryLibraryUrl);
                         } else {
                             primaryLibrary = libraries.get(primaryLibraryUrl);
@@ -206,7 +205,6 @@ public class MeasureProcessor extends BaseProcessor {
                     }
 
 
-
                     processedMeasures.add(measureSourcePath);
 
                     synchronized (this) {
@@ -219,25 +217,9 @@ public class MeasureProcessor extends BaseProcessor {
 
             }//end of for loop
 
-            // Submit tasks and obtain futures
-            List<Future<Void>> futures = new ArrayList<>();
-            for (Callable<Void> task : tasks) {
-                futures.add(executorService.submit(task));
-            }
-
-            // Wait for all tasks to complete
-            for (Future<Void> future : futures) {
-                try {
-                    future.get();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            ThreadUtils.executeTasks(tasks);
         } catch (Exception e) {
             LogUtils.putException("bundleMeasures", e);
-        } finally {
-            // Shutdown the executor when you're done, even if an exception occurs
-            executorService.shutdown();
         }
 
         StringBuilder message = new StringBuilder("\r\n" + bundledMeasures.size() + " Measures successfully bundled:");
@@ -284,7 +266,7 @@ public class MeasureProcessor extends BaseProcessor {
         BundleUtils.postBundle(encoding, fhirContext, fhirUri, (IBaseResource) bundle);
     }
 
-//    private void persistTestFiles(String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, String fhirUri) {
+    //    private void persistTestFiles(String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, String fhirUri) {
 //
 //        String filesLoc = bundleDestPath + File.separator + libraryName + "-files";
 //        File directory = new File(filesLoc);
@@ -315,14 +297,148 @@ public class MeasureProcessor extends BaseProcessor {
 
             if (filesInDir != null) {
                 for (File file : filesInDir) {
-                    IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext, true);
-                    if (resource != null) {
-                        BundleUtils.postBundle(encoding, fhirContext, fhirUri, resource);
-                    }
+                    String filePath = file.getAbsolutePath();
+
+                    IBaseResource fileAsResource = IOUtils.readResource(filePath, fhirContext, true);
+
+//                    //might be a transaction containing a sindle bundle of type collection, convert if possible:
+//                    try {
+//                        IBaseResource convertedBundle = convertedTransaction(fileAsResource);
+//                        if (convertedBundle != null) {
+//                            BundleUtils.postBundle(encoding, fhirContext, fhirUri, convertedBundle);
+//                            continue;
+//                        }
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+                    BundleUtils.postBundle(encoding, fhirContext, fhirUri, fileAsResource);
                 }
             }
         }
     }
+
+
+
+
+    private IBaseResource convertedTransaction(IBaseResource inputResource) {
+        if (inputResource == null) return null;
+
+        if (inputResource instanceof org.hl7.fhir.dstu3.model.Bundle) {
+            org.hl7.fhir.dstu3.model.Bundle collectionBundle = getCollectionBundle((org.hl7.fhir.dstu3.model.Bundle) inputResource);
+            if (collectionBundle != null) return convertCollectionToTransaction(collectionBundle);
+        } else if (inputResource instanceof org.hl7.fhir.r4.model.Bundle) {
+            org.hl7.fhir.r4.model.Bundle collectionBundle = getCollectionBundle((org.hl7.fhir.r4.model.Bundle) inputResource);
+            if (collectionBundle != null) return convertCollectionToTransaction(collectionBundle);
+        }
+        return null;
+    }
+
+    private org.hl7.fhir.dstu3.model.Bundle getCollectionBundle(org.hl7.fhir.dstu3.model.Bundle collectionBundle){
+        if (collectionBundle.getType().equals(org.hl7.fhir.dstu3.model.Bundle.BundleType.COLLECTION)) {
+            return collectionBundle;
+        }
+
+
+        List<org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent> bundleEntries = collectionBundle.getEntry();
+        for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent bundleEntry : bundleEntries) {
+            IBaseResource resource = bundleEntry.getResource();
+            if (resource instanceof org.hl7.fhir.dstu3.model.Bundle) {
+                if (((org.hl7.fhir.dstu3.model.Bundle)resource).getType().equals(org.hl7.fhir.dstu3.model.Bundle.BundleType.COLLECTION)) {
+                    return (org.hl7.fhir.dstu3.model.Bundle)resource;
+                }
+            }
+        }
+        return null;
+    }
+    private org.hl7.fhir.r4.model.Bundle getCollectionBundle(org.hl7.fhir.r4.model.Bundle collectionBundle){
+        List<org.hl7.fhir.r4.model.Bundle.BundleEntryComponent> bundleEntries = collectionBundle.getEntry();
+        for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent bundleEntry : bundleEntries) {
+            IBaseResource resource = bundleEntry.getResource();
+            if (resource instanceof org.hl7.fhir.r4.model.Bundle) {
+                if (((org.hl7.fhir.r4.model.Bundle)resource).getType().equals(org.hl7.fhir.r4.model.Bundle.BundleType.COLLECTION)) {
+                    return (org.hl7.fhir.r4.model.Bundle)resource;
+                }
+            }
+        }
+        return null;
+    }
+    public static org.hl7.fhir.dstu3.model.Bundle convertCollectionToTransaction(org.hl7.fhir.dstu3.model.Bundle collectionBundle) {
+        if (collectionBundle == null ){
+            return null;
+        }
+
+        org.hl7.fhir.dstu3.model.Bundle transactionBundle = new org.hl7.fhir.dstu3.model.Bundle();
+
+        transactionBundle.setId(collectionBundle.getId());
+        transactionBundle.setLink(collectionBundle.getLink());
+        transactionBundle.setIdentifier(collectionBundle.getIdentifier());
+        transactionBundle.setSignature(collectionBundle.getSignature());
+        transactionBundle.setTotal(collectionBundle.getTotal());
+        transactionBundle.setMeta(collectionBundle.getMeta());
+        transactionBundle.setLanguageElement(collectionBundle.getLanguageElement());
+        transactionBundle.setImplicitRulesElement(collectionBundle.getImplicitRulesElement());
+        transactionBundle.setIdElement(collectionBundle.getIdElement());
+        transactionBundle.setIdBase(collectionBundle.getIdBase());
+        transactionBundle.setLanguage(collectionBundle.getLanguage());
+
+        transactionBundle.setType(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION);
+
+        for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : collectionBundle.getEntry()) {
+            // Clone the entry and add it to the transaction bundle
+            org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent transactionEntry = entry.copy();
+
+            //build a request entry
+            org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent request = new org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent();
+            request.setMethod(org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.POST); // Adjust the HTTP method as needed
+            String resourceType = entry.getResource().fhirType();
+            request.setUrl(resourceType);
+            transactionEntry.setRequest(request);
+
+            transactionBundle.addEntry(transactionEntry);
+        }
+
+        return transactionBundle;
+    }
+
+
+    public static org.hl7.fhir.r4.model.Bundle convertCollectionToTransaction(org.hl7.fhir.r4.model.Bundle collectionBundle) {
+        if (collectionBundle == null ){
+            return null;
+        }
+        
+        org.hl7.fhir.r4.model.Bundle transactionBundle = new org.hl7.fhir.r4.model.Bundle();
+
+        transactionBundle.setId(collectionBundle.getId());
+        transactionBundle.setLink(collectionBundle.getLink());
+        transactionBundle.setIdentifier(collectionBundle.getIdentifier());
+        transactionBundle.setSignature(collectionBundle.getSignature());
+        transactionBundle.setTotal(collectionBundle.getTotal());
+        transactionBundle.setMeta(collectionBundle.getMeta());
+        transactionBundle.setLanguageElement(collectionBundle.getLanguageElement());
+        transactionBundle.setImplicitRulesElement(collectionBundle.getImplicitRulesElement());
+        transactionBundle.setIdElement(collectionBundle.getIdElement());
+        transactionBundle.setIdBase(collectionBundle.getIdBase());
+        transactionBundle.setLanguage(collectionBundle.getLanguage());
+
+        transactionBundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
+
+        for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : collectionBundle.getEntry()) {
+            // Clone the entry and add it to the transaction bundle
+            org.hl7.fhir.r4.model.Bundle.BundleEntryComponent transactionEntry = entry.copy();
+
+            //build a request entry
+            org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent request = new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent();
+            request.setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST); // Adjust the HTTP method as needed
+            String resourceType = entry.getResource().fhirType();
+            request.setUrl(resourceType);
+            transactionEntry.setRequest(request);
+
+            transactionBundle.addEntry(transactionEntry);
+        }
+
+        return transactionBundle;
+    }
+
     private void bundleFiles(String igPath, String bundleDestPath, String libraryName, List<String> binaryPaths, String resourceFocusSourcePath,
                              String librarySourcePath, FhirContext fhirContext, Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios,
                              Boolean includeVersion, Boolean addBundleTimestamp) {

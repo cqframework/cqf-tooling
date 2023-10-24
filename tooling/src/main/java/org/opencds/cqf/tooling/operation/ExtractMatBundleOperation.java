@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.common.ThreadUtils;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
@@ -125,43 +126,20 @@ public class ExtractMatBundleOperation extends Operation {
             }
         }
 
-        List<Callable<Void>> tasks = new ArrayList<>();
 
-
-        ExecutorService executorService = Executors.newCachedThreadPool();
-
-        try {
-            //if -dir was found, treat inputLocation as directory:
-            if (directoryFlagPresent) {
-                File[] filesInDir = new File(inputLocation).listFiles();
-                if (filesInDir != null) {
-                    //use recursive calls to build up task list:
-                    tasks.addAll(processFilesInDir(filesInDir, version, suppressNarrative));
-
-                    // Submit tasks and obtain futures
-                    List<Future<Void>> futures = new ArrayList<>();
-                    for (Callable<Void> task : tasks) {
-                        futures.add(executorService.submit(task));
-                    }
-
-                    // Wait for all tasks to complete
-                    for (Future<Void> future : futures) {
-                        try {
-                            future.get();
-                        } catch (Exception e) {
-                            LogUtils.putException("ExtractMatBundleOperation.execute", e);
-                        }
-                    }
-                }
-            } else {
-                //single file, allow processSingleFile() to run with currently assigned inputFile:
-                processSingleFile(new File(inputLocation), version, suppressNarrative);
+        //if -dir was found, treat inputLocation as directory:
+        if (directoryFlagPresent) {
+            File[] filesInDir = new File(inputLocation).listFiles();
+            if (filesInDir != null) {
+                //use recursive calls to build up task list:
+                ThreadUtils.executeTasks(processFilesInDir(filesInDir, version, suppressNarrative));
             }
-
-
-        } finally {
-            executorService.shutdown();
+        } else {
+            //single file, allow processSingleFile() to run with currently assigned inputFile:
+            processSingleFile(new File(inputLocation), version, suppressNarrative);
         }
+
+
         LogUtils.info("Successfully extracted the following resources: " + processedBundleCollection);
     }
 

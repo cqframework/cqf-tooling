@@ -48,6 +48,7 @@ public class HttpClientUtils {
      * Method builds up tasks to be executed later
      */
     public static void post(String fhirServerUrl, IBaseResource resource, Encoding encoding, FhirContext fhirContext) throws IOException {
+        if (resource == null) return;
         try {
             POSTInfoPojo postPojo = new POSTInfoPojo(fhirServerUrl, resource, encoding, fhirContext);
 
@@ -55,6 +56,7 @@ public class HttpClientUtils {
             post.addHeader("content-type", "application/" + encoding.toString());
 
             final String resourceString = IOUtils.encodeResourceAsString(resource, encoding, fhirContext);
+
             final StringEntity input = new StringEntity(resourceString);
             post.setEntity(input);
 

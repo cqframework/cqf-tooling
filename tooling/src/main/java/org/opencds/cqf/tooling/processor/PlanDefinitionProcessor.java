@@ -5,6 +5,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.Utilities;
+import org.opencds.cqf.tooling.common.ThreadUtils;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.utilities.*;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
@@ -38,9 +39,6 @@ public class PlanDefinitionProcessor {
         List<String> bundledPlanDefinitions = new CopyOnWriteArrayList<>();
 
         Map<String, String> failedExceptionMessages = new ConcurrentHashMap<>();
-
-        //let OS handle threading:
-        ExecutorService executorService = Executors.newCachedThreadPool();
 
         //build list of tasks via for loop:
         List<Callable<Void>> tasks = new ArrayList<>();
@@ -139,25 +137,11 @@ public class PlanDefinitionProcessor {
 
             }//end for loop
 
-            // Submit tasks and obtain futures
-            List<Future<Void>> futures = new ArrayList<>();
-            for (Callable<Void> task : tasks) {
-                futures.add(executorService.submit(task));
-            }
 
-            // Wait for all tasks to complete
-            for (Future<Void> future : futures) {
-                try {
-                    future.get(); // This will block until the task is complete
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            ThreadUtils.executeTasks(tasks);
+
         } catch (Exception e) {
             LogUtils.putException("bundlePlanDefinitions", e);
-        } finally {
-            // Shutdown the executor when you're done, even if an exception occurs
-            executorService.shutdown();
         }
 
         StringBuilder message = new StringBuilder("\r\n" + bundledPlanDefinitions.size() + " PlanDefinitions successfully bundled:");
