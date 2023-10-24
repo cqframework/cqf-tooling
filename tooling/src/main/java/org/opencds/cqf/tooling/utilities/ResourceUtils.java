@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.utilities;
 
 import static org.opencds.cqf.tooling.utilities.CanonicalUtils.getTail;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.Validate;
@@ -816,14 +818,31 @@ public class ResourceUtils
         return def;
     }
 
+    private static final ConcurrentHashMap<String, Boolean> outputResourceTracker = new ConcurrentHashMap<>();
+    public static final String separator = System.getProperty("file.separator");
     public static void outputResource(IBaseResource resource, String encoding, FhirContext context, String outputPath) {
-        try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding)) {
-            writer.write(
-                encoding.equals("json")
-                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-            );
-            writer.flush();
+        String resourceFileLocation = outputPath + separator +
+                resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() +
+                "." + encoding;
+        if (outputResourceTracker.containsKey(resourceFileLocation)){
+            LogUtils.info("This resource has already been processed: " + resourceFileLocation);
+            return;
+        }
+
+        try (FileOutputStream writer = new FileOutputStream(resourceFileLocation);
+             //swapping out FileOutputStream for BufferedOutputStream for reduced system calls,
+             //reduced disk access, optimized network i/o, efficient disk writing, and improved write performance
+             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(writer);) {
+
+            String encodedResource =
+                    encoding.equals("json")
+                            ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource)
+                            : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource);
+
+            bufferedOutputStream.write(encodedResource.getBytes());
+
+            outputResourceTracker.put(resourceFileLocation, Boolean.TRUE);
+
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
