@@ -2,10 +2,13 @@ package org.opencds.cqf.tooling.operation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.IniFile;
+import org.junit.After;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.opencds.cqf.tooling.RefreshTest;
@@ -61,6 +64,8 @@ public class RefreshIGOperationTest extends RefreshTest {
     private final PrintStream originalStdOut = System.out;
     private ByteArrayOutputStream console = new ByteArrayOutputStream();
 
+
+
     @BeforeMethod
     public void setUp() throws Exception {
         IOUtils.resourceDirectories = new ArrayList<String>();
@@ -74,6 +79,7 @@ public class RefreshIGOperationTest extends RefreshTest {
         deleteTempINI();
     }
 
+
     /**
      * This test breaks down refreshIG's process and can verify multiple bundles
      */
@@ -81,106 +87,106 @@ public class RefreshIGOperationTest extends RefreshTest {
     @Test
     //TODO: Fix separately, this is blocking a bunch of other higher priority things
     public void testBundledFiles() throws IOException {
-        //we can assert how many bundles were posted by keeping track via mocking the HttpClientUtils.post call and
-        //adding the argument for the IBaseResource to our collection.
-        List<IBaseResource> postedBundleCollection = new ArrayList<>();
+        //we can assert how many bundles were posted by keeping track via WireMockServer
+        WireMockServer wireMockServer = new WireMockServer(8081);
+        wireMockServer.start();
 
-        try (MockedStatic<HttpClientUtils> mock = Mockito.mockStatic(HttpClientUtils.class)) {
-            mock.when(() -> HttpClientUtils.post(anyString(), any(), any(), any())).thenAnswer(invocation -> {
-                IBaseResource resource = (IBaseResource) invocation.getArguments()[1];
-                postedBundleCollection.add(resource);
-                return null;
-            });
+        WireMock.configureFor("localhost", 8081);
+        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/fhir"))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(200)
+                        .withBody("Mock response")));
 
-            // Call the method under test, which should use HttpClientUtils.post
-            copyResourcesToTargetDir("target" + separator + "refreshIG", "testfiles/refreshIG");
-            // build ini object
-            File iniFile = new File(INI_LOC);
-            String iniFileLocation = iniFile.getAbsolutePath();
-            IniFile ini = new IniFile(iniFileLocation);
 
-            String bundledFilesLocation = iniFile.getParent() + separator + "bundles" + separator + "measure" + separator;
+        // Call the method under test, which should use HttpClientUtils.post
+        copyResourcesToTargetDir("target" + separator + "refreshIG", "testfiles/refreshIG");
+        // build ini object
+        File iniFile = new File(INI_LOC);
+        String iniFileLocation = iniFile.getAbsolutePath();
+        IniFile ini = new IniFile(iniFileLocation);
 
-            String[] args = {"-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false"};
-            //, "-fs=http://localhost:8080/fhir"};
+        String bundledFilesLocation = iniFile.getParent() + separator + "bundles" + separator + "measure" + separator;
 
-            // execute refresh using ARGS
-            new RefreshIGOperation().execute(args);
+        String[] args = {"-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false", "-fs=http://localhost:8081/fhir"};
 
-            // determine fhireContext for measure lookup
-            FhirContext fhirContext = IGProcessor.getIgFhirContext(getFhirVersion(ini));
+        // EXECUTE REFRESHIG WITH OUR ARGS:
+        new RefreshIGOperation().execute(args);
 
-            // get list of measures resulting from execution
-            Map<String, IBaseResource> measures = IOUtils.getMeasures(fhirContext);
+        int requestCount = WireMock.getAllServeEvents().size();
+        assertEquals(requestCount, 3); //Looking for 3 resources posts (measure, and two tests)
+        wireMockServer.stop();
 
-            // loop through measure, verify each has all resources from multiple files
-            // bundled into single file using id/resourceType as lookup:
-            for (String measureName : measures.keySet()) {
-                // location of single bundled file:
-                final String bundledFileResult = bundledFilesLocation + measureName + separator + measureName
-                        + "-bundle.json";
-                // multiple individual files in sub directory to loop through:
-                final Path dir = Paths
-                        .get(bundledFilesLocation + separator + measureName + separator + measureName + "-files");
+        // determine fhireContext for measure lookup
+        FhirContext fhirContext = IGProcessor.getIgFhirContext(getFhirVersion(ini));
 
-                // loop through each file, determine resourceType and treat accordingly
-                Map<String, String> resourceTypeMap = new HashMap<>();
+        // get list of measures resulting from execution
+        Map<String, IBaseResource> measures = IOUtils.getMeasures(fhirContext);
 
-                try (final DirectoryStream<Path> dirStream = Files.newDirectoryStream(dir)) {
-                    dirStream.forEach(path -> {
-                        File file = new File(path.toString());
+        // loop through measure, verify each has all resources from multiple files
+        // bundled into single file using id/resourceType as lookup:
+        for (String measureName : measures.keySet()) {
+            // location of single bundled file:
+            final String bundledFileResult = bundledFilesLocation + measureName + separator + measureName
+                    + "-bundle.json";
+            // multiple individual files in sub directory to loop through:
+            final Path dir = Paths
+                    .get(bundledFilesLocation + separator + measureName + separator + measureName + "-files");
 
-                        if (file.getName().toLowerCase().endsWith(".json")) {
+            // loop through each file, determine resourceType and treat accordingly
+            Map<String, String> resourceTypeMap = new HashMap<>();
 
-                            Map<?, ?> map = this.jsonMap(file);
-                            if (map == null) {
-                                System.out.println("# Unable to parse " + file.getName() + " as json");
-                            } else {
+            try (final DirectoryStream<Path> dirStream = Files.newDirectoryStream(dir)) {
+                dirStream.forEach(path -> {
+                    File file = new File(path.toString());
 
-                                // ensure "resourceType" exists
-                                if (map.containsKey(RESOURCE_TYPE)) {
-                                    String parentResourceType = (String) map.get(RESOURCE_TYPE);
-                                    // if Library, resource will be translated into "Measure" in main bundled file:
-                                    if (parentResourceType.equalsIgnoreCase(LIB_TYPE)) {
-                                        resourceTypeMap.put((String) map.get(ID), MEASURE_TYPE);
-                                    } else if (parentResourceType.equalsIgnoreCase(BUNDLE_TYPE)) {
-                                        // file is a bundle type, loop through resources in entry list, build up map of
-                                        // <id, resourceType>:
-                                        if (map.get(ENTRY) != null) {
-                                            ArrayList<Map<?, ?>> entryList = (ArrayList<Map<?, ?>>) map.get(ENTRY);
-                                            for (Map<?, ?> entry : entryList) {
-                                                if (entry.containsKey(RESOURCE)) {
-                                                    Map<?, ?> resourceMap = (Map<?, ?>) entry.get(RESOURCE);
-                                                    resourceTypeMap.put((String) resourceMap.get(ID),
-                                                            (String) resourceMap.get(RESOURCE_TYPE));
-                                                }
+                    if (file.getName().toLowerCase().endsWith(".json")) {
+
+                        Map<?, ?> map = this.jsonMap(file);
+                        if (map == null) {
+                            System.out.println("# Unable to parse " + file.getName() + " as json");
+                        } else {
+
+                            // ensure "resourceType" exists
+                            if (map.containsKey(RESOURCE_TYPE)) {
+                                String parentResourceType = (String) map.get(RESOURCE_TYPE);
+                                // if Library, resource will be translated into "Measure" in main bundled file:
+                                if (parentResourceType.equalsIgnoreCase(LIB_TYPE)) {
+                                    resourceTypeMap.put((String) map.get(ID), MEASURE_TYPE);
+                                } else if (parentResourceType.equalsIgnoreCase(BUNDLE_TYPE)) {
+                                    // file is a bundle type, loop through resources in entry list, build up map of
+                                    // <id, resourceType>:
+                                    if (map.get(ENTRY) != null) {
+                                        ArrayList<Map<?, ?>> entryList = (ArrayList<Map<?, ?>>) map.get(ENTRY);
+                                        for (Map<?, ?> entry : entryList) {
+                                            if (entry.containsKey(RESOURCE)) {
+                                                Map<?, ?> resourceMap = (Map<?, ?>) entry.get(RESOURCE);
+                                                resourceTypeMap.put((String) resourceMap.get(ID),
+                                                        (String) resourceMap.get(RESOURCE_TYPE));
                                             }
                                         }
                                     }
                                 }
                             }
                         }
-                    });
+                    }
+                });
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                // map out entries in the resulting single bundle file:
-                Map<?, ?> bundledJson = this.jsonMap(new File(bundledFileResult));
-                assertNull((bundledJson.get("timestamp")));  // argument "-ts=false" should not attach timestamp to bundle
-                Map<String, String> bundledJsonResourceTypes = new HashMap<>();
-                ArrayList<Map<?, ?>> entryList = (ArrayList<Map<?, ?>>) bundledJson.get(ENTRY);
-                for (Map<?, ?> entry : entryList) {
-                    Map<?, ?> resourceMap = (Map<?, ?>) entry.get(RESOURCE);
-                    bundledJsonResourceTypes.put((String) resourceMap.get(ID), (String) resourceMap.get(RESOURCE_TYPE));
-                }
-
-                // compare mappings of <id, resourceType> to ensure all bundled correctly:
-                assertTrue(mapsAreEqual(resourceTypeMap, bundledJsonResourceTypes));
-
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-//            assertEquals(postedBundleCollection.size(), 3);
+
+            // map out entries in the resulting single bundle file:
+            Map<?, ?> bundledJson = this.jsonMap(new File(bundledFileResult));
+            assertNull((bundledJson.get("timestamp")));  // argument "-ts=false" should not attach timestamp to bundle
+            Map<String, String> bundledJsonResourceTypes = new HashMap<>();
+            ArrayList<Map<?, ?>> entryList = (ArrayList<Map<?, ?>>) bundledJson.get(ENTRY);
+            for (Map<?, ?> entry : entryList) {
+                Map<?, ?> resourceMap = (Map<?, ?>) entry.get(RESOURCE);
+                bundledJsonResourceTypes.put((String) resourceMap.get(ID), (String) resourceMap.get(RESOURCE_TYPE));
+            }
+
+            // compare mappings of <id, resourceType> to ensure all bundled correctly:
+            assertTrue(mapsAreEqual(resourceTypeMap, bundledJsonResourceTypes));
         }
     }
 
@@ -365,14 +371,14 @@ public class RefreshIGOperationTest extends RefreshTest {
     }
 
     private boolean mapsAreEqual(Map<String, String> map1, Map<String, String> map2) {
-        System.out.println("#TEST INFO: COMPARING " + map1.getClass() + "(" + map1.size() + ") AND " + map2.getClass()
-                + "(" + map2.size() + ")");
+//        System.out.println("#TEST INFO: COMPARING " + map1.getClass() + "(" + map1.size() + ") AND " + map2.getClass()
+//                + "(" + map2.size() + ")");
 
         if (map1.size() != map2.size()) {
             return false;
         }
         boolean comparison = map1.entrySet().stream().allMatch(e -> e.getValue().equals(map2.get(e.getKey())));
-        System.out.println("#TEST INFO: MATCH: " + comparison);
+//        System.out.println("#TEST INFO: MATCH: " + comparison);
         return comparison;
     }
 

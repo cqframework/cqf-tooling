@@ -327,7 +327,17 @@
             <version>5.6.0</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock</artifactId>
+            <version>2.27.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.13</version> <!-- Use the appropriate version -->
+        </dependency>
         <!-- https://mvnrepository.com/artifact/net.sf.jopt-simple/jopt-simple -->
         <dependency>
             <groupId>net.sf.jopt-simple</groupId>

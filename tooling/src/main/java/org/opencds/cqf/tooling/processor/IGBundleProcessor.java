@@ -34,7 +34,7 @@ public class IGBundleProcessor {
                 addBundleTimestamp, fhirContext, fhirUri, encoding);
 
         LogUtils.info("Total \"tests-*\" files copied: " + IOUtils.getTestsCounter() + ". " +
-                (!fhirUri.isEmpty() ? "These files will be posted to " + fhirUri : "")
+                (fhirUri != null && !fhirUri.isEmpty() ? "These files will be posted to " + fhirUri : "")
         );
         LogUtils.info("\r\n  [measureProcessor.bundleMeasures has finished]\r\n");
 
