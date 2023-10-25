@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.Validate;
@@ -819,27 +820,32 @@ public class ResourceUtils
         return def;
     }
 
+    //to keep track of output already written and avoid duplicate functionality slowing down performance:
+    private static final ConcurrentHashMap<String, Boolean> outputResourceTracker = new ConcurrentHashMap<>();
+    public static final String separator = System.getProperty("file.separator");
     public static void outputResource(IBaseResource resource, String encoding, FhirContext context, String outputPath) {
-        try (FileOutputStream writer = new FileOutputStream(outputPath + "/" +
+        String resourceFileLocation = outputPath + separator +
                 resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() +
-                "." + encoding);
+                "." + encoding;
+        if (outputResourceTracker.containsKey(resource.getIdElement().getResourceType() + ":" + outputPath)){
+            LogUtils.info("This resource has already been processed: " + resource.getIdElement().getResourceType());
+            return;
+        }
+
+        try (FileOutputStream writer = new FileOutputStream(resourceFileLocation);
              //swapping out FileOutputStream for BufferedOutputStream for reduced system calls,
              //reduced disk access, optimized network i/o, efficient disk writing, and improved write performance
              BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(writer);) {
 
             String encodedResource =
-                encoding.equals("json")
-                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource)
-                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource);
+                    encoding.equals("json")
+                            ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource)
+                            : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource);
 
             bufferedOutputStream.write(encodedResource.getBytes());
 
-//            writer.write(
-//                encoding.equals("json")
-//                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-//                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-//            );
-//            writer.flush();
+            outputResourceTracker.put(resourceFileLocation, Boolean.TRUE);
+
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
