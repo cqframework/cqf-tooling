@@ -91,56 +91,56 @@ public class LibraryProcessor extends BaseProcessor {
         return libraryProcessor.refreshLibraryContent(params);
     }
 
-//    public Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
-//                                             Encoding encoding, boolean versioned) {
-//        return ThreadUtils.executeTasks(bundleLibraryDependenciesTasks(path, fhirContext, resources, encoding, versioned));
-//    }
-//
-//    public List<Callable<Void>> bundleLibraryDependenciesTasks(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
-//                                                               Encoding encoding, boolean versioned) {
-//        List<Callable<Void>> returnTasks = new ArrayList<>();
-//
-//        String fileName = FilenameUtils.getName(path);
-//        boolean prefixed = fileName.toLowerCase().startsWith("library-");
-//        try {
-//            Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding, versioned, logger);
-//            // String currentResourceID = IOUtils.getTypeQualifiedResourceId(path, fhirContext);
-//            for (IBaseResource resource : dependencies.values()) {
-//                returnTasks.add(() -> {
-//                    resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
-//
-//                    // NOTE: Assuming dependency library will be in directory of dependent.
-//                    String dependencyPath = IOUtils.getResourceFileName(IOUtils.getResourceDirectory(path), resource, encoding, fhirContext, versioned, prefixed);
-//                    returnTasks.addAll(bundleLibraryDependenciesTasks(dependencyPath, fhirContext, resources, encoding, versioned));
-//                    return null;
-//                });
-//            }
-//        } catch (Exception e) {
-//            LogUtils.putException(path, e);
-//        }
-//        return returnTasks;
-//    }
-public Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
-                                         Encoding encoding, boolean versioned) {
-    String fileName = FilenameUtils.getName(path);
-    boolean prefixed = fileName.toLowerCase().startsWith("library-");
-    Boolean shouldPersist = true;
-    try {
-        Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding, versioned, logger);
-        // String currentResourceID = IOUtils.getTypeQualifiedResourceId(path, fhirContext);
-        for (IBaseResource resource : dependencies.values()) {
-            resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
-
-            // NOTE: Assuming dependency library will be in directory of dependent.
-            String dependencyPath = IOUtils.getResourceFileName(IOUtils.getResourceDirectory(path), resource, encoding, fhirContext, versioned, prefixed);
-            bundleLibraryDependencies(dependencyPath, fhirContext, resources, encoding, versioned);
-        }
-    } catch (Exception e) {
-        shouldPersist = false;
-        LogUtils.putException(path, e);
+    public Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
+                                             Encoding encoding, boolean versioned) {
+        return ThreadUtils.executeTasks(bundleLibraryDependenciesTasks(path, fhirContext, resources, encoding, versioned));
     }
-    return shouldPersist;
-}
+
+    public List<Callable<Void>> bundleLibraryDependenciesTasks(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
+                                                               Encoding encoding, boolean versioned) {
+        List<Callable<Void>> returnTasks = new ArrayList<>();
+
+        String fileName = FilenameUtils.getName(path);
+        boolean prefixed = fileName.toLowerCase().startsWith("library-");
+        try {
+            Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding, versioned, logger);
+            // String currentResourceID = IOUtils.getTypeQualifiedResourceId(path, fhirContext);
+            for (IBaseResource resource : dependencies.values()) {
+                returnTasks.add(() -> {
+                    resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
+
+                    // NOTE: Assuming dependency library will be in directory of dependent.
+                    String dependencyPath = IOUtils.getResourceFileName(IOUtils.getResourceDirectory(path), resource, encoding, fhirContext, versioned, prefixed);
+                    returnTasks.addAll(bundleLibraryDependenciesTasks(dependencyPath, fhirContext, resources, encoding, versioned));
+                    return null;
+                });
+            }
+        } catch (Exception e) {
+            LogUtils.putException(path, e);
+        }
+        return returnTasks;
+    }
+//public Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
+//                                         Encoding encoding, boolean versioned) {
+//    String fileName = FilenameUtils.getName(path);
+//    boolean prefixed = fileName.toLowerCase().startsWith("library-");
+//    Boolean shouldPersist = true;
+//    try {
+//        Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding, versioned, logger);
+//        // String currentResourceID = IOUtils.getTypeQualifiedResourceId(path, fhirContext);
+//        for (IBaseResource resource : dependencies.values()) {
+//            resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
+//
+//            // NOTE: Assuming dependency library will be in directory of dependent.
+//            String dependencyPath = IOUtils.getResourceFileName(IOUtils.getResourceDirectory(path), resource, encoding, fhirContext, versioned, prefixed);
+//            bundleLibraryDependencies(dependencyPath, fhirContext, resources, encoding, versioned);
+//        }
+//    } catch (Exception e) {
+//        shouldPersist = false;
+//        LogUtils.putException(path, e);
+//    }
+//    return shouldPersist;
+//}
 
     protected boolean versioned;
 
