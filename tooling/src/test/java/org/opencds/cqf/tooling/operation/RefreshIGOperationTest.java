@@ -8,9 +8,6 @@ import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.IniFile;
-import org.junit.After;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.MeasureProcessor;
@@ -21,7 +18,6 @@ import org.opencds.cqf.tooling.processor.IGProcessor;
 import org.opencds.cqf.tooling.processor.PlanDefinitionProcessor;
 import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
 import org.opencds.cqf.tooling.questionnaire.QuestionnaireProcessor;
-import org.opencds.cqf.tooling.utilities.HttpClientUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -37,8 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.testng.Assert.*;
 
 public class RefreshIGOperationTest extends RefreshTest {
