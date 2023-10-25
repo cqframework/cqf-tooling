@@ -176,8 +176,18 @@ public class HttpClientUtils {
                 }
             };
             LogUtils.info("Processing results...");
-            printSuccessList(postResultMessageComparator);
-            StringBuilder message;
+
+
+            successfulPostCalls.sort(postResultMessageComparator);
+
+            StringBuilder message = new StringBuilder();
+            message.append("\r\n").append(successfulPostCalls.size()).append(" resources successfully posted.");
+            for (String successPost : successfulPostCalls) {
+                message.append("\n").append(successPost);
+            }
+            LogUtils.info(message.toString());
+
+            successfulPostCalls = new ArrayList<>();
 
 
             //retry the failed POSTs once, using straight forward sequential processing:
@@ -207,24 +217,31 @@ public class HttpClientUtils {
                         throw new RuntimeException(e);
                     }
                 }
+                if (!failedPostCalls.isEmpty()) {
+                    LogUtils.info("\n" + failedPostCalls.size() + " task(s) still failed to POST: ");
+                    List<String> failedMessages = new ArrayList<>(failedPostCalls.keySet());
+                    failedMessages.sort(postResultMessageComparator);
+                    message = new StringBuilder();
+                    message.append("\r\n").append(failedMessages.size()).append(" resources failed to post.");
+                    for (String failedPost : failedMessages) {
+                        message.append("\n").append(failedPost);
+                    }
+                    LogUtils.info(message.toString());
+                }else{
+                    LogUtils.info("Retry successful, all tasks successfully posted");
+                }
             }
 
-            if (!failedPostCalls.isEmpty()) {
-                LogUtils.info("\n" + failedPostCalls.size() + " task(s) still failed to POST: ");
-                List<String> failedMessages = new ArrayList<>(failedPostCalls.keySet());
-                failedMessages.sort(postResultMessageComparator);
-                message = new StringBuilder();
-                message.append("\r\n").append(failedMessages.size()).append(" resources failed to post.");
-                for (String failedPost : failedMessages) {
-                    message.append("\n").append(failedPost);
-                }
-                LogUtils.info(message.toString());
-            }else{
-                LogUtils.info("Retry successful, all tasks successfully posted");
-            }
+
 
             if (!successfulPostCalls.isEmpty()){
-                printSuccessList(postResultMessageComparator);
+                message = new StringBuilder();
+                message.append("\r\n").append(successfulPostCalls.size()).append(" resources successfully posted.");
+                for (String successPost : successfulPostCalls) {
+                    message.append("\n").append(successPost);
+                }
+                LogUtils.info(message.toString());
+                successfulPostCalls = new ArrayList<>();
             }
 
         } finally {
@@ -234,15 +251,6 @@ public class HttpClientUtils {
 
     }
 
-    private static void printSuccessList(Comparator<String> postResultMessageComparator) {
-        successfulPostCalls.sort(postResultMessageComparator);
-        StringBuilder message = new StringBuilder();
-        message.append("\r\n").append(successfulPostCalls.size()).append(" resources successfully posted.");
-        for (String successPost : successfulPostCalls) {
-            message.append("\n").append(successPost);
-        }
-        LogUtils.info(message.toString());
-    }
 
     public static String get(String path) throws IOException {
         try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
