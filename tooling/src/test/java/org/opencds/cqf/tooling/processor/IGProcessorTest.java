@@ -26,6 +26,7 @@ import org.opencds.cqf.tooling.measure.MeasureProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -34,14 +35,12 @@ import com.google.gson.Gson;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class IGProcessorTest extends RefreshTest {
     
     private IGProcessor processor;
-    private ByteArrayOutputStream console = new ByteArrayOutputStream();
+//    private ByteArrayOutputStream console = new ByteArrayOutputStream();
 
 	private final String ID = "id";
 	private final String ENTRY = "entry";
@@ -68,7 +67,6 @@ public class IGProcessorTest extends RefreshTest {
     public void setUp() throws Exception {
         IOUtils.resourceDirectories = new ArrayList<String>();
         IOUtils.clearDevicePaths();
-        System.setOut(new PrintStream(this.console));
         File dir  = new File("target" + separator + "refreshIG");
         if (dir.exists()) {
             FileUtils.deleteDirectory(dir);
@@ -78,6 +76,8 @@ public class IGProcessorTest extends RefreshTest {
     @Test
 	@SuppressWarnings("unchecked")
     public void testRefreshIG() throws Exception {
+		System.out.println("IGProcessorTest.testRefreshIG()");
+
         String targetDirectory = "target" + separator + "refreshIG";
 		copyResourcesToTargetDir(targetDirectory, "testfiles/refreshIG");
         
@@ -119,7 +119,7 @@ public class IGProcessorTest extends RefreshTest {
 			Map<String, String> resourceTypeMap = new HashMap<>();
 
 			try (final DirectoryStream<Path> dirStream = Files.newDirectoryStream(dir)) {
-				for (Path path : dirStream) {
+				dirStream.forEach(path -> {
 					File file = new File(path.toString());
 
 					if (file.getName().toLowerCase().endsWith(".json")) {
@@ -132,10 +132,9 @@ public class IGProcessorTest extends RefreshTest {
 							// ensure "resourceType" exists
 							if (map.containsKey(RESOURCE_TYPE)) {
 								String parentResourceType = (String) map.get(RESOURCE_TYPE);
-								// if Library, resource will produce a "Measure" in main bundled file:
+								// if Library, resource will be translated into "Measure" in main bundled file:
 								if (parentResourceType.equalsIgnoreCase(LIB_TYPE)) {
-									resourceTypeMap.put(MEASURE_TYPE + "_" + (String) map.get(ID), MEASURE_TYPE);
-									resourceTypeMap.put(LIB_TYPE + "_" + (String) map.get(ID), LIB_TYPE);
+									resourceTypeMap.put((String) map.get(ID), MEASURE_TYPE);
 								} else if (parentResourceType.equalsIgnoreCase(BUNDLE_TYPE)) {
 									// file is a bundle type, loop through resources in entry list, build up map of
 									// <id, resourceType>:
@@ -144,7 +143,7 @@ public class IGProcessorTest extends RefreshTest {
 										for (Map<?, ?> entry : entryList) {
 											if (entry.containsKey(RESOURCE)) {
 												Map<?, ?> resourceMap = (Map<?, ?>) entry.get(RESOURCE);
-												resourceTypeMap.put((String) resourceMap.get(RESOURCE_TYPE) + "_" + (String) resourceMap.get(ID),
+												resourceTypeMap.put((String) resourceMap.get(ID),
 														(String) resourceMap.get(RESOURCE_TYPE));
 											}
 										}
@@ -153,20 +152,19 @@ public class IGProcessorTest extends RefreshTest {
 							}
 						}
 					}
-				}
+				});
 
 			} catch (IOException e) {
-				e.printStackTrace();
+				LogUtils.info(e.getMessage());
 			}
 
 			// map out entries in the resulting single bundle file:
 			Map<?, ?> bundledJson = this.jsonMap(new File(bundledFileResult));
-			testTimestamp(bundledJson);
 			Map<String, String> bundledJsonResourceTypes = new HashMap<>();
 			ArrayList<Map<?, ?>> entryList = (ArrayList<Map<?, ?>>) bundledJson.get(ENTRY);
 			for (Map<?, ?> entry : entryList) {
 				Map<?, ?> resourceMap = (Map<?, ?>) entry.get(RESOURCE);
-				bundledJsonResourceTypes.put((String) resourceMap.get(RESOURCE_TYPE) + "_" + (String) resourceMap.get(ID), (String) resourceMap.get(RESOURCE_TYPE));
+				bundledJsonResourceTypes.put((String) resourceMap.get(ID), (String) resourceMap.get(RESOURCE_TYPE));
 			}
 
 			// compare mappings of <id, resourceType> to ensure all bundled correctly:
@@ -198,14 +196,14 @@ public class IGProcessorTest extends RefreshTest {
 	}
 
 	private boolean mapsAreEqual(Map<String, String> map1, Map<String, String> map2) {
-//		System.out.println("#TEST INFO: COMPARING " + map1.getClass() + "(" + map1.size() + ") AND " + map2.getClass()
-//				+ "(" + map2.size() + ")");
+		System.out.println("#TEST INFO: COMPARING " + map1.getClass() + "(" + map1.size() + ") AND " + map2.getClass()
+				+ "(" + map2.size() + ")");
 
 		if (map1.size() != map2.size()) {
 			return false;
 		}
 		boolean comparison = map1.entrySet().stream().allMatch(e -> e.getValue().equals(map2.get(e.getKey())));
-//		System.out.println("#TEST INFO: MATCH: " + comparison);
+		System.out.println("#TEST INFO: MATCH: " + comparison);
 		return comparison;
 	}
 

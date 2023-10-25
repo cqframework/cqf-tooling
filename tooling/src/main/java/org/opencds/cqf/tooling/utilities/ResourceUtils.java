@@ -821,7 +821,7 @@ public class ResourceUtils
     }
 
     //to keep track of output already written and avoid duplicate functionality slowing down performance:
-    private static final ConcurrentHashMap<String, Boolean> outputResourceTracker = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, Boolean> outputResourceTracker = new ConcurrentHashMap<>();
     public static final String separator = System.getProperty("file.separator");
     public static void outputResource(IBaseResource resource, String encoding, FhirContext context, String outputPath) {
         String resourceFileLocation = outputPath + separator +
@@ -864,5 +864,10 @@ public class ResourceUtils
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    public static void cleanUp(){
+        outputResourceTracker = new ConcurrentHashMap<>();
+        cachedElm = new HashMap<String, org.hl7.elm.r1.Library>();
     }
 }

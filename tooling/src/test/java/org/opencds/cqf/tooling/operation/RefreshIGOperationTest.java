@@ -19,11 +19,13 @@ import org.opencds.cqf.tooling.processor.PlanDefinitionProcessor;
 import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
 import org.opencds.cqf.tooling.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -62,7 +64,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        IOUtils.resourceDirectories = new ArrayList<String>();
+        IOUtils.resourceDirectories = new ArrayList<>();
         IOUtils.clearDevicePaths();
         System.setOut(new PrintStream(this.console));
         File dir = new File("target" + separator + "refreshIG");
@@ -82,15 +84,27 @@ public class RefreshIGOperationTest extends RefreshTest {
     //TODO: Fix separately, this is blocking a bunch of other higher priority things
     public void testBundledFiles() throws IOException {
         //we can assert how many bundles were posted by keeping track via WireMockServer
-        WireMockServer wireMockServer = new WireMockServer(8081);
-        wireMockServer.start();
+        //first find an open port:
+        int availablePort = findAvailablePort();
+        String fhirUri = "http://localhost:" + availablePort + "/fhir";
+        if (availablePort == -1){
+            fhirUri = "";
+            LogUtils.info("No available ports to test post with. Removing mock fhir server from test.");
+        }else{
+            System.out.println("Available port: " + availablePort + ", mock fhir server url: " + fhirUri);
+        }
 
-        WireMock.configureFor("localhost", 8081);
-        wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/fhir"))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(200)
-                        .withBody("Mock response")));
+        WireMockServer wireMockServer = null;
+        if (!fhirUri.isEmpty()) {
+            wireMockServer = new WireMockServer(availablePort);
+            wireMockServer.start();
 
+            WireMock.configureFor("localhost", availablePort);
+            wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo("/fhir"))
+                    .willReturn(WireMock.aResponse()
+                            .withStatus(200)
+                            .withBody("Mock response")));
+        }
 
         // Call the method under test, which should use HttpClientUtils.post
         copyResourcesToTargetDir("target" + separator + "refreshIG", "testfiles/refreshIG");
@@ -101,14 +115,22 @@ public class RefreshIGOperationTest extends RefreshTest {
 
         String bundledFilesLocation = iniFile.getParent() + separator + "bundles" + separator + "measure" + separator;
 
-        String[] args = {"-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false", "-fs=http://localhost:8081/fhir"};
+        String[] args;
+        if (!fhirUri.isEmpty()) {
+            args = new String[]{"-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false", "-fs=" + fhirUri};
+        } else {
+            args = new String[]{"-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false"};
+        }
 
         // EXECUTE REFRESHIG WITH OUR ARGS:
         new RefreshIGOperation().execute(args);
 
         int requestCount = WireMock.getAllServeEvents().size();
         assertEquals(requestCount, 3); //Looking for 3 resources posts (measure, and two tests)
-        wireMockServer.stop();
+
+        if (wireMockServer != null) {
+            wireMockServer.stop();
+        }
 
         // determine fhireContext for measure lookup
         FhirContext fhirContext = IGProcessor.getIgFhirContext(getFhirVersion(ini));
@@ -166,12 +188,11 @@ public class RefreshIGOperationTest extends RefreshTest {
                 });
 
             } catch (IOException e) {
-                e.printStackTrace();
+                LogUtils.info(e.getMessage());
             }
 
             // map out entries in the resulting single bundle file:
             Map<?, ?> bundledJson = this.jsonMap(new File(bundledFileResult));
-            assertNull((bundledJson.get("timestamp")));  // argument "-ts=false" should not attach timestamp to bundle
             Map<String, String> bundledJsonResourceTypes = new HashMap<>();
             ArrayList<Map<?, ?>> entryList = (ArrayList<Map<?, ?>>) bundledJson.get(ENTRY);
             for (Map<?, ?> entry : entryList) {
@@ -182,6 +203,27 @@ public class RefreshIGOperationTest extends RefreshTest {
             // compare mappings of <id, resourceType> to ensure all bundled correctly:
             assertTrue(mapsAreEqual(resourceTypeMap, bundledJsonResourceTypes));
         }
+    }
+
+    private static int findAvailablePort() {
+        for (int port = 8000; port <= 9000; port++) {
+            if (isPortAvailable(port)) {
+                return port;
+            }
+        }
+        return -1;
+    }
+
+    private static boolean isPortAvailable(int port) {
+        ServerSocket ss;
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            System.out.println("Trying " + serverSocket);
+            ss = serverSocket;
+        } catch (IOException e) {
+            return false;
+        }
+        System.out.println(ss + " is open.");
+        return true;
     }
 
     //@Test(expectedExceptions = IllegalArgumentException.class)

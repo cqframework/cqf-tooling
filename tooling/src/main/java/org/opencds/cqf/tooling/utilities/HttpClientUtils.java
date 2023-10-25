@@ -31,7 +31,9 @@ public class HttpClientUtils {
     //as tasks get ran, they are added here, unless the list is maxed out. When a response is met in the task,
     //the callable void removes itself from the pool and the task call loop proceeds, resulting in a max # of posts running
     //and waiting at any given time.
-    private static final List<IBaseResource> runningPostTaskList = new CopyOnWriteArrayList<>();
+    private static List<IBaseResource> runningPostTaskList = new CopyOnWriteArrayList<>();
+
+
 
 
     private static void reportProgress() {
@@ -48,7 +50,10 @@ public class HttpClientUtils {
      * Method builds up tasks to be executed later
      */
     public static void post(String fhirServerUrl, IBaseResource resource, Encoding encoding, FhirContext fhirContext) throws IOException {
-        if (resource == null) return;
+        if (fhirServerUrl == null ||
+                resource == null ||
+        encoding == null ||
+        fhirContext == null) return;
         try {
             POSTInfoPojo postPojo = new POSTInfoPojo(fhirServerUrl, resource, encoding, fhirContext);
 
@@ -246,6 +251,7 @@ public class HttpClientUtils {
 
         } finally {
             // Shutdown the executor when you're done, even if an exception occurs
+            cleanUp();
             executorService.shutdown();
         }
 
@@ -281,5 +287,14 @@ public class HttpClientUtils {
             this.encoding = encoding;
             this.fhirContext = fhirContext;
         }
+    }
+
+    public static void cleanUp(){
+        //reset variables because tests reuse the app process?
+        failedPostCalls = new ConcurrentHashMap<>();
+        successfulPostCalls = new CopyOnWriteArrayList<>();
+        tasks = new ConcurrentHashMap<>();
+        counter = 0;
+        runningPostTaskList = new CopyOnWriteArrayList<>();
     }
 }

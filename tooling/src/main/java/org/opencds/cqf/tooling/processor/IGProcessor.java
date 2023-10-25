@@ -65,6 +65,7 @@ public class IGProcessor extends BaseProcessor {
         Boolean addBundleTimestamp = params.addBundleTimestamp;
         Boolean versioned = params.versioned;
         String fhirUri = params.fhirUri;
+
         // String measureToRefreshPath = params.measureToRefreshPath;
         ArrayList<String> resourceDirs = new ArrayList<String>();
         for (String resourceDir : params.resourceDirs) {

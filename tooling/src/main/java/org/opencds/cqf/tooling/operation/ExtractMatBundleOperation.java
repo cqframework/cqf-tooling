@@ -142,8 +142,11 @@ public class ExtractMatBundleOperation extends Operation {
             processSingleFile(new File(inputLocation), version, suppressNarrative);
         }
 
-
-        LogUtils.info("Successfully extracted the following resources: " + processedBundleCollection);
+        if (!processedBundleCollection.isEmpty()) {
+            LogUtils.info("Successfully extracted the following resources: " + processedBundleCollection);
+        }else{
+            LogUtils.info("ExtractMatBundleOperation ended with no resources extracted!");
+        }
     }
 
     /**
@@ -258,6 +261,7 @@ public class ExtractMatBundleOperation extends Operation {
 
         //move and properly rename the files
         moveAndRenameFiles(outputDir, context, version);
+
         LogUtils.info(INFO_EXTRACTION_SUCCESSFUL + ": " + inputFileLocation);
     }
 

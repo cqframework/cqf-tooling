@@ -11,6 +11,7 @@ import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.opencds.cqf.tooling.utilities.LogUtils;
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 public class IGBundleProcessor {
     public static final String bundleFilesPathElement = "files/";
@@ -54,5 +55,15 @@ public class IGBundleProcessor {
             HttpClientUtils.postTaskCollection();
             LogUtils.info("\r\n  [HttpClientUtils.postTaskCollection() has finished]");
         }
+
+        cleanUp();
+    }
+
+    private static void cleanUp(){
+        //run cleanup (maven runs all tests sequentially and static member variables retain values from previous tests)
+        IOUtils.cleanUp();
+        ResourceUtils.cleanUp();
+        TestCaseProcessor.cleanUp();
+        HttpClientUtils.cleanUp();
     }
 }

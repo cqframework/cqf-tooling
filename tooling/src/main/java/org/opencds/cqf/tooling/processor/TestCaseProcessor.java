@@ -146,4 +146,8 @@ public class TestCaseProcessor {
         }
         LogUtils.info("bundleTestCaseFiles: " + tracker + " files copied for " + igTestCasePath);
     }
+
+    public static void cleanUp() {
+        copiedFilePaths = new HashSet<>();
+    }
 }
