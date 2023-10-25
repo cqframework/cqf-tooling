@@ -115,50 +115,6 @@ public class IOUtils
         writeResource(resource, path, encoding, fhirContext, true, null, prettyPrintOutput);
     }
 
-//    public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext, Boolean versioned, String outputFileName, boolean prettyPrintOutput) {
-//        // If the path is to a specific resource file, just re-use that file path/name.
-//        String outputPath = null;
-//        File file = new File(path);
-//        if (file.isFile()) {
-//            outputPath = path;
-//        }
-//        else {
-//            try {
-//                ensurePath(path);
-//            }
-//            catch (IOException e) {
-//                e.printStackTrace();
-//                throw new RuntimeException("Error writing Resource to file: " + e.getMessage());
-//            }
-//
-//            String baseName = null;
-//            if (outputFileName == null || outputFileName.isBlank()) {
-//                baseName = resource.getIdElement().getIdPart();
-//            } else {
-//                baseName = outputFileName;
-//            }
-//
-//            // Issue 96
-//            // If includeVersion is false then just use name and not id for the file baseName
-//            if (!versioned) {
-//                // Assumes that the id will be a string with - separating the version number
-//                // baseName = baseName.split("-")[0];
-//            }
-//            outputPath = FilenameUtils.concat(path, formatFileName(baseName, encoding, fhirContext));
-//        }
-//
-//        try (FileOutputStream writer = new FileOutputStream(outputPath))
-//        {
-//            writer.write(encodeResource(resource, encoding, fhirContext, prettyPrintOutput));
-//            writer.flush();
-//        }
-//        catch (IOException e)
-//        {
-//            e.printStackTrace();
-//            throw new RuntimeException("Error writing Resource to file: " + e.getMessage());
-//        }
-//    }
-
     public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext, Boolean versioned, String outputFileName, boolean prettyPrintOutput) {
         String outputPath;
         File file = new File(path);
@@ -184,7 +140,6 @@ public class IOUtils
             byte[] encodedResource = encodeResource(resource, encoding, fhirContext, prettyPrintOutput);
             bufferedOutputStream.write(encodedResource);
 
-//            writer.write(encodedResource);
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Error writing Resource to file: " + e.getMessage());
@@ -298,51 +253,6 @@ public class IOUtils
         return readResource(path, fhirContext, false);
     }
 
-    //users should always check for null
-//    private static final Map<String, IBaseResource> cachedResources = new LinkedHashMap<String, IBaseResource>();
-//    public static IBaseResource readResource(String path, FhirContext fhirContext, Boolean safeRead)
-//    {
-//        Encoding encoding = getEncoding(path);
-//        if (encoding == Encoding.UNKNOWN || encoding == Encoding.CQL) {
-//            return null;
-//        }
-//
-//        IBaseResource resource = cachedResources.get(path);
-//        if (resource != null) {
-//            return resource;
-//        }
-//
-//        try
-//        {
-//            IParser parser = getParser(encoding, fhirContext);
-//            File file = new File(path);
-//
-//            if (file.exists() && file.isDirectory()) {
-//                throw new IllegalArgumentException(String.format("Cannot read a resource from a directory: %s", path));
-//            }
-//
-//            // if (!file.exists()) {
-//            //     String[] paths = file.getParent().split("\\\\");
-//            //     file = new File(Paths.get(file.getParent(), paths[paths.length - 1] + "-" + file.getName()).toString());
-//            // }
-//
-//            if (safeRead) {
-//                if (!file.exists()) {
-//                    return null;
-//                }
-//            }
-//            try (FileReader reader = new FileReader(file)){
-//                resource = parser.parseResource(reader);
-//            }
-//            cachedResources.put(path, resource);
-//        }
-//        catch (Exception e)
-//        {
-//            throw new RuntimeException(String.format("Error reading resource from path %s: %s", path, e.getMessage()), e);
-//        }
-//        return resource;
-//    }
-
     private static final Map<String, IBaseResource> cachedResources = new LinkedHashMap<String, IBaseResource>();
 
     public static IBaseResource readResource(String path, FhirContext fhirContext, boolean safeRead) {
@@ -396,26 +306,6 @@ public class IOUtils
         }
         return resources;
     }
-
-//    public static List<String> getFilePaths(String directoryPath, Boolean recursive)
-//    {
-//        List<String> filePaths = new ArrayList<String>();
-//        File inputDir = new File(directoryPath);
-//        ArrayList<File> files = inputDir.isDirectory() ? new ArrayList<File>(Arrays.asList(Optional.ofNullable(inputDir.listFiles()).<NoSuchElementException>orElseThrow(() -> new NoSuchElementException()))) : new ArrayList<File>();
-//
-//        for (File file : files) {
-//            if (file.isDirectory()) {
-//                //note: this is not the same as anding recursive to isDirectory as that would result in directories being added to the list if the request is not recursive.
-//                if (recursive) {
-//                    filePaths.addAll(getFilePaths(file.getPath(), recursive));
-//                }
-//            }
-//            else {
-//                filePaths.add(file.getPath());
-//            }
-//        }
-//        return filePaths;
-//    }
 
     private static final Map<String, List<String>> cachedFilePaths = new HashMap<>();
 
@@ -480,30 +370,6 @@ public class IOUtils
         File file = new File(path);
         return file.getParent();
     }
-
-//    public static List<String> getDirectoryPaths(String path, Boolean recursive)
-//    {
-//        List<String> directoryPaths = new ArrayList<String>();
-//        List<File> directories = new ArrayList<File>();
-//        File parentDirectory = new File(path);
-//        try {
-//            directories = Arrays.asList(Optional.ofNullable(parentDirectory.listFiles()).<NoSuchElementException>orElseThrow(() -> new NoSuchElementException()));
-//        } catch (Exception e) {
-//            System.out.println("No paths found for the Directory " + path + ":");
-//            return directoryPaths;
-//        }
-//
-//
-//        for (File directory : directories) {
-//            if (directory.isDirectory()) {
-//                if (recursive) {
-//                    directoryPaths.addAll(getDirectoryPaths(directory.getPath(), recursive));
-//                }
-//                directoryPaths.add(directory.getPath());
-//            }
-//        }
-//        return directoryPaths;
-//    }
 
     private static final Map<String, List<String>> cachedDirectoryPaths = new HashMap<>();
 
@@ -964,27 +830,6 @@ public class IOUtils
         }
         return measureReportPaths;
     }
-
-//    private static void setupMeasureReportPaths(FhirContext fhirContext) {
-//        HashMap<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
-//        for(String dir : resourceDirectories) {
-//            for(String path : IOUtils.getFilePaths(dir, true))
-//            {
-//                try {
-//                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
-//                } catch (Exception e) {
-//                    //TODO: handle exception
-//                }
-//            }
-//            //TODO: move these to ResourceUtils
-//            RuntimeResourceDefinition measureReportDefinition = ResourceUtils.getResourceDefinition(fhirContext, "MeasureReport");
-//            String measureReportClassName = measureReportDefinition.getImplementingClass().getName();
-//            resources.entrySet().stream()
-//                    .filter(entry -> entry.getValue() != null)
-//                    .filter(entry ->  measureReportClassName.equals(entry.getValue().getClass().getName()))
-//                    .forEach(entry -> measureReportPaths.add(entry.getKey()));
-//        }
-//    }
 
     /**
      * Uses Arrays.stream().parallel() for performance gain

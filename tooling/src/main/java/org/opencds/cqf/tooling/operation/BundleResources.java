@@ -143,47 +143,6 @@ public class BundleResources extends Operation {
         // TODO: add DSTU2
     }
 
-//    private void getResources(File[] resources) {
-//        for (File resource : resources) {
-//
-//            if(resource.isDirectory()) {
-//                getResources(resource.listFiles());
-//                continue;
-//            }
-//
-//            if (resource.getPath().endsWith(".xml")) {
-//                try {
-//                    theResource = context.newXmlParser().parseResource(new FileReader(resource));
-//                } catch (FileNotFoundException e) {
-//                    e.printStackTrace();
-//                    throw new RuntimeException(e.getMessage());
-//                }
-//                catch (Exception e) {
-//                    String message = String.format("'%s' will not be included in the bundle because the following error occurred: '%s'", resource.getName(), e.getMessage());
-//                    System.out.println(message);
-//                    continue;
-//                }
-//            }
-//            else if (resource.getPath().endsWith(".json")) {
-//                try {
-//                    theResource = context.newJsonParser().parseResource(new FileReader(resource));
-//                } catch (FileNotFoundException e) {
-//                    e.printStackTrace();
-//                    throw new RuntimeException(e.getMessage());
-//                }
-//                catch (Exception e) {
-//                    String message = String.format("'%s' will not be included in the bundle because the following error occurred: '%s'", resource.getName(), e.getMessage());
-//                    System.out.println(message);
-//                    continue;
-//                }
-//            }
-//            else {
-//                continue;
-//            }
-//            theResources.add(theResource);
-//        }
-//    }
-
     private void getResources(File[] resources) {
         for (File resource : resources) {
             if (resource.isDirectory()) {
@@ -231,13 +190,6 @@ public class BundleResources extends Operation {
                     : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource);
 
             bufferedOutputStream.write(encodedResource.getBytes());
-
-//            writer.write(
-//                encoding.equals("json")
-//                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-//                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-//            );
-//            writer.flush();
 
         } catch (IOException e) {
             e.printStackTrace();
