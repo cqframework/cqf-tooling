@@ -116,36 +116,48 @@ public class IOUtils
     }
 
     public static <T extends IBaseResource> void writeResource(T resource, String path, Encoding encoding, FhirContext fhirContext, Boolean versioned, String outputFileName, boolean prettyPrintOutput) {
-        String outputPath;
+        // If the path is to a specific resource file, just re-use that file path/name.
+        String outputPath = null;
         File file = new File(path);
-
         if (file.isFile()) {
             outputPath = path;
-        } else {
-            if (!versioned) {
-                // If not versioned, use the resource ID for the base name
-                outputFileName = resource.getIdElement().getIdPart();
-            } else if (outputFileName == null || outputFileName.isBlank()) {
-                outputFileName = resource.getIdElement().getIdPart();
+        }
+        else {
+            try {
+                ensurePath(path);
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Error writing Resource to file: " + e.getMessage());
             }
 
-            outputPath = FilenameUtils.concat(path, formatFileName(outputFileName, encoding, fhirContext));
+            String baseName = null;
+            if (outputFileName == null || outputFileName.isBlank()) {
+                baseName = resource.getIdElement().getIdPart();
+            } else {
+                baseName = outputFileName;
+            }
+
+            // Issue 96
+            // If includeVersion is false then just use name and not id for the file baseName
+            if (!versioned) {
+                // Assumes that the id will be a string with - separating the version number
+                // baseName = baseName.split("-")[0];
+            }
+            outputPath = FilenameUtils.concat(path, formatFileName(baseName, encoding, fhirContext));
         }
 
-        try (FileOutputStream writer = new FileOutputStream(outputPath);
-             //swapping out FileOutputStream for BufferedOutputStream for reduced system calls,
-             //reduced disk access, optimized network i/o, efficient disk writing, and improved write performance
-             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(writer)) {
-
-            byte[] encodedResource = encodeResource(resource, encoding, fhirContext, prettyPrintOutput);
-            bufferedOutputStream.write(encodedResource);
-
-        } catch (IOException e) {
+        try (FileOutputStream writer = new FileOutputStream(outputPath))
+        {
+            writer.write(encodeResource(resource, encoding, fhirContext, prettyPrintOutput));
+            writer.flush();
+        }
+        catch (IOException e)
+        {
             e.printStackTrace();
             throw new RuntimeException("Error writing Resource to file: " + e.getMessage());
         }
     }
-
 
     public static <T extends IBaseResource> void writeResources(Map<String, T> resources, String path, Encoding encoding, FhirContext fhirContext)
     {
@@ -1048,6 +1060,8 @@ public class IOUtils
         System.out.println("The file " + fileDirPath + libraryName + " is not the right type of file.");
         return false;
     }
+
+
     public static void cleanUp(){
         alreadyCopied = new HashMap<>();
         cachedResources = new LinkedHashMap<String, IBaseResource>();

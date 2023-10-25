@@ -60,10 +60,9 @@ public class IGBundleProcessor {
     }
 
     private static void cleanUp(){
-        //run cleanup (maven runs all tests sequentially and static member variables retain values from previous tests)
+//        run cleanup (maven runs all tests sequentially and static member variables retain values from previous tests)
         IOUtils.cleanUp();
         ResourceUtils.cleanUp();
         TestCaseProcessor.cleanUp();
-        HttpClientUtils.cleanUp();
     }
 }

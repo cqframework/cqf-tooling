@@ -181,15 +181,13 @@ public class BundleResources extends Operation {
             fileNameBase = getOutputPath() + File.separator + bundleId;
         }
 
-        try (FileOutputStream writer = new FileOutputStream(fileNameBase + "-bundle." + encoding);
-            //swapping out FileOutputStream for BufferedOutputStream for reduced system calls,
-            //reduced disk access, optimized network i/o, efficient disk writing, and improved write performance
-            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(writer);) {
-            String encodedResource = encoding.equals("json")
-                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource)
-                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource);
-
-            bufferedOutputStream.write(encodedResource.getBytes());
+        try (FileOutputStream writer = new FileOutputStream(fileNameBase + "-bundle." + encoding)) {
+            writer.write(
+                    encoding.equals("json")
+                            ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                            : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+            );
+            writer.flush();
 
         } catch (IOException e) {
             e.printStackTrace();

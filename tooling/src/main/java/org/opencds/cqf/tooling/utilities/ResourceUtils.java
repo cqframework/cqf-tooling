@@ -832,18 +832,13 @@ public class ResourceUtils
             return;
         }
 
-        try (FileOutputStream writer = new FileOutputStream(resourceFileLocation);
-             //swapping out FileOutputStream for BufferedOutputStream for reduced system calls,
-             //reduced disk access, optimized network i/o, efficient disk writing, and improved write performance
-             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(writer);) {
-
-            String encodedResource =
+        try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding)) {
+            writer.write(
                     encoding.equals("json")
-                            ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource)
-                            : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource);
-
-            bufferedOutputStream.write(encodedResource.getBytes());
-
+                            ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                            : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+            );
+            writer.flush();
             outputResourceTracker.put(resourceFileLocation, Boolean.TRUE);
 
         } catch (IOException e) {

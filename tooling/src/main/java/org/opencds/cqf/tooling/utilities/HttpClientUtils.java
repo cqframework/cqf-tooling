@@ -289,7 +289,7 @@ public class HttpClientUtils {
         }
     }
 
-    public static void cleanUp(){
+    private static void cleanUp(){
         //reset variables because tests reuse the app process?
         failedPostCalls = new ConcurrentHashMap<>();
         successfulPostCalls = new CopyOnWriteArrayList<>();
