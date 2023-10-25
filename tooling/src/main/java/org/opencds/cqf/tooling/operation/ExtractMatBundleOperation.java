@@ -208,7 +208,22 @@ public class ExtractMatBundleOperation extends Operation {
             return;
         }
 
+        //ensure the xml and json files are transaction Bundle types:
+        if (bundle instanceof org.hl7.fhir.dstu3.model.Bundle) {
+            if (!((org.hl7.fhir.dstu3.model.Bundle) bundle).getType().equals(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION)) {
+                LogUtils.info("Invalid Bundle type in " + encoding + " file: " + inputFileLocation);
+                return;
+            }
 
+        } else if (bundle instanceof org.hl7.fhir.r4.model.Bundle) {
+            if (!((org.hl7.fhir.r4.model.Bundle) bundle).getType().equals(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION)) {
+                LogUtils.info("Invalid Bundle type in " + encoding + " file: " + inputFileLocation);
+                return;
+            }
+        } else {
+            LogUtils.info("Not a recognized bundle in " + encoding + "file: " + inputFileLocation);
+            return;
+        }
 
         //call the Bundle utilities to extract the bundle
         String outputDir = bundleFile.getAbsoluteFile().getParent();
