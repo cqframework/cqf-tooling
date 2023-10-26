@@ -153,7 +153,7 @@ public class IOUtils
 
             String baseName = null;
             if (outputFileName == null || outputFileName.isBlank()) {
-                baseName = resource.getIdElement().getIdPart();
+                baseName = resource.fhirType() + "-" + resource.getIdElement().getIdPart();
             } else {
                 baseName = outputFileName;
             }

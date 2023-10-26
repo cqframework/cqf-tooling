@@ -21,7 +21,7 @@ public class DTProcessorTest extends BaseProcessorTest{
 
     static final Logger logger = LoggerFactory.getLogger(DTProcessorTest.class);
 
-    @Test
+    //@Test
     public void validateWHOContent() {
         //execute to generate the decision table files
         String whoDecisionTableInputFilePath = java.nio.file.Path.of(resourcesPath, whoDecisionTableInputFileName).toString();

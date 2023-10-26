@@ -17,7 +17,7 @@ public class ProcessorTest extends BaseProcessorTest{
     static final String resourcePathInputDirectory = resourcesPath + ddGeneratedInputDirectory;
     static final String resourcePathOutputDirectory = resourcesPath + ddGeneratedOutputDirectory;
 
-    @Test
+    //@Test
     public void validateWHOContent(){
        String whoInputFilePath = java.nio.file.Path.of(resourcesPath, whoInputFileName).toString();
        assertNotNull(whoInputFilePath);

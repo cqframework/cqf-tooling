@@ -54,9 +54,13 @@ public class LibraryProcessor extends BaseProcessor {
     }
     
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
-        return refreshIgLibraryContent(parentContext, outputEncoding, null, versioned, fhirContext, shouldApplySoftwareSystemStamp);
+        return refreshIgLibraryContent(parentContext, outputEncoding, null, null, versioned, fhirContext, shouldApplySoftwareSystemStamp);
     }
+
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
+        return refreshIgLibraryContent(parentContext, outputEncoding, null, libraryOutputDirectory, versioned, fhirContext, shouldApplySoftwareSystemStamp);
+    }
+    public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryPath, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
         System.out.println("Refreshing libraries...");
         // ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
 
@@ -73,7 +77,12 @@ public class LibraryProcessor extends BaseProcessor {
                         "Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
 
-        String libraryPath = FilenameUtils.concat(parentContext.getRootDir(), IGProcessor.libraryPathElement);
+        if (libraryPath == null) {
+            libraryPath = FilenameUtils.concat(parentContext.getRootDir(), IGProcessor.libraryPathElement);
+        }
+        else if (!Utilities.isAbsoluteFileName(libraryPath)) {
+            libraryPath = FilenameUtils.concat(parentContext.getRootDir(), libraryPath);
+        }
         RefreshLibraryParameters params = new RefreshLibraryParameters();
         if (Strings.isNullOrEmpty(libraryOutputDirectory)) {
             logger.info("No output directory found for libraries.  Any existing libraries will be overwritten.");

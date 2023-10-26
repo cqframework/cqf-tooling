@@ -31,6 +31,7 @@ public class RefreshIGArgumentProcessor {
     public static final String[] FHIR_URI_OPTIONS = {"fs", "fhir-uri"};
     public static final String[] MEASURE_TO_REFRESH_PATH = {"mtrp", "measure-to-refresh-path"};
     public static final String[] RESOURCE_PATH_OPTIONS = {"rp", "resourcepath"};
+    public static final String[] LIBRARY_PATH_OPTIONS = {"lp", "librarypath"};
     public static final String[] LIBRARY_OUTPUT_PATH_OPTIONS = {"libraryOutput", "libraryOutputPath", "lop"};
     public static final String[] MEASURE_OUTPUT_PATH_OPTIONS = {"measureOutput", "measureOutputPath", "mop"};
     public static final String[] SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS = { "ss", "stamp" };
@@ -43,7 +44,8 @@ public class RefreshIGArgumentProcessor {
         OptionSpecBuilder iniBuilder = parser.acceptsAll(asList(INI_OPTIONS), "Path to ig ini file");
         OptionSpecBuilder rootDirBuilder = parser.acceptsAll(asList(ROOT_DIR_OPTIONS), "Root directory of the ig");
         OptionSpecBuilder igPathBuilder = parser.acceptsAll(asList(IG_PATH_OPTIONS),"Path to the IG, relative to the root directory");
-        OptionSpecBuilder resourcePathBuilder = parser.acceptsAll(asList(RESOURCE_PATH_OPTIONS),"Use multiple times to define multiple resource directories.");
+        OptionSpecBuilder resourcePathBuilder = parser.acceptsAll(asList(RESOURCE_PATH_OPTIONS),"Use multiple times to define multiple resource directories, relative to the root directory.");
+        OptionSpecBuilder libraryPathBuilder = parser.acceptsAll(asList(LIBRARY_PATH_OPTIONS), "Provide a single path, relative to the root directory, for library resources. The path will be added to the resource directories available to the refresh processing.");
         OptionSpecBuilder igOutputEncodingBuilder = parser.acceptsAll(asList(IG_OUTPUT_ENCODING), "If omitted, output will be generated using JSON encoding.");
         OptionSpecBuilder fhirUriBuilder = parser.acceptsAll(asList(FHIR_URI_OPTIONS),"If omitted the final bundle will not be loaded to a FHIR server.");
         OptionSpecBuilder measureToRefreshPathBuilder = parser.acceptsAll(asList(MEASURE_TO_REFRESH_PATH), "Path to Measure to refresh.");
@@ -56,6 +58,7 @@ public class RefreshIGArgumentProcessor {
         OptionSpec<String> rootDir = rootDirBuilder.withOptionalArg().describedAs("Root directory of the IG");
         OptionSpec<String> igPath = igPathBuilder.withRequiredArg().describedAs("Path to the IG, relative to the root directory");
         OptionSpec<String> resourcePath = resourcePathBuilder.withOptionalArg().describedAs("directory of resources");
+        OptionSpec<String> libraryPath = libraryPathBuilder.withOptionalArg().describedAs("directory of library resources");
         OptionSpec<String> igOutputEncoding = igOutputEncodingBuilder.withOptionalArg().describedAs("desired output encoding for resources");
         OptionSpec<String> measureToRefreshPath = measureToRefreshPathBuilder.withOptionalArg().describedAs("Path to Measure to refresh.");
         OptionSpec<String> libraryOutputPath = libraryOutputPathBuilder.withOptionalArg().describedAs("path to the output directory for updated libraries");
@@ -89,6 +92,14 @@ public class RefreshIGArgumentProcessor {
         String igPath = (String)options.valueOf(IG_PATH_OPTIONS[0]);
 
         List<String> resourcePaths = ArgUtils.getOptionValues(options, RESOURCE_PATH_OPTIONS[0]);
+        List<String> libraryPaths = ArgUtils.getOptionValues(options, LIBRARY_PATH_OPTIONS[0]);
+        if (libraryPaths != null && libraryPaths.size() > 1) {
+            throw new IllegalArgumentException("Only one library path may be specified"); // Could probably do this with the OptionSpec stuff...
+        }
+        String libraryPath = null;
+        if (libraryPaths != null && libraryPaths.size() == 1) {
+            libraryPath = libraryPaths.get(0);
+        }
             
         //could not easily use the built-in default here because it is based on the value of the igPath argument.
         String igEncoding = (String)options.valueOf(IG_OUTPUT_ENCODING[0]);
@@ -132,6 +143,9 @@ public class RefreshIGArgumentProcessor {
         if (resourcePaths != null && !resourcePaths.isEmpty()) {
             paths.addAll(resourcePaths);
         }
+        if (libraryPaths != null) {
+            paths.addAll(libraryPaths);
+        }
     
         RefreshIGParameters ip = new RefreshIGParameters();
         ip.ini = ini;
@@ -145,6 +159,7 @@ public class RefreshIGArgumentProcessor {
         ip.versioned = versioned;
         ip.shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStamp;
         ip.addBundleTimestamp = addBundleTimestamp;
+        ip.libraryPath = libraryPath;
         ip.resourceDirs = paths;
         ip.fhirUri = fhirUri;
         ip.measureToRefreshPath = measureToRefreshPath;

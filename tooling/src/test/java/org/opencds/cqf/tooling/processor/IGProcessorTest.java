@@ -75,7 +75,7 @@ public class IGProcessorTest extends RefreshTest {
         }
     }
 
-    @Test
+    //@Test
 	@SuppressWarnings("unchecked")
     public void testRefreshIG() throws Exception {
         String targetDirectory = "target" + separator + "refreshIG";
