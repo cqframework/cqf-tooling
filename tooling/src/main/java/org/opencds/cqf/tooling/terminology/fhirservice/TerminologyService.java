@@ -1,6 +1,7 @@
 package org.opencds.cqf.tooling.terminology.fhirservice;
 
 import org.hl7.fhir.CodeableConcept;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -36,8 +37,6 @@ public interface TerminologyService {
 
     // https://hl7.org/fhir/valueset-operation-validate-code.html
     // TODO: Define ValidateResult class
-
-    Parameters validateValueSet(String url, String pathToIG, String jarPath, String outputPath, String fhirVersion);
     Parameters validateCodeInValueSet(String url, String code, String systemUrl, String display);
     Parameters validateCodingInValueSet(String url, Coding code);
     Parameters validateCodeableConceptInValueSet(String url, CodeableConcept concept);
@@ -50,6 +49,8 @@ public interface TerminologyService {
     // https://hl7.org/fhir/codesystem-operation-subsumes.html
     ConceptSubsumptionOutcome subsumes(String codeA, String codeB, String systemUrl);
     ConceptSubsumptionOutcome subsumes(Coding codeA, Coding codeB);
+
+    IBaseResource getResource(String url);
 
     // https://hl7.org/fhir/conceptmap-operation-translate.html
     // TODO: Translation support

@@ -5,7 +5,6 @@ import org.hl7.fhir.CodeableConcept;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
-import org.opencds.cqf.tooling.terminology.SpreadsheetValidateVSandCS;
 import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -14,18 +13,8 @@ import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.IOperationUntyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
-import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.*;
-import java.lang.Process;
-
-import javax.swing.*;
 
 public class FhirTerminologyClient implements TerminologyService {
-
-    private static final Logger logger = LoggerFactory.getLogger(FhirTerminologyClient.class);
 
     private IGenericClient client;
     public FhirTerminologyClient(IGenericClient client) {
@@ -87,7 +76,7 @@ public class FhirTerminologyClient implements TerminologyService {
     }
 
     private Object prepareExpand(String url) {
-        String canonical = url;
+        String canonical = url; //CanonicalUtils.stripVersion(url); //baustin - not in current CanonicalUtils/nor in past git versions--  no longer needed??
         String version = CanonicalUtils.getVersion(url);
         IOperationUntyped operation = null;
         IOperationUntypedWithInputAndPartialOutput<Parameters> operationWithInput = null;
@@ -171,121 +160,8 @@ public class FhirTerminologyClient implements TerminologyService {
     }
 
     @Override
-    public Parameters validateValueSet(String url, String pathToIG, String jarPath, String outputPath, String fhirVersion){
-        String vsToValidate = getAndSaveValueSetFromURL(url, outputPath);
-        if(vsToValidate != null){
-            String callJar = "java -jar " + jarPath + " " + vsToValidate + " -version " + fhirVersion + " -ig " + pathToIG;
-            StringBuffer sbResults = new StringBuffer();
-
-            try{
-                Process proc = Runtime.getRuntime().exec(callJar);
-                final BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(proc.getInputStream()));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sbResults.append(line + System.lineSeparator());
-                }
-                reader.close();
-                final BufferedReader errReader = new BufferedReader(
-                        new InputStreamReader(proc.getErrorStream()));
-                String errLine;
-                while ((errLine = errReader.readLine()) != null) {
-                    sbResults.append(errLine + System.lineSeparator());
-                }
-                System.out.println(sbResults.toString());
-                errReader.close();
-                saveResults(sbResults.toString(), vsToValidate.substring(vsToValidate.lastIndexOf(File.separator)+1, vsToValidate.lastIndexOf(".")), outputPath);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }else{
-            return null;
-        }
-        return new Parameters();
-    }
-
-    private void saveResults(String results, String fileName, String outputPath){
-        createOutputLocations(outputPath);
-        boolean wasFailure = results.toUpperCase().contains("*FAILURE*");
-        String outputPathFileLocation = null;
-        if(wasFailure){
-            fileName = fileName + "_FAIL" + ".txt";
-            outputPathFileLocation = outputPath + File.separator + "Fail";
-        }else{
-            fileName = fileName + "_PASS" + ".txt";
-            outputPathFileLocation = outputPath + File.separator + "Pass";
-        }
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputPathFileLocation + File.separator + fileName))) {
-            if(wasFailure){
-                writer.write(results.substring(results.indexOf("*FAILURE*")));
-            }else {
-                writer.write(results.substring(results.indexOf("Success")));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void createOutputLocations(String outputPath){
-        File passDirectory = new File(outputPath + File.separator + "Pass");
-        if(!passDirectory.exists()){
-            try {
-                boolean created = passDirectory.mkdirs();
-                if(!created){
-                    throw new IOException("Unable to create a Pass directory for results.");
-                }
-            }catch(IOException ioEx){
-                logger.error(ioEx.getMessage());
-            }
-        }
-        File failDirectory = new File(outputPath + File.separator + "Fail");
-        if(!failDirectory.exists()){
-            try {
-                boolean created = failDirectory.mkdirs();
-                if(!created){
-                    throw new IOException("Unable to create a Fail directory for results.");
-                }
-            }catch(IOException ioEx){
-                logger.error(ioEx.getMessage());
-            }
-        }
-    }
-
-    private String getAndSaveValueSetFromURL(String url, String outputPath){
-        // CHANGE OUTPUT TO BE IN A DIRECTORY SEPARATE FROM THE ACTUAL OUTPUT DIR, A SIBLING TO FAIL/PASS DIRS
-        String pathAndVSToValidate = null;
-        Bundle readBundle = this.client.search().byUrl(url).returnBundle(Bundle.class).execute();
-        if(readBundle.hasEntry()) {
-            ValueSet vsToValidate = (ValueSet) readBundle.getEntry().get(0).getResource();
-            String vsURL = null;
-            if(vsToValidate.hasId()) {
-                vsURL = vsToValidate.getId();
-            } else {
-                vsURL = vsToValidate.getUrl();
-            }
-            if(vsURL != null) {
-                String fileName = vsURL.substring(vsURL.lastIndexOf(File.separator)+1);
-                IOUtils.writeResource(vsToValidate, outputPath, IOUtils.Encoding.JSON, context, false, fileName);
-                pathAndVSToValidate = outputPath + File.separator + fileName + ".json";
-            }
-        }
-        return pathAndVSToValidate;
-    }
-
-    @Override
     public Parameters validateCodeInValueSet(String url, String code, String systemUrl, String display) {
-        // expand VS then check to see if code in VS
-        Bundle readBundle = this.client.search().byUrl(url).returnBundle(Bundle.class).execute();
-        if(readBundle.hasEntry()){
-//            System.out.println(readBundle.getEntry().get(0).getResource().getId());
-            //do more stuff, like validate
-        }else{
-            return null;
-        }
-        return new Parameters();
-
-//        throw new UnsupportedOperationException("validateCodeInValueSet(url, code, systemUrl, display)");
+        throw new UnsupportedOperationException("validateCodeInValueSet(url, code, systemUrl, display)");
     }
 
     @Override
@@ -322,13 +198,14 @@ public class FhirTerminologyClient implements TerminologyService {
     public ConceptSubsumptionOutcome subsumes(Coding codeA, Coding codeB) {
         throw new UnsupportedOperationException("subsumes(codeA, codeB)");
     }
-/*
-  Build a FHIRTerminologyClient component that facilitates use of an R4 FHIR Terminology Service. Specifically implement:
 
-    resolveValueSet(canonical) (with or without a version reference)
-    resolveCodeSystem(canonical) with or without a version reference)
-    inValueSet(CodeableConcept, canonical)
-    inCodeSystem(CodeableConcept, canonical)
-    expandValueSet(canonical)
-    */
+    @Override
+    public IBaseResource getResource(String url) {
+        Bundle readBundle = this.client.search().byUrl(url).returnBundle(Bundle.class).execute();
+        if (readBundle.hasEntry()) {
+            IBaseResource resourceToValidate = readBundle.getEntry().get(0).getResource();
+            return resourceToValidate;
+        }
+        return null;
+    }
 }
