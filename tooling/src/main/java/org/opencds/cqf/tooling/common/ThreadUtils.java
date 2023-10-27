@@ -23,8 +23,6 @@ public class ThreadUtils {
     public static void executeTasks(List<Callable<Void>> tasks) {
         if (tasks == null || tasks.isEmpty()){
             return;
-        }else{
-            System.out.println("Executing " + tasks.size() + " tasks: \n");
         }
 
         //let OS handle threading:

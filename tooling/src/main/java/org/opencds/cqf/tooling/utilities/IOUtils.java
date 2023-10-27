@@ -321,27 +321,35 @@ public class IOUtils
 
     private static Map<String, List<String>> cachedFilePaths = new HashMap<>();
 
-    public static List<String> getFilePaths(String directoryPath, boolean recursive) {
+
+    public static List<String> getFilePaths(String directoryPath, Boolean recursive) {
+
         List<String> filePaths = new ArrayList<>();
         String key = directoryPath + ":" + recursive;
+
         if (IOUtils.cachedFilePaths.containsKey(key)) {
             filePaths = IOUtils.cachedFilePaths.get(key);
             return filePaths;
         }
-        try {
-            //Files.walk has performance benefit over for loop:
-            Files.walk(Paths.get(directoryPath))
-                    .filter(path -> !Files.isDirectory(path) || (recursive && Files.isDirectory(path)))
-                    .map(Path::toString)
-                    .forEach(filePaths::add);
-        } catch (IOException e) {
-            // Handle the exception
-            e.printStackTrace();
-        }
 
+        File inputDir = new File(directoryPath);
+        ArrayList<File> files = inputDir.isDirectory() ? new ArrayList<File>(Arrays.asList(Optional.ofNullable(inputDir.listFiles()).<NoSuchElementException>orElseThrow(() -> new NoSuchElementException()))) : new ArrayList<File>();
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+                //note: this is not the same as anding recursive to isDirectory as that would result in directories being added to the list if the request is not recursive.
+                if (recursive) {
+                    filePaths.addAll(getFilePaths(file.getPath(), recursive));
+                }
+            } else {
+                filePaths.add(file.getPath());
+            }
+        }
         cachedFilePaths.put(key, filePaths);
         return filePaths;
     }
+
+
 
     public static String getResourceFileName(String resourcePath, IBaseResource resource, Encoding encoding, FhirContext fhirContext, boolean versioned, boolean prefixed) {
         String resourceVersion = IOUtils.getCanonicalResourceVersion(resource, fhirContext);
