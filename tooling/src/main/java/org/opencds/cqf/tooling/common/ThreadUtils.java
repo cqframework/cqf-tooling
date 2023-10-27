@@ -1,18 +1,28 @@
 package org.opencds.cqf.tooling.common;
 
+import org.opencds.cqf.tooling.utilities.LogUtils;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class ThreadUtils {
-
+    /**
+     * Executes a list of tasks concurrently using a thread pool.
+     * <p>
+     * This method takes a list of Callable tasks and executes them concurrently using a thread pool. It utilizes
+     * an ExecutorService with a cached thread pool configuration to manage the execution of the tasks.
+     * The method waits for all tasks to complete before returning.
+     *
+     * @param tasks A list of Callable tasks to execute concurrently.
+     */
     public static boolean executeTasks(List<Callable<Void>> tasks) {
         //let OS handle threading:
         ExecutorService executorService = Executors.newCachedThreadPool();// Submit tasks and obtain futures
-
         try {
             List<Future<Void>> futures = new ArrayList<>();
             for (Callable<Void> task : tasks) {
@@ -24,13 +34,14 @@ public class ThreadUtils {
                 future.get();
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            LogUtils.putException("ThreadUtils.executeTasks", e);
         } finally {
             executorService.shutdown();
         }
-
         return true;
     }
 
+    public static Boolean executeTasks(Queue<Callable<Void>> callables) {
+        return executeTasks(new ArrayList<>(callables));
+    }
 }
