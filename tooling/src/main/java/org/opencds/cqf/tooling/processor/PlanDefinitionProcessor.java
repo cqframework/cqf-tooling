@@ -54,7 +54,7 @@ public class PlanDefinitionProcessor {
                     // Assumption - File name matches planDefinition.name
                     String planDefinitionName = FilenameUtils.getBaseName(planDefinitionSourcePath).replace(PlanDefinitionProcessor.ResourcePrefix, "");
                     try {
-                        Map<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
+                        Map<String, IBaseResource> resources = new ConcurrentHashMap<>();
 
                         Boolean shouldPersist = ResourceUtils.safeAddResource(planDefinitionSourcePath, resources, fhirContext);
                         if (!resources.containsKey("PlanDefinition/" + planDefinitionEntry.getKey())) {
@@ -87,7 +87,9 @@ public class PlanDefinitionProcessor {
                         String cqlLibrarySourcePath = IOUtils.getCqlLibrarySourcePath(primaryLibraryName, cqlFileName, binaryPaths);
 
                         if (cqlLibrarySourcePath == null) {
-                            throw new IllegalArgumentException(String.format("Could not determine CqlLibrarySource path for library %s", primaryLibraryName));
+                            failedExceptionMessages.put(planDefinitionSourcePath, String.format("Could not determine CqlLibrarySource path for library %s", primaryLibraryName));
+                            //exit from task:
+                            return null;
                         }
 
                         if (includeTerminology) {
@@ -102,7 +104,9 @@ public class PlanDefinitionProcessor {
                         if (includeDependencies) {
                             boolean result = libraryProcessor.bundleLibraryDependencies(primaryLibrarySourcePath, fhirContext, resources, encoding, includeVersion);
                             if (shouldPersist && !result) {
-                                LogUtils.info("PlanDefinition will not be bundled because Library Dependency bundling failed.");
+                                failedExceptionMessages.put(planDefinitionSourcePath, "PlanDefinition will not be bundled because Library Dependency bundling failed.");
+                                //exit from task:
+                                return null;
                             }
                             shouldPersist = shouldPersist & result;
                         }
@@ -110,7 +114,9 @@ public class PlanDefinitionProcessor {
                         if (includePatientScenarios) {
                             boolean result = TestCaseProcessor.bundleTestCases(igPath, PlanDefinitionTestGroupName, primaryLibraryName, fhirContext, resources);
                             if (shouldPersist && !result) {
-                                LogUtils.info("PlanDefinition will not be bundled because Test Case bundling failed.");
+                                failedExceptionMessages.put(planDefinitionSourcePath, "PlanDefinition will not be bundled because Test Case bundling failed.");
+                                //exit from task:
+                                return null;
                             }
                             shouldPersist = shouldPersist & result;
                         }

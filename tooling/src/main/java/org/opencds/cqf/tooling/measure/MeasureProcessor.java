@@ -129,7 +129,7 @@ public class MeasureProcessor extends BaseProcessor {
                     // Assumption - File name matches measure.name
                     String measureName = FilenameUtils.getBaseName(measureSourcePath).replace(MeasureProcessor.ResourcePrefix, "");
                     try {
-                        Map<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
+                        Map<String, IBaseResource> resources = new ConcurrentHashMap<>();
 
                         Boolean shouldPersist = ResourceUtils.safeAddResource(measureSourcePath, resources, fhirContext);
                         if (!resources.containsKey("Measure/" + measureEntry.getKey())) {
@@ -162,7 +162,9 @@ public class MeasureProcessor extends BaseProcessor {
                         String cqlLibrarySourcePath = IOUtils.getCqlLibrarySourcePath(primaryLibraryName, cqlFileName, binaryPaths);
 
                         if (cqlLibrarySourcePath == null) {
-                            throw new IllegalArgumentException(String.format("Could not determine CqlLibrarySource path for library %s", primaryLibraryName));
+                            failedExceptionMessages.put(measureSourcePath, String.format("Could not determine CqlLibrarySource path for library %s", primaryLibraryName));
+                            //exit from task:
+                            return null;
                         }
 
                         if (includeTerminology) {
@@ -178,7 +180,9 @@ public class MeasureProcessor extends BaseProcessor {
                             LibraryProcessor libraryProcessor = new LibraryProcessor();
                             boolean result = libraryProcessor.bundleLibraryDependencies(primaryLibrarySourcePath, fhirContext, resources, encoding, includeVersion);
                             if (shouldPersist && !result) {
-                                LogUtils.info("Measure will not be bundled because Library Dependency bundling failed.");
+                                failedExceptionMessages.put(measureSourcePath, "Measure will not be bundled because Library Dependency bundling failed.");
+                                //exit from task:
+                                return null;
                             }
                             shouldPersist = shouldPersist & result;
                         }
@@ -186,7 +190,9 @@ public class MeasureProcessor extends BaseProcessor {
                         if (includePatientScenarios) {
                             boolean result = TestCaseProcessor.bundleTestCases(igPath, MeasureTestGroupName, primaryLibraryName, fhirContext, resources);
                             if (shouldPersist && !result) {
-                                LogUtils.info("Measure will not be bundled because Test Case bundling failed.");
+                                failedExceptionMessages.put(measureSourcePath, "Measure will not be bundled because Test Case bundling failed.");
+                                //exit from task:
+                                return null;
                             }
                             shouldPersist = shouldPersist & result;
                         }

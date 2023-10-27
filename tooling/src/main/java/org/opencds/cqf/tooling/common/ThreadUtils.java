@@ -20,7 +20,13 @@ public class ThreadUtils {
      *
      * @param tasks A list of Callable tasks to execute concurrently.
      */
-    public static boolean executeTasks(List<Callable<Void>> tasks) {
+    public static void executeTasks(List<Callable<Void>> tasks) {
+        if (tasks == null || tasks.isEmpty()){
+            return;
+        }else{
+            System.out.println("Executing " + tasks.size() + " tasks: \n");
+        }
+
         //let OS handle threading:
         ExecutorService executorService = Executors.newCachedThreadPool();// Submit tasks and obtain futures
         try {
@@ -38,10 +44,10 @@ public class ThreadUtils {
         } finally {
             executorService.shutdown();
         }
-        return true;
     }
 
-    public static Boolean executeTasks(Queue<Callable<Void>> callables) {
-        return executeTasks(new ArrayList<>(callables));
+    public static void executeTasks(Queue<Callable<Void>> callables) {
+
+        executeTasks(new ArrayList<>(callables));
     }
 }

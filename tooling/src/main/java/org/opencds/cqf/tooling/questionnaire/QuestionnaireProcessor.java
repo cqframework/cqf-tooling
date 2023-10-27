@@ -56,11 +56,13 @@ public class QuestionnaireProcessor {
                     // Assumption - File name matches questionnaire.name
                     String questionnaireName = FilenameUtils.getBaseName(questionnaireSourcePath).replace(org.opencds.cqf.tooling.questionnaire.QuestionnaireProcessor.ResourcePrefix, "");
                     try {
-                        Map<String, IBaseResource> resources = new HashMap<String, IBaseResource>();
+                        Map<String, IBaseResource> resources = new ConcurrentHashMap<>();
 
                         Boolean shouldPersist = ResourceUtils.safeAddResource(questionnaireSourcePath, resources, fhirContext);
                         if (!resources.containsKey("Questionnaire/" + questionnaireEntry.getKey())) {
-                            throw new IllegalArgumentException(String.format("Could not retrieve base resource for Questionnaire %s", questionnaireName));
+                            failedExceptionMessages.put(questionnaireSourcePath, String.format("Could not retrieve base resource for Questionnaire %s", questionnaireName));
+                            //exit from task:
+                            return null;
                         }
                         IBaseResource questionnaire = resources.get("Questionnaire/" + questionnaireEntry.getKey());
 
@@ -106,17 +108,25 @@ public class QuestionnaireProcessor {
 
                         if (includeDependencies) {
                             boolean result = libraryProcessor.bundleLibraryDependencies(primaryLibrarySourcePath, fhirContext, resources, encoding, includeVersion);
+
                             if (shouldPersist && !result) {
-                                LogUtils.info("Questionnaire will not be bundled because Library Dependency bundling failed.");
+                                failedExceptionMessages.put(questionnaireSourcePath, "Questionnaire will not be bundled because Library Dependency bundling failed.");
+                                //exit from task:
+                                return null;
                             }
+
                             shouldPersist = shouldPersist & result;
                         }
 
                         if (includePatientScenarios) {
                             boolean result = TestCaseProcessor.bundleTestCases(igPath, QuestionnaireTestGroupName, primaryLibraryName, fhirContext, resources);
+
                             if (shouldPersist && !result) {
-                                LogUtils.info("Questionnaire will not be bundled because Test Case bundling failed.");
+                                failedExceptionMessages.put(questionnaireSourcePath, "Questionnaire will not be bundled because Test Case bundling failed.");
+                                //exit from task:
+                                return null;
                             }
+
                             shouldPersist = shouldPersist & result;
                         }
 
