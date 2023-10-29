@@ -47,7 +47,7 @@ public class MeasureRefreshProcessor {
     private Library getModuleDefinitionLibrary(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary CompiledLibrary, CqlTranslatorOptions options){
         Set<String> expressionList = getExpressions(measureToUse);
         DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
-        return dqReqTrans.gatherDataRequirements(libraryManager, CompiledLibrary, options, expressionList, true);
+        return dqReqTrans.gatherDataRequirements(libraryManager, CompiledLibrary, options.getCqlCompilerOptions(), expressionList, true);
     }
 
     private Set<String> getExpressions(Measure measureToUse) {

@@ -6,13 +6,13 @@
     <parent>
         <groupId>org.opencds.cqf</groupId>
         <artifactId>tooling-parent</artifactId>
-        <version>2.5.0</version>
+        <version>2.6.0</version>
 
     </parent>
 
     <groupId>org.opencds.cqf</groupId>
     <artifactId>tooling</artifactId>
-    <version>2.5.0</version>
+    <version>2.6.0</version>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -179,6 +179,7 @@
         </dependency>
 
         <!-- Narrative Generation -->
+<!--
         <dependency>
             <groupId>org.thymeleaf</groupId>
             <artifactId>thymeleaf</artifactId>
@@ -187,15 +188,16 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.13.4.1</version>
+            <version>2.15.2</version>
         </dependency>
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>2.9.1</version>
         </dependency>
-
+-->
         <!-- https://mvnrepository.com/artifact/javax.activation/activation -->
+<!--
         <dependency>
             <groupId>javax.activation</groupId>
             <artifactId>activation</artifactId>
@@ -205,7 +207,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-jaxb-annotations</artifactId>
-            <version>2.13.2</version>
+            <version>2.14.2</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -225,7 +227,7 @@
             <artifactId>validation-api</artifactId>
             <version>2.0.1.Final</version>
         </dependency>
-
+-->
         <!--redirects apache commons-logging to slf4j -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -276,6 +278,18 @@
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>evaluator.builder</artifactId>
             <version>${cql-evaluator.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>model-jaxb</artifactId>
+            <version>${cql-engine.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>elm-jaxb</artifactId>
+            <version>${cql-engine.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

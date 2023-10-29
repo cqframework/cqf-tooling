@@ -278,7 +278,7 @@ public class MeasureProcessor extends BaseProcessor {
             String libraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
             VersionedIdentifier primaryLibraryIdentifier = CanonicalUtils.toVersionedIdentifier(libraryUrl);
             List<CqlCompilerException> errors = new ArrayList<CqlCompilerException>();
-            CompiledLibrary CompiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, cqlTranslatorOptions, errors);
+            CompiledLibrary CompiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, errors);
             boolean hasErrors = false;
             if (errors.size() > 0) {
                 for (CqlCompilerException e : errors) {

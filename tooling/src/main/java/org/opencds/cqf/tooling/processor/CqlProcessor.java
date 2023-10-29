@@ -259,6 +259,9 @@ public class CqlProcessor {
         // Construct FhirLibrarySourceProvider
         ModelManager modelManager = new ModelManager();
         LibraryManager libraryManager = new LibraryManager(modelManager);
+        if (options.getCqlCompilerOptions().getValidateUnits()) {
+            libraryManager.setUcumService(ucumService);
+        }
         if (packages != null) {
             modelManager.getModelInfoLoader().registerModelInfoProvider(new NpmModelInfoProvider(packages, reader, logger), true);
             libraryManager.getLibrarySourceLoader().registerProvider(new NpmLibrarySourceProvider(packages, reader, logger));
@@ -273,7 +276,7 @@ public class CqlProcessor {
         boolean hadCqlFiles = false;
         for (File file : new File(folder).listFiles(getCqlFilenameFilter())) {
             hadCqlFiles = true;
-            translateFile(modelManager, libraryManager, file, options);
+            translateFile(libraryManager, file, options);
         }
 
         if (hadCqlFiles) {
@@ -339,7 +342,7 @@ public class CqlProcessor {
         }
     }
 
-    private void translateFile(ModelManager modelManager, LibraryManager libraryManager, File file, CqlTranslatorOptions options) {
+    private void translateFile(LibraryManager libraryManager, File file, CqlTranslatorOptions options) {
         logger.logMessage(String.format("Translating CQL source in file %s", file.toString()));
         CqlSourceFileInformation result = new CqlSourceFileInformation();
         fileMap.put(file.getAbsoluteFile().toString(), result);
@@ -347,8 +350,7 @@ public class CqlProcessor {
         try {
 
             // translate toXML
-            CqlTranslator translator = CqlTranslator.fromFile(namespaceInfo, file, modelManager, libraryManager,
-                    options.getValidateUnits() ? ucumService : null, options);
+            CqlTranslator translator = CqlTranslator.fromFile(namespaceInfo, file, libraryManager);
 
             // record errors and warnings
             for (CqlCompilerException exception : translator.getExceptions()) {
@@ -376,13 +378,12 @@ public class CqlProcessor {
 
                     // Add the translated library to the library manager (NOTE: This should be a "cacheLibrary" call on the LibraryManager, available in 1.5.3+)
                     // Without this, the data requirements processor will try to load the current library, resulting in a re-translation
-                    CompiledLibrary CompiledLibrary = translator.getTranslatedLibrary();
-                    String libraryPath = NamespaceManager.getPath(CompiledLibrary.getIdentifier().getSystem(), CompiledLibrary.getIdentifier().getId());
-                    libraryManager.getCompiledLibraries().put(libraryPath, CompiledLibrary);
+                    CompiledLibrary compiledLibrary = translator.getTranslatedLibrary();
+                    libraryManager.getCompiledLibraries().put(compiledLibrary.getIdentifier(), compiledLibrary);
 
                     DataRequirementsProcessor drp = new DataRequirementsProcessor();
                     org.hl7.fhir.r5.model.Library requirementsLibrary =
-                            drp.gatherDataRequirements(libraryManager, translator.getTranslatedLibrary(), options, null, false);
+                            drp.gatherDataRequirements(libraryManager, translator.getTranslatedLibrary(), options.getCqlCompilerOptions(), null, false);
 
                     // TODO: Report context, requires 1.5 translator (ContextDef)
                     // NOTE: In STU3, only Patient context is supported

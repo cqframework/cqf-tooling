@@ -9,7 +9,6 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.acceleratorkit.DTProcessor;
 import org.opencds.cqf.tooling.acceleratorkit.Processor;
-import org.opencds.cqf.tooling.library.r4.LibraryGenerator;
 import org.opencds.cqf.tooling.measure.r4.RefreshR4MeasureOperation;
 import org.opencds.cqf.tooling.measure.stu3.RefreshStu3MeasureOperation;
 import org.opencds.cqf.tooling.modelinfo.StructureDefinitionToModelInfo;
@@ -54,22 +53,12 @@ class OperationFactory {
                 return new EnsureExecutableValueSetOperation();
             case "ToJsonValueSetDb":
                 return new ToJsonValueSetDbOperation();
-            case "CqlToSTU3Library":
-                return new org.opencds.cqf.tooling.library.stu3.LibraryGenerator();
-            case "CqlToR4Library":
-                return new LibraryGenerator();
-            case "UpdateSTU3Cql":
-                return new org.opencds.cqf.tooling.library.stu3.LibraryGenerator();
-            case "UpdateR4Cql":
-                return new LibraryGenerator();
             case "JsonSchemaGenerator":
 //                return new SchemaGenerator();
             case "BundleIg":
                 return new IgBundler();
 //            case "PackageIG":
 //                return new PackageOperation();
-            case "GenerateCQLFromDrool":
-                return new GenerateCQLFromDroolOperation();
             case "VmrToFhir":
                 return new VmrToFhirOperation();
             case "RefreshIG":

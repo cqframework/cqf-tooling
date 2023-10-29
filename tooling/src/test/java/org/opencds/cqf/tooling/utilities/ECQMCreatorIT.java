@@ -50,12 +50,12 @@ public class ECQMCreatorIT {
 
     private Measure refreshMeasure(String primaryLibraryPath, String measurePath) throws IOException {
         CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
-        cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
-        cqlTranslatorOptions.getOptions().add(CqlTranslatorOptions.Options.EnableAnnotations);
+        cqlTranslatorOptions.getFormats().add(CqlTranslatorOptions.Format.JSON);
+        cqlTranslatorOptions.getCqlCompilerOptions().getOptions().add(CqlCompilerOptions.Options.EnableAnnotations);
         // This option performs data analysis, including element reference detection
-        cqlTranslatorOptions.setAnalyzeDataRequirements(true);
+        cqlTranslatorOptions.getCqlCompilerOptions().setAnalyzeDataRequirements(true);
         // This option collapses duplicate data requirements
-        cqlTranslatorOptions.setCollapseDataRequirements(true);
+        cqlTranslatorOptions.getCqlCompilerOptions().setCollapseDataRequirements(true);
         CqlTranslator translator = createTranslator(primaryLibraryPath, cqlTranslatorOptions);
         translator.toELM();
         cacheLibrary(translator.getTranslatedLibrary());
@@ -730,9 +730,9 @@ public class ECQMCreatorIT {
     public void TestECQMCreatorDataRequirements() {
         // TODO - translate measure into ELM measure then call creator with that measure
         CqlTranslatorOptions cqlTranslatorOptions = new CqlTranslatorOptions();
-        cqlTranslatorOptions.getFormats().add(CqlTranslator.Format.JSON);
-        cqlTranslatorOptions.getOptions().add(CqlTranslatorOptions.Options.EnableAnnotations);
-        cqlTranslatorOptions.setCollapseDataRequirements(true);
+        cqlTranslatorOptions.getFormats().add(CqlTranslatorOptions.Format.JSON);
+        cqlTranslatorOptions.getCqlCompilerOptions().getOptions().add(CqlCompilerOptions.Options.EnableAnnotations);
+        cqlTranslatorOptions.getCqlCompilerOptions().setCollapseDataRequirements(true);
         String libraryPath = "CompositeMeasures/cql/BCSComponent.cql"; //EXM124-9.0.000.cql";//library-EXM124-9.0.000.json";
         try {
             CqlTranslator translator = createTranslator(libraryPath, cqlTranslatorOptions);
@@ -757,8 +757,7 @@ public class ECQMCreatorIT {
     private static void cacheLibrary(CompiledLibrary library) {
         // Add the translated library to the library manager (NOTE: This should be a "cacheLibrary" call on the LibraryManager, available in 1.5.3+)
         // Without this, the data requirements processor will try to load the current library, resulting in a re-translation
-        String libraryPath = NamespaceManager.getPath(library.getIdentifier().getSystem(), library.getIdentifier().getId());
-        libraryManager.getCompiledLibraries().put(libraryPath, library);
+        libraryManager.getCompiledLibraries().put(library.getIdentifier(), library);
     }
 
     private static void tearDown() {
@@ -809,18 +808,14 @@ public class ECQMCreatorIT {
     }
 
     public static CqlTranslator createTranslator(String testFileName, CqlTranslatorOptions options) throws IOException {
-        return createTranslator(null, testFileName, options);
+        return createTranslator(null, testFileName);
     }
 
-    public static CqlTranslator createTranslator(NamespaceInfo namespaceInfo, String testFileName, CqlTranslatorOptions.Options... options) throws IOException {
-        return createTranslator(namespaceInfo, testFileName, new CqlTranslatorOptions(options));
-    }
-
-    public static CqlTranslator createTranslator(NamespaceInfo namespaceInfo, String libraryName, CqlTranslatorOptions options) throws IOException {
+    public static CqlTranslator createTranslator(NamespaceInfo namespaceInfo, String libraryName) throws IOException {
         File translationTestFile = new File(ECQMCreatorIT.class.getResource(libraryName).getFile());
         reset();
         setup(translationTestFile.getParent());
-        CqlTranslator translator = CqlTranslator.fromFile(namespaceInfo, translationTestFile, getModelManager(), getLibraryManager(), getUcumService(), options);
+        CqlTranslator translator = CqlTranslator.fromFile(namespaceInfo, translationTestFile, getLibraryManager());
         return translator;
     }
 }

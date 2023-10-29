@@ -520,11 +520,7 @@ public class IOUtils
             // options.add(CqlTranslatorOptions.Options.EnableDateRangeOptimization);
   
             translator =
-                    CqlTranslator.fromFile(
-                            cqlFile,
-                            modelManager,
-                            libraryManager,
-                            null, options);
+                    CqlTranslator.fromFile(cqlFile, libraryManager);
 
             if (translator.getErrors().size() > 0) {
                 //System.err.println("Translation failed due to errors:");
