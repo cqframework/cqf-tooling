@@ -23,6 +23,8 @@ public class RefreshIGArgumentProcessor {
     public static final String[] ROOT_DIR_OPTIONS = {"root-dir"};
     public static final String[] IG_PATH_OPTIONS = {"ip", "ig-path"};
     public static final String[] IG_OUTPUT_ENCODING = {"e", "encoding"};
+
+    public static final String[] SKIP_PACKAGES_OPTIONS = {"s", "skip-packages"};
     public static final String[] INCLUDE_ELM_OPTIONS = {"elm", "include-elm"};
     public static final String[] INCLUDE_DEPENDENCY_LIBRARY_OPTIONS = {"d", "include-dependencies"};
     public static final String[] INCLUDE_TERMINOLOGY_OPTIONS = {"t", "include-terminology"};
@@ -70,6 +72,7 @@ public class RefreshIGArgumentProcessor {
         OptionSpec<String> fhirUri = fhirUriBuilder.withOptionalArg().describedAs("uri of fhir server");  
 
         parser.acceptsAll(asList(OPERATION_OPTIONS),"The operation to run.");
+        parser.acceptsAll(asList(SKIP_PACKAGES_OPTIONS), "Specifies whether to skip packages building.");
         parser.acceptsAll(asList(INCLUDE_ELM_OPTIONS),"If omitted ELM will not be produced or packaged.");
         parser.acceptsAll(asList(INCLUDE_DEPENDENCY_LIBRARY_OPTIONS),"If omitted only the primary CQL library will be packaged.");
         parser.acceptsAll(asList(INCLUDE_TERMINOLOGY_OPTIONS),"If omitted terminology will not be packaged.");
@@ -107,6 +110,7 @@ public class RefreshIGArgumentProcessor {
         if (igEncoding != null) {
             outputEncodingEnum = Encoding.parse(igEncoding.toLowerCase());
         }
+        Boolean skipPackages = options.has(SKIP_PACKAGES_OPTIONS[0]);
         Boolean includeELM = options.has(INCLUDE_ELM_OPTIONS[0]);  
         Boolean includeDependencies = options.has(INCLUDE_DEPENDENCY_LIBRARY_OPTIONS[0]);
         Boolean includeTerminology = options.has(INCLUDE_TERMINOLOGY_OPTIONS[0]);
@@ -152,6 +156,7 @@ public class RefreshIGArgumentProcessor {
         ip.rootDir = rootDir;
         ip.igPath = igPath;
         ip.outputEncoding = outputEncodingEnum;
+        ip.skipPackages = skipPackages;
         ip.includeELM = includeELM;
         ip.includeDependencies = includeDependencies;
         ip.includeTerminology = includeTerminology;

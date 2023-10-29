@@ -9,6 +9,7 @@ public class RefreshIGParameters {
     public String rootDir;
     public String igPath;
     public IOUtils.Encoding outputEncoding;
+    public Boolean skipPackages;
     public Boolean includeELM;
     public Boolean includeDependencies;
     public Boolean includeTerminology;

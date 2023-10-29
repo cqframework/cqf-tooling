@@ -259,6 +259,9 @@ public class CqlProcessor {
         // Construct FhirLibrarySourceProvider
         ModelManager modelManager = new ModelManager();
         LibraryManager libraryManager = new LibraryManager(modelManager, options.getCqlCompilerOptions());
+        if (options.getCqlCompilerOptions().getValidateUnits()) {
+            libraryManager.setUcumService(ucumService);
+        }
         if (packages != null) {
             modelManager.getModelInfoLoader().registerModelInfoProvider(new NpmModelInfoProvider(packages, reader, logger), true);
             libraryManager.getLibrarySourceLoader().registerProvider(new NpmLibrarySourceProvider(packages, reader, logger));
