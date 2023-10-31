@@ -267,14 +267,7 @@ public class SpreadsheetValidateVSandCS extends Operation {
         if(terminologyServerCodeSystem.getCount() != sourceOfTruthCodeSystem.getCount()){fieldsWithErrors.add("Count");}
         if(!compareConcepts(terminologyServerCodeSystem.getConcept(), sourceOfTruthCodeSystem.getConcept())){fieldsWithErrors.add("Concepts");}
         if(fieldsWithErrors.size() > 0){
-            report.append(terminologyServerCodeSystem.getName() + " does not match the IG for the following fields:");
-            Iterator<String> iterator = fieldsWithErrors.iterator();
-            while (iterator.hasNext()) {
-                String fieldName = iterator.next();
-                report.append( " "+ fieldName);
-                if(iterator.hasNext()){ report.append(", ");}
-            }
-            report.append(newLine);
+            addToReport(fieldsWithErrors, terminologyServerCodeSystem.getName(), report);
         }
     }
 
@@ -294,17 +287,21 @@ public class SpreadsheetValidateVSandCS extends Operation {
         if(!terminologyServerValueSet.getStatus().equals(sourceOfTruthValueSet.getStatus())){fieldsWithErrors.add("Status");}
         if(!compareComposes(terminologyServerValueSet.getCompose(), sourceOfTruthValueSet.getCompose())){fieldsWithErrors.add("Compose");}
         if(fieldsWithErrors.size() > 0){
-            report.append(terminologyServerValueSet.getName() + " does not match the IG for the following fields:");
-            Iterator<String> iterator = fieldsWithErrors.iterator();
-            while (iterator.hasNext()) {
-                String fieldName = iterator.next();
-                report.append( " "+ fieldName);
-                if(iterator.hasNext()){ report.append(", ");}
-            }
-            report.append(newLine);
+            addToReport(fieldsWithErrors, terminologyServerValueSet.getName(), report);
         }
     }
 
+    private void addToReport(Set errorSet, String name, StringBuilder report){
+        report.append(name + " does not match the IG for the following fields:");
+        Iterator<String> iterator = errorSet.iterator();
+        while (iterator.hasNext()) {
+            String fieldName = iterator.next();
+            report.append( " "+ fieldName);
+            if(iterator.hasNext()){ report.append(", ");}
+        }
+        report.append(newLine);
+
+    }
 
     private boolean compareComposes(ValueSet.ValueSetComposeComponent terminologyServerComposeComponent, ValueSet.ValueSetComposeComponent sourceOfTruthComposeComponent) {
         AtomicBoolean composesMatch = new AtomicBoolean(true);
