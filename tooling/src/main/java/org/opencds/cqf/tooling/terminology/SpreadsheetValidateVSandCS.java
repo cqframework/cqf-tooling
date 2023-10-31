@@ -291,7 +291,7 @@ public class SpreadsheetValidateVSandCS extends Operation {
         }
     }
 
-    private void addToReport(Set errorSet, String name, StringBuilder report){
+    private void addToReport(Set<String> errorSet, String name, StringBuilder report){
         report.append(name + " does not match the IG for the following fields:");
         Iterator<String> iterator = errorSet.iterator();
         while (iterator.hasNext()) {
