@@ -18,7 +18,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-//import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -31,9 +30,7 @@ public class SpreadsheetValidateVSandCS extends Operation {
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
     private String urlToTestServer; // -urltotestserver (-uts)  server to validate
     private boolean hasHeader = true; // -hasheader (-hh)
-//    private String jarPath;  // -jarPath (-jp)  path to validator_cli.jar, including jar name
     private String pathToIG; // -pathToIG (-ptig) path to IG - files installed using "npm --registry https://packages.simplifier.net install hl7.fhir.us.qicore@4.1.1" (or other package)
-//    private String fhirVersion = "4.0.1";
     Map<String, CodeSystem> csMap;
     Map<String, ValueSet> vsMap;
     private static final String newLine = System.getProperty("line.separator");
@@ -182,7 +179,7 @@ public class SpreadsheetValidateVSandCS extends Operation {
             }
         }
         report.append(vsReport + newLine);
-        if(!vsNotPresentInIG.isEmpty()){
+        if (!vsNotPresentInIG.isEmpty()) {
             report.append(newLine);
             report.append("ValueSets not in IG:" + newLine);
             vsNotPresentInIG.forEach(vsName -> {
@@ -190,7 +187,7 @@ public class SpreadsheetValidateVSandCS extends Operation {
             });
         }
         report.append(csReport);
-        if(!csNotPresentInIG.isEmpty()){
+        if (!csNotPresentInIG.isEmpty()) {
             report.append(newLine);
             report.append("CodeSystems not in IG:" + newLine);
             csNotPresentInIG.forEach(csName -> {
@@ -226,7 +223,7 @@ public class SpreadsheetValidateVSandCS extends Operation {
                     processCodeSystemURL(codeSystemURL, csReport);
                 }
             }
-        }else{
+        } else {
             vsNotPresentInIG.add(vsToValidate.getId().substring(vsToValidate.getId().lastIndexOf(File.separator) + 1));
         }
     }
@@ -256,48 +253,127 @@ public class SpreadsheetValidateVSandCS extends Operation {
 
     private void compareCodeSystems(CodeSystem terminologyServerCodeSystem, CodeSystem sourceOfTruthCodeSystem, StringBuilder report) {
         Set<String> fieldsWithErrors = new HashSet<>();
-        if(!terminologyServerCodeSystem.getUrl().equals(sourceOfTruthCodeSystem.getUrl())){fieldsWithErrors.add("URL");}
-        if(!terminologyServerCodeSystem.getVersion().equals(sourceOfTruthCodeSystem.getVersion())){fieldsWithErrors.add("Version");}
-        if(!terminologyServerCodeSystem.getStatus().equals(sourceOfTruthCodeSystem.getStatus())){fieldsWithErrors.add("Status");}
-        if(!terminologyServerCodeSystem.getExperimental() == sourceOfTruthCodeSystem.getExperimental()){fieldsWithErrors.add("Experimental");}
-        if(!terminologyServerCodeSystem.getName().equals(sourceOfTruthCodeSystem.getName())){fieldsWithErrors.add("Name");}
-        if(!terminologyServerCodeSystem.getTitle().equals(sourceOfTruthCodeSystem.getTitle())){fieldsWithErrors.add("Title");}
-        if(!terminologyServerCodeSystem.getPublisher().equals(sourceOfTruthCodeSystem.getPublisher())){fieldsWithErrors.add("Publisher");}
-        if(!terminologyServerCodeSystem.getContent().equals(sourceOfTruthCodeSystem.getContent())){fieldsWithErrors.add("Content");}
-        if(terminologyServerCodeSystem.getCount() != sourceOfTruthCodeSystem.getCount()){fieldsWithErrors.add("Count");}
-        if(!compareConcepts(terminologyServerCodeSystem.getConcept(), sourceOfTruthCodeSystem.getConcept())){fieldsWithErrors.add("Concepts");}
-        if(fieldsWithErrors.size() > 0){
+        if (!terminologyServerCodeSystem.getUrl().equals(sourceOfTruthCodeSystem.getUrl())) {
+            fieldsWithErrors.add("URL");
+        }
+        if (!terminologyServerCodeSystem.getVersion().equals(sourceOfTruthCodeSystem.getVersion())) {
+            fieldsWithErrors.add("Version");
+        }
+        if (!terminologyServerCodeSystem.getStatus().equals(sourceOfTruthCodeSystem.getStatus())) {
+            fieldsWithErrors.add("Status");
+        }
+        if (!terminologyServerCodeSystem.getExperimental() == sourceOfTruthCodeSystem.getExperimental()) {
+            fieldsWithErrors.add("Experimental");
+        }
+        if (!terminologyServerCodeSystem.getName().equals(sourceOfTruthCodeSystem.getName())) {
+            fieldsWithErrors.add("Name");
+        }
+        if (!terminologyServerCodeSystem.getTitle().equals(sourceOfTruthCodeSystem.getTitle())) {
+            fieldsWithErrors.add("Title");
+        }
+        if (!terminologyServerCodeSystem.getPublisher().equals(sourceOfTruthCodeSystem.getPublisher())) {
+            fieldsWithErrors.add("Publisher");
+        }
+        if (!terminologyServerCodeSystem.getContent().equals(sourceOfTruthCodeSystem.getContent())) {
+            fieldsWithErrors.add("Content");
+        }
+        if (terminologyServerCodeSystem.getCount() != sourceOfTruthCodeSystem.getCount()) {
+            fieldsWithErrors.add("Count");
+        }
+        if (!compareCodeSystemConcepts(terminologyServerCodeSystem.getConcept(), sourceOfTruthCodeSystem.getConcept())) {
+            fieldsWithErrors.add("Concepts");
+        }
+        if (fieldsWithErrors.size() > 0) {
             addToReport(fieldsWithErrors, terminologyServerCodeSystem.getName(), report);
         }
     }
 
-    private boolean compareConcepts(List<CodeSystem.ConceptDefinitionComponent> terminologyConcept, List<CodeSystem.ConceptDefinitionComponent> truthConcept1) {
-        return true;
+    private boolean compareCodeSystemConcepts(List<CodeSystem.ConceptDefinitionComponent> terminologyConcepts, List<CodeSystem.ConceptDefinitionComponent> truthConcepts) {
+        AtomicBoolean conceptsMatch = new AtomicBoolean(true);
+        if ((terminologyConcepts != null && truthConcepts != null) && (terminologyConcepts.size() == truthConcepts.size())) {
+            Map<String, CodeSystem.ConceptDefinitionComponent> terminologyConceptsMap = createConceptMap(terminologyConcepts);
+            Map<String, CodeSystem.ConceptDefinitionComponent> truthConceptsMap = createConceptMap(truthConcepts);
+            terminologyConceptsMap.forEach((conceptCode, termConcept) -> {
+                if (truthConceptsMap.containsKey(conceptCode) && conceptsMatch.get()) {
+                    CodeSystem.ConceptDefinitionComponent truthConcept = truthConceptsMap.get(conceptCode);
+                    if (termConcept != null && truthConcept != null) {
+                        if(conceptsMatch.get()){conceptsMatch.set(compareStrings(termConcept.getCode(), truthConcept.getCode()));};
+                        if(conceptsMatch.get()){conceptsMatch.set(compareStrings(termConcept.getDisplay(), truthConcept.getDisplay()));};
+                        if(conceptsMatch.get()){conceptsMatch.set(compareStrings(termConcept.getDefinition(), truthConcept.getDefinition()));};
+                    } else {
+                        conceptsMatch.set(false);
+                    }
+                } else {
+                    conceptsMatch.set(false);
+                }
+            });
+        } else {
+            conceptsMatch.set(false);
+        }
+        return conceptsMatch.get();
     }
 
-    private void compareValueSets(ValueSet terminologyServerValueSet, ValueSet sourceOfTruthValueSet, StringBuilder report){
+    private boolean compareStrings(String terminologyString, String truthString){
+        if((terminologyString != null && truthString != null) || (terminologyString == null && truthString == null)){
+            if(terminologyString == null && truthString == null){return true;}
+            if((terminologyString != null) && (terminologyString.equals(truthString))){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Map<String, CodeSystem.ConceptDefinitionComponent> createConceptMap(List<CodeSystem.ConceptDefinitionComponent> concepts) {
+        Map<String, CodeSystem.ConceptDefinitionComponent> conceptMap = new HashMap<>();
+        concepts.forEach(concept -> {
+            conceptMap.put(concept.getCode(), concept);
+        });
+        return conceptMap;
+    }
+
+    private void compareValueSets(ValueSet terminologyServerValueSet, ValueSet sourceOfTruthValueSet, StringBuilder report) {
         Set<String> fieldsWithErrors = new HashSet<>();
-        if(!terminologyServerValueSet.getUrl().equals(sourceOfTruthValueSet.getUrl())){fieldsWithErrors.add("URL");}
-        if(!terminologyServerValueSet.getVersion().equals(sourceOfTruthValueSet.getVersion())){fieldsWithErrors.add("Version");}
-        if(!terminologyServerValueSet.getStatus().equals(sourceOfTruthValueSet.getStatus())){fieldsWithErrors.add("Status");}
-        if(!terminologyServerValueSet.getExperimental() == sourceOfTruthValueSet.getExperimental()){fieldsWithErrors.add("Experimental");}
-        if(!terminologyServerValueSet.getName().equals(sourceOfTruthValueSet.getName())){fieldsWithErrors.add("Name");}
-        if(!terminologyServerValueSet.getTitle().equals(sourceOfTruthValueSet.getTitle())){fieldsWithErrors.add("Title");}
-        if(!terminologyServerValueSet.getPublisher().equals(sourceOfTruthValueSet.getPublisher())){fieldsWithErrors.add("Publisher");}
-        if(!terminologyServerValueSet.getStatus().equals(sourceOfTruthValueSet.getStatus())){fieldsWithErrors.add("Status");}
-        if(!compareComposes(terminologyServerValueSet.getCompose(), sourceOfTruthValueSet.getCompose())){fieldsWithErrors.add("Compose");}
-        if(fieldsWithErrors.size() > 0){
+        if (!terminologyServerValueSet.getUrl().equals(sourceOfTruthValueSet.getUrl())) {
+            fieldsWithErrors.add("URL");
+        }
+        if (!terminologyServerValueSet.getVersion().equals(sourceOfTruthValueSet.getVersion())) {
+            fieldsWithErrors.add("Version");
+        }
+        if (!terminologyServerValueSet.getStatus().equals(sourceOfTruthValueSet.getStatus())) {
+            fieldsWithErrors.add("Status");
+        }
+        if (!terminologyServerValueSet.getExperimental() == sourceOfTruthValueSet.getExperimental()) {
+            fieldsWithErrors.add("Experimental");
+        }
+        if (!terminologyServerValueSet.getName().equals(sourceOfTruthValueSet.getName())) {
+            fieldsWithErrors.add("Name");
+        }
+        if (!terminologyServerValueSet.getTitle().equals(sourceOfTruthValueSet.getTitle())) {
+            fieldsWithErrors.add("Title");
+        }
+        if (!terminologyServerValueSet.getPublisher().equals(sourceOfTruthValueSet.getPublisher())) {
+            fieldsWithErrors.add("Publisher");
+        }
+        if (!terminologyServerValueSet.getStatus().equals(sourceOfTruthValueSet.getStatus())) {
+            fieldsWithErrors.add("Status");
+        }
+        if (!compareComposes(terminologyServerValueSet.getCompose(), sourceOfTruthValueSet.getCompose())) {
+            fieldsWithErrors.add("Compose");
+        }
+        if (fieldsWithErrors.size() > 0) {
             addToReport(fieldsWithErrors, terminologyServerValueSet.getName(), report);
         }
     }
 
-    private void addToReport(Set<String> errorSet, String name, StringBuilder report){
+    private void addToReport(Set<String> errorSet, String name, StringBuilder report) {
         report.append(name + " does not match the IG for the following fields:");
         Iterator<String> iterator = errorSet.iterator();
         while (iterator.hasNext()) {
             String fieldName = iterator.next();
-            report.append( " "+ fieldName);
-            if(iterator.hasNext()){ report.append(", ");}
+            report.append(" " + fieldName);
+            if (iterator.hasNext()) {
+                report.append(", ");
+            }
         }
         report.append(newLine);
 
@@ -306,16 +382,16 @@ public class SpreadsheetValidateVSandCS extends Operation {
     private boolean compareComposes(ValueSet.ValueSetComposeComponent terminologyServerComposeComponent, ValueSet.ValueSetComposeComponent sourceOfTruthComposeComponent) {
         AtomicBoolean composesMatch = new AtomicBoolean(true);
         List<ValueSet.ConceptSetComponent> terminologyServerIncludes = terminologyServerComposeComponent.getInclude();
-        Map<?, ?> terminologyServerIncludesMap = createIncludesMap(terminologyServerIncludes);
+        Map<String, Object> terminologyServerIncludesMap = createIncludesMap(terminologyServerIncludes);
         List<ValueSet.ConceptSetComponent> sourceOfTruthIncludes = sourceOfTruthComposeComponent.getInclude();
-        Map<?, ?> sourceOfTruthIncludesMap = createIncludesMap(sourceOfTruthIncludes);
+        Map<String, Object> sourceOfTruthIncludesMap = createIncludesMap(sourceOfTruthIncludes);
         if (!terminologyServerIncludesMap.isEmpty() && !sourceOfTruthIncludesMap.isEmpty()) {
             if (terminologyServerIncludesMap.size() == sourceOfTruthIncludesMap.size()) {
                 terminologyServerIncludesMap.forEach((terminologyIncludeKey, terminologyIncludeValue) -> {
                     if (sourceOfTruthIncludesMap.containsKey(terminologyIncludeKey)) {
                         terminologyServerIncludesMap.forEach((terminologyIncludesKey, terminologyIncludesValue) -> {
-                            HashMap<?, ?> terminologyConceptsMap = (HashMap) (terminologyServerIncludesMap.get(terminologyIncludeKey));
-                            HashMap<?, ?> truthConceptsMap = (HashMap) (sourceOfTruthIncludesMap.get(terminologyIncludeKey));
+                            Map<?, ?> terminologyConceptsMap = (HashMap) (terminologyServerIncludesMap.get(terminologyIncludeKey));
+                            Map<?, ?> truthConceptsMap = (HashMap) (sourceOfTruthIncludesMap.get(terminologyIncludeKey));
                             if (!terminologyConceptsMap.isEmpty() && !truthConceptsMap.isEmpty() &&
                                     terminologyConceptsMap.size() == truthConceptsMap.size()) {
                                 terminologyConceptsMap.forEach((terminologyConceptsKey, terminologyConceptsValue) -> {
