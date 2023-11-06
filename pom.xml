@@ -12,9 +12,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <cql-engine.version>3.1.0</cql-engine.version>
+        <cql-engine.version>3.3.2</cql-engine.version>
         <cql-evaluator.version>2.6.0</cql-evaluator.version>
-        <cqframework.version>3.1.0</cqframework.version>
+        <cqframework.version>3.3.2</cqframework.version>
         <hapi.version>6.8.0</hapi.version>
         <core.version>6.0.22</core.version>
         <spring-boot.version>2.1.5.RELEASE</spring-boot.version>
