@@ -1,18 +1,29 @@
 package org.opencds.cqf.tooling.operations.library;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r5.utils.Version;
+import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
+import org.opencds.cqf.tooling.igtools.IGLoggingService;
+import org.opencds.cqf.tooling.npm.ILibraryReader;
+import org.opencds.cqf.tooling.npm.LibraryLoader;
+import org.opencds.cqf.tooling.processor.CqlProcessor;
+import org.opencds.cqf.tooling.utilities.IGUtils;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 public class LibraryRefreshIT {
 
@@ -27,15 +38,20 @@ public class LibraryRefreshIT {
 
       Library libraryToRefresh = (Library) fhirContext.newJsonParser().parseResource(AOE_LIBRARY);
 
-      LibraryRefresh libraryRefresh = new LibraryRefresh();
-      libraryRefresh.setFhirContext(fhirContext);
+      IGUtils.IGInfo igInfo = new IGUtils.IGInfo(fhirContext, "/");
+      LibraryRefresh libraryRefresh = new LibraryRefresh(igInfo);
       libraryRefresh.setModelManager(modelManager);
       libraryRefresh.setLibraryManager(libraryManager);
+      List<NpmPackage> packages = new ArrayList<>();
+      ILibraryReader reader = new LibraryLoader(FhirVersionEnum.R5.getFhirVersionString());
+      CqlProcessor cqlProcessor = new CqlProcessor(packages,
+              Collections.singletonList(igInfo.getCqlBinaryPath()), reader, new IGLoggingService(LoggerFactory.getLogger(LibraryRefreshIT.class)),
+              libraryManager.getUcumService(), igInfo.getPackageId(), igInfo.getCanonical());
 
-      IBaseResource result = libraryRefresh.refreshLibrary(libraryToRefresh);
+      List<IBaseResource> results = libraryRefresh.refreshLibraries(igInfo, cqlProcessor);
 
-      Assert.assertTrue(result instanceof Library);
-      Library refreshedLibrary = (Library) result;
+      //Assert.assertTrue(results instanceof Library);
+      Library refreshedLibrary = (Library) results.get(0);
 
       // test date update
       Assert.assertTrue(DateUtils.isSameDay(new Date(), refreshedLibrary.getDate()));
@@ -62,15 +78,20 @@ public class LibraryRefreshIT {
 
       Library libraryToRefresh = (Library) fhirContext.newJsonParser().parseResource(AOE_LIBRARY);
 
-      LibraryRefresh libraryRefresh = new LibraryRefresh();
-      libraryRefresh.setFhirContext(fhirContext);
+      IGUtils.IGInfo igInfo = new IGUtils.IGInfo(fhirContext, null);
+      LibraryRefresh libraryRefresh = new LibraryRefresh(igInfo);
       libraryRefresh.setModelManager(modelManager);
       libraryRefresh.setLibraryManager(libraryManager);
+      List<NpmPackage> packages = new ArrayList<>();
+      ILibraryReader reader = new LibraryLoader(FhirVersionEnum.R5.getFhirVersionString());
+      CqlProcessor cqlProcessor = new CqlProcessor(packages,
+              Collections.singletonList(igInfo.getCqlBinaryPath()), reader, new IGLoggingService(LoggerFactory.getLogger(LibraryRefreshIT.class)),
+              libraryManager.getUcumService(), igInfo.getPackageId(), igInfo.getCanonical());
 
-      IBaseResource result = libraryRefresh.refreshLibrary(libraryToRefresh);
+      List<IBaseResource> results = libraryRefresh.refreshLibraries(igInfo, cqlProcessor);
 
-      Assert.assertTrue(result instanceof Library);
-      Library refreshedLibrary = (Library) result;
+      //Assert.assertTrue(result instanceof Library);
+      Library refreshedLibrary = (Library) results.get(0);
 
       // test date update
       Assert.assertTrue(DateUtils.isSameDay(new Date(), refreshedLibrary.getDate()));

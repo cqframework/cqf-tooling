@@ -110,11 +110,11 @@ public class IGUtils {
         private final String igPath;
         private final String cqlBinaryPath;
         private final String resourcePath;
-        private final String libraryResourcePath;
+        private String libraryResourcePath;
         private boolean refreshLibraries = true;
-        private final String planDefinitionResourcePath;
+        private String planDefinitionResourcePath;
         private boolean refreshPlanDefinitions = true;
-        private final String measureResourcePath;
+        private String measureResourcePath;
         private boolean refreshMeasures = true;
         private final String valueSetResourcePath;
         private final String codeSystemResourcePath;
@@ -257,6 +257,11 @@ public class IGUtils {
             return null;
         }
 
+        public void setLibraryResourcePath(String libraryResourcePath) {
+            this.libraryResourcePath =
+                    StringUtils.isEmpty(libraryResourcePath) ? getLibraryResourcePath() : libraryResourcePath;
+        }
+
         public boolean isRefreshLibraries() {
             return this.refreshLibraries;
         }
@@ -281,6 +286,11 @@ public class IGUtils {
             return null;
         }
 
+        public void setPlanDefinitionResourcePath(String planDefinitionResourcePath) {
+            this.planDefinitionResourcePath = StringUtils.isEmpty(planDefinitionResourcePath) ?
+                    getPlanDefinitionResourcePath() : planDefinitionResourcePath;
+        }
+
         public boolean isRefreshPlanDefinitions() {
             return this.refreshPlanDefinitions;
         }
@@ -303,6 +313,11 @@ public class IGUtils {
                 }
             }
             return null;
+        }
+
+        public void setMeasureResourcePath(String measureResourcePath) {
+            this.measureResourcePath =
+                    StringUtils.isEmpty(measureResourcePath) ? getMeasureResourcePath() : measureResourcePath;
         }
 
         public boolean isRefreshMeasures() {
