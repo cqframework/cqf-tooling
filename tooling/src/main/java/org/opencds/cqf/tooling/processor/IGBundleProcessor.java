@@ -1,17 +1,16 @@
 package org.opencds.cqf.tooling.processor;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import ca.uhn.fhir.context.FhirContext;
 import org.opencds.cqf.tooling.measure.MeasureProcessor;
 import org.opencds.cqf.tooling.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.tooling.utilities.HttpClientUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
-
-import ca.uhn.fhir.context.FhirContext;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class IGBundleProcessor {
     public static final String bundleFilesPathElement = "files/";

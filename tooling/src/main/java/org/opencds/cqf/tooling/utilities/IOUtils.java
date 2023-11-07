@@ -10,8 +10,6 @@ import org.cqframework.cql.cql2elm.*;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.Utilities;
-//import org.opencds.cqf.tooling.common.LinkedHashMap;
-//import org.opencds.cqf.tooling.common.LinkedHashSet;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 
 import java.io.*;

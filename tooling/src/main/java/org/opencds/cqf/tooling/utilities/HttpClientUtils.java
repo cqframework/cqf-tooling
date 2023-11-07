@@ -1,6 +1,7 @@
 package org.opencds.cqf.tooling.utilities;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.config.RequestConfig;
@@ -10,7 +11,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.apache.commons.lang3.tuple.Pair;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

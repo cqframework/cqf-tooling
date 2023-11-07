@@ -1,14 +1,7 @@
 package org.opencds.cqf.tooling.processor;
 
-import static java.util.Objects.requireNonNull;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import ca.uhn.fhir.context.FhirContext;
 import com.google.common.base.Strings;
-
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
@@ -19,7 +12,12 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
 
 public class IGProcessor extends BaseProcessor {
     public static final String IG_VERSION_REQUIRED = "igVersion required";

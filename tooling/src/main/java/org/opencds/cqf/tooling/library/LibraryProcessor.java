@@ -1,5 +1,26 @@
 package org.opencds.cqf.tooling.library;
 
+import ca.uhn.fhir.context.FhirContext;
+import com.google.common.base.Strings;
+import org.apache.commons.io.FilenameUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.utilities.TextFile;
+import org.hl7.fhir.utilities.Utilities;
+import org.opencds.cqf.tooling.common.ThreadUtils;
+import org.opencds.cqf.tooling.library.r4.R4LibraryProcessor;
+import org.opencds.cqf.tooling.library.stu3.STU3LibraryProcessor;
+import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
+import org.opencds.cqf.tooling.processor.BaseProcessor;
+import org.opencds.cqf.tooling.processor.CqlProcessor;
+import org.opencds.cqf.tooling.processor.IGProcessor;
+import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
+import org.opencds.cqf.tooling.utilities.LogUtils;
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,33 +30,6 @@ import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Pattern;
-
-import com.google.common.base.Strings;
-
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.CodeableConcept;
-import org.hl7.fhir.r5.model.Coding;
-import org.hl7.fhir.r5.model.Attachment;
-import org.hl7.fhir.r5.model.Library;
-import org.hl7.fhir.r5.model.RelatedArtifact;
-import org.hl7.fhir.utilities.TextFile;
-import org.hl7.fhir.utilities.Utilities;
-import org.opencds.cqf.tooling.common.ThreadUtils;
-import org.opencds.cqf.tooling.library.r4.R4LibraryProcessor;
-import org.opencds.cqf.tooling.library.stu3.STU3LibraryProcessor;
-import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
-import org.opencds.cqf.tooling.processor.*;
-import org.opencds.cqf.tooling.utilities.HttpClientUtils;
-import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.opencds.cqf.tooling.utilities.LogUtils;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class LibraryProcessor extends BaseProcessor {
     private Logger logger = LoggerFactory.getLogger(this.getClass());

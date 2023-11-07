@@ -1,14 +1,13 @@
 package org.opencds.cqf.tooling.operation;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BundleResources extends Operation {
 

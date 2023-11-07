@@ -1,11 +1,6 @@
 package org.opencds.cqf.tooling.processor;
 
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.Nullable;
-
+import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
@@ -13,7 +8,8 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
-import ca.uhn.fhir.context.FhirContext;
+import javax.annotation.Nullable;
+import java.util.*;
 
 public class TestCaseProcessor {
     public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext) {

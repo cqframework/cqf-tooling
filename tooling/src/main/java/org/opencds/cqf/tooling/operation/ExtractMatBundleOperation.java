@@ -3,7 +3,6 @@ package org.opencds.cqf.tooling.operation;
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.common.ThreadUtils;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
@@ -11,16 +10,15 @@ import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ExtractMatBundleOperation extends Operation {
     private static final String ERROR_BUNDLE_OUTPUT_INVALID = "When specifying the output folder using -op for ExtractMatBundle, the output directory name must contain the word 'bundle' (all lowercase.)";
