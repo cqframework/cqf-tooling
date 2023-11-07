@@ -1,13 +1,18 @@
 package org.opencds.cqf.tooling.operation;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class BundleResources extends Operation {
 
@@ -97,7 +102,7 @@ public class BundleResources extends Operation {
                     throw new IllegalArgumentException("Unknown fhir version: " + version);
             }
         }
-
+        
         getResources(resources);
 
         if (context.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
@@ -144,35 +149,45 @@ public class BundleResources extends Operation {
 
     private void getResources(File[] resources) {
         for (File resource : resources) {
-            if (resource.isDirectory()) {
+
+            if(resource.isDirectory()) {
                 getResources(resource.listFiles());
                 continue;
             }
 
-            try (FileReader fileReader = new FileReader(resource);
-                 BufferedReader bufferedReader = new BufferedReader(fileReader);) {
-
-                String fileExtension = resource.getPath().substring(resource.getPath().lastIndexOf('.') + 1);
-
-                IBaseResource parsedResource = null;
-
-                if ("xml".equalsIgnoreCase(fileExtension)) {
-                    parsedResource = context.newXmlParser().parseResource(bufferedReader);
-                } else if ("json".equalsIgnoreCase(fileExtension)) {
-                    parsedResource = context.newJsonParser().parseResource(bufferedReader);
+            if (resource.getPath().endsWith(".xml")) {
+                try {
+                    theResource = context.newXmlParser().parseResource(new FileReader(resource));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e.getMessage());
                 }
-
-                if (parsedResource != null) {
-                    theResources.add(parsedResource);
+                catch (Exception e) {
+                    String message = String.format("'%s' will not be included in the bundle because the following error occurred: '%s'", resource.getName(), e.getMessage());
+                    System.out.println(message);
+                    continue;
                 }
-
-            } catch (Exception e) {
-                String message = String.format("'%s' will not be included in the bundle because the following error occurred: '%s'", resource.getName(), e.getMessage());
-                System.out.println(message);
             }
+            else if (resource.getPath().endsWith(".json")) {
+                try {
+                    theResource = context.newJsonParser().parseResource(new FileReader(resource));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e.getMessage());
+                }
+                catch (Exception e) {
+                    String message = String.format("'%s' will not be included in the bundle because the following error occurred: '%s'", resource.getName(), e.getMessage());
+                    System.out.println(message);
+                    continue;
+                }
+            }
+            else {
+                continue;
+            }
+            theResources.add(theResource);
         }
     }
-
+    
     // Output
     public void output(IBaseResource resource, FhirContext context) {
         String fileNameBase = getOutputPath() + getOutputPath().substring(getOutputPath().lastIndexOf(File.separator));
@@ -182,12 +197,11 @@ public class BundleResources extends Operation {
 
         try (FileOutputStream writer = new FileOutputStream(fileNameBase + "-bundle." + encoding)) {
             writer.write(
-                    encoding.equals("json")
-                            ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-                            : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                encoding.equals("json")
+                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
             );
             writer.flush();
-
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());

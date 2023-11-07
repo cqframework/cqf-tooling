@@ -303,7 +303,7 @@ public class TestCaseProcessor {
         // This is either only useful to me in this instance, or actually pretty useful.
         // If it is useful, it should probably be moved to a helper class of some kind.
         Iterator<Cell> cIterator = row.cellIterator();
-        StringBuilder statement = new StringBuilder("switch (yourCondition) {\n");
+        String statement = "switch (yourCondition) {\n";
         ArrayList<String> alreadyAdded = new ArrayList<String>();
 
         while (cIterator.hasNext()) {
@@ -317,18 +317,18 @@ public class TestCaseProcessor {
                 continue;
             }
 
-            statement.append(String.format(
+            statement += String.format(
                     "\tcase \"%s\":\n\t\tbreak;\n",
                     cellStr
-            ));
+            );
 
             alreadyAdded.add(cellStr);
         }
 
-        statement.append("}");
+        statement += "}";
         try {
             BufferedWriter out = new BufferedWriter(new FileWriter(outputPath));
-            out.write(statement.toString());
+            out.write(statement);
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
