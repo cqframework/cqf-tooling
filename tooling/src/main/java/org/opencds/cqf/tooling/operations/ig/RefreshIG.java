@@ -78,7 +78,7 @@ public class RefreshIG implements ExecutableOperation {
 
       // refresh libraries
       LibraryRefresh libraryRefresh = new LibraryRefresh(info);
-      publishLibraries(info, libraryRefresh.refreshLibraries(info, libraryRefresh.getCqlProcessor()));
+      publishLibraries(info, libraryRefresh.refreshLibraries(info));
 
       // package (Bundle or list of resources)
        BundleResources bundleResources = new BundleResources();

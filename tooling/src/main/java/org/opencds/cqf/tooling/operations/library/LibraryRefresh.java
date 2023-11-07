@@ -4,13 +4,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TerserUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.FilenameUtils;
-import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
-import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
+import org.cqframework.fhir.npm.NpmPackageManager;
 import org.cqframework.fhir.utilities.exception.IGInitializationException;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
@@ -19,12 +18,10 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.Library;
-import org.hl7.fhir.utilities.json.JsonException;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.opencds.cqf.tooling.exception.InvalidOperationArgs;
 import org.opencds.cqf.tooling.igtools.IGLoggingService;
 import org.opencds.cqf.tooling.npm.LibraryLoader;
-import org.opencds.cqf.tooling.npm.NpmPackageManager;
 import org.opencds.cqf.tooling.operations.ExecutableOperation;
 import org.opencds.cqf.tooling.operations.Operation;
 import org.opencds.cqf.tooling.operations.OperationParam;
@@ -59,19 +56,34 @@ public class LibraryRefresh implements ExecutableOperation {
            description = "The directory path to which the generated FHIR resources should be written (default is to replace existing resources within the IG)")
    private String outputPath;
 
-   private final IGUtils.IGInfo igInfo;
+   private IGUtils.IGInfo igInfo;
    private final FhirContext fhirContext;
    private ModelManager modelManager;
    private LibraryManager libraryManager;
    private CqlTranslatorOptions translatorOptions = CqlTranslatorOptions.defaultOptions();
-   private final NpmPackageManager npmPackageManager;
+   private NpmPackageManager npmPackageManager;
    private final CqlProcessor cqlProcessor;
    private final List<LibraryPackage> libraryPackages;
+
+   public LibraryRefresh(FhirContext fhirContext) {
+      this.fhirContext = fhirContext;
+      this.libraryPackages = new ArrayList<>();
+      LibraryLoader libraryLoader = new LibraryLoader(this.fhirContext.getVersion().getVersion().getFhirVersionString());
+      UcumEssenceService ucumService;
+      try {
+         ucumService = new UcumEssenceService(UcumEssenceService.class.getResourceAsStream("/ucum-essence.xml"));
+      } catch (UcumException e) {
+         throw new IGInitializationException("Could not create UCUM validation service", e);
+      }
+      this.cqlProcessor = new CqlProcessor(null,
+              Collections.singletonList(pathToCql), libraryLoader, new IGLoggingService(logger),
+              ucumService, null, null);
+   }
 
    public LibraryRefresh(IGUtils.IGInfo igInfo) {
       this.igInfo = igInfo;
       this.fhirContext = igInfo.getFhirContext();
-      this.npmPackageManager = new NpmPackageManager(igInfo.getIgResource(), fhirContext.getVersion().getVersion().getFhirVersionString());
+      this.npmPackageManager = new NpmPackageManager(igInfo.getIgResource(), null);
       this.libraryPackages = new ArrayList<>();
       LibraryLoader libraryLoader = new LibraryLoader(igInfo.getFhirContext().getVersion().getVersion().getFhirVersionString());
       UcumEssenceService ucumService;
@@ -98,7 +110,7 @@ public class LibraryRefresh implements ExecutableOperation {
          libraryManager = new LibraryManager(modelManager, translatorOptions.getCqlCompilerOptions());
          libraryManager.getLibrarySourceLoader().registerProvider(new DefaultLibrarySourceProvider(Paths.get(pathToCql)));
          libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
-         refreshLibrary(libraryToRefresh, cqlProcessor);
+         refreshLibrary(libraryToRefresh);
 
          if (outputPath == null) {
             outputPath = pathToLibrary;
@@ -111,14 +123,14 @@ public class LibraryRefresh implements ExecutableOperation {
    }
 
    // Directory Case
-   public List<IBaseResource> refreshLibraries(IGUtils.IGInfo igInfo, CqlProcessor cqlProcessor) {
+   public List<IBaseResource> refreshLibraries(IGUtils.IGInfo igInfo) {
       List<IBaseResource> refreshedLibraries = new ArrayList<>();
       cqlProcessor.execute();
       if (igInfo.isRefreshLibraries()) {
          logger.info("Refreshing Libraries...");
          for (var library : RefreshUtils.getResourcesOfTypeFromDirectory(fhirContext,
                  "Library", igInfo.getLibraryResourcePath())) {
-            refreshedLibraries.add(refreshLibrary(library, cqlProcessor));
+            refreshedLibraries.add(refreshLibrary(library));
          }
          resolveLibraryPackages();
       }
@@ -126,7 +138,8 @@ public class LibraryRefresh implements ExecutableOperation {
    }
 
    // Library access method
-   private IBaseResource refreshLibrary(IBaseResource libraryToRefresh, CqlProcessor cqlProcessor) {
+   public IBaseResource refreshLibrary(IBaseResource libraryToRefresh) {
+      cqlProcessor.execute();
       String name = ResourceUtils.getName(libraryToRefresh, fhirContext);
 
       logger.info("Refreshing {}", libraryToRefresh.getIdElement());
