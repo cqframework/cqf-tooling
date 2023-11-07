@@ -1,7 +1,14 @@
 package org.opencds.cqf.tooling.processor;
 
-import ca.uhn.fhir.context.FhirContext;
+import static java.util.Objects.requireNonNull;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.common.base.Strings;
+
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
@@ -12,12 +19,7 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.Objects.requireNonNull;
+import ca.uhn.fhir.context.FhirContext;
 
 public class IGProcessor extends BaseProcessor {
     public static final String IG_VERSION_REQUIRED = "igVersion required";
@@ -63,7 +65,6 @@ public class IGProcessor extends BaseProcessor {
         Boolean addBundleTimestamp = params.addBundleTimestamp;
         Boolean versioned = params.versioned;
         String fhirUri = params.fhirUri;
-
         // String measureToRefreshPath = params.measureToRefreshPath;
         ArrayList<String> resourceDirs = new ArrayList<String>();
         for (String resourceDir : params.resourceDirs) {
@@ -202,7 +203,7 @@ public class IGProcessor extends BaseProcessor {
     public static final String testCasePathElement = "input/tests/";
     public static final String devicePathElement = "input/resources/device/";
     
-    public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, List<String> resourcePaths) {
+    public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, ArrayList<String> resourcePaths) {                
         File directory = new File(getBundlesPath(igPath));
         if (!directory.exists()) {
             directory.mkdir();
