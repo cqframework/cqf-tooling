@@ -319,50 +319,7 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
         BundleUtils.postBundle(encoding, fhirContext, fhirUri, (IBaseResource) bundle);
     }
 
-    private void persistTestFiles(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri) {
-
-        String filesLoc = bundleDestPath + File.separator + libraryName + "-files";
-        File directory = new File(filesLoc);
-        if (directory.exists()) {
-
-            File[] filesInDir = directory.listFiles(new FilenameFilter() {
-                @Override
-                public boolean accept(File dir, String name) {
-                    return name.toLowerCase().startsWith("tests-");
-                }
-            });
-
-            if (!(filesInDir == null || filesInDir.length == 0)) {
-                for (File file : filesInDir) {
-                    if (file.getName().toLowerCase().startsWith("tests-")) {
-                        try {
-                            IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext, true);
-                            //ensure the resource can be posted
-                            if (resourceIsTransactionBundle(resource)) {
-                                BundleUtils.postBundle(encoding, fhirContext, fhirUri, resource);
-                            }
-                        } catch (Exception e) {
-                            //resource is likely not IBaseResource
-                            LogUtils.putException("persistTestFiles", e);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private boolean resourceIsTransactionBundle(IBaseResource inputResource) {
-        if (inputResource == null) return false;
-
-        if (inputResource instanceof org.hl7.fhir.dstu3.model.Bundle) {
-            return ((org.hl7.fhir.dstu3.model.Bundle) inputResource).getType().equals(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION);
-
-        } else if (inputResource instanceof org.hl7.fhir.r4.model.Bundle) {
-            return ((org.hl7.fhir.r4.model.Bundle) inputResource).getType().equals(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
-        }
-        return false;
-
-    }
+    protected abstract void persistTestFiles(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri);
 
     protected abstract String getSourcePath(FhirContext fhirContext, Map.Entry<String, IBaseResource> resourceEntry);
 

@@ -43,17 +43,16 @@ public class IOUtils
                 return UNKNOWN;
             }
 
-            String lowerValue = value.trim().toLowerCase();
-
-            return ENCODING_MAP.getOrDefault(lowerValue, UNKNOWN);
-        }
-
-        //Map lookup works slightly faster than switch:
-        private static final Map<String, Encoding> ENCODING_MAP = new HashMap<>();
-        static {
-            ENCODING_MAP.put("cql", CQL);
-            ENCODING_MAP.put("json", JSON);
-            ENCODING_MAP.put("xml", XML);
+            switch (value.trim().toLowerCase()) {
+                case "cql":
+                    return CQL;
+                case "json":
+                    return JSON;
+                case "xml":
+                    return XML;
+                default:
+                    return UNKNOWN;
+            }
         }
     }
 
@@ -192,10 +191,10 @@ public class IOUtils
     }
 
     private static Map<String, String> alreadyCopied = new HashMap<>();
-    public static int getTestsCounter() {
-        return testsCounter;
+    public static int copyFileCounter() {
+        return copyFileCounter;
     }
-    private static int testsCounter = 0;
+    private static int copyFileCounter = 0;
     public static boolean copyFile(String inputPath, String outputPath) {
 
         if ((inputPath == null || inputPath.isEmpty()) &&
@@ -226,7 +225,7 @@ public class IOUtils
             Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
 
             if (inputPath.toLowerCase().contains("tests-")){
-                testsCounter++;
+                copyFileCounter++;
 //                System.out.println("Total tests-*: " + testsCounter + ": " + inputPath);
             }
 
@@ -863,34 +862,24 @@ public class IOUtils
      * @param fhirContext
      */
     private static void setupMeasureReportPaths(FhirContext fhirContext) {
-        HashMap<String, IBaseResource> resources = new LinkedHashMap<>();
-        RuntimeResourceDefinition measureReportDefinition = ResourceUtils.getResourceDefinition(fhirContext, "MeasureReport");
-        String measureReportClassName = measureReportDefinition.getImplementingClass().getName();
-
-        String[] resourceDirectoriesArray = resourceDirectories.toArray(new String[0]);
-
-        Arrays.stream(resourceDirectoriesArray)
-                .parallel()
-                .forEach(dir -> {
-                    List<String> filePaths = IOUtils.getFilePaths(dir, true);
-                    Map<String, IBaseResource> directoryResources = new HashMap<>();
-
-                    for (String path : filePaths) {
-                        try {
-                            IBaseResource resource = IOUtils.readResource(path, fhirContext, true);
-                            if (resource != null) {
-                                directoryResources.put(path, resource);
-                            }
-                        } catch (Exception e) {
-                            // Handle exception
-                        }
-                    }
-
-                    directoryResources.entrySet()
-                            .stream()
-                            .filter(entry -> measureReportClassName.equals(entry.getValue().getClass().getName()))
-                            .forEach(entry -> measureReportPaths.add(entry.getKey()));
-                });
+        HashMap<String, IBaseResource> resources = new LinkedHashMap<String, IBaseResource>();
+        for(String dir : resourceDirectories) {
+            for(String path : IOUtils.getFilePaths(dir, true))
+            {
+                try {
+                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                } catch (Exception e) {
+                    //TODO: handle exception
+                }
+            }
+            //TODO: move these to ResourceUtils
+            RuntimeResourceDefinition measureReportDefinition = ResourceUtils.getResourceDefinition(fhirContext, "MeasureReport");
+            String measureReportClassName = measureReportDefinition.getImplementingClass().getName();
+            resources.entrySet().stream()
+                    .filter(entry -> entry.getValue() != null)
+                    .filter(entry ->  measureReportClassName.equals(entry.getValue().getClass().getName()))
+                    .forEach(entry -> measureReportPaths.add(entry.getKey()));
+        }
     }
 
     private static Set<String> planDefinitionPaths = new LinkedHashSet<String>();

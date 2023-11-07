@@ -51,7 +51,7 @@ public class IGBundleProcessor {
                 fhirUri, encoding);
         LogUtils.info("\r\n  [questionnaireProcessor.bundleQuestionnaires has finished]\r\n");
 
-        LogUtils.info("Total \"tests-*\" files copied: " + IOUtils.getTestsCounter() + ". " +
+        LogUtils.info("Total \"tests-*\" files copied: " + IOUtils.copyFileCounter() + ". " +
                 (fhirUri != null && !fhirUri.isEmpty() ? "These files will be posted to " + fhirUri : "")
         );
 

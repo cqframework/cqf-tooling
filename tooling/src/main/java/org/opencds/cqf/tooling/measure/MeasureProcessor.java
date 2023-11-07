@@ -15,11 +15,11 @@ import org.opencds.cqf.tooling.parameter.RefreshMeasureParameters;
 import org.opencds.cqf.tooling.processor.AbstractResourceProcessor;
 import org.opencds.cqf.tooling.processor.BaseProcessor;
 import org.opencds.cqf.tooling.processor.IGProcessor;
-import org.opencds.cqf.tooling.utilities.CanonicalUtils;
-import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.*;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -116,9 +116,53 @@ public class MeasureProcessor extends AbstractResourceProcessor {
         return measure;
     }
 
-
-
     //abstract methods to override:
+    @Override
+    protected void persistTestFiles(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri) {
+
+        String filesLoc = bundleDestPath + File.separator + libraryName + "-files";
+        File directory = new File(filesLoc);
+        if (directory.exists()) {
+
+            File[] filesInDir = directory.listFiles(new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String name) {
+                    return name.toLowerCase().startsWith("tests-");
+                }
+            });
+
+            if (!(filesInDir == null || filesInDir.length == 0)) {
+                for (File file : filesInDir) {
+                    if (file.getName().toLowerCase().startsWith("tests-")) {
+                        try {
+                            IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext, true);
+                            //ensure the resource can be posted
+                            if (resourceIsTransactionBundle(resource)) {
+                                BundleUtils.postBundle(encoding, fhirContext, fhirUri, resource);
+                            }
+                        } catch (Exception e) {
+                            //resource is likely not IBaseResource
+                            LogUtils.putException("persistTestFiles", e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean resourceIsTransactionBundle(IBaseResource inputResource) {
+        if (inputResource == null) return false;
+
+        if (inputResource instanceof org.hl7.fhir.dstu3.model.Bundle) {
+            return ((org.hl7.fhir.dstu3.model.Bundle) inputResource).getType().equals(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION);
+
+        } else if (inputResource instanceof org.hl7.fhir.r4.model.Bundle) {
+            return ((org.hl7.fhir.r4.model.Bundle) inputResource).getType().equals(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
+        }
+        return false;
+
+    }
+
     @Override
     protected String getSourcePath(FhirContext fhirContext, Map.Entry<String, IBaseResource> resourceEntry) {
         return IOUtils.getMeasurePathMap(fhirContext).get(resourceEntry.getKey());
