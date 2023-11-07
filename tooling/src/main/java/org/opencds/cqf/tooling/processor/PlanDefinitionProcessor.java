@@ -1,22 +1,12 @@
 package org.opencds.cqf.tooling.processor;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.apache.commons.io.FilenameUtils;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.utilities.Utilities;
-import org.opencds.cqf.tooling.common.ThreadUtils;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
-import org.opencds.cqf.tooling.utilities.*;
-import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Set;
 
 public class PlanDefinitionProcessor extends AbstractResourceProcessor{
     public PlanDefinitionProcessor(LibraryProcessor libraryProcessor, CDSHooksProcessor cdsHooksProcessor) {

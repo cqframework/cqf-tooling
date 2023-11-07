@@ -19,8 +19,6 @@ import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
