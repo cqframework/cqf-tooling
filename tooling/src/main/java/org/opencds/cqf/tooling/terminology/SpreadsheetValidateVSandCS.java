@@ -23,6 +23,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SpreadsheetValidateVSandCS extends Operation {
+
+    String systemName;
     private static final Logger logger = LoggerFactory.getLogger(SpreadsheetValidateVSandCS.class);
 
     private FhirContext fhirContext;
@@ -31,15 +33,16 @@ public class SpreadsheetValidateVSandCS extends Operation {
     private String urlToTestServer; // -urltotestserver (-uts)  server to validate
     private boolean hasHeader = true; // -hasheader (-hh)
     private String pathToIG; // -pathToIG (-ptig) path to IG - files installed using "npm --registry https://packages.simplifier.net install hl7.fhir.us.qicore@4.1.1" (or other package)
-    Map<String, CodeSystem> csMap;
-    Map<String, ValueSet> vsMap;
+    private Map<String, CodeSystem> csMap;
+    private Map<String, ValueSet> vsMap;
     private static final String newLine = System.getProperty("line.separator");
     private Set<String> csNotPresentInIG;
     private Set<String> vsNotPresentInIG;
-
-
-    // The file name of the input spreadsheet
-    private String spreadsheetName;
+    private Set<String> vsNotInTestServer;
+    private Set<String> csNotInTestServer;
+    private Set<String> spreadSheetErrors;
+    private Map<String, Object> vsFailureReport = new HashMap<>();
+    private Map<String, Object> csFailureReport = new HashMap<>();
 
     private String getHeader(Row header, int columnIndex) {
         if (header != null) {
@@ -65,6 +68,8 @@ public class SpreadsheetValidateVSandCS extends Operation {
         String password = "";
         csNotPresentInIG = new HashSet<>();
         vsNotPresentInIG = new HashSet<>();
+        vsNotInTestServer = new HashSet<>();
+        spreadSheetErrors = new HashSet<>();
 
         for (String arg : args) {
             if (arg.equals("-SpreadsheetValidateVSandCS")) continue;
@@ -116,6 +121,7 @@ public class SpreadsheetValidateVSandCS extends Operation {
         fhirClient = new FhirTerminologyClient(fhirContext, endpoint, userName, password);
 
         validateSpreadsheet(userName, password);
+        reportResults();
         System.out.println("Finished with the validation.");
     }
 
@@ -127,25 +133,18 @@ public class SpreadsheetValidateVSandCS extends Operation {
         int versionCellNumber = 5;
         int codeSystemURLCellNumber = 6;
 
-        String resourcePaths = "4.0.1;US-Core/3.1.0;QI-Core/4.1.1";
+        String resourcePaths = "4.0.1;US-Core/3.1.0;QI-Core/4.1.1;THO/3.1.0";
         Atlas atlas = new Atlas();
         atlas.loadPaths(pathToIG, resourcePaths);
         csMap = atlas.getCodeSystems();
         vsMap = atlas.getValueSets();
 
-        spreadsheetName = new File(pathToSpreadsheet).getName();
         Workbook workbook = SpreadsheetHelper.getWorkbook(pathToSpreadsheet);
         Sheet sheet = workbook.getSheetAt(firstSheet);
 
         Iterator<Row> rows = sheet.rowIterator();
         Row header = null;
         LocalDateTime begin = java.time.LocalDateTime.now();
-        StringBuilder report = new StringBuilder();
-        report.append("Validation Failure Report for Server " + urlToTestServer + " compared to " + pathToIG + newLine + newLine);
-        StringBuilder vsReport = new StringBuilder();
-        vsReport.append("ValueSets report" + newLine + newLine);
-        StringBuilder csReport = new StringBuilder();
-        csReport.append("CodeSystems report" + newLine + newLine);
 
         while (rows.hasNext()) {
             Row row = rows.next();
@@ -159,45 +158,24 @@ public class SpreadsheetValidateVSandCS extends Operation {
                 String valueSetURL = null;
                 String version = null;
                 String codeSystemURL = null;
-                if (row.getCell(idCellNumber).getStringCellValue() != null) {
+                if (row.getCell(idCellNumber) != null) {
                     id = row.getCell(idCellNumber).getStringCellValue();
                 }
-                if (row.getCell(valueSetURLCellNumber).getStringCellValue() != null) {
+                if (row.getCell(valueSetURLCellNumber) != null) {
                     valueSetURL = row.getCell(valueSetURLCellNumber).getStringCellValue();
                 }
-                if (row.getCell(versionCellNumber).getStringCellValue() != null) {
+                if (row.getCell(versionCellNumber) != null) {
                     version = row.getCell(versionCellNumber).getStringCellValue();
                 }
-                if (row.getCell(codeSystemURLCellNumber).getStringCellValue() != null) {
+                if (row.getCell(codeSystemURLCellNumber) != null) {
                     codeSystemURL = row.getCell(codeSystemURLCellNumber).getStringCellValue();
                 }
-                validateRow(valueSetURL, codeSystemURL, fhirClient, vsReport, csReport, row.getRowNum());
+                validateRow(valueSetURL, codeSystemURL, fhirClient, row.getRowNum() + 1); //add one row number due to header row
             } catch (NullPointerException | ConfigurationException ex) {
                 logger.debug(ex.getMessage());
                 logger.debug(ex.toString());
                 logger.debug(ex.getStackTrace().toString());
             }
-        }
-        report.append(vsReport + newLine);
-        if (!vsNotPresentInIG.isEmpty()) {
-            report.append(newLine);
-            report.append("ValueSets not in IG:" + newLine);
-            vsNotPresentInIG.forEach(vsName -> {
-                report.append(vsName + newLine);
-            });
-        }
-        report.append(csReport);
-        if (!csNotPresentInIG.isEmpty()) {
-            report.append(newLine);
-            report.append("CodeSystems not in IG:" + newLine);
-            csNotPresentInIG.forEach(csName -> {
-                report.append(csName + newLine);
-            });
-        }
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(getOutputPath() + File.separator + "validationReport.txt"))) {
-            writer.write(report.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
         LocalDateTime end = java.time.LocalDateTime.now();
@@ -205,39 +183,49 @@ public class SpreadsheetValidateVSandCS extends Operation {
 
     }
 
-    private void validateRow(String valueSetURL, String codeSystemURL, FhirTerminologyClient fhirClient, StringBuilder vsReport, StringBuilder csReport, int rowNumber) {
+    private void validateRow(String valueSetURL, String codeSystemURL, FhirTerminologyClient fhirClient, int rowNumber) {
         String vsServerUrl = urlToTestServer + "ValueSet/?url=" + valueSetURL;
         ValueSet vsToValidate = (ValueSet) fhirClient.getResource(vsServerUrl);
-        ValueSet vsSourceOfTruth = vsMap.get(vsToValidate.getId().substring(vsToValidate.getId().lastIndexOf(File.separator) + 1));
-        if (vsSourceOfTruth != null) {
-            compareValueSets(vsToValidate, vsSourceOfTruth, vsReport);
-            if (codeSystemURL == null || codeSystemURL.isEmpty()) {
-                csReport.append("Row " + rowNumber + " does not contain a codeSystem;" + newLine);
+        if (vsToValidate != null) {
+            ValueSet vsSourceOfTruth = vsMap.get(vsToValidate.getId().substring(vsToValidate.getId().lastIndexOf(File.separator) + 1));
+            if (vsSourceOfTruth != null) {
+                compareValueSets(vsToValidate, vsSourceOfTruth);
             } else {
-                if (codeSystemURL.contains(";")) {
-                    String[] codeSystemURLs = codeSystemURL.split(";");
-                    Arrays.stream(codeSystemURLs).forEach(singleCodeSystemURL -> {
-                        processCodeSystemURL(singleCodeSystemURL, csReport);
-                    });
-                } else {
-                    processCodeSystemURL(codeSystemURL, csReport);
-                }
+                vsNotPresentInIG.add(vsToValidate.getId().substring(vsToValidate.getId().lastIndexOf(File.separator) + 1));
             }
         } else {
-            vsNotPresentInIG.add(vsToValidate.getId().substring(vsToValidate.getId().lastIndexOf(File.separator) + 1));
+            vsNotInTestServer.add(vsServerUrl.substring(vsServerUrl.lastIndexOf("/") + 1));
+
+        }
+        if (codeSystemURL == null || codeSystemURL.isEmpty()) {
+            spreadSheetErrors.add("Row " + rowNumber + " does not contain a codeSystem");
+        } else {
+            if (codeSystemURL.contains(";")) {
+                String[] codeSystemURLs = codeSystemURL.split(";");
+                Arrays.stream(codeSystemURLs).forEach(singleCodeSystemURL -> {
+                    processCodeSystemURL(singleCodeSystemURL);
+                });
+            } else {
+                processCodeSystemURL(codeSystemURL);
+            }
         }
     }
 
-    private void processCodeSystemURL(String codeSystemURL, StringBuilder report) {
+    private void processCodeSystemURL(String codeSystemURL) {
         if (codeSystemNotInOutSideLocations(codeSystemURL)) {
             String csServerUrl = urlToTestServer + "CodeSystem/?url=" + codeSystemURL;
             CodeSystem csToValidate = (CodeSystem) fhirClient.getResource(csServerUrl);
-            CodeSystem csSourceOfTruth = csMap.get(csToValidate.getId().substring(csToValidate.getId().lastIndexOf(File.separator) + 1));
-            if (csSourceOfTruth == null || csSourceOfTruth.isEmpty()) {
-                csNotPresentInIG.add(csToValidate.getName());
-                return;
+            if (csToValidate != null) {
+                CodeSystem csSourceOfTruth = csMap.get(csToValidate.getId().substring(csToValidate.getId().lastIndexOf(File.separator) + 1));
+                if (csSourceOfTruth == null || csSourceOfTruth.isEmpty()) {
+                    csNotPresentInIG.add(csToValidate.getName());
+                    return;
+                }
+                compareCodeSystems(csToValidate, csSourceOfTruth);
+
+            } else {
+                csNotInTestServer.add(codeSystemURL);
             }
-            compareCodeSystems(csToValidate, csSourceOfTruth, report);
         }
     }
 
@@ -251,73 +239,129 @@ public class SpreadsheetValidateVSandCS extends Operation {
         return true;
     }
 
-    private void compareCodeSystems(CodeSystem terminologyServerCodeSystem, CodeSystem sourceOfTruthCodeSystem, StringBuilder report) {
-        Set<String> fieldsWithErrors = new HashSet<>();
+    private void compareCodeSystems(CodeSystem terminologyServerCodeSystem, CodeSystem sourceOfTruthCodeSystem) {
+        Set<Map<String, String>> fieldsWithErrors = new HashSet<>();
         if (!terminologyServerCodeSystem.getUrl().equals(sourceOfTruthCodeSystem.getUrl())) {
-            fieldsWithErrors.add("URL");
+            Map<String, String> urlFailure = new HashMap<>();
+            urlFailure.put("URL", "\"" + terminologyServerCodeSystem.getUrl() + "\" Does not equal IG URL \"" + sourceOfTruthCodeSystem.getUrl() + "\"" + newLine);
+            fieldsWithErrors.add(urlFailure);
         }
         if (!terminologyServerCodeSystem.getVersion().equals(sourceOfTruthCodeSystem.getVersion())) {
-            fieldsWithErrors.add("Version");
+            Map<String, String> versionFailure = new HashMap<>();
+            versionFailure.put("Version", "\"" + terminologyServerCodeSystem.getVersion() + "\" Does not equal IG Version \"" + sourceOfTruthCodeSystem.getVersion() + "\"" + newLine);
+            fieldsWithErrors.add(versionFailure);
         }
         if (!terminologyServerCodeSystem.getStatus().equals(sourceOfTruthCodeSystem.getStatus())) {
-            fieldsWithErrors.add("Status");
+            Map<String, String> statusFailure = new HashMap<>();
+            statusFailure.put("Status", "\"" + terminologyServerCodeSystem.getStatus() + "\" Does not equal IG Status \"" + sourceOfTruthCodeSystem.getStatus() + "\"" + newLine);
+            fieldsWithErrors.add(statusFailure);
         }
         if (!terminologyServerCodeSystem.getExperimental() == sourceOfTruthCodeSystem.getExperimental()) {
-            fieldsWithErrors.add("Experimental");
+            Map<String, String> experimentalFailure = new HashMap<>();
+            experimentalFailure.put("Experimental", "\"" + terminologyServerCodeSystem.getExperimental() + "\" Does not equal IG Experimental \"" + sourceOfTruthCodeSystem.getExperimental() + "\"" + newLine);
+            fieldsWithErrors.add(experimentalFailure);
         }
         if (!terminologyServerCodeSystem.getName().equals(sourceOfTruthCodeSystem.getName())) {
-            fieldsWithErrors.add("Name");
+            Map<String, String> nameFailure = new HashMap<>();
+            nameFailure.put("Name", "\"" + terminologyServerCodeSystem.getName() + "\" Does not equal IG Name \"" + sourceOfTruthCodeSystem.getName() + "\"" + newLine);
+            fieldsWithErrors.add(nameFailure);
         }
         if (!terminologyServerCodeSystem.getTitle().equals(sourceOfTruthCodeSystem.getTitle())) {
-            fieldsWithErrors.add("Title");
+            Map<String, String> titleFailure = new HashMap<>();
+            titleFailure.put("Title", "\"" + terminologyServerCodeSystem.getTitle() + "\" Does not equal IG Title \"" + sourceOfTruthCodeSystem.getTitle() + "\"" + newLine);
+            fieldsWithErrors.add(titleFailure);
         }
         if (!terminologyServerCodeSystem.getPublisher().equals(sourceOfTruthCodeSystem.getPublisher())) {
-            fieldsWithErrors.add("Publisher");
+            Map<String, String> publisherFailure = new HashMap<>();
+            publisherFailure.put("Publisher", "\"" + terminologyServerCodeSystem.getPublisher() + "\" Does not equal IG Publisher \"" + sourceOfTruthCodeSystem.getPublisher() + "\"" + newLine);
+            fieldsWithErrors.add(publisherFailure);
         }
         if (!terminologyServerCodeSystem.getContent().equals(sourceOfTruthCodeSystem.getContent())) {
-            fieldsWithErrors.add("Content");
+            Map<String, String> contentFailure = new HashMap<>();
+            contentFailure.put("Content", "\"" + terminologyServerCodeSystem.getContent() + "\" Does not equal IG Content \"" + sourceOfTruthCodeSystem.getContent() + "\"" + newLine);
+            fieldsWithErrors.add(contentFailure);
         }
         if (terminologyServerCodeSystem.getCount() != sourceOfTruthCodeSystem.getCount()) {
-            fieldsWithErrors.add("Count");
+            Map<String, String> countFailure = new HashMap<>();
+            countFailure.put("Count", "\"" + terminologyServerCodeSystem.getCount() + "\" Does not equal IG Count \"" + sourceOfTruthCodeSystem.getCount() + "\"" + newLine);
+            fieldsWithErrors.add(countFailure);
         }
-        if (!compareCodeSystemConcepts(terminologyServerCodeSystem.getConcept(), sourceOfTruthCodeSystem.getConcept())) {
-            fieldsWithErrors.add("Concepts");
+        Map<String, String> conceptErrors = new HashMap<>();
+        if (!compareCodeSystemConcepts(terminologyServerCodeSystem.getConcept(), sourceOfTruthCodeSystem.getConcept(), conceptErrors)) {
+            fieldsWithErrors.add(conceptErrors);
         }
-        if (fieldsWithErrors.size() > 0) {
-            addToReport(fieldsWithErrors, terminologyServerCodeSystem.getName(), report);
+        if (!fieldsWithErrors.isEmpty()) {
+            csFailureReport.put(terminologyServerCodeSystem.getName(), fieldsWithErrors);
         }
     }
 
-    private boolean compareCodeSystemConcepts(List<CodeSystem.ConceptDefinitionComponent> terminologyConcepts, List<CodeSystem.ConceptDefinitionComponent> truthConcepts) {
+    private boolean compareCodeSystemConcepts(List<CodeSystem.ConceptDefinitionComponent> terminologyConcepts, List<CodeSystem.ConceptDefinitionComponent> truthConcepts, Map<String, String> conceptErrors) {
         AtomicBoolean conceptsMatch = new AtomicBoolean(true);
         if ((terminologyConcepts != null && truthConcepts != null) && (terminologyConcepts.size() == truthConcepts.size())) {
             Map<String, CodeSystem.ConceptDefinitionComponent> terminologyConceptsMap = createConceptMap(terminologyConcepts);
             Map<String, CodeSystem.ConceptDefinitionComponent> truthConceptsMap = createConceptMap(truthConcepts);
+            conceptErrors.put("Concept", "");
             terminologyConceptsMap.forEach((conceptCode, termConcept) -> {
+                boolean falseFound = false;
                 if (truthConceptsMap.containsKey(conceptCode) && conceptsMatch.get()) {
                     CodeSystem.ConceptDefinitionComponent truthConcept = truthConceptsMap.get(conceptCode);
                     if (termConcept != null && truthConcept != null) {
-                        if(conceptsMatch.get()){conceptsMatch.set(compareStrings(termConcept.getCode(), truthConcept.getCode()));};
-                        if(conceptsMatch.get()){conceptsMatch.set(compareStrings(termConcept.getDisplay(), truthConcept.getDisplay()));};
-                        if(conceptsMatch.get()){conceptsMatch.set(compareStrings(termConcept.getDefinition(), truthConcept.getDefinition()));};
+                        if(!compareStrings(termConcept.getCode().trim(), truthConcept.getCode().trim())){
+                            falseFound = true;
+                            conceptErrors.put("Code:", "\t \"" + termConcept.getCode() + "\" does not match the IG code \""  + truthConcept.getCode() + "\"" + newLine);
+                        }
+                        if(!compareStrings(termConcept.getDisplay().trim(), truthConcept.getDisplay().trim())){
+                            falseFound = true;
+                            conceptErrors.put("Display:", "\t \"" + termConcept.getDisplay() + "\" does not match the IG display \""  + truthConcept.getDisplay() + "\""  + newLine);
+                        }
+                        if(!compareStrings(termConcept.getDefinition().trim(), truthConcept.getDefinition().trim())){
+                            falseFound = true;
+                            conceptErrors.put("Definition", "\t \"" + termConcept.getDefinition() + "\" does not match the IG definition \""  + truthConcept.getDefinition() + "\""  + newLine);
+                        }
+                        if(falseFound){
+                            conceptsMatch.set(false);
+                        }
                     } else {
                         conceptsMatch.set(false);
+                        if (termConcept == null) {
+                            conceptErrors.put("Concepts Null", " concept is null and IG concept is not null." + newLine);
+                        } else {
+                            conceptErrors.put("Concepts Null", " concept is not null and IG concept is null." + newLine);
+                        }
+
+                    }
+                    if(termConcept.getConcept() != null){
+                        conceptsMatch.set(compareCodeSystemConcepts(termConcept.getConcept(), truthConcept.getConcept(), conceptErrors));
                     }
                 } else {
                     conceptsMatch.set(false);
+                    conceptErrors.put("Code", "\tThe concept code \"" + conceptCode + "\" from the terminology server does not match the concept code \"" + truthConceptsMap.get(conceptCode) + "\" from the IG." + newLine);
                 }
             });
         } else {
             conceptsMatch.set(false);
+            if (terminologyConcepts == null) {
+                conceptErrors.put("Concepts", "\tThe terminology concept is not present, but the IG contains one." + newLine);
+            }
+            if (truthConcepts == null) {
+                conceptErrors.put("Concepts", "\tThe terminology concept is present, but the IG does not contains one." + newLine);
+            }
+            if (terminologyConcepts.size() != truthConcepts.size()) {
+                conceptErrors.put("Concepts", "\tThe terminology concept and the IG concept sizes do not match ." + newLine);
+            }
         }
         return conceptsMatch.get();
     }
 
-    private boolean compareStrings(String terminologyString, String truthString){
-        if((terminologyString != null && truthString != null) || (terminologyString == null && truthString == null)){
-            if(terminologyString == null && truthString == null){return true;}
-            if((terminologyString != null) && (terminologyString.equals(truthString))){
+    private boolean compareStrings(String terminologyString, String truthString) {
+        if ((terminologyString != null && truthString != null) || (terminologyString == null && truthString == null)) {
+            if (terminologyString == null && truthString == null) {
                 return true;
+            }
+            if ((terminologyString != null) && (terminologyString.equals(truthString))) {
+                return true;
+            } else {
+                return false;
             }
         }
         return false;
@@ -331,42 +375,65 @@ public class SpreadsheetValidateVSandCS extends Operation {
         return conceptMap;
     }
 
-    private void compareValueSets(ValueSet terminologyServerValueSet, ValueSet sourceOfTruthValueSet, StringBuilder report) {
-        Set<String> fieldsWithErrors = new HashSet<>();
-        if (!terminologyServerValueSet.getUrl().equals(sourceOfTruthValueSet.getUrl())) {
-            fieldsWithErrors.add("URL");
+    private void compareValueSets(ValueSet terminologyServerValueSet, ValueSet sourceOfTruthValueSet) {
+
+        Set<Map<String, String>> fieldsWithErrors = new HashSet<>();
+        if (!terminologyServerValueSet.getUrl()
+                .equals(sourceOfTruthValueSet.getUrl())) {
+            Map<String, String> urlFailure = new HashMap<>();
+            urlFailure.put("URL", terminologyServerValueSet.getUrl() + " Does not equal IG URL " + sourceOfTruthValueSet.getUrl() + newLine);
+            fieldsWithErrors.add(urlFailure);
         }
         if (!terminologyServerValueSet.getVersion().equals(sourceOfTruthValueSet.getVersion())) {
-            fieldsWithErrors.add("Version");
+            Map<String, String> versionFailure = new HashMap<>();
+            versionFailure.put("Version", "\"" + terminologyServerValueSet.getVersion() + "\" Does not equal IG Version \"" + sourceOfTruthValueSet.getVersion() + "\"" + newLine);
+            fieldsWithErrors.add(versionFailure);
         }
         if (!terminologyServerValueSet.getStatus().equals(sourceOfTruthValueSet.getStatus())) {
-            fieldsWithErrors.add("Status");
+            Map<String, String> statusFailure = new HashMap<>();
+            statusFailure.put("Status", "\"" + terminologyServerValueSet.getStatus() + "\" Does not equal IG Status \"" + sourceOfTruthValueSet.getStatus() + "\"" + newLine);
+            fieldsWithErrors.add(statusFailure);
         }
         if (!terminologyServerValueSet.getExperimental() == sourceOfTruthValueSet.getExperimental()) {
-            fieldsWithErrors.add("Experimental");
+            Map<String, String> experimentalFailure = new HashMap<>();
+            experimentalFailure.put("Experimental", "\"" + terminologyServerValueSet.getExperimental() + "\" Does not equal IG Experimental \"" + sourceOfTruthValueSet.getExperimental() + "\"" + newLine);
+            fieldsWithErrors.add(experimentalFailure);
         }
         if (!terminologyServerValueSet.getName().equals(sourceOfTruthValueSet.getName())) {
-            fieldsWithErrors.add("Name");
+            Map<String, String> nameFailure = new HashMap<>();
+            nameFailure.put("Name", "\"" + terminologyServerValueSet.getName() + "\" Does not equal IG Experimental \"" + sourceOfTruthValueSet.getName() + "\"" + newLine);
+            fieldsWithErrors.add(nameFailure);
         }
         if (!terminologyServerValueSet.getTitle().equals(sourceOfTruthValueSet.getTitle())) {
-            fieldsWithErrors.add("Title");
+            Map<String, String> titleFailure = new HashMap<>();
+            titleFailure.put("Status", "\"" + terminologyServerValueSet.getTitle() + "\" Does not equal IG Experimental \"" + sourceOfTruthValueSet.getTitle() + "\"" + newLine);
+            fieldsWithErrors.add(titleFailure);
         }
         if (!terminologyServerValueSet.getPublisher().equals(sourceOfTruthValueSet.getPublisher())) {
-            fieldsWithErrors.add("Publisher");
+            Map<String, String> publisherFailure = new HashMap<>();
+            publisherFailure.put("Publisher", "\"" + terminologyServerValueSet.getPublisher() + "\" Does not equal IG Experimental \"" + sourceOfTruthValueSet.getPublisher() + "\"" + newLine);
+            fieldsWithErrors.add(publisherFailure);
         }
-        if (!terminologyServerValueSet.getStatus().equals(sourceOfTruthValueSet.getStatus())) {
+/*        TODO: add contact verification method
+        if (!terminologyServerValueSet.getContact().equals(sourceOfTruthValueSet.getContact())) {
+            Map<String, String> publisherFailure = new HashMap<>();
+            publisherFailure.put("Publisher", terminologyServerValueSet.getPublisher() + " Does not equal IG Experimental " + sourceOfTruthValueSet.getPublisher());
+            fieldsWithErrors.add(publisherFailure);
             fieldsWithErrors.add("Status");
         }
+ */
         if (!compareComposes(terminologyServerValueSet.getCompose(), sourceOfTruthValueSet.getCompose())) {
-            fieldsWithErrors.add("Compose");
+            //TODO: fix up compose comparison
+//            fieldsWithErrors.add("Compose");
         }
-        if (fieldsWithErrors.size() > 0) {
-            addToReport(fieldsWithErrors, terminologyServerValueSet.getName(), report);
+        if (!fieldsWithErrors.isEmpty()) {
+            vsFailureReport.put(terminologyServerValueSet.getName(), fieldsWithErrors);
         }
     }
 
-    private void addToReport(Set<String> errorSet, String name, StringBuilder report) {
-        report.append(name + " does not match the IG for the following fields:");
+/*
+    private void addToReport(Set<String> errorSet, String name) {
+        report.append("\t" + name + " does not match the IG for the following fields:");
         Iterator<String> iterator = errorSet.iterator();
         while (iterator.hasNext()) {
             String fieldName = iterator.next();
@@ -378,6 +445,7 @@ public class SpreadsheetValidateVSandCS extends Operation {
         report.append(newLine);
 
     }
+*/
 
     private boolean compareComposes(ValueSet.ValueSetComposeComponent terminologyServerComposeComponent, ValueSet.ValueSetComposeComponent sourceOfTruthComposeComponent) {
         AtomicBoolean composesMatch = new AtomicBoolean(true);
@@ -424,5 +492,84 @@ public class SpreadsheetValidateVSandCS extends Operation {
             includesMap.put(include.getSystem(), conceptMap);
         });
         return includesMap;
+    }
+
+    private void reportResults() {
+        StringBuilder report = new StringBuilder();
+        report.append("Validation Failure Report for Server " + urlToTestServer + " compared to " + pathToIG + newLine + newLine);
+        handleFailureReport(report, "valueset");
+        if (!vsNotInTestServer.isEmpty()) {
+            report.append(newLine);
+            report.append("\tValueSets not found in Test Server:" + newLine);
+            vsNotInTestServer.forEach(vsName -> {
+                report.append("\t\t" + vsName + newLine);
+            });
+        }
+        if (!vsNotPresentInIG.isEmpty()) {
+            report.append(newLine);
+            report.append("\tValueSets not in IG:" + newLine);
+            vsNotPresentInIG.forEach(vsName -> {
+                report.append("\t\t" + vsName + newLine);
+            });
+        }
+
+        handleFailureReport(report, "codesystem");
+        if (!csNotPresentInIG.isEmpty()) {
+            report.append(newLine);
+            report.append("\tCodeSystems not in IG:" + newLine);
+            csNotPresentInIG.forEach(csName -> {
+                report.append("\t\t" + csName + newLine);
+            });
+        }
+        if (!spreadSheetErrors.isEmpty()) {
+            report.append(newLine + newLine);
+            report.append("SpreadSheet Errors:" + newLine);
+            spreadSheetErrors.forEach(sheetError -> {
+                report.append("\t\t" + sheetError + newLine);
+            });
+        }
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(getOutputPath() + File.separator + "validationReport.txt"))) {
+            writer.write(report.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleFailureReport(StringBuilder report, String whichReport) {
+        String headerText = "";
+        Map<String, Object> failureReport = new HashMap<>();
+        StringBuilder newReport = new StringBuilder();
+        if (whichReport.equalsIgnoreCase("valueset")) {
+            headerText = "\tValueSet Failures" + newLine;
+            failureReport = vsFailureReport;
+        } else if (whichReport.equalsIgnoreCase("codesystem")) {
+            headerText = newLine + "\tCodeSystem Failures" + newLine;
+            failureReport = csFailureReport;
+        }
+        newReport.append(headerText);
+        if (!failureReport.isEmpty()) {
+            failureReport.forEach((setName, failureSet) -> {
+                newReport.append("\t\t" + setName + ":" + newLine);
+                ((Set<?>) failureSet).forEach((fieldWithErrors) -> {
+                    if(((Map<?, ?>)fieldWithErrors).get("Concept") != null){
+                        newReport.append("\t\t\t" + "Concept:" + newLine);
+                        ((Map<?, ?>) fieldWithErrors).forEach((field, reason) -> {
+                            if(!(field.equals("Concept"))) {
+                                newReport.append("\t\t\t\t" + field + ": " + newLine);
+                                newReport.append("\t\t\t\t\t" + reason);
+                            }
+                        });
+
+                    }else {
+                        ((Map<?, ?>) fieldWithErrors).forEach((field, reason) -> {
+                            newReport.append("\t\t\t" + field + ": " + newLine);
+                            newReport.append("\t\t\t\t" + reason);
+                        });
+                    }
+                });
+
+            });
+            report.append(newReport);
+        }
     }
 }
