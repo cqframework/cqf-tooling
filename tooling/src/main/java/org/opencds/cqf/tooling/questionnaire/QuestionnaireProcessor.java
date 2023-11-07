@@ -35,4 +35,9 @@ public class QuestionnaireProcessor extends AbstractResourceProcessor{
     protected Set<String> getPaths(FhirContext fhirContext) {
         return IOUtils.getQuestionnairePaths(fhirContext);
     }
+
+    @Override
+    protected void persistTestFiles(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri) {
+        //not needed
+    }
 }

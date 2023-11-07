@@ -34,4 +34,9 @@ public class PlanDefinitionProcessor extends AbstractResourceProcessor{
     protected Set<String> getPaths(FhirContext fhirContext) {
         return IOUtils.getPlanDefinitionPaths(fhirContext);
     }
+
+    @Override
+    protected void persistTestFiles(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri) {
+        //not needed
+    }
 }
