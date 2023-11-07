@@ -101,7 +101,7 @@ public class TestCaseProcessor {
     static Set<String> copiedFilePaths = new HashSet<>();
 
     //TODO: the bundle needs to have -expectedresults added too
-    public static void bundleTestCaseFiles(String igPath, String contextResourceType, String libraryName, String destPath, FhirContext fhirContext) {
+    public static String bundleTestCaseFiles(String igPath, String contextResourceType, String libraryName, String destPath, FhirContext fhirContext) {
         String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), contextResourceType), libraryName);
         List<String> testCasePaths = IOUtils.getFilePaths(igTestCasePath, false);
         Set<String> measureReportPaths = IOUtils.getMeasureReportPaths(fhirContext);
@@ -144,7 +144,7 @@ public class TestCaseProcessor {
                 }
             }
         }
-        LogUtils.info("bundleTestCaseFiles: " + tracker + " files copied for " + igTestCasePath);
+        return "\nBundle Test Case Files: " + tracker + " files copied for " + igTestCasePath;
     }
 
     public static void cleanUp() {

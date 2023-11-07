@@ -31,23 +31,30 @@ public class IGBundleProcessor {
 
 
         LogUtils.info("\r\n  [measureProcessor.bundleMeasures has started]");
-        measureProcessor.bundleMeasures(refreshedLibraryNames, igPath, binaryPaths, includeDependencies, includeTerminology, includePatientScenarios, versioned,
-                addBundleTimestamp, fhirContext, fhirUri, encoding);
+        measureProcessor.bundleResources(refreshedLibraryNames,
+                igPath, binaryPaths, includeDependencies, includeTerminology,
+                includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
+                fhirUri, encoding);
+
+        LogUtils.info("\r\n  [measureProcessor.bundleMeasures has finished]\r\n");
+
+        LogUtils.info("\r\n  [planDefinitionProcessor.bundlePlanDefinitions has started]");
+        planDefinitionProcessor.bundleResources(refreshedLibraryNames,
+                igPath, binaryPaths, includeDependencies, includeTerminology,
+                includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
+                fhirUri, encoding);
+        LogUtils.info("\r\n  [planDefinitionProcessor.bundlePlanDefinitions has finished]\r\n");
+
+        LogUtils.info("\r\n  [questionnaireProcessor.bundleQuestionnaires has started]");
+        questionnaireProcessor.bundleResources(refreshedLibraryNames,
+                igPath, binaryPaths, includeDependencies, includeTerminology,
+                includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
+                fhirUri, encoding);
+        LogUtils.info("\r\n  [questionnaireProcessor.bundleQuestionnaires has finished]\r\n");
 
         LogUtils.info("Total \"tests-*\" files copied: " + IOUtils.getTestsCounter() + ". " +
                 (fhirUri != null && !fhirUri.isEmpty() ? "These files will be posted to " + fhirUri : "")
         );
-        LogUtils.info("\r\n  [measureProcessor.bundleMeasures has finished]\r\n");
-
-        LogUtils.info("\r\n  [planDefinitionProcessor.bundlePlanDefinitions has started]");
-        planDefinitionProcessor.bundlePlanDefinitions(refreshedLibraryNames, igPath, binaryPaths, includeDependencies, includeTerminology,
-                includePatientScenarios, versioned, addBundleTimestamp, fhirContext, fhirUri, encoding);
-        LogUtils.info("\r\n  [planDefinitionProcessor.bundlePlanDefinitions has finished]\r\n");
-
-        LogUtils.info("\r\n  [questionnaireProcessor.bundleQuestionnaires has started]");
-        questionnaireProcessor.bundleQuestionnaires(refreshedLibraryNames, igPath, binaryPaths, includeDependencies, includeTerminology,
-                includePatientScenarios, versioned, addBundleTimestamp, fhirContext, fhirUri, encoding);
-        LogUtils.info("\r\n  [questionnaireProcessor.bundleQuestionnaires has finished]\r\n");
 
         //run collected post calls last:
         if (HttpClientUtils.hasPostTasksInQueue()) {

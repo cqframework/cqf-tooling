@@ -76,7 +76,7 @@ public class QuestionnaireProcessorTest extends RefreshTest {
                 TARGET_PATH + separator + "bundles" + separator + "questionnaire" + separator +
                         "libraryevaluationtest" + separator + "libraryevaluationtest-bundle.json";
 
-        questionnaireProcessor.bundleQuestionnaires(refreshedLibraryNames, TARGET_PATH, binaryPaths, includeDependencies, includeTerminology,
+        questionnaireProcessor.bundleResources(refreshedLibraryNames, TARGET_PATH, binaryPaths, includeDependencies, includeTerminology,
                 includePatientScenarios, versioned, addBundleTimestamp, fhirContext, null, IOUtils.Encoding.JSON);
 
         File outputBundleFile = new File(outputBundleFilePath);

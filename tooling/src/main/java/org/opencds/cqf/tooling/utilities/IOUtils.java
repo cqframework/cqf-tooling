@@ -200,15 +200,25 @@ public class IOUtils
     private static int testsCounter = 0;
     public static boolean copyFile(String inputPath, String outputPath) {
 
+        if ((inputPath == null || inputPath.isEmpty()) &&
+                (outputPath == null || outputPath.isEmpty())) {
+            LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath and outputPath are missing!"));
+            return false;
+        }
 
+        if (inputPath == null || inputPath.isEmpty()) {
+            LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
+            return false;
+        }
 
-        if (inputPath == null || outputPath == null) {
-            throw new IllegalArgumentException("InputPath and outputPath cannot be null.");
+        if (outputPath == null || outputPath.isEmpty()) {
+            LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
+            return false;
         }
 
         String key = inputPath + ":" + outputPath;
         if (alreadyCopied.containsKey(key)) {
-            // File already copied to destination
+            // File already copied to destination, no need to do anything
             return false;
         }
 
@@ -401,11 +411,10 @@ public class IOUtils
             return directoryPaths;
         }
 
-
         File parentDirectory = new File(path);
 
         if (!parentDirectory.exists() || !parentDirectory.isDirectory()) {
-            System.out.println("No paths found for the Directory " + path);
+//            System.out.println("No paths found for the Directory " + path);
             return directoryPaths;
         }
 
