@@ -228,17 +228,17 @@ public class IOUtils {
 
         if ((inputPath == null || inputPath.isEmpty()) &&
                 (outputPath == null || outputPath.isEmpty())) {
-            logger.error("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath and outputPath are missing!"));
+            LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath and outputPath are missing!"));
             return false;
         }
 
         if (inputPath == null || inputPath.isEmpty()) {
-            logger.error("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
+            LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
             return false;
         }
 
         if (outputPath == null || outputPath.isEmpty()) {
-            logger.error("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
+            LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
             return false;
         }
 
@@ -262,7 +262,7 @@ public class IOUtils {
             return true;
         } catch (IOException e) {
             logger.error(e.getMessage());
-            logger.error("IOUtils.copyFile(" + inputPath + ", " + outputPath + "): ",
+            LogUtils.putException("IOUtils.copyFile(" + inputPath + ", " + outputPath + "): ",
                     new RuntimeException("Error copying file: " + e.getMessage()));
             return false;
         }
@@ -469,7 +469,7 @@ public class IOUtils {
             directories = Arrays.asList(Optional.ofNullable(parentDirectory.listFiles())
                     .orElseThrow(NoSuchElementException::new));
         } catch (Exception e) {
-            logger.error("No paths found for the Directory {}:", path);
+//            logger.error("No paths found for the Directory {}:", path);
             return directoryPaths;
         }
 
@@ -729,7 +729,7 @@ public class IOUtils {
             }
         } catch (IOException e) {
             logger.error(e.getMessage());
-            logger.error(libraryName, e);
+            LogUtils.putException(libraryName, e);
         }
 
         return cqlLibrarySourcePath;
@@ -792,10 +792,10 @@ public class IOUtils {
         if (libraryPathMap.isEmpty()) {
             setupLibraryPaths(fhirContext);
         }
-        logger.info(String.format("libraryUrlMap Size: %d", libraryPathMap.size()));
-        for (Map.Entry<String, IBaseResource> e : libraryUrlMap.entrySet()) {
-            logger.info(String.format("libraryUrlMap Entry: %s", e.getKey()));
-        }
+//        LogUtils.info(String.format("libraryUrlMap Size: %d", libraryPathMap.size()));
+//        for (Map.Entry<String, IBaseResource> e : libraryUrlMap.entrySet()) {
+//            LogUtils.info(String.format("libraryUrlMap Entry: %s", e.getKey()));
+//        }
         return libraryUrlMap;
     }
     private static Map<String, String> libraryPathMap = new LinkedHashMap<>();

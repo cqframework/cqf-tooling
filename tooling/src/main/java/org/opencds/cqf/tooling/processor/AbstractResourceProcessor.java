@@ -13,8 +13,6 @@ import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +58,8 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
         //for keeping track of failed reasons:
         Map<String, String> failedExceptionMessages = new ConcurrentHashMap<>();
 
+        Map<String, String> warningExceptionMessages = new ConcurrentHashMap<>();
+
         int totalResources = resourcesMap.size();
 
         //build list of tasks via for loop:
@@ -93,7 +93,7 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
                 tasks.add(() -> {
                     //check if resourceSourcePath has been processed before:
                     if (processedResources.contains(resourceSourcePath)) {
-                        logger.info(getResourceProcessorType() + " processed already: " + resourceSourcePath);
+                        System.out.println(getResourceProcessorType() + " processed already: " + resourceSourcePath);
                         return null;
                     }
                     String resourceName = FilenameUtils.getBaseName(resourceSourcePath).replace(getResourcePrefix(), "");
@@ -139,12 +139,12 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
                         }
 
                         if (includeTerminology) {
-                            //ValueSetsProcessor.bundleValueSets modified to throw Exception so we can collect it and report it in the final "report"
-                            boolean result = ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
-//                            if (shouldPersist && !result) {
-//                                logger.info(getResourceProcessorType() + " will not be bundled because ValueSet bundling failed: " + resourceSourcePath  + "\n");
-//                            }
-                            shouldPersist = shouldPersist & result;
+                            //throws Exception if failed, which will be logged and reported it in the final summary
+                            try {
+                                ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
+                            }catch (Exception warn){
+                                warningExceptionMessages.put(resourceSourcePath, String.format("Could not bundle value sets for library %s: %s", primaryLibraryName, warn.getMessage()));
+                            }
                         }
 
                         if (includeDependencies) {
@@ -173,9 +173,11 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
 
                             String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), getResourceTestGroupName()), resourceName);
                             persistBundle(igPath, bundleDestPath, resourceName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri, addBundleTimestamp);
-                            String possibleBundleTestMessage = bundleFiles(igPath, bundleDestPath, resourceName, binaryPaths, resourceSourcePath, primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios, includeVersion, addBundleTimestamp);
+                            String possibleBundleTestMessage = bundleFiles(igPath, bundleDestPath, resourceName, binaryPaths, resourceSourcePath,
+                                    primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios,
+                                    includeVersion, addBundleTimestamp, warningExceptionMessages);
 
-                            if (cdsHooksProcessor != null){
+                            if (cdsHooksProcessor != null) {
                                 List<String> activityDefinitionPaths = CDSHooksProcessor.bundleActivityDefinitions(resourceSourcePath, fhirContext, resources, encoding, includeVersion, shouldPersist);
                                 cdsHooksProcessor.addActivityDefinitionFilesToBundle(igPath, bundleDestPath, activityDefinitionPaths, fhirContext, encoding);
                             }
@@ -189,7 +191,7 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
 
 
                     } catch (Exception e) {
-                        logger.error(resourceName, e);
+//                        LogUtils.putException(resourceName, e);
                         failedExceptionMessages.put(resourceSourcePath, e.getMessage());
                     }
 
@@ -198,7 +200,7 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
 
                     synchronized (this) {
                         double percentage = (double) processedResources.size() / totalResources * 100;
-                        logger.info("Bundle " + getResourceProcessorType() + "s Progress: " + String.format("%.2f%%", percentage) + " PROCESSED: " + resourceEntry.getKey());
+                        System.out.println("Bundle " + getResourceProcessorType() + "s Progress: " + String.format("%.2f%%", percentage) + " PROCESSED: " + resourceEntry.getKey());
                     }
                     //task requires return statement
                     return null;
@@ -211,16 +213,16 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
             //Test file information:
             String bundleTestFileMessage = bundleTestFileStringBuilder.toString();
             if (!bundleTestFileMessage.isEmpty()) {
-                logger.info(bundleTestFileMessage);
+                System.out.println(bundleTestFileMessage);
             }
 
 
         } catch (Exception e) {
-            logger.error("bundleResources: " + getResourceProcessorType(), e);
+            LogUtils.putException("bundleResources: " + getResourceProcessorType(), e);
         }
 
 
-        StringBuilder message = new StringBuilder("\r\n" + bundledResources.size() + " " + getResourceProcessorType() + "s successfully bundled:");
+        StringBuilder message = new StringBuilder("\r\n" + bundledResources.size() + " " + getResourceProcessorType() + "(s) successfully bundled:");
         for (String bundledResource : bundledResources) {
             message.append("\r\n     ").append(bundledResource).append(" BUNDLED");
         }
@@ -232,16 +234,15 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
 
         resourcePathLibraryNames.removeAll(bundledResources);
         resourcePathLibraryNames.retainAll(refreshedLibraryNames);
-        message.append("\r\n").append(resourcePathLibraryNames.size()).append(" ").append(getResourceProcessorType()).append("s refreshed, but not bundled (due to issues):");
+        message.append("\r\n").append(resourcePathLibraryNames.size()).append(" ").append(getResourceProcessorType()).append("(s) refreshed, but not bundled (due to issues):");
         for (String notBundled : resourcePathLibraryNames) {
             message.append("\r\n     ").append(notBundled).append(" REFRESHED");
         }
 
-
         //attempt to give some kind of informational message:
         failedResources.removeAll(bundledResources);
         failedResources.removeAll(resourcePathLibraryNames);
-        message.append("\r\n").append(failedResources.size()).append(" ").append(getResourceProcessorType()).append("s failed refresh:");
+        message.append("\r\n").append(failedResources.size()).append(" ").append(getResourceProcessorType()).append("(s) failed refresh:");
         for (String failed : failedResources) {
             if (failedExceptionMessages.containsKey(failed)) {
                 message.append("\r\n     ").append(failed).append(" FAILED: ").append(failedExceptionMessages.get(failed));
@@ -250,7 +251,15 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
             }
         }
 
-        logger.info(message.toString());
+        //Exceptions stemming from IOUtils.translate that did not prevent process from completing for file:
+        if (!warningExceptionMessages.isEmpty()) {
+            message.append("\r\n").append(warningExceptionMessages.size()).append(" ").append(getResourceProcessorType()).append("(s) encountered warnings:");
+            for (String library : warningExceptionMessages.keySet()) {
+                message.append("\r\n     ").append(library).append(" WARNING: ").append(warningExceptionMessages.get(library));
+            }
+        }
+
+        System.out.println(message.toString());
     }
 
     private String getResourcePrefix() {
@@ -261,7 +270,7 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
 
     private String bundleFiles(String igPath, String bundleDestPath, String libraryName, List<String> binaryPaths, String resourceFocusSourcePath,
                                String librarySourcePath, FhirContext fhirContext, IOUtils.Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios,
-                               Boolean includeVersion, Boolean addBundleTimestamp) {
+                               Boolean includeVersion, Boolean addBundleTimestamp, Map<String, String> warningExceptionMessages) throws Exception {
         String bundleMessage = "";
 
         String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, libraryName + "-" + IGBundleProcessor.bundleFilesPathElement);
@@ -285,8 +294,8 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
                     Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<IBaseResource>(valueSets.values()), fhirContext, addBundleTimestamp, this.getIdentifiers());
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);
                 }
-            } catch (Exception e) {
-                logger.error(libraryName, e.getMessage());
+            }catch (Exception warn){
+                warningExceptionMessages.put(librarySourcePath, String.format("Could not retrieve Dep Value Set Resources for library %s: %s", libraryName, warn.getMessage()));
             }
         }
 

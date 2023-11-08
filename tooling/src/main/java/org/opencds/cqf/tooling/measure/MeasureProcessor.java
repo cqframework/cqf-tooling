@@ -15,11 +15,8 @@ import org.opencds.cqf.tooling.parameter.RefreshMeasureParameters;
 import org.opencds.cqf.tooling.processor.AbstractResourceProcessor;
 import org.opencds.cqf.tooling.processor.BaseProcessor;
 import org.opencds.cqf.tooling.processor.IGProcessor;
-import org.opencds.cqf.tooling.utilities.BundleUtils;
-import org.opencds.cqf.tooling.utilities.CanonicalUtils;
-import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.*;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -150,7 +147,7 @@ public class MeasureProcessor extends AbstractResourceProcessor {
                             }
                         } catch (Exception e) {
                             //resource is likely not IBaseResource
-                            logger.error("MeasureProcessor.persistTestFiles", e);
+                            logger.error("persistTestFiles", e);
                         }
                     }
                 }

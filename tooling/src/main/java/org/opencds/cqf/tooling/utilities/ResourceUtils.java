@@ -268,6 +268,7 @@ public class ResourceUtils {
 
    public static Map<String, IBaseResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext, boolean includeDependencies, Boolean includeVersion) throws Exception {
       Map<String, IBaseResource> valueSetResources = new HashMap<>();
+
       List<String> valueSetDefIDs = getDepELMValueSetDefIDs(cqlContentPath);
 
       for (String valueSetUrl : valueSetDefIDs) {
@@ -310,7 +311,7 @@ public class ResourceUtils {
       return includedLibraryNames;
    }
 
-   public static List<String> getDepELMValueSetDefIDs(String cqlContentPath) {
+   public static List<String> getDepELMValueSetDefIDs(String cqlContentPath) throws Exception {
       List<String> includedValueSetDefIDs = new ArrayList<>();
       List<ValueSetDef> valueSetDefs = getValueSetDefs(cqlContentPath);
       for (ValueSetDef def : valueSetDefs) {
@@ -340,15 +341,10 @@ public class ResourceUtils {
       return includedDefs;
    }
 
-   public static List<ValueSetDef> getValueSetDefs(String cqlContentPath) {
+   public static List<ValueSetDef> getValueSetDefs(String cqlContentPath) throws Exception{
       ArrayList<ValueSetDef> valueSetDefs = new ArrayList<>();
       org.hl7.elm.r1.Library elm;
-      try {
-         elm = getElmFromCql(cqlContentPath);
-      } catch (Exception e) {
-        logger.error("error translating cql: ");
-        return valueSetDefs;
-      }
+      elm = getElmFromCql(cqlContentPath);
       if (elm.getValueSets() != null && !elm.getValueSets().getDef().isEmpty()) {
          valueSetDefs.addAll(elm.getValueSets().getDef());
       }
@@ -373,7 +369,7 @@ public class ResourceUtils {
    }
 
    private static Map<String, org.hl7.elm.r1.Library> cachedElm = new HashMap<>();
-   public static org.hl7.elm.r1.Library getElmFromCql(String cqlContentPath) {
+   public static org.hl7.elm.r1.Library getElmFromCql(String cqlContentPath) throws Exception{
       org.hl7.elm.r1.Library elm = cachedElm.get(cqlContentPath);
       if (elm != null) {
          return elm;

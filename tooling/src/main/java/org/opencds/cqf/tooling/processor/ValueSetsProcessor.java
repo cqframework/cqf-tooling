@@ -75,21 +75,11 @@ public class ValueSetsProcessor {
         return "valuesets-" + baseId;
     }
 
-    public static Boolean bundleValueSets(String cqlContentPath, String igPath, FhirContext fhirContext,
-            Map<String, IBaseResource> resources, Encoding encoding, Boolean includeDependencies, Boolean includeVersion) throws Exception{
-        Boolean shouldPersist = true;
-
-        try {
+    public static void bundleValueSets(String cqlContentPath, String igPath, FhirContext fhirContext,
+            Map<String, IBaseResource> resources, Encoding encoding, Boolean includeDependencies, Boolean includeVersion) throws Exception {
             Map<String, IBaseResource> dependencies = ResourceUtils.getDepValueSetResources(cqlContentPath, igPath, fhirContext, includeDependencies, includeVersion);
-
             for (IBaseResource resource : dependencies.values()) {
                 resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
             }
-        } catch (Exception e) {
-            shouldPersist = false;
-            throw e;
-//            LogUtils.putException(cqlContentPath, e.getMessage());
-        }
-        return shouldPersist;
     }
 }
