@@ -33,6 +33,7 @@ public class SpreadsheetValidateVSandCS extends Operation {
     private String urlToTestServer; // -urltotestserver (-uts)  server to validate
     private boolean hasHeader = true; // -hasheader (-hh)
     private String pathToIG; // -pathToIG (-ptig) path to IG - files installed using "npm --registry https://packages.simplifier.net install hl7.fhir.us.qicore@4.1.1" (or other package)
+    private String resourcePaths; // -resourcePaths (-rp)
     private Map<String, CodeSystem> csMap;
     private Map<String, ValueSet> vsMap;
     private static final String newLine = System.getProperty("line.separator");
@@ -64,6 +65,8 @@ public class SpreadsheetValidateVSandCS extends Operation {
     public void execute(String[] args) {
         fhirContext = FhirContext.forR4Cached();
         setOutputPath("src/main/resources/org/opencds/cqf/tooling/terminology/output"); // default
+        resourcePaths = "4.0.1;US-Core/3.1.0;QI-Core/4.1.1;THO/3.1.0"; // default
+
         String userName = "";
         String password = "";
         csNotPresentInIG = new HashSet<>();
@@ -109,6 +112,10 @@ public class SpreadsheetValidateVSandCS extends Operation {
                 case "ptig":
                     pathToIG = value;
                     break; // -pathToIG (-ptig)
+                case "resourcepaths":
+                case "rp":
+                    resourcePaths = value;
+                    break; // -resourcePaths (-rp)
                 default:
                     throw new IllegalArgumentException("Unknown flag: " + flag);
             }
@@ -133,7 +140,6 @@ public class SpreadsheetValidateVSandCS extends Operation {
         int versionCellNumber = 5;
         int codeSystemURLCellNumber = 6;
 
-        String resourcePaths = "4.0.1;US-Core/3.1.0;QI-Core/4.1.1;THO/3.1.0";
         Atlas atlas = new Atlas();
         atlas.loadPaths(pathToIG, resourcePaths);
         csMap = atlas.getCodeSystems();
@@ -290,6 +296,7 @@ public class SpreadsheetValidateVSandCS extends Operation {
         if (!compareCodeSystemConcepts(terminologyServerCodeSystem.getConcept(), sourceOfTruthCodeSystem.getConcept(), conceptErrors)) {
             fieldsWithErrors.add(conceptErrors);
         }
+        compareContacts(fieldsWithErrors, terminologyServerCodeSystem.getContact(), sourceOfTruthCodeSystem.getContact());
         if (!fieldsWithErrors.isEmpty()) {
             csFailureReport.put(terminologyServerCodeSystem.getName(), fieldsWithErrors);
         }
@@ -312,11 +319,11 @@ public class SpreadsheetValidateVSandCS extends Operation {
                         }
                         if(!compareStrings(termConcept.getDisplay().trim(), truthConcept.getDisplay().trim())){
                             falseFound = true;
-                            conceptErrors.put("Display:", "\t \"" + termConcept.getDisplay() + "\" does not match the IG display \""  + truthConcept.getDisplay() + "\""  + newLine);
+                            conceptErrors.put("Display:", "\"" + termConcept.getDisplay() + "\" does not match the IG display \""  + truthConcept.getDisplay() + "\""  + newLine);
                         }
                         if(!compareStrings(termConcept.getDefinition().trim(), truthConcept.getDefinition().trim())){
                             falseFound = true;
-                            conceptErrors.put("Definition", "\t \"" + termConcept.getDefinition() + "\" does not match the IG definition \""  + truthConcept.getDefinition() + "\""  + newLine);
+                            conceptErrors.put("Definition", "\"" + termConcept.getDefinition() + "\" does not match the IG definition \""  + truthConcept.getDefinition() + "\""  + newLine);
                         }
                         if(falseFound){
                             conceptsMatch.set(false);
@@ -335,19 +342,19 @@ public class SpreadsheetValidateVSandCS extends Operation {
                     }
                 } else {
                     conceptsMatch.set(false);
-                    conceptErrors.put("Code", "\tThe concept code \"" + conceptCode + "\" from the terminology server does not match the concept code \"" + truthConceptsMap.get(conceptCode) + "\" from the IG." + newLine);
+                    conceptErrors.put("Code", "The concept code \"" + conceptCode + "\" from the terminology server does not match the concept code \"" + truthConceptsMap.get(conceptCode) + "\" from the IG." + newLine);
                 }
             });
         } else {
             conceptsMatch.set(false);
             if (terminologyConcepts == null) {
-                conceptErrors.put("Concepts", "\tThe terminology concept is not present, but the IG contains one." + newLine);
+                conceptErrors.put("Concepts", "The terminology concept is not present, but the IG contains one." + newLine);
             }
             if (truthConcepts == null) {
-                conceptErrors.put("Concepts", "\tThe terminology concept is present, but the IG does not contains one." + newLine);
+                conceptErrors.put("Concepts", "The terminology concept is present, but the IG does not contains one." + newLine);
             }
             if (terminologyConcepts.size() != truthConcepts.size()) {
-                conceptErrors.put("Concepts", "\tThe terminology concept and the IG concept sizes do not match ." + newLine);
+                conceptErrors.put("Concepts", "The terminology concept and the IG concept sizes do not match ." + newLine);
             }
         }
         return conceptsMatch.get();
@@ -414,14 +421,7 @@ public class SpreadsheetValidateVSandCS extends Operation {
             publisherFailure.put("Publisher", "\"" + terminologyServerValueSet.getPublisher() + "\" Does not equal IG Experimental \"" + sourceOfTruthValueSet.getPublisher() + "\"" + newLine);
             fieldsWithErrors.add(publisherFailure);
         }
-/*        TODO: add contact verification method
-        if (!terminologyServerValueSet.getContact().equals(sourceOfTruthValueSet.getContact())) {
-            Map<String, String> publisherFailure = new HashMap<>();
-            publisherFailure.put("Publisher", terminologyServerValueSet.getPublisher() + " Does not equal IG Experimental " + sourceOfTruthValueSet.getPublisher());
-            fieldsWithErrors.add(publisherFailure);
-            fieldsWithErrors.add("Status");
-        }
- */
+        compareContacts(fieldsWithErrors, terminologyServerValueSet.getContact(), sourceOfTruthValueSet.getContact());
         if (!compareComposes(terminologyServerValueSet.getCompose(), sourceOfTruthValueSet.getCompose())) {
             //TODO: fix up compose comparison
 //            fieldsWithErrors.add("Compose");
@@ -431,6 +431,140 @@ public class SpreadsheetValidateVSandCS extends Operation {
         }
     }
 
+    private void compareContacts(Set<Map<String, String>> fieldsWithErrors, List<ContactDetail> termContacts, List<ContactDetail> truthContacts){
+        // 0..* contacts
+            // 0..1 name
+            // 0..* telecom
+        AtomicBoolean contactsMatch = new AtomicBoolean(true);
+        Map<String, String> contactFailure = new HashMap<>();
+        Map<String, Map<String, ContactPoint>>termContactMap = createContactMap(termContacts);
+        Map<String, Map<String, ContactPoint>>truthContactMap = createContactMap(truthContacts);
+        if(termContactMap != null && truthContactMap != null){
+            if(termContactMap.size() == truthContactMap.size()) {
+                termContactMap.forEach((termContactName, termContactPoints)->{
+                    Map<String, ContactPoint> truthContactPoints = truthContactMap.get(termContactName);
+                    if(termContactPoints != null && truthContactPoints != null){
+                        Map<String, String> contactPointFailure = new HashMap<>();
+                        if(!compareContactPoints(termContactPoints, truthContactPoints, contactPointFailure )){
+                            fieldsWithErrors.add(contactPointFailure);
+                        }
+                    }else{
+                        if(termContactPoints != null){
+                            contactFailure.put("Contact", "This server's contact point has values and the matching IG contact point does not." + newLine);
+                            fieldsWithErrors.add(contactFailure);
+                        }else{
+                            contactFailure.put("Contact", "This server's contact point does not have values and the matching IG contact point does." + newLine);
+                            fieldsWithErrors.add(contactFailure);
+                        }
+                    }
+                });
+            }else{
+                contactFailure.put("Contact", "This server's number of contacts does not match the IG's." + newLine);
+                fieldsWithErrors.add(contactFailure);
+            }
+        }else{
+            if(termContacts != null){
+                contactFailure.put("Contact", "This server has contacts and the IG oes not." + newLine);
+                fieldsWithErrors.add(contactFailure);
+            }else{
+                contactFailure.put("Contact", "This server does not have contacts and the IG does." + newLine);
+                fieldsWithErrors.add(contactFailure);
+            }
+        }
+
+    }
+
+    private boolean compareContactPoints(Map<String, ContactPoint> termContactPoints, Map<String, ContactPoint> truthContactPoints, Map<String, String> contactPointFailure) {
+        AtomicBoolean contactPointsMatch = new AtomicBoolean(true);
+        termContactPoints.forEach((termCPValue, termCP) ->{
+            ContactPoint truthCP = truthContactPoints.get(termCPValue);
+            if(truthCP != null){
+                if(termCP.getSystem() != null && !termCP.getSystem().equals(truthCP.getSystem())){
+                    contactPointsMatch.set(false);
+                    contactPointFailure.put("ContactPoint", "The server's contact point system with the value of \"" + termCP.getSystem() + "\" does not match the IG's contact point system of \"" + truthCP.getSystem() + "\"." + newLine);
+                }else if(truthCP.getSystem() != null && termCP.getSystem() == null){
+                    contactPointsMatch.set(false);
+                    contactPointFailure.put("ContactPoint", "The IG's contact point system with the value of \"" + truthCP.getSystem() + "\" does not match the server's null value." + newLine);
+                }
+                if(termCP.getUse() != null && !termCP.getUse().equals(truthCP.getUse())){
+                    contactPointsMatch.set(false);
+                    contactPointFailure.put("ContactPoint", "The server's contact point use with the value of \"" + termCP.getUse() + "\" does not match the IG's contact point system of \"" + truthCP.getUse() + "\"." + newLine);
+                }else if(truthCP.getUse() != null && termCP.getUse() == null){
+                    contactPointsMatch.set(false);
+                    contactPointFailure.put("ContactPoint", "The IG's contact point system with the value of \"" + truthCP.getUse() + "\" does not match the server's null value." + newLine);
+                }
+                if(termCP.getRank() != truthCP.getRank()){
+                    contactPointsMatch.set(false);
+                    contactPointFailure.put("ContactPoint", "The server's contact point rank with the value of \"" + termCP.getRank() + "\" does not match the IG's contact point system of \"" + truthCP.getRank() + "\"." + newLine);
+                }
+                comparePeriods(termCP.getPeriod(), truthCP.getPeriod(), contactPointFailure);
+            }else{
+                contactPointsMatch.set(false);
+                contactPointFailure.put("ContactPoint", "The server's contact point with the value of \"" + termCPValue + "\" does not exist in the IG's contact points." + newLine);
+            }
+        });
+        return contactPointsMatch.get();
+    }
+
+    private boolean comparePeriods(Period termPeriod, Period truthPeriod, Map<String, String> contactPointFailure) {
+        boolean periodsMatch = true;
+        if(termPeriod.getStart() != null && truthPeriod.getStart() != null){
+            if(!termPeriod.getStart().equals(truthPeriod.getStart())){
+                contactPointFailure.put("ContactPointPeriod", "The server's contact point period with the start value of \"" + termPeriod.getStart() + "\" does not match in the IG's contact point period start of \"" + truthPeriod.getStart() + "\"." + newLine);
+                periodsMatch = false;
+            }
+        }else if(termPeriod.getStart() != null){
+            contactPointFailure.put("ContactPointPeriod", "The server's contact point period start value of \"" + termPeriod.getStart() + "\" does not match the IG's contact point period start of \"null\"." + newLine);
+            periodsMatch = false;
+        }else{
+            contactPointFailure.put("ContactPointPeriod", "The IG's contact point period start value of \"" + truthPeriod.getStart() + "\" does not match the server's contact point period start of \"null\"." + newLine);
+            periodsMatch = false;
+        }
+        if(termPeriod.getEnd() != null && truthPeriod.getEnd() != null){
+            if(!termPeriod.getEnd().equals(truthPeriod.getEnd())){
+                contactPointFailure.put("ContactPointPeriod", "The server's contact point period with the end value of \"" + termPeriod.getEnd() + "\" does not match in the IG's contact point period end of \"" + truthPeriod.getEnd() + "\"." + newLine);
+                periodsMatch = false;
+            }
+        }else if(termPeriod.getEnd() != null){
+            contactPointFailure.put("ContactPointPeriod", "The server's contact point period end value of \"" + termPeriod.getEnd() + "\" does not match the IG's contact point period end of \"null\"." + newLine);
+            periodsMatch = false;
+        }else{
+            contactPointFailure.put("ContactPointPeriod", "The IG's contact point period end value of \"" + truthPeriod.getEnd() + "\" does not match the server's contact point period end of \"null\"." + newLine);
+            periodsMatch = false;
+        }
+        if(termPeriod.getId() != null && truthPeriod.getId() != null){
+            if(!termPeriod.getId().equals(truthPeriod.getId())){
+                contactPointFailure.put("ContactPointPeriod", "The server's contact point period with the id value of \"" + termPeriod.getId() + "\" does not match in the IG's contact point period id of \"" + truthPeriod.getId() + "\"." + newLine);
+                periodsMatch = false;
+            }
+        }else if(termPeriod.getId() != null){
+            contactPointFailure.put("ContactPointPeriod", "The server's contact point period id value of \"" + termPeriod.getId() + "\" does not match the IG's contact point period id of \"null\"." + newLine);
+            periodsMatch = false;
+        }else{
+            contactPointFailure.put("ContactPointPeriod", "The IG's contact point period id value of \"" + truthPeriod.getId() + "\" does not match the server's contact point period id of \"null\"." + newLine);
+            periodsMatch = false;
+        }
+        return periodsMatch;
+    }
+
+    private Map<String, Map<String, ContactPoint>> createContactMap(List<ContactDetail> contacts){
+        // 0..* contacts
+            // 0..1 name
+            // 0..* telecom
+        Map<String, Map<String, ContactPoint>> contactMap = new HashMap<>();
+        contacts.forEach(contact -> {
+            String contactName = contact.getName();
+            if(contactName != null && !contactName.isEmpty()) {  // if no name, skip the contact
+                Map<String, ContactPoint> contactPoints = new HashMap<String, ContactPoint>();
+                contact.getTelecom().forEach(telcom->{
+                    contactPoints.put(telcom.getValue(), telcom);
+                });
+                contactMap.put(contactName, contactPoints);
+            }
+        });
+        return contactMap;
+
+    }
 /*
     private void addToReport(Set<String> errorSet, String name) {
         report.append("\t" + name + " does not match the IG for the following fields:");
@@ -496,7 +630,8 @@ public class SpreadsheetValidateVSandCS extends Operation {
 
     private void reportResults() {
         StringBuilder report = new StringBuilder();
-        report.append("Validation Failure Report for Server " + urlToTestServer + " compared to " + pathToIG + newLine + newLine);
+        report.append("Validation Failure Report for Server " + urlToTestServer + " compared to " + pathToIG + newLine);
+        report.append("\tUsing resource paths of " + resourcePaths + newLine + newLine);
         handleFailureReport(report, "valueset");
         if (!vsNotInTestServer.isEmpty()) {
             report.append(newLine);
