@@ -228,17 +228,17 @@ public class IOUtils {
 
         if ((inputPath == null || inputPath.isEmpty()) &&
                 (outputPath == null || outputPath.isEmpty())) {
-            LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath and outputPath are missing!"));
+            logger.error("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath and outputPath are missing!"));
             return false;
         }
 
         if (inputPath == null || inputPath.isEmpty()) {
-            LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
+            logger.error("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
             return false;
         }
 
         if (outputPath == null || outputPath.isEmpty()) {
-            LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
+            logger.error("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
             return false;
         }
 
@@ -262,7 +262,7 @@ public class IOUtils {
             return true;
         } catch (IOException e) {
             logger.error(e.getMessage());
-            LogUtils.putException("IOUtils.copyFile(" + inputPath + ", " + outputPath + "): ",
+            logger.error("IOUtils.copyFile(" + inputPath + ", " + outputPath + "): ",
                     new RuntimeException("Error copying file: " + e.getMessage()));
             return false;
         }
@@ -729,7 +729,7 @@ public class IOUtils {
             }
         } catch (IOException e) {
             logger.error(e.getMessage());
-            LogUtils.putException(libraryName, e);
+            logger.error(libraryName, e);
         }
 
         return cqlLibrarySourcePath;
@@ -792,10 +792,10 @@ public class IOUtils {
         if (libraryPathMap.isEmpty()) {
             setupLibraryPaths(fhirContext);
         }
-//        LogUtils.info(String.format("libraryUrlMap Size: %d", libraryPathMap.size()));
-//        for (Map.Entry<String, IBaseResource> e : libraryUrlMap.entrySet()) {
-//            LogUtils.info(String.format("libraryUrlMap Entry: %s", e.getKey()));
-//        }
+        logger.info(String.format("libraryUrlMap Size: %d", libraryPathMap.size()));
+        for (Map.Entry<String, IBaseResource> e : libraryUrlMap.entrySet()) {
+            logger.info(String.format("libraryUrlMap Entry: %s", e.getKey()));
+        }
         return libraryUrlMap;
     }
     private static Map<String, String> libraryPathMap = new LinkedHashMap<>();

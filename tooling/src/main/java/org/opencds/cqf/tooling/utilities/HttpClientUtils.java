@@ -2,16 +2,12 @@ package org.opencds.cqf.tooling.utilities;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.lang3.tuple.Pair;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -19,6 +15,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,6 +31,7 @@ import java.util.function.Function;
  * A utility class for collecting HTTP requests to a FHIR server and executing them collectively.
  */
 public class HttpClientUtils {
+    protected static final Logger logger = LoggerFactory.getLogger(HttpClientUtils.class);
     private static final String FHIR_SERVER_URL = "FHIR Server URL";
     private static final String BUNDLE_RESOURCE = "Bundle Resource";
     private static final String ENCODING_TYPE = "Encoding Type";
@@ -71,7 +70,7 @@ public class HttpClientUtils {
 
         if (!missingValues.isEmpty()) {
             String missingValueString = String.join(", ", missingValues);
-            LogUtils.info("An invalid HTTP POST call was attempted with a null value for: " + missingValueString +
+            logger.info("An invalid HTTP POST call was attempted with a null value for: " + missingValueString +
                     (!values.isEmpty() ? "\\nRemaining values are: " + String.join(", ", values) : ""));
         }
 
@@ -125,7 +124,7 @@ public class HttpClientUtils {
             Callable<Void> task = createPostCallable(post, postPojo, currentTaskIndex);
             tasks.put(resource, task);
         } catch (Exception e) {
-            LogUtils.putException("Error while submitting the POST request: " + e.getMessage(), e);
+            logger.error("Error while submitting the POST request: " + e.getMessage(), e);
         }
     }
 
@@ -241,7 +240,7 @@ public class HttpClientUtils {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
 
         try {
-            LogUtils.info(tasks.size() + " POST calls to be made. Starting now. Please wait...");
+            logger.info(tasks.size() + " POST calls to be made. Starting now. Please wait...");
             double percentage = 0;
             System.out.print("\rPOST: " + String.format("%.2f%%", percentage) + " done. ");
 
@@ -262,11 +261,11 @@ public class HttpClientUtils {
                 try {
                     future.get();
                 } catch (Exception e) {
-                    LogUtils.putException("HTTPClientUtils future.get()", e);
+                    logger.error("HTTPClientUtils future.get()", e);
                 }
             }
 
-            LogUtils.info("Processing results...");
+            logger.info("Processing results...");
             successfulPostCalls.sort(postResultMessageComparator);
 
             StringBuilder message = new StringBuilder();
@@ -274,7 +273,7 @@ public class HttpClientUtils {
             for (String successPost : successfulPostCalls) {
                 message.append("\n").append(successPost);
             }
-            LogUtils.info(message.toString());
+            logger.info(message.toString());
             successfulPostCalls = new ArrayList<>();
 
             if (!failedPostCalls.isEmpty()) {
@@ -305,7 +304,7 @@ public class HttpClientUtils {
                     }
 
                     if (failedPostCalls.isEmpty()) {
-                        LogUtils.info("Retry successful, all tasks successfully posted");
+                        logger.info("Retry successful, all tasks successfully posted");
                     }
                 }
             }
@@ -316,12 +315,12 @@ public class HttpClientUtils {
                 for (String successPost : successfulPostCalls) {
                     message.append("\n").append(successPost);
                 }
-                LogUtils.info(message.toString());
+                logger.info(message.toString());
                 successfulPostCalls = new ArrayList<>();
             }
 
             if (!failedPostCalls.isEmpty()) {
-                LogUtils.info("\n" + failedPostCalls.size() + " task(s) still failed to POST: ");
+                logger.info("\n" + failedPostCalls.size() + " task(s) still failed to POST: ");
                 List<String> failedMessages = new ArrayList<>();
                 for (Pair<String, PostComponent> pair : failedPostCalls) {
                     failedMessages.add(pair.getLeft());
@@ -332,7 +331,7 @@ public class HttpClientUtils {
                 for (String failedPost : failedMessages) {
                     message.append("\n").append(failedPost);
                 }
-                LogUtils.info(message.toString());
+                logger.info(message.toString());
             }
 
         } finally {
@@ -353,7 +352,7 @@ public class HttpClientUtils {
         try {
             Thread.sleep(i);
         } catch (InterruptedException e) {
-            LogUtils.putException("postTaskCollection", new RuntimeException(e));
+            logger.error("postTaskCollection", new RuntimeException(e));
         }
     }
     /**

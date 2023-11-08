@@ -5,7 +5,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +37,9 @@ public class TestCaseProcessor
                         Object bundle = BundleUtils.bundleArtifacts(getId(FilenameUtils.getName(testCasePath)), resources, fhirContext, false);
                         IOUtils.writeBundle(bundle, testArtifactPath, encoding, fhirContext);
                     } catch (Exception e) {
-                        LogUtils.putException(testCasePath, e);
+                        logger.error(testCasePath, e);
                     } finally {
-                        LogUtils.warn(testCasePath);
+                        logger.warn(testCasePath);
                     }
                 }
             }
@@ -94,7 +93,7 @@ public class TestCaseProcessor
             }
         } catch (Exception e) {
             shouldPersist = false;
-            LogUtils.putException(igTestCasePath, e);
+            logger.error(igTestCasePath, e);
         }
         return shouldPersist;
     }

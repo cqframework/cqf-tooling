@@ -8,6 +8,8 @@ import org.opencds.cqf.tooling.common.ThreadUtils;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileReader;
@@ -21,6 +23,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ExtractMatBundleOperation extends Operation {
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String ERROR_BUNDLE_OUTPUT_INVALID = "When specifying the output folder using -op for ExtractMatBundle, the output directory name must contain the word 'bundle' (all lowercase.)";
     private static final String ERROR_BUNDLE_FILE_IS_REQUIRED = "The path to a bundle file is required";
     private static final String ERROR_DIR_IS_NOT_A_DIRECTORY = "The path specified with -dir is not a directory.";
@@ -132,7 +135,7 @@ public class ExtractMatBundleOperation extends Operation {
                 //use recursive calls to build up task list:
                 ThreadUtils.executeTasks(processFilesInDir(filesInDir, version, suppressNarrative));
             }else{
-                LogUtils.info(ERROR_DIR_IS_EMPTY);
+                logger.info(ERROR_DIR_IS_EMPTY);
                 return;
             }
         } else {
@@ -141,9 +144,9 @@ public class ExtractMatBundleOperation extends Operation {
         }
 
         if (!processedBundleCollection.isEmpty()) {
-            LogUtils.info("Successfully extracted the following resources: " + processedBundleCollection);
+            logger.info("Successfully extracted the following resources: " + processedBundleCollection);
         }else{
-            LogUtils.info("ExtractMatBundleOperation ended with no resources extracted!");
+            logger.info("ExtractMatBundleOperation ended with no resources extracted!");
         }
     }
 
@@ -175,7 +178,7 @@ public class ExtractMatBundleOperation extends Operation {
     void processSingleFile(File bundleFile, String version, boolean suppressNarrative) {
         String inputFileLocation = bundleFile.getAbsolutePath();
 
-        LogUtils.info(String.format("Extracting MAT bundle from %s", inputFileLocation));
+        logger.info(String.format("Extracting MAT bundle from %s", inputFileLocation));
 
         // Set the FhirContext based on the version specified
         FhirContext context;
@@ -191,7 +194,7 @@ public class ExtractMatBundleOperation extends Operation {
                     context = FhirContext.forR4Cached();
                     break;
                 default:
-                    LogUtils.putException("processSingleFile", new IllegalArgumentException("Unknown fhir version: " + version));
+                    logger.error("processSingleFile", new IllegalArgumentException("Unknown fhir version: " + version));
                     return;
             }
         }
@@ -205,7 +208,7 @@ public class ExtractMatBundleOperation extends Operation {
             try (FileReader reader = new FileReader(bundleFile)) {
                 bundle = context.newXmlParser().parseResource(reader);
             } catch (Exception e) {
-                LogUtils.info(ERROR_NOT_VALID + "\n" + inputFileLocation);
+                logger.info(ERROR_NOT_VALID + "\n" + inputFileLocation);
                 return;
             }
 
@@ -214,35 +217,35 @@ public class ExtractMatBundleOperation extends Operation {
             try (FileReader reader = new FileReader(bundleFile)) {
                 bundle = context.newJsonParser().parseResource(reader);
             } catch (Exception e) {
-                LogUtils.info(ERROR_NOT_VALID + "\n" + inputFileLocation);
+                logger.info(ERROR_NOT_VALID + "\n" + inputFileLocation);
                 return;
             }
 
         } else {
-            LogUtils.info(ERROR_NOT_JSON_OR_XML + "\n" + inputFileLocation);
+            logger.info(ERROR_NOT_JSON_OR_XML + "\n" + inputFileLocation);
             return;
         }
 
         //sometimes tests leave library or measure files behind, so we want to make sure we only iterate over bundle files:
         if (!(bundle instanceof org.hl7.fhir.dstu3.model.Bundle || bundle instanceof org.hl7.fhir.r4.model.Bundle)) {
-            LogUtils.info(ERROR_NOT_VALID_BUNDLE + inputFileLocation);
+            logger.info(ERROR_NOT_VALID_BUNDLE + inputFileLocation);
             return;
         }
 
         //ensure the xml and json files are transaction Bundle types:
         if (bundle instanceof org.hl7.fhir.dstu3.model.Bundle) {
             if (!((org.hl7.fhir.dstu3.model.Bundle) bundle).getType().equals(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION)) {
-                LogUtils.info("Invalid Bundle type in " + encoding + " file: " + inputFileLocation);
+                logger.info("Invalid Bundle type in " + encoding + " file: " + inputFileLocation);
                 return;
             }
 
         } else if (bundle instanceof org.hl7.fhir.r4.model.Bundle) {
             if (!((org.hl7.fhir.r4.model.Bundle) bundle).getType().equals(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION)) {
-                LogUtils.info("Invalid Bundle type in " + encoding + " file: " + inputFileLocation);
+                logger.info("Invalid Bundle type in " + encoding + " file: " + inputFileLocation);
                 return;
             }
         } else {
-            LogUtils.info("Not a recognized bundle in " + encoding + "file: " + inputFileLocation);
+            logger.info("Not a recognized bundle in " + encoding + "file: " + inputFileLocation);
             return;
         }
 
@@ -260,7 +263,7 @@ public class ExtractMatBundleOperation extends Operation {
         //move and properly rename the files
         moveAndRenameFiles(outputDir, context, version);
 
-        LogUtils.info(INFO_EXTRACTION_SUCCESSFUL + ": " + inputFileLocation);
+        logger.info(INFO_EXTRACTION_SUCCESSFUL + ": " + inputFileLocation);
     }
 
 
@@ -280,7 +283,7 @@ public class ExtractMatBundleOperation extends Operation {
                     theResource = context.newXmlParser().parseResource(new FileReader(extractedFile));
                 } catch (Exception e) {
 //                    e.printStackTrace();
-                    LogUtils.putException("moveAndRenameFiles", new RuntimeException(e.getMessage()));
+                    logger.error("moveAndRenameFiles", new RuntimeException(e.getMessage()));
                     continue;
                 }
             } else if (extractedFile.getPath().endsWith(".json")) {
@@ -288,7 +291,7 @@ public class ExtractMatBundleOperation extends Operation {
                     theResource = context.newJsonParser().parseResource(new FileReader(extractedFile));
                 } catch (Exception e) {
 //                    e.printStackTrace();
-                    LogUtils.putException("moveAndRenameFiles", new RuntimeException(e.getMessage()));
+                    logger.error("moveAndRenameFiles", new RuntimeException(e.getMessage()));
                     continue;
                 }
             }

@@ -4,20 +4,14 @@ import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
-public class PlanDefinitionProcessor extends AbstractResourceProcessor{
-    public static final String ResourcePrefix = "plandefinition-";
-    public static final String PlanDefinitionTestGroupName = "plandefinition";
-    private LibraryProcessor libraryProcessor;
-    private CDSHooksProcessor cdsHooksProcessor;
-    private static final Logger logger = LoggerFactory.getLogger(PlanDefinitionProcessor.class);
+
+public class PlanDefinitionProcessor extends AbstractResourceProcessor {
 
     public PlanDefinitionProcessor(LibraryProcessor libraryProcessor, CDSHooksProcessor cdsHooksProcessor) {
-       setLibraryProcessor(libraryProcessor);
+        setLibraryProcessor(libraryProcessor);
         setCDSHooksProcessor(cdsHooksProcessor);
     }
 

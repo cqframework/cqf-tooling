@@ -16,7 +16,6 @@ import org.opencds.cqf.tooling.processor.CqlProcessor;
 import org.opencds.cqf.tooling.processor.IGProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
-import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,7 +123,7 @@ public class LibraryProcessor extends BaseProcessor {
                 });
             }
         } catch (Exception e) {
-            LogUtils.putException(path, e);
+            logger.error(path, e);
             //purposely break addAll:
             return null;
         }

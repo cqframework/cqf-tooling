@@ -15,10 +15,11 @@ import org.opencds.cqf.tooling.parameter.RefreshMeasureParameters;
 import org.opencds.cqf.tooling.processor.AbstractResourceProcessor;
 import org.opencds.cqf.tooling.processor.BaseProcessor;
 import org.opencds.cqf.tooling.processor.IGProcessor;
-import org.opencds.cqf.tooling.utilities.*;
+import org.opencds.cqf.tooling.utilities.BundleUtils;
+import org.opencds.cqf.tooling.utilities.CanonicalUtils;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -28,13 +29,11 @@ import java.util.Map;
 import java.util.Set;
 public class MeasureProcessor extends AbstractResourceProcessor {
     public static final String ResourcePrefix = "measure-";
-    public static final String MeasureTestGroupName = "measure";
     protected List<Object> identifiers;
 
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
     }
-    private static final Logger logger = LoggerFactory.getLogger(MeasureProcessor.class);
     public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, String measureToRefreshPath, Boolean shouldApplySoftwareSystemStamp) {
         return refreshIgMeasureContent(parentContext, outputEncoding, null, versioned, fhirContext, measureToRefreshPath, shouldApplySoftwareSystemStamp);
     }
@@ -110,7 +109,7 @@ public class MeasureProcessor extends AbstractResourceProcessor {
             List<CqlCompilerException> errors = new ArrayList<CqlCompilerException>();
             CompiledLibrary CompiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, errors);
             boolean hasErrors = false;
-            if (errors.size() > 0) {
+            if (!errors.isEmpty()) {
                 for (CqlCompilerException e : errors) {
                     if (e.getSeverity() == CqlCompilerException.ErrorSeverity.Error) {
                         hasErrors = true;
@@ -151,7 +150,7 @@ public class MeasureProcessor extends AbstractResourceProcessor {
                             }
                         } catch (Exception e) {
                             //resource is likely not IBaseResource
-                            LogUtils.putException("persistTestFiles", e);
+                            logger.error("MeasureProcessor.persistTestFiles", e);
                         }
                     }
                 }

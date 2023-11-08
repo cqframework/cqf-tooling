@@ -1,6 +1,8 @@
 package org.opencds.cqf.tooling.common;
 
 import org.opencds.cqf.tooling.utilities.LogUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class ThreadUtils {
+    protected static final Logger logger = LoggerFactory.getLogger(ThreadUtils.class);
     /**
      * Executes a list of tasks concurrently using a thread pool.
      * <p>
@@ -38,7 +41,7 @@ public class ThreadUtils {
                 future.get();
             }
         } catch (Exception e) {
-            LogUtils.putException("ThreadUtils.executeTasks", e);
+            logger.error("ThreadUtils.executeTasks", e);
         } finally {
             executorService.shutdown();
         }

@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class AbstractResourceProcessor extends BaseProcessor {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
     protected final String TYPE_QUESTIONNAIRE = "Questionnaire";
     protected final String TYPE_PLAN_DEFINITION = "PlanDefinition";
     protected final String TYPE_MEASURE = "Measure";
@@ -93,7 +93,7 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
                 tasks.add(() -> {
                     //check if resourceSourcePath has been processed before:
                     if (processedResources.contains(resourceSourcePath)) {
-                        LogUtils.info(getResourceProcessorType() + " processed already: " + resourceSourcePath);
+                        logger.info(getResourceProcessorType() + " processed already: " + resourceSourcePath);
                         return null;
                     }
                     String resourceName = FilenameUtils.getBaseName(resourceSourcePath).replace(getResourcePrefix(), "");
@@ -142,7 +142,7 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
                             //ValueSetsProcessor.bundleValueSets modified to throw Exception so we can collect it and report it in the final "report"
                             boolean result = ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
 //                            if (shouldPersist && !result) {
-//                                LogUtils.info(getResourceProcessorType() + " will not be bundled because ValueSet bundling failed: " + resourceSourcePath  + "\n");
+//                                logger.info(getResourceProcessorType() + " will not be bundled because ValueSet bundling failed: " + resourceSourcePath  + "\n");
 //                            }
                             shouldPersist = shouldPersist & result;
                         }
@@ -189,7 +189,7 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
 
 
                     } catch (Exception e) {
-                        LogUtils.putException(resourceName, e);
+                        logger.error(resourceName, e);
                         failedExceptionMessages.put(resourceSourcePath, e.getMessage());
                     }
 
@@ -198,7 +198,7 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
 
                     synchronized (this) {
                         double percentage = (double) processedResources.size() / totalResources * 100;
-                        LogUtils.info("Bundle " + getResourceProcessorType() + "s Progress: " + String.format("%.2f%%", percentage) + " PROCESSED: " + resourceEntry.getKey());
+                        logger.info("Bundle " + getResourceProcessorType() + "s Progress: " + String.format("%.2f%%", percentage) + " PROCESSED: " + resourceEntry.getKey());
                     }
                     //task requires return statement
                     return null;
@@ -211,12 +211,12 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
             //Test file information:
             String bundleTestFileMessage = bundleTestFileStringBuilder.toString();
             if (!bundleTestFileMessage.isEmpty()) {
-                LogUtils.info(bundleTestFileMessage);
+                logger.info(bundleTestFileMessage);
             }
 
 
         } catch (Exception e) {
-            LogUtils.putException("bundleResources: " + getResourceProcessorType(), e);
+            logger.error("bundleResources: " + getResourceProcessorType(), e);
         }
 
 
@@ -250,7 +250,7 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
             }
         }
 
-        LogUtils.info(message.toString());
+        logger.info(message.toString());
     }
 
     private String getResourcePrefix() {
@@ -286,7 +286,7 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);
                 }
             } catch (Exception e) {
-                LogUtils.putException(libraryName, e.getMessage());
+                logger.error(libraryName, e.getMessage());
             }
         }
 
@@ -325,8 +325,6 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
 
     /**
      * Handled by the child class in gathering specific IBaseResources
-     *
-     * @return
      */
     protected abstract Map<String, IBaseResource> getResources(FhirContext fhirContext);
 

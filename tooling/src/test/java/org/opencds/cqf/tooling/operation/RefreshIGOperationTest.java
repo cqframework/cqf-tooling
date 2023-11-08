@@ -20,6 +20,8 @@ import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
 import org.opencds.cqf.tooling.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -37,7 +39,7 @@ import java.util.Map;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 public class RefreshIGOperationTest extends RefreshTest {
-
+	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	public RefreshIGOperationTest() {
 		super(FhirContext.forCached(FhirVersionEnum.R4));
 	}
@@ -86,7 +88,7 @@ public class RefreshIGOperationTest extends RefreshTest {
         String fhirUri = "http://localhost:" + availablePort + "/fhir";
         if (availablePort == -1){
             fhirUri = "";
-            LogUtils.info("No available ports to test post with. Removing mock fhir server from test.");
+            logger.info("No available ports to test post with. Removing mock fhir server from test.");
         }else{
             System.out.println("Available port: " + availablePort + ", mock fhir server url: " + fhirUri);
         }
@@ -185,7 +187,7 @@ public class RefreshIGOperationTest extends RefreshTest {
                 });
 
             } catch (IOException e) {
-                LogUtils.info(e.getMessage());
+                logger.info(e.getMessage());
             }
 
             // map out entries in the resulting single bundle file:

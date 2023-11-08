@@ -5,8 +5,11 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
+import org.opencds.cqf.tooling.quick.QuickPageGenerator;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
 
 import java.io.ByteArrayOutputStream;
@@ -15,6 +18,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 
 public class QuestionnaireProcessorTest extends RefreshTest {
+    private static final Logger logger = LoggerFactory.getLogger(QuestionnaireProcessorTest.class);
 
     public static final String separator = System.getProperty("file.separator");
     private final String TARGET_PATH = "target" + separator + "bundleQuestionnaires";
@@ -80,7 +84,7 @@ public class QuestionnaireProcessorTest extends RefreshTest {
 
         File outputBundleFile = new File(outputBundleFilePath);
 
-        LogUtils.info(String.format("OutputBundleFilePath: %s", outputBundleFilePath));
+        logger.info(String.format("OutputBundleFilePath: %s", outputBundleFilePath));
         //TODO: more intelligently inspect the contents. For now just a naive check to see if the bundle file was successfully created.
         assert(outputBundleFile.exists());
     }
