@@ -372,7 +372,7 @@ public class ResourceUtils {
       return options;
    }
 
-   private static final Map<String, org.hl7.elm.r1.Library> cachedElm = new HashMap<>();
+   private static Map<String, org.hl7.elm.r1.Library> cachedElm = new HashMap<>();
    public static org.hl7.elm.r1.Library getElmFromCql(String cqlContentPath) {
       org.hl7.elm.r1.Library elm = cachedElm.get(cqlContentPath);
       if (elm != null) {

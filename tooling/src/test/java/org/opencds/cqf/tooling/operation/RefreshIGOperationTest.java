@@ -2,6 +2,8 @@ package org.opencds.cqf.tooling.operation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;

@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
-public class PlanDefinitionProcessor {
+public class PlanDefinitionProcessor extends AbstractResourceProcessor{
     public static final String ResourcePrefix = "plandefinition-";
     public static final String PlanDefinitionTestGroupName = "plandefinition";
     private LibraryProcessor libraryProcessor;
