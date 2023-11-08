@@ -219,15 +219,54 @@ public class IOUtils {
         }
     }
 
-    public static void copyFile(String inputPath, String outputPath) {
-        try  {
+    private static Map<String, String> alreadyCopied = new HashMap<>();
+    public static int copyFileCounter() {
+        return copyFileCounter;
+    }
+    private static int copyFileCounter = 0;
+    public static boolean copyFile(String inputPath, String outputPath) {
+
+        if ((inputPath == null || inputPath.isEmpty()) &&
+                (outputPath == null || outputPath.isEmpty())) {
+            LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath and outputPath are missing!"));
+            return false;
+        }
+
+        if (inputPath == null || inputPath.isEmpty()) {
+            LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
+            return false;
+        }
+
+        if (outputPath == null || outputPath.isEmpty()) {
+            LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
+            return false;
+        }
+
+        String key = inputPath + ":" + outputPath;
+        if (alreadyCopied.containsKey(key)) {
+            // File already copied to destination, no need to do anything
+            return false;
+        }
+
+        try {
             Path src = Paths.get(inputPath);
             Path dest = Paths.get(outputPath);
             Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
+
+            if (inputPath.toLowerCase().contains("tests-")){
+                copyFileCounter++;
+//                System.out.println("Total tests-*: " + testsCounter + ": " + inputPath);
+            }
+
+            alreadyCopied.put(key, outputPath);
+            return true;
         } catch (IOException e) {
             logger.error(e.getMessage());
-            throw new RuntimeException("Error copying file: " + e.getMessage());
+            LogUtils.putException("IOUtils.copyFile(" + inputPath + ", " + outputPath + "): ",
+                    new RuntimeException("Error copying file: " + e.getMessage()));
+            return false;
         }
+
     }
 
     public static String getTypeQualifiedResourceId(String path, FhirContext fhirContext) {
@@ -235,6 +274,7 @@ public class IOUtils {
         if (resource != null) {
             return resource.getIdElement().getResourceType() + "/" + resource.getIdElement().getIdPart();
         }
+
         return null;
     }
 
@@ -262,7 +302,7 @@ public class IOUtils {
     }
 
     //users should always check for null
-    private static final Map<String, IBaseResource> cachedResources = new LinkedHashMap<>();
+    private static Map<String, IBaseResource> cachedResources = new LinkedHashMap<>();
     public static IBaseResource readResource(String path, FhirContext fhirContext, Boolean safeRead) {
         Encoding encoding = getEncoding(path);
         if (encoding == Encoding.UNKNOWN || encoding == Encoding.CQL) {
@@ -345,9 +385,16 @@ public class IOUtils {
     public static boolean isDirectory(String path) {
         return FileUtils.isDirectory(new File(path));
     }
+    private static Map<String, List<String>> cachedFilePaths = new HashMap<>();
 
     public static List<String> getFilePaths(String directoryPath, Boolean recursive) {
         List<String> filePaths = new ArrayList<>();
+        String key = directoryPath + ":" + recursive;
+
+        if (IOUtils.cachedFilePaths.containsKey(key)) {
+            filePaths = IOUtils.cachedFilePaths.get(key);
+            return filePaths;
+        }
         File inputDir = new File(directoryPath);
         ArrayList<File> files = inputDir.isDirectory()
                 ? new ArrayList<>(Arrays.asList(Optional.ofNullable(
@@ -365,6 +412,7 @@ public class IOUtils {
                 filePaths.add(file.getPath());
             }
         }
+        cachedFilePaths.put(key, filePaths);
         return filePaths;
     }
 
@@ -397,6 +445,7 @@ public class IOUtils {
         if (!result.toLowerCase().endsWith("resources")) {
             result = getParentDirectoryPath(result);
         }
+
         return result;
     }
 
@@ -405,8 +454,15 @@ public class IOUtils {
         return file.getParent();
     }
 
+    private static Map<String, List<String>> cachedDirectoryPaths = new HashMap<>();
+
     public static List<String> getDirectoryPaths(String path, Boolean recursive) {
         List<String> directoryPaths = new ArrayList<>();
+        String key = path + ":" + recursive;
+        if (IOUtils.cachedDirectoryPaths.containsKey(key)) {
+            directoryPaths = IOUtils.cachedDirectoryPaths.get(key);
+            return directoryPaths;
+        }
         List<File> directories;
         File parentDirectory = new File(path);
         try {
@@ -426,6 +482,7 @@ public class IOUtils {
                 directoryPaths.add(directory.getPath());
             }
         }
+        cachedDirectoryPaths.put(key, directoryPaths);
         return directoryPaths;
     }
 
@@ -531,7 +588,7 @@ public class IOUtils {
         return dependencyCqlFiles;
     }
 
-    private static final Map<String, CqlTranslator> cachedTranslator = new LinkedHashMap<>();
+    private static Map<String, CqlTranslator> cachedTranslator = new LinkedHashMap<>();
     public static CqlTranslator translate(String cqlContentPath, ModelManager modelManager, LibraryManager libraryManager, CqlTranslatorOptions options) {
         CqlTranslator translator = cachedTranslator.get(cqlContentPath);
         if (translator != null) {
@@ -551,6 +608,7 @@ public class IOUtils {
                     TrackBack tb = error.getLocator();
                     String lines = tb == null ? "[n/a]" : String.format("[%d:%d, %d:%d]",
                             tb.getStartLine(), tb.getStartChar(), tb.getEndLine(), tb.getEndChar());
+                    //System.err.printf("%s %s%n", lines, error.getMessage());
                     errors.add(lines + error.getMessage());
                 }
                 throw new IllegalArgumentException(errors.toString());
@@ -636,7 +694,7 @@ public class IOUtils {
         return libraryPath;
     }
 
-    private static final HashSet<String> cqlLibraryPaths = new LinkedHashSet<>();
+    private static Set<String> cqlLibraryPaths = new LinkedHashSet<>();
     public static Set<String> getCqlLibraryPaths() {
         if (cqlLibraryPaths.isEmpty()) {
             setupCqlLibraryPaths();
@@ -677,7 +735,7 @@ public class IOUtils {
         return cqlLibrarySourcePath;
     }
 
-    private static final HashSet<String> terminologyPaths = new LinkedHashSet<>();
+    private static Set<String> terminologyPaths = new LinkedHashSet<>();
     public static Set<String> getTerminologyPaths(FhirContext fhirContext) {
         if (terminologyPaths.isEmpty()) {
             setupTerminologyPaths(fhirContext);
@@ -722,32 +780,32 @@ public class IOUtils {
         return library;
     }
 
-    private static final HashSet<String> libraryPaths = new LinkedHashSet<>();
+    private static Set<String> libraryPaths = new LinkedHashSet<>();
     public static Set<String> getLibraryPaths(FhirContext fhirContext) {
         if (libraryPaths.isEmpty()) {
             setupLibraryPaths(fhirContext);
         }
         return libraryPaths;
     }
-    private static final Map<String, IBaseResource> libraryUrlMap = new LinkedHashMap<>();
+    private static Map<String, IBaseResource> libraryUrlMap = new LinkedHashMap<>();
     public static Map<String, IBaseResource> getLibraryUrlMap(FhirContext fhirContext) {
         if (libraryPathMap.isEmpty()) {
             setupLibraryPaths(fhirContext);
         }
-        LogUtils.info(String.format("libraryUrlMap Size: %d", libraryPathMap.size()));
-        for (Map.Entry<String, IBaseResource> e : libraryUrlMap.entrySet()) {
-            LogUtils.info(String.format("libraryUrlMap Entry: %s", e.getKey()));
-        }
+//        LogUtils.info(String.format("libraryUrlMap Size: %d", libraryPathMap.size()));
+//        for (Map.Entry<String, IBaseResource> e : libraryUrlMap.entrySet()) {
+//            LogUtils.info(String.format("libraryUrlMap Entry: %s", e.getKey()));
+//        }
         return libraryUrlMap;
     }
-    private static final Map<String, String> libraryPathMap = new LinkedHashMap<>();
+    private static Map<String, String> libraryPathMap = new LinkedHashMap<>();
     public static Map<String, String> getLibraryPathMap(FhirContext fhirContext) {
         if (libraryPathMap.isEmpty()) {
             setupLibraryPaths(fhirContext);
         }
         return libraryPathMap;
     }
-    private static final Map<String, IBaseResource> libraries = new LinkedHashMap<>();
+    private static Map<String, IBaseResource> libraries = new LinkedHashMap<>();
     public static Map<String, IBaseResource> getLibraries(FhirContext fhirContext) {
         if (libraries.isEmpty()) {
             setupLibraryPaths(fhirContext);
@@ -783,21 +841,21 @@ public class IOUtils {
         }
     }
 
-    private static final HashSet<String> measurePaths = new LinkedHashSet<>();
+    private static Set<String> measurePaths = new LinkedHashSet<>();
     public static Set<String> getMeasurePaths(FhirContext fhirContext) {
         if (measurePaths.isEmpty()) {
             setupMeasurePaths(fhirContext);
         }
         return measurePaths;
     }
-    private static final Map<String, String> measurePathMap = new LinkedHashMap<>();
+    private static Map<String, String> measurePathMap = new LinkedHashMap<>();
     public static Map<String, String> getMeasurePathMap(FhirContext fhirContext) {
         if (measurePathMap.isEmpty()) {
             setupMeasurePaths(fhirContext);
         }
         return measurePathMap;
     }
-    private static final Map<String, IBaseResource> measures = new LinkedHashMap<>();
+    private static Map<String, IBaseResource> measures = new LinkedHashMap<>();
     public static Map<String, IBaseResource> getMeasures(FhirContext fhirContext) {
         if (measures.isEmpty()) {
             setupMeasurePaths(fhirContext);
@@ -813,7 +871,7 @@ public class IOUtils {
                     resources.put(path, resource);
                 } catch (Exception e) {
                     if(path.toLowerCase().contains("measure")) {
-                        logger.error("Error reading in Measure from path: {} \n {}", path, e.getMessage());
+                        System.out.println("Error reading in Measure from path: " + path + "\n" + e);
                     }
                 }
             }
@@ -831,7 +889,7 @@ public class IOUtils {
         }
     }
 
-    private static final HashSet<String> measureReportPaths = new LinkedHashSet<>();
+    private static Set<String> measureReportPaths = new LinkedHashSet<>();
     public static Set<String> getMeasureReportPaths(FhirContext fhirContext) {
         if (measureReportPaths.isEmpty()) {
             setupMeasureReportPaths(fhirContext);
@@ -858,21 +916,21 @@ public class IOUtils {
         }
     }
 
-    private static final HashSet<String> planDefinitionPaths = new LinkedHashSet<>();
+    private static Set<String> planDefinitionPaths = new LinkedHashSet<>();
     public static Set<String> getPlanDefinitionPaths(FhirContext fhirContext) {
         if (planDefinitionPaths.isEmpty()) {
             setupPlanDefinitionPaths(fhirContext);
         }
         return planDefinitionPaths;
     }
-    private static final Map<String, String> planDefinitionPathMap = new LinkedHashMap<>();
+    private static Map<String, String> planDefinitionPathMap = new LinkedHashMap<>();
     public static Map<String, String> getPlanDefinitionPathMap(FhirContext fhirContext) {
         if (planDefinitionPathMap.isEmpty()) {
             setupPlanDefinitionPaths(fhirContext);
         }
         return planDefinitionPathMap;
     }
-    private static final Map<String, IBaseResource> planDefinitions = new LinkedHashMap<>();
+    private static Map<String, IBaseResource> planDefinitions = new LinkedHashMap<>();
     public static Map<String, IBaseResource> getPlanDefinitions(FhirContext fhirContext) {
         if (planDefinitions.isEmpty()) {
             setupPlanDefinitionPaths(fhirContext);
@@ -902,7 +960,7 @@ public class IOUtils {
         }
     }
 
-    private static final HashSet<String> questionnairePaths = new LinkedHashSet<>();
+    private static Set<String> questionnairePaths = new LinkedHashSet<>();
     public static Set<String> getQuestionnairePaths(FhirContext fhirContext) {
         if (questionnairePaths.isEmpty()) {
             setupQuestionnairePaths(fhirContext);
@@ -910,7 +968,7 @@ public class IOUtils {
         return questionnairePaths;
     }
 
-    private static final Map<String, String> questionnairePathMap = new LinkedHashMap<>();
+    private static Map<String, String> questionnairePathMap = new LinkedHashMap<>();
     public static Map<String, String> getQuestionnairePathMap(FhirContext fhirContext) {
         if (questionnairePathMap.isEmpty()) {
             setupQuestionnairePaths(fhirContext);
@@ -918,7 +976,7 @@ public class IOUtils {
         return questionnairePathMap;
     }
 
-    private static final Map<String, IBaseResource> questionnaires = new LinkedHashMap<>();
+    private static Map<String, IBaseResource> questionnaires = new LinkedHashMap<>();
     public static Map<String, IBaseResource> getQuestionnaires(FhirContext fhirContext) {
         if (questionnaires.isEmpty()) {
             setupQuestionnairePaths(fhirContext);
@@ -949,7 +1007,7 @@ public class IOUtils {
         }
     }
 
-    private static final HashSet<String> activityDefinitionPaths = new LinkedHashSet<>();
+    private static Set<String> activityDefinitionPaths = new LinkedHashSet<>();
     public static Set<String> getActivityDefinitionPaths(FhirContext fhirContext) {
         if (activityDefinitionPaths.isEmpty()) {
             logger.info("Reading activitydefinitions");
@@ -989,7 +1047,7 @@ public class IOUtils {
         }
     }
 
-    private static HashSet<String> devicePaths;
+    private static Set<String> devicePaths;
     public static Set<String> getDevicePaths(FhirContext fhirContext) {
         if (devicePaths == null) {
             setupDevicePaths(fhirContext);
@@ -1041,5 +1099,30 @@ public class IOUtils {
             filePath = FilenameUtils.concat(filePath, pathToAppend);
         }
         return filePath;
+    }
+
+    public static void cleanUp(){
+        alreadyCopied = new HashMap<>();
+        cachedResources = new LinkedHashMap<String, IBaseResource>();
+        cachedFilePaths = new HashMap<>();
+        cachedDirectoryPaths = new HashMap<>();
+        cachedTranslator = new LinkedHashMap<String, CqlTranslator>();
+        cqlLibraryPaths = new LinkedHashSet<String>();
+        terminologyPaths = new LinkedHashSet<String>();
+        libraryPaths = new LinkedHashSet<String>();
+        libraryUrlMap = new LinkedHashMap<String, IBaseResource>();
+        libraryPathMap = new LinkedHashMap<String, String>();
+        libraries = new LinkedHashMap<String, IBaseResource>();
+        measurePaths = new LinkedHashSet<String>();
+        measurePathMap = new LinkedHashMap<String, String>();
+        measures = new LinkedHashMap<String, IBaseResource>();
+        measureReportPaths = new LinkedHashSet<String>();
+        planDefinitionPaths = new LinkedHashSet<String>();
+        planDefinitionPathMap = new LinkedHashMap<String, String>();
+        planDefinitions = new LinkedHashMap<String, IBaseResource>();
+        questionnairePaths = new LinkedHashSet<String>();
+        questionnairePathMap = new LinkedHashMap<String, String>();
+        questionnaires = new LinkedHashMap<String, IBaseResource>();
+        activityDefinitionPaths = new LinkedHashSet<String>();
     }
 }

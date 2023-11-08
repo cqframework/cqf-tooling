@@ -1,17 +1,15 @@
 package org.opencds.cqf.tooling.processor;
 
+import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
-import org.opencds.cqf.tooling.utilities.LogUtils;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class ValueSetsProcessor {
     private static Map<String, IBaseResource> copyToUrls(List<IBaseResource> valueSets, FhirContext fhirContext) {
@@ -78,16 +76,19 @@ public class ValueSetsProcessor {
     }
 
     public static Boolean bundleValueSets(String cqlContentPath, String igPath, FhirContext fhirContext,
-            Map<String, IBaseResource> resources, Encoding encoding, Boolean includeDependencies, Boolean includeVersion) {
+            Map<String, IBaseResource> resources, Encoding encoding, Boolean includeDependencies, Boolean includeVersion) throws Exception{
         Boolean shouldPersist = true;
+
         try {
             Map<String, IBaseResource> dependencies = ResourceUtils.getDepValueSetResources(cqlContentPath, igPath, fhirContext, includeDependencies, includeVersion);
+
             for (IBaseResource resource : dependencies.values()) {
                 resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
             }
         } catch (Exception e) {
             shouldPersist = false;
-            LogUtils.putException(cqlContentPath, e.getMessage());
+            throw e;
+//            LogUtils.putException(cqlContentPath, e.getMessage());
         }
         return shouldPersist;
     }

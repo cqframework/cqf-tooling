@@ -1,54 +1,31 @@
 package org.opencds.cqf.tooling.utilities;
 
-import static org.opencds.cqf.tooling.utilities.CanonicalUtils.getTail;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.util.TerserUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.Validate;
-import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
-import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
-import org.cqframework.cql.cql2elm.LibraryManager;
-import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.cql2elm.*;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseElement;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.opencds.cqf.tooling.processor.ValueSetsProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
-import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.opencds.cqf.tooling.utilities.CanonicalUtils.getTail;
 
 public class ResourceUtils {
    private static final Logger logger = LoggerFactory.getLogger(ResourceUtils.class);
@@ -312,13 +289,13 @@ public class ResourceUtils {
       }
 
       if (dependencies.size() != valueSetResources.size()) {
-        String message = (dependencies.size() - valueSetResources.size()) + " missing ValueSets: \r\n";
+        StringBuilder message = new StringBuilder((dependencies.size() - valueSetResources.size()) + " missing ValueSets: \r\n");
         dependencies.removeAll(valueSetResources.keySet());
         for (String valueSetUrl : dependencies) {
-          message += valueSetUrl + " MISSING \r\n";
+          message.append(valueSetUrl).append(" MISSING \r\n");
         }
-        logger.error(message);
-        throw new Exception(message);
+        logger.error(message.toString());
+        throw new Exception(message.toString());
       }
       return valueSetResources;
    }
@@ -348,6 +325,10 @@ public class ResourceUtils {
       try {
          elm = getElmFromCql(cqlContentPath);
       } catch (Exception e) {
+//        System.out.println("error processing cql: ");
+//        System.out.println(e.getMessage());
+
+          LogUtils.putException("getIncludedDefs", e);
         logger.error("error processing cql: ");
         logger.error(e.getMessage());
         return includedDefs;
@@ -843,33 +824,49 @@ public class ResourceUtils {
       return fhirContext.getElementDefinition(elementName);
    }
 
-   public static void outputResource(IBaseResource resource, String encoding, FhirContext context, String outputPath) {
-      try (FileOutputStream writer = new FileOutputStream(IOUtils.concatFilePath(outputPath,
-              resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding))) {
-         writer.write(
-                 encoding.equals("json")
-                         ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-                         : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-         );
-         writer.flush();
-      } catch (IOException e) {
-         e.printStackTrace();
-         throw new RuntimeException(e.getMessage());
-      }
-   }
+    //to keep track of output already written and avoid duplicate functionality slowing down performance:
+    private static ConcurrentHashMap<String, Boolean> outputResourceTracker = new ConcurrentHashMap<>();
+    public static final String separator = System.getProperty("file.separator");
+    public static void outputResource(IBaseResource resource, String encoding, FhirContext context, String outputPath) {
+        String resourceFileLocation = outputPath + separator +
+                resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() +
+                "." + encoding;
+        if (outputResourceTracker.containsKey(resource.getIdElement().getResourceType() + ":" + outputPath)){
+            LogUtils.info("This resource has already been processed: " + resource.getIdElement().getResourceType());
+            return;
+        }
 
-   public static void outputResourceByName(IBaseResource resource, String encoding, FhirContext context, String outputPath, String name) {
-      try (FileOutputStream writer = new FileOutputStream(
-              IOUtils.concatFilePath(outputPath, name + "." + encoding))) {
-         writer.write(
-                 encoding.equals("json")
-                         ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-                         : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-         );
-         writer.flush();
-      } catch (IOException e) {
-         e.printStackTrace();
-         throw new RuntimeException(e.getMessage());
-      }
-   }
+        try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding)) {
+            writer.write(
+                    encoding.equals("json")
+                            ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                            : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+            );
+            writer.flush();
+            outputResourceTracker.put(resourceFileLocation, Boolean.TRUE);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public static void outputResourceByName(IBaseResource resource, String encoding, FhirContext context, String outputPath, String name) {
+        try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + name + "." + encoding)) {
+            writer.write(
+                encoding.equals("json")
+                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+            );
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public static void cleanUp(){
+        outputResourceTracker = new ConcurrentHashMap<>();
+        cachedElm = new HashMap<String, org.hl7.elm.r1.Library>();
+    }
 }

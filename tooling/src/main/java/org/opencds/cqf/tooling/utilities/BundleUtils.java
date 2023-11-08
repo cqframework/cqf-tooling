@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling.utilities;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import java.io.File;
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -16,8 +18,10 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class BundleUtils {
 
@@ -167,7 +171,10 @@ public class BundleUtils {
         }
     }
 
-    public static void extractStu3Resources(org.hl7.fhir.dstu3.model.Bundle bundle, String encoding, String outputPath, boolean suppressNarrative) {
+    public static final String separator = System.getProperty("file.separator");
+    public static Set<String> extractStu3Resources(org.hl7.fhir.dstu3.model.Bundle bundle, String encoding, String outputPath, boolean suppressNarrative) {
+        Set<String> extractedResources = new HashSet<>();
+
         FhirContext context = FhirContext.forDstu3Cached();
         for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
             org.hl7.fhir.dstu3.model.Resource entryResource = entry.getResource();
@@ -175,12 +182,22 @@ public class BundleUtils {
                 if (entryResource.fhirType().equals("Measure") && suppressNarrative) {
                     ((org.hl7.fhir.dstu3.model.Measure) entryResource).setText(null);
                 }
+
+                String resourceFileLocation = outputPath + separator +
+                        entryResource.getIdElement().getResourceType() + "-" + entryResource.getIdElement().getIdPart() +
+                        "." + encoding;
+                extractedResources.add(resourceFileLocation);
+
                 ResourceUtils.outputResource(entryResource, encoding, context, outputPath);
             }
         }
+
+        return extractedResources;
     }
 
-    public static void extractR4Resources(org.hl7.fhir.r4.model.Bundle bundle, String encoding, String outputPath, boolean suppressNarrative) {
+    public static Set<String> extractR4Resources(org.hl7.fhir.r4.model.Bundle bundle, String encoding, String outputPath, boolean suppressNarrative) {
+        Set<String> extractedResources = new HashSet<>();
+
         FhirContext context = FhirContext.forR4Cached();
         for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
             org.hl7.fhir.r4.model.Resource entryResource = entry.getResource();
@@ -188,19 +205,28 @@ public class BundleUtils {
                 if (entryResource.fhirType().equals("Measure") && suppressNarrative) {
                     ((org.hl7.fhir.r4.model.Measure) entryResource).setText(null);
                 }
+                String resourceFileLocation = outputPath + separator +
+                        entryResource.getIdElement().getResourceType() + "-" + entryResource.getIdElement().getIdPart() +
+                        "." + encoding;
+                extractedResources.add(resourceFileLocation);
+
                 ResourceUtils.outputResource(entryResource, encoding, context, outputPath);
             }
         }
+
+        return extractedResources;
     }
 
-    public static void extractResources(Object bundle, String encoding, String outputDir, boolean suppressNarrative, String version) {
+    public static Set<String> extractResources(Object bundle, String encoding, String outputDir, boolean suppressNarrative, String version) {
+        Set<String> extractedResources = new HashSet<>();
         if (version.equals("stu3") && bundle instanceof org.hl7.fhir.dstu3.model.Bundle) {
-            BundleUtils.extractStu3Resources((org.hl7.fhir.dstu3.model.Bundle) bundle, encoding, outputDir, suppressNarrative);
+             extractedResources = new HashSet<>(BundleUtils.extractStu3Resources((org.hl7.fhir.dstu3.model.Bundle) bundle, encoding, outputDir, suppressNarrative));
         } else if (version.equals("r4") && bundle instanceof org.hl7.fhir.r4.model.Bundle) {
-            BundleUtils.extractR4Resources((org.hl7.fhir.r4.model.Bundle) bundle, encoding, outputDir, suppressNarrative);
+            extractedResources = new HashSet<>(BundleUtils.extractR4Resources((org.hl7.fhir.r4.model.Bundle) bundle, encoding, outputDir, suppressNarrative));
         }else{
             throw new IllegalArgumentException("Invalid bundle/version: " + bundle + "/" + version);
         }
+        return extractedResources;
     }
 
     public static List<Resource> getR4ResourcesFromBundle(Bundle bundle){

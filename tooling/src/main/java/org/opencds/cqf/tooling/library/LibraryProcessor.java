@@ -1,35 +1,35 @@
 package org.opencds.cqf.tooling.library;
 
+import ca.uhn.fhir.context.FhirContext;
+import com.google.common.base.Strings;
+import org.apache.commons.io.FilenameUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.utilities.TextFile;
+import org.hl7.fhir.utilities.Utilities;
+import org.opencds.cqf.tooling.common.ThreadUtils;
+import org.opencds.cqf.tooling.library.r4.R4LibraryProcessor;
+import org.opencds.cqf.tooling.library.stu3.STU3LibraryProcessor;
+import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
+import org.opencds.cqf.tooling.processor.BaseProcessor;
+import org.opencds.cqf.tooling.processor.CqlProcessor;
+import org.opencds.cqf.tooling.processor.IGProcessor;
+import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
+import org.opencds.cqf.tooling.utilities.LogUtils;
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Pattern;
-
-import com.google.common.base.Strings;
-
-import org.apache.commons.io.FilenameUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.CodeableConcept;
-import org.hl7.fhir.r5.model.Coding;
-import org.hl7.fhir.r5.model.Attachment;
-import org.hl7.fhir.r5.model.Library;
-import org.hl7.fhir.r5.model.RelatedArtifact;
-import org.hl7.fhir.utilities.TextFile;
-import org.hl7.fhir.utilities.Utilities;
-import org.opencds.cqf.tooling.library.r4.R4LibraryProcessor;
-import org.opencds.cqf.tooling.library.stu3.STU3LibraryProcessor;
-import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
-import org.opencds.cqf.tooling.processor.*;
-import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.opencds.cqf.tooling.utilities.LogUtils;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public class LibraryProcessor extends BaseProcessor {
     private static final Logger logger = LoggerFactory.getLogger(LibraryProcessor.class);
@@ -52,7 +52,7 @@ public class LibraryProcessor extends BaseProcessor {
             throw new RuntimeException("The library id format is invalid.");
         }
     }
-    
+
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
         return refreshIgLibraryContent(parentContext, outputEncoding, null, versioned, fhirContext, shouldApplySoftwareSystemStamp);
     }
@@ -90,25 +90,45 @@ public class LibraryProcessor extends BaseProcessor {
     }
 
     public Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
-            Encoding encoding, boolean versioned) {
+                                             Encoding encoding, boolean versioned) {
+        try{
+            Queue<Callable<Void>> bundleLibraryDependenciesTasks = bundleLibraryDependenciesTasks(path, fhirContext, resources, encoding, versioned);
+            ThreadUtils.executeTasks(bundleLibraryDependenciesTasks);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+
+    }
+    public Queue<Callable<Void>> bundleLibraryDependenciesTasks(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
+                                                               Encoding encoding, boolean versioned) {
+
+        Queue<Callable<Void>> returnTasks = new ConcurrentLinkedQueue<>();
+
         String fileName = FilenameUtils.getName(path);
         boolean prefixed = fileName.toLowerCase().startsWith("library-");
-        Boolean shouldPersist = true;
         try {
             Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding, versioned, logger);
             // String currentResourceID = IOUtils.getTypeQualifiedResourceId(path, fhirContext);
             for (IBaseResource resource : dependencies.values()) {
-                resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
+                returnTasks.add(() -> {
+                    resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
 
-                // NOTE: Assuming dependency library will be in directory of dependent.
-                String dependencyPath = IOUtils.getResourceFileName(IOUtils.getResourceDirectory(path), resource, encoding, fhirContext, versioned, prefixed);
-                bundleLibraryDependencies(dependencyPath, fhirContext, resources, encoding, versioned);
+                    // NOTE: Assuming dependency library will be in directory of dependent.
+                    String dependencyPath = IOUtils.getResourceFileName(IOUtils.getResourceDirectory(path), resource, encoding, fhirContext, versioned, prefixed);
+
+                    returnTasks.addAll(bundleLibraryDependenciesTasks(dependencyPath, fhirContext, resources, encoding, versioned));
+
+                    //return statement needed for Callable<Void>
+                    return null;
+                });
             }
         } catch (Exception e) {
-            shouldPersist = false;
             LogUtils.putException(path, e);
+            //purposely break addAll:
+            return null;
         }
-        return shouldPersist;
+        return returnTasks;
     }
 
     protected boolean versioned;
@@ -163,7 +183,7 @@ public class LibraryProcessor extends BaseProcessor {
                 sourceLibrary.getParameter().clear();
                 sourceLibrary.getParameter().addAll(info.getParameters());
             } else {
-                logMessage(String.format("No cql info found for %s", fileName));
+                logMessage(String.format("No cql info found for ", fileName));
                 //f.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, ValidationMessage.IssueType.NOTFOUND, "Library", "No cql info found for "+f.getName(), ValidationMessage.IssueSeverity.ERROR));
             }
         }

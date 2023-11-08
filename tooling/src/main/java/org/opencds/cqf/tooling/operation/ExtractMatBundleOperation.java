@@ -3,22 +3,22 @@ package org.opencds.cqf.tooling.operation;
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.common.ThreadUtils;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ExtractMatBundleOperation extends Operation {
     private static final String ERROR_BUNDLE_OUTPUT_INVALID = "When specifying the output folder using -op for ExtractMatBundle, the output directory name must contain the word 'bundle' (all lowercase.)";
@@ -34,13 +34,14 @@ public class ExtractMatBundleOperation extends Operation {
     private static final String ERROR_NOT_JSON_OR_XML = "The path to a bundle file of type json or xml is required.";
     private static final String ERROR_NOT_VALID = "Unable to translate the file. The resource appears invalid.";
     private static final String ERROR_NOT_VALID_BUNDLE = "Not a recognized transaction Bundle: ";
-    public static final String INFO_RESOURCE_ALREADY_PROCESSED = "This Resource has already been processed: ";
+
 
     private List<String> processedBundleCollection;
 
     @Override
     public void execute(String[] args) {
-        processedBundleCollection = new ArrayList<>();
+
+        processedBundleCollection = new CopyOnWriteArrayList<>();
 
         boolean directoryFlagPresent = false;
         boolean suppressNarrative = true;
@@ -123,34 +124,52 @@ public class ExtractMatBundleOperation extends Operation {
             }
         }
 
+
         //if -dir was found, treat inputLocation as directory:
         if (directoryFlagPresent) {
             File[] filesInDir = new File(inputLocation).listFiles();
-            if (filesInDir == null || filesInDir.length == 0) {
-                throw new IllegalArgumentException(ERROR_DIR_IS_EMPTY);
-            } else {
-                for (File file : filesInDir) {
-                    //process only 1 layer of subdirectories (should they exist)
-                    if (file.isDirectory()) {
-                        File[] filesInSubDir = file.listFiles();
-                        if (filesInSubDir == null || filesInSubDir.length == 0) {
-                            continue;
-                        } else {
-                            for (File subDirFile : filesInSubDir) {
-                                processSingleFile(subDirFile, version, suppressNarrative);
-                            }
-                        }
-                    } else {
-                        processSingleFile(file, version, suppressNarrative);
-                    }
-                }
+            if (filesInDir != null && filesInDir.length > 0) {
+                //use recursive calls to build up task list:
+                ThreadUtils.executeTasks(processFilesInDir(filesInDir, version, suppressNarrative));
+            }else{
+                LogUtils.info(ERROR_DIR_IS_EMPTY);
+                return;
             }
         } else {
             //single file, allow processSingleFile() to run with currently assigned inputFile:
             processSingleFile(new File(inputLocation), version, suppressNarrative);
         }
-        LogUtils.info(INFO_EXTRACTION_SUCCESSFUL);
-        LogUtils.info("Successfully extracted the following resources: " + processedBundleCollection);
+
+        if (!processedBundleCollection.isEmpty()) {
+            LogUtils.info("Successfully extracted the following resources: " + processedBundleCollection);
+        }else{
+            LogUtils.info("ExtractMatBundleOperation ended with no resources extracted!");
+        }
+    }
+
+    /**
+     * This method uses paralellism to deploy multiple threads and speed up ExtractMatBundleOperation on entire directories
+     *
+     * @param filesInDir
+     * @param version
+     * @param suppressNarrative
+     */
+    private List<Callable<Void>> processFilesInDir(File[] filesInDir, String version, boolean suppressNarrative) {
+        List<Callable<Void>> tasks = new ArrayList<>();
+        if (filesInDir != null) {
+            for (File file : filesInDir) {
+                //process only 1 layer of subdirectories (should they exist)
+                if (file.isDirectory()) {
+                    tasks.addAll(processFilesInDir(file.listFiles(), version, suppressNarrative));
+                } else {
+                    tasks.add(() -> {
+                        processSingleFile(file, version, suppressNarrative);
+                        return null;
+                    });
+                }
+            }
+        }
+        return tasks;
     }
 
     void processSingleFile(File bundleFile, String version, boolean suppressNarrative) {
@@ -172,7 +191,8 @@ public class ExtractMatBundleOperation extends Operation {
                     context = FhirContext.forR4Cached();
                     break;
                 default:
-                    throw new IllegalArgumentException("Unknown fhir version: " + version);
+                    LogUtils.putException("processSingleFile", new IllegalArgumentException("Unknown fhir version: " + version));
+                    return;
             }
         }
 
@@ -203,33 +223,23 @@ public class ExtractMatBundleOperation extends Operation {
             return;
         }
 
-        //sometimes tests leave library or measure files behind so we want to make sure we only iterate over bundle files:
+        //sometimes tests leave library or measure files behind, so we want to make sure we only iterate over bundle files:
         if (!(bundle instanceof org.hl7.fhir.dstu3.model.Bundle || bundle instanceof org.hl7.fhir.r4.model.Bundle)) {
             LogUtils.info(ERROR_NOT_VALID_BUNDLE + inputFileLocation);
             return;
         }
-
-        IBaseResource processedBundle;
 
         //ensure the xml and json files are transaction Bundle types:
         if (bundle instanceof org.hl7.fhir.dstu3.model.Bundle) {
             if (!((org.hl7.fhir.dstu3.model.Bundle) bundle).getType().equals(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION)) {
                 LogUtils.info("Invalid Bundle type in " + encoding + " file: " + inputFileLocation);
                 return;
-            } else {
-                //Bundle is a valid transaction Bundle, now ensure its entries aren't duplicate to what has been
-                //processed already:
-                processedBundle = processDSTU3BundleResources((org.hl7.fhir.dstu3.model.Bundle) bundle);
             }
 
         } else if (bundle instanceof org.hl7.fhir.r4.model.Bundle) {
             if (!((org.hl7.fhir.r4.model.Bundle) bundle).getType().equals(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION)) {
                 LogUtils.info("Invalid Bundle type in " + encoding + " file: " + inputFileLocation);
                 return;
-            } else {
-                //Bundle is a valid transaction Bundle, now ensure its entries aren't duplicate to what has been
-                //processed already:
-                processedBundle = processR4BundleResources((org.hl7.fhir.r4.model.Bundle) bundle);
             }
         } else {
             LogUtils.info("Not a recognized bundle in " + encoding + "file: " + inputFileLocation);
@@ -245,64 +255,14 @@ public class ExtractMatBundleOperation extends Operation {
             outputDir = getOutputPath();
         }
 
-        BundleUtils.extractResources(processedBundle, encoding, outputDir, suppressNarrative, version);
+        processedBundleCollection.addAll(BundleUtils.extractResources(bundle, encoding, outputDir, suppressNarrative, version));
 
         //move and properly rename the files
         moveAndRenameFiles(outputDir, context, version);
-        LogUtils.info(INFO_EXTRACTION_SUCCESSFUL);
+
+        LogUtils.info(INFO_EXTRACTION_SUCCESSFUL + ": " + inputFileLocation);
     }
 
-    /**
-     * This method returns an Bundle instance where certain entries are stripped should their resource ID turn up in our
-     * collection of processed resource IDs
-     *
-     * @param bundle
-     * @return
-     */
-    private org.hl7.fhir.dstu3.model.Bundle processDSTU3BundleResources(org.hl7.fhir.dstu3.model.Bundle bundle) {
-        Iterator<org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent> entryIterator = bundle.getEntry().iterator();
-
-        while (entryIterator.hasNext()) {
-            org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry = entryIterator.next();
-            if (entry.hasResource() && entry.getResource().hasIdElement()) {
-                String resourceID = entry.getResource().getIdElement().getIdPart();
-                if (processedBundleCollection.contains(resourceID)) {
-                    LogUtils.info(INFO_RESOURCE_ALREADY_PROCESSED + resourceID);
-                    entryIterator.remove();
-                } else {
-                    processedBundleCollection.add(resourceID);
-                }
-            }
-        }
-
-        return bundle;
-    }
-
-    /**
-     * This method returns an Bundle instance where certain entries are stripped should their resource ID turn up in our
-     * collection of processed resource IDs
-     *
-     * @param bundle
-     * @return
-     */
-    private org.hl7.fhir.r4.model.Bundle processR4BundleResources(org.hl7.fhir.r4.model.Bundle bundle) {
-        Iterator<org.hl7.fhir.r4.model.Bundle.BundleEntryComponent> entryIterator = bundle.getEntry().iterator();
-
-        while (entryIterator.hasNext()) {
-            org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry = entryIterator.next();
-            if (entry.hasResource() && entry.getResource().hasId()) {
-                String resourceID = entry.getResource().getId();
-                if (processedBundleCollection.contains(resourceID)) {
-                    LogUtils.info(INFO_RESOURCE_ALREADY_PROCESSED + resourceID);
-                    entryIterator.remove();
-                } else {
-                    processedBundleCollection.add(resourceID);
-                }
-            }
-        }
-
-        return bundle;
-    }
 
 
     /**
@@ -318,16 +278,18 @@ public class ExtractMatBundleOperation extends Operation {
             if (extractedFile.getPath().endsWith(".xml")) {
                 try {
                     theResource = context.newXmlParser().parseResource(new FileReader(extractedFile));
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e.getMessage());
+                } catch (Exception e) {
+//                    e.printStackTrace();
+                    LogUtils.putException("moveAndRenameFiles", new RuntimeException(e.getMessage()));
+                    continue;
                 }
             } else if (extractedFile.getPath().endsWith(".json")) {
                 try {
                     theResource = context.newJsonParser().parseResource(new FileReader(extractedFile));
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e.getMessage());
+                } catch (Exception e) {
+//                    e.printStackTrace();
+                    LogUtils.putException("moveAndRenameFiles", new RuntimeException(e.getMessage()));
+                    continue;
                 }
             }
 
