@@ -143,7 +143,14 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
                             try {
                                 ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
                             }catch (Exception warn){
-                                warningExceptionMessages.put(resourceSourcePath, String.format("Could not bundle value sets for library %s: %s", primaryLibraryName, warn.getMessage()));
+                                String warnMessage = String.format("Could not bundle value sets for library %s: %s", primaryLibraryName, warn.getMessage());
+                                if (warningExceptionMessages.containsKey(primaryLibraryName)){
+                                    String existingMessage = warningExceptionMessages.get(primaryLibraryName);
+                                    existingMessage = existingMessage + "\n" + warnMessage;
+                                    warningExceptionMessages.put(primaryLibraryName, existingMessage + "\n" + warnMessage);
+                                }else{
+                                    warningExceptionMessages.put(primaryLibraryName, warnMessage);
+                                }
                             }
                         }
 
@@ -295,7 +302,14 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);
                 }
             }catch (Exception warn){
-                warningExceptionMessages.put(librarySourcePath, String.format("Could not retrieve Dep Value Set Resources for library %s: %s", libraryName, warn.getMessage()));
+                String warnMessage = String.format("Could not retrieve Dep Value Set Resources for library %s: %s", libraryName, warn.getMessage());
+                if (warningExceptionMessages.containsKey(libraryName)){
+                    String existingMessage = warningExceptionMessages.get(libraryName);
+                    existingMessage = existingMessage + "\n" + warnMessage;
+                    warningExceptionMessages.put(libraryName, existingMessage + "\n" + warnMessage);
+                }else{
+                    warningExceptionMessages.put(libraryName, warnMessage);
+                }
             }
         }
 
