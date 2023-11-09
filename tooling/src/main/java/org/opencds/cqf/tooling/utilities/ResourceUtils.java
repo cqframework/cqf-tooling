@@ -11,6 +11,7 @@ import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.opencds.cqf.tooling.cql.exception.CQLTranslatorException;
 import org.opencds.cqf.tooling.processor.ValueSetsProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.slf4j.Logger;
@@ -266,7 +267,7 @@ public class ResourceUtils {
       }
    }
 
-   public static Map<String, IBaseResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext, boolean includeDependencies, Boolean includeVersion) throws Exception {
+   public static Map<String, IBaseResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext, boolean includeDependencies, Boolean includeVersion) throws CQLTranslatorException {
       Map<String, IBaseResource> valueSetResources = new HashMap<>();
 
       List<String> valueSetDefIDs = getDepELMValueSetDefIDs(cqlContentPath);
@@ -276,32 +277,32 @@ public class ResourceUtils {
                  .filter(entry -> entry.getKey().equals(valueSetUrl))
                  .forEach(entry -> valueSetResources.put(entry.getKey(), entry.getValue()));
       }
-      Set<String> dependencies = new HashSet<>(valueSetDefIDs);
+//      Set<String> dependencies = new HashSet<>(valueSetDefIDs);
 
       if (includeDependencies) {
          List<String> dependencyCqlPaths = IOUtils.getDependencyCqlPaths(cqlContentPath, includeVersion);
          for (String path : dependencyCqlPaths) {
             Map<String, IBaseResource> dependencyValueSets = getDepValueSetResources(path, igPath, fhirContext, includeDependencies, includeVersion);
-            dependencies.addAll(dependencyValueSets.keySet());
+//            dependencies.addAll(dependencyValueSets.keySet());
             for (Entry<String, IBaseResource> entry : dependencyValueSets.entrySet()) {
                valueSetResources.putIfAbsent(entry.getKey(), entry.getValue());
             }
          }
       }
 
-      if (dependencies.size() != valueSetResources.size()) {
-        StringBuilder message = new StringBuilder((dependencies.size() - valueSetResources.size()) + " missing ValueSets: \r\n");
-        dependencies.removeAll(valueSetResources.keySet());
-        for (String valueSetUrl : dependencies) {
-          message.append(valueSetUrl).append(" MISSING \r\n");
-        }
-        logger.error(message.toString());
-        throw new Exception(message.toString());
-      }
+//      if (dependencies.size() != valueSetResources.size()) {
+//        StringBuilder message = new StringBuilder((dependencies.size() - valueSetResources.size()) + " missing ValueSets: \r\n");
+//        dependencies.removeAll(valueSetResources.keySet());
+//        for (String valueSetUrl : dependencies) {
+//          message.append(valueSetUrl).append(" MISSING \r\n");
+//        }
+//        logger.error(message.toString());
+//        throw new Exception(message.toString());
+//      }
       return valueSetResources;
    }
 
-   public static List<String> getIncludedLibraryNames(String cqlContentPath, Boolean includeVersion) {
+   public static List<String> getIncludedLibraryNames(String cqlContentPath, Boolean includeVersion) throws CQLTranslatorException{
       List<String> includedLibraryNames = new ArrayList<>();
       List<IncludeDef> includedDefs = getIncludedDefs(cqlContentPath);
       for (IncludeDef def : includedDefs) {
@@ -311,7 +312,7 @@ public class ResourceUtils {
       return includedLibraryNames;
    }
 
-   public static List<String> getDepELMValueSetDefIDs(String cqlContentPath) throws Exception {
+   public static List<String> getDepELMValueSetDefIDs(String cqlContentPath) throws CQLTranslatorException {
       List<String> includedValueSetDefIDs = new ArrayList<>();
       List<ValueSetDef> valueSetDefs = getValueSetDefs(cqlContentPath);
       for (ValueSetDef def : valueSetDefs) {
@@ -320,28 +321,16 @@ public class ResourceUtils {
       return includedValueSetDefIDs;
    }
 
-   public static List<IncludeDef> getIncludedDefs(String cqlContentPath) {
+   public static List<IncludeDef> getIncludedDefs(String cqlContentPath) throws CQLTranslatorException{
       ArrayList<IncludeDef> includedDefs = new ArrayList<>();
-      org.hl7.elm.r1.Library elm;
-      try {
-         elm = getElmFromCql(cqlContentPath);
-      } catch (Exception e) {
-//        System.out.println("error processing cql: ");
-//        System.out.println(e.getMessage());
-
-          LogUtils.putException("getIncludedDefs", e);
-        logger.error("error processing cql: ");
-        logger.error(e.getMessage());
-        return includedDefs;
-      }
-
+      org.hl7.elm.r1.Library elm = getElmFromCql(cqlContentPath);
       if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
          includedDefs.addAll(elm.getIncludes().getDef());
       }
       return includedDefs;
    }
 
-   public static List<ValueSetDef> getValueSetDefs(String cqlContentPath) throws Exception{
+   public static List<ValueSetDef> getValueSetDefs(String cqlContentPath) throws CQLTranslatorException{
       ArrayList<ValueSetDef> valueSetDefs = new ArrayList<>();
       org.hl7.elm.r1.Library elm;
       elm = getElmFromCql(cqlContentPath);
@@ -369,7 +358,7 @@ public class ResourceUtils {
    }
 
    private static Map<String, org.hl7.elm.r1.Library> cachedElm = new HashMap<>();
-   public static org.hl7.elm.r1.Library getElmFromCql(String cqlContentPath) throws Exception{
+   public static org.hl7.elm.r1.Library getElmFromCql(String cqlContentPath) throws CQLTranslatorException {
       org.hl7.elm.r1.Library elm = cachedElm.get(cqlContentPath);
       if (elm != null) {
          return elm;

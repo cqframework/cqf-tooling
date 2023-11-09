@@ -5,6 +5,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.common.ThreadUtils;
+import org.opencds.cqf.tooling.cql.exception.CQLTranslatorException;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -58,7 +59,7 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
         //for keeping track of failed reasons:
         Map<String, String> failedExceptionMessages = new ConcurrentHashMap<>();
 
-        Map<String, String> warningExceptionMessages = new ConcurrentHashMap<>();
+        Map<String, Set<String>> translatorWarningMessages = new ConcurrentHashMap<>();
 
         int totalResources = resourcesMap.size();
 
@@ -139,17 +140,15 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
                         }
 
                         if (includeTerminology) {
-                            //throws Exception if failed, which will be logged and reported it in the final summary
+                            //throws CQLTranslatorException if failed, which will be logged and reported it in the final summary
                             try {
                                 ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
-                            }catch (Exception warn){
-                                String warnMessage = String.format("Could not bundle value sets for library %s: %s", primaryLibraryName, warn.getMessage());
-                                if (warningExceptionMessages.containsKey(primaryLibraryName)){
-                                    String existingMessage = warningExceptionMessages.get(primaryLibraryName);
-                                    existingMessage = existingMessage + "\n" + warnMessage;
-                                    warningExceptionMessages.put(primaryLibraryName, existingMessage + "\n" + warnMessage);
+                            }catch (CQLTranslatorException warn){
+                                if (translatorWarningMessages.containsKey(primaryLibraryName)){
+                                    Set<String> existingMessages = translatorWarningMessages.get(primaryLibraryName);
+                                    existingMessages.addAll(warn.getErrors());
                                 }else{
-                                    warningExceptionMessages.put(primaryLibraryName, warnMessage);
+                                    translatorWarningMessages.put(primaryLibraryName, warn.getErrors());
                                 }
                             }
                         }
@@ -182,7 +181,7 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
                             persistBundle(igPath, bundleDestPath, resourceName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri, addBundleTimestamp);
                             String possibleBundleTestMessage = bundleFiles(igPath, bundleDestPath, resourceName, binaryPaths, resourceSourcePath,
                                     primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios,
-                                    includeVersion, addBundleTimestamp, warningExceptionMessages);
+                                    includeVersion, addBundleTimestamp, translatorWarningMessages);
 
                             if (cdsHooksProcessor != null) {
                                 List<String> activityDefinitionPaths = CDSHooksProcessor.bundleActivityDefinitions(resourceSourcePath, fhirContext, resources, encoding, includeVersion, shouldPersist);
@@ -198,7 +197,6 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
 
 
                     } catch (Exception e) {
-//                        LogUtils.putException(resourceName, e);
                         failedExceptionMessages.put(resourceSourcePath, e.getMessage());
                     }
 
@@ -259,10 +257,10 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
         }
 
         //Exceptions stemming from IOUtils.translate that did not prevent process from completing for file:
-        if (!warningExceptionMessages.isEmpty()) {
-            message.append("\r\n").append(warningExceptionMessages.size()).append(" ").append(getResourceProcessorType()).append("(s) encountered warnings:");
-            for (String library : warningExceptionMessages.keySet()) {
-                message.append("\r\n     ").append(library).append(" WARNING: ").append(warningExceptionMessages.get(library));
+        if (!translatorWarningMessages.isEmpty()) {
+            message.append("\r\n").append(translatorWarningMessages.size()).append(" ").append(getResourceProcessorType()).append("(s) encountered warnings:");
+            for (String library : translatorWarningMessages.keySet()) {
+                message.append("\r\n     ").append(library).append(" WARNING: ").append(translatorWarningMessages.get(library));
             }
         }
 
@@ -275,12 +273,12 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
 
     protected abstract Set<String> getPaths(FhirContext fhirContext);
 
-    private String bundleFiles(String igPath, String bundleDestPath, String libraryName, List<String> binaryPaths, String resourceFocusSourcePath,
+    private String bundleFiles(String igPath, String bundleDestPath, String primaryLibraryName, List<String> binaryPaths, String resourceFocusSourcePath,
                                String librarySourcePath, FhirContext fhirContext, IOUtils.Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios,
-                               Boolean includeVersion, Boolean addBundleTimestamp, Map<String, String> warningExceptionMessages) throws Exception {
+                               Boolean includeVersion, Boolean addBundleTimestamp, Map<String, Set<String>> translatorWarningMessages) {
         String bundleMessage = "";
 
-        String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, libraryName + "-" + IGBundleProcessor.bundleFilesPathElement);
+        String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, primaryLibraryName + "-" + IGBundleProcessor.bundleFilesPathElement);
         IOUtils.initializeDirectory(bundleDestFilesPath);
 
         IOUtils.copyFile(resourceFocusSourcePath, FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(resourceFocusSourcePath)));
@@ -290,7 +288,7 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
         if (cqlFileName.toLowerCase().startsWith("library-")) {
             cqlFileName = cqlFileName.substring(8);
         }
-        String cqlLibrarySourcePath = IOUtils.getCqlLibrarySourcePath(libraryName, cqlFileName, binaryPaths);
+        String cqlLibrarySourcePath = IOUtils.getCqlLibrarySourcePath(primaryLibraryName, cqlFileName, binaryPaths);
         String cqlDestPath = FilenameUtils.concat(bundleDestFilesPath, cqlFileName);
         IOUtils.copyFile(cqlLibrarySourcePath, cqlDestPath);
 
@@ -298,17 +296,15 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
             try {
                 Map<String, IBaseResource> valueSets = ResourceUtils.getDepValueSetResources(cqlLibrarySourcePath, igPath, fhirContext, includeDependencies, includeVersion);
                 if (!valueSets.isEmpty()) {
-                    Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(libraryName), new ArrayList<IBaseResource>(valueSets.values()), fhirContext, addBundleTimestamp, this.getIdentifiers());
+                    Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(primaryLibraryName), new ArrayList<IBaseResource>(valueSets.values()), fhirContext, addBundleTimestamp, this.getIdentifiers());
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);
                 }
-            }catch (Exception warn){
-                String warnMessage = String.format("Could not retrieve Dep Value Set Resources for library %s: %s", libraryName, warn.getMessage());
-                if (warningExceptionMessages.containsKey(libraryName)){
-                    String existingMessage = warningExceptionMessages.get(libraryName);
-                    existingMessage = existingMessage + "\n" + warnMessage;
-                    warningExceptionMessages.put(libraryName, existingMessage + "\n" + warnMessage);
+            }catch (CQLTranslatorException warn){
+                if (translatorWarningMessages.containsKey(primaryLibraryName)){
+                    Set<String> existingMessages = translatorWarningMessages.get(primaryLibraryName);
+                    existingMessages.addAll(warn.getErrors());
                 }else{
-                    warningExceptionMessages.put(libraryName, warnMessage);
+                    translatorWarningMessages.put(primaryLibraryName, warn.getErrors());
                 }
             }
         }
@@ -316,14 +312,14 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
         if (includeDependencies) {
             Map<String, IBaseResource> depLibraries = ResourceUtils.getDepLibraryResources(librarySourcePath, fhirContext, encoding, includeVersion, logger);
             if (!depLibraries.isEmpty()) {
-                String depLibrariesID = "library-deps-" + libraryName;
+                String depLibrariesID = "library-deps-" + primaryLibraryName;
                 Object bundle = BundleUtils.bundleArtifacts(depLibrariesID, new ArrayList<IBaseResource>(depLibraries.values()), fhirContext, addBundleTimestamp, this.getIdentifiers());
                 IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);
             }
         }
 
         if (includePatientScenarios) {
-            bundleMessage = TestCaseProcessor.bundleTestCaseFiles(igPath, getResourceTestGroupName(), libraryName, bundleDestFilesPath, fhirContext);
+            bundleMessage = TestCaseProcessor.bundleTestCaseFiles(igPath, getResourceTestGroupName(), primaryLibraryName, bundleDestFilesPath, fhirContext);
         }
 
         return bundleMessage;

@@ -16,7 +16,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -41,6 +40,7 @@ import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.Utilities;
+import org.opencds.cqf.tooling.cql.exception.CQLTranslatorException;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -544,7 +544,7 @@ public class IOUtils {
         return result;
     }
 
-    public static List<String> getDependencyCqlPaths(String cqlContentPath, Boolean includeVersion) {
+    public static List<String> getDependencyCqlPaths(String cqlContentPath, Boolean includeVersion) throws CQLTranslatorException{
         List<File> dependencyFiles = getDependencyCqlFiles(cqlContentPath, includeVersion);
         List<String> dependencyPaths = new ArrayList<>();
         for (File file : dependencyFiles) {
@@ -553,7 +553,7 @@ public class IOUtils {
         return dependencyPaths;
     }
 
-    public static List<File> getDependencyCqlFiles(String cqlContentPath, Boolean includeVersion) {
+    public static List<File> getDependencyCqlFiles(String cqlContentPath, Boolean includeVersion) throws CQLTranslatorException{
         File cqlContent = new File(cqlContentPath);
         File cqlContentDir = cqlContent.getParentFile();
         if (!cqlContentDir.isDirectory()) {
@@ -589,7 +589,7 @@ public class IOUtils {
     }
 
     private static Map<String, CqlTranslator> cachedTranslator = new LinkedHashMap<>();
-    public static CqlTranslator translate(String cqlContentPath, ModelManager modelManager, LibraryManager libraryManager, CqlTranslatorOptions options) {
+    public static CqlTranslator translate(String cqlContentPath, ModelManager modelManager, LibraryManager libraryManager, CqlTranslatorOptions options) throws CQLTranslatorException {
         CqlTranslator translator = cachedTranslator.get(cqlContentPath);
         if (translator != null) {
             return translator;
@@ -597,27 +597,31 @@ public class IOUtils {
         try {
             File cqlFile = new File(cqlContentPath);
             if (!cqlFile.getName().endsWith(".cql")) {
-                throw new IllegalArgumentException("cqlContentPath must be a path to a .cql file");
+                throw new CQLTranslatorException("cqlContentPath must be a path to a .cql file");
             }
 
             translator = CqlTranslator.fromFile(cqlFile, libraryManager);
 
             if (!translator.getErrors().isEmpty()) {
-                ArrayList<String> errors = new ArrayList<>();
-                for (CqlCompilerException error : translator.getErrors()) {
-                    TrackBack tb = error.getLocator();
-                    String lines = tb == null ? "[n/a]" : String.format("[%d:%d, %d:%d]",
-                            tb.getStartLine(), tb.getStartChar(), tb.getEndLine(), tb.getEndChar());
-                    //System.err.printf("%s %s%n", lines, error.getMessage());
-                    errors.add(lines + error.getMessage());
-                }
-                throw new IllegalArgumentException(errors.toString());
+                throw new CQLTranslatorException(listTranslatorErrors(translator));
             }
             cachedTranslator.put(cqlContentPath, translator);
             return translator;
         } catch (IOException e) {
-            throw new IllegalArgumentException("Error encountered during CQL translation", e);
+            throw new CQLTranslatorException(e);
         }
+    }
+
+    private static ArrayList<String> listTranslatorErrors(CqlTranslator translator) {
+        ArrayList<String> errors = new ArrayList<>();
+        for (CqlCompilerException error : translator.getErrors()) {
+            TrackBack tb = error.getLocator();
+            String lines = tb == null ? "[n/a]" : String.format("[%d:%d, %d:%d]",
+                    tb.getStartLine(), tb.getStartChar(), tb.getEndLine(), tb.getEndChar());
+            //System.err.printf("%s %s%n", lines, error.getMessage());
+            errors.add(lines + error.getMessage());
+        }
+        return errors;
     }
 
     public static String getCqlString(String cqlContentPath) {

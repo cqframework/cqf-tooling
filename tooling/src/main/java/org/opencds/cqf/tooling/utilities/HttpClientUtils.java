@@ -70,7 +70,7 @@ public class HttpClientUtils {
 
         if (!missingValues.isEmpty()) {
             String missingValueString = String.join(", ", missingValues);
-            logger.info("An invalid HTTP POST call was attempted with a null value for: " + missingValueString +
+            System.out.println("An invalid HTTP POST call was attempted with a null value for: " + missingValueString +
                     (!values.isEmpty() ? "\\nRemaining values are: " + String.join(", ", values) : ""));
         }
 
@@ -240,7 +240,7 @@ public class HttpClientUtils {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
 
         try {
-            logger.info(tasks.size() + " POST calls to be made. Starting now. Please wait...");
+            System.out.println(tasks.size() + " POST calls to be made. Starting now. Please wait...");
             double percentage = 0;
             System.out.print("\rPOST: " + String.format("%.2f%%", percentage) + " done. ");
 
@@ -265,7 +265,7 @@ public class HttpClientUtils {
                 }
             }
 
-            logger.info("Processing results...");
+            System.out.println("Processing results...");
             successfulPostCalls.sort(postResultMessageComparator);
 
             StringBuilder message = new StringBuilder();
@@ -273,7 +273,7 @@ public class HttpClientUtils {
             for (String successPost : successfulPostCalls) {
                 message.append("\n").append(successPost);
             }
-            logger.info(message.toString());
+            System.out.println(message.toString());
             successfulPostCalls = new ArrayList<>();
 
             if (!failedPostCalls.isEmpty()) {
@@ -304,7 +304,7 @@ public class HttpClientUtils {
                     }
 
                     if (failedPostCalls.isEmpty()) {
-                        logger.info("Retry successful, all tasks successfully posted");
+                        System.out.println("Retry successful, all tasks successfully posted");
                     }
                 }
             }
@@ -315,12 +315,12 @@ public class HttpClientUtils {
                 for (String successPost : successfulPostCalls) {
                     message.append("\n").append(successPost);
                 }
-                logger.info(message.toString());
+                System.out.println(message.toString());
                 successfulPostCalls = new ArrayList<>();
             }
 
             if (!failedPostCalls.isEmpty()) {
-                logger.info("\n" + failedPostCalls.size() + " task(s) still failed to POST: ");
+                System.out.println("\n" + failedPostCalls.size() + " task(s) still failed to POST: ");
                 List<String> failedMessages = new ArrayList<>();
                 for (Pair<String, PostComponent> pair : failedPostCalls) {
                     failedMessages.add(pair.getLeft());
@@ -331,7 +331,7 @@ public class HttpClientUtils {
                 for (String failedPost : failedMessages) {
                     message.append("\n").append(failedPost);
                 }
-                logger.info(message.toString());
+                System.out.println(message.toString());
             }
 
         } finally {

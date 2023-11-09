@@ -11,7 +11,9 @@ import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class IGBundleProcessor {
@@ -31,50 +33,56 @@ public class IGBundleProcessor {
                          Boolean includeDependencies, Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned, Boolean addBundleTimestamp,
                          FhirContext fhirContext, String fhirUri) {
 
-
-        logger.info("\r\n  [Bundle Measures has started]");
+        System.out.println("\n");
+                
+        System.out.println("\r\n[Bundle Measures has started - " + getTime() + "]\r\n");
         measureProcessor.bundleResources(refreshedLibraryNames,
                 igPath, binaryPaths, includeDependencies, includeTerminology,
                 includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
                 fhirUri, encoding);
 
-        logger.info("\r\n  [Bundle Measures has finished]\r\n");
-
         //this message can be moved to any point of this process, but so far it's just the bundle measure process
         //that will persist test files. If Questionnaires and PlanDefinitions should ever need test files as well
         //persistTestFiles can be moved to AbstractResourceProcessor from MeasureProcessor instead of abstract sig
-        logger.info("Total \"tests-*\" files copied: " + IOUtils.copyFileCounter() + ". " +
+        System.out.println("\r\nTotal \"tests-*\" files copied: " + IOUtils.copyFileCounter() + ". " +
                 (fhirUri != null && !fhirUri.isEmpty() ? "These files will be posted to " + fhirUri : "")
         );
-        
+        System.out.println("\r\n[Bundle Measures has finished - " + getTime() + "]\r\n");
 
-        logger.info("\r\n  [Bundle PlanDefinitions has started]");
+        
+        System.out.println("\r\n[Bundle PlanDefinitions has started - " + getTime() + "]\r\n");
         planDefinitionProcessor.bundleResources(refreshedLibraryNames,
                 igPath, binaryPaths, includeDependencies, includeTerminology,
                 includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
                 fhirUri, encoding);
-        logger.info("\r\n  [Bundle PlanDefinitions has finished]\r\n");
+        System.out.println("\r\n[Bundle PlanDefinitions has finished - " + getTime() + "]\r\n");
 
-        logger.info("\r\n  [Bundle Questionnaires has started]");
+        
+        
+        System.out.println("\r\n[Bundle Questionnaires has started - " + getTime() + "]\r\n");
         questionnaireProcessor.bundleResources(refreshedLibraryNames,
                 igPath, binaryPaths, includeDependencies, includeTerminology,
                 includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
                 fhirUri, encoding);
-        logger.info("\r\n  [Bundle Questionnaires has finished]\r\n");
+        System.out.println("\r\n[Bundle Questionnaires has finished - " + getTime() + "]\r\n");
 
 
 
         //run collected post calls last:
         if (HttpClientUtils.hasPostTasksInQueue()) {
-            logger.info("\r\n  [HttpClientUtils.hasPostTasksInQueue = true. HttpClientUtils.postTaskCollection() has started]");
+            System.out.println("\r\n[POST task(s) found in queue. POST task(s) started - " + getTime() + "]");
             HttpClientUtils.postTaskCollection();
-            logger.info("\r\n  [HttpClientUtils.postTaskCollection() has finished]");
+            System.out.println("\r\n[POST task(s) finished - " + getTime() + "]");
         }
 
         // run cleanup (maven runs all tests sequentially and static member variables retain values from previous tests)
         IOUtils.cleanUp();
         ResourceUtils.cleanUp();
         TestCaseProcessor.cleanUp();
+    }
+
+    private String getTime() {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
     }
 
 }

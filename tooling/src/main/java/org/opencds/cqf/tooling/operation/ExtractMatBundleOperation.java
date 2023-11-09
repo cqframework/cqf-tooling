@@ -21,6 +21,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 public class ExtractMatBundleOperation extends Operation {
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -144,7 +145,7 @@ public class ExtractMatBundleOperation extends Operation {
         }
 
         if (!processedBundleCollection.isEmpty()) {
-            logger.info("Successfully extracted the following resources: " + processedBundleCollection);
+            logger.info("Successfully extracted " + processedBundleCollection.size() + " resource(s): \n" + String.join("\n", processedBundleCollection));
         }else{
             logger.info("ExtractMatBundleOperation ended with no resources extracted!");
         }
@@ -282,16 +283,14 @@ public class ExtractMatBundleOperation extends Operation {
                 try {
                     theResource = context.newXmlParser().parseResource(new FileReader(extractedFile));
                 } catch (Exception e) {
-//                    e.printStackTrace();
-                    logger.error("moveAndRenameFiles", new RuntimeException(e.getMessage()));
+                    logger.error("moveAndRenameFiles: " + extractedFile + ": " + e.getMessage());
                     continue;
                 }
             } else if (extractedFile.getPath().endsWith(".json")) {
                 try {
-                    theResource = context.newJsonParser().parseResource(new FileReader(extractedFile));
+                    theResource = context.newJsonParser().parseResource(new FileReader(extractedFile + ": " + extractedFile));
                 } catch (Exception e) {
-//                    e.printStackTrace();
-                    logger.error("moveAndRenameFiles", new RuntimeException(e.getMessage()));
+                    logger.error("moveAndRenameFiles: " + extractedFile + ": " + e.getMessage());
                     continue;
                 }
             }
@@ -375,8 +374,7 @@ public class ExtractMatBundleOperation extends Operation {
                 try {
                     FileUtils.writeByteArrayToFile(new File(cqlFilename), decodedBytes);
                 } catch (IOException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e.getMessage());
+                    throw new RuntimeException(cqlFilename + ": " + e.getMessage());
                 }
             }
         }
@@ -399,8 +397,7 @@ public class ExtractMatBundleOperation extends Operation {
                 try {
                     FileUtils.writeByteArrayToFile(new File(cqlFilename), decodedBytes);
                 } catch (IOException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e.getMessage());
+                    throw new RuntimeException(cqlFilename + ": " + e.getMessage());
                 }
             }
         }
