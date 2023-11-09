@@ -288,7 +288,7 @@ public class ExtractMatBundleOperation extends Operation {
                 }
             } else if (extractedFile.getPath().endsWith(".json")) {
                 try {
-                    theResource = context.newJsonParser().parseResource(new FileReader(extractedFile + ": " + extractedFile));
+                    theResource = context.newJsonParser().parseResource(new FileReader(extractedFile));
                 } catch (Exception e) {
                     logger.error("moveAndRenameFiles: " + extractedFile + ": " + e.getMessage());
                     continue;

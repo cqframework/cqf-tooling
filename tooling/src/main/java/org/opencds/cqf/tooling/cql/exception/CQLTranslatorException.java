@@ -14,7 +14,7 @@ public class CQLTranslatorException extends Exception implements Serializable {
     /**
      * Using Set to avoid duplicate entries.
      */
-    private final Set<String> errors = new HashSet<>();
+    private final transient Set<String> errors = new HashSet<>();
 
     public CQLTranslatorException(Exception e) {
         super("CQL Translation Error(s): " + e.getMessage());
