@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.modelinfo.Atlas;
 import org.opencds.cqf.tooling.terminology.fhirservice.FhirTerminologyClient;
+import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +66,7 @@ public class SpreadsheetValidateVSandCS extends Operation {
     public void execute(String[] args) {
         fhirContext = FhirContext.forR4Cached();
         setOutputPath("src/main/resources/org/opencds/cqf/tooling/terminology/output"); // default
-        resourcePaths = "4.0.1;US-Core/3.1.0;QI-Core/4.1.1;THO/3.1.0"; // default
+        resourcePaths = "4.0.1;US-Core/3.1.1;QI-Core/4.1.1;THO/3.1.0"; // default
 
         String userName = "";
         String password = "";
@@ -222,7 +223,10 @@ public class SpreadsheetValidateVSandCS extends Operation {
             String csServerUrl = urlToTestServer + "CodeSystem/?url=" + codeSystemURL;
             CodeSystem csToValidate = (CodeSystem) fhirClient.getResource(csServerUrl);
             if (csToValidate != null) {
-                CodeSystem csSourceOfTruth = csMap.get(csToValidate.getId().substring(csToValidate.getId().lastIndexOf(File.separator) + 1));
+//                resources.put(codeSystem.getUrl(), codeSystem);
+//                String id = CanonicalUtils.getTail(codeSystem.getUrl());
+//                CodeSystem csSourceOfTruth = csMap.get(csToValidate.getId().substring(csToValidate.getId().lastIndexOf(File.separator) + 1));
+                CodeSystem csSourceOfTruth = csMap.get(CanonicalUtils.getTail(csToValidate.getUrl()));
                 if (csSourceOfTruth == null || csSourceOfTruth.isEmpty()) {
                     csNotPresentInIG.add(csToValidate.getName());
                     return;
@@ -239,6 +243,7 @@ public class SpreadsheetValidateVSandCS extends Operation {
         if (codeSystemURL.toLowerCase().contains("snomed") ||
                 codeSystemURL.toLowerCase().contains("rxnorm") ||
                 codeSystemURL.toLowerCase().contains("unitsofmeasure") ||
+                codeSystemURL.toLowerCase().contains("loinc") ||
                 codeSystemURL.toLowerCase().contains("nucc")) {
             return false;
         }
