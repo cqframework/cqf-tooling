@@ -62,11 +62,12 @@ public class LibraryRefresh implements ExecutableOperation {
    private LibraryManager libraryManager;
    private CqlTranslatorOptions translatorOptions = CqlTranslatorOptions.defaultOptions();
    private NpmPackageManager npmPackageManager;
-   private final CqlProcessor cqlProcessor;
+   private CqlProcessor cqlProcessor;
    private final List<LibraryPackage> libraryPackages;
 
-   public LibraryRefresh(FhirContext fhirContext) {
+   public LibraryRefresh(FhirContext fhirContext, String pathToCql) {
       this.fhirContext = fhirContext;
+      this.pathToCql = pathToCql;
       this.libraryPackages = new ArrayList<>();
       LibraryLoader libraryLoader = new LibraryLoader(this.fhirContext.getVersion().getVersion().getFhirVersionString());
       UcumEssenceService ucumService;
@@ -76,7 +77,7 @@ public class LibraryRefresh implements ExecutableOperation {
          throw new IGInitializationException("Could not create UCUM validation service", e);
       }
       this.cqlProcessor = new CqlProcessor(null,
-              Collections.singletonList(pathToCql), libraryLoader, new IGLoggingService(logger),
+              Collections.singletonList(this.pathToCql), libraryLoader, new IGLoggingService(logger),
               ucumService, null, null);
    }
 

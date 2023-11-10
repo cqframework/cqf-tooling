@@ -34,10 +34,10 @@ public class LibraryRefreshIT {
               new InMemoryLibrarySourceProvider(Collections.singletonList(AOE_CQL_UNCHANGED)));
 
       Library libraryToRefresh = (Library) fhirContext.newJsonParser().parseResource(AOE_LIBRARY);
-      LibraryRefresh libraryRefresh = new LibraryRefresh(fhirContext);
+      LibraryRefresh libraryRefresh = new LibraryRefresh(fhirContext,
+              Objects.requireNonNull(LibraryRefreshIT.class.getResource("")).getPath());
       libraryRefresh.setModelManager(modelManager);
       libraryRefresh.setLibraryManager(libraryManager);
-      ILibraryReader reader = new LibraryLoader(FhirVersionEnum.R5.getFhirVersionString());
 
       IBaseResource result = libraryRefresh.refreshLibrary(libraryToRefresh);
 
@@ -68,8 +68,8 @@ public class LibraryRefreshIT {
               new InMemoryLibrarySourceProvider(Collections.singletonList(AOE_CQL_UPDATED)));
 
       Library libraryToRefresh = (Library) fhirContext.newJsonParser().parseResource(AOE_LIBRARY);
-      LibraryRefresh libraryRefresh = new LibraryRefresh(fhirContext);
-      libraryRefresh.setPathToCql(Objects.requireNonNull(LibraryRefreshIT.class.getResource("AdultOutpatientEncountersUpdate.cql")).getPath());
+      LibraryRefresh libraryRefresh = new LibraryRefresh(fhirContext,
+              Objects.requireNonNull(LibraryRefreshIT.class.getResource("")).getPath());
       libraryRefresh.setModelManager(modelManager);
       libraryRefresh.setLibraryManager(libraryManager);
 

@@ -388,7 +388,7 @@ public class CqlProcessor {
             }
             else {
                 try {
-                    result.setOptions(this.getCqlTranslatorOptions());
+                    //result.setOptions(this.getCqlTranslatorOptions()); //TODO this fails as it's called before it can possibly be set??
                     // convert to base64 bytes
                     // NOTE: Publication tooling requires XML content
                     result.setCql(TextFile.fileToBytes(file));
