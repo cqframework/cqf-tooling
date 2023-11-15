@@ -8,15 +8,8 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r5.utils.Version;
-import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
-import org.opencds.cqf.tooling.igtools.IGLoggingService;
-import org.opencds.cqf.tooling.npm.ILibraryReader;
-import org.opencds.cqf.tooling.npm.LibraryLoader;
-import org.opencds.cqf.tooling.processor.CqlProcessor;
 import org.opencds.cqf.tooling.utilities.IGUtils;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -73,25 +66,23 @@ public class LibraryRefreshIT {
       libraryRefresh.setModelManager(modelManager);
       libraryRefresh.setLibraryManager(libraryManager);
 
-      IBaseResource result = libraryRefresh.refreshLibrary(libraryToRefresh);
-
-      //Assert.assertTrue(result instanceof Library);
-      Library refreshedLibrary = (Library) result;
+      Library beforeUpdate = libraryToRefresh.copy();
+      libraryRefresh.refreshLibrary(libraryToRefresh);
 
       // test date update
-      Assert.assertTrue(DateUtils.isSameDay(new Date(), refreshedLibrary.getDate()));
+      Assert.assertTrue(DateUtils.isSameDay(new Date(), libraryToRefresh.getDate()));
 
       // CQL content tests before update (should not be the same)
-      Assert.assertEquals(refreshedLibrary.getContent().size(), libraryToRefresh.getContent().size());
-      Assert.assertNotEquals(StringUtils.deleteWhitespace(new String(refreshedLibrary.getContent().get(0).getData())),
+      Assert.assertEquals(beforeUpdate.getContent().size(), libraryToRefresh.getContent().size());
+      Assert.assertNotEquals(StringUtils.deleteWhitespace(new String(beforeUpdate.getContent().get(0).getData())),
               StringUtils.deleteWhitespace(new String(libraryToRefresh.getContent().get(0).getData())));
 
       // DataRequirement tests before update (should not be the same)
-      Assert.assertNotEquals(refreshedLibrary.getDataRequirement().size(),
+      Assert.assertNotEquals(beforeUpdate.getDataRequirement().size(),
               libraryToRefresh.getDataRequirement().size());
 
       // Parameter tests before update (should not be the same)
-      Assert.assertNotEquals(refreshedLibrary.getParameter().size(), libraryToRefresh.getParameter().size());
+      Assert.assertNotEquals(beforeUpdate.getParameter().size(), libraryToRefresh.getParameter().size());
    }
 
    private final String AOE_CQL_UNCHANGED = "/*\n" +

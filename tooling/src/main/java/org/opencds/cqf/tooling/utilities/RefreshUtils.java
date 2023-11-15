@@ -21,8 +21,7 @@ public abstract class RefreshUtils {
     public abstract List<IBaseResource> refresh();
 
     public static void refreshDate(FhirContext fhirContext, IBaseResource resource) {
-        TerserUtil.clearField(fhirContext, resource, "date");
-        TerserUtil.setField(fhirContext, "date", resource,
+        TerserUtil.setFieldByFhirPath(fhirContext, "date", resource,
                 ResourceAndTypeConverter.convertType(fhirContext, new DateTimeType(new Date())));
     }
 
