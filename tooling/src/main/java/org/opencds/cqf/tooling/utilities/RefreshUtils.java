@@ -1,10 +1,12 @@
 package org.opencds.cqf.tooling.utilities;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TerserUtil;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.*;
 import org.opencds.cqf.tooling.utilities.constants.CqfmConstants;
@@ -21,8 +23,8 @@ public abstract class RefreshUtils {
     public abstract List<IBaseResource> refresh();
 
     public static void refreshDate(FhirContext fhirContext, IBaseResource resource) {
-        TerserUtil.setFieldByFhirPath(fhirContext, "date", resource,
-                ResourceAndTypeConverter.convertType(fhirContext, new DateTimeType(new Date())));
+        IBaseDatatype datatype = fhirContext.getVersion().getVersion() == FhirVersionEnum.R5 ? new DateTimeType(new Date()) : new org.hl7.fhir.r4.model.DateTimeType(new Date());
+        TerserUtil.setFieldByFhirPath(fhirContext, "date", resource, datatype);
     }
 
     public static void validatePrimaryLibraryReference(IBaseResource resource) {

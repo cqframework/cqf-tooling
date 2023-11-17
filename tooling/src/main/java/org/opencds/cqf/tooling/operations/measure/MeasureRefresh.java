@@ -9,11 +9,16 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
+import org.cqframework.fhir.utilities.exception.IGInitializationException;
+import org.fhir.ucum.UcumEssenceService;
+import org.fhir.ucum.UcumException;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.*;
 import org.opencds.cqf.tooling.exception.InvalidOperationArgs;
+import org.opencds.cqf.tooling.igtools.IGLoggingService;
+import org.opencds.cqf.tooling.npm.LibraryLoader;
 import org.opencds.cqf.tooling.operations.ExecutableOperation;
 import org.opencds.cqf.tooling.operations.Operation;
 import org.opencds.cqf.tooling.operations.OperationParam;
@@ -49,10 +54,26 @@ public class MeasureRefresh implements ExecutableOperation {
     private String outputPath;
 
     private final FhirContext fhirContext;
-    private final IGUtils.IGInfo igInfo;
+    private IGUtils.IGInfo igInfo;
     private CqlProcessor cqlProcessor;
 
     private final List<LibraryPackage> libraryPackages;
+
+    public MeasureRefresh(FhirContext fhirContext, String pathToCql) {
+        this.fhirContext = fhirContext;
+        this.pathToCql = pathToCql;
+        this.libraryPackages = new ArrayList<>();
+        LibraryLoader libraryLoader = new LibraryLoader(this.fhirContext.getVersion().getVersion().getFhirVersionString());
+        UcumEssenceService ucumService;
+        try {
+            ucumService = new UcumEssenceService(UcumEssenceService.class.getResourceAsStream("/ucum-essence.xml"));
+        } catch (UcumException e) {
+            throw new IGInitializationException("Could not create UCUM validation service", e);
+        }
+        this.cqlProcessor = new CqlProcessor(null,
+                Collections.singletonList(this.pathToCql), libraryLoader, new IGLoggingService(logger),
+                ucumService, null, null);
+    }
 
     public MeasureRefresh(IGUtils.IGInfo igInfo, CqlProcessor cqlProcessor) {
         this.igInfo = igInfo;
@@ -101,7 +122,8 @@ public class MeasureRefresh implements ExecutableOperation {
 
     // Measure access method
     public IBaseResource refreshMeasure(IBaseResource measureToRefresh) {
-        Measure measure = (Measure) ResourceAndTypeConverter.convertToR5Resource(fhirContext, measureToRefresh);
+        Measure measure = (Measure) measureToRefresh;
+        cqlProcessor.execute();
 
         logger.info("Refreshing {}", measure.getId());
 

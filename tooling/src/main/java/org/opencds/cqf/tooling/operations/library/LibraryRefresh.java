@@ -267,7 +267,7 @@ public class LibraryRefresh implements ExecutableOperation {
    private NpmPackage getNpmPackage(String url) {
       Optional<NpmPackage> npmPackage = this.npmPackageManager.getNpmList().stream()
               .filter(pkg -> pkg.getNpm().has("canonical")
-                      && pkg.getNpm().getJsonObject("canonical").asString().equals(url))
+                      && pkg.getNpm().get("canonical").asString().equals(url))
               .findFirst();
       if (npmPackage.isPresent()) {
          logger.warn("Could not resolve canonical url {} from local packages", url);

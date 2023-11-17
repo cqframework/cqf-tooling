@@ -4,11 +4,16 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.util.BundleUtil;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
+import org.cqframework.fhir.utilities.exception.IGInitializationException;
+import org.fhir.ucum.UcumEssenceService;
+import org.fhir.ucum.UcumException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.PlanDefinition;
 import org.opencds.cqf.tooling.exception.InvalidOperationArgs;
+import org.opencds.cqf.tooling.igtools.IGLoggingService;
+import org.opencds.cqf.tooling.npm.LibraryLoader;
 import org.opencds.cqf.tooling.operations.ExecutableOperation;
 import org.opencds.cqf.tooling.operations.OperationParam;
 import org.opencds.cqf.tooling.operations.library.LibraryPackage;
@@ -40,7 +45,7 @@ public class PlanDefinitionRefresh implements ExecutableOperation {
             description = "The directory path to which the generated FHIR resources should be written (default is to replace existing resources within the IG)")
     private String outputPath;
 
-    private final IGUtils.IGInfo igInfo;
+    private IGUtils.IGInfo igInfo;
     private final FhirContext fhirContext;
 
     private final CqlProcessor cqlProcessor;
@@ -48,6 +53,23 @@ public class PlanDefinitionRefresh implements ExecutableOperation {
     private final List<LibraryPackage> libraryPackages;
 
     private final List<PlanDefinitionPackage> planDefinitionPackages;
+
+    public PlanDefinitionRefresh(FhirContext fhirContext, String pathToCql) {
+        this.fhirContext = fhirContext;
+        this.pathToCql = pathToCql;
+        this.libraryPackages = new ArrayList<>();
+        this.planDefinitionPackages = new ArrayList<>();
+        LibraryLoader libraryLoader = new LibraryLoader(this.fhirContext.getVersion().getVersion().getFhirVersionString());
+        UcumEssenceService ucumService;
+        try {
+            ucumService = new UcumEssenceService(UcumEssenceService.class.getResourceAsStream("/ucum-essence.xml"));
+        } catch (UcumException e) {
+            throw new IGInitializationException("Could not create UCUM validation service", e);
+        }
+        this.cqlProcessor = new CqlProcessor(null,
+                Collections.singletonList(this.pathToCql), libraryLoader, new IGLoggingService(logger),
+                ucumService, null, null);
+    }
 
     public PlanDefinitionRefresh(IGUtils.IGInfo igInfo, CqlProcessor cqlProcessor, List<LibraryPackage> libraryPackages) {
         this.igInfo = igInfo;
@@ -90,13 +112,14 @@ public class PlanDefinitionRefresh implements ExecutableOperation {
                     "PlanDefinition", igInfo.getPlanDefinitionResourcePath())) {
                 refreshedPlanDefinitions.add(refreshPlanDefinition(planDefinition));
             }
-            //resolveLibraryPackages();
+            resolvePlanDefinitionPackages();
         }
         return refreshedPlanDefinitions;
     }
 
     public IBaseResource refreshPlanDefinition(IBaseResource planDefinitionToRefresh) {
         PlanDefinition planDefinition = (PlanDefinition) ResourceAndTypeConverter.convertToR5Resource(fhirContext, planDefinitionToRefresh);
+        cqlProcessor.execute();
 
         logger.info("Refreshing {}", planDefinition.getId());
 
@@ -123,7 +146,6 @@ public class PlanDefinitionRefresh implements ExecutableOperation {
                         fhirContext, libraryPackage));
             }
         }
-        resolvePlanDefinitionPackages();
 
         logger.info("Success!");
         return ResourceAndTypeConverter.convertToR5Resource(fhirContext, planDefinition);
