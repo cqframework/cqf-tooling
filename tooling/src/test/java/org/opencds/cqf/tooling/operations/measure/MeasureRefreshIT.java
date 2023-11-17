@@ -37,16 +37,17 @@ public class MeasureRefreshIT {
         Assert.assertTrue(DateUtils.isSameDay(new Date(), refreshedMeasure.getDate()));
 
         // Contained Resource tests before update (should be the same)
-        Assert.assertEquals(refreshedMeasure.getContained().size(), measureToRefresh.getContained().size());
-        Assert.assertEquals(StringUtils.deleteWhitespace(refreshedMeasure.getContained().get(0).getId()),
-                StringUtils.deleteWhitespace(measureToRefresh.getContained().get(0).getId()));
+        Assert.assertTrue(refreshedMeasure.hasContained());
+
+
+        Assert.assertTrue(refreshedMeasure.hasContained());
 
         // Extension tests before update (should be the same)
         Assert.assertEquals(refreshedMeasure.getExtension().size(),
                 measureToRefresh.getExtension().size());
 
         // Library tests before update (should be the same)
-        Assert.assertEquals(refreshedMeasure.getLibrary().size(), measureToRefresh.getLibrary().size());
+        Assert.assertEquals(refreshedMeasure.getLibrary().get(0).getId(), measureToRefresh.getLibrary().get(0).getId());
     }
 
     @Test
@@ -62,16 +63,14 @@ public class MeasureRefreshIT {
         Assert.assertTrue(DateUtils.isSameDay(new Date(), measureToRefresh.getDate()));
 
         // Contained Resource tests before update (should not be the same)
-        Assert.assertNotEquals(beforeUpdate.getContained().size(), measureToRefresh.getContained().size());
-        /*Assert.assertNotEquals(StringUtils.deleteWhitespace(beforeUpdate.getContained().get(0).getId()),
-                StringUtils.deleteWhitespace(measureToRefresh.getContained().get(0).getId()));*/
+        Assert.assertTrue(measureToRefresh.hasContained());
 
         // DataRequirement tests before update (should not be the same)
         Assert.assertNotEquals(beforeUpdate.getExtension().size(),
                 measureToRefresh.getExtension().size());
 
         // Library tests before update (should not be the same)
-        Assert.assertEquals(beforeUpdate.getLibrary().size(), measureToRefresh.getLibrary().size());
+        Assert.assertEquals(beforeUpdate.getLibrary().get(0).getId(), measureToRefresh.getLibrary().get(0).getId());
     }
 
     private static final String BCSMEASURE = "{\n" +

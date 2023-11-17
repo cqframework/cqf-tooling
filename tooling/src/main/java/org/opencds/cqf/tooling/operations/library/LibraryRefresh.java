@@ -319,6 +319,10 @@ public class LibraryRefresh implements ExecutableOperation {
               ResourceAndTypeConverter.convertType(fhirContext, elmJson));
    }
 
+   private void refreshDataRequirements(Library library, CqlProcessor.CqlSourceFileInformation info) {
+      library.setDataRequirement(info.getDataRequirements());
+   }
+
    private void refreshDataRequirements(IBaseResource library, CqlProcessor.CqlSourceFileInformation info) {
       IBase[] dataRequirements = info.getDataRequirements().stream()
               .map(dataRequirement -> ResourceAndTypeConverter.convertType(fhirContext, dataRequirement))
