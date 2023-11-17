@@ -22,11 +22,6 @@ public abstract class RefreshUtils {
 
     public abstract List<IBaseResource> refresh();
 
-    public static void refreshDate(FhirContext fhirContext, IBaseResource resource) {
-        IBaseDatatype datatype = fhirContext.getVersion().getVersion() == FhirVersionEnum.R5 ? new DateTimeType(new Date()) : new org.hl7.fhir.r4.model.DateTimeType(new Date());
-        TerserUtil.setFieldByFhirPath(fhirContext, "date", resource, datatype);
-    }
-
     public static void validatePrimaryLibraryReference(IBaseResource resource) {
         if ((resource instanceof PlanDefinition && !((PlanDefinition) resource).hasLibrary())
                 || (resource instanceof Measure && !((Measure) resource).hasLibrary())) {

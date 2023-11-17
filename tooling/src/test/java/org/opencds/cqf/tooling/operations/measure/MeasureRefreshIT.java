@@ -1,22 +1,14 @@
 package org.opencds.cqf.tooling.operations.measure;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.cqframework.cql.cql2elm.LibraryManager;
-import org.cqframework.cql.cql2elm.ModelManager;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r5.model.Measure;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
-import org.opencds.cqf.tooling.operations.library.LibraryRefresh;
-import org.opencds.cqf.tooling.operations.library.LibraryRefreshIT;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.Objects;
+
 
 public class MeasureRefreshIT {
 
@@ -36,10 +28,7 @@ public class MeasureRefreshIT {
         // test date update
         Assert.assertTrue(DateUtils.isSameDay(new Date(), refreshedMeasure.getDate()));
 
-        // Contained Resource tests before update (should be the same)
-        Assert.assertTrue(refreshedMeasure.hasContained());
-
-
+        // Contained Resource tests before update
         Assert.assertTrue(refreshedMeasure.hasContained());
 
         // Extension tests before update (should be the same)
@@ -62,7 +51,7 @@ public class MeasureRefreshIT {
         // test date update
         Assert.assertTrue(DateUtils.isSameDay(new Date(), measureToRefresh.getDate()));
 
-        // Contained Resource tests before update (should not be the same)
+        // Contained Resource tests before update
         Assert.assertTrue(measureToRefresh.hasContained());
 
         // DataRequirement tests before update (should not be the same)

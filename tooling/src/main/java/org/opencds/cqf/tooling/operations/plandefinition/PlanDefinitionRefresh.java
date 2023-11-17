@@ -148,7 +148,7 @@ public class PlanDefinitionRefresh implements ExecutableOperation {
         }
 
         logger.info("Success!");
-        return ResourceAndTypeConverter.convertToR5Resource(fhirContext, planDefinition);
+        return planDefinition;
     }
 
     private List<IBaseResource> activityDefinitions;

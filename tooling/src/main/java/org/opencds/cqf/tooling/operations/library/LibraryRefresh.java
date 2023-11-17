@@ -1,7 +1,6 @@
 package org.opencds.cqf.tooling.operations.library;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.util.TerserUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
@@ -14,7 +13,6 @@ import org.cqframework.fhir.utilities.exception.IGInitializationException;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.Library;
@@ -140,23 +138,23 @@ public class LibraryRefresh implements ExecutableOperation {
 
    // Library access method
    public IBaseResource refreshLibrary(IBaseResource libraryToRefresh) {
+      Library library = (Library) ResourceAndTypeConverter.convertToR5Resource(fhirContext, libraryToRefresh);
       cqlProcessor.execute();
-      String name = ResourceUtils.getName(libraryToRefresh, fhirContext);
 
       logger.info("Refreshing {}", libraryToRefresh.getIdElement());
 
       for (CqlProcessor.CqlSourceFileInformation info : cqlProcessor.getAllFileInformation()) {
-         if (info.getIdentifier().getId().endsWith(name)) {
+         if (info.getIdentifier().getId().endsWith(library.getName())) {
             // TODO: should likely verify or resolve/refresh the following elements:
             //  cpg-knowledgeCapability, cpg-knowledgeRepresentationLevel, url, identifier, status,
             //  experimental, type, publisher, contact, description, useContext, jurisdiction,
             //  and profile(s) (http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-shareablelibrary)
-            RefreshUtils.refreshDate(fhirContext, libraryToRefresh);
-            refreshContent(libraryToRefresh, info);
-            refreshDataRequirements(libraryToRefresh, info);
-            refreshRelatedArtifacts(libraryToRefresh, info);
-            refreshParameters(libraryToRefresh, info);
-            this.libraryPackages.add(new LibraryPackage(libraryToRefresh, fhirContext, info));
+            library.setDate(new Date());
+            refreshContent(library, new String(info.getCql()), new String(info.getElm()), new String(info.getJsonElm()));
+            refreshDataRequirements(library, info);
+            refreshRelatedArtifacts(library, info);
+            refreshParameters(library, info);
+            this.libraryPackages.add(new LibraryPackage(library, fhirContext, info));
          }
       }
 
@@ -308,43 +306,16 @@ public class LibraryRefresh implements ExecutableOperation {
               new Attachment().setContentType("application/elm+json").setData(elmJson.getBytes())));
    }
 
-   private void refreshContent(IBaseResource library, CqlProcessor.CqlSourceFileInformation info) {
-      Attachment cql = new Attachment().setContentType("text/cql").setData(info.getCql());
-      Attachment elmXml = new Attachment().setContentType("application/elm+xml").setData(info.getElm());
-      Attachment elmJson = new Attachment().setContentType("application/elm+json").setData(info.getJsonElm());
-      TerserUtil.clearField(fhirContext, library, "content");
-      TerserUtil.setField(fhirContext, "content", library,
-              ResourceAndTypeConverter.convertType(fhirContext, cql),
-              ResourceAndTypeConverter.convertType(fhirContext, elmXml),
-              ResourceAndTypeConverter.convertType(fhirContext, elmJson));
-   }
-
    private void refreshDataRequirements(Library library, CqlProcessor.CqlSourceFileInformation info) {
       library.setDataRequirement(info.getDataRequirements());
    }
 
-   private void refreshDataRequirements(IBaseResource library, CqlProcessor.CqlSourceFileInformation info) {
-      IBase[] dataRequirements = info.getDataRequirements().stream()
-              .map(dataRequirement -> ResourceAndTypeConverter.convertType(fhirContext, dataRequirement))
-              .toArray(IBase[]::new);
-      TerserUtil.clearField(fhirContext, library, "dataRequirement");
-      TerserUtil.setField(fhirContext, "dataRequirement", library, dataRequirements);
+   private void refreshRelatedArtifacts(Library library, CqlProcessor.CqlSourceFileInformation info) {
+      library.setRelatedArtifact(info.getRelatedArtifacts());
    }
 
-   private void refreshRelatedArtifacts(IBaseResource library, CqlProcessor.CqlSourceFileInformation info) {
-      IBase[] relatedArtifacts = info.getRelatedArtifacts().stream()
-              .map(relatedArtifact -> ResourceAndTypeConverter.convertType(fhirContext, relatedArtifact))
-              .toArray(IBase[]::new);
-      TerserUtil.clearField(fhirContext, library, "relatedArtifact");
-      TerserUtil.setField(fhirContext, "relatedArtifact", library, relatedArtifacts);
-   }
-
-   private void refreshParameters(IBaseResource library, CqlProcessor.CqlSourceFileInformation info) {
-      IBase[] parameters = info.getParameters().stream()
-              .map(parameter -> ResourceAndTypeConverter.convertType(fhirContext, parameter))
-              .toArray(IBase[]::new);
-      TerserUtil.clearField(fhirContext, library, "parameter");
-      TerserUtil.setField(fhirContext, "parameter", library, parameters);
+   private void refreshParameters(Library library, CqlProcessor.CqlSourceFileInformation info) {
+      library.setParameter(info.getParameters());
    }
 
    public String getPathToLibrary() {

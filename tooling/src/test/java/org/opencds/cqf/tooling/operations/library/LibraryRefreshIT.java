@@ -1,15 +1,13 @@
 package org.opencds.cqf.tooling.operations.library;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r5.model.Library;
 import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
-import org.opencds.cqf.tooling.utilities.IGUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -17,7 +15,7 @@ import java.util.*;
 
 public class LibraryRefreshIT {
 
-   private final FhirContext fhirContext = FhirContext.forR4Cached();
+   private final FhirContext fhirContext = FhirContext.forR5Cached();
 
    @Test
    void testSingleLibraryWithoutUpdate() {

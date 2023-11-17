@@ -1,19 +1,10 @@
 package org.opencds.cqf.tooling.operations.measure;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.util.BundleUtil;
-import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
-import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
-import org.cqframework.cql.cql2elm.LibraryManager;
-import org.cqframework.cql.cql2elm.ModelManager;
-import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
 import org.cqframework.fhir.utilities.exception.IGInitializationException;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.*;
 import org.opencds.cqf.tooling.exception.InvalidOperationArgs;
@@ -30,7 +21,6 @@ import org.opencds.cqf.tooling.utilities.converters.ResourceAndTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Paths;
 import java.util.*;
 
 @Operation(name = "RefreshMeasure")
@@ -122,7 +112,7 @@ public class MeasureRefresh implements ExecutableOperation {
 
     // Measure access method
     public IBaseResource refreshMeasure(IBaseResource measureToRefresh) {
-        Measure measure = (Measure) measureToRefresh;
+        Measure measure = (Measure) ResourceAndTypeConverter.convertToR5Resource(fhirContext, measureToRefresh);
         cqlProcessor.execute();
 
         logger.info("Refreshing {}", measure.getId());
@@ -135,7 +125,7 @@ public class MeasureRefresh implements ExecutableOperation {
                 //  cqfm-artifactComment, cqfm-allocation, cqfm-softwaresystem, url, identifier, version,
                 //  name, title, status, experimental, type, publisher, contact, description, useContext,
                 //  jurisdiction, and profile(s) (http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/measure-cqfm)
-                RefreshUtils.refreshDate(fhirContext, measure);
+                measure.setDate(new Date());
                 RefreshUtils.addProfiles(measure, CqfmConstants.COMPUTABLE_MEASURE_PROFILE_URL);
                 DataRequirementsProcessor dataRecProc = new DataRequirementsProcessor();
                 Library moduleDefinitionLibrary = getModuleDefinitionLibrary(
@@ -146,7 +136,7 @@ public class MeasureRefresh implements ExecutableOperation {
         }
 
         logger.info("Success!");
-        return ResourceAndTypeConverter.convertToR5Resource(fhirContext, measure);
+        return measure;
     }
 
     private Library getModuleDefinitionLibrary(Measure measure, DataRequirementsProcessor dataRecProc,
