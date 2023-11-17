@@ -33,10 +33,10 @@ context Patient
 
 define "Pregnancy Conditions":
   [Condition: "Pregnancy"] C
-    where C.clinicalStatus = 'active'
-      and C.verificationStatus = 'confirmed'
+    where C.clinicalStatus.coding.code.value contains 'active'
+      and C.verificationStatus.coding.code.value contains 'confirmed'
       // well, this is ugly....
-      and Interval[C.onset as dateTime, C.abatement as dateTime] includes Today()
+      and Interval[C.onset as dateTime, C.abatement as dateTime] includes Now()
 
 define "Is Patient Pregnant":
   Patient.gender = 'female'
@@ -50,7 +50,7 @@ define "Zika Exposure Assessment Result":
     [Observation: "Zika Exposure Assessment"] O
       where O.status = 'final'
         and O.encounter.reference = "Current Encounter".id // TODO: fix
-      sort by (O.effective) desc
+      sort by (effective) desc
   )
 
 define "Has Zika Exposure Assessment":
@@ -58,9 +58,9 @@ define "Has Zika Exposure Assessment":
 
 define "Zika Symptoms":
   [Condition: "Zika Virus Signs and Symptoms"] C
-    where C.clinicalStatus = 'active'
-      and C.verificationStatus = 'confirmed'
-      and C."context".reference = "Current Encounter".id // TODO: fix
+    where C.clinicalStatus.coding.code.value contains 'active'
+      and C.verificationStatus.coding.code.value contains 'confirmed'
+      and C.encounter.reference = "Current Encounter".id // TODO: fix
 
 define "Has Zika Symptoms":
   exists "Zika Symptoms"
@@ -124,7 +124,7 @@ define "Has Possible Zika Exposure":
 define "Zika Symptom Onset":
   First(
     "Zika Symptoms" S
-      sort by (S.onset as dateTime)
+      sort by (onset as dateTime)
   ).onset
 
 define "Time Since Symptom Onset":
