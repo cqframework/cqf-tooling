@@ -15,6 +15,7 @@ import org.fhir.ucum.UcumException;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Attachment;
+import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.opencds.cqf.tooling.exception.InvalidOperationArgs;
@@ -75,6 +76,24 @@ public class LibraryRefresh implements ExecutableOperation {
          throw new IGInitializationException("Could not create UCUM validation service", e);
       }
       this.cqlProcessor = new CqlProcessor(null,
+              Collections.singletonList(this.pathToCql), libraryLoader, new IGLoggingService(logger),
+              ucumService, null, null);
+   }
+
+   public LibraryRefresh(FhirContext fhirContext, IGUtils.IGInfo igInfo, String pathToCql) {
+      this.igInfo = igInfo;
+      this.fhirContext = fhirContext;
+      this.npmPackageManager = new NpmPackageManager(igInfo.getIgResource(), null);
+      this.pathToCql = pathToCql;
+      this.libraryPackages = new ArrayList<>();
+      LibraryLoader libraryLoader = new LibraryLoader(this.fhirContext.getVersion().getVersion().getFhirVersionString());
+      UcumEssenceService ucumService;
+      try {
+         ucumService = new UcumEssenceService(UcumEssenceService.class.getResourceAsStream("/ucum-essence.xml"));
+      } catch (UcumException e) {
+         throw new IGInitializationException("Could not create UCUM validation service", e);
+      }
+      this.cqlProcessor = new CqlProcessor(cleanPackageList(this.npmPackageManager.getNpmList()),
               Collections.singletonList(this.pathToCql), libraryLoader, new IGLoggingService(logger),
               ucumService, null, null);
    }
@@ -158,6 +177,8 @@ public class LibraryRefresh implements ExecutableOperation {
          }
       }
 
+      // TODO: this shouldn't be here!
+      resolveLibraryPackages();
       logger.info("Success!");
 
       return libraryToRefresh;
@@ -165,14 +186,14 @@ public class LibraryRefresh implements ExecutableOperation {
 
    private void resolveLibraryPackages() {
       // See the comment below regarding terminology resolution below
-      List<IBaseResource> sourceIGValueSets =
-              RefreshUtils.getResourcesOfTypeFromDirectory(fhirContext, "ValueSet", igInfo.getValueSetResourcePath());
-      List<IBaseResource> sourceIGCodeSystems =
-              RefreshUtils.getResourcesOfTypeFromDirectory(fhirContext, "CodeSystem", igInfo.getCodeSystemResourcePath());
+//      List<IBaseResource> sourceIGValueSets =
+//              RefreshUtils.getResourcesOfTypeFromDirectory(fhirContext, "ValueSet", igInfo.getValueSetResourcePath());
+//      List<IBaseResource> sourceIGCodeSystems =
+//              RefreshUtils.getResourcesOfTypeFromDirectory(fhirContext, "CodeSystem", igInfo.getCodeSystemResourcePath());
       this.libraryPackages.forEach(
               libraryPackage -> {
-                 libraryPackage.setDependsOnValueSets(sourceIGValueSets);
-                 libraryPackage.setDependsOnCodeSystems(sourceIGCodeSystems);
+//                 libraryPackage.setDependsOnValueSets(sourceIGValueSets);
+//                 libraryPackage.setDependsOnCodeSystems(sourceIGCodeSystems);
                  libraryPackage.getCqlFileInfo().getRelatedArtifacts().forEach(
                          relatedArtifact -> {
                             if (relatedArtifact.hasResource() && UrlUtil.isValid(relatedArtifact.getResource())) {

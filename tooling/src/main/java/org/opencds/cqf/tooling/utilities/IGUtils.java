@@ -105,24 +105,34 @@ public class IGUtils {
 
     public static class IGInfo {
         private final FhirContext fhirContext;
-        private final String rootDir;
-        private final String iniPath;
-        private final String igPath;
-        private final String cqlBinaryPath;
-        private final String resourcePath;
+        private String rootDir;
+        private String iniPath;
+        private String igPath;
+        private String cqlBinaryPath;
+        private String resourcePath;
         private String libraryResourcePath;
         private boolean refreshLibraries = true;
         private String planDefinitionResourcePath;
         private boolean refreshPlanDefinitions = true;
         private String measureResourcePath;
         private boolean refreshMeasures = true;
-        private final String valueSetResourcePath;
-        private final String codeSystemResourcePath;
-        private final String activityDefinitionResourcePath;
-        private final String questionnaireResourcePath;
-        private final ImplementationGuide igResource;
-        private final String packageId;
-        private final String canonical;
+        private String valueSetResourcePath;
+        private String codeSystemResourcePath;
+        private String activityDefinitionResourcePath;
+        private String questionnaireResourcePath;
+        private ImplementationGuide igResource;
+        private String packageId;
+        private String canonical;
+
+        public IGInfo(FhirContext fhirContext) {
+            if (fhirContext == null) {
+                this.fhirContext = FhirContext.forR4Cached();
+                logger.info("The FHIR context was not provided, using {}",
+                        this.fhirContext.getVersion().getVersion().getFhirVersionString());
+            } else {
+                this.fhirContext = fhirContext;
+            }
+        }
 
         public IGInfo(FhirContext fhirContext, String rootDir) {
             if (fhirContext == null) {
@@ -353,6 +363,10 @@ public class IGUtils {
             }
         }
 
+        public void setValueSetResourcePath(String valueSetResourcePath) {
+            this.valueSetResourcePath = valueSetResourcePath;
+        }
+
         public String getCodeSystemResourcePath() {
             if (this.codeSystemResourcePath != null) {
                 return this.codeSystemResourcePath;
@@ -376,6 +390,10 @@ public class IGUtils {
                 logger.warn("Unable to locate the CodeSystem resource directory. The base resources path will be used.");
                 return getResourcePath();
             }
+        }
+
+        public void setCodeSystemResourcePath(String codeSystemResourcePath) {
+            this.codeSystemResourcePath = codeSystemResourcePath;
         }
 
         public String getActivityDefinitionResourcePath() {
@@ -417,6 +435,10 @@ public class IGUtils {
                 default: throw new IGInitializationException(
                         "Unsupported FHIR context: " + this.fhirContext.getVersion().getVersion().getFhirVersionString());
             }
+        }
+
+        public void setIgResource(ImplementationGuide igResource) {
+            this.igResource = igResource;
         }
 
         public String getPackageId() {
