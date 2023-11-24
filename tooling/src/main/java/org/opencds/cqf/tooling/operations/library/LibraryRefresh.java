@@ -3,6 +3,7 @@ package org.opencds.cqf.tooling.operations.library;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -158,7 +159,13 @@ public class LibraryRefresh implements ExecutableOperation {
    // Library access method
    public IBaseResource refreshLibrary(IBaseResource libraryToRefresh) {
       Library library = (Library) ResourceAndTypeConverter.convertToR5Resource(fhirContext, libraryToRefresh);
-      cqlProcessor.execute();
+
+      //Ensure file information is populated if refreshing a single library
+      try {
+         cqlProcessor.getAllFileInformation();
+      } catch (IllegalStateException e) {
+         cqlProcessor.execute();
+      }
 
       logger.info("Refreshing {}", libraryToRefresh.getIdElement());
 
@@ -176,9 +183,7 @@ public class LibraryRefresh implements ExecutableOperation {
             this.libraryPackages.add(new LibraryPackage(library, fhirContext, info));
          }
       }
-
-      // TODO: this shouldn't be here!
-      resolveLibraryPackages();
+      
       logger.info("Success!");
 
       return libraryToRefresh;
@@ -186,14 +191,16 @@ public class LibraryRefresh implements ExecutableOperation {
 
    private void resolveLibraryPackages() {
       // See the comment below regarding terminology resolution below
-//      List<IBaseResource> sourceIGValueSets =
-//              RefreshUtils.getResourcesOfTypeFromDirectory(fhirContext, "ValueSet", igInfo.getValueSetResourcePath());
-//      List<IBaseResource> sourceIGCodeSystems =
-//              RefreshUtils.getResourcesOfTypeFromDirectory(fhirContext, "CodeSystem", igInfo.getCodeSystemResourcePath());
+      List<IBaseResource> sourceIGValueSets = igInfo != null && !StringUtils.isEmpty(igInfo.getValueSetResourcePath()) ?
+              RefreshUtils.getResourcesOfTypeFromDirectory(fhirContext, "ValueSet", igInfo.getValueSetResourcePath()) :
+              new ArrayList<>();
+      List<IBaseResource> sourceIGCodeSystems = igInfo != null &&!StringUtils.isEmpty(igInfo.getCodeSystemResourcePath()) ?
+              RefreshUtils.getResourcesOfTypeFromDirectory(fhirContext, "CodeSystem", igInfo.getCodeSystemResourcePath()) :
+              new ArrayList<>();
       this.libraryPackages.forEach(
               libraryPackage -> {
-//                 libraryPackage.setDependsOnValueSets(sourceIGValueSets);
-//                 libraryPackage.setDependsOnCodeSystems(sourceIGCodeSystems);
+                 libraryPackage.setDependsOnValueSets(sourceIGValueSets);
+                 libraryPackage.setDependsOnCodeSystems(sourceIGCodeSystems);
                  libraryPackage.getCqlFileInfo().getRelatedArtifacts().forEach(
                          relatedArtifact -> {
                             if (relatedArtifact.hasResource() && UrlUtil.isValid(relatedArtifact.getResource())) {
@@ -259,7 +266,7 @@ public class LibraryRefresh implements ExecutableOperation {
                   resourceCache.put(url,
                           npmPackage.getFolders().get("package").getTypes().get(resourceType).stream().map(
                                   fileName -> IOUtils.readJsonResourceIgnoreElements(
-                                          FilenameUtils.concat(path, fileName), fhirContext, "text"))
+                                          FilenameUtils.concat(path, fileName), fhirContext, "text", "type"))
                                   .collect(Collectors.toList()));
                }
             } catch (IOException e) {

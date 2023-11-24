@@ -509,6 +509,33 @@ public class ResourceUtils {
             }
             throw new IllegalArgumentException(String.format("Could not retrieve url for resource type %s", resource.fhirType()));
          }
+         case R5: {
+            if (resource instanceof org.hl7.fhir.r5.model.Measure) {
+               return ((org.hl7.fhir.r5.model.Measure)resource).getUrl();
+            }
+            if (resource instanceof org.hl7.fhir.r5.model.Library) {
+               return ((org.hl7.fhir.r5.model.Library)resource).getUrl();
+            }
+            if (resource instanceof org.hl7.fhir.r5.model.PlanDefinition) {
+               return ((org.hl7.fhir.r5.model.PlanDefinition)resource).getUrl();
+            }
+            if (resource instanceof org.hl7.fhir.r5.model.CodeSystem) {
+               return ((org.hl7.fhir.r5.model.CodeSystem)resource).getUrl();
+            }
+            if (resource instanceof org.hl7.fhir.r5.model.ValueSet) {
+               return ((org.hl7.fhir.r5.model.ValueSet)resource).getUrl();
+            }
+            if (resource instanceof org.hl7.fhir.r5.model.ActivityDefinition) {
+               return ((org.hl7.fhir.r5.model.ActivityDefinition)resource).getUrl();
+            }
+            if (resource instanceof org.hl7.fhir.r5.model.StructureDefinition) {
+               return ((org.hl7.fhir.r5.model.StructureDefinition)resource).getUrl();
+            }
+            if (resource instanceof org.hl7.fhir.r5.model.GraphDefinition) {
+               return ((org.hl7.fhir.r5.model.GraphDefinition)resource).getUrl();
+            }
+            throw new IllegalArgumentException(String.format("Could not retrieve url for resource type %s", resource.fhirType()));
+         }
          default:
             throw new IllegalArgumentException("Unsupported fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
       }
