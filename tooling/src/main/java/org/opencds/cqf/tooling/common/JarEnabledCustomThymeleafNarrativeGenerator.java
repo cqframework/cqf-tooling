@@ -1,5 +1,14 @@
 package org.opencds.cqf.tooling.common;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.narrative.BaseThymeleafNarrativeGenerator;
+import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import com.google.common.base.Charsets;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,19 +19,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import com.google.common.base.Charsets;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
-import ca.uhn.fhir.narrative2.ThymeleafNarrativeGenerator;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-
-
-public class JarEnabledCustomThymeleafNarrativeGenerator extends ThymeleafNarrativeGenerator {
+public class JarEnabledCustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator {
 	private List<String> myPropertyFile;
 
     public JarEnabledCustomThymeleafNarrativeGenerator(String... thePropertyFile) {
@@ -40,8 +38,19 @@ public class JarEnabledCustomThymeleafNarrativeGenerator extends ThymeleafNarrat
 		super.populateResourceNarrative(theFhirContext, theResource);
 		return false;
     }
-    
-    private synchronized void initialize() {
+
+	@Override
+	protected NarrativeTemplateManifest getManifest() {
+		List<String> propFileName = getPropertyFile();
+		try {
+			NarrativeTemplateManifest manifest = forManifestFileLocation(propFileName);
+			return manifest;
+		} catch (IOException e) {
+			throw new InternalErrorException(e);
+		}
+	}
+
+	private synchronized void initialize() {
 		if (myInitialized) {
 			return;
 		}
@@ -49,7 +58,7 @@ public class JarEnabledCustomThymeleafNarrativeGenerator extends ThymeleafNarrat
 		List<String> propFileName = getPropertyFile();
 		try {
 			NarrativeTemplateManifest manifest = forManifestFileLocation(propFileName);
-			setManifest(manifest);
+//			setManifest(manifest);
 		} catch (IOException e) {
 			throw new InternalErrorException(e);
 		}

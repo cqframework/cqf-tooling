@@ -715,6 +715,9 @@ public class Processor extends Operation {
                 }
             }
 
+//            setCanonicalBase("http://example.org/sdh/dtr/aslp");
+//            System.out.println("System value: " + system);
+//            System.out.println("Project Code System Base value: " + projectCodeSystemBase);
             if (system.startsWith(projectCodeSystemBase)) {
                 CodeSystem codeSystem = resolveCodeSystem(system);
                 if (codeSystem == null) {

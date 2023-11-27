@@ -1,12 +1,11 @@
 package org.opencds.cqf.tooling.library;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.narrative.INarrativeGenerator;
+import ca.uhn.fhir.narrative2.BaseNarrativeGenerator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.opencds.cqf.tooling.common.JarEnabledCustomThymeleafNarrativeGenerator;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.narrative.INarrativeGenerator;
-import ca.uhn.fhir.narrative2.ThymeleafNarrativeGenerator;
 
 public abstract class BaseNarrativeProvider<T extends INarrative> {
     private INarrativeGenerator generator;
@@ -21,7 +20,7 @@ public abstract class BaseNarrativeProvider<T extends INarrative> {
 
     public BaseNarrativeProvider(String pathToPropertiesFile)
     {
-        ThymeleafNarrativeGenerator myGenerator = new JarEnabledCustomThymeleafNarrativeGenerator("classpath:ca/uhn/fhir/narrative/narratives.properties", pathToPropertiesFile);
+        BaseNarrativeGenerator myGenerator = new JarEnabledCustomThymeleafNarrativeGenerator("classpath:ca/uhn/fhir/narrative/narratives.properties", pathToPropertiesFile);
         this.generator = myGenerator;
     }
 
