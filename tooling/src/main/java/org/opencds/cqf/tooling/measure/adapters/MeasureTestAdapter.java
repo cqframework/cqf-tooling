@@ -20,31 +20,18 @@ public abstract class MeasureTestAdapter {
     protected IMeasureReportAdapter expectedReportAdapter;
     protected IMeasureReportAdapter actualReportAdapter;
 
-    private IBaseResource expectedReport;
-
     public MeasureTestAdapter(FhirContext fhirContext, String testPath) {
-        this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext can not be null.");
-        Objects.requireNonNull(testPath, "testPath can not be null.");
-
-        this.testBundle = IOUtils.readResource(testPath, fhirContext);
-
-        if (testBundle == null) {
-            throw new IllegalArgumentException(String.format("FHIR Resource does not exist at %s", testPath));
-        }
-
-        validateTestBundle();
-        this.expectedReportAdapter = getMeasureReportAdapter(this.expectedReport);
+        this(fhirContext, IOUtils.readResource(Objects.requireNonNull(testPath), fhirContext));
     }
 
     public MeasureTestAdapter(FhirContext fhirContext, IBaseResource testBundle) {
         this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext can not be null.");
         this.testBundle = Objects.requireNonNull(testBundle, "testBundle can not be null.");
-
-        validateTestBundle();
-        this.expectedReportAdapter = getMeasureReportAdapter(this.expectedReport);
+        var expectedReport = loadExpectedReportFromBundle();
+        this.expectedReportAdapter = getMeasureReportAdapter(fhirContext, expectedReport);
     }
 
-    protected IMeasureReportAdapter getMeasureReportAdapter(IBaseResource measureReport) {
+    protected static IMeasureReportAdapter getMeasureReportAdapter(FhirContext fhirContext, IBaseResource measureReport) {
         //TODO: R5?
         IMeasureReportAdapter measureReportAdapter;
         if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
@@ -58,7 +45,7 @@ public abstract class MeasureTestAdapter {
         return measureReportAdapter;
     }
 
-    private void validateTestBundle() {
+    private IBaseResource loadExpectedReportFromBundle() {
         if (this.testBundle == null) {
             throw new IllegalArgumentException("testBundle can not be null");
         }
@@ -69,14 +56,14 @@ public abstract class MeasureTestAdapter {
 
         IBaseBundle bundle = (IBaseBundle)this.testBundle;
 
-        List<? extends IBaseResource> measureReports = BundleUtil.toListOfResourcesOfType(this.fhirContext, bundle, 
+        List<? extends IBaseResource> measureReports = BundleUtil.toListOfResourcesOfType(this.fhirContext, bundle,
             this.fhirContext.getResourceDefinition("MeasureReport").getImplementingClass());
 
         if (measureReports == null || measureReports.size() == 0 || measureReports.size() > 1) {
             throw new IllegalArgumentException("Bundle is not a valid Measure Test Bundle. It must contain exactly 1 MeasureReport");
         }
 
-        this.expectedReport = measureReports.get(0);
+        return measureReports.get(0);
     }
 
     protected abstract IMeasureReportAdapter evaluate();

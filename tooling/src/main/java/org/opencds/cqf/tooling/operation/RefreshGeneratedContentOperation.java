@@ -1,16 +1,16 @@
 package org.opencds.cqf.tooling.operation;
 
-import com.google.common.base.Strings;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+
+import com.google.common.base.Strings;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public abstract class RefreshGeneratedContentOperation extends Operation {
     // private String igPath;
-    private FhirContext fhirContext;
+    protected FhirContext fhirContext;
     private String pathToMeasures; // -ptm
     private String pathToLibraries; // -ptl
     private String operationName;
@@ -21,13 +21,11 @@ public abstract class RefreshGeneratedContentOperation extends Operation {
     private String encoding; // -e (json|xml)
 
     public RefreshGeneratedContentOperation(String outputPath, String operationName, FhirContext fhirContext) {
-        setOutputPath(outputPath);
-        this.operationName = operationName;
-        this.fhirContext = fhirContext;
-        this.shouldApplySoftwareSystemStamp = true;
-        this.addBundleTimestamp = false;
+        this(outputPath, operationName, fhirContext, null, null);
     }
 
+
+    @SuppressWarnings("this-escape")
     public RefreshGeneratedContentOperation(String outputPath, String operationName, FhirContext fhirContext,
                                             String pathToLibraries, String pathToMeasures) {
         setOutputPath(outputPath);

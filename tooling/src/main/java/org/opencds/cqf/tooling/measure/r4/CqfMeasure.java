@@ -30,72 +30,72 @@ public class CqfMeasure extends Measure {
     private static final long serialVersionUID = -1297192817969868337L;
 
     @Child(name = "parameter", type = {ParameterDefinition.class}, order=26, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Parameters defined by the library", formalDefinition="The parameter element defines parameters used by the library." )
+    @Description(shortDefinition="Parameters defined by the library", value="The parameter element defines parameters used by the library." )
     @SuppressWarnings("serial")
     protected List<ParameterDefinition> parameter;
 
     @Child(name = "dataRequirement", type = {DataRequirement.class}, order=27, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="What data is referenced by this library", formalDefinition="Describes a set of data that must be provided in order to be able to successfully perform the computations defined by the library." )
+    @Description(shortDefinition="What data is referenced by this library", value="Describes a set of data that must be provided in order to be able to successfully perform the computations defined by the library." )
     @SuppressWarnings("serial")
     protected List<DataRequirement> dataRequirement;
 
     @Child(name = "content", type = {Attachment.class}, order=28, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Contents of the library, either embedded or referenced", formalDefinition="The content of the library as an Attachment. The content may be a reference to a url, or may be directly embedded as a base-64 string. Either way, the contentType of the attachment determines how to interpret the content." )
+    @Description(shortDefinition="Contents of the library, either embedded or referenced", value="The content of the library as an Attachment. The content may be a reference to a url, or may be directly embedded as a base-64 string. Either way, the contentType of the attachment determines how to interpret the content." )
     @SuppressWarnings("serial")
     protected List<Attachment> content;
 
     @Child(name = "populationStatements", type = {}, order=29, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Population Statements of the library", formalDefinition="The populations of the library as a MeasureGroupComponent." )
+    @Description(shortDefinition="Population Statements of the library", value="The populations of the library as a MeasureGroupComponent." )
     @SuppressWarnings("serial")
     protected List<MeasureGroupComponent> populationStatements;
-    
+
     @Child(name = "definitionStatements", type = {}, order=30, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Defintion Statements of the library", formalDefinition="The definitions of the library as a MeasureGroupPopulationComponent." )
+    @Description(shortDefinition="Defintion Statements of the library", value="The definitions of the library as a MeasureGroupPopulationComponent." )
     @SuppressWarnings("serial")
     protected List<MeasureGroupPopulationComponent> definitionStatements;
 
     @Child(name = "functionStatements", type = {}, order=31, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Function Statements of the library", formalDefinition="The functions of the library as a MeasureGroupPopulationComponent." )
+    @Description(shortDefinition="Function Statements of the library", value="The functions of the library as a MeasureGroupPopulationComponent." )
     @SuppressWarnings("serial")
     protected List<MeasureGroupPopulationComponent> functionStatements;
 
     @Child(name = "supplementalDataElements", type = {}, order=32, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Supplemental Data Elements of the library", formalDefinition="The supplemental data elements of the library as a MeasureGroupPopulationComponent." )
+    @Description(shortDefinition="Supplemental Data Elements of the library", value="The supplemental data elements of the library as a MeasureGroupPopulationComponent." )
     @SuppressWarnings("serial")
     protected List<MeasureGroupPopulationComponent> supplementalDataElements;
 
     @Child(name = "terminology", type = {TerminologyRef.class}, order=33, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Terminology of the library", formalDefinition="The terminology referenced in the library" )
+    @Description(shortDefinition="Terminology of the library", value="The terminology referenced in the library" )
     @SuppressWarnings("serial")
     protected List<TerminologyRef> terminology;
 
     @Child(name = "dataCriteria", type = {StringType.class}, order=34, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Data Elements of the library", formalDefinition="The data elements referenced in the library" )
+    @Description(shortDefinition="Data Elements of the library", value="The data elements referenced in the library" )
     @SuppressWarnings("serial")
     protected List<StringType> dataCriteria;
 
     @Child(name = "libraries", type = {Library.class}, order=35, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Measure libraries", formalDefinition="All the libraries the measure depends on" )
+    @Description(shortDefinition="Measure libraries", value="All the libraries the measure depends on" )
     @SuppressWarnings("serial")
     protected List<Library> libraries;
 
     @Child(name = "citations", type = {RelatedArtifact.class}, order=36, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Additional documentation, citations, etc", formalDefinition="Related artifacts such as additional documentation, justification, or bibliographic references." )
+    @Description(shortDefinition="Additional documentation, citations, etc", value="Related artifacts such as additional documentation, justification, or bibliographic references." )
     @SuppressWarnings("serial")
     protected List<RelatedArtifact> citations;
 
     @Child(name = "sharedPopulationCriteria", type = {PopulationCriteriaMap.class}, order=37, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Shared critiera of the library", formalDefinition="The shared criteria of the measure." )
-    protected PopulationCriteriaMap sharedPopulationCritieria;
-    
+    @Description(shortDefinition="Shared criteria of the library", value="The shared criteria of the measure." )
+    protected PopulationCriteriaMap sharedPopulationCriteria;
+
     // @Child(name = "uniquePopulationGroup", type = {}, order=38, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    // @Description(shortDefinition="Population Statements of the library", formalDefinition="The populations of the library as a MeasureGroupComponent." )
+    // @Description(shortDefinition="Population Statements of the library", value="The populations of the library as a MeasureGroupComponent." )
     // protected List<MeasureGroupComponent> uniquePopulationGroup;
-    
+
     /**
      * @return {@link #relatedArtifact} (Related artifacts such as additional documentation, justification, or bibliographic references.)
      */
-    public List<RelatedArtifact> getCitations() { 
+    public List<RelatedArtifact> getCitations() {
       if (this.citations == null)
         this.citations = new ArrayList<RelatedArtifact>();
       return this.citations;
@@ -104,12 +104,12 @@ public class CqfMeasure extends Measure {
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public Measure setCitations(List<RelatedArtifact> theRelatedArtifact) { 
+    public Measure setCitations(List<RelatedArtifact> theRelatedArtifact) {
       this.citations = theRelatedArtifact;
       return this;
     }
 
-    public boolean hasCitations() { 
+    public boolean hasCitations() {
       if (this.citations == null)
         return false;
       for (RelatedArtifact item : this.citations)
@@ -138,7 +138,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return The first repetition of repeating field {@link #relatedArtifact}, creating it if it does not already exist
      */
-    public RelatedArtifact getCitationsFirstRep() { 
+    public RelatedArtifact getCitationsFirstRep() {
       if (getCitations().isEmpty()) {
         addCitations();
       }
@@ -148,7 +148,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return {@link #library} (The library element defines libraries used by the library.)
     */
-    public List<Library> getLibraries() { 
+    public List<Library> getLibraries() {
         if (this.libraries == null)
             this.libraries = new ArrayList<Library>();
         return this.libraries;
@@ -157,12 +157,12 @@ public class CqfMeasure extends Measure {
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public CqfMeasure setLibraries(List<Library> theLibraries) { 
+    public CqfMeasure setLibraries(List<Library> theLibraries) {
         this.libraries = theLibraries;
         return this;
     }
 
-    public boolean hasLibraries() { 
+    public boolean hasLibraries() {
         return this.libraries != null && this.libraries.size() > 0;
     }
 
@@ -186,7 +186,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return The first repetition of repeating field {@link #library}, creating it if it does not already exist
      */
-    public Library getLibrariesFirstRep() { 
+    public Library getLibrariesFirstRep() {
         if (getLibraries().isEmpty()) {
             addLibraries();
         }
@@ -197,7 +197,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return {@link #parameter} (The parameter element defines parameters used by the library.)
     */
-    public List<ParameterDefinition> getParameter() { 
+    public List<ParameterDefinition> getParameter() {
         if (this.parameter == null)
             this.parameter = new ArrayList<ParameterDefinition>();
         return this.parameter;
@@ -206,12 +206,12 @@ public class CqfMeasure extends Measure {
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public CqfMeasure setParameter(List<ParameterDefinition> theParameter) { 
+    public CqfMeasure setParameter(List<ParameterDefinition> theParameter) {
         this.parameter = theParameter;
         return this;
     }
 
-    public boolean hasParameter() { 
+    public boolean hasParameter() {
         if (this.parameter == null)
             return false;
         for (ParameterDefinition item : this.parameter)
@@ -240,7 +240,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return The first repetition of repeating field {@link #parameter}, creating it if it does not already exist
      */
-    public ParameterDefinition getParameterFirstRep() { 
+    public ParameterDefinition getParameterFirstRep() {
         if (getParameter().isEmpty()) {
             addParameter();
         }
@@ -250,21 +250,21 @@ public class CqfMeasure extends Measure {
     /**
      * @return {@link #dataRequirement} (Describes a set of data that must be provided in order to be able to successfully perform the computations defined by the library.)
      */
-    public List<DataRequirement> getDataRequirement() { 
+    public List<DataRequirement> getDataRequirement() {
         if (this.dataRequirement == null)
             this.dataRequirement = new ArrayList<DataRequirement>();
         return this.dataRequirement;
     }
-  
+
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public CqfMeasure setDataRequirement(List<DataRequirement> theDataRequirement) { 
+    public CqfMeasure setDataRequirement(List<DataRequirement> theDataRequirement) {
         this.dataRequirement = theDataRequirement;
         return this;
     }
-  
-    public boolean hasDataRequirement() { 
+
+    public boolean hasDataRequirement() {
         if (this.dataRequirement == null)
             return false;
         for (DataRequirement item : this.dataRequirement)
@@ -272,7 +272,7 @@ public class CqfMeasure extends Measure {
             return true;
         return false;
     }
-  
+
     public DataRequirement addDataRequirement() { //3
         DataRequirement t = new DataRequirement();
         if (this.dataRequirement == null)
@@ -280,7 +280,7 @@ public class CqfMeasure extends Measure {
         this.dataRequirement.add(t);
         return t;
     }
-  
+
     public CqfMeasure addDataRequirement(DataRequirement t) { //3
         if (t == null)
             return this;
@@ -289,21 +289,21 @@ public class CqfMeasure extends Measure {
         this.dataRequirement.add(t);
         return this;
     }
-  
+
     /**
      * @return The first repetition of repeating field {@link #dataRequirement}, creating it if it does not already exist
      */
-    public DataRequirement getDataRequirementFirstRep() { 
+    public DataRequirement getDataRequirementFirstRep() {
         if (getDataRequirement().isEmpty()) {
             addDataRequirement();
         }
         return getDataRequirement().get(0);
     }
-  
+
     /**
      * @return {@link #content} (The content of the library as an Attachment. The content may be a reference to a url, or may be directly embedded as a base-64 string. Either way, the contentType of the attachment determines how to interpret the content.)
      */
-    public List<Attachment> getContent() { 
+    public List<Attachment> getContent() {
         if (this.content == null)
             this.content = new ArrayList<Attachment>();
         return this.content;
@@ -312,12 +312,12 @@ public class CqfMeasure extends Measure {
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public CqfMeasure setContent(List<Attachment> theContent) { 
+    public CqfMeasure setContent(List<Attachment> theContent) {
         this.content = theContent;
         return this;
     }
 
-    public boolean hasContent() { 
+    public boolean hasContent() {
         if (this.content == null)
             return false;
         for (Attachment item : this.content)
@@ -346,7 +346,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return The first repetition of repeating field {@link #content}, creating it if it does not already exist
      */
-    public Attachment getContentFirstRep() { 
+    public Attachment getContentFirstRep() {
         if (getContent().isEmpty()) {
             addContent();
         }
@@ -354,47 +354,39 @@ public class CqfMeasure extends Measure {
     }
 
 
-    public Map<String, Pair<String,String>> getSharedPopulationCritieria() { 
-        if (this.sharedPopulationCritieria == null)
-            this.sharedPopulationCritieria = new PopulationCriteriaMap();
-        return this.sharedPopulationCritieria.getMap();
+    public Map<String, Pair<String,String>> getSharedPopulationCriteria() {
+        if (this.sharedPopulationCriteria == null)
+            this.sharedPopulationCriteria = new PopulationCriteriaMap();
+        return this.sharedPopulationCriteria.getMap();
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public CqfMeasure setSharedPopulationCritiera(Map<String, Pair<String, String>> theSharedPopulationCriteria) { 
-        this.sharedPopulationCritieria.setMap(theSharedPopulationCriteria);
+    public CqfMeasure setSharedPopulationCriteria(Map<String, Pair<String, String>> theSharedPopulationCriteria) {
+        this.sharedPopulationCriteria.setMap(theSharedPopulationCriteria);
         return this;
     }
 
-    public boolean hasSharedPopulationCritiera() { 
-        if (this.sharedPopulationCritieria == null)
+    public boolean hasSharedPopulationCriteria() {
+        if (this.sharedPopulationCriteria == null)
             return false;
-        return this.sharedPopulationCritieria.getMap().size() > 0;
+        return this.sharedPopulationCriteria.getMap().size() > 0;
     }
 
-    // public MeasureGroupComponent addSharedPopulationCritiera() { //3
-    //     MeasureGroupComponent t = new MeasureGroupComponent();
-    //     if (this.combinedPopulationGroup == null)
-    //         this.combinedPopulationGroup = new ArrayList<MeasureGroupComponent>();
-    //     this.combinedPopulationGroup.add(t);
-    //     return t;
-    // }
-
-    public CqfMeasure addSharedPopulationCritiera(String key, String display, String description) { //3
+    public CqfMeasure addSharedPopulationCriteria(String key, String display, String description) { //3
         if (key == null || display == null || description == null)
             return this;
-        if (this.sharedPopulationCritieria == null)
-            this.sharedPopulationCritieria = new PopulationCriteriaMap();
-        this.sharedPopulationCritieria.getMap().put(key, Pair.of(display, description));
+        if (this.sharedPopulationCriteria == null)
+            this.sharedPopulationCriteria = new PopulationCriteriaMap();
+        this.sharedPopulationCriteria.getMap().put(key, Pair.of(display, description));
         return this;
     }
 
     /**
      * @return The first repetition of repeating field {@link #populationStatements}, creating it if it does not already exist
      */
-    // public MeasureGroupComponent getCombinedPopulationGroupFirstRep() { 
+    // public MeasureGroupComponent getCombinedPopulationGroupFirstRep() {
     //     if (getCombinedPopulationGroup().isEmpty()) {
     //         addCombinedPopulationGroup();
     //     }
@@ -404,7 +396,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return {@link #populationStatements} (The Population Statements of the library as an Attachment. The content may be a reference to a url, or may be directly embedded as a base-64 string. Either way, the contentType of the attachment determines how to interpret the content.)
      */
-    // public List<MeasureGroupComponent> getUniquePopulationGroup() { 
+    // public List<MeasureGroupComponent> getUniquePopulationGroup() {
     //     if (this.uniquePopulationGroup == null)
     //         this.uniquePopulationGroup = new ArrayList<MeasureGroupComponent>();
     //     return this.uniquePopulationGroup;
@@ -413,12 +405,12 @@ public class CqfMeasure extends Measure {
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    // public CqfMeasure setUniquePopulationGroup(List<MeasureGroupComponent> thePopulationGroup) { 
+    // public CqfMeasure setUniquePopulationGroup(List<MeasureGroupComponent> thePopulationGroup) {
     //     this.uniquePopulationGroup = thePopulationGroup;
     //     return this;
     // }
 
-    // public boolean hasUniquePopulationGroup() { 
+    // public boolean hasUniquePopulationGroup() {
     //     if (this.uniquePopulationGroup == null)
     //         return false;
     //     for (MeasureGroupComponent item : this.uniquePopulationGroup)
@@ -447,7 +439,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return The first repetition of repeating field {@link #populationStatements}, creating it if it does not already exist
      */
-    // public MeasureGroupComponent getUniquePopulationGroupFirstRep() { 
+    // public MeasureGroupComponent getUniquePopulationGroupFirstRep() {
     //     if (getUniquePopulationGroup().isEmpty()) {
     //         addUniquePopulationGroup();
     //     }
@@ -457,7 +449,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return {@link #populationStatements} (The Population Statements of the library as an Attachment. The content may be a reference to a url, or may be directly embedded as a base-64 string. Either way, the contentType of the attachment determines how to interpret the content.)
      */
-    public List<MeasureGroupComponent> getPopulationStatements() { 
+    public List<MeasureGroupComponent> getPopulationStatements() {
         if (this.populationStatements == null)
             this.populationStatements = new ArrayList<MeasureGroupComponent>();
         return this.populationStatements;
@@ -466,12 +458,12 @@ public class CqfMeasure extends Measure {
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public CqfMeasure setPopulationStatements(List<MeasureGroupComponent> thePopulationStatements) { 
+    public CqfMeasure setPopulationStatements(List<MeasureGroupComponent> thePopulationStatements) {
         this.populationStatements = thePopulationStatements;
         return this;
     }
 
-    public boolean hasPopulationStatements() { 
+    public boolean hasPopulationStatements() {
         if (this.populationStatements == null)
             return false;
         for (MeasureGroupComponent item : this.populationStatements)
@@ -500,7 +492,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return The first repetition of repeating field {@link #populationStatements}, creating it if it does not already exist
      */
-    public MeasureGroupComponent getPopulationStatementsFirstRep() { 
+    public MeasureGroupComponent getPopulationStatementsFirstRep() {
         if (getPopulationStatements().isEmpty()) {
             addPopulationStatements();
         }
@@ -510,7 +502,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return {@link #definitionStatements} (The Definition Statements of the library as a MeasureGroupPopulationComponent.)
      */
-    public List<MeasureGroupPopulationComponent> getDefinitionStatements() { 
+    public List<MeasureGroupPopulationComponent> getDefinitionStatements() {
         if (this.definitionStatements == null)
             this.definitionStatements = new ArrayList<MeasureGroupPopulationComponent>();
         return this.definitionStatements;
@@ -519,12 +511,12 @@ public class CqfMeasure extends Measure {
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public CqfMeasure setDefinitionStatements(List<MeasureGroupPopulationComponent> theDefinitionStatements) { 
+    public CqfMeasure setDefinitionStatements(List<MeasureGroupPopulationComponent> theDefinitionStatements) {
         this.definitionStatements = theDefinitionStatements;
         return this;
     }
 
-    public boolean hasDefinitionStatements() { 
+    public boolean hasDefinitionStatements() {
         if (this.definitionStatements == null)
             return false;
         for (MeasureGroupPopulationComponent item : this.definitionStatements)
@@ -553,7 +545,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return The first repetition of repeating field {@link #definitionStatements}, creating it if it does not already exist
      */
-    public MeasureGroupPopulationComponent getDefinitionStatementsFirstRep() { 
+    public MeasureGroupPopulationComponent getDefinitionStatementsFirstRep() {
         if (getDefinitionStatements().isEmpty()) {
             addDefinitionStatements();
         }
@@ -563,7 +555,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return {@link #functionStatements} (The Function Statements of the library as a MeasureGroupPopulationComponent.)
      */
-    public List<MeasureGroupPopulationComponent> getFunctionStatements() { 
+    public List<MeasureGroupPopulationComponent> getFunctionStatements() {
         if (this.functionStatements == null)
             this.functionStatements = new ArrayList<MeasureGroupPopulationComponent>();
         return this.functionStatements;
@@ -572,12 +564,12 @@ public class CqfMeasure extends Measure {
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public CqfMeasure setFunctionStatements(List<MeasureGroupPopulationComponent> theFunctionStatements) { 
+    public CqfMeasure setFunctionStatements(List<MeasureGroupPopulationComponent> theFunctionStatements) {
         this.functionStatements = theFunctionStatements;
         return this;
     }
 
-    public boolean hasFunctionStatements() { 
+    public boolean hasFunctionStatements() {
         if (this.functionStatements == null)
             return false;
         for (MeasureGroupPopulationComponent item : this.functionStatements)
@@ -606,7 +598,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return The first repetition of repeating field {@link #functionStatements}, creating it if it does not already exist
      */
-    public MeasureGroupPopulationComponent getFunctionStatementsFirstRep() { 
+    public MeasureGroupPopulationComponent getFunctionStatementsFirstRep() {
         if (getFunctionStatements().isEmpty()) {
             addFunctionStatements();
         }
@@ -616,7 +608,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return {@link #supplementalDataElements} (The supplemenetal data elements referenced in the library.)
      */
-    public List<MeasureGroupPopulationComponent> getSupplementalDataElements() { 
+    public List<MeasureGroupPopulationComponent> getSupplementalDataElements() {
         if (this.supplementalDataElements == null)
             this.supplementalDataElements = new ArrayList<MeasureGroupPopulationComponent>();
         return this.supplementalDataElements;
@@ -625,12 +617,12 @@ public class CqfMeasure extends Measure {
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public CqfMeasure setSupplementalDataElements(List<MeasureGroupPopulationComponent> theSupplementalDataElements) { 
+    public CqfMeasure setSupplementalDataElements(List<MeasureGroupPopulationComponent> theSupplementalDataElements) {
         this.supplementalDataElements = theSupplementalDataElements;
         return this;
     }
 
-    public boolean hasSupplementalDataElements() { 
+    public boolean hasSupplementalDataElements() {
         if (this.supplementalDataElements == null)
             return false;
         for (MeasureGroupPopulationComponent item : this.supplementalDataElements)
@@ -659,7 +651,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return The first repetition of repeating field {@link #supplementalDataElements}, creating it if it does not already exist
      */
-    public MeasureGroupPopulationComponent getSupplementalDataElementsFirstRep() { 
+    public MeasureGroupPopulationComponent getSupplementalDataElementsFirstRep() {
         if (getSupplementalDataElements().isEmpty()) {
             addSupplementalDataElements();
         }
@@ -669,7 +661,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return {@link #terminology} (The terminology referenced in the library.)
      */
-    public List<TerminologyRef> getTerminology() { 
+    public List<TerminologyRef> getTerminology() {
         if (this.terminology == null)
             this.terminology = new ArrayList<TerminologyRef>();
         return this.terminology;
@@ -678,12 +670,12 @@ public class CqfMeasure extends Measure {
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public CqfMeasure setTerminology(List<TerminologyRef> theTerminology) { 
+    public CqfMeasure setTerminology(List<TerminologyRef> theTerminology) {
         this.terminology = theTerminology;
         return this;
     }
 
-    public boolean hasTerminology() { 
+    public boolean hasTerminology() {
         return (this.terminology != null && this.terminology.size() > 0);
     }
 
@@ -709,7 +701,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return The first repetition of repeating field {@link #terminology}, creating it if it does not already exist
      */
-    public TerminologyRef getTerminologyFirstRep() { 
+    public TerminologyRef getTerminologyFirstRep() {
         if (getTerminology().isEmpty()) {
             addTerminology();
         }
@@ -719,7 +711,7 @@ public class CqfMeasure extends Measure {
     /**
      * @return {@link #dataCriteria} (The data elements referenced in the library.)
      */
-    public List<StringType> getDataCriteria() { 
+    public List<StringType> getDataCriteria() {
         if (this.dataCriteria == null)
             this.dataCriteria = new ArrayList<StringType>();
         return this.dataCriteria;
@@ -728,12 +720,12 @@ public class CqfMeasure extends Measure {
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public CqfMeasure setDataCriteria(List<StringType> theDataCriteria) { 
+    public CqfMeasure setDataCriteria(List<StringType> theDataCriteria) {
         this.dataCriteria = theDataCriteria;
         return this;
     }
 
-    public boolean hasDataCriteria() { 
+    public boolean hasDataCriteria() {
         if (this.dataCriteria == null)
             return false;
         for (StringType item : this.dataCriteria)
@@ -762,13 +754,13 @@ public class CqfMeasure extends Measure {
     /**
      * @return The first repetition of repeating field {@link #dataCriteria}, creating it if it does not already exist
      */
-    public StringType getDataCriteriaFirstRep() { 
+    public StringType getDataCriteriaFirstRep() {
         if (getDataCriteria().isEmpty()) {
             addDataCriteria();
         }
         return getDataCriteria().get(0);
 	}
-	
+
 	public CqfMeasure() {
 		super();
 	}
@@ -880,7 +872,7 @@ public class CqfMeasure extends Measure {
                 supplementalData.add(i.copy());
         };
 	}
-	
+
 	public String fhirType() {
 		return "CqfMeasure";
 	}

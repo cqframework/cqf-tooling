@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +20,8 @@ import org.opencds.cqf.tooling.exception.IGInitializationException;
 import org.opencds.cqf.tooling.utilities.converters.ResourceAndTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class IGUtils {
     private static final Logger logger = LoggerFactory.getLogger(IGUtils.class);
@@ -86,7 +87,7 @@ public class IGUtils {
 
     /**
      * Tries to create a File for a path that may not exist.
-     * 
+     *
      * @param rootDir base directory for path
      * @param path child directories for path
      * @return File if directory exists, null otherwise
@@ -124,6 +125,7 @@ public class IGUtils {
         private final String packageId;
         private final String canonical;
 
+        @SuppressWarnings("this-escape")
         public IGInfo(FhirContext fhirContext, String rootDir) {
             if (fhirContext == null) {
                 this.fhirContext = FhirContext.forR4Cached();

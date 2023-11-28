@@ -5,7 +5,7 @@
 
     <groupId>org.opencds.cqf</groupId>
     <artifactId>tooling-parent</artifactId>
-    <version>2.6.0-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -13,10 +13,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <cql-engine.version>3.3.2</cql-engine.version>
-        <cql-evaluator.version>2.6.0</cql-evaluator.version>
         <cqframework.version>3.3.2</cqframework.version>
-        <hapi.version>6.8.0</hapi.version>
-        <core.version>6.0.22</core.version>
+        <hapi.version>6.8.5</hapi.version>
+        <core.version>6.0.22.2</core.version>
         <spring-boot.version>2.1.5.RELEASE</spring-boot.version>
     </properties>
 
@@ -108,26 +107,8 @@
         <dependencies>
             <dependency>
                 <groupId>info.cqframework</groupId>
-                <artifactId>evaluator.builder</artifactId>
-                <version>${cql-evaluator.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.opencds.cqf.cql</groupId>
-                <artifactId>evaluator.jaxb-deps</artifactId>
-                <version>${cql-evaluator.version}</version>
-                <type>pom</type>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
                 <artifactId>engine</artifactId>
                 <version>${cql-engine.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
