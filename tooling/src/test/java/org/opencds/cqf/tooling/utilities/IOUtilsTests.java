@@ -2,9 +2,9 @@ package org.opencds.cqf.tooling.utilities;
 
 import static org.testng.Assert.assertEquals;
 
-import org.junit.Test;
-
 import java.io.File;
+
+import org.testng.annotations.Test;
 
 public class IOUtilsTests {
 

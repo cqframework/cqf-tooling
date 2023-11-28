@@ -12,11 +12,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <cql-engine.version>3.3.2</cql-engine.version>
-        <cqframework.version>3.3.2</cqframework.version>
+        <cql.version>3.3.2</cql.version>
         <hapi.version>6.8.5</hapi.version>
         <core.version>6.0.22.2</core.version>
         <spring-boot.version>2.1.5.RELEASE</spring-boot.version>
+        <slf4j.version>2.0.5</slf4j.version>
     </properties>
 
     <name>CQF Tooling</name>
@@ -108,83 +108,83 @@
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>engine</artifactId>
-                <version>${cql-engine.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>engine-fhir</artifactId>
-                <version>${cql-engine.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>cql-formatter</artifactId>
-                <version>${cqframework.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>quick</artifactId>
-                <version>${cqframework.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>qdm</artifactId>
-                <version>${cqframework.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>model</artifactId>
-                <version>${cqframework.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>elm</artifactId>
-                <version>${cqframework.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>cql-to-elm</artifactId>
-                <version>${cqframework.version}</version>
+                <version>${cql.version}</version>
             </dependency>
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>cql</artifactId>
-                <version>${cqframework.version}</version>
+                <version>${cql.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>elm-jackson</artifactId>
-                <version>${cqframework.version}</version>
+                <version>${cql.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>model-jackson</artifactId>
-                <version>${cqframework.version}</version>
+                <version>${cql.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>elm-jaxb</artifactId>
-                <version>${cqframework.version}</version>
+                <version>${cql.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>model-jaxb</artifactId>
-                <version>${cqframework.version}</version>
+                <version>${cql.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>cqf-fhir</artifactId>
-                <version>${cqframework.version}</version>
+                <version>${cql.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>elm-fhir</artifactId>
-                <version>${cqframework.version}</version>
+                <version>${cql.version}</version>
             </dependency>
 
             <dependency>
@@ -202,6 +202,28 @@
                 <artifactId>jackson-core</artifactId>
                 <version>2.15.2</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>log4j-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jul-to-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

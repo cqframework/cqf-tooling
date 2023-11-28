@@ -21,15 +21,20 @@
             <artifactId>tooling</artifactId>
             <version>3.0.0-SNAPSHOT</version>
         </dependency>
+
         <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>org.eclipse.persistence.moxy</artifactId>
-            <version>2.7.7</version>
+            <groupId>info.cqframework</groupId>
+            <artifactId>elm-jackson</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>model-jackson</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>2.0.5</version>
         </dependency>
 
         <dependency>

@@ -1,13 +1,13 @@
 package org.opencds.cqf.tooling.terminology;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class SpreadsheetToCQLOperationTest {
 
@@ -31,9 +31,7 @@ public class SpreadsheetToCQLOperationTest {
 		} finally {
 			assertTrue(true);
 		}
-
 	}
-
 
 	@Test
 	//checking if it works with header argument as well
@@ -51,7 +49,7 @@ public class SpreadsheetToCQLOperationTest {
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expectedExceptions = IllegalArgumentException.class)
 	//If the first argument is not SpreadsheetToCQL, then it will cause an illegal argument exception
 	public void first_arg_test()  {
 		SpreadsheetToCQLOperation tester = new SpreadsheetToCQLOperation();
@@ -62,13 +60,9 @@ public class SpreadsheetToCQLOperationTest {
 		arguments[2] = "-op=" + output_cql_dir;
 
 		tester.execute(arguments);
-
-
-
 	}
 
-
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expectedExceptions = IllegalArgumentException.class)
 	//If there is less than two arguments passed then an illegal argument exception will be thrown
 	public void arguments_test()  {
 		SpreadsheetToCQLOperation tester = new SpreadsheetToCQLOperation();
@@ -76,14 +70,9 @@ public class SpreadsheetToCQLOperationTest {
 		String[] arguments = new String[2];
 		arguments[0] = "SpreadsheetToCQL";
 		tester.execute(arguments);
-
-
-
 	}
 
-
-
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expectedExceptions = IllegalArgumentException.class)
 	//Checking if proper flag in wrong place throws exception
 	public void unknown_flag_test()  {
 		SpreadsheetToCQLOperation tester = new SpreadsheetToCQLOperation();
@@ -98,7 +87,7 @@ public class SpreadsheetToCQLOperationTest {
 
 
 	}
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expectedExceptions = IllegalArgumentException.class)
 	//If there is no path to the spreadsheet then illegal argument exception is thrown
 	public void pathToSpreadsheet_test()  {
 		SpreadsheetToCQLOperation tester = new SpreadsheetToCQLOperation();

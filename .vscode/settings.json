@@ -3,7 +3,8 @@
     "cSpell.words": [
         "Careand",
         "pagecontent",
-        "plandefinition"
+        "plandefinition",
+        "testng"
     ],
     "editor.codeActionsOnSave": {
 		"source.organizeImports": true,

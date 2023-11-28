@@ -1,13 +1,9 @@
 package org.opencds.cqf.tooling.operation;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import org.opencds.cqf.tooling.dateroller.DataDateRollerOperation;
-import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
+import static org.opencds.cqf.tooling.CqfmSoftwareSystemTest.separator;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,10 +14,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.opencds.cqf.tooling.CqfmSoftwareSystemTest.separator;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import org.apache.commons.io.FileUtils;
+import org.opencds.cqf.tooling.dateroller.DataDateRollerOperation;
+import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class DateRollerTest {
 
