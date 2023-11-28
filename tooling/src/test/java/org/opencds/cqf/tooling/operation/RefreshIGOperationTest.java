@@ -136,7 +136,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 								String parentResourceType = (String) map.get(RESOURCE_TYPE);
 								// if Library, resource will be translated into "Measure" in main bundled file:
 								if (parentResourceType.equalsIgnoreCase(LIB_TYPE)) {
-									resourceTypeMap.put((String) map.get(ID), MEASURE_TYPE);
+									resourceTypeMap.put((String) map.get(ID), LIB_TYPE);
 								} else if (parentResourceType.equalsIgnoreCase(BUNDLE_TYPE)) {
 									// file is a bundle type, loop through resources in entry list, build up map of
 									// <id, resourceType>:
