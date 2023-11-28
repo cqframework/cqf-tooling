@@ -1,7 +1,5 @@
 package org.opencds.cqf.tooling.processor;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,20 +7,22 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.IFhirVersion;
 import org.apache.commons.io.FilenameUtils;
-import org.hl7.fhir.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
-
-import ca.uhn.fhir.context.FhirContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.api.IFhirVersion;
 
 public class TestCaseProcessor
 {
@@ -79,7 +79,7 @@ public class TestCaseProcessor
                                 // Handle bundled resources when that is how they are provided
                                 if ((resource.fhirType() == "Bundle") && (version.getVersion() == FhirVersionEnum.R4)) {
                                     org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle) resource;
-                                    ArrayList<org.hl7.fhir.r4.model.Resource> bundleResources =
+                                    var bundleResources =
                                             BundleUtils.getR4ResourcesFromBundle(bundle);
                                     for (IBaseResource bundleResource : bundleResources) {
                                         if (bundleResource.fhirType() == "Patient") {
@@ -125,12 +125,12 @@ public class TestCaseProcessor
     public static List<IBaseResource> getTestCaseResources(String path, FhirContext fhirContext)
     {
         List<IBaseResource> resources = new ArrayList<IBaseResource>();
-        List<String> testCasePaths = IOUtils.getDirectoryPaths(path, false); 
+        List<String> testCasePaths = IOUtils.getDirectoryPaths(path, false);
         for (String testCasePath : testCasePaths) {
             List<String> paths = IOUtils.getFilePaths(testCasePath, true);
             resources.addAll(ensureIds(testCasePath, IOUtils.readResources(paths, fhirContext)));
-        }         
-        return resources; 
+        }
+        return resources;
     }
 
     private static List<IBaseResource> ensureIds(String baseId, List<IBaseResource> resources) {
@@ -207,7 +207,7 @@ public class TestCaseProcessor
                         IOUtils.copyFile(testContentPath, bundleTestContentDestPath);
                     }
                 }
-            }            
+            }
         }
     }
 }
