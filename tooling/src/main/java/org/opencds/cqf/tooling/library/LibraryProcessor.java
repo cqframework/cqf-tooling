@@ -7,31 +7,41 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import com.google.common.base.Strings;
-
 import org.apache.commons.io.FilenameUtils;
+import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.r5.model.Attachment;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.Extension;
+import org.hl7.fhir.r5.model.Library;
+import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.r4.R4LibraryProcessor;
 import org.opencds.cqf.tooling.library.stu3.STU3LibraryProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
-import org.opencds.cqf.tooling.processor.*;
+import org.opencds.cqf.tooling.processor.BaseProcessor;
+import org.opencds.cqf.tooling.processor.CqlProcessor;
+import org.opencds.cqf.tooling.processor.IGProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Strings;
 
 import ca.uhn.fhir.context.FhirContext;
 
 public class LibraryProcessor extends BaseProcessor {
     private static final Logger logger = LoggerFactory.getLogger(LibraryProcessor.class);
-    public static final String ResourcePrefix = "library-";   
+    public static final String ResourcePrefix = "library-";
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
     }
@@ -50,7 +60,7 @@ public class LibraryProcessor extends BaseProcessor {
             throw new RuntimeException("The library id format is invalid.");
         }
     }
-    
+
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
         return refreshIgLibraryContent(parentContext, outputEncoding, null, versioned, fhirContext, shouldApplySoftwareSystemStamp);
     }
@@ -190,23 +200,25 @@ public class LibraryProcessor extends BaseProcessor {
         }
         optionsParameters.getParameter().clear();
 
-        optionsParameters.addParameter("translatorVersion", CqlTranslatorOptions.class.getPackage().getImplementationVersion());
-        for (CqlTranslatorOptions.Options o : options.getOptions()) {
+        optionsParameters.addParameter("translatorVersion", CqlTranslator.class.getPackage().getImplementationVersion());
+
+        var compilerOptions = options.getCqlCompilerOptions();
+        for (CqlCompilerOptions.Options o : compilerOptions.getOptions()) {
             optionsParameters.addParameter("option", o.name());
         }
-        for (CqlTranslator.Format f : options.getFormats()) {
+        for (CqlTranslatorOptions.Format f : options.getFormats()) {
             optionsParameters.addParameter("format", f.name());
         }
-        optionsParameters.addParameter("analyzeDataRequirements", options.getAnalyzeDataRequirements());
-        optionsParameters.addParameter("collapseDataRequirements", options.getCollapseDataRequirements());
-        if (options.getCompatibilityLevel() != null) {
-            optionsParameters.addParameter("compatibilityLevel", options.getCompatibilityLevel());
+        optionsParameters.addParameter("analyzeDataRequirements", compilerOptions.getAnalyzeDataRequirements());
+        optionsParameters.addParameter("collapseDataRequirements", compilerOptions.getCollapseDataRequirements());
+        if (compilerOptions.getCompatibilityLevel() != null) {
+            optionsParameters.addParameter("compatibilityLevel", compilerOptions.getCompatibilityLevel());
         }
-        optionsParameters.addParameter("enableCqlOnly", options.getEnableCqlOnly());
-        optionsParameters.addParameter("errorLevel", options.getErrorLevel().name());
-        optionsParameters.addParameter("signatureLevel", options.getSignatureLevel().name());
-        optionsParameters.addParameter("validateUnits", options.getValidateUnits());
-        optionsParameters.addParameter("verifyOnly", options.getVerifyOnly());
+        optionsParameters.addParameter("enableCqlOnly", compilerOptions.getEnableCqlOnly());
+        optionsParameters.addParameter("errorLevel", compilerOptions.getErrorLevel().name());
+        optionsParameters.addParameter("signatureLevel", compilerOptions.getSignatureLevel().name());
+        optionsParameters.addParameter("validateUnits", compilerOptions.getValidateUnits());
+        optionsParameters.addParameter("verifyOnly", compilerOptions.getVerifyOnly());
     }
 
     protected List<Library> refreshGeneratedContent(List<Library> sourceLibraries) {
