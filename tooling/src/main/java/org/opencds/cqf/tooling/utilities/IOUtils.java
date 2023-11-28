@@ -24,8 +24,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import ca.uhn.fhir.util.BundleBuilder;
 import com.google.gson.JsonObject;
@@ -1033,6 +1035,15 @@ public class IOUtils {
         }
         logger.warn("The file {}{} is not the right type of file.", fileDirPath, libraryName);
         return false;
+    }
+
+    // Assumes the tests are structured as .../input/tests/measure/{MeasureName}/{TestName} and will extract
+    // the measure name
+    public static String getMeasureTestDirectory(String pathString) {
+        Path path = Paths.get(pathString);
+        String[] testDirs = StreamSupport.stream(path.spliterator(), false).map(Path::toString).toArray(String[]::new);
+        String testDir = testDirs[testDirs.length - 2];
+        return testDir;
     }
 
     public static String concatFilePath(String basePath, String... pathsToAppend) {
