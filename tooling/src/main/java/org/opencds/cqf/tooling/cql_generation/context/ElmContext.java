@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -58,8 +59,9 @@ public class ElmContext {
         try {
             UcumService ucumService = new UcumEssenceService(
                     UcumEssenceService.class.getResourceAsStream("/ucum-essence.xml"));
-            this.libraryBuilder = new LibraryBuilder(modelManager, libraryManager, ucumService);
-            this.libraryBuilder.setTranslatorOptions(CqlTranslatorOptions.defaultOptions());
+            libraryManager.setUcumService(ucumService);
+            this.libraryBuilder = new LibraryBuilder(libraryManager);
+            this.libraryBuilder.setCompilerOptions(CqlCompilerOptions.defaultOptions());
             this.libraryBuilder.setLibraryIdentifier(libraryInfo.getLeft());
             this.libraryBuilder.getModel(new UsingDef().withUri(modelBuilder.getModelUri())
                     .withLocalIdentifier(modelBuilder.getModelIdentifier()).withVersion(modelBuilder.getModelVersion()));

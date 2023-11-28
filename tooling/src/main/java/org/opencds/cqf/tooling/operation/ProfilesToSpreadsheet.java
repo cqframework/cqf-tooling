@@ -7,6 +7,7 @@ import org.apache.poi.xssf.usermodel.*;
 import org.opencds.cqf.tooling.acceleratorkit.StructureDefinitionBindingObject;
 import org.opencds.cqf.tooling.acceleratorkit.StructureDefinitionElementBindingVisitor;
 import org.opencds.cqf.tooling.terminology.SpreadsheetCreatorHelper;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ModelCanonicalAtlasCreator;
 
 
@@ -83,7 +84,8 @@ public class ProfilesToSpreadsheet extends StructureDefinitionToSpreadsheetBase 
         bindingObjects.forEach((bindingObject) -> {
             addBindingObjectRowDataToCurrentSheet(firstSheet, rowCount.getAndAccumulate(1, ibo), bindingObject);
         });
-        SpreadsheetCreatorHelper.writeSpreadSheet(workBook, getOutputPath() + separator + modelName + modelVersion + ".xlsx");
+        SpreadsheetCreatorHelper.writeSpreadSheet(workBook,
+                IOUtils.concatFilePath(getOutputPath(), modelName + modelVersion + ".xlsx"));
     }
 
     private List<String> createHeaderNameList() {

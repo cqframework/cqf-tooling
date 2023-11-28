@@ -69,7 +69,7 @@ public class DroolPredicateToElmExpressionConverter {
     private boolean startedFunction = false;
 
     public static Set<String> valueSetIds = new HashSet<String>();
-    private Logger logger;
+    private static final Logger logger = LoggerFactory.getLogger(DroolPredicateToElmExpressionConverter.class);
     private Map<String, Marker> markers = new HashMap<String, Marker>();
 
     /**
@@ -77,7 +77,6 @@ public class DroolPredicateToElmExpressionConverter {
      * @param modelBuilder modelBuilder
     */
     public DroolPredicateToElmExpressionConverter(VmrToModelElmBuilder modelBuilder) {
-        logger = LoggerFactory.getLogger(this.getClass());
         this.modelBuilder = modelBuilder;
         markers.put("Left_Operand", MarkerFactory.getMarker("Left_Operand"));
         markers.put("Right_Operand", MarkerFactory.getMarker("Right_Operand"));

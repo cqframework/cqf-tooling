@@ -14,6 +14,7 @@ public class FhirVersionEnumConverter implements ValueConverter<FhirVersionEnum>
         switch(value.trim().toUpperCase()) {
             case "DSTU3": return FhirVersionEnum.DSTU3;
             case "R4": return FhirVersionEnum.R4;
+            case "R5": return FhirVersionEnum.R5;
             default: throw new IllegalArgumentException(String.format("unknown or unsupported FHIR version %s", value));
         }
     }

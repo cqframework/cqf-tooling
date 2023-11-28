@@ -1,21 +1,36 @@
 package org.opencds.cqf.tooling.operation;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.Narrative;
+import org.hl7.fhir.r4.model.PlanDefinition;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.opencds.cqf.tooling.Operation;
 
-import java.io.*;
-import java.util.*;
-import java.util.stream.Collectors;
+import ca.uhn.fhir.context.FhirContext;
 
 public class StripGeneratedContentOperation extends Operation {
 
     private String pathToResource;
     private FhirContext context;
     String version;
-    private boolean isDirectory;
 
     @Override
     public void execute(String[] args) {
@@ -44,12 +59,11 @@ public class StripGeneratedContentOperation extends Operation {
                     throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
-        this.context = setContext(version);
+        this.context = contextForVersion(version);
         File res  = validateDirectory(pathToResource);
-        List<File> list = new ArrayList<>();
-        getListOfActionableFiles(res, list);
+        var files = getListOfActionableFiles(res);
 
-        for(File file : list) {
+        for(File file : files) {
             parseAndStripResource(file);
         }
 
@@ -57,50 +71,35 @@ public class StripGeneratedContentOperation extends Operation {
 
     private File validateDirectory(String pathToDir) {
         if (pathToDir == null) {
-            throw new IllegalArgumentException("The path to the resource is required");
+            throw new IllegalArgumentException("The path to the directory is required");
         }
 
         File bundleDirectory = new File(pathToDir);
-        if (bundleDirectory.isDirectory()) {
-            isDirectory = true;
+        if (!bundleDirectory.isDirectory()) {
+            throw new IllegalArgumentException("The path supplied is not a directory");
         }
         return bundleDirectory;
     }
 
-    private void getListOfActionableFiles(File file, List<File> list) {
-        if (!isDirectory) {
-            list.add(file);
-        } else {
-            Arrays.stream(file.listFiles()).forEach(f -> {
-                if (!f.isDirectory()) {
-                    list.add(f);
-                } else {
-                    getListOfActionableFiles(f, list);
-                }
-            });
-        }
+    private Collection<File> getListOfActionableFiles(File file) {
+        return FileUtils.listFiles(file, new String[] { "json", "xml"}, true);
     }
 
-    private FhirContext setContext(String version) {
-        FhirContext context;
+    private FhirContext contextForVersion(String version) {
         if (StringUtils.isEmpty(version)) {
-            context = FhirContext.forR4Cached();
+            return FhirContext.forR4Cached();
         } else {
             switch (version.toLowerCase()) {
                 case "dstu3":
-                    context = FhirContext.forDstu3Cached();
-                    break;
+                    return FhirContext.forDstu3Cached();
                 case "r4":
-                    context = FhirContext.forR4Cached();
-                    break;
+                    return FhirContext.forR4Cached();
                 case "r5":
-                    context = FhirContext.forR5Cached();
-                    break;
+                    return  FhirContext.forR5Cached();
                 default:
                     throw new IllegalArgumentException("Unknown fhir version: " + version);
             }
         }
-        return context;
     }
 
     private void parseAndStripResource(File file) {
@@ -111,6 +110,11 @@ public class StripGeneratedContentOperation extends Operation {
             } else if(file.getName().endsWith(".xml")){
                 theResource = context.newXmlParser().parseResource(new FileReader(file));
             }
+
+            if (theResource == null) {
+                throw new RuntimeException(String.format("failed to parse resource for file: %s", file.toString()));
+            }
+
             stripResource(file.getPath().substring(pathToResource.length()), theResource);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -125,21 +129,6 @@ public class StripGeneratedContentOperation extends Operation {
 
     private void stripResource(String fileName, IBaseResource resource) {
         switch(context.getVersion().getVersion().name().toLowerCase()) {
-            case "r4":
-                if(resource.getIdElement().getResourceType().equals("Library")) {
-                    Library library = (Library) resource;
-                    stripLibraryAndWrite(fileName, library);
-                } else if (resource.getIdElement().getResourceType().equals("Measure")) {
-                    Measure measure = (Measure) resource;
-                    stripMeasureAndWrite(fileName, measure);
-                } else if (resource.getIdElement().getResourceType().equals("PlanDefinition")) {
-                    PlanDefinition planDefinition = (PlanDefinition) resource;
-                    stripPlanDefinitionAndWrite(fileName, planDefinition);
-                } else if (resource.getIdElement().getResourceType().equals("Questionnaire")) {
-                    Questionnaire questionnaire = (Questionnaire) resource;
-                    stripQuestionnaireAndWrite(fileName, questionnaire);
-                }
-                break;
             case "dstu3":
                 if(resource.getIdElement().getResourceType().equals("Library")) {
                     org.hl7.fhir.dstu3.model.Library library = (org.hl7.fhir.dstu3.model.Library) resource;
@@ -153,6 +142,25 @@ public class StripGeneratedContentOperation extends Operation {
                 } else if (resource.getIdElement().getResourceType().equals("Questionnaire")) {
                     org.hl7.fhir.dstu3.model.Questionnaire questionnaire = (org.hl7.fhir.dstu3.model.Questionnaire) resource;
                     stripQuestionnaireAndWrite(fileName, questionnaire);
+                } else if (resource instanceof org.hl7.fhir.dstu3.model.DomainResource) {
+                    stripResourceAndWrite(fileName, (org.hl7.fhir.dstu3.model.DomainResource)resource);
+                }
+                break;
+            case "r4":
+                if(resource.getIdElement().getResourceType().equals("Library")) {
+                    Library library = (Library) resource;
+                    stripLibraryAndWrite(fileName, library);
+                } else if (resource.getIdElement().getResourceType().equals("Measure")) {
+                    Measure measure = (Measure) resource;
+                    stripMeasureAndWrite(fileName, measure);
+                } else if (resource.getIdElement().getResourceType().equals("PlanDefinition")) {
+                    PlanDefinition planDefinition = (PlanDefinition) resource;
+                    stripPlanDefinitionAndWrite(fileName, planDefinition);
+                } else if (resource.getIdElement().getResourceType().equals("Questionnaire")) {
+                    Questionnaire questionnaire = (Questionnaire) resource;
+                    stripQuestionnaireAndWrite(fileName, questionnaire);
+                } else if (resource instanceof org.hl7.fhir.r4.model.DomainResource) {
+                    stripResourceAndWrite(fileName, (org.hl7.fhir.r4.model.DomainResource)resource);
                 }
                 break;
             case "r5":
@@ -168,12 +176,30 @@ public class StripGeneratedContentOperation extends Operation {
                 } else if (resource.getIdElement().getResourceType().equals("Questionnaire")) {
                     org.hl7.fhir.r5.model.Questionnaire questionnaire = (org.hl7.fhir.r5.model.Questionnaire) resource;
                     stripQuestionnaireAndWrite(fileName, questionnaire);
+                } else if (resource instanceof org.hl7.fhir.r5.model.DomainResource) {
+                    stripResourceAndWrite(fileName, (org.hl7.fhir.r5.model.DomainResource)resource);
                 }
                 break;
 
         }
 
     }
+
+    private void stripResourceAndWrite(String fileName, org.hl7.fhir.dstu3.model.DomainResource resource) {
+        resource.setText(null);
+        writeFile(fileName, resource);
+    }
+
+    private void stripResourceAndWrite(String fileName, org.hl7.fhir.r4.model.DomainResource resource) {
+        resource.setText(null);
+        writeFile(fileName, resource);
+    }
+
+    private void stripResourceAndWrite(String fileName, org.hl7.fhir.r5.model.DomainResource resource) {
+        resource.setText(null);
+        writeFile(fileName, resource);
+    }
+
     private void stripLibraryAndWrite(String fileName, Library library) {
         if(library.hasText()) {
             library.setText(new Narrative());
@@ -188,7 +214,7 @@ public class StripGeneratedContentOperation extends Operation {
             List<RelatedArtifact> list = library.getRelatedArtifact()
                     .stream()
                     .filter(relatedArtifact -> (relatedArtifact.hasType() &&
-                            !(relatedArtifact.getType()== RelatedArtifact.RelatedArtifactType.DEPENDSON)))
+                            relatedArtifact.getType() != RelatedArtifact.RelatedArtifactType.DEPENDSON))
                     .collect(Collectors.toList());
             library.setRelatedArtifact(list);
         }

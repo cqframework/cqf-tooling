@@ -17,10 +17,9 @@ import java.util.Locale;
 
 public class DataDateRollerOperation extends Operation {
     private FhirContext fhirContext;
-    public static final String separator = System.getProperty("file.separator");
     public String fhirVersion;
     private IOUtils.Encoding fileEncoding;
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(DataDateRollerOperation.class);
 
     @Override
     public void execute(String[] args) {
@@ -88,7 +87,7 @@ public class DataDateRollerOperation extends Operation {
     }
 
     private void rollDatesInFile(File file) {
-        logger.info("Rolling dates for file: " + file.getAbsolutePath());
+        logger.info("Rolling dates for file: {}", file.getAbsolutePath());
         fileEncoding = IOUtils.getEncoding(file.getName());
 
         String fileContents = IOUtils.getFileContent(file);
@@ -125,7 +124,7 @@ public class DataDateRollerOperation extends Operation {
             }
         }
         else{
-            logger.error(String.format("The file %s was either empty or came back null.", file.getAbsolutePath()));
+            logger.error("The file {} was either empty or came back null.", file.getAbsolutePath());
         }
     }
 }

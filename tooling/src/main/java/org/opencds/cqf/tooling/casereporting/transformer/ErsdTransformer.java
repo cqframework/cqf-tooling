@@ -140,7 +140,7 @@ public class ErsdTransformer extends Operation {
 
     private PlanDefinition getV2PlanDefinition(String pathToPlanDefinition) {
         PlanDefinition planDef = null;
-        System.out.println(String.format("PlanDefinitionPath: '%s'", pathToPlanDefinition));
+        logger.info(String.format("PlanDefinitionPath: '%s'", pathToPlanDefinition));
         if (pathToPlanDefinition != null && !pathToPlanDefinition.isEmpty()) {
             planDef = (PlanDefinition)IOUtils.readResource(pathToPlanDefinition, ctx, true);
             planDef.setEffectivePeriod(this.effectivePeriod);
@@ -429,7 +429,7 @@ public class ErsdTransformer extends Operation {
     }
 
     private Bundle resolveSpecificationBundle(Bundle bundle, Library specificationLibrary) {
-        System.out.println(FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true)
+        logger.info(FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true)
                 .encodeResourceToString(specificationLibrary));
         List<BundleEntryComponent> entries = new ArrayList<BundleEntryComponent>();
         entries.add(new BundleEntryComponent().setResource(specificationLibrary)
