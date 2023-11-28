@@ -33,10 +33,16 @@ import org.hl7.fhir.r4.model.TriggerDefinition;
 import org.hl7.fhir.r4.model.UsageContext;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DTProcessor extends Operation {
+
+    private static final Logger logger = LoggerFactory.getLogger(DTProcessor.class);
+
     private String pathToSpreadsheet; // -pathtospreadsheet (-pts)
     private String encoding = "json"; // -encoding (-e)
 
@@ -92,12 +98,7 @@ public class DTProcessor extends Operation {
 
     private void processWorkbook(Workbook workbook) {
         String outputPath = getOutputPath();
-        try {
-            ensurePath(outputPath);
-        }
-        catch (IOException e) {
-            throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
-        }
+        ensurePath(outputPath);
 
         // process workbook
         if (decisionTablePages != null) {
@@ -125,10 +126,10 @@ public class DTProcessor extends Operation {
     private void processDecisionTablePage(Workbook workbook, String page) {
         Sheet sheet = workbook.getSheet(page);
         if (sheet == null) {
-            System.out.println(String.format("Sheet %s not found in the Workbook, so no processing was done.", page));
+            logger.info(String.format("Sheet %s not found in the Workbook, so no processing was done.", page));
         }
         else {
-            System.out.println(String.format("Processing Sheet %s.", page));
+            logger.info(String.format("Processing Sheet %s.", page));
             processDecisionTableSheet(workbook, sheet);
         }
     }
@@ -613,13 +614,8 @@ public class DTProcessor extends Operation {
 
     private void writeLibraries(String outputPath) {
         if (libraries != null && libraries.size() > 0) {
-            String outputFilePath = outputPath + File.separator + "input" + File.separator + "resources" + File.separator + "library";
-            try {
-                ensurePath(outputFilePath);
-            }
-            catch (IOException e) {
-                throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
-            }
+            String outputFilePath = IOUtils.concatFilePath(outputPath, "input", "resources", "library");
+            ensurePath(outputFilePath);
 
             for (Library library : libraries.values()) {
                 writeResource(outputFilePath, library);
@@ -630,14 +626,10 @@ public class DTProcessor extends Operation {
     private void writeLibraryCQL(String outputPath) {
         if (libraryCQL != null && libraryCQL.size() > 0) {
             for (Map.Entry<String, StringBuilder> entry : libraryCQL.entrySet()) {
-                String outputDirectoryPath = outputPath + File.separator + "input" + File.separator + "cql";
-                String outputFilePath = outputDirectoryPath + File.separator + entry.getKey() + ".cql";
-                try {
-                    ensurePath(outputDirectoryPath);
-                }
-                catch (IOException e) {
-                    throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
-                }
+                String outputDirectoryPath = IOUtils.concatFilePath(outputPath, "input", "cql");
+                String outputFilePath = IOUtils.concatFilePath(outputDirectoryPath,
+                        entry.getKey() + ".cql");
+                ensurePath(outputDirectoryPath);
 
                 try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
                     writer.write(entry.getValue().toString().getBytes());
@@ -654,13 +646,9 @@ public class DTProcessor extends Operation {
     private void writePlanDefinitions(String outputPath) {
         if (planDefinitions != null && planDefinitions.size() > 0) {
             for (PlanDefinition planDefinition : planDefinitions.values()) {
-                String outputFilePath = outputPath + File.separator + "input" + File.separator + "resources" + File.separator + "plandefinition";
-                try {
-                    ensurePath(outputFilePath);
-                }
-                catch (IOException e) {
-                    throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
-                }
+                String outputFilePath = IOUtils.concatFilePath(outputPath,
+                        "input", "resources", "plandefinition");
+                ensurePath(outputFilePath);
                 writeResource(outputFilePath, planDefinition);
             }
         }
@@ -668,7 +656,8 @@ public class DTProcessor extends Operation {
 
     /* Write Methods */
     public void writeResource(String path, Resource resource) {
-        String outputFilePath = path + File.separator + resource.getResourceType().toString().toLowerCase() + "-" + resource.getIdElement().getIdPart() + "." + encoding;
+        String outputFilePath = IOUtils.concatFilePath(path,
+                resource.getResourceType().toString().toLowerCase() + "-" + resource.getIdElement().getIdPart() + "." + encoding);
         try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
             writer.write(
                     encoding.equals("json")
@@ -701,13 +690,9 @@ public class DTProcessor extends Operation {
     }
 
     public void writePlanDefinitionIndex(String outputPath) {
-        String outputFilePath = outputPath + File.separator + "input" + File.separator + "pagecontent"+ File.separator + "PlanDefinitionIndex.md";
-        try {
-            ensurePath(outputFilePath);
-        }
-        catch (IOException e) {
-            throw new IllegalArgumentException(String.format("Could not ensure output path: %s", e.getMessage()), e);
-        }
+        String outputFilePath = IOUtils.concatFilePath(outputPath,
+                "input", "pagecontent", "PlanDefinitionIndex.md");
+        ensurePath(outputFilePath);
 
         try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
             writer.write(buildPlanDefinitionIndex().getBytes());

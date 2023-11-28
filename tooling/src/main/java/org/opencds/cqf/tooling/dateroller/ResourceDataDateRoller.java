@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ResourceDataDateRoller {
     private static Logger logger = LoggerFactory.getLogger(ResourceDataDateRoller.class);
@@ -17,16 +18,12 @@ public class ResourceDataDateRoller {
     public static void rollBundleDates(FhirContext fhirContext, IBaseResource iBaseResource) {
         switch (fhirContext.getVersion().getVersion().name()) {
             case "R4":
-                ArrayList<Resource> r4ResourceArrayList = BundleUtils.getR4ResourcesFromBundle((org.hl7.fhir.r4.model.Bundle) iBaseResource);
-                r4ResourceArrayList.forEach(resource -> {
-                    RollDatesR4.rollDatesInResource(resource);
-                });
+                List<Resource> r4ResourceArrayList = BundleUtils.getR4ResourcesFromBundle((org.hl7.fhir.r4.model.Bundle) iBaseResource);
+                r4ResourceArrayList.forEach(RollDatesR4::rollDatesInResource);
                 break;
             case "Stu3":
-                ArrayList<org.hl7.fhir.dstu3.model.Resource> stu3resourceArrayList = BundleUtils.getStu3ResourcesFromBundle((org.hl7.fhir.dstu3.model.Bundle) iBaseResource);
-                stu3resourceArrayList.forEach(resource -> {
-                    RollDatesDstu3.rollDatesInResource(resource);
-                });
+                List<org.hl7.fhir.dstu3.model.Resource> stu3resourceArrayList = BundleUtils.getStu3ResourcesFromBundle((org.hl7.fhir.dstu3.model.Bundle) iBaseResource);
+                stu3resourceArrayList.forEach(RollDatesDstu3::rollDatesInResource);
                 break;
         }
     }

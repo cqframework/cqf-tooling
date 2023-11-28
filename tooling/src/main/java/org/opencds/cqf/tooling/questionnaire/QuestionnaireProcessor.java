@@ -22,7 +22,7 @@ public class QuestionnaireProcessor {
     public static final String QuestionnaireTestGroupName = "questionnaire";
     private LibraryProcessor libraryProcessor;
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(QuestionnaireProcessor.class);
 
     public QuestionnaireProcessor(LibraryProcessor libraryProcessor) {
         this.libraryProcessor = libraryProcessor;

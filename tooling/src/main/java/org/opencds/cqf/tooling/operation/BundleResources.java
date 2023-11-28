@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -192,7 +193,7 @@ public class BundleResources extends Operation {
     public void output(IBaseResource resource, FhirContext context) {
         String fileNameBase = getOutputPath() + getOutputPath().substring(getOutputPath().lastIndexOf(File.separator));
         if (bundleId != null && !bundleId.isEmpty()) {
-            fileNameBase = getOutputPath() + File.separator + bundleId;
+            fileNameBase = IOUtils.concatFilePath(getOutputPath(), bundleId);
         }
 
         try (FileOutputStream writer = new FileOutputStream(fileNameBase + "-bundle." + encoding)) {

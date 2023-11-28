@@ -20,8 +20,13 @@ import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.LogUtils;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IGProcessor extends BaseProcessor {
+
+    private static final Logger logger = LoggerFactory.getLogger(IGProcessor.class);
+
     public static final String IG_VERSION_REQUIRED = "igVersion required";
 	protected IGBundleProcessor igBundleProcessor;
     protected LibraryProcessor libraryProcessor;
@@ -115,7 +120,7 @@ public class IGProcessor extends BaseProcessor {
                 initializeFromIg(params.rootDir, params.igPath, null);
             }
             catch (Exception e) {
-                logMessage(String.format("Error Refreshing for File "+ params.igPath+": "+e.getMessage(), e));
+                logMessage(String.format("Error Refreshing for File %s: %s", params.igPath, e.getMessage()));
             }
         }
 
@@ -129,7 +134,7 @@ public class IGProcessor extends BaseProcessor {
         Boolean versioned = params.versioned;
         // String fhirUri = params.fhirUri;
         String measureToRefreshPath = params.measureToRefreshPath;
-        ArrayList<String> resourceDirs = params.resourceDirs;
+        List<String> resourceDirs = params.resourceDirs;
         if (resourceDirs.size() == 0) {
             try {
                 resourceDirs = IGUtils.extractResourcePaths(this.rootDir, this.sourceIg);
@@ -203,7 +208,7 @@ public class IGProcessor extends BaseProcessor {
     public static final String testCasePathElement = "input/tests/";
     public static final String devicePathElement = "input/resources/device/";
     
-    public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, ArrayList<String> resourcePaths) {                
+    public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, List<String> resourcePaths) {
         File directory = new File(getBundlesPath(igPath));
         if (!directory.exists()) {
             directory.mkdir();
@@ -243,7 +248,7 @@ public class IGProcessor extends BaseProcessor {
     private static void checkForDirectory(String igPath, String pathElement) {
         File directory = new File(FilenameUtils.concat(igPath, pathElement));
         if (!directory.exists()) {
-            System.out.println("No directory found by convention for: " + directory.getName());
+            logger.info("No directory found by convention for: {}", directory.getName());
         }
         else {
             // TODO: This is a concept different from "resource directories". It is expected elsewhere (e.g., IOUtils.setupActivityDefinitionPaths)

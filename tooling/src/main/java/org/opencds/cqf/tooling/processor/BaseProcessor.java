@@ -236,4 +236,9 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
     public void logDebugMessage(IWorkerContext.ILoggingService.LogCategory category, String msg) {
         logger.debug("Category: {} Message: {}", category.name(), msg);
     }
+
+    @Override
+    public boolean isDebugLogging() {
+        return false;
+    }
 }

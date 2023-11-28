@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
@@ -19,6 +20,17 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 
 public class BundleUtils {
+
+    private BundleUtils() {}
+
+    public static BundleTypeEnum getBundleType(String bundleTypeName) {
+        for (BundleTypeEnum bundleTypeEnum : BundleTypeEnum.values()) {
+            if (bundleTypeEnum.getCode().equalsIgnoreCase(bundleTypeName)) {
+                return bundleTypeEnum;
+            }
+        }
+        return null;
+    }
 
     @SafeVarargs
     public static Object bundleArtifacts(String id, List<IBaseResource> resources, FhirContext fhirContext, Boolean addBundleTimestamp, List<Object>... identifiers) {
@@ -64,7 +76,7 @@ public class BundleUtils {
         org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
         ResourceUtils.setIgId(id, bundle, false);
         bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
-        if (addBundleTimestamp) {
+        if (Boolean.TRUE.equals(addBundleTimestamp)) {
             bundle.setTimestamp((new Date()));
         }
         if (identifiers != null && !identifiers.isEmpty()) {
@@ -101,11 +113,11 @@ public class BundleUtils {
         }
     }
 
-    public static List<Map.Entry<String, IBaseResource>> GetBundlesInDir(String directoryPath, FhirContext fhirContext) {
-        return GetBundlesInDir(directoryPath, fhirContext, true);
+    public static List<Map.Entry<String, IBaseResource>> getBundlesInDir(String directoryPath, FhirContext fhirContext) {
+        return getBundlesInDir(directoryPath, fhirContext, true);
     }
 
-    public static List<Map.Entry<String, IBaseResource>> GetBundlesInDir(String directoryPath, FhirContext fhirContext, Boolean recursive) {
+    public static List<Map.Entry<String, IBaseResource>> getBundlesInDir(String directoryPath, FhirContext fhirContext, Boolean recursive) {
         File dir = new File(directoryPath);
         if (!dir.isDirectory()) {
             throw new IllegalArgumentException("path to directory must be an existing directory.");
@@ -138,7 +150,7 @@ public class BundleUtils {
     public static void stampDstu3BundleEntriesWithSoftwareSystems(org.hl7.fhir.dstu3.model.Bundle bundle, List<CqfmSoftwareSystem> softwareSystems, FhirContext fhirContext, String rootDir) {
         for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
             org.hl7.fhir.dstu3.model.Resource resource = entry.getResource();
-            if ((resource.fhirType().equals("Library")) || ((resource.fhirType().equals("Measure")))) {
+            if ((resource.fhirType().equals("Library")) || (resource.fhirType().equals("Measure"))) {
                 org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper cqfmSoftwareSystemHelper = new org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper(rootDir);
                 cqfmSoftwareSystemHelper.ensureSoftwareSystemExtensionAndDevice((org.hl7.fhir.dstu3.model.DomainResource) resource, softwareSystems, fhirContext);
             }
@@ -191,9 +203,8 @@ public class BundleUtils {
         }
     }
 
-    public static ArrayList<Resource> getR4ResourcesFromBundle(Bundle bundle) {
-        ArrayList<Resource> resourceArrayList = new ArrayList<>();
-        FhirContext context = FhirContext.forR4Cached();
+    public static List<Resource> getR4ResourcesFromBundle(Bundle bundle){
+        ArrayList <Resource> resourceArrayList = new ArrayList<>();
         for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
             org.hl7.fhir.r4.model.Resource entryResource = entry.getResource();
             if (entryResource != null) {
@@ -203,8 +214,8 @@ public class BundleUtils {
         return resourceArrayList;
     }
 
-    public static ArrayList<org.hl7.fhir.dstu3.model.Resource> getStu3ResourcesFromBundle(org.hl7.fhir.dstu3.model.Bundle bundle) {
-        ArrayList<org.hl7.fhir.dstu3.model.Resource> resourceArrayList = new ArrayList<>();
+    public static List<org.hl7.fhir.dstu3.model.Resource> getStu3ResourcesFromBundle(org.hl7.fhir.dstu3.model.Bundle bundle){
+        ArrayList <org.hl7.fhir.dstu3.model.Resource> resourceArrayList = new ArrayList<>();
         for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
             org.hl7.fhir.dstu3.model.Resource entryResource = entry.getResource();
             if (entryResource != null) {

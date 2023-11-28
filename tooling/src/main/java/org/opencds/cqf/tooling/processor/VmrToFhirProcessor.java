@@ -58,7 +58,7 @@ public class VmrToFhirProcessor {
 
     private static void writeOutput(String fhirOutputPath, FhirContext context, Patient patient, List<IAnyResource> resources,
             BundleBuilder bundleBuilder) {
-        File outputDirectory = new File(fhirOutputPath + "/" + patient.getIdElement().getIdPart());
+        File outputDirectory = new File(IOUtils.concatFilePath(fhirOutputPath, patient.getIdElement().getIdPart()));
         if (!outputDirectory.isDirectory()) {
             outputDirectory.mkdirs();
         }

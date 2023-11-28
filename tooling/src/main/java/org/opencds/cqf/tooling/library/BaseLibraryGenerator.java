@@ -21,8 +21,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends BaseNarrativeProvider<?>> extends Operation {
+
+    private static final Logger logger = LoggerFactory.getLogger(BaseLibraryGenerator.class);
 
     private T narrativeProvider;
     private FhirContext fhirContext;
@@ -186,19 +190,10 @@ public abstract class BaseLibraryGenerator<L extends IBaseResource, T extends Ba
 
     private CqlTranslator translate(File cqlFile) {
         try {
-            ArrayList<CqlTranslatorOptions.Options> options = new ArrayList<>();
-            options.add(CqlTranslatorOptions.Options.EnableDateRangeOptimization);
-
-            CqlTranslator translator =
-                CqlTranslator.fromFile(
-                    cqlFile,
-                    modelManager,
-                    libraryManager,
-                    options.toArray(new CqlTranslatorOptions.Options[0])
-                );
+            CqlTranslator translator = CqlTranslator.fromFile(cqlFile, libraryManager);
 
             if (translator.getErrors().size() > 0) {
-                System.err.println("Translation failed due to errors:");
+                logger.error("Translation failed due to errors:");
                 ArrayList<String> errors = new ArrayList<>();
                 for (CqlCompilerException error : translator.getErrors()) {
                     TrackBack tb = error.getLocator();

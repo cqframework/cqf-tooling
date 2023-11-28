@@ -219,7 +219,58 @@ package org.opencds.cqf.tooling.cli;
 
         */
 
+//import org.opencds.cqf.tooling.exception.InvalidOperationArgs;
+//import org.opencds.cqf.tooling.exception.InvalidOperationInitialization;
+//import org.opencds.cqf.tooling.exception.OperationNotFound;
+//import org.opencds.cqf.tooling.operations.ExecutableOperation;
+//import org.opencds.cqf.tooling.operations.Operation;
+//import org.reflections.Reflections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+//import java.lang.reflect.InvocationTargetException;
+//import java.util.HashMap;
+//import java.util.Map;
+//import java.util.Set;
+
 public class Main {
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+
+// TODO: Uncomment this block and imports once operation refactor is ready
+//    private static Map<String, Class<?>> operationClassMap;
+//
+//    public static void main(String[] args) {
+//        if (args == null || args.length == 0) {
+//            logger.error("cqf-tooling version: {}", Main.class.getPackage().getImplementationVersion());
+//            throw new OperationNotFound(
+//                    "Requests must include which operation to run as a command line argument. See docs for examples on how to use this project.");
+//        }
+//
+//        // NOTE: we may want to use the Spring Context Library to find the annotated classes
+//        if (operationClassMap == null) {
+//            operationClassMap = new HashMap<>();
+//            Reflections reflections = new Reflections("org.opencds.cqf.tooling.operations");
+//            Set<Class<?>> operationClasses = reflections
+//                    .getTypesAnnotatedWith(Operation.class);
+//            operationClasses.forEach(clazz -> operationClassMap.put(clazz.getAnnotation(Operation.class).name(), clazz));
+//        }
+//
+//        String operation = args[0];
+//        if (!operation.startsWith("-")) {
+//            throw new InvalidOperationArgs(
+//                    "Invalid operation syntax: " + operation + ". Operations must be declared with a \"-\" prefix");
+//        }
+//
+//        try {
+//            ExecutableOperation executableOperation = OperationFactory.createOperation(
+//                    operation, operationClassMap.get(operation.substring(1)), args);
+//            if (executableOperation != null) {
+//                executableOperation.execute();
+//            }
+//        } catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
+//            throw new InvalidOperationInitialization(e.getMessage(), e);
+//        }
+//    }
 
     public static void main(String[] args) {
         if (args.length == 0) {

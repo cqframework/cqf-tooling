@@ -18,10 +18,15 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QuickPageGenerator extends Operation {
+
+    private static final Logger logger = LoggerFactory.getLogger(QuickPageGenerator.class);
 
     // Assuming R4
     private FhirContext context = FhirContext.forR4Cached();
@@ -68,7 +73,7 @@ public class QuickPageGenerator extends Operation {
      */
     private void processQiCoreProfiles() throws IOException, FHIRException {
         for (Map.Entry<String, StructureDefinition> entrySet : atlas.getQicoreProfiles().entrySet()) {
-            System.out.println("Processing the " + entrySet.getKey() + " profile...");
+            logger.info("Processing the {} profile...", entrySet.getKey());
 
             // Initialize HTML page
             HtmlBuilder html = new HtmlBuilder(entrySet.getKey(), atlas);
@@ -207,8 +212,8 @@ public class QuickPageGenerator extends Operation {
                             html.buildRow(mustSupport, isModifier, qicoreExtension, field, card, type, description);
                         }
 
-                        System.out.println(
-                                String.format("Field: %s, Card: %s, Type: %s, Description: %s", field, card, type, description)
+                        logger.info(
+                                "Field: {}, Card: {}, Type: {}, Description: {}", field, card, type, description
                         );
                     }
                     html.buildTableEnd();
@@ -491,7 +496,7 @@ public class QuickPageGenerator extends Operation {
      * @throws IOException
      */
     private void writeHtmlFile(String fileName, String html) throws IOException {
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + fileName)) {
+        try (FileOutputStream writer = new FileOutputStream(IOUtils.concatFilePath(getOutputPath(), fileName))) {
             writer.write(html.getBytes());
             writer.flush();
         }

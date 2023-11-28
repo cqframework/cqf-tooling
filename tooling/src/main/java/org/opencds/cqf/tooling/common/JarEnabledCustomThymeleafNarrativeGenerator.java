@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import ca.uhn.fhir.narrative.BaseThymeleafNarrativeGenerator;
 import com.google.common.base.Charsets;
 
 import org.apache.commons.io.IOUtils;
@@ -18,44 +19,33 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
-import ca.uhn.fhir.narrative2.ThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 
-public class JarEnabledCustomThymeleafNarrativeGenerator extends ThymeleafNarrativeGenerator {
+public class JarEnabledCustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator {
 	private List<String> myPropertyFile;
+	private NarrativeTemplateManifest manifest;
 
     public JarEnabledCustomThymeleafNarrativeGenerator(String... thePropertyFile) {
 		super();
 		setPropertyFile(thePropertyFile);
+		 try {
+			 manifest = forManifestFileLocation(getPropertyFile());
+		 } catch (IOException e) {
+			 throw new InternalErrorException(e);
+		 }
     }
-
-    private boolean myInitialized;
 
     @Override
 	public boolean populateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
-		if (!myInitialized) {
-			initialize();
-		}
 		super.populateResourceNarrative(theFhirContext, theResource);
 		return false;
     }
-    
-    private synchronized void initialize() {
-		if (myInitialized) {
-			return;
-		}
 
-		List<String> propFileName = getPropertyFile();
-		try {
-			NarrativeTemplateManifest manifest = forManifestFileLocation(propFileName);
-			setManifest(manifest);
-		} catch (IOException e) {
-			throw new InternalErrorException(e);
-		}
-
-		myInitialized = true;
-    }
+	@Override
+	protected NarrativeTemplateManifest getManifest() {
+		return this.manifest;
+	}
     
     public static NarrativeTemplateManifest forManifestFileLocation(Collection<String> thePropertyFilePaths) throws IOException {
 		List<String> manifestFileContents = new ArrayList<>(thePropertyFilePaths.size());
@@ -72,7 +62,7 @@ public class JarEnabledCustomThymeleafNarrativeGenerator extends ThymeleafNarrat
 			String cpName = name.substring("classpath:".length());
 			try (InputStream resource =  Thread.currentThread().getContextClassLoader().getResourceAsStream(cpName)) {
 				if (resource == null) {
-					try (InputStream resource2 =Thread.currentThread().getContextClassLoader().getResourceAsStream("/" + cpName)) {
+					try (InputStream resource2 =Thread.currentThread().getContextClassLoader().getResourceAsStream(File.separator + cpName)) {
 						if (resource2 == null) {
 							throw new IOException("Can not find '" + cpName + "' on classpath");
 						}

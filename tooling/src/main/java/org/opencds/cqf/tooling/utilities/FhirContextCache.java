@@ -1,6 +1,6 @@
 package org.opencds.cqf.tooling.utilities;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -9,7 +9,9 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class FhirContextCache {
 
-    private final static Map<FhirVersionEnum, FhirContext> contextCache = new HashMap<>();
+    private static final Map<FhirVersionEnum, FhirContext> contextCache = new EnumMap<>(FhirVersionEnum.class);
+
+    private FhirContextCache() {}
 
     /**
      * @param fhirVersion The FHIR version to get a context for (e.g. "DSTU3", "4.0", etc.)
@@ -34,11 +36,7 @@ public class FhirContextCache {
      */
     public static synchronized FhirContext getContext(FhirVersionEnum fhirVersion) {
         Objects.requireNonNull(fhirVersion, "fhirVersion can not be null");
-
-        if (!contextCache.containsKey(fhirVersion)) {
-            contextCache.put(fhirVersion, fhirVersion.newContext());
-        }
-
+        contextCache.computeIfAbsent(fhirVersion, k -> fhirVersion.newContext());
         return contextCache.get(fhirVersion);
     }
 }

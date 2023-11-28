@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.cqframework.cql.cql2elm.CqlCompilerException;
+import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
@@ -22,7 +23,6 @@ import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.fhir.ucum.UcumService;
 import org.hl7.cql.model.NamespaceInfo;
-import org.hl7.cql.model.NamespaceManager;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.context.IWorkerContext.ILoggingService;
@@ -258,7 +258,7 @@ public class CqlProcessor {
         // Construct DefaultLibrarySourceProvider
         // Construct FhirLibrarySourceProvider
         ModelManager modelManager = new ModelManager();
-        LibraryManager libraryManager = new LibraryManager(modelManager);
+        LibraryManager libraryManager = new LibraryManager(modelManager, options.getCqlCompilerOptions());
         if (packages != null) {
             modelManager.getModelInfoLoader().registerModelInfoProvider(new NpmModelInfoProvider(packages, reader, logger), true);
             libraryManager.getLibrarySourceLoader().registerProvider(new NpmLibrarySourceProvider(packages, reader, logger));
@@ -273,7 +273,7 @@ public class CqlProcessor {
         boolean hadCqlFiles = false;
         for (File file : new File(folder).listFiles(getCqlFilenameFilter())) {
             hadCqlFiles = true;
-            translateFile(modelManager, libraryManager, file, options);
+            translateFile(libraryManager, file, options.getCqlCompilerOptions());
         }
 
         if (hadCqlFiles) {
@@ -339,23 +339,26 @@ public class CqlProcessor {
         }
     }
 
-    private void translateFile(ModelManager modelManager, LibraryManager libraryManager, File file, CqlTranslatorOptions options) {
+    private void translateFile(LibraryManager libraryManager, File file, CqlCompilerOptions options) {
         logger.logMessage(String.format("Translating CQL source in file %s", file.toString()));
         CqlSourceFileInformation result = new CqlSourceFileInformation();
         fileMap.put(file.getAbsoluteFile().toString(), result);
 
+        if (options.getValidateUnits()) {
+            libraryManager.setUcumService(ucumService);
+        }
+
         try {
 
             // translate toXML
-            CqlTranslator translator = CqlTranslator.fromFile(namespaceInfo, file, modelManager, libraryManager,
-                    options.getValidateUnits() ? ucumService : null, options);
+            CqlTranslator translator = CqlTranslator.fromFile(namespaceInfo, file, libraryManager);
 
             // record errors and warnings
             for (CqlCompilerException exception : translator.getExceptions()) {
                 result.getErrors().add(exceptionToValidationMessage(file, exception));
             }
 
-            if (translator.getErrors().size() > 0) {
+            if (!translator.getErrors().isEmpty()) {
                 result.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, IssueType.EXCEPTION, file.getName(),
                         String.format("CQL Processing failed with (%d) errors.", translator.getErrors().size()), IssueSeverity.ERROR));
                 logger.logMessage(String.format("Translation failed with (%d) errors; see the error log for more information.", translator.getErrors().size()));
@@ -370,15 +373,12 @@ public class CqlProcessor {
                     // NOTE: Publication tooling requires XML content
                     result.setElm(translator.toXml().getBytes());
                     result.setIdentifier(translator.toELM().getIdentifier());
-                    if (options.getFormats().contains(CqlTranslator.Format.JSON)) {
-                        result.setJsonElm(translator.toJson().getBytes());
-                    }
+                    result.setJsonElm(translator.toJson().getBytes());
 
                     // Add the translated library to the library manager (NOTE: This should be a "cacheLibrary" call on the LibraryManager, available in 1.5.3+)
                     // Without this, the data requirements processor will try to load the current library, resulting in a re-translation
-                    CompiledLibrary CompiledLibrary = translator.getTranslatedLibrary();
-                    String libraryPath = NamespaceManager.getPath(CompiledLibrary.getIdentifier().getSystem(), CompiledLibrary.getIdentifier().getId());
-                    libraryManager.getCompiledLibraries().put(libraryPath, CompiledLibrary);
+                    CompiledLibrary compiledLibrary = translator.getTranslatedLibrary();
+                    libraryManager.getCompiledLibraries().put(compiledLibrary.getIdentifier(), compiledLibrary);
 
                     DataRequirementsProcessor drp = new DataRequirementsProcessor();
                     org.hl7.fhir.r5.model.Library requirementsLibrary =

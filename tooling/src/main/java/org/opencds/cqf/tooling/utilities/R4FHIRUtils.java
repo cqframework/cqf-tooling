@@ -21,6 +21,8 @@ import org.hl7.fhir.r4.model.Coding;
 
 public class R4FHIRUtils {
 
+    private R4FHIRUtils() {}
+
     public static Coding toCoding(Code code, CompiledLibrary library, LibraryManager libraryManager) {
         CodeSystemDef codeSystemDef = resolveCodeSystemRef(code.getSystem(), library, libraryManager);
         Coding coding = new Coding();
@@ -49,7 +51,7 @@ public class R4FHIRUtils {
     }
 
     public static String parseId(String reference) {
-        String[] tokens = reference.split("[/]");
+        String[] tokens = reference.split("/");
         if (tokens.length > 1) {
             return tokens[1];
         }

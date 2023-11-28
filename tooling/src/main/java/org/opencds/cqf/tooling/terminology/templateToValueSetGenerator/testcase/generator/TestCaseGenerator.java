@@ -25,8 +25,13 @@ import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.testcase.
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestCaseGenerator extends Operation {
+
+    private static final Logger logger = LoggerFactory.getLogger(TestCaseGenerator.class);
+
     private final FhirContext ctx = FhirContext.forR4Cached();
     private final IParser parser = ctx.newJsonParser();
     private final List<GuidanceResponse> guidanceResponses = new ArrayList<>();
@@ -102,7 +107,7 @@ public class TestCaseGenerator extends Operation {
         HashMap<String, String>logicInputCorrelations = buildInputCorrelatedHashmap(logicSheet, true, 5);
 
         for (Map.Entry<String, String> i : logicInputCorrelations.entrySet())
-            System.out.println(i.getKey() + " : " + i.getValue());
+            logger.info("{} : {}", i.getKey(), i.getValue());
 
         sortedLogicSheets = Helper.getSortedSheets(logicWorkbook);
         sortedDictSheets  = Helper.getSortedSheets(dictWorkbook);
@@ -274,7 +279,7 @@ public class TestCaseGenerator extends Operation {
 
     private void output(TestCase testCase) {
         String guidanceResponsePath = outputPath + "/testCase-" + testCase.getId().replace("/", "-").toLowerCase() + ".json";
-        System.out.println(testCase.getId());
+        logger.info(testCase.getId());
 
         if (guidanceResponsePath.contains("="))
             guidanceResponsePath = guidanceResponsePath.replace("=", "");

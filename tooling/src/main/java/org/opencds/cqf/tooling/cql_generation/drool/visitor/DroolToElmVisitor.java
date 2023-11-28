@@ -56,7 +56,7 @@ public class DroolToElmVisitor implements Visitor {
     private DroolPredicateToElmExpressionConverter expressionBodyAdapter;
     private DefinitionConverter definitionAdapter = new DefinitionConverter();
     private LibraryConverter libraryAdapter = new LibraryConverter();
-    private Logger logger;
+    private static final Logger logger = LoggerFactory.getLogger(DroolToElmVisitor.class);
     private Map<String, Marker> markers = new HashMap<String, Marker>();
 
     /**
@@ -68,7 +68,6 @@ public class DroolToElmVisitor implements Visitor {
         this.modelBuilder = modelBuilder;
         context = new ElmContext(modelBuilder);
         expressionBodyAdapter = new DroolPredicateToElmExpressionConverter(modelBuilder);
-        logger = LoggerFactory.getLogger(this.getClass());
         markers.put("Expression", MarkerFactory.getMarker("Expression"));
         markers.put("Library", MarkerFactory.getMarker("Library"));
         markers.put("ExpressionDef", MarkerFactory.getMarker("ExpressionDef"));
@@ -79,7 +78,6 @@ public class DroolToElmVisitor implements Visitor {
         this.modelBuilder = modelBuilder;
         context = new ElmContext(modelBuilder);
         expressionBodyAdapter = new DroolPredicateToElmExpressionConverter(modelBuilder);
-        logger = LoggerFactory.getLogger(this.getClass());
     }
 
 
@@ -140,7 +138,7 @@ public class DroolToElmVisitor implements Visitor {
         if (predicate.getPredicatePartDTOs().size() > 0 && !predicate.getPredicateType().equals(CriteriaPredicateType.PredicateGroup)) {
             Expression predicateExpression = expressionBodyAdapter.adapt(predicate, context.libraryBuilder);
             if (predicateExpression == null) {
-                logger.warn(markers.get("Expression"), "Not enough information to generate elm from " + predicate.getUuid());
+                logger.warn(markers.get("Expression"), "Not enough information to generate elm from {}", predicate.getUuid());
             } else {
                 logger.debug(markers.get("Expression"), "pushing Predicate Expression to expression Stack: {}", predicateExpression);
                 context.expressionStack.push(predicateExpression);
@@ -157,7 +155,7 @@ public class DroolToElmVisitor implements Visitor {
             logger.debug(markers.get("ExpressionDef"), "pushing expression reference to reference stack: {}", expressionReferenceConjunctionPair);
             context.referenceStack.push(expressionReferenceConjunctionPair);
         } else {
-            logger.warn(markers.get("ExpressionDef"), "Not enough information to generate elm from " + predicate.getUuid());
+            logger.warn(markers.get("ExpressionDef"), "Not enough information to generate elm from {}", predicate.getUuid());
         }
     }
 
@@ -174,7 +172,7 @@ public class DroolToElmVisitor implements Visitor {
                     logger.debug("No Criteria Met Expression Reference built for conditionRel {}", conditionCriteriaRel.getUuid());
                 }
             } else {
-                logger.warn(markers.get("ExpressionDef"), "Not enough information to generate elm from remaining Expression Reference to build CriteriaMetExpression for condition {}" + conditionCriteriaRel.getUuid());
+                logger.warn(markers.get("ExpressionDef"), "Not enough information to generate elm from remaining Expression Reference to build CriteriaMetExpression for condition {}", conditionCriteriaRel.getUuid());
             }
             logger.debug(markers.get("Library"), "Building Library {}", context.libraryBuilder.getLibraryIdentifier());
             context.buildLibrary();
@@ -220,7 +218,7 @@ public class DroolToElmVisitor implements Visitor {
                     logger.debug("No Criteria Met Expression Reference built for condition {}", conditionDTO.getUuid());
                 }
             } else {
-                logger.warn(markers.get("Library"), "No remaining Expression Reference to build CriteriaMetExpression from condition {}" + conditionDTO.getUuid());
+                logger.warn(markers.get("Library"), "No remaining Expression Reference to build CriteriaMetExpression from condition {}", conditionDTO.getUuid());
             }
             logger.debug(markers.get("Library"), "Building Library {}", context.libraryBuilder.getLibraryIdentifier());
             context.buildLibrary();

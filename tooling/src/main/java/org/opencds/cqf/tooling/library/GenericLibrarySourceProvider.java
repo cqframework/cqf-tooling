@@ -25,7 +25,11 @@ public class GenericLibrarySourceProvider implements LibrarySourceProvider {
         }
 
         File sourceDir = new File(pathToSource);
-        for (File file : sourceDir.listFiles()) {
+        File[] files = sourceDir.listFiles();
+        if (files == null) {
+            files = new File[] {sourceDir};
+        }
+        for (File file : files) {
             if (!file.getName().endsWith(".cql")) continue;
             try (Scanner scanner = new Scanner(new FileInputStream(file))) {
                 String cql = scanner.useDelimiter("\\A").next();

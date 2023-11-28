@@ -32,7 +32,7 @@ import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import ca.uhn.fhir.context.FhirContext;
 
 public class LibraryProcessor extends BaseProcessor {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(LibraryProcessor.class);
     public static final String ResourcePrefix = "library-";   
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
@@ -57,7 +57,7 @@ public class LibraryProcessor extends BaseProcessor {
         return refreshIgLibraryContent(parentContext, outputEncoding, null, versioned, fhirContext, shouldApplySoftwareSystemStamp);
     }
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
-        System.out.println("Refreshing libraries...");
+        logger.info("Refreshing libraries...");
         // ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
 
         LibraryProcessor libraryProcessor;
@@ -163,7 +163,7 @@ public class LibraryProcessor extends BaseProcessor {
                 sourceLibrary.getParameter().clear();
                 sourceLibrary.getParameter().addAll(info.getParameters());
             } else {
-                logMessage(String.format("No cql info found for ", fileName));
+                logMessage(String.format("No cql info found for %s", fileName));
                 //f.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, ValidationMessage.IssueType.NOTFOUND, "Library", "No cql info found for "+f.getName(), ValidationMessage.IssueSeverity.ERROR));
             }
         }

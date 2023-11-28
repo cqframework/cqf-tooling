@@ -21,6 +21,8 @@ import org.hl7.fhir.dstu3.model.Coding;
 
 public class STU3FHIRUtils {
 
+    private STU3FHIRUtils() {}
+
     public static Coding toCoding(Code code, CompiledLibrary library, LibraryManager libraryManager) {
         CodeSystemDef codeSystemDef = resolveCodeSystemRef(code.getSystem(), library, libraryManager);
         Coding coding = new Coding();
