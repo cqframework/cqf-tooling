@@ -34,6 +34,8 @@ public class ErsdTransformer extends Operation {
     private final String usPhSpecificationLibraryProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-specification-library";
     private final String usPhTriggeringValueSetLibraryProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset-library";
     private final String usPhTriggeringValueSetProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset";
+    private final String valueSetStewardExtensionUrl = "http://hl7.org/fhir/StructureDefinition/valueset-steward";
+
     private PlanDefinition v2PlanDefinition;
     private String version;
     private Period effectivePeriod;
@@ -138,7 +140,7 @@ public class ErsdTransformer extends Operation {
 
     private PlanDefinition getV2PlanDefinition(String pathToPlanDefinition) {
         PlanDefinition planDef = null;
-        System.out.println(String.format("PlanDefinitionPath: '%s'", pathToPlanDefinition));
+        logger.info(String.format("PlanDefinitionPath: '%s'", pathToPlanDefinition));
         if (pathToPlanDefinition != null && !pathToPlanDefinition.isEmpty()) {
             planDef = (PlanDefinition)IOUtils.readResource(pathToPlanDefinition, ctx, true);
             planDef.setEffectivePeriod(this.effectivePeriod);
@@ -210,7 +212,7 @@ public class ErsdTransformer extends Operation {
         specificationLibrary.setDescription(
                 "Defines the asset-collection library containing the US Public Health specification assets.");
         specificationLibrary.setStatus(PublicationStatus.ACTIVE);
-        specificationLibrary.setExperimental(true);
+        specificationLibrary.setExperimental(false);
         specificationLibrary.setPublisher(PUBLISHER);
         specificationLibrary.setUrl("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary");
         specificationLibrary.setType(new CodeableConcept(
@@ -274,7 +276,7 @@ public class ErsdTransformer extends Operation {
         // });
         // res.setVersion(this.version);
         // res.setPublisher(PUBLISHER);
-        // res.setExperimental(true);
+        // res.setExperimental(false);
         // res.setDescription("Example Description");
         return null;
     }
@@ -363,14 +365,7 @@ public class ErsdTransformer extends Operation {
 
         // Update Grouping ValueSet references (in useContexts) to PlanDefinition
         List<UsageContext> useContexts = res.getUseContext();
-
-        if (v2PlanDefinition != null) {
-            useContexts.stream().forEach(uc -> {
-                if (uc.hasValueReference() && uc.getValueReference().hasReference() && uc.getValueReference().getReference().contains("skeleton")) {
-                    uc.setValue(new Reference(v2PlanDefinition.getId()));
-                }
-            });
-        }
+        res.getUseContext().removeIf(uc -> uc.hasValueReference() && uc.getValueReference().hasReference() && uc.getValueReference().getReference().contains("skeleton"));
 
         boolean hasPriorityUseContext = false;
         for (UsageContext uc : useContexts) {
@@ -388,8 +383,15 @@ public class ErsdTransformer extends Operation {
                 )
             );
         }
-        res.setVersion(this.version);
-        res.setPublisher(PUBLISHER);
+
+        Extension stewardExtension = res.getExtensionByUrl(valueSetStewardExtensionUrl);
+        if (stewardExtension != null && stewardExtension.hasValue()) {
+            String stewardName = ((ContactDetail) stewardExtension.getValue()).getName();
+            if (stewardName != null && !stewardName.isEmpty() && !stewardName.isBlank()) {
+                res.setPublisher(stewardName);
+            }
+        }
+
 
         // Groupers need to have an include per ValueSet in the compose rather than all in one Include together.
         List<String> grouperUrls = new ArrayList<>();
@@ -401,6 +403,9 @@ public class ErsdTransformer extends Operation {
         grouperUrls.add("http://hl7.org/fhir/us/ecr/ValueSet/sdtc");
         String url = res.getUrl();
         if (grouperUrls.contains(url)) {
+            res.setVersion(this.version);
+            res.setPublisher(PUBLISHER);
+
             ValueSet.ValueSetComposeComponent compose = res.getCompose();
             List<ValueSet.ConceptSetComponent> includes = compose.getInclude();
             if (includes.size() > 1) {
@@ -419,12 +424,12 @@ public class ErsdTransformer extends Operation {
             compose.getInclude().remove(include);
         }
 
-        res.setExperimental(true);
+        res.setExperimental(false);
         return null;
     }
 
     private Bundle resolveSpecificationBundle(Bundle bundle, Library specificationLibrary) {
-        System.out.println(FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true)
+        logger.info(FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true)
                 .encodeResourceToString(specificationLibrary));
         List<BundleEntryComponent> entries = new ArrayList<BundleEntryComponent>();
         entries.add(new BundleEntryComponent().setResource(specificationLibrary)

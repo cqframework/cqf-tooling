@@ -18,6 +18,7 @@ import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -297,7 +298,7 @@ public class VSACValueSetGenerator extends Operation {
                         : encoding.toLowerCase().startsWith("j")
                                 ? FhirContext.forDstu3Cached().newJsonParser()
                                 : FhirContext.forDstu3Cached().newXmlParser();
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + fileName)) {
+        try (FileOutputStream writer = new FileOutputStream(IOUtils.concatFilePath(getOutputPath(), fileName))) {
             writer.write(parser.setPrettyPrint(true).encodeResourceToString(vs).getBytes());
             writer.flush();
         } catch (IOException e) {

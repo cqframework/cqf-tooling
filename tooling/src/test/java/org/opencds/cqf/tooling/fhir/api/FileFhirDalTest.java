@@ -25,7 +25,7 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
   private FileFhirDal dal;
   private Patient patient;
   private final String resourceDir = "target/FileFhirDalTest";
-  private Logger logger;
+  private static final Logger logger = LoggerFactory.getLogger(FileFhirDalTest.class);
 
   public FileFhirDalTest() {
     FileFhirPlatformParameters platformParams = new FileFhirPlatformParameters();
@@ -38,8 +38,6 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
 
     this.patient = (Patient) new Patient().setId("TestPatient");
     this.patient.setId(this.patient.getIdElement().withResourceType("Patient"));
-
-    this.logger = LoggerFactory.getLogger(this.getClass());
   }
 
   @BeforeClass

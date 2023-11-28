@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
  */
 public class VmrToFhirTransformer {
     private static final String ConditionClinicalStatusCodesUrl = "http://terminology.hl7.org/CodeSystem/condition-clinical";
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(VmrToFhirTransformer.class);
     private Patient patient = new Patient();
 
     /**
@@ -458,7 +458,7 @@ public class VmrToFhirTransformer {
                 return Date.from(zdt.toInstant());
 
             } catch (DateTimeParseException dtpe) {
-                logger.debug("Unable to parse DateTime from: " + operand);
+                logger.debug("Unable to parse DateTime from: {}", operand);
                 return null;
             }
         }

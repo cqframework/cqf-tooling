@@ -30,7 +30,7 @@ import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import ca.uhn.fhir.context.FhirContext;
 
 public class LibraryProcessor extends BaseProcessor {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(LibraryProcessor.class);
     public static final String ResourcePrefix = "library-";   
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
@@ -55,7 +55,7 @@ public class LibraryProcessor extends BaseProcessor {
         return refreshIgLibraryContent(parentContext, outputEncoding, null, versioned, fhirContext, shouldApplySoftwareSystemStamp);
     }
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
-        System.out.println("Refreshing libraries...");
+        logger.info("Refreshing libraries...");
         // ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
 
         LibraryProcessor libraryProcessor;
@@ -143,6 +143,7 @@ public class LibraryProcessor extends BaseProcessor {
         if (attachment != null) {
             sourceLibrary.getContent().clear();
             sourceLibrary.getContent().add(attachment);
+            setLibraryType(sourceLibrary);
             CqlProcessor.CqlSourceFileInformation info = getCqlProcessor().getFileInformation(attachment.getUrl());
             attachment.setUrlElement(null);
             if (info != null) {
@@ -162,7 +163,7 @@ public class LibraryProcessor extends BaseProcessor {
                 getCqlProcessor().getCqlTranslatorOptions();
                 setTranslatorOptions(sourceLibrary, getCqlProcessor().getCqlTranslatorOptions());
             } else {
-                logMessage(String.format("No cql info found for ", fileName));
+                logMessage(String.format("No cql info found for %s", fileName));
                 //f.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, ValidationMessage.IssueType.NOTFOUND, "Library", "No cql info found for "+f.getName(), ValidationMessage.IssueSeverity.ERROR));
             }
         }
@@ -224,6 +225,12 @@ public class LibraryProcessor extends BaseProcessor {
         return internalRefreshGeneratedContent(libraries);
     }
 
+    private void setLibraryType(Library library) {
+        library.setType(new CodeableConcept().addCoding(
+                new Coding().setCode("logic-library")
+                        .setSystem("http://terminology.hl7.org/CodeSystem/library-type")));
+    }
+
     private List<Library> internalRefreshGeneratedContent(List<Library> sourceLibraries) {
         getCqlProcessor().execute();
 
@@ -246,6 +253,7 @@ public class LibraryProcessor extends BaseProcessor {
                     newLibrary.setVersion(fileInfo.getIdentifier().getVersion());
                     newLibrary.setUrl(String.format("%s/Library/%s", (newLibrary.getName().equals("FHIRHelpers") ? "http://hl7.org/fhir" : canonicalBase), fileInfo.getIdentifier().getId()));
                     newLibrary.setId(newLibrary.getName() + (versioned ? "-" + newLibrary.getVersion() : ""));
+                    setLibraryType(newLibrary);
                     validateIdAlphaNumeric(newLibrary.getId());
                     List<Attachment> attachments = new ArrayList<Attachment>();
                     Attachment attachment = new Attachment();

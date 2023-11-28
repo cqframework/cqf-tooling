@@ -8,6 +8,7 @@ import org.apache.poi.xssf.usermodel.*;
 import org.opencds.cqf.tooling.acceleratorkit.StructureDefinitionElementObject;
 import org.opencds.cqf.tooling.acceleratorkit.StructureDefinitionElementVisitor;
 import org.opencds.cqf.tooling.terminology.SpreadsheetCreatorHelper;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ModelCanonicalAtlasCreator;
 
 import java.util.ArrayList;
@@ -91,7 +92,8 @@ public class QICoreElementsToSpreadsheet extends StructureDefinitionToSpreadshee
         });
         firstSheet.setColumnWidth(ConstraintColumn, ConstraintColumnWidth);
 //        firstSheet.autoSizeColumn(ConstraintColumn);
-        SpreadsheetCreatorHelper.writeSpreadSheet(workBook, getOutputPath() + separator + modelName + modelVersion + ".xlsx");
+        SpreadsheetCreatorHelper.writeSpreadSheet(workBook,
+                IOUtils.concatFilePath(getOutputPath(), modelName + modelVersion + ".xlsx"));
     }
 
     private List<String> createHeaderNameList() {

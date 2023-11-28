@@ -37,14 +37,14 @@
                         "id": "example-rec-08-order-sign-mme-greater-than-fifty-context",
                         "status": "active",
                         "intent": "order",
-                        "category": {
+                        "category": [{
                             "coding": [
                                 {
                                     "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
                                     "code": "community"
                                 }
                             ]
-                        },
+                        }],
                         "medicationCodeableConcept": {
                             "coding": [
                                 {
@@ -186,14 +186,15 @@
                             ],
                             "id": "example-rec-10-2-illicit-drugs-prefetch",
                             "status": "final",
-                            "category": {
+                            "category": [
+                            {
                                 "coding": [
                                     {
                                         "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                                         "code": "laboratory"
                                     }
                                 ]
-                            },
+                            }],
                             "code": {
                                 "coding": [
                                     {
@@ -245,14 +246,14 @@
                             ],
                             "id": "example-rec-10-2-illicit-drugs-prefetch",
                             "status": "final",
-                            "category": {
+                            "category": [{
                                 "coding": [
                                     {
                                         "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                                         "code": "laboratory"
                                     }
                                 ]
-                            },
+                            }],
                             "code": {
                                 "coding": [
                                     {
@@ -305,14 +306,14 @@
                             ],
                             "id": "example-rec-10-2-illicit-drugs-prefetch",
                             "status": "final",
-                            "category": {
+                            "category": [{
                                 "coding": [
                                     {
                                         "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                                         "code": "laboratory"
                                     }
                                 ]
-                            },
+                            }],
                             "code": {
                                 "coding": [
                                     {
@@ -344,14 +345,14 @@
                             "resourceType": "Observation",
                             "id": "example-rec-10-2-illicit-drugs-prefetch",
                             "status": "final",
-                            "category": {
+                            "category": [{
                                 "coding": [
                                     {
                                         "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                                         "code": "laboratory"
                                     }
                                 ]
-                            },
+                            }],
                             "code": {
                                 "coding": [
                                     {

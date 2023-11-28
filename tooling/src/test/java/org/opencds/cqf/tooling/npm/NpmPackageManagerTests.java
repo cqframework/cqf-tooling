@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 
 public class NpmPackageManagerTests implements IWorkerContext.ILoggingService {
 
-    private Logger logger = LoggerFactory.getLogger(NpmPackageManagerTests.class);
+    private static final Logger logger = LoggerFactory.getLogger(NpmPackageManagerTests.class);
     /*
     NOTE: This test depends on the dev package cache for the [sample-ig](https://github.com/FHIR/sample-ig)
     Running the IG publisher on a clone of this IG locally will create and cache the package
@@ -83,5 +83,10 @@ public class NpmPackageManagerTests implements IWorkerContext.ILoggingService {
     @Override
     public void logDebugMessage(IWorkerContext.ILoggingService.LogCategory category, String msg) {
         logMessage(msg);
+    }
+
+    @Override
+    public boolean isDebugLogging() {
+        return false;
     }
 }
