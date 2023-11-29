@@ -7,10 +7,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ExampleBuilder {
@@ -378,7 +375,14 @@ public class ExampleBuilder {
             extension.setValue((Type)elementValue);
             elementValue = extension;
         }
-        value.setProperty(getElementName(ed.getPath()), elementValue);
+        if (!elementName.equals("extension")) {
+            value.setProperty(getElementName(ed.getPath()), elementValue);
+        }
+        else {
+            Extension subExtension = (Extension) ((Extension) elementValue).getValue();
+            subExtension.setUrl(((Extension) elementValue).getUrl());
+            value.setProperty(getElementName(ed.getPath()), subExtension);
+        }
 
         index.set(index.get() + 1);
         while (index.get() < eds.size()) {
@@ -675,6 +679,21 @@ public class ExampleBuilder {
                         .setCode("example")
                         .setSystem("http://example.org/fhir/CodeSystem/example-codes")
                         .setDisplay("Example");
+            }
+        }
+        else if (value instanceof Extension) {
+            if (ed.getType("Extension") != null && ed.getType("Extension").getProfile() != null && atlas != null && atlas.getValueSets() != null && atlas.getExtensions() != null) {
+                StructureDefinition sdExtension = atlas.getExtensions().getByCanonicalUrlWithVersion(ed.getType("Extension").getProfile().get(0).getValue());
+                ElementDefinition extensionElement = sdExtension.getDifferential().getElement().stream()
+                    .filter(x -> x.hasBinding() && x.getBinding().hasValueSetElement()).findFirst().get();
+
+                Type extensionValue = null;
+                if (extensionElement.getType("CodeableConcept") != null) {
+                    extensionValue = new CodeableConcept();
+                }
+
+                generateValue(sdExtension, extensionElement, extensionValue, givenValue);
+                value.addExtension(new Extension().setUrl(extensionElement.getShort()).setValue(extensionValue));
             }
         }
     }

@@ -575,14 +575,14 @@ public class Processor extends Operation {
     }
 
     private String getCodeSystemCommentColName(String codeSystem) {
-        switch (codeSystem) {
+        switch (codeSystem.toUpperCase()) {
             case "ICD-10": return "ICD-10Comments";
             case "ICD-11": return "ICD-11Comments";
             case "ICHI": return "ICHIComments";
             case "ICF": return "ICFComments";
             case "SNOMED-CT": return "SNOMEDComments";
             case "LOINC": return "LOINCComments";
-            case "RXNorm": return "RXNormComments";
+            case "RXNORM": return "RXNormComments";
             case "CPT": return "CPTComments";
             case "HCPCS": return "HCPCSComments";
             case "NDC": return "NDCComments";
@@ -2549,7 +2549,8 @@ public class Processor extends Operation {
                     new CanonicalResourceAtlas()
                             .setValueSets(new InMemoryCanonicalResourceProvider<ValueSet>(this.valueSets))
                             .setCodeSystems(new InMemoryCanonicalResourceProvider<CodeSystem>(this.codeSystems))
-                            .setConceptMaps(new InMemoryCanonicalResourceProvider<ConceptMap>(this.conceptMaps.values()));
+                            .setConceptMaps(new InMemoryCanonicalResourceProvider<ConceptMap>(this.conceptMaps.values()))
+                            .setExtensions(new InMemoryCanonicalResourceProvider<StructureDefinition>(this.extensions));
         }
         return atlas;
     }
