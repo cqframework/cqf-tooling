@@ -1,15 +1,17 @@
 package org.opencds.cqf.tooling.processor;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.util.Map;
+import java.util.Set;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import java.util.Map;
-import java.util.Set;
+import ca.uhn.fhir.context.FhirContext;
 
 public class PlanDefinitionProcessor extends AbstractResourceProcessor {
 
+    @SuppressWarnings("this-escape")
     public PlanDefinitionProcessor(LibraryProcessor libraryProcessor, CDSHooksProcessor cdsHooksProcessor) {
         setLibraryProcessor(libraryProcessor);
         setCDSHooksProcessor(cdsHooksProcessor);
