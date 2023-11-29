@@ -1,27 +1,9 @@
 package org.opencds.cqf.tooling.library;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
 import ca.uhn.fhir.context.FhirContext;
 import com.google.common.base.Strings;
 import org.apache.commons.io.FilenameUtils;
-import org.cqframework.cql.cql2elm.CqlCompilerOptions;
-import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.Attachment;
-import org.hl7.fhir.r5.model.CodeableConcept;
-import org.hl7.fhir.r5.model.Coding;
-import org.hl7.fhir.r5.model.Extension;
-import org.hl7.fhir.r5.model.Library;
-import org.hl7.fhir.r5.model.Parameters;
-import org.hl7.fhir.r5.model.Reference;
-import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
@@ -34,12 +16,6 @@ import org.opencds.cqf.tooling.processor.CqlProcessor;
 import org.opencds.cqf.tooling.processor.IGProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
-import org.opencds.cqf.tooling.utilities.LogUtils;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Strings;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,13 +100,12 @@ public class LibraryProcessor extends BaseProcessor {
 
     }
     public Queue<Callable<Void>> bundleLibraryDependenciesTasks(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
-                                                               Encoding encoding, boolean versioned) {
+                                                                Encoding encoding, boolean versioned) {
 
         Queue<Callable<Void>> returnTasks = new ConcurrentLinkedQueue<>();
 
         String fileName = FilenameUtils.getName(path);
         boolean prefixed = fileName.toLowerCase().startsWith("library-");
-        Boolean shouldPersist = true;
         try {
             Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding, versioned, logger);
             // String currentResourceID = IOUtils.getTypeQualifiedResourceId(path, fhirContext);
@@ -206,55 +181,13 @@ public class LibraryProcessor extends BaseProcessor {
                 sourceLibrary.getRelatedArtifact().addAll(info.getRelatedArtifacts());
                 sourceLibrary.getParameter().clear();
                 sourceLibrary.getParameter().addAll(info.getParameters());
-                getCqlProcessor().getCqlTranslatorOptions();
-                setTranslatorOptions(sourceLibrary, getCqlProcessor().getCqlTranslatorOptions());
             } else {
-                logMessage(String.format("No cql info found for %s", fileName));
+                logMessage(String.format("No cql info found for ", fileName));
                 //f.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, ValidationMessage.IssueType.NOTFOUND, "Library", "No cql info found for "+f.getName(), ValidationMessage.IssueSeverity.ERROR));
             }
         }
 
         return sourceLibrary;
-    }
-
-    protected void setTranslatorOptions(Library sourceLibrary, CqlTranslatorOptions options) {
-        Extension optionsExtension = sourceLibrary.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions");
-        if (optionsExtension == null) {
-            optionsExtension = sourceLibrary.addExtension().setUrl("http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions");
-        }
-        Reference optionsReference = optionsExtension.getValueReference();
-        String optionsReferenceValue = optionsReference.getReference();
-        if (optionsReferenceValue == null) {
-            optionsReferenceValue = "#options";
-            optionsReference.setReference(optionsReferenceValue);
-        }
-        Parameters optionsParameters = (Parameters)sourceLibrary.getContained(optionsReferenceValue);
-        if (optionsParameters == null) {
-            optionsParameters = new Parameters();
-            optionsParameters.setId(optionsReferenceValue.substring(1));
-            sourceLibrary.addContained(optionsParameters);
-        }
-        optionsParameters.getParameter().clear();
-
-        optionsParameters.addParameter("translatorVersion", CqlTranslator.class.getPackage().getImplementationVersion());
-
-        var compilerOptions = options.getCqlCompilerOptions();
-        for (CqlCompilerOptions.Options o : compilerOptions.getOptions()) {
-            optionsParameters.addParameter("option", o.name());
-        }
-        for (CqlTranslatorOptions.Format f : options.getFormats()) {
-            optionsParameters.addParameter("format", f.name());
-        }
-        optionsParameters.addParameter("analyzeDataRequirements", compilerOptions.getAnalyzeDataRequirements());
-        optionsParameters.addParameter("collapseDataRequirements", compilerOptions.getCollapseDataRequirements());
-        if (compilerOptions.getCompatibilityLevel() != null) {
-            optionsParameters.addParameter("compatibilityLevel", compilerOptions.getCompatibilityLevel());
-        }
-        optionsParameters.addParameter("enableCqlOnly", compilerOptions.getEnableCqlOnly());
-        optionsParameters.addParameter("errorLevel", compilerOptions.getErrorLevel().name());
-        optionsParameters.addParameter("signatureLevel", compilerOptions.getSignatureLevel().name());
-        optionsParameters.addParameter("validateUnits", compilerOptions.getValidateUnits());
-        optionsParameters.addParameter("verifyOnly", compilerOptions.getVerifyOnly());
     }
 
     protected List<Library> refreshGeneratedContent(List<Library> sourceLibraries) {
