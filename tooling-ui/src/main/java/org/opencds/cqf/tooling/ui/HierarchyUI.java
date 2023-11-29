@@ -1,7 +1,14 @@
-package org.opencds.cqf.tooling.operations.codesystem.loinc;
+package org.opencds.cqf.tooling.ui;
+
+import java.io.File;
+import java.io.IOException;
+
+import org.opencds.cqf.tooling.operations.codesystem.loinc.HierarchyProcessor;
+import org.opencds.cqf.tooling.operations.valueset.generate.config.Config.ValueSets;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -19,11 +26,6 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
-import java.io.File;
-import java.io.IOException;
-
-import static org.opencds.cqf.tooling.operations.valueset.generate.config.Config.ValueSets;
 
 
 public class HierarchyUI extends Application {
