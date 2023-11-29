@@ -3,14 +3,14 @@ package org.opencds.cqf.tooling.measure.adapters;
 import java.text.SimpleDateFormat;
 import java.util.Objects;
 
-import ca.uhn.fhir.parser.IParser;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.opencds.cqf.tooling.utilities.HttpClientUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 public abstract class FhirServerMeasureTestAdapter extends MeasureTestAdapter {
 
@@ -60,7 +60,7 @@ public abstract class FhirServerMeasureTestAdapter extends MeasureTestAdapter {
         IParser parser = fhirContext.newJsonParser();
         measureReport = parser.parseResource(response);
 
-        measureReportAdapter = this.getMeasureReportAdapter(measureReport);
+        measureReportAdapter = getMeasureReportAdapter(this.fhirContext, measureReport);
         return measureReportAdapter;
     }
 }

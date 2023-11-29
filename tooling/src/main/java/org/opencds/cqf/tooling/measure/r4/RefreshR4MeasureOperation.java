@@ -6,12 +6,12 @@ import java.io.FileNotFoundException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import com.google.common.base.Strings;
-
 import org.hl7.fhir.r4.model.Measure;
 import org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper;
 import org.opencds.cqf.tooling.operation.RefreshGeneratedContentOperation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+
+import com.google.common.base.Strings;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -27,10 +27,11 @@ public class RefreshR4MeasureOperation extends RefreshGeneratedContentOperation 
     public RefreshR4MeasureOperation() {
         super("src/main/resources/org/opencds/cqf/tooling/measure/output/r4", "-RefreshR4Measure", FhirContext.forCached(FhirVersionEnum.R4));
         cqfmHelper = new CqfmSoftwareSystemHelper("src/main/resources/org/opencds/cqf/tooling/measure/output/r4");
-        jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
-        xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
+        jsonParser = (JsonParser)fhirContext.newJsonParser();
+        xmlParser = (XmlParser)fhirContext.newXmlParser();
     }
 
+    @SuppressWarnings("this-escape")
     public RefreshR4MeasureOperation(String pathToMeasures) {
         super(pathToMeasures, "-RefreshR4Measure", FhirContext.forCached(FhirVersionEnum.R4), null, pathToMeasures);
         if (!Strings.isNullOrEmpty(getOutputPath())) {

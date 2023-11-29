@@ -6,11 +6,11 @@
     <parent>
         <groupId>org.opencds.cqf</groupId>
         <artifactId>tooling-parent</artifactId>
-        <version>2.6.0-SNAPSHOT</version>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>tooling-cli</artifactId>
-    <version>2.6.0-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <description>CQF Tooling CLI</description>
@@ -19,19 +19,27 @@
         <dependency>
             <groupId>org.opencds.cqf</groupId>
             <artifactId>tooling</artifactId>
-            <version>2.6.0-SNAPSHOT</version>
+            <version>3.0.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
-            <groupId>org.opencds.cqf.cql</groupId>
-            <artifactId>evaluator.jaxb-deps</artifactId>
-            <type>pom</type>
+            <groupId>info.cqframework</groupId>
+            <artifactId>elm-jackson</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>org.eclipse.persistence.moxy</artifactId>
-            <version>2.7.7</version>
+            <groupId>info.cqframework</groupId>
+            <artifactId>model-jackson</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>

@@ -131,6 +131,8 @@ public class DataProfileConformance implements ExecutableOperation {
 
       CachingValidationSupport cachingValidationSupport = new CachingValidationSupport(supportChain);
       validator = fhirContext.newValidator();
+      validator.setValidateAgainstStandardSchema(false);
+      validator.setValidateAgainstStandardSchematron(false);
       FhirInstanceValidator instanceValidator = new FhirInstanceValidator(cachingValidationSupport);
       validator.registerValidatorModule(instanceValidator);
    }

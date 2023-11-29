@@ -1,16 +1,18 @@
 package org.opencds.cqf.tooling.questionnaire;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.util.Map;
+import java.util.Set;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.processor.AbstractResourceProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import java.util.Map;
-import java.util.Set;
+import ca.uhn.fhir.context.FhirContext;
 
 public class QuestionnaireProcessor extends AbstractResourceProcessor {
 
+    @SuppressWarnings("this-escape")
     public QuestionnaireProcessor(LibraryProcessor libraryProcessor) {
         setLibraryProcessor(libraryProcessor);
     }

@@ -10,14 +10,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import ca.uhn.fhir.narrative.BaseThymeleafNarrativeGenerator;
-import com.google.common.base.Charsets;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import com.google.common.base.Charsets;
+
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.narrative.BaseThymeleafNarrativeGenerator;
 import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
@@ -28,9 +28,10 @@ public class JarEnabledCustomThymeleafNarrativeGenerator extends BaseThymeleafNa
 
     public JarEnabledCustomThymeleafNarrativeGenerator(String... thePropertyFile) {
 		super();
-		setPropertyFile(thePropertyFile);
+		var propFile = Arrays.asList(thePropertyFile);
+		this.myPropertyFile = propFile;
 		 try {
-			 manifest = forManifestFileLocation(getPropertyFile());
+			 this.manifest = forManifestFileLocation(propFile);
 		 } catch (IOException e) {
 			 throw new InternalErrorException(e);
 		 }
@@ -46,7 +47,7 @@ public class JarEnabledCustomThymeleafNarrativeGenerator extends BaseThymeleafNa
 	protected NarrativeTemplateManifest getManifest() {
 		return this.manifest;
 	}
-    
+
     public static NarrativeTemplateManifest forManifestFileLocation(Collection<String> thePropertyFilePaths) throws IOException {
 		List<String> manifestFileContents = new ArrayList<>(thePropertyFilePaths.size());
 		for (String next : thePropertyFilePaths) {
@@ -56,7 +57,7 @@ public class JarEnabledCustomThymeleafNarrativeGenerator extends BaseThymeleafNa
 
         return NarrativeTemplateManifest.forManifestFileContents(manifestFileContents);
     }
-    
+
     static String loadResourceAlsoFromJar(String name) throws IOException {
 		if (name.startsWith("classpath:")) {
 			String cpName = name.substring("classpath:".length());

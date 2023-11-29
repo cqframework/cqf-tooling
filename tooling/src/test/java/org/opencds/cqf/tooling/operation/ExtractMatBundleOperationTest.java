@@ -1,24 +1,23 @@
 package org.opencds.cqf.tooling.operation;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 
-import static org.junit.Assert.*;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 public class ExtractMatBundleOperationTest {
 
     private ExtractMatBundleOperation operation;
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
-
-    @Before
+    @BeforeClass
     public void setUp() {
         operation = new ExtractMatBundleOperation();
     }
@@ -49,8 +48,10 @@ public class ExtractMatBundleOperationTest {
 
     @Test
     public void testExecuteWithNonExistentDirectory() throws IOException {
-        File nonexistentDir = tempFolder.newFile("nonexistent_directory");
-        String[] args = {"-ExtractMatBundle", nonexistentDir.getAbsolutePath(), "-dir"};
+
+        File newFile = File.createTempFile("temp", "json");
+
+        String[] args = {"-ExtractMatBundle", newFile.getAbsolutePath(), "-dir"};
 
         try {
             operation.execute(args);
@@ -62,7 +63,8 @@ public class ExtractMatBundleOperationTest {
 
     @Test
     public void testExecuteWithEmptyDirectory() throws IOException {
-        File emptyDir = tempFolder.newFolder("emptyDir");
+        File emptyDir = Files.createTempDirectory("emptyDir").toFile();
+        emptyDir.deleteOnExit();
         String[] args = {"-ExtractMatBundle", emptyDir.getAbsolutePath(), "-dir"};
 
         operation.execute(args);
@@ -73,7 +75,7 @@ public class ExtractMatBundleOperationTest {
     @Test
     public void testExecuteWithNonJsonFile() throws IOException {
         //should output 0 files as it hits error
-        File nonJsonFile = tempFolder.newFile("file.non_json");
+        File nonJsonFile = File.createTempFile("file","non_json");
         String[] args = {"-ExtractMatBundle", nonJsonFile.getAbsolutePath()};
         operation.execute(args);
         File[] files = nonJsonFile.listFiles();
@@ -82,7 +84,7 @@ public class ExtractMatBundleOperationTest {
 
     @Test
     public void testExecuteWithNonXmlFile() throws IOException {
-        File nonXmlFile = tempFolder.newFile("file.non_xml");
+        File nonXmlFile = File.createTempFile("file", "non_xml");
         String err = "The path to a bundle file of type json or xml is required." + "\n" + nonXmlFile.getAbsolutePath();
         String[] args = {"-ExtractMatBundle", nonXmlFile.getAbsolutePath()};
 
@@ -95,7 +97,9 @@ public class ExtractMatBundleOperationTest {
 
     @Test
     public void testExecuteWithFileAndDirArg() throws IOException {
-        File nonXmlFile = tempFolder.newFile("file.xml");
+        File nonXmlFile = File.createTempFile("file","xml");
+        nonXmlFile.deleteOnExit();
+
         String[] args = {"-ExtractMatBundle", nonXmlFile.getAbsolutePath(), "-dir"};
 
         try {
@@ -108,7 +112,9 @@ public class ExtractMatBundleOperationTest {
 
     @Test
     public void testExecuteWithNonsense() throws IOException {
-        File nonXmlFile = tempFolder.newFile("file.xml");
+        File nonXmlFile = File.createTempFile("file", "xml");
+        nonXmlFile.deleteOnExit();
+
         String[] args = {"-ExtractMatBundle", nonXmlFile.getAbsolutePath(), "-nonsense"};
 
         try {
@@ -128,7 +134,9 @@ public class ExtractMatBundleOperationTest {
         if (resourceUrl == null) {
             throw new IllegalArgumentException("Resource not found: " + resourcePath);
         }
-        File emptyDir = tempFolder.newFolder("emptyDir");
+        File emptyDir = Files.createTempDirectory("emptyDir").toFile();
+        emptyDir.deleteOnExit();
+
         try {
             operation.execute(new String[]{"-ExtractMATBundle", resourceUrl.getFile(), "-dir", "-op=" + emptyDir.getAbsolutePath()});
             fail("Expected IllegalArgumentException was not thrown");
@@ -156,8 +164,12 @@ public class ExtractMatBundleOperationTest {
 
     @Test
     public void TestExtractMatBundleWithMissingOutputDirectoryAsAFile() throws IOException {
-        tempFolder.newFolder("emptyDir/bundle/");
-        File file = tempFolder.newFile("emptyDir/bundle/missing.xml");
+
+        File emptyDir = Files.createTempDirectory("emptyDir").toFile();
+        emptyDir.deleteOnExit();
+
+        File file = File.createTempFile("missing", "xml");
+        file.deleteOnExit();
         ExtractMatBundleOperation o = new ExtractMatBundleOperation();
         ClassLoader classLoader = getClass().getClassLoader();
         String resourcePath = "org/opencds/cqf/tooling/operation/ExtractMatBundle/bundles_small/";
@@ -182,8 +194,21 @@ public class ExtractMatBundleOperationTest {
             throw new IllegalArgumentException("Resource not found: " + resourcePath);
         }
 
-        File emptyDir = tempFolder.newFolder("bundles");
-        operation.execute(new String[]{"-ExtractMATBundle", resourceUrl.getFile(), "-dir", "-op=" + emptyDir.getAbsolutePath()});
+        File emptyDir = Files.createTempDirectory("bundles").toFile();
+        emptyDir.deleteOnExit();
+
+        Thread executionThread = new Thread(new Runnable() {
+            public void run() {
+                operation.execute(new String[]{"-ExtractMATBundle", resourceUrl.getFile(), "-dir", "-op=" + emptyDir.getAbsolutePath()});
+            }
+        });
+
+        executionThread.start();
+        try {
+            executionThread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         File[] files = emptyDir.listFiles();
         assertNotNull(files);
         assertEquals(16, files.length);
@@ -198,8 +223,21 @@ public class ExtractMatBundleOperationTest {
             throw new IllegalArgumentException("Resource not found: " + resourcePath);
         }
 
-        File emptyDir = tempFolder.newFolder("bundles");
-        operation.execute(new String[]{"-ExtractMATBundle", resourceUrl.getFile(), "-dir", "-op=" + emptyDir.getAbsolutePath()});
+        File emptyDir = Files.createTempDirectory("bundles").toFile();
+        emptyDir.deleteOnExit();
+
+        Thread executionThread = new Thread(new Runnable() {
+            public void run() {
+                operation.execute(new String[]{"-ExtractMATBundle", resourceUrl.getFile(), "-dir", "-op=" + emptyDir.getAbsolutePath()});
+            }
+        });
+
+        executionThread.start();
+        try {
+            executionThread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         File[] files = emptyDir.listFiles();
         assertNotNull(files);
         assertEquals(41, files.length);
@@ -214,7 +252,14 @@ public class ExtractMatBundleOperationTest {
             throw new IllegalArgumentException("Resource not found: " + resourcePath);
         }
 
-        File emptyDir = tempFolder.newFolder("bundles");
+        File emptyDir = Files.createTempDirectory("bundles").toFile();
+        emptyDir.deleteOnExit();
+
+        Thread executionThread = new Thread(new Runnable() {
+            public void run() {
+                operation.execute(new String[]{"-ExtractMATBundle", resourceUrl.getFile(), "-dir", "-op=" + emptyDir.getAbsolutePath()});
+            }
+        });
 
         operation.execute(new String[]{"-ExtractMATBundle", resourceUrl.getFile(), "-dir", "-op=" + emptyDir.getAbsolutePath()});
 

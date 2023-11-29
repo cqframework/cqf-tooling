@@ -1,18 +1,19 @@
 package org.opencds.cqf.tooling.operations.library;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.util.Collections;
+import java.util.Date;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Library;
-import org.opencds.cqf.cql.evaluator.cql2elm.content.InMemoryLibrarySourceProvider;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.Collections;
-import java.util.Date;
+import ca.uhn.fhir.context.FhirContext;
 
 public class LibraryRefreshIT {
 
@@ -23,7 +24,7 @@ public class LibraryRefreshIT {
       ModelManager modelManager = new ModelManager();
       LibraryManager libraryManager = new LibraryManager(modelManager);
       libraryManager.getLibrarySourceLoader().registerProvider(
-              new InMemoryLibrarySourceProvider(Collections.singletonList(AOE_CQL_UNCHANGED)));
+              new StringLibrarySourceProvider(Collections.singletonList(AOE_CQL_UNCHANGED)));
 
       Library libraryToRefresh = (Library) fhirContext.newJsonParser().parseResource(AOE_LIBRARY);
 
@@ -58,7 +59,7 @@ public class LibraryRefreshIT {
       ModelManager modelManager = new ModelManager();
       LibraryManager libraryManager = new LibraryManager(modelManager);
       libraryManager.getLibrarySourceLoader().registerProvider(
-              new InMemoryLibrarySourceProvider(Collections.singletonList(AOE_CQL_UPDATED)));
+              new StringLibrarySourceProvider(Collections.singletonList(AOE_CQL_UPDATED)));
 
       Library libraryToRefresh = (Library) fhirContext.newJsonParser().parseResource(AOE_LIBRARY);
 
