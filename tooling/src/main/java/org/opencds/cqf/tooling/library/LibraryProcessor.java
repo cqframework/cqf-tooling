@@ -3,6 +3,9 @@ package org.opencds.cqf.tooling.library;
 import ca.uhn.fhir.context.FhirContext;
 import com.google.common.base.Strings;
 import org.apache.commons.io.FilenameUtils;
+import org.cqframework.cql.cql2elm.CqlCompilerOptions;
+import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.utilities.TextFile;
@@ -205,13 +208,55 @@ public class LibraryProcessor extends BaseProcessor {
                 sourceLibrary.getRelatedArtifact().addAll(info.getRelatedArtifacts());
                 sourceLibrary.getParameter().clear();
                 sourceLibrary.getParameter().addAll(info.getParameters());
+                getCqlProcessor().getCqlTranslatorOptions();
+                setTranslatorOptions(sourceLibrary, getCqlProcessor().getCqlTranslatorOptions());
             } else {
-                logMessage(String.format("No cql info found for ", fileName));
+                logMessage(String.format("No cql info found for %s", fileName));
                 //f.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, ValidationMessage.IssueType.NOTFOUND, "Library", "No cql info found for "+f.getName(), ValidationMessage.IssueSeverity.ERROR));
             }
         }
 
         return sourceLibrary;
+    }
+
+    protected void setTranslatorOptions(Library sourceLibrary, CqlTranslatorOptions options) {
+        Extension optionsExtension = sourceLibrary.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions");
+        if (optionsExtension == null) {
+            optionsExtension = sourceLibrary.addExtension().setUrl("http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions");
+        }
+        Reference optionsReference = optionsExtension.getValueReference();
+        String optionsReferenceValue = optionsReference.getReference();
+        if (optionsReferenceValue == null) {
+            optionsReferenceValue = "#options";
+            optionsReference.setReference(optionsReferenceValue);
+        }
+        Parameters optionsParameters = (Parameters)sourceLibrary.getContained(optionsReferenceValue);
+        if (optionsParameters == null) {
+            optionsParameters = new Parameters();
+            optionsParameters.setId(optionsReferenceValue.substring(1));
+            sourceLibrary.addContained(optionsParameters);
+        }
+        optionsParameters.getParameter().clear();
+
+        optionsParameters.addParameter("translatorVersion", CqlTranslator.class.getPackage().getImplementationVersion());
+
+        var compilerOptions = options.getCqlCompilerOptions();
+        for (CqlCompilerOptions.Options o : compilerOptions.getOptions()) {
+            optionsParameters.addParameter("option", o.name());
+        }
+        for (CqlTranslatorOptions.Format f : options.getFormats()) {
+            optionsParameters.addParameter("format", f.name());
+        }
+        optionsParameters.addParameter("analyzeDataRequirements", compilerOptions.getAnalyzeDataRequirements());
+        optionsParameters.addParameter("collapseDataRequirements", compilerOptions.getCollapseDataRequirements());
+        if (compilerOptions.getCompatibilityLevel() != null) {
+            optionsParameters.addParameter("compatibilityLevel", compilerOptions.getCompatibilityLevel());
+        }
+        optionsParameters.addParameter("enableCqlOnly", compilerOptions.getEnableCqlOnly());
+        optionsParameters.addParameter("errorLevel", compilerOptions.getErrorLevel().name());
+        optionsParameters.addParameter("signatureLevel", compilerOptions.getSignatureLevel().name());
+        optionsParameters.addParameter("validateUnits", compilerOptions.getValidateUnits());
+        optionsParameters.addParameter("verifyOnly", compilerOptions.getVerifyOnly());
     }
 
     protected List<Library> refreshGeneratedContent(List<Library> sourceLibraries) {

@@ -1091,6 +1091,10 @@ public class IOUtils {
         return filePath;
     }
 
+
+    /**
+     * Cleans up cached data to ensure a clean state for subsequent ci tests.
+     */
     public static void cleanUp(){
         alreadyCopied = new HashMap<>();
         cachedResources = new LinkedHashMap<String, IBaseResource>();
