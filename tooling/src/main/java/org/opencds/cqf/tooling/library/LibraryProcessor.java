@@ -88,6 +88,17 @@ public class LibraryProcessor extends BaseProcessor {
         return libraryProcessor.refreshLibraryContent(params);
     }
 
+    /**
+     * Bundles library dependencies for a given FHIR library file and populates the provided resource map.
+     * This method executes asynchronously by invoking the associated task queue.
+     *
+     * @param path          The path to the FHIR library file.
+     * @param fhirContext   The FHIR context to use for processing resources.
+     * @param resources     The map to populate with library resources.
+     * @param encoding      The encoding to use for reading and processing resources.
+     * @param versioned     A boolean indicating whether to consider versioned resources.
+     * @return True if the bundling of library dependencies is successful; false otherwise.
+     */
     public Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
                                              Encoding encoding, boolean versioned) {
         try{
@@ -99,6 +110,19 @@ public class LibraryProcessor extends BaseProcessor {
         }
 
     }
+
+    /**
+     * Recursively bundles library dependencies for a given FHIR library file and populates the provided resource map.
+     * Each dependency is added as a Callable task to be executed asynchronously.
+     *
+     * @param path          The path to the FHIR library file.
+     * @param fhirContext   The FHIR context to use for processing resources.
+     * @param resources     The map to populate with library resources.
+     * @param encoding      The encoding to use for reading and processing resources.
+     * @param versioned     A boolean indicating whether to consider versioned resources.
+     * @return A queue of Callable tasks, each representing the bundling of a library dependency.
+     *         The Callable returns null (Void) and is meant for asynchronous execution.
+     */
     public Queue<Callable<Void>> bundleLibraryDependenciesTasks(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
                                                                 Encoding encoding, boolean versioned) {
 

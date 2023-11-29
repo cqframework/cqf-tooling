@@ -175,6 +175,18 @@ public class TestCaseProcessor
     static Set<String> copiedFilePaths = new HashSet<>();
 
     //TODO: the bundle needs to have -expectedresults added too
+    /**
+     * Bundles test case files from the specified path into a destination path.
+     * The method copies relevant test case files, including expected results for MeasureReports,
+     * and returns a summary message with the number of files copied.
+     *
+     * @param igPath             The path to the Implementation Guide (IG) containing test case files.
+     * @param contextResourceType The resource type associated with the test cases.
+     * @param libraryName        The name of the library associated with the test cases.
+     * @param destPath           The destination path for the bundled test case files.
+     * @param fhirContext        The FHIR context used for reading and processing resources.
+     * @return A summary message indicating the number of files copied for the specified test case path.
+     */
     public static String bundleTestCaseFiles(String igPath, String contextResourceType, String libraryName, String destPath, FhirContext fhirContext) {
         String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), contextResourceType), libraryName);
         List<String> testCasePaths = IOUtils.getFilePaths(igTestCasePath, false);

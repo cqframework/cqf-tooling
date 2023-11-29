@@ -22,19 +22,49 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * An abstract base class for processors that handle the bundling of various types of resources within an ig.
+ * This class provides methods for bundling resources, including dependencies and test cases, and handles the execution of associated tasks.
+ * Subclasses must implement specific methods for gathering, processing, and persisting resources.
+ */
 public abstract class AbstractResourceProcessor extends BaseProcessor {
+    /**
+     * The logger for logging messages specific to the implementing class.
+     */
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    /**
+     * The resource type constant for Questionnaire.
+     */
     protected final String TYPE_QUESTIONNAIRE = "Questionnaire";
+
+    /**
+     * The resource type constant for PlanDefinition.
+     */
     protected final String TYPE_PLAN_DEFINITION = "PlanDefinition";
+
+    /**
+     * The resource type constant for Measure.
+     */
     protected final String TYPE_MEASURE = "Measure";
     private List<Object> identifiers;
     private CDSHooksProcessor cdsHooksProcessor;
     private LibraryProcessor libraryProcessor;
 
+    /**
+     * Sets the LibraryProcessor for handling library-related tasks.
+     *
+     * @param libraryProcessor The LibraryProcessor instance to set.
+     */
     protected void setLibraryProcessor(LibraryProcessor libraryProcessor) {
         this.libraryProcessor = libraryProcessor;
     }
 
+    /**
+     * Sets the CDSHooksProcessor for handling CDS Hooks-related tasks.
+     *
+     * @param cdsHooksProcessor The CDSHooksProcessor instance to set.
+     */
     protected void setCDSHooksProcessor(CDSHooksProcessor cdsHooksProcessor) {
         this.cdsHooksProcessor = cdsHooksProcessor;
     }
@@ -46,6 +76,21 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
         return identifiers;
     }
 
+    /**
+     * Bundles resources within an Implementation Guide based on specified options.
+     *
+     * @param refreshedLibraryNames A list of refreshed library names.
+     * @param igPath               The path to the IG.
+     * @param binaryPaths          The list of binary paths.
+     * @param includeDependencies  Flag indicating whether to include dependencies.
+     * @param includeTerminology   Flag indicating whether to include terminology.
+     * @param includePatientScenarios Flag indicating whether to include patient scenarios.
+     * @param includeVersion       Flag indicating whether to include version information.
+     * @param addBundleTimestamp   Flag indicating whether to add a timestamp to the bundle.
+     * @param fhirContext          The FHIR context.
+     * @param fhirUri              The FHIR server URI.
+     * @param encoding             The encoding type for processing resources.
+     */
     public void bundleResources(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
                                 Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp,
                                 FhirContext fhirContext, String fhirUri, IOUtils.Encoding encoding) {
