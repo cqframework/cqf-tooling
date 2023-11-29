@@ -12,14 +12,12 @@ import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.MeasureProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
-import org.opencds.cqf.tooling.processor.CDSHooksProcessor;
-import org.opencds.cqf.tooling.processor.IGBundleProcessor;
-import org.opencds.cqf.tooling.processor.IGProcessor;
-import org.opencds.cqf.tooling.processor.PlanDefinitionProcessor;
+import org.opencds.cqf.tooling.processor.*;
 import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
 import org.opencds.cqf.tooling.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.LogUtils;
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -202,6 +200,11 @@ public class RefreshIGOperationTest extends RefreshTest {
             // compare mappings of <id, resourceType> to ensure all bundled correctly:
             assertTrue(mapsAreEqual(resourceTypeMap, bundledJsonResourceTypes));
         }
+
+		// run cleanup (maven runs all ci tests sequentially and static member variables could retain values from previous tests)
+		IOUtils.cleanUp();
+		ResourceUtils.cleanUp();
+		TestCaseProcessor.cleanUp();
     }
 
     private static int findAvailablePort() {

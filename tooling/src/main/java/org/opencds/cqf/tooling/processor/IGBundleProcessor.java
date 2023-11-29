@@ -75,7 +75,7 @@ public class IGBundleProcessor {
             System.out.println("\r\n[POST task(s) finished - " + getTime() + "]");
         }
 
-        // run cleanup (maven runs all tests sequentially and static member variables retain values from previous tests)
+        // run cleanup (maven runs all ci tests sequentially and static member variables could retain values from previous tests)
         IOUtils.cleanUp();
         ResourceUtils.cleanUp();
         TestCaseProcessor.cleanUp();
