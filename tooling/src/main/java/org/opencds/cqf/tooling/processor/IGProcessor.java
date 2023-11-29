@@ -28,14 +28,14 @@ public class IGProcessor extends BaseProcessor {
     private static final Logger logger = LoggerFactory.getLogger(IGProcessor.class);
 
     public static final String IG_VERSION_REQUIRED = "igVersion required";
-	protected IGBundleProcessor igBundleProcessor;
+    protected IGBundleProcessor igBundleProcessor;
     protected LibraryProcessor libraryProcessor;
     protected MeasureProcessor measureProcessor;
 
     public IGProcessor(IGBundleProcessor igBundleProcessor, LibraryProcessor libraryProcessor, MeasureProcessor measureProcessor) {
-        this.igBundleProcessor = igBundleProcessor;
         this.libraryProcessor = libraryProcessor;
         this.measureProcessor = measureProcessor;
+        this.igBundleProcessor = igBundleProcessor;
     }
     //mega ig method
     public void publishIG(RefreshIGParameters params) {

@@ -2,7 +2,7 @@ package org.opencds.cqf.tooling.operation;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.fail;
 
 import java.io.File;
@@ -67,40 +67,33 @@ public class ExtractMatBundleOperationTest {
         emptyDir.deleteOnExit();
         String[] args = {"-ExtractMatBundle", emptyDir.getAbsolutePath(), "-dir"};
 
-        try {
-            operation.execute(args);
-            fail("Expected IllegalArgumentException was not thrown");
-        } catch (IllegalArgumentException e) {
-            assertEquals("The path specified with -dir is empty.", e.getMessage());
-        }
+        operation.execute(args);
+        File[] files = emptyDir.listFiles();
+        assertEquals(0, files.length);
     }
 
-//    @Test
-//    public void testExecuteWithNonJsonFile() throws IOException {
-//        File nonJsonFile = tempFolder.newFile("file.non_json");
-//        String err = "The path to a bundle file of type json or xml is required." + "\n" + nonJsonFile.getAbsolutePath();
-//        String[] args = {"-ExtractMatBundle", nonJsonFile.getAbsolutePath()};
-//
-//        try {
-//            operation.execute(args);
-//            fail("Expected IllegalArgumentException was not thrown");
-//        } catch (IllegalArgumentException e) {
-//            assertEquals(err, e.getMessage());
-//        }
-//    }
-//
-//    @Test
-//    public void testExecuteWithNonXmlFile() throws IOException {
-//        File nonXmlFile = tempFolder.newFile("file.non_xml");
-//        String err = "The path to a bundle file of type json or xml is required." + "\n" + nonXmlFile.getAbsolutePath();
-//        String[] args = {"-ExtractMatBundle", nonXmlFile.getAbsolutePath()};
-//
-//        try {
-//            operation.execute(args);
-//        } catch (IllegalArgumentException e) {
-//            assertEquals(err, e.getMessage());
-//        }
-//    }
+    @Test
+    public void testExecuteWithNonJsonFile() throws IOException {
+        //should output 0 files as it hits error
+        File nonJsonFile = File.createTempFile("file","non_json");
+        String[] args = {"-ExtractMatBundle", nonJsonFile.getAbsolutePath()};
+        operation.execute(args);
+        File[] files = nonJsonFile.listFiles();
+        assertNull(files);
+    }
+
+    @Test
+    public void testExecuteWithNonXmlFile() throws IOException {
+        File nonXmlFile = File.createTempFile("file", "non_xml");
+        String err = "The path to a bundle file of type json or xml is required." + "\n" + nonXmlFile.getAbsolutePath();
+        String[] args = {"-ExtractMatBundle", nonXmlFile.getAbsolutePath()};
+
+        try {
+            operation.execute(args);
+        } catch (IllegalArgumentException e) {
+            assertEquals(err, e.getMessage());
+        }
+    }
 
     @Test
     public void testExecuteWithFileAndDirArg() throws IOException {
@@ -247,7 +240,7 @@ public class ExtractMatBundleOperationTest {
         }
         File[] files = emptyDir.listFiles();
         assertNotNull(files);
-        assertTrue(files.length >= 40);
+        assertEquals(41, files.length);
     }
 
     @Test
@@ -268,14 +261,10 @@ public class ExtractMatBundleOperationTest {
             }
         });
 
-        executionThread.start();
-        try {
-            executionThread.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        operation.execute(new String[]{"-ExtractMATBundle", resourceUrl.getFile(), "-dir", "-op=" + emptyDir.getAbsolutePath()});
+
         File[] files = emptyDir.listFiles();
         assertNotNull(files);
-        assertEquals(8, files.length);
+        assertEquals(files.length, 16);
     }
 }

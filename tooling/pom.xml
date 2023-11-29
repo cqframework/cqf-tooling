@@ -343,6 +343,14 @@
             <version>4.1.0</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock</artifactId>
+            <version>3.0.3</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/net.sf.jopt-simple/jopt-simple -->
         <dependency>
             <groupId>net.sf.jopt-simple</groupId>
