@@ -277,28 +277,28 @@ public class ResourceUtils {
                  .filter(entry -> entry.getKey().equals(valueSetUrl))
                  .forEach(entry -> valueSetResources.put(entry.getKey(), entry.getValue()));
       }
-//      Set<String> dependencies = new HashSet<>(valueSetDefIDs);
+      Set<String> dependencies = new HashSet<>(valueSetDefIDs);
 
       if (includeDependencies) {
          List<String> dependencyCqlPaths = IOUtils.getDependencyCqlPaths(cqlContentPath, includeVersion);
          for (String path : dependencyCqlPaths) {
             Map<String, IBaseResource> dependencyValueSets = getDepValueSetResources(path, igPath, fhirContext, includeDependencies, includeVersion);
-//            dependencies.addAll(dependencyValueSets.keySet());
+            dependencies.addAll(dependencyValueSets.keySet());
             for (Entry<String, IBaseResource> entry : dependencyValueSets.entrySet()) {
                valueSetResources.putIfAbsent(entry.getKey(), entry.getValue());
             }
          }
       }
 
-//      if (dependencies.size() != valueSetResources.size()) {
-//        StringBuilder message = new StringBuilder((dependencies.size() - valueSetResources.size()) + " missing ValueSets: \r\n");
-//        dependencies.removeAll(valueSetResources.keySet());
-//        for (String valueSetUrl : dependencies) {
-//          message.append(valueSetUrl).append(" MISSING \r\n");
-//        }
-//        logger.error(message.toString());
-//        throw new Exception(message.toString());
-//      }
+      if (dependencies.size() != valueSetResources.size()) {
+        List<String> missingValueSets = new ArrayList<>();
+        dependencies.removeAll(valueSetResources.keySet());
+        for (String valueSetUrl : dependencies) {
+          missingValueSets.add(valueSetUrl + " MISSING");
+        }
+        logger.error(missingValueSets.toString());
+        throw new CQLTranslatorException(missingValueSets);
+      }
       return valueSetResources;
    }
 
