@@ -1,13 +1,28 @@
 package org.opencds.cqf.tooling.library;
 
-import ca.uhn.fhir.context.FhirContext;
-import com.google.common.base.Strings;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.regex.Pattern;
+
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.r5.model.Attachment;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.Extension;
+import org.hl7.fhir.r5.model.Library;
+import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.common.ThreadUtils;
@@ -23,15 +38,9 @@ import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.regex.Pattern;
+import com.google.common.base.Strings;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class LibraryProcessor extends BaseProcessor {
     private static final Logger logger = LoggerFactory.getLogger(LibraryProcessor.class);
@@ -56,10 +65,15 @@ public class LibraryProcessor extends BaseProcessor {
     }
 
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
-        return refreshIgLibraryContent(parentContext, outputEncoding, null, versioned, fhirContext, shouldApplySoftwareSystemStamp);
+        return refreshIgLibraryContent(parentContext, outputEncoding, null, null, versioned, fhirContext, shouldApplySoftwareSystemStamp);
     }
+
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
-        logger.info("Refreshing libraries...");
+        return refreshIgLibraryContent(parentContext, outputEncoding, null, libraryOutputDirectory, versioned, fhirContext, shouldApplySoftwareSystemStamp);
+    }
+
+    public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryPath, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
+        System.out.println("Refreshing libraries...");
         // ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
 
         LibraryProcessor libraryProcessor;
@@ -75,7 +89,12 @@ public class LibraryProcessor extends BaseProcessor {
                         "Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
 
-        String libraryPath = FilenameUtils.concat(parentContext.getRootDir(), IGProcessor.libraryPathElement);
+        if (libraryPath == null) {
+            libraryPath = FilenameUtils.concat(parentContext.getRootDir(), IGProcessor.libraryPathElement);
+        }
+        else if (!Utilities.isAbsoluteFileName(libraryPath)) {
+            libraryPath = FilenameUtils.concat(parentContext.getRootDir(), libraryPath);
+        }
         RefreshLibraryParameters params = new RefreshLibraryParameters();
         if (Strings.isNullOrEmpty(libraryOutputDirectory)) {
             logger.info("No output directory found for libraries.  Any existing libraries will be overwritten.");

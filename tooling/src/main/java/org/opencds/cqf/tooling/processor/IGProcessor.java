@@ -127,6 +127,7 @@ public class IGProcessor extends BaseProcessor {
         Encoding encoding = params.outputEncoding;
         // Boolean includeELM = params.includeELM;
         // Boolean includeDependencies = params.includeDependencies;
+        String libraryPath = params.libraryPath;
         String libraryOutputPath = params.libraryOutputPath;
         String measureOutputPath = params.measureOutputPath;
         Boolean includeTerminology = params.includeTerminology;
@@ -149,11 +150,7 @@ public class IGProcessor extends BaseProcessor {
         IGProcessor.ensure(rootDir, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
 
         List<String> refreshedLibraryNames;
-        if (Strings.isNullOrEmpty(libraryOutputPath)) {
-            refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext, params.shouldApplySoftwareSystemStamp);
-        } else {
-            refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, libraryOutputPath, versioned, fhirContext, params.shouldApplySoftwareSystemStamp);
-        }
+        refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, libraryPath, libraryOutputPath, versioned, fhirContext, params.shouldApplySoftwareSystemStamp);
         refreshedResourcesNames.addAll(refreshedLibraryNames);
 
         List<String> refreshedMeasureNames;
