@@ -1,6 +1,6 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,26 +11,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.FileUtils;
-import org.opencds.cqf.tooling.acceleratorkit.util.FilesBase;
-import org.testng.annotations.AfterClass;
 
 public class BaseProcessorTest {
-    static final String separator = System.getProperty("file.separator");
-    static final String resourcesPath = "src/test/resources/acceleratorkit";
-
-    @AfterClass
-    public void destroy() throws IOException {
-        FileUtils.deleteDirectory(new File(resourcesPath + "/out"));
-    }
-
-    protected void compareFiles(String inputFilePath, String compareFilePath) {
-        List<File> inputFilePaths = readFiles(inputFilePath);
-        List<File> compareFilePaths = readFiles(compareFilePath);
-        FilesBase filesBase = new FilesBase(inputFilePaths, compareFilePaths);
-        //check if the list sizes are equals
-        assertEquals(filesBase.getInputFiles().size(), filesBase.getCompareFiles().size());
-        filesBase.listFilesAndCompare();
+    protected void countFiles(String filePath, int expectedCount) {
+        List<File> files = readFiles(filePath);
+        assertEquals(files.size(), expectedCount, String.format("expected filePath %s to contain %d files. Found %d files instead.", filePath, expectedCount, files.size()));
     }
 
     protected List<File> readFiles(String path){
