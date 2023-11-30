@@ -34,7 +34,7 @@ public class OperationUtilsIT {
       Assert.assertEquals(helpMenu, bundleResourcesHelpMenu);
    }
 
-   private final String bundleResourcesHelpMenu = "\n" +
+   private final String bundleResourcesHelpMenu = System.lineSeparator() +
            "╔═════════════════════════╤════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗\n" +
            "║ Parameter               │ Description                                                                                                                                ║\n" +
            "╠═════════════════════════╪════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣\n" +
