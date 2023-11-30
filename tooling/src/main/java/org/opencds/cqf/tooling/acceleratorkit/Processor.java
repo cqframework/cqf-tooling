@@ -1006,6 +1006,7 @@ public class Processor extends Operation {
         Sheet sheet = workbook.getSheet(page);
         if (sheet == null) {
             logger.info(String.format("Sheet %s not found in the Workbook, so no processing was done.", page));
+            return;
         }
 
         questionnaireItemLinkIdCounter = 1;
