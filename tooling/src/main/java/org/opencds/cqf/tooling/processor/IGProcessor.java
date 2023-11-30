@@ -39,6 +39,9 @@ public class IGProcessor extends BaseProcessor {
     }
     //mega ig method
     public void publishIG(RefreshIGParameters params) {
+        if (params.skipPackages == null) {
+            params.skipPackages = false;
+        }
         requireNonNull(params.includeDependencies, "includeDependencies can not be null");
         requireNonNull(params.includeELM, "includeELM can not be null");
         requireNonNull(params.includePatientScenarios, "includePatientScenarios can not be null");
@@ -63,6 +66,7 @@ public class IGProcessor extends BaseProcessor {
         }
 
         Encoding encoding = params.outputEncoding;
+        Boolean skipPackages = params.skipPackages;
         Boolean includeELM = params.includeELM;
         Boolean includeDependencies = params.includeDependencies;
         Boolean includeTerminology = params.includeTerminology;
@@ -103,8 +107,22 @@ public class IGProcessor extends BaseProcessor {
         //Use case 3
         //package everything
         LogUtils.info("IGProcessor.publishIG - bundleIg");
-        igBundleProcessor.bundleIg(refreshedResourcesNames, rootDir, getBinaryPaths(), encoding, includeELM, includeDependencies, includeTerminology, includePatientScenarios,
-        versioned, addBundleTimestamp, fhirContext, fhirUri);
+        if (!skipPackages) {
+            igBundleProcessor.bundleIg(
+                    refreshedResourcesNames,
+                    rootDir,
+                    getBinaryPaths(),
+                    encoding,
+                    includeELM,
+                    includeDependencies,
+                    includeTerminology,
+                    includePatientScenarios,
+                    versioned,
+                    addBundleTimestamp,
+                    fhirContext,
+                    fhirUri
+            );
+        }
         //test everything
         //IGTestProcessor.testIg(IGTestParameters);
         //Publish?
@@ -127,6 +145,7 @@ public class IGProcessor extends BaseProcessor {
         Encoding encoding = params.outputEncoding;
         // Boolean includeELM = params.includeELM;
         // Boolean includeDependencies = params.includeDependencies;
+        String libraryPath = params.libraryPath;
         String libraryOutputPath = params.libraryOutputPath;
         String measureOutputPath = params.measureOutputPath;
         Boolean includeTerminology = params.includeTerminology;
@@ -149,11 +168,7 @@ public class IGProcessor extends BaseProcessor {
         IGProcessor.ensure(rootDir, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
 
         List<String> refreshedLibraryNames;
-        if (Strings.isNullOrEmpty(libraryOutputPath)) {
-            refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, versioned, fhirContext, params.shouldApplySoftwareSystemStamp);
-        } else {
-            refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, libraryOutputPath, versioned, fhirContext, params.shouldApplySoftwareSystemStamp);
-        }
+        refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, libraryPath, libraryOutputPath, versioned, fhirContext, params.shouldApplySoftwareSystemStamp);
         refreshedResourcesNames.addAll(refreshedLibraryNames);
 
         List<String> refreshedMeasureNames;

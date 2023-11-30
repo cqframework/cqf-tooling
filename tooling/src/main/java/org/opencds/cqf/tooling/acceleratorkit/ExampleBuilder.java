@@ -685,15 +685,17 @@ public class ExampleBuilder {
             if (ed.getType("Extension") != null && ed.getType("Extension").getProfile() != null && atlas != null && atlas.getValueSets() != null && atlas.getExtensions() != null) {
                 StructureDefinition sdExtension = atlas.getExtensions().getByCanonicalUrlWithVersion(ed.getType("Extension").getProfile().get(0).getValue());
                 ElementDefinition extensionElement = sdExtension.getDifferential().getElement().stream()
-                    .filter(x -> x.hasBinding() && x.getBinding().hasValueSetElement()).findFirst().get();
+                    .filter(x -> x.hasBinding() && x.getBinding().hasValueSetElement()).findFirst().orElse(null);
 
-                Type extensionValue = null;
-                if (extensionElement.getType("CodeableConcept") != null) {
-                    extensionValue = new CodeableConcept();
+                if (extensionElement != null) {
+                    Type extensionValue = null;
+                    if (extensionElement.getType("CodeableConcept") != null) {
+                        extensionValue = new CodeableConcept();
+                    }
+
+                    generateValue(sdExtension, extensionElement, extensionValue, givenValue);
+                    value.addExtension(new Extension().setUrl(extensionElement.getShort()).setValue(extensionValue));
                 }
-
-                generateValue(sdExtension, extensionElement, extensionValue, givenValue);
-                value.addExtension(new Extension().setUrl(extensionElement.getShort()).setValue(extensionValue));
             }
         }
     }

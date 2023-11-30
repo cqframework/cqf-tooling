@@ -34,10 +34,10 @@ import org.hl7.fhir.r4.model.UsageContext;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
 import org.opencds.cqf.tooling.utilities.IOUtils;
-
-import ca.uhn.fhir.context.FhirContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public class DTProcessor extends Operation {
 
@@ -362,7 +362,7 @@ public class DTProcessor extends Operation {
             currentAction.getCondition().add(newCondition);
         }
         else if (newCondition != null) {
-            currentCondition.getExpression().setDescription(String.format("(%s)\n  OR (%s)", currentCondition.getExpression().getDescription(), newCondition.getExpression().getDescription()));
+            currentCondition.getExpression().setDescription(String.format("(%s)%n  OR (%s)", currentCondition.getExpression().getDescription(), newCondition.getExpression().getDescription()));
         }
     }
 
@@ -473,7 +473,7 @@ public class DTProcessor extends Operation {
             else {
                 for (String conditionValue : conditionValues) {
                     if (applicabilityCondition.length() > 0) {
-                        applicabilityCondition.append(String.format("\n  AND "));
+                        applicabilityCondition.append(String.format("%n  AND "));
                     }
                     applicabilityCondition.append("(");
                     applicabilityCondition.append(conditionValue);
@@ -690,11 +690,11 @@ public class DTProcessor extends Operation {
     }
 
     public void writePlanDefinitionIndex(String outputPath) {
-        String outputFilePath = IOUtils.concatFilePath(outputPath,
-                "input", "pagecontent", "PlanDefinitionIndex.md");
+        String outputFilePath = outputPath + File.separator + "input" + File.separator + "pagecontent";
         ensurePath(outputFilePath);
 
-        try (FileOutputStream writer = new FileOutputStream(outputFilePath)) {
+        String outputFile = outputFilePath + File.separator + "PlanDefinitionIndex.md";
+        try (FileOutputStream writer = new FileOutputStream(outputFile)) {
             writer.write(buildPlanDefinitionIndex().getBytes());
             writer.flush();
         }

@@ -95,7 +95,6 @@ public class RefreshIGOperationTest extends RefreshTest {
 		deleteTempINI();
     }
 
-
     /**
      * This test breaks down refreshIG's process and can verify multiple bundles
      */
