@@ -22,63 +22,57 @@ public class ANCMiniContentValidationTest extends BaseProcessorTest {
             throw new RuntimeException(e);
         }
 
+        String outPath = outDir.getAbsolutePath();
+
         String spreadSheetPath = Path.of(resourcesPath, spreadSheet).toString();
         String[] args = { "-ProcessAcceleratorKit", "-s=ANCM", "-pts=" + spreadSheetPath,
-                "-dep=" + dataDictionarySheets, "-op=" + outDir.getAbsolutePath() };
+                "-dep=" + dataDictionarySheets, "-op=" + outPath };
 
         Processor acceleratorKitProcessor = new Processor();
         // execute to generate the data dictionary files
         acceleratorKitProcessor.execute(args);
         // structure definitions
-        // compareProfilesStructureDefinitions();
-        // // vocabulary
-        // compareVocabulary();
-        // // resources
-        // compareResources();
-        // // cql
-        // compareCql();
-        // // examples
-        // compareExamples();
-        // // extensions
-        // compareExtensions();
-        // // tests
-        // compareTests();
+        compareProfilesStructureDefinitions(outPath);
+        // vocabulary
+        compareVocabulary(outPath);
+        // resources
+        compareResources(outPath);
+        // cql
+        compareCql(outPath);
+        // examples
+        compareExamples(outPath);
+        // extensions
+        compareExtensions(outPath);
+        // tests
+        compareTests(outPath);
     }
 
-    // private void compareProfilesStructureDefinitions() {
-    //     compareFiles(resourcePathInputDirectory + "profiles",
-    //             resourcePathOutputDirectory + "profiles");
-    // }
+    private void compareProfilesStructureDefinitions(String root) {
+        countFiles(Path.of(root, "input", "profiles").toString(), 0);
+    }
 
-    // private void compareCql() {
-    //     compareFiles(resourcePathInputDirectory + "cql",
-    //             resourcePathOutputDirectory + "cql");
-    // }
+    private void compareCql(String root) {
+        countFiles(Path.of(root, "input", "cql").toString(), 4);
+    }
 
-    // private void compareExamples() {
-    //     compareFiles(resourcePathInputDirectory + "examples",
-    //             resourcePathOutputDirectory + "examples");
-    // }
+    private void compareExamples(String root) {
+        countFiles(Path.of(root, "input", "examples").toString(), 0);
+    }
 
-    // private void compareExtensions() {
-    //     compareFiles(resourcePathInputDirectory + "extensions",
-    //             resourcePathOutputDirectory + "extensions");
-    // }
+    private void compareExtensions(String root) {
+        countFiles(Path.of(root, "input", "extensions").toString(), 0);
+    }
 
-    // private void compareResources() {
-    //     compareFiles(resourcePathInputDirectory + "resources",
-    //             resourcePathOutputDirectory + "resources");
-    // }
+    private void compareResources(String root) {
+        countFiles(Path.of(root, "input", "resources").toString(), 0);
+    }
 
-    // private void compareTests() {
-    //     compareFiles(resourcePathInputDirectory + "tests",
-    //             resourcePathOutputDirectory + "tests");
-    // }
+    private void compareTests(String root) {
+        countFiles(Path.of(root, "input", "tests").toString(), 0);
+    }
 
-    // private void compareVocabulary() {
-    //     String vocabularyInputPath = resourcePathInputDirectory + "vocabulary";
-    //     String vocabularyComparePath = resourcePathOutputDirectory + "vocabulary";
-    //     compareFiles(vocabularyInputPath, vocabularyComparePath);
-    // }
+    private void compareVocabulary(String root) {
+        countFiles(Path.of(root, "input", "vocabulary").toString(), 1);
+    }
 
 }
