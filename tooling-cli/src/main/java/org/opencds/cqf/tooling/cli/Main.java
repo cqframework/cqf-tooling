@@ -123,14 +123,19 @@ package org.opencds.cqf.tooling.cli;
             - This tooling decomposes a Bundle entry into separate resource files
             - Accepts Bundles with .json or .xml extensions
 
-- MAT Bundle extraction
-    - mvn exec:java -Dexec.args="[-ExtractMatBundle] [Bundle file path] (-v) (-dir)
-    - Example: mvn exec:java -Dexec.args="-ExtractMatBundle /Users/mholck/Development/ecqm-content-r4/bundles/mat/EXM124/EXM124.json -v=r4"
-    - This tooling extracts out the resources and CQL from a MAT export bundle and puts them in the appropriate directories
-    - Accepts Bundles with .json or .xml extensions
-    - version = FHIR version { stu3, r4 }
-        Default version: r4
-    - dir = Directory indicator. To process the input location as a directory of files, the input should point to a valid directory and the -dir flag should be present in the arguments list.
+        - Bundle transaction - Converts a collection bundle to a transaction bundle
+            - mvn exec:java -Dexec.args="-MakeTransaction [Bundle file path] (output encoding)
+            - This tooling converts a collection bundle to a transaction bundle
+            - Accepts bundles with .json or .xml extensions
+
+        - MAT Bundle extraction
+            - mvn exec:java -Dexec.args="[-ExtractMatBundle] [Bundle file path] (-v) (-dir)
+            - Example: mvn exec:java -Dexec.args="-ExtractMatBundle /Users/mholck/Development/ecqm-content-r4/bundles/mat/EXM124/EXM124.json -v=r4"
+            - This tooling extracts out the resources and CQL from a MAT export bundle and puts them in the appropriate directories
+            - Accepts Bundles with .json or .xml extensions
+            - version = FHIR version { stu3, r4 }
+                Default version: r4
+            - dir = Directory indicator. To process the input location as a directory of files, the input should point to a valid directory and the -dir flag should be present in the arguments list.
 
         - Generate StructureDefinitions from ModelInfo
             - command: mvn exec:java -Dexec.args="[-GenerateSDs] [path to modelinfo xml] (-outputpath | -op) (-encoding | -e)"
