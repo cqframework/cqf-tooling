@@ -48,7 +48,13 @@ public abstract class BaseContentTest {
 
     @BeforeClass
     protected void init() throws IOException {
-        outputPath = Files.createTempDirectory(Path.of(tempPath), "content-test-").toAbsolutePath();
+        var p = Path.of(tempPath);
+        if (!p.toFile().exists() && !p.toAbsolutePath().toFile().exists()) {
+           Files.createDirectories(p);
+        }
+
+        var f = Files.createTempDirectory(p, "content-test-");
+        outputPath = f.toAbsolutePath();
         processor = new Processor();
         processor.execute(args());
     }
@@ -168,8 +174,8 @@ public abstract class BaseContentTest {
     // Resource helpers
 
     protected <T extends IBaseResource> T resourceAtPath(Class<T> resourceClass, Path resourcePath) {
-        Objects.requireNonNull(resourcePath, "resourcePath is required");
         Objects.requireNonNull(resourceClass, "resourceClass is required");
+        Objects.requireNonNull(resourcePath, "resourcePath is required");
 
         var file = resourcePath.toFile();
         if (!file.exists()) {
