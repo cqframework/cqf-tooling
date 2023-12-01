@@ -37,7 +37,7 @@ public abstract class BaseContentTest {
     protected BaseContentTest(Spreadsheet spreadsheet, FhirVersionEnum fhirVersion) {
         Objects.requireNonNull(spreadsheet, "spreadsheet is required");
         Objects.requireNonNull(spreadsheet.path, "spreadsheet path is required");
-        Objects.requireNonNull(spreadsheet.dataDictionarySheets, "data dictionary sheets are required");
+        Objects.requireNonNull(spreadsheet.dataElementPages, "data element pages are required");
         Objects.requireNonNull(spreadsheet.scope, "scope is required");
 
         Objects.requireNonNull(fhirVersion, "fhir version is required");
@@ -68,7 +68,6 @@ public abstract class BaseContentTest {
      */
     protected static class Spreadsheet {
         String path;
-        String dataDictionarySheets;
         String encoding;
         String scope;
         String dataElementPages;
@@ -79,7 +78,7 @@ public abstract class BaseContentTest {
         return new String[] {
             "-s", scope(),
             "-pts", spreadsheetPath().toAbsolutePath().toString(),
-            "-dep", dataDictionarySheets(),
+            "-dep", dataElementPages(),
             "-op", outputPath().toAbsolutePath().toString(),
             "-e", encoding(),
             "-tc", testCases()};
@@ -124,8 +123,8 @@ public abstract class BaseContentTest {
         return Path.of(resourcesPath, spreadsheet.path);
     }
 
-    protected String dataDictionarySheets() {
-        return spreadsheet.dataDictionarySheets;
+    protected String dataElementPages() {
+        return spreadsheet.dataElementPages;
     }
 
     // FHIR context accessors
