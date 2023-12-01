@@ -47,13 +47,8 @@ public abstract class BaseContentTest {
     }
 
     @BeforeClass
-    protected void init() {
-        try {
-            outputPath = Files.createTempDirectory(Path.of(tempPath).toAbsolutePath(), "content-test-").toAbsolutePath();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
+    protected void init() throws IOException {
+        outputPath = Files.createTempDirectory(Path.of(tempPath), "content-test-").toAbsolutePath();
         processor = new Processor();
         processor.execute(args());
     }
