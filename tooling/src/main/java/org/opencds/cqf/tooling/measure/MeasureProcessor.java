@@ -142,7 +142,7 @@ public class MeasureProcessor extends AbstractResourceProcessor {
                         try {
                             IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext, true);
                             //ensure the resource can be posted
-                            if (resourceIsTransactionBundle(resource)) {
+                            if (BundleUtils.resourceIsTransactionBundle(resource)) {
                                 BundleUtils.postBundle(encoding, fhirContext, fhirUri, resource);
                             }
                         } catch (Exception e) {
@@ -153,19 +153,6 @@ public class MeasureProcessor extends AbstractResourceProcessor {
                 }
             }
         }
-    }
-
-    private boolean resourceIsTransactionBundle(IBaseResource inputResource) {
-        if (inputResource == null) return false;
-
-        if (inputResource instanceof org.hl7.fhir.dstu3.model.Bundle) {
-            return ((org.hl7.fhir.dstu3.model.Bundle) inputResource).getType().equals(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION);
-
-        } else if (inputResource instanceof org.hl7.fhir.r4.model.Bundle) {
-            return ((org.hl7.fhir.r4.model.Bundle) inputResource).getType().equals(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
-        }
-        return false;
-
     }
 
     @Override

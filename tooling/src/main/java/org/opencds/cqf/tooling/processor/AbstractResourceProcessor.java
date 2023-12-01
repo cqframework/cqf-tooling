@@ -223,10 +223,16 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
                         if (shouldPersist) {
 
                             String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), getResourceTestGroupName()), resourceName);
+
                             persistBundle(igPath, bundleDestPath, resourceName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri, addBundleTimestamp);
+
                             String possibleBundleTestMessage = bundleFiles(igPath, bundleDestPath, resourceName, binaryPaths, resourceSourcePath,
                                     primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios,
                                     includeVersion, addBundleTimestamp, translatorWarningMessages);
+
+                            //Check for test files in bundleDestPath + "-files", loop through if exists,
+                            // find all files that start with "tests-", post to fhir server following same folder structure:
+                            persistTestFiles(bundleDestPath, resourceName, encoding, fhirContext, fhirUri);
 
                             if (cdsHooksProcessor != null) {
                                 List<String> activityDefinitionPaths = CDSHooksProcessor.bundleActivityDefinitions(resourceSourcePath, fhirContext, resources, encoding, includeVersion, shouldPersist);
@@ -372,10 +378,6 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
 
 
     private void persistBundle(String igPath, String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, List<IBaseResource> resources, String fhirUri, Boolean addBundleTimestamp) {
-        //Check for test files in bundleDestPath + "-files", loop through if exists,
-        // find all files that start with "tests-", post to fhir server following same folder structure:
-        persistTestFiles(bundleDestPath, libraryName, encoding, fhirContext, fhirUri);
-
         IOUtils.initializeDirectory(bundleDestPath);
         Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext, addBundleTimestamp, this.getIdentifiers());
         IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);
