@@ -745,6 +745,7 @@ public class Processor extends Operation {
                 }
             }
 
+            setCanonicalBase("http://example.org/sdh");
             if (system.startsWith(projectCodeSystemBase)) {
                 CodeSystem codeSystem = resolveCodeSystem(system);
                 if (codeSystem == null) {
@@ -2890,6 +2891,7 @@ public class Processor extends Operation {
             ensureCodeSystemPath(scopePath);
 
             for (CodeSystem cs : codeSystems) {
+                System.out.println(cs);
                 writeResource(codeSystemPath, cs);
 
                 // Generate JSON fragment for inclusion in the IG:
@@ -2918,6 +2920,7 @@ public class Processor extends Operation {
 
     public void processQuestionnaires() {
         for (Questionnaire q : questionnaires) {
+            System.out.println(q);
             for (Questionnaire.QuestionnaireItemComponent item : q.getItem()) {
                 if (item.hasDefinition()) {
                     String definition = item.getDefinition();
@@ -2982,6 +2985,7 @@ public class Processor extends Operation {
             ensureValueSetPath(scopePath);
 
             for (ValueSet vs : valueSets) {
+                System.out.println(vs);
                 writeResource(valueSetPath, vs);
 
                 // Generate JSON fragment for inclusion in the IG:
