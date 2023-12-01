@@ -255,7 +255,8 @@ public class BundleUtils {
     public static boolean resourceIsABundle(IBaseResource resource) {
         return (
                 (resource instanceof org.hl7.fhir.dstu3.model.Bundle)
-                        || (resource instanceof org.hl7.fhir.r5.model.Bundle)
+//                      uncomment when R5 processing is accounted for
+//                      || (resource instanceof org.hl7.fhir.r5.model.Bundle)
                         || (resource instanceof org.hl7.fhir.r4.model.Bundle)
         );
     }
