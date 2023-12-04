@@ -2891,7 +2891,6 @@ public class Processor extends Operation {
             ensureCodeSystemPath(scopePath);
 
             for (CodeSystem cs : codeSystems) {
-                System.out.println(cs);
                 writeResource(codeSystemPath, cs);
 
                 // Generate JSON fragment for inclusion in the IG:
@@ -2920,7 +2919,6 @@ public class Processor extends Operation {
 
     public void processQuestionnaires() {
         for (Questionnaire q : questionnaires) {
-            System.out.println(q);
             for (Questionnaire.QuestionnaireItemComponent item : q.getItem()) {
                 if (item.hasDefinition()) {
                     String definition = item.getDefinition();
@@ -2985,7 +2983,6 @@ public class Processor extends Operation {
             ensureValueSetPath(scopePath);
 
             for (ValueSet vs : valueSets) {
-                System.out.println(vs);
                 writeResource(valueSetPath, vs);
 
                 // Generate JSON fragment for inclusion in the IG:
@@ -3103,15 +3100,12 @@ public class Processor extends Operation {
         sb.append(System.lineSeparator());
         // Supported code systems
         for (Map.Entry<String, String> entry : supportedCodeSystems.entrySet()) {
-            System.out.println("supportedCodeSystems " + entry.getKey() + " = " + entry.getValue());
             sb.append(String.format("codesystem \"%s\": '%s'", entry.getKey(), entry.getValue()));
             sb.append(System.lineSeparator());
         }
         // For each code system, generate a codesystem CQL entry:
         // codesystem "CodeSystem.title": 'CodeSystem.url' [version 'CodeSystem.version']
-        System.out.println("Complete codeSystems = " + codeSystems);
         for (CodeSystem cs : codeSystems) {
-            System.out.println("codeSystems " + cs.getName() + " = " + cs.getUrl());
             String identifier = getCodeSystemIdentifier(cs);
             sb.append(String.format("codesystem \"%s\": '%s'", identifier, cs.getUrl()));
             if (cs.hasVersion()) {
