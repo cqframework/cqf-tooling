@@ -745,7 +745,7 @@ public class Processor extends Operation {
                 }
             }
 
-            setCanonicalBase("http://example.org/sdh");
+//            setCanonicalBase("http://example.org/sdh");
             if (system.startsWith(projectCodeSystemBase)) {
                 CodeSystem codeSystem = resolveCodeSystem(system);
                 if (codeSystem == null) {
@@ -3103,12 +3103,15 @@ public class Processor extends Operation {
         sb.append(System.lineSeparator());
         // Supported code systems
         for (Map.Entry<String, String> entry : supportedCodeSystems.entrySet()) {
+            System.out.println("supportedCodeSystems " + entry.getKey() + " = " + entry.getValue());
             sb.append(String.format("codesystem \"%s\": '%s'", entry.getKey(), entry.getValue()));
             sb.append(System.lineSeparator());
         }
         // For each code system, generate a codesystem CQL entry:
         // codesystem "CodeSystem.title": 'CodeSystem.url' [version 'CodeSystem.version']
+        System.out.println("Complete codeSystems = " + codeSystems);
         for (CodeSystem cs : codeSystems) {
+            System.out.println("codeSystems " + cs.getName() + " = " + cs.getUrl());
             String identifier = getCodeSystemIdentifier(cs);
             sb.append(String.format("codesystem \"%s\": '%s'", identifier, cs.getUrl()));
             if (cs.hasVersion()) {
@@ -3179,14 +3182,14 @@ public class Processor extends Operation {
             return activityCodeSystem;
         }
 
-        return canonicalBase + "/CodeSystem/activity-codes";
+        return canonicalBase + "/CodeSystem/aslp-codes";
     }
 
     private CodeSystem createActivityCodeSystem(String system) {
         CodeSystem codeSystem = resolveCodeSystem(system);
 
         if (codeSystem == null) {
-            codeSystem = createCodeSystem("activity-codes", String.format("%sActivityCodes", contentId), projectCodeSystemBase, String.format("%s Activity Codes", contentId),
+            codeSystem = createCodeSystem("aslp-codes", String.format("%sActivityCodes", contentId), projectCodeSystemBase, String.format("%s Codes", contentId),
                     "Set of codes representing all activities used in the implementation guide");
         }
 
