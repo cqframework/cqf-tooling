@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.util.*;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IFhirVersion;
 
@@ -87,8 +86,16 @@ public class TestCaseProcessor
                                 }
                             }
 
-                            Object bundle = BundleUtils.bundleArtifacts(getId(FilenameUtils.getName(testCasePath)), resources, fhirContext, false);
+                            // If the resource is a transaction bundle then don't bundle it again otherwise do
+                            String fileId = getId(FilenameUtils.getName(testCasePath));
+                            Object bundle;
+                            if ((resources.size() == 1) && (BundleUtils.resourceIsABundle(resources.get(0)))) {
+                                bundle = processTestBundle(fileId, resources.get(0), fhirContext);
+                            }else {
+                                bundle = BundleUtils.bundleArtifacts(fileId, resources, fhirContext, false);
+                            }
                             IOUtils.writeBundle(bundle, testArtifactPath, encoding, fhirContext);
+
                         } catch (Exception e) {
                             LogUtils.putException(testCasePath, e);
                         } finally {
@@ -105,6 +112,40 @@ public class TestCaseProcessor
             }
         }
     }
+
+    public static Object processTestBundle(String id, IBaseResource resource, FhirContext fhirContext) {
+        switch (fhirContext.getVersion().getVersion()) {
+            case DSTU3:
+                org.hl7.fhir.dstu3.model.Bundle dstu3Bundle = (org.hl7.fhir.dstu3.model.Bundle) resource;
+                ResourceUtils.setIgId(id, dstu3Bundle, false);
+                dstu3Bundle.setType(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION);
+
+                for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : dstu3Bundle.getEntry()) {
+                    org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent request = new org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent();
+                    request.setMethod(org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.PUT);
+                    request.setUrl(entry.getResource().fhirType() + "/" + entry.getResource().getIdElement().getIdPart());
+                    entry.setRequest(request);
+                }
+
+                return dstu3Bundle;
+
+            case R4:
+                org.hl7.fhir.r4.model.Bundle r4Bundle = (org.hl7.fhir.r4.model.Bundle)resource;
+                ResourceUtils.setIgId(id, r4Bundle, false);
+                r4Bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
+                for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : r4Bundle.getEntry()) {
+                    org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent request = new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent();
+                    request.setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT); // Adjust the HTTP method as needed
+                    request.setUrl(entry.getResource().fhirType() + "/" + entry.getResource().getIdElement().getIdPart());
+                    entry.setRequest(request);
+                }
+
+                return r4Bundle;
+            default:
+                throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
+        }
+    }
+
 
     private void addPatientToGroupR4(Group group, org.hl7.fhir.r4.model.Patient patient) {
         IdType idType = patient.getIdElement();
