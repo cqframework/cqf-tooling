@@ -1,7 +1,6 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
@@ -13,24 +12,22 @@ import org.testng.annotations.Test;
 public class ANCMiniContentTest extends BaseContentTest {
 
     public ANCMiniContentTest() {
-        super(new Spreadsheet() {
-            {
-                path = "acceleratorkit/ANC Test Cases-mini.xlsx";
-                scope = "ANCM";
-                dataElementPages = "ANC.A. Registration,ANC.B5 Quick check,ANC.End End";
-            }
-        });
+        super(new Spreadsheet()
+                .path("acceleratorkit/WHO-ANC-mini.xlsx")
+                .testCases("acceleratorkit/ANC Test Cases-mini.xlsx")
+                .scope("ANCM")
+                .dataElementPages("ANC.A. Registration,ANC.B5 Quick check,ANC.End End"));
     }
 
     @Test
     public void validateContentCount() {
-        assertFalse(profilesPath().toFile().exists());
+        assertEquals(profilesPath().toFile().listFiles().length, 12);
         assertEquals(cqlPath().toFile().listFiles().length, 4);
-        assertFalse(examplesPath().toFile().exists());
-        assertFalse(extensionsPath().toFile().exists());
-        assertFalse(resourcesPath().toFile().exists());
-        assertFalse(testsPath().toFile().exists());
-        assertEquals(vocabularyPath().resolve("codesystem").toFile().listFiles().length, 1);
+        assertEquals(examplesPath().toFile().listFiles().length, 12);
+        assertEquals(extensionsPath().toFile().listFiles().length, 2);
+        assertEquals(resourcesPath().resolve("questionnaire").toFile().listFiles().length, 3);
+        assertEquals(testsPath().toFile().listFiles().length, 14);
+        assertEquals(vocabularyPath().resolve("codesystem").toFile().listFiles().length, 2);
     }
 
     @Test

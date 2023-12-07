@@ -8,13 +8,10 @@ import org.testng.annotations.Test;
 public class DTRContentTest extends BaseContentTest {
 
     public DTRContentTest() {
-        super(new Spreadsheet() {
-            {
-                path = "acceleratorkit/DTR.xlsx";
-                scope = "ASLP";
-                dataElementPages = "ASLP.A1 Adult Sleep Studies";
-            }
-        });
+        super(new Spreadsheet()
+            .path("acceleratorkit/DTR.xlsx")
+            .scope("ASLP")
+            .dataElementPages("ASLP.A1 Adult Sleep Studies"));;
     }
 
     @Test
