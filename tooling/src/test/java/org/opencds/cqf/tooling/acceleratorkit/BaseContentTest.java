@@ -1,11 +1,13 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Objects;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -53,7 +55,17 @@ public abstract class BaseContentTest {
            Files.createDirectories(p);
         }
 
-        var f = Files.createTempDirectory(p, "content-test-");
+        var testPath = p.resolve("content-test-" + scope());
+
+        // Clean out any existing tests.
+        if (testPath.toFile().exists()) {
+             Files.walk(testPath)
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach(File::delete);
+        }
+
+        var f = Files.createDirectory(testPath);
         outputPath = f.toAbsolutePath();
         processor = new Processor();
         processor.execute(args());
@@ -67,11 +79,55 @@ public abstract class BaseContentTest {
      * Add new fields to this class to support additional command line arguments.
      */
     protected static class Spreadsheet {
-        String path;
-        String encoding;
-        String scope;
-        String dataElementPages;
-        String testCases;
+        private String path;
+        public String path() {
+            return path;
+        }
+
+        public Spreadsheet path(String path) {
+            this.path = path;
+            return this;
+        }
+
+        private String encoding;
+        public String encoding() {
+            return encoding;
+        }
+
+        public Spreadsheet encoding(String encoding) {
+            this.encoding = encoding;
+            return this;
+        }
+
+        private String scope;
+        private String scope() {
+            return scope;
+        }
+
+        public Spreadsheet scope(String scope) {
+            this.scope = scope;
+            return this;
+        }
+
+        private String dataElementPages;
+        public String dataElementPages() {
+            return dataElementPages;
+        }
+
+        public Spreadsheet dataElementPages(String dataElementPages) {
+            this.dataElementPages = dataElementPages;
+            return this;
+        }
+
+        private String testCases;
+        public String testCases() {
+            return testCases;
+        }
+
+        public Spreadsheet testCases(String testCases) {
+            this.testCases = testCases;
+            return this;
+        }
     }
 
     protected String[] params() {
@@ -81,7 +137,8 @@ public abstract class BaseContentTest {
             "-dep", dataElementPages(),
             "-op", outputPath().toAbsolutePath().toString(),
             "-e", encoding(),
-            "-tc", testCases()};
+            "-tc", testCasesPath() != null ? testCasesPath().toAbsolutePath().toString() : null
+        };
     };
 
     protected String[] args() {
@@ -106,25 +163,28 @@ public abstract class BaseContentTest {
     }
 
     // Input params accessors
+    protected Path spreadsheetPath() {
+        return Path.of(resourcesPath, spreadsheet.path());
+    }
 
-    protected String testCases() {
-        return spreadsheet.testCases;
+    protected Path testCasesPath() {
+        if (spreadsheet.testCases() == null) {
+            return null;
+        }
+
+        return Path.of(resourcesPath, spreadsheet.testCases());
     }
 
     protected String encoding() {
-        return spreadsheet.encoding;
+        return spreadsheet.encoding();
     }
 
     protected String scope() {
-        return spreadsheet.scope;
-    }
-
-    protected Path spreadsheetPath() {
-        return Path.of(resourcesPath, spreadsheet.path);
+        return spreadsheet.scope();
     }
 
     protected String dataElementPages() {
-        return spreadsheet.dataElementPages;
+        return spreadsheet.dataElementPages();
     }
 
     // FHIR context accessors
