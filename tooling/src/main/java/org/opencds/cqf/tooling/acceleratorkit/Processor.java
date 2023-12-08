@@ -745,7 +745,6 @@ public class Processor extends Operation {
                 }
             }
 
-//            setCanonicalBase("http://example.org/sdh");
             if (system.startsWith(projectCodeSystemBase)) {
                 CodeSystem codeSystem = resolveCodeSystem(system);
                 if (codeSystem == null) {
@@ -3176,14 +3175,14 @@ public class Processor extends Operation {
             return activityCodeSystem;
         }
 
-        return canonicalBase + "/CodeSystem/aslp-codes";
+        return canonicalBase + "/CodeSystem/activity-codes";
     }
 
     private CodeSystem createActivityCodeSystem(String system) {
         CodeSystem codeSystem = resolveCodeSystem(system);
 
         if (codeSystem == null) {
-            codeSystem = createCodeSystem("aslp-codes", String.format("%sActivityCodes", contentId), projectCodeSystemBase, String.format("%s Codes", contentId),
+            codeSystem = createCodeSystem("activity-codes", String.format("%sActivityCodes", contentId), projectCodeSystemBase, String.format("%s Activity Codes", contentId),
                     "Set of codes representing all activities used in the implementation guide");
         }
 
@@ -3193,6 +3192,7 @@ public class Processor extends Operation {
     private CodeSystem resolveCodeSystem(String system) {
         CodeSystem codeSystem = null;
         for (CodeSystem cs : codeSystems) {
+            System.out.println("CodeSystems cs: " + cs.getUrl());
             if (cs.getUrl().equals(system)) {
                 codeSystem = cs;
             }
