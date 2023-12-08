@@ -12,7 +12,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <cql.version>3.5.0</cql.version>
+        <cql.version>3.5.1</cql.version>
         <hapi.version>6.10.0</hapi.version>
         <core.version>6.1.2.2</core.version>
         <spring-boot.version>2.1.5.RELEASE</spring-boot.version>
