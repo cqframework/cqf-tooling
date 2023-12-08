@@ -9,9 +9,5 @@
         "pagecontent",
         "plandefinition",
         "testng"
-    ],
-    "editor.codeActionsOnSave": {
-		"source.organizeImports": true,
-		"editor.formatOnSave": true
-	},
+    ]
 }

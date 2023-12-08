@@ -1,7 +1,7 @@
 package org.opencds.cqf.tooling.operations.bundle;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.util.BundleUtil;
+import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.operations.ExecutableOperation;
@@ -10,8 +10,9 @@ import org.opencds.cqf.tooling.operations.OperationParam;
 import org.opencds.cqf.tooling.utilities.FhirContextCache;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import javax.annotation.Nonnull;
-import java.util.List;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.BundleUtil;
+import jakarta.annotation.Nonnull;
 
 @Operation(name = "BundleToResources")
 public class BundleToResources implements ExecutableOperation {
