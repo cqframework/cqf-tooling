@@ -44,8 +44,8 @@ public class ANCMiniContentTest extends BaseContentTest {
     public void validateCodeSystem() {
         var codeSystem = resourceAtPath(
                 CodeSystem.class,
-                vocabularyPath().resolve("codesystem/codesystem-activity-codes.json"));
-        assertEquals(codeSystem.getTitle(), "ANCM Activity Codes");
+                vocabularyPath().resolve("codesystem/codesystem-ancm-codes.json"));
+        assertEquals(codeSystem.getTitle(), "ANCM Codes");
     }
 
     @Test
