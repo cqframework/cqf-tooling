@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MeasureProcessor extends BaseProcessor {
-    public static volatile String ResourcePrefix = "measure-";
-    protected volatile List<Object> identifiers;
+    public static String ResourcePrefix = "measure-";
+    protected List<Object> identifiers;
 
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
