@@ -347,9 +347,9 @@ public abstract class AbstractBundler {
             message.append(NEWLINE).append(cqlTranslatorErrorMessages.size()).append(" ").append(getResourceProcessorType()).append("(s) encountered CQL translator errors:");
 
             for (String library : cqlTranslatorErrorMessages.keySet()) {
-                message.append(INDENT).append(
+                message.append(NEWLINE_INDENT).append(
                         CqlProcessor.buildStatusMessage(cqlTranslatorErrorMessages.get(library), library, verboseMessaging, false, NEWLINE_INDENT2)
-                ).append(NEWLINE);
+                );
             }
         }
 
