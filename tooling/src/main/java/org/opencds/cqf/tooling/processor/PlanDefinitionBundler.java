@@ -36,9 +36,9 @@ public class PlanDefinitionBundler extends AbstractBundler {
     }
 
     @Override
-    protected List<String> persistExtraFiles(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri) {
+    protected int persistFilesFolder(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri) {
         //do nothing
-        return new ArrayList<>();
+        return 0;
     }
 
     @Override

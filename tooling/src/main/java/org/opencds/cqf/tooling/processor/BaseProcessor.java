@@ -75,11 +75,10 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
 
     protected IProcessorContext parentContext;
 
-    //used to inform user of errors that occurred during refresh of library, measure, or test cases
-    public Boolean includeErrors = false;
+    public Boolean verboseMessaging = false;
 
-    public Boolean getIncludeErrors() {
-        return includeErrors;
+    public Boolean getVerboseMessaging() {
+        return verboseMessaging;
     }
 
     public void initialize(IProcessorContext context) {
@@ -95,7 +94,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
             this.packageManager = parentContext.getPackageManager();
             this.binaryPaths = parentContext.getBinaryPaths();
             this.cqlProcessor = parentContext.getCqlProcessor();
-            this.includeErrors = parentContext.getIncludeErrors();
+            this.verboseMessaging = parentContext.getVerboseMessaging();
         }
     }
 
@@ -170,7 +169,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
             }
             cqlProcessor = new CqlProcessor(new CopyOnWriteArrayList<>(packageManager.getNpmList()),
                     new CopyOnWriteArrayList<>(binaryPaths), reader, this, ucumService,
-                    packageId, canonicalBase, includeErrors);
+                    packageId, canonicalBase, verboseMessaging);
         }
 
         return cqlProcessor;

@@ -198,54 +198,42 @@ public class IOUtils {
 
 
     private static final Map<String, String> alreadyCopied = new HashMap<>();
-    public static int copyFileCounter() {
-        return persistCopyFileCounter;
-    }
-    private static int persistCopyFileCounter = 0;
 
-    public static boolean copyFile(String inputPath, String outputPath) {
+    public static void copyFile(String inputPath, String outputPath) {
 
         if ((inputPath == null || inputPath.isEmpty()) &&
                 (outputPath == null || outputPath.isEmpty())) {
             LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath and outputPath are missing!"));
-            return false;
+            return;
         }
 
         if (inputPath == null || inputPath.isEmpty()) {
             LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
-            return false;
+            return;
         }
 
         if (outputPath == null || outputPath.isEmpty()) {
             LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
-            return false;
+            return;
         }
 
         String key = inputPath + ":" + outputPath;
         if (alreadyCopied.containsKey(key)) {
             // File already copied to destination, no need to do anything
-            return false;
+            return;
         }
 
         try {
             Path src = Paths.get(inputPath);
             Path dest = Paths.get(outputPath);
             Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
-            String separator = System.getProperty("file.separator");
-            if (inputPath.toLowerCase().contains(separator + "tests-") ||
-                    inputPath.toLowerCase().contains(separator + "group-")){
-                persistCopyFileCounter++;
-            }
 
             alreadyCopied.put(key, outputPath);
-            return true;
         } catch (IOException e) {
             logger.error(e.getMessage());
             LogUtils.putException("IOUtils.copyFile(" + inputPath + ", " + outputPath + "): ",
                     new RuntimeException("Error copying file: " + e.getMessage()));
-            return false;
         }
-
     }
 
 

@@ -135,9 +135,9 @@ public class CqlProcessor {
 
     private NamespaceInfo namespaceInfo;
 
-    private boolean includeErrors;
+    private boolean verboseMessaging;
 
-    public CqlProcessor(List<NpmPackage> packages, List<String> folders, ILibraryReader reader, ILoggingService logger, UcumService ucumService, String packageId, String canonicalBase, Boolean includeErrors) {
+    public CqlProcessor(List<NpmPackage> packages, List<String> folders, ILibraryReader reader, ILoggingService logger, UcumService ucumService, String packageId, String canonicalBase, Boolean verboseMessaging) {
         super();
         this.packages = packages;
         this.folders = folders;
@@ -149,7 +149,7 @@ public class CqlProcessor {
         if (packageId != null && !packageId.isEmpty() && canonicalBase != null && !canonicalBase.isEmpty()) {
             this.namespaceInfo = new NamespaceInfo(packageId, canonicalBase);
         }
-        this.includeErrors = includeErrors;
+        this.verboseMessaging = verboseMessaging;
     }
 
     /**
@@ -409,7 +409,7 @@ public class CqlProcessor {
             }
 
             //output Success/Warn/Info/Fail message to user:
-            System.out.println(buildStatusMessage(translator.getErrors(), file.getName(), includeErrors));
+            System.out.println(buildStatusMessage(translator.getErrors(), file.getName(), verboseMessaging));
         }
         catch (Exception e) {
             result.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, IssueType.EXCEPTION, file.getName(), "CQL Processing failed with exception: "+e.getMessage(), IssueSeverity.ERROR));
@@ -449,11 +449,11 @@ public class CqlProcessor {
                 .collect(Collectors.toList());
     }
 
-    public static String buildStatusMessage(List<CqlCompilerException> errors, String resourceName, boolean includeErrors){
-        return buildStatusMessage(errors, resourceName, includeErrors, true, "\n\t");
+    public static String buildStatusMessage(List<CqlCompilerException> errors, String resourceName, boolean verboseMessaging){
+        return buildStatusMessage(errors, resourceName, verboseMessaging, true, "\n\t");
     }
 
-    public static String buildStatusMessage(List<CqlCompilerException> errors, String resourceName, boolean includeErrors, boolean withStatusIndicator, String delimiter){
+    public static String buildStatusMessage(List<CqlCompilerException> errors, String resourceName, boolean verboseMessaging, boolean withStatusIndicator, String delimiter){
         String successMsg = "[SUCCESS] CQL Processing of ";
         String statusIndicatorMinor = " completed successfully";
         String statusIndicator;
@@ -490,7 +490,7 @@ public class CqlProcessor {
         String warningStatus =  warningsList.size() + " Warning(s)" ;
 
         return (withStatusIndicator ? statusIndicator : "") + "CQL Processing of " + resourceName + statusIndicatorMinor + " with " + errorsStatus + ", "
-                +  warningStatus + ", and " + infoStatus + (includeErrors ? ": " + delimiter + fullSortedListMsg : "");
+                +  warningStatus + ", and " + infoStatus + (verboseMessaging ? ": " + delimiter + fullSortedListMsg : "");
     }
 
     public static boolean hasSevereErrors(List<CqlCompilerException> errors) {

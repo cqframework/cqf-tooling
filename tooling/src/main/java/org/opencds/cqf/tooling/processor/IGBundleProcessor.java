@@ -20,12 +20,12 @@ public class IGBundleProcessor {
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
     public static final String bundleFilesPathElement = "files/";
 
-    private Boolean includeErrors = true;
+    private Boolean verboseMessaging = true;
     LibraryProcessor libraryProcessor;
     CDSHooksProcessor cdsHooksProcessor;
 
-    public IGBundleProcessor(Boolean includeErrors, LibraryProcessor libraryProcessor, CDSHooksProcessor cdsHooksProcessor) {
-        this.includeErrors = includeErrors;
+    public IGBundleProcessor(Boolean verboseMessaging, LibraryProcessor libraryProcessor, CDSHooksProcessor cdsHooksProcessor) {
+        this.verboseMessaging = verboseMessaging;
         this.libraryProcessor = libraryProcessor;
         this.cdsHooksProcessor = cdsHooksProcessor;
     }
@@ -40,14 +40,8 @@ public class IGBundleProcessor {
         new MeasureBundler().bundleResources(refreshedLibraryNames,
                 igPath, binaryPaths, includeDependencies, includeTerminology,
                 includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
-                fhirUri, encoding, includeErrors);
+                fhirUri, encoding, verboseMessaging);
 
-        //this message can be moved to any point of this process, but so far it's just the bundle measure process
-        //that will persist test files. If Questionnaires and PlanDefinitions should ever need test files as well
-        //persistTestFiles can be moved to AbstractResourceProcessor from MeasureProcessor instead of abstract sig
-        System.out.println("\r\nTotal test files copied: " + IOUtils.copyFileCounter() + ". " +
-                (fhirUri != null && !fhirUri.isEmpty() ? "These files will be posted to " + fhirUri : "")
-        );
         System.out.println("\r\n[Bundle Measures has finished - " + getTime() + "]\r\n");
 
 
@@ -55,7 +49,7 @@ public class IGBundleProcessor {
         new PlanDefinitionBundler(this.libraryProcessor, this.cdsHooksProcessor).bundleResources(refreshedLibraryNames,
                 igPath, binaryPaths, includeDependencies, includeTerminology,
                 includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
-                fhirUri, encoding, includeErrors);
+                fhirUri, encoding, verboseMessaging);
         System.out.println("\r\n[Bundle PlanDefinitions has finished - " + getTime() + "]\r\n");
 
 
@@ -64,7 +58,7 @@ public class IGBundleProcessor {
         new QuestionnaireBundler(this.libraryProcessor).bundleResources(refreshedLibraryNames,
                 igPath, binaryPaths, includeDependencies, includeTerminology,
                 includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
-                fhirUri, encoding, includeErrors);
+                fhirUri, encoding, verboseMessaging);
         System.out.println("\r\n[Bundle Questionnaires has finished - " + getTime() + "]\r\n");
 
 

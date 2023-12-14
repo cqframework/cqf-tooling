@@ -26,7 +26,7 @@ public class RefreshIGOperation extends Operation {
             System.exit(1);
         }
 
-        if (params.includeErrors == null || !params.includeErrors) {
+        if (params.verboseMessaging == null || !params.verboseMessaging) {
             System.out.println("\r\nRe-run with -x to for expanded reporting of errors, warnings, and informational messages.\r\n");
         }
 

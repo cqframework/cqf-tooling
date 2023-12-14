@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
 
 /**
  * An abstract base class for bundlers that handle the bundling of various types of resources within an ig.
@@ -110,9 +111,8 @@ public abstract class AbstractBundler {
      */
     public void bundleResources(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
                                 Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp,
-                                FhirContext fhirContext, String fhirUri, IOUtils.Encoding encoding, Boolean includeErrors) {
+                                FhirContext fhirContext, String fhirUri, IOUtils.Encoding encoding, Boolean verboseMessaging) {
 
-        final Map<String, IBaseResource> resourcesMap = getResources(fhirContext);
         final List<String> bundledResources = new CopyOnWriteArrayList<>();
 
         //for keeping track of progress:
@@ -121,13 +121,17 @@ public abstract class AbstractBundler {
         //for keeping track of failed reasons:
         final Map<String, String> failedExceptionMessages = new ConcurrentHashMap<>();
 
+        //keeping track of error list returned during cql translation:
         final Map<String, List<CqlCompilerException>> cqlTranslatorErrorMessages = new ConcurrentHashMap<>();
 
-        //build list of tasks via for loop:
-        List<Callable<Void>> tasks = new ArrayList<>();
-        try {
+        //used to summarize file count user can expect to see in POST queue for each resource:
+        final Map<String, Integer> persistedFileReport = new ConcurrentHashMap<>();
 
-            final StringBuilder persistedFileReport = new StringBuilder();
+        //build list of executable tasks to be sent to thread pool:
+        List<Callable<Void>> tasks = new ArrayList<>();
+
+        try {
+            final Map<String, IBaseResource> resourcesMap = getResources(fhirContext);
             final Map<String, IBaseResource> libraryUrlMap = IOUtils.getLibraryUrlMap(fhirContext);
             final Map<String, IBaseResource> libraries = IOUtils.getLibraries(fhirContext);
             final Map<String, String> libraryPathMap = IOUtils.getLibraryPathMap(fhirContext);
@@ -241,33 +245,34 @@ public abstract class AbstractBundler {
                                     primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios,
                                     includeVersion, addBundleTimestamp, cqlTranslatorErrorMessages);
 
-                            //Child classes implement any extra processing of files (Such as MeasureBundler persisting tests-*)
-                            List<String> persistedExtraFiles = persistExtraFiles(bundleDestPath, resourceName, encoding, fhirContext, fhirUri);
+                            //If user supplied a fhir server url, inform them of total # of files to be persisted to the server:
+                            if (fhirUri != null && !fhirUri.isEmpty()) {
+                                persistedFileReport.put(resourceName,
+                                        //+1 to account for -bundle
+                                        persistFilesFolder(bundleDestPath, resourceName, encoding, fhirContext, fhirUri) + 1);
+                            }
 
                             if (cdsHooksProcessor != null) {
                                 List<String> activityDefinitionPaths = CDSHooksProcessor.bundleActivityDefinitions(resourceSourcePath, fhirContext, resources, encoding, includeVersion, shouldPersist);
                                 cdsHooksProcessor.addActivityDefinitionFilesToBundle(igPath, bundleDestPath, activityDefinitionPaths, fhirContext, encoding);
                             }
 
-                            //If user supplied a fhir server url, inform them of total # of files to be persisted to the server:
-                            if (fhirUri != null && !fhirUri.isEmpty()) {
-                                persistedFileReport.append("\r\n")
-                                        //all persisted files + the bundle:
-                                        .append(persistedExtraFiles.size() + 1)
-                                        .append(" total files will be posted to ")
-                                        .append(fhirUri)
-                                        .append(" for ")
-                                        .append(resourceName);
-                            }
                             bundledResources.add(resourceSourcePath);
                         }
 
 
                     } catch (Exception e) {
-                        if (resourceSourcePath == null) {
-                            failedExceptionMessages.put(resourceEntry.getValue().getIdElement().getIdPart(), e.getMessage());
+                        String failMsg = "";
+                        if (e.getMessage() != null ){
+                            failMsg = e.getMessage();
+                        }else{
+                            failMsg = e.getClass().getName();
+                            e.printStackTrace();
+                        }
+                        if (resourceSourcePath == null || resourceSourcePath.isEmpty()) {
+                            failedExceptionMessages.put(resourceEntry.getValue().getIdElement().getIdPart(), failMsg);
                         } else {
-                            failedExceptionMessages.put(resourceSourcePath, e.getMessage());
+                            failedExceptionMessages.put(resourceSourcePath, failMsg);
                         }
                     }
 
@@ -282,17 +287,33 @@ public abstract class AbstractBundler {
 
             ThreadUtils.executeTasks(tasks);
 
-            if (!persistedFileReport.toString().isEmpty()) {
-                System.out.println(persistedFileReport);
-            }
-
-
         } catch (Exception e) {
             LogUtils.putException("bundleResources: " + getResourceProcessorType(), e);
         }
 
+        //Prepare final report:
+        StringBuilder message = new StringBuilder(NEWLINE);
 
-        StringBuilder message = new StringBuilder(NEWLINE + bundledResources.size() + " " + getResourceProcessorType() + "(s) successfully bundled:");
+        //Give user a snapshot of the files each resource will have persisted to their FHIR server (if fhirUri is provided)
+        if (!persistedFileReport.isEmpty()) {
+            message.append(NEWLINE).append(persistedFileReport.size()).append(" ").append(getResourceProcessorType()).append("(s) have POST tasks in the queue:");
+            int totalQueueCount = 0;
+            for (String library : persistedFileReport.keySet()) {
+                totalQueueCount = totalQueueCount + persistedFileReport.get(library);
+                message.append(NEWLINE_INDENT)
+                        .append(library)
+                        .append(": ")
+                        .append(persistedFileReport.get(library))
+                        .append(" File(s) will be posted to ")
+                        .append(fhirUri);
+            }
+            message.append(NEWLINE_INDENT)
+                    .append("Total: ")
+                    .append(totalQueueCount)
+                    .append(" File(s)");
+        }
+
+        message.append(NEWLINE).append(bundledResources.size()).append(" ").append(getResourceProcessorType()).append("(s) successfully bundled:");
         for (String bundledResource : bundledResources) {
             message.append(NEWLINE_INDENT).append(bundledResource).append(" BUNDLED");
         }
@@ -327,12 +348,12 @@ public abstract class AbstractBundler {
 
             for (String library : cqlTranslatorErrorMessages.keySet()) {
                 message.append(INDENT).append(
-                        CqlProcessor.buildStatusMessage(cqlTranslatorErrorMessages.get(library), library, includeErrors, false, NEWLINE_INDENT2)
+                        CqlProcessor.buildStatusMessage(cqlTranslatorErrorMessages.get(library), library, verboseMessaging, false, NEWLINE_INDENT2)
                 ).append(NEWLINE);
             }
         }
 
-        System.out.println(message.toString());
+        System.out.println(message);
     }
 
 
@@ -360,7 +381,7 @@ public abstract class AbstractBundler {
     }
 
 
-    protected abstract List<String> persistExtraFiles(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri);
+    protected abstract int persistFilesFolder(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri);
 
     private void bundleFiles(String igPath, String bundleDestPath, String primaryLibraryName, List<String> binaryPaths, String resourceFocusSourcePath,
                              String librarySourcePath, FhirContext fhirContext, IOUtils.Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios,

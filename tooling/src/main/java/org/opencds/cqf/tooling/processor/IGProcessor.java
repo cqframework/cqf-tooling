@@ -52,7 +52,7 @@ public class IGProcessor extends BaseProcessor {
         boolean igPathProvided = params.igPath != null && !params.igPath.isEmpty();
 
         //presence of -x arg means give error details instead of just error count during cql processing
-        includeErrors = (params.includeErrors != null ? params.includeErrors : false);
+        verboseMessaging = (params.verboseMessaging != null ? params.verboseMessaging : false);
 
         if (!iniProvided && (!rootDirProvided || !igPathProvided)) {
             throw new IllegalArgumentException("Either the ini argument or both igPath and rootDir must be provided");
@@ -87,7 +87,6 @@ public class IGProcessor extends BaseProcessor {
 
         //Use case 2 while developing in Atom refresh content and run tests for either entire IG or targeted Artifact
         //refreshContent
-        LogUtils.info("IGProcessor.publishIG - refreshIG");
         refreshIG(params);
         //validate
         //ValidateProcessor.validate(ValidateParameters);
@@ -96,11 +95,10 @@ public class IGProcessor extends BaseProcessor {
 
         //Use case 3
         //package everything
-        LogUtils.info("IGProcessor.publishIG - bundleIg");
         Boolean skipPackages = params.skipPackages;
 
         if (!skipPackages) {
-            new IGBundleProcessor(params.includeErrors, new LibraryProcessor(), new CDSHooksProcessor()).bundleIg(
+            new IGBundleProcessor(params.verboseMessaging, new LibraryProcessor(), new CDSHooksProcessor()).bundleIg(
                     refreshedResourcesNames,
                     rootDir,
                     getBinaryPaths(),
@@ -172,7 +170,7 @@ public class IGProcessor extends BaseProcessor {
 
         if (includePatientScenarios) {
             TestCaseProcessor testCaseProcessor = new TestCaseProcessor();
-            testCaseProcessor.refreshTestCases(FilenameUtils.concat(rootDir, IGProcessor.TEST_CASE_PATH_ELEMENT), encoding, fhirContext, refreshedResourcesNames, includeErrors);
+            testCaseProcessor.refreshTestCases(FilenameUtils.concat(rootDir, IGProcessor.TEST_CASE_PATH_ELEMENT), encoding, fhirContext, refreshedResourcesNames, verboseMessaging);
         }
     }
 

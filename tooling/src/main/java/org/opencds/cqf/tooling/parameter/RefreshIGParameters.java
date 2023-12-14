@@ -24,5 +24,5 @@ public class RefreshIGParameters {
     public String libraryPath;
     public String libraryOutputPath;
     public String measureOutputPath;
-    public Boolean includeErrors;
+    public Boolean verboseMessaging;
 }

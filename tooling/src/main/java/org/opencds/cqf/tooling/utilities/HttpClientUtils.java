@@ -32,6 +32,12 @@ import java.util.function.Function;
  * A utility class for collecting HTTP requests to a FHIR server and executing them collectively.
  */
 public class HttpClientUtils {
+    //60 second timeout
+    protected static final RequestConfig requestConfig = RequestConfig.custom()
+            .setSocketTimeout(60000)
+            .setConnectTimeout(60000)
+            .build();
+
     protected static final Logger logger = LoggerFactory.getLogger(HttpClientUtils.class);
     private static final String FHIR_SERVER_URL = "FHIR Server URL";
     private static final String BUNDLE_RESOURCE = "Bundle Resource";
@@ -46,9 +52,9 @@ public class HttpClientUtils {
     //failedPostCalls needs to maintain the details built in the FAILED message, as well as a copy of the inputs for a retry by the user on failed posts.
     private static Queue<Pair<String, PostComponent>> failedPostCalls = new ConcurrentLinkedQueue<>();
     private static List<String> successfulPostCalls = new CopyOnWriteArrayList<>();
-    private static Map<String, Callable<Void>> tasks = new ConcurrentHashMap<>();
-    private static Map<String, Callable<Void>> initialTasks = new ConcurrentHashMap<>();
-    private static List<String> runningPostTaskList = new CopyOnWriteArrayList<>();
+    private static Map<IBaseResource, Callable<Void>> tasks = new ConcurrentHashMap<>();
+    private static Map<IBaseResource, Callable<Void>> initialTasks = new ConcurrentHashMap<>();
+    private static List<IBaseResource> runningPostTaskList = new CopyOnWriteArrayList<>();
     private static int processedPostCounter = 0;
 
     private HttpClientUtils() {
@@ -133,9 +139,9 @@ public class HttpClientUtils {
             PostComponent postPojo = new PostComponent(fhirServerUrl, resource, encoding, fhirContext, fileLocation, withPriority);
             HttpPost post = configureHttpPost(fhirServerUrl, resource, encoding, fhirContext);
             if (withPriority) {
-                initialTasks.put(resource.getIdElement().getIdPart(), createPostCallable(post, postPojo));
+                initialTasks.put(resource, createPostCallable(post, postPojo));
             } else {
-                tasks.put(resource.getIdElement().getIdPart(), createPostCallable(post, postPojo));
+                tasks.put(resource, createPostCallable(post, postPojo));
             }
         } catch (Exception e) {
             logger.error("Error while submitting the POST request: " + e.getMessage(), e);
@@ -167,9 +173,7 @@ public class HttpClientUtils {
 
         HttpPost post = new HttpPost(fhirServer);
         post.addHeader("content-type", "application/" + encoding.toString());
-
         String resourceString = IOUtils.encodeResourceAsString(resource, encoding, fhirContext);
-
         StringEntity input;
         try {
             input = new StringEntity(resourceString);
@@ -177,12 +181,6 @@ public class HttpClientUtils {
             throw new RuntimeException(e);
         }
         post.setEntity(input);
-
-        //60 second timeout
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setSocketTimeout(60000)
-                .setConnectTimeout(60000)
-                .build();
         post.setConfig(requestConfig);
 
         return post;
@@ -209,7 +207,9 @@ public class HttpClientUtils {
                     :
                     postComponent.resource.getIdElement().getIdPart());
             try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
+
                 HttpResponse response = httpClient.execute(post);
+
                 StatusLine statusLine = response.getStatusLine();
                 int statusCode = statusLine.getStatusCode();
                 String diagnosticString = getDiagnosticString(EntityUtils.toString(response.getEntity()));
@@ -224,7 +224,7 @@ public class HttpClientUtils {
                 failedPostCalls.add(Pair.of("[FAIL] Exception during " + resourceIdentifier + " POST request execution to " + postComponent.fhirServerUrl + ": " + e.getMessage(), postComponent));
             }
 
-            runningPostTaskList.remove(postComponent.resource.getIdElement().getIdPart());
+            runningPostTaskList.remove(postComponent.resource);
             reportProgress();
             return null;
         };
@@ -242,8 +242,6 @@ public class HttpClientUtils {
      * }
      * It extracts the diagnostics and returns a string appendable to the response
      *
-     * @param jsonString
-     * @return
      */
     private static String getDiagnosticString(String jsonString) {
         try {
@@ -382,14 +380,14 @@ public class HttpClientUtils {
         }
     }
 
-    private static void executeTasks(ExecutorService executorService, Map<String, Callable<Void>> executableTasksMap) {
+    private static void executeTasks(ExecutorService executorService, Map<IBaseResource, Callable<Void>> executableTasksMap) {
         List<Future<Void>> futures = new ArrayList<>();
-        List<String> resources = new ArrayList<>(executableTasksMap.keySet());
+        List<IBaseResource> resources = new ArrayList<>(executableTasksMap.keySet());
         for (int i = 0; i < resources.size(); i++) {
-            String thisResourceId = resources.get(i);
+            IBaseResource thisResource = resources.get(i);
             if (runningPostTaskList.size() < MAX_SIMULTANEOUS_POST_COUNT) {
-                runningPostTaskList.add(thisResourceId);
-                futures.add(executorService.submit(executableTasksMap.get(thisResourceId)));
+                runningPostTaskList.add(thisResource);
+                futures.add(executorService.submit(executableTasksMap.get(thisResource)));
             } else {
                 threadSleep(10);
                 i--;

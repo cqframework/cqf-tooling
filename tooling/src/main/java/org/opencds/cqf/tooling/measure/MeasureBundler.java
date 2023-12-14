@@ -43,12 +43,12 @@ public class MeasureBundler extends AbstractBundler {
 
     //so far only the Measure Bundle process needs to persist extra files:
     @Override
-    protected List<String> persistExtraFiles(String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, String fhirUri) {
+    protected int persistFilesFolder(String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, String fhirUri) {
         //persist tests-* before group-* files and make a record of which files were tracked:
         List<String> persistedFiles = persistTestFilesWithPriority(bundleDestPath, libraryName, encoding, fhirContext, fhirUri);
         persistedFiles.addAll(persistEverythingElse(bundleDestPath, libraryName, encoding, fhirContext, fhirUri, persistedFiles));
 
-        return persistedFiles;
+        return persistedFiles.size();
     }
 
     private List<String> persistTestFilesWithPriority(String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, String fhirUri) {
@@ -57,7 +57,6 @@ public class MeasureBundler extends AbstractBundler {
         File directory = new File(filesLoc);
         if (directory.exists()) {
             File[] filesInDir = directory.listFiles();
-
             if (!(filesInDir == null || filesInDir.length == 0)) {
                 for (File file : filesInDir) {
                     if (file.getName().toLowerCase().startsWith("tests-")) {

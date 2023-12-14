@@ -25,5 +25,5 @@ public interface IProcessorContext {
 
     CqlProcessor getCqlProcessor();
 
-    Boolean getIncludeErrors();
+    Boolean getVerboseMessaging();
 }

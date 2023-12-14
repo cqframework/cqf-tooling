@@ -29,12 +29,12 @@ public class TestCaseProcessor {
     public static final String separator = System.getProperty("file.separator");
     private static final Logger logger = LoggerFactory.getLogger(TestCaseProcessor.class);
 
-    public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, Boolean includeErrors) {
-        refreshTestCases(path, encoding, fhirContext, null, includeErrors);
+    public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, Boolean verboseMessaging) {
+        refreshTestCases(path, encoding, fhirContext, null, verboseMessaging);
     }
 
     public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, @Nullable List<String> refreshedResourcesNames,
-                                 Boolean includeErrors) {
+                                 Boolean verboseMessaging) {
         System.out.println("\r\n[Refreshing Tests]\r\n");
 
 
@@ -47,7 +47,6 @@ public class TestCaseProcessor {
         IFhirVersion version = fhirContext.getVersion();
         //build list of tasks via for loop:
         List<Callable<Void>> testGroupTasks = new ArrayList<>();
-        ExecutorService testGroupExecutor = Executors.newCachedThreadPool();
         List<String> resourceTypeTestGroups = IOUtils.getDirectoryPaths(path, false);
         for (String group : resourceTypeTestGroups) {
             testGroupTasks.add(() -> {
@@ -165,15 +164,15 @@ public class TestCaseProcessor {
                 return null;
             });
         }//end for (String group : resourceTypeTestGroups) {
-        ThreadUtils.executeTasks(testGroupTasks, testGroupExecutor);
+        ThreadUtils.executeTasks(testGroupTasks);
         //Now with all possible tasks collected, progress can be reported instead of flooding the console.
         ThreadUtils.executeTasks(testCaseRefreshTasks);
         //ensure accurate progress at final stage:
         reportProgress((testCaseRefreshFailMap.size() + testCaseRefreshSuccessMap.size()), testCaseRefreshTasks.size());
 
-        StringBuilder testCaseMessage = buildInformationMessage(testCaseRefreshFailMap, testCaseRefreshSuccessMap, "Test Case", "Refreshed", includeErrors);
+        StringBuilder testCaseMessage = buildInformationMessage(testCaseRefreshFailMap, testCaseRefreshSuccessMap, "Test Case", "Refreshed", verboseMessaging);
         if (!groupFileRefreshSuccessMap.isEmpty() || !groupFileRefreshFailMap.isEmpty()) {
-            testCaseMessage.append(buildInformationMessage(groupFileRefreshFailMap, groupFileRefreshSuccessMap, "Group File", "Created", includeErrors));
+            testCaseMessage.append(buildInformationMessage(groupFileRefreshFailMap, groupFileRefreshSuccessMap, "Group File", "Created", verboseMessaging));
         }
         System.out.println(testCaseMessage);
     }
@@ -185,10 +184,10 @@ public class TestCaseProcessor {
      * @param successMap    which items succeeded
      * @param type          group file or test case
      * @param successType   created or refreshed
-     * @param includeErrors give the exception message if includeErrors is on
+     * @param verboseMessaging give the exception message if verboseMessaging is on
      * @return built message for console
      */
-    private StringBuilder buildInformationMessage(Map<String, String> failMap, Map<String, String> successMap, String type, String successType, boolean includeErrors) {
+    private StringBuilder buildInformationMessage(Map<String, String> failMap, Map<String, String> successMap, String type, String successType, boolean verboseMessaging) {
         StringBuilder message = new StringBuilder();
         if (!successMap.isEmpty() || !failMap.isEmpty()) {
             message.append(NEWLINE).append(successMap.size()).append(" ").append(type).append("(s) successfully ").append(successType.toLowerCase()).append(":");
@@ -198,7 +197,7 @@ public class TestCaseProcessor {
             if (!failMap.isEmpty()) {
                 message.append(NEWLINE).append(failMap.size()).append(" ").append(type).append("(s) failed to be ").append(successType.toLowerCase()).append(":");
                 for (String failed : failMap.keySet()) {
-                    message.append(NEWLINE_INDENT).append(failed).append(" FAILED").append(includeErrors ? ": " + failMap.get(failed) : "");
+                    message.append(NEWLINE_INDENT).append(failed).append(" FAILED").append(verboseMessaging ? ": " + failMap.get(failed) : "");
                 }
             }
         }

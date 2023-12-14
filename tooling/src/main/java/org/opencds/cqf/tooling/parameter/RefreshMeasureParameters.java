@@ -51,5 +51,5 @@ public class RefreshMeasureParameters {
      */
     public String measureOutputDirectory;
 
-    public Boolean includeErrors;
+    public Boolean verboseMessaging;
 }

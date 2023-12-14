@@ -139,7 +139,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 		new RefreshIGOperation().execute(args);
 
 		int requestCount = WireMock.getAllServeEvents().size();
-		assertEquals(requestCount, 6); //Looking for 6 resources posted (all files found in -files ending in .cql, .xml, or .json)
+		assertEquals(requestCount, 7); //Looking for 7 resources posted (all files found in -files ending in .cql, .xml, or .json)
 
 		if (wireMockServer != null) {
 			wireMockServer.stop();
