@@ -1,12 +1,12 @@
 package org.opencds.cqf.tooling.processor;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.opencds.cqf.tooling.measure.MeasureProcessor;
-import org.opencds.cqf.tooling.questionnaire.QuestionnaireProcessor;
+import org.opencds.cqf.tooling.library.LibraryProcessor;
+import org.opencds.cqf.tooling.measure.MeasureBundler;
+import org.opencds.cqf.tooling.questionnaire.QuestionnaireBundler;
 import org.opencds.cqf.tooling.utilities.HttpClientUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
-import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,14 +19,15 @@ import java.util.List;
 public class IGBundleProcessor {
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
     public static final String bundleFilesPathElement = "files/";
-    MeasureProcessor measureProcessor;
-    PlanDefinitionProcessor planDefinitionProcessor;
-    QuestionnaireProcessor questionnaireProcessor;
 
-    public IGBundleProcessor(MeasureProcessor measureProcessor, PlanDefinitionProcessor planDefinitionProcessor, QuestionnaireProcessor questionnaireProcessor) {
-        this.measureProcessor = measureProcessor;
-        this.planDefinitionProcessor = planDefinitionProcessor;
-        this.questionnaireProcessor = questionnaireProcessor;
+    private Boolean includeErrors = true;
+    LibraryProcessor libraryProcessor;
+    CDSHooksProcessor cdsHooksProcessor;
+
+    public IGBundleProcessor(Boolean includeErrors, LibraryProcessor libraryProcessor, CDSHooksProcessor cdsHooksProcessor) {
+        this.includeErrors = includeErrors;
+        this.libraryProcessor = libraryProcessor;
+        this.cdsHooksProcessor = cdsHooksProcessor;
     }
 
     public void bundleIg(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Encoding encoding, Boolean includeELM,
@@ -34,36 +35,36 @@ public class IGBundleProcessor {
                          FhirContext fhirContext, String fhirUri) {
 
         System.out.println("\n");
-                
+
         System.out.println("\r\n[Bundle Measures has started - " + getTime() + "]\r\n");
-        measureProcessor.bundleResources(refreshedLibraryNames,
+        new MeasureBundler().bundleResources(refreshedLibraryNames,
                 igPath, binaryPaths, includeDependencies, includeTerminology,
                 includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
-                fhirUri, encoding);
+                fhirUri, encoding, includeErrors);
 
         //this message can be moved to any point of this process, but so far it's just the bundle measure process
         //that will persist test files. If Questionnaires and PlanDefinitions should ever need test files as well
         //persistTestFiles can be moved to AbstractResourceProcessor from MeasureProcessor instead of abstract sig
-        System.out.println("\r\nTotal \"tests-*\" files copied: " + IOUtils.copyFileCounter() + ". " +
+        System.out.println("\r\nTotal test files copied: " + IOUtils.copyFileCounter() + ". " +
                 (fhirUri != null && !fhirUri.isEmpty() ? "These files will be posted to " + fhirUri : "")
         );
         System.out.println("\r\n[Bundle Measures has finished - " + getTime() + "]\r\n");
 
-        
+
         System.out.println("\r\n[Bundle PlanDefinitions has started - " + getTime() + "]\r\n");
-        planDefinitionProcessor.bundleResources(refreshedLibraryNames,
+        new PlanDefinitionBundler(this.libraryProcessor, this.cdsHooksProcessor).bundleResources(refreshedLibraryNames,
                 igPath, binaryPaths, includeDependencies, includeTerminology,
                 includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
-                fhirUri, encoding);
+                fhirUri, encoding, includeErrors);
         System.out.println("\r\n[Bundle PlanDefinitions has finished - " + getTime() + "]\r\n");
 
-        
-        
+
+
         System.out.println("\r\n[Bundle Questionnaires has started - " + getTime() + "]\r\n");
-        questionnaireProcessor.bundleResources(refreshedLibraryNames,
+        new QuestionnaireBundler(this.libraryProcessor).bundleResources(refreshedLibraryNames,
                 igPath, binaryPaths, includeDependencies, includeTerminology,
                 includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
-                fhirUri, encoding);
+                fhirUri, encoding, includeErrors);
         System.out.println("\r\n[Bundle Questionnaires has finished - " + getTime() + "]\r\n");
 
 
@@ -78,7 +79,6 @@ public class IGBundleProcessor {
         // run cleanup (maven runs all ci tests sequentially and static member variables could retain values from previous tests)
         IOUtils.cleanUp();
         ResourceUtils.cleanUp();
-        TestCaseProcessor.cleanUp();
     }
 
     private String getTime() {

@@ -3,6 +3,7 @@ package org.opencds.cqf.tooling.processor;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
@@ -74,6 +75,13 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
 
     protected IProcessorContext parentContext;
 
+    //used to inform user of errors that occurred during refresh of library, measure, or test cases
+    public Boolean includeErrors = false;
+
+    public Boolean getIncludeErrors() {
+        return includeErrors;
+    }
+
     public void initialize(IProcessorContext context) {
         this.parentContext = context;
 
@@ -87,6 +95,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
             this.packageManager = parentContext.getPackageManager();
             this.binaryPaths = parentContext.getBinaryPaths();
             this.cqlProcessor = parentContext.getCqlProcessor();
+            this.includeErrors = parentContext.getIncludeErrors();
         }
     }
 
@@ -159,8 +168,9 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
             if (packageManager == null) {
                 throw new IllegalStateException("packageManager is null. It should be initialized at this point.");
             }
-            cqlProcessor = new CqlProcessor(packageManager.getNpmList(), binaryPaths, reader, this, ucumService,
-                    packageId, canonicalBase);
+            cqlProcessor = new CqlProcessor(new CopyOnWriteArrayList<>(packageManager.getNpmList()),
+                    new CopyOnWriteArrayList<>(binaryPaths), reader, this, ucumService,
+                    packageId, canonicalBase, includeErrors);
         }
 
         return cqlProcessor;

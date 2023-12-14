@@ -2,32 +2,33 @@ package org.opencds.cqf.tooling.processor;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FilenameUtils;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.common.ThreadUtils;
-import org.opencds.cqf.tooling.cql.exception.CQLTranslatorException;
+import org.opencds.cqf.tooling.cql.exception.CqlTranslatorException;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
-import org.opencds.cqf.tooling.utilities.BundleUtils;
-import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.opencds.cqf.tooling.utilities.LogUtils;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
+import org.opencds.cqf.tooling.utilities.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * An abstract base class for processors that handle the bundling of various types of resources within an ig.
+ * An abstract base class for bundlers that handle the bundling of various types of resources within an ig.
  * This class provides methods for bundling resources, including dependencies and test cases, and handles the execution of associated tasks.
  * Subclasses must implement specific methods for gathering, processing, and persisting resources.
  */
-public abstract class AbstractResourceProcessor extends BaseProcessor {
+public abstract class AbstractBundler {
+    public static final String separator = System.getProperty("file.separator");
+    public static final String NEWLINE_INDENT2 = "\n\t\t";
+    public static final String NEWLINE_INDENT = "\r\n\t";
+    public static final String INDENT = "\t";
+    public static final String NEWLINE = "\r\n";
     /**
      * The logger for logging messages specific to the implementing class.
      */
@@ -76,42 +77,57 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
         return identifiers;
     }
 
+    private String getResourcePrefix() {
+        return getResourceProcessorType().toLowerCase() + "-";
+    }
+
+    protected abstract Set<String> getPaths(FhirContext fhirContext);
+
+    protected abstract String getSourcePath(FhirContext fhirContext, Map.Entry<String, IBaseResource> resourceEntry);
+
+    /**
+     * Handled by the child class in gathering specific IBaseResources
+     */
+    protected abstract Map<String, IBaseResource> getResources(FhirContext fhirContext);
+
+    protected abstract String getResourceProcessorType();
+
+
     /**
      * Bundles resources within an Implementation Guide based on specified options.
      *
-     * @param refreshedLibraryNames A list of refreshed library names.
-     * @param igPath               The path to the IG.
-     * @param binaryPaths          The list of binary paths.
-     * @param includeDependencies  Flag indicating whether to include dependencies.
-     * @param includeTerminology   Flag indicating whether to include terminology.
+     * @param refreshedLibraryNames   A list of refreshed library names.
+     * @param igPath                  The path to the IG.
+     * @param binaryPaths             The list of binary paths.
+     * @param includeDependencies     Flag indicating whether to include dependencies.
+     * @param includeTerminology      Flag indicating whether to include terminology.
      * @param includePatientScenarios Flag indicating whether to include patient scenarios.
-     * @param includeVersion       Flag indicating whether to include version information.
-     * @param addBundleTimestamp   Flag indicating whether to add a timestamp to the bundle.
-     * @param fhirContext          The FHIR context.
-     * @param fhirUri              The FHIR server URI.
-     * @param encoding             The encoding type for processing resources.
+     * @param includeVersion          Flag indicating whether to include version information.
+     * @param addBundleTimestamp      Flag indicating whether to add a timestamp to the bundle.
+     * @param fhirContext             The FHIR context.
+     * @param fhirUri                 The FHIR server URI.
+     * @param encoding                The encoding type for processing resources.
      */
     public void bundleResources(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
                                 Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp,
-                                FhirContext fhirContext, String fhirUri, IOUtils.Encoding encoding) {
+                                FhirContext fhirContext, String fhirUri, IOUtils.Encoding encoding, Boolean includeErrors) {
 
-        Map<String, IBaseResource> resourcesMap = getResources(fhirContext);
-        List<String> bundledResources = new CopyOnWriteArrayList<>();
+        final Map<String, IBaseResource> resourcesMap = getResources(fhirContext);
+        final List<String> bundledResources = new CopyOnWriteArrayList<>();
 
         //for keeping track of progress:
-        List<String> processedResources = new CopyOnWriteArrayList<>();
+        final List<String> processedResources = new CopyOnWriteArrayList<>();
 
         //for keeping track of failed reasons:
-        Map<String, String> failedExceptionMessages = new ConcurrentHashMap<>();
+        final Map<String, String> failedExceptionMessages = new ConcurrentHashMap<>();
 
-        Map<String, Set<String>> translatorWarningMessages = new ConcurrentHashMap<>();
-
-        int totalResources = resourcesMap.size();
+        final Map<String, List<CqlCompilerException>> cqlTranslatorErrorMessages = new ConcurrentHashMap<>();
 
         //build list of tasks via for loop:
         List<Callable<Void>> tasks = new ArrayList<>();
         try {
-            final StringBuilder bundleTestFileStringBuilder = new StringBuilder();
+
+            final StringBuilder persistedFileReport = new StringBuilder();
             final Map<String, IBaseResource> libraryUrlMap = IOUtils.getLibraryUrlMap(fhirContext);
             final Map<String, IBaseResource> libraries = IOUtils.getLibraries(fhirContext);
             final Map<String, String> libraryPathMap = IOUtils.getLibraryPathMap(fhirContext);
@@ -129,13 +145,14 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
                 //no path for this resource:
                 if (resourceEntry.getKey() == null ||
                         resourceEntry.getKey().equalsIgnoreCase("null")) {
-                    if (!resourceId.isEmpty()) {
+                    if (resourceId != null && !resourceId.isEmpty()) {
                         failedExceptionMessages.put(resourceId, "Path is null for " + resourceId);
                     }
                     continue;
                 }
 
                 final String resourceSourcePath = getSourcePath(fhirContext, resourceEntry);
+
                 tasks.add(() -> {
                     //check if resourceSourcePath has been processed before:
                     if (processedResources.contains(resourceSourcePath)) {
@@ -185,16 +202,11 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
                         }
 
                         if (includeTerminology) {
-                            //throws CQLTranslatorException if failed, which will be logged and reported it in the final summary
+                            //throws CQLTranslatorException if failed with severe errors, which will be logged and reported it in the final summary
                             try {
                                 ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
-                            }catch (CQLTranslatorException warn){
-                                if (translatorWarningMessages.containsKey(primaryLibraryName)){
-                                    Set<String> existingMessages = translatorWarningMessages.get(primaryLibraryName);
-                                    existingMessages.addAll(warn.getErrors());
-                                }else{
-                                    translatorWarningMessages.put(primaryLibraryName, warn.getErrors());
-                                }
+                            } catch (CqlTranslatorException cqlTranslatorException) {
+                                cqlTranslatorErrorMessages.put(primaryLibraryName, cqlTranslatorException.getErrors());
                             }
                         }
 
@@ -221,43 +233,47 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
                         }
 
                         if (shouldPersist) {
-
                             String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), getResourceTestGroupName()), resourceName);
 
-                            persistBundle(igPath, bundleDestPath, resourceName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri, addBundleTimestamp);
+                            persistBundle(bundleDestPath, resourceName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri, addBundleTimestamp);
 
-                            String possibleBundleTestMessage = bundleFiles(igPath, bundleDestPath, resourceName, binaryPaths, resourceSourcePath,
+                            bundleFiles(igPath, bundleDestPath, resourceName, binaryPaths, resourceSourcePath,
                                     primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios,
-                                    includeVersion, addBundleTimestamp, translatorWarningMessages);
+                                    includeVersion, addBundleTimestamp, cqlTranslatorErrorMessages);
 
-                            //Check for test files in bundleDestPath + "-files", loop through if exists,
-                            // find all files that start with "tests-", post to fhir server following same folder structure:
-                            persistTestFiles(bundleDestPath, resourceName, encoding, fhirContext, fhirUri);
+                            //Child classes implement any extra processing of files (Such as MeasureBundler persisting tests-*)
+                            List<String> persistedExtraFiles = persistExtraFiles(bundleDestPath, resourceName, encoding, fhirContext, fhirUri);
 
                             if (cdsHooksProcessor != null) {
                                 List<String> activityDefinitionPaths = CDSHooksProcessor.bundleActivityDefinitions(resourceSourcePath, fhirContext, resources, encoding, includeVersion, shouldPersist);
                                 cdsHooksProcessor.addActivityDefinitionFilesToBundle(igPath, bundleDestPath, activityDefinitionPaths, fhirContext, encoding);
                             }
 
-                            if (!possibleBundleTestMessage.isEmpty()) {
-                                bundleTestFileStringBuilder.append(possibleBundleTestMessage);
+                            //If user supplied a fhir server url, inform them of total # of files to be persisted to the server:
+                            if (fhirUri != null && !fhirUri.isEmpty()) {
+                                persistedFileReport.append("\r\n")
+                                        //all persisted files + the bundle:
+                                        .append(persistedExtraFiles.size() + 1)
+                                        .append(" total files will be posted to ")
+                                        .append(fhirUri)
+                                        .append(" for ")
+                                        .append(resourceName);
                             }
-
                             bundledResources.add(resourceSourcePath);
                         }
 
 
                     } catch (Exception e) {
-                        failedExceptionMessages.put(resourceSourcePath, e.getMessage());
+                        if (resourceSourcePath == null) {
+                            failedExceptionMessages.put(resourceEntry.getValue().getIdElement().getIdPart(), e.getMessage());
+                        } else {
+                            failedExceptionMessages.put(resourceSourcePath, e.getMessage());
+                        }
                     }
-
 
                     processedResources.add(resourceSourcePath);
+                    reportProgress(processedResources.size(), tasks.size());
 
-                    synchronized (this) {
-                        double percentage = (double) processedResources.size() / totalResources * 100;
-                        System.out.println("Bundle " + getResourceProcessorType() + "s Progress: " + String.format("%.2f%%", percentage) + " PROCESSED: " + resourceEntry.getKey());
-                    }
                     //task requires return statement
                     return null;
                 });
@@ -266,10 +282,8 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
 
             ThreadUtils.executeTasks(tasks);
 
-            //Test file information:
-            String bundleTestFileMessage = bundleTestFileStringBuilder.toString();
-            if (!bundleTestFileMessage.isEmpty()) {
-                System.out.println(bundleTestFileMessage);
+            if (!persistedFileReport.toString().isEmpty()) {
+                System.out.println(persistedFileReport);
             }
 
 
@@ -278,9 +292,9 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
         }
 
 
-        StringBuilder message = new StringBuilder("\r\n" + bundledResources.size() + " " + getResourceProcessorType() + "(s) successfully bundled:");
+        StringBuilder message = new StringBuilder(NEWLINE + bundledResources.size() + " " + getResourceProcessorType() + "(s) successfully bundled:");
         for (String bundledResource : bundledResources) {
-            message.append("\r\n     ").append(bundledResource).append(" BUNDLED");
+            message.append(NEWLINE_INDENT).append(bundledResource).append(" BUNDLED");
         }
 
         List<String> resourcePathLibraryNames = new ArrayList<>(getPaths(fhirContext));
@@ -290,44 +304,67 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
 
         resourcePathLibraryNames.removeAll(bundledResources);
         resourcePathLibraryNames.retainAll(refreshedLibraryNames);
-        message.append("\r\n").append(resourcePathLibraryNames.size()).append(" ").append(getResourceProcessorType()).append("(s) refreshed, but not bundled (due to issues):");
+        message.append(NEWLINE).append(resourcePathLibraryNames.size()).append(" ").append(getResourceProcessorType()).append("(s) refreshed, but not bundled (due to issues):");
         for (String notBundled : resourcePathLibraryNames) {
-            message.append("\r\n     ").append(notBundled).append(" REFRESHED");
+            message.append(NEWLINE_INDENT).append(notBundled).append(" REFRESHED");
         }
 
         //attempt to give some kind of informational message:
         failedResources.removeAll(bundledResources);
         failedResources.removeAll(resourcePathLibraryNames);
-        message.append("\r\n").append(failedResources.size()).append(" ").append(getResourceProcessorType()).append("(s) failed refresh:");
+        message.append(NEWLINE).append(failedResources.size()).append(" ").append(getResourceProcessorType()).append("(s) failed refresh:");
         for (String failed : failedResources) {
             if (failedExceptionMessages.containsKey(failed)) {
-                message.append("\r\n     ").append(failed).append(" FAILED: ").append(failedExceptionMessages.get(failed));
+                message.append(NEWLINE_INDENT).append(failed).append(" FAILED: ").append(failedExceptionMessages.get(failed));
             } else {
-                message.append("\r\n     ").append(failed).append(" FAILED");
+                message.append(NEWLINE_INDENT).append(failed).append(" FAILED");
             }
         }
 
         //Exceptions stemming from IOUtils.translate that did not prevent process from completing for file:
-        if (!translatorWarningMessages.isEmpty()) {
-            message.append("\r\n").append(translatorWarningMessages.size()).append(" ").append(getResourceProcessorType()).append("(s) encountered warnings:");
-            for (String library : translatorWarningMessages.keySet()) {
-                message.append("\r\n     ").append(library).append(" WARNING: ").append(translatorWarningMessages.get(library));
+        if (!cqlTranslatorErrorMessages.isEmpty()) {
+            message.append(NEWLINE).append(cqlTranslatorErrorMessages.size()).append(" ").append(getResourceProcessorType()).append("(s) encountered CQL translator errors:");
+
+            for (String library : cqlTranslatorErrorMessages.keySet()) {
+                message.append(INDENT).append(
+                        CqlProcessor.buildStatusMessage(cqlTranslatorErrorMessages.get(library), library, includeErrors, false, NEWLINE_INDENT2)
+                ).append(NEWLINE);
             }
         }
 
         System.out.println(message.toString());
     }
 
-    private String getResourcePrefix() {
-        return getResourceProcessorType().toLowerCase() + "-";
+
+    private void reportProgress(int count, int total) {
+        double percentage = (double) count / total * 100;
+        System.out.print("\rBundle " + getResourceProcessorType() + "s: " + String.format("%.2f%%", percentage) + " processed.");
     }
 
-    protected abstract Set<String> getPaths(FhirContext fhirContext);
+    private String getResourceTestGroupName() {
+        return getResourceProcessorType().toLowerCase();
+    }
 
-    private String bundleFiles(String igPath, String bundleDestPath, String primaryLibraryName, List<String> binaryPaths, String resourceFocusSourcePath,
-                               String librarySourcePath, FhirContext fhirContext, IOUtils.Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios,
-                               Boolean includeVersion, Boolean addBundleTimestamp, Map<String, Set<String>> translatorWarningMessages) {
-        String bundleMessage = "";
+    private void persistBundle(String bundleDestPath, String libraryName,
+                               IOUtils.Encoding encoding, FhirContext fhirContext,
+                               List<IBaseResource> resources, String fhirUri,
+                               Boolean addBundleTimestamp) throws IOException {
+        IOUtils.initializeDirectory(bundleDestPath);
+        Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext, addBundleTimestamp, this.getIdentifiers());
+        IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);
+
+        if (fhirUri != null && !fhirUri.isEmpty()) {
+            String resourceWriteLocation = bundleDestPath + separator + libraryName + "-bundle." + encoding;
+            HttpClientUtils.post(fhirUri, (IBaseResource) bundle, encoding, fhirContext, resourceWriteLocation, true);
+        }
+    }
+
+
+    protected abstract List<String> persistExtraFiles(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri);
+
+    private void bundleFiles(String igPath, String bundleDestPath, String primaryLibraryName, List<String> binaryPaths, String resourceFocusSourcePath,
+                             String librarySourcePath, FhirContext fhirContext, IOUtils.Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios,
+                             Boolean includeVersion, Boolean addBundleTimestamp, Map<String, List<CqlCompilerException>> translatorWarningMessages) {
 
         String bundleDestFilesPath = FilenameUtils.concat(bundleDestPath, primaryLibraryName + "-" + IGBundleProcessor.bundleFilesPathElement);
         IOUtils.initializeDirectory(bundleDestFilesPath);
@@ -350,13 +387,8 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
                     Object bundle = BundleUtils.bundleArtifacts(ValueSetsProcessor.getId(primaryLibraryName), new ArrayList<IBaseResource>(valueSets.values()), fhirContext, addBundleTimestamp, this.getIdentifiers());
                     IOUtils.writeBundle(bundle, bundleDestFilesPath, encoding, fhirContext);
                 }
-            }catch (CQLTranslatorException warn){
-                if (translatorWarningMessages.containsKey(primaryLibraryName)){
-                    Set<String> existingMessages = translatorWarningMessages.get(primaryLibraryName);
-                    existingMessages.addAll(warn.getErrors());
-                }else{
-                    translatorWarningMessages.put(primaryLibraryName, warn.getErrors());
-                }
+            } catch (CqlTranslatorException cqlTranslatorException) {
+                translatorWarningMessages.put(primaryLibraryName, cqlTranslatorException.getErrors());
             }
         }
 
@@ -370,34 +402,9 @@ public abstract class AbstractResourceProcessor extends BaseProcessor {
         }
 
         if (includePatientScenarios) {
-            bundleMessage = TestCaseProcessor.bundleTestCaseFiles(igPath, getResourceTestGroupName(), primaryLibraryName, bundleDestFilesPath, fhirContext);
+            TestCaseProcessor.bundleTestCaseFiles(igPath, getResourceTestGroupName(), primaryLibraryName, bundleDestFilesPath, fhirContext);
         }
 
-        return bundleMessage;
-    }
-
-
-    private void persistBundle(String igPath, String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, List<IBaseResource> resources, String fhirUri, Boolean addBundleTimestamp) {
-        IOUtils.initializeDirectory(bundleDestPath);
-        Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext, addBundleTimestamp, this.getIdentifiers());
-        IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);
-
-        BundleUtils.postBundle(encoding, fhirContext, fhirUri, (IBaseResource) bundle);
-    }
-
-    protected abstract void persistTestFiles(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri);
-
-    protected abstract String getSourcePath(FhirContext fhirContext, Map.Entry<String, IBaseResource> resourceEntry);
-
-    /**
-     * Handled by the child class in gathering specific IBaseResources
-     */
-    protected abstract Map<String, IBaseResource> getResources(FhirContext fhirContext);
-
-    protected abstract String getResourceProcessorType();
-
-    private String getResourceTestGroupName() {
-        return getResourceProcessorType().toLowerCase();
     }
 
 

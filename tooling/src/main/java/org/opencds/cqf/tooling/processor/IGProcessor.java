@@ -24,19 +24,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IGProcessor extends BaseProcessor {
-
     private static final Logger logger = LoggerFactory.getLogger(IGProcessor.class);
-
     public static final String IG_VERSION_REQUIRED = "igVersion required";
-    protected IGBundleProcessor igBundleProcessor;
-    protected LibraryProcessor libraryProcessor;
-    protected MeasureProcessor measureProcessor;
+    public static final String CQL_LIBRARY_PATH_ELEMENT = "input/pagecontent/cql/";
+    public static final String LIBRARY_PATH_ELEMENT = "input/resources/library/";
+    public static final String MEASURE_PATH_ELEMENT = "input/resources/measure/";
+    public static final String PLAN_DEFINITION_PATH_ELEMENT = "input/resources/plandefinition/";
+    public static final String VALUE_SETS_PATH_ELEMENT = "input/vocabulary/valueset/";
+    public static final String TEST_CASE_PATH_ELEMENT = "input/tests/";
+    public static final String DEVICE_PATH_ELEMENT = "input/resources/device/";
 
-    public IGProcessor(IGBundleProcessor igBundleProcessor, LibraryProcessor libraryProcessor, MeasureProcessor measureProcessor) {
-        this.libraryProcessor = libraryProcessor;
-        this.measureProcessor = measureProcessor;
-        this.igBundleProcessor = igBundleProcessor;
-    }
     //mega ig method
     public void publishIG(RefreshIGParameters params) {
         if (params.skipPackages == null) {
@@ -54,26 +51,19 @@ public class IGProcessor extends BaseProcessor {
         boolean rootDirProvided = params.rootDir != null && !params.rootDir.isEmpty();
         boolean igPathProvided = params.igPath != null && !params.igPath.isEmpty();
 
+        //presence of -x arg means give error details instead of just error count during cql processing
+        includeErrors = (params.includeErrors != null ? params.includeErrors : false);
+
         if (!iniProvided && (!rootDirProvided || !igPathProvided)) {
             throw new IllegalArgumentException("Either the ini argument or both igPath and rootDir must be provided");
         }
 
         if (params.ini != null) {
             initializeFromIni(params.ini);
-        }
-        else {
+        } else {
             initializeFromIg(params.rootDir, params.igPath, null);
         }
 
-        Encoding encoding = params.outputEncoding;
-        Boolean skipPackages = params.skipPackages;
-        Boolean includeELM = params.includeELM;
-        Boolean includeDependencies = params.includeDependencies;
-        Boolean includeTerminology = params.includeTerminology;
-        Boolean includePatientScenarios = params.includePatientScenarios;
-        Boolean addBundleTimestamp = params.addBundleTimestamp;
-        Boolean versioned = params.versioned;
-        String fhirUri = params.fhirUri;
         // String measureToRefreshPath = params.measureToRefreshPath;
         ArrayList<String> resourceDirs = new ArrayList<String>();
         for (String resourceDir : params.resourceDirs) {
@@ -107,20 +97,22 @@ public class IGProcessor extends BaseProcessor {
         //Use case 3
         //package everything
         LogUtils.info("IGProcessor.publishIG - bundleIg");
+        Boolean skipPackages = params.skipPackages;
+
         if (!skipPackages) {
-            igBundleProcessor.bundleIg(
+            new IGBundleProcessor(params.includeErrors, new LibraryProcessor(), new CDSHooksProcessor()).bundleIg(
                     refreshedResourcesNames,
                     rootDir,
                     getBinaryPaths(),
-                    encoding,
-                    includeELM,
-                    includeDependencies,
-                    includeTerminology,
-                    includePatientScenarios,
-                    versioned,
-                    addBundleTimestamp,
+                    params.outputEncoding,
+                    params.includeELM,
+                    params.includeDependencies,
+                    params.includeTerminology,
+                    params.includePatientScenarios,
+                    params.versioned,
+                    params.addBundleTimestamp,
                     fhirContext,
-                    fhirUri
+                    params.fhirUri
             );
         }
         //test everything
@@ -129,55 +121,49 @@ public class IGProcessor extends BaseProcessor {
     }
 
     public ArrayList<String> refreshedResourcesNames = new ArrayList<String>();
+
     public void refreshIG(RefreshIGParameters params) {
         if (params.ini != null) {
             initializeFromIni(params.ini);
-        }
-        else {
+        } else {
             try {
                 initializeFromIg(params.rootDir, params.igPath, null);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 logMessage(String.format("Error Refreshing for File %s: %s", params.igPath, e.getMessage()));
             }
         }
 
-        Encoding encoding = params.outputEncoding;
-        // Boolean includeELM = params.includeELM;
-        // Boolean includeDependencies = params.includeDependencies;
-        String libraryPath = params.libraryPath;
-        String libraryOutputPath = params.libraryOutputPath;
-        String measureOutputPath = params.measureOutputPath;
-        Boolean includeTerminology = params.includeTerminology;
-        Boolean includePatientScenarios = params.includePatientScenarios;
-        Boolean versioned = params.versioned;
-        // String fhirUri = params.fhirUri;
-        String measureToRefreshPath = params.measureToRefreshPath;
         List<String> resourceDirs = params.resourceDirs;
-        if (resourceDirs.size() == 0) {
+        if (resourceDirs.isEmpty()) {
             try {
                 resourceDirs = IGUtils.extractResourcePaths(this.rootDir, this.sourceIg);
             } catch (IOException e) {
-                e.printStackTrace();
+                logMessage(String.format("Error Extracting Resource Paths for File %s: %s", params.igPath, e.getMessage()));
             }
         }
+
+        String measureToRefreshPath = params.measureToRefreshPath;
+        Encoding encoding = params.outputEncoding;
+        String measureOutputPath = params.measureOutputPath;
+        Boolean includePatientScenarios = params.includePatientScenarios;
+        Boolean versioned = params.versioned;
+
+
         IOUtils.resourceDirectories.addAll(resourceDirs);
-
         FhirContext fhirContext = IGProcessor.getIgFhirContext(fhirVersion);
+        IGProcessor.ensure(rootDir, includePatientScenarios, params.includeTerminology, IOUtils.resourceDirectories);
 
-        IGProcessor.ensure(rootDir, includePatientScenarios, includeTerminology, IOUtils.resourceDirectories);
+        refreshedResourcesNames.addAll(new LibraryProcessor()
+                .refreshIgLibraryContent(this, encoding, params.libraryPath, params.libraryOutputPath,
+                        versioned, fhirContext, params.shouldApplySoftwareSystemStamp));
 
-        List<String> refreshedLibraryNames;
-        refreshedLibraryNames = libraryProcessor.refreshIgLibraryContent(this, encoding, libraryPath, libraryOutputPath, versioned, fhirContext, params.shouldApplySoftwareSystemStamp);
-        refreshedResourcesNames.addAll(refreshedLibraryNames);
-
-        List<String> refreshedMeasureNames;
         if (Strings.isNullOrEmpty(measureOutputPath)) {
-            refreshedMeasureNames = measureProcessor.refreshIgMeasureContent(this, encoding, versioned, fhirContext, measureToRefreshPath, params.shouldApplySoftwareSystemStamp);
+            refreshedResourcesNames.addAll(new MeasureProcessor().refreshIgMeasureContent(this, encoding, versioned,
+                    fhirContext, measureToRefreshPath, params.shouldApplySoftwareSystemStamp));
         } else {
-            refreshedMeasureNames = measureProcessor.refreshIgMeasureContent(this, encoding, measureOutputPath, versioned, fhirContext, measureToRefreshPath, params.shouldApplySoftwareSystemStamp);
+            refreshedResourcesNames.addAll(new MeasureProcessor().refreshIgMeasureContent(this, encoding, measureOutputPath,
+                    versioned, fhirContext, measureToRefreshPath, params.shouldApplySoftwareSystemStamp));
         }
-        refreshedResourcesNames.addAll(refreshedMeasureNames);
 
         if (refreshedResourcesNames.isEmpty()) {
             LogUtils.info("No resources successfully refreshed.");
@@ -186,12 +172,11 @@ public class IGProcessor extends BaseProcessor {
 
         if (includePatientScenarios) {
             TestCaseProcessor testCaseProcessor = new TestCaseProcessor();
-            testCaseProcessor.refreshTestCases(FilenameUtils.concat(rootDir, IGProcessor.testCasePathElement), encoding, fhirContext, refreshedResourcesNames);
+            testCaseProcessor.refreshTestCases(FilenameUtils.concat(rootDir, IGProcessor.TEST_CASE_PATH_ELEMENT), encoding, fhirContext, refreshedResourcesNames, includeErrors);
         }
     }
 
-    public static FhirContext getIgFhirContext(String igVersion)
-    {
+    public static FhirContext getIgFhirContext(String igVersion) {
         if (igVersion == null) {
             throw new IllegalArgumentException(IG_VERSION_REQUIRED);
         }
@@ -208,43 +193,36 @@ public class IGProcessor extends BaseProcessor {
 
             default:
                 throw new IllegalArgumentException("Unknown IG version: " + igVersion);
-        }     
+        }
     }
-    
+
     public static final String bundlePathElement = "bundles/";
+
     public static String getBundlesPath(String igPath) {
         return FilenameUtils.concat(igPath, bundlePathElement);
     }
-    public static final String cqlLibraryPathElement = "input/pagecontent/cql/";
-    public static final String libraryPathElement = "input/resources/library/";
-    public static final String measurePathElement = "input/resources/measure/";
-    public static final String planDefinitionPathElement = "input/resources/plandefinition/";
-    public static final String valuesetsPathElement = "input/vocabulary/valueset/";
-    public static final String testCasePathElement = "input/tests/";
-    public static final String devicePathElement = "input/resources/device/";
-    
+
     public static void ensure(String igPath, Boolean includePatientScenarios, Boolean includeTerminology, List<String> resourcePaths) {
         File directory = new File(getBundlesPath(igPath));
         if (!directory.exists()) {
             directory.mkdir();
-        }        
+        }
         if (resourcePaths.isEmpty()) {
-            ensureDirectory(igPath, IGProcessor.cqlLibraryPathElement);
-            ensureDirectory(igPath, IGProcessor.libraryPathElement);
-            ensureDirectory(igPath, IGProcessor.measurePathElement);
-            ensureDirectory(igPath, IGProcessor.planDefinitionPathElement);
-            ensureDirectory(igPath, IGProcessor.valuesetsPathElement);
-            ensureDirectory(igPath, IGProcessor.testCasePathElement);
+            ensureDirectory(igPath, IGProcessor.CQL_LIBRARY_PATH_ELEMENT);
+            ensureDirectory(igPath, IGProcessor.LIBRARY_PATH_ELEMENT);
+            ensureDirectory(igPath, IGProcessor.MEASURE_PATH_ELEMENT);
+            ensureDirectory(igPath, IGProcessor.PLAN_DEFINITION_PATH_ELEMENT);
+            ensureDirectory(igPath, IGProcessor.VALUE_SETS_PATH_ELEMENT);
+            ensureDirectory(igPath, IGProcessor.TEST_CASE_PATH_ELEMENT);
+        } else {
+            checkForDirectory(igPath, IGProcessor.CQL_LIBRARY_PATH_ELEMENT);
+            checkForDirectory(igPath, IGProcessor.LIBRARY_PATH_ELEMENT);
+            checkForDirectory(igPath, IGProcessor.MEASURE_PATH_ELEMENT);
+            checkForDirectory(igPath, IGProcessor.PLAN_DEFINITION_PATH_ELEMENT);
+            checkForDirectory(igPath, IGProcessor.VALUE_SETS_PATH_ELEMENT);
+            checkForDirectory(igPath, IGProcessor.TEST_CASE_PATH_ELEMENT);
         }
-        else {
-            checkForDirectory(igPath, IGProcessor.cqlLibraryPathElement);
-            checkForDirectory(igPath, IGProcessor.libraryPathElement);
-            checkForDirectory(igPath, IGProcessor.measurePathElement);
-            checkForDirectory(igPath, IGProcessor.planDefinitionPathElement);
-            checkForDirectory(igPath, IGProcessor.valuesetsPathElement);
-            checkForDirectory(igPath, IGProcessor.testCasePathElement);
-        }
-        checkForDirectory(igPath, IGProcessor.devicePathElement);
+        checkForDirectory(igPath, IGProcessor.DEVICE_PATH_ELEMENT);
 
         // HashSet<String> cqlContentPaths = IOUtils.getCqlLibraryPaths();
     }
@@ -264,8 +242,7 @@ public class IGProcessor extends BaseProcessor {
         File directory = new File(FilenameUtils.concat(igPath, pathElement));
         if (!directory.exists()) {
             logger.info("No directory found by convention for: {}", directory.getName());
-        }
-        else {
+        } else {
             // TODO: This is a concept different from "resource directories". It is expected elsewhere (e.g., IOUtils.setupActivityDefinitionPaths)
             // that resourceDirectories contains a set of proper "resource" directories. Adding non-resource directories
             // leads to surprising results when bundling like picking up resources from the /tests directory.

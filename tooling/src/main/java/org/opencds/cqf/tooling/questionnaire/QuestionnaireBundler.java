@@ -1,19 +1,21 @@
 package org.opencds.cqf.tooling.questionnaire;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
-import org.opencds.cqf.tooling.processor.AbstractResourceProcessor;
+import org.opencds.cqf.tooling.processor.AbstractBundler;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class QuestionnaireProcessor extends AbstractResourceProcessor {
+public class QuestionnaireBundler extends AbstractBundler {
 
     @SuppressWarnings("this-escape")
-    public QuestionnaireProcessor(LibraryProcessor libraryProcessor) {
+    public QuestionnaireBundler(LibraryProcessor libraryProcessor) {
         setLibraryProcessor(libraryProcessor);
     }
 
@@ -34,12 +36,14 @@ public class QuestionnaireProcessor extends AbstractResourceProcessor {
     }
 
     @Override
+    protected List<String> persistExtraFiles(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri) {
+        //do nothing
+        return new ArrayList<>();
+    }
+
+    @Override
     protected Set<String> getPaths(FhirContext fhirContext) {
         return IOUtils.getQuestionnairePaths(fhirContext);
     }
 
-    @Override
-    protected void persistTestFiles(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri) {
-        //not needed
-    }
 }

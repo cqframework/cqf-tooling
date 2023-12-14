@@ -2,42 +2,43 @@ package org.opencds.cqf.tooling.measure;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FilenameUtils;
-import org.cqframework.cql.cql2elm.CqlCompilerException;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
-import org.cqframework.cql.cql2elm.LibraryManager;
+import org.cqframework.cql.cql2elm.*;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Measure;
 import org.opencds.cqf.tooling.measure.r4.R4MeasureProcessor;
 import org.opencds.cqf.tooling.measure.stu3.STU3MeasureProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshMeasureParameters;
-import org.opencds.cqf.tooling.processor.AbstractResourceProcessor;
 import org.opencds.cqf.tooling.processor.BaseProcessor;
+import org.opencds.cqf.tooling.processor.CqlProcessor;
 import org.opencds.cqf.tooling.processor.IGProcessor;
 import org.opencds.cqf.tooling.utilities.*;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-public class MeasureProcessor extends AbstractResourceProcessor {
-    public static final String ResourcePrefix = "measure-";
-    protected List<Object> identifiers;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class MeasureProcessor extends BaseProcessor {
+    public static volatile String ResourcePrefix = "measure-";
+    protected volatile List<Object> identifiers;
 
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
     }
-    public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, String measureToRefreshPath, Boolean shouldApplySoftwareSystemStamp) {
-        return refreshIgMeasureContent(parentContext, outputEncoding, null, versioned, fhirContext, measureToRefreshPath, shouldApplySoftwareSystemStamp);
+
+    public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext,
+                                                String measureToRefreshPath, Boolean shouldApplySoftwareSystemStamp) {
+
+        return refreshIgMeasureContent(parentContext, outputEncoding, null, versioned, fhirContext, measureToRefreshPath,
+                shouldApplySoftwareSystemStamp);
     }
 
-    public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, String measureOutputDirectory, Boolean versioned, FhirContext fhirContext, String measureToRefreshPath, Boolean shouldApplySoftwareSystemStamp) {
+    public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, String measureOutputDirectory,
+                                                Boolean versioned, FhirContext fhirContext, String measureToRefreshPath,
+                                                Boolean shouldApplySoftwareSystemStamp) {
 
-        logger.info("Refreshing measures...");
+        System.out.println("\r\n[Refreshing Measures]\r\n");
 
         MeasureProcessor measureProcessor;
         switch (fhirContext.getVersion().getVersion()) {
@@ -52,7 +53,7 @@ public class MeasureProcessor extends AbstractResourceProcessor {
                         "Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
 
-        String measurePath = FilenameUtils.concat(parentContext.getRootDir(), IGProcessor.measurePathElement);
+        String measurePath = FilenameUtils.concat(parentContext.getRootDir(), IGProcessor.MEASURE_PATH_ELEMENT);
         RefreshMeasureParameters params = new RefreshMeasureParameters();
         params.measurePath = measurePath;
         params.parentContext = parentContext;
@@ -89,89 +90,38 @@ public class MeasureProcessor extends AbstractResourceProcessor {
     private List<Measure> internalRefreshGeneratedContent(List<Measure> sourceMeasures) {
         // for each Measure, refresh the measure based on the primary measure library
         List<Measure> resources = new ArrayList<>();
-        for (Measure measure : sourceMeasures) {
-            resources.add(refreshGeneratedContent(measure));
-        }
-        return resources;
-    }
-
-    private Measure refreshGeneratedContent(Measure measure) {
         MeasureRefreshProcessor processor = new MeasureRefreshProcessor();
         LibraryManager libraryManager = getCqlProcessor().getLibraryManager();
         CqlTranslatorOptions cqlTranslatorOptions = getCqlProcessor().getCqlTranslatorOptions();
-        // Do not attempt to refresh if the measure does not have a library
-        if (measure.hasLibrary()) {
-            String libraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
-            VersionedIdentifier primaryLibraryIdentifier = CanonicalUtils.toVersionedIdentifier(libraryUrl);
-            List<CqlCompilerException> errors = new ArrayList<CqlCompilerException>();
-            CompiledLibrary CompiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, errors);
-            boolean hasErrors = false;
-            if (!errors.isEmpty()) {
-                for (CqlCompilerException e : errors) {
-                    if (e.getSeverity() == CqlCompilerException.ErrorSeverity.Error) {
-                        hasErrors = true;
-                    }
-                    logMessage(e.getMessage());
-                }
-            }
-            if (!hasErrors) {
-                return processor.refreshMeasure(measure, libraryManager, CompiledLibrary, cqlTranslatorOptions.getCqlCompilerOptions());
+        for (Measure measure : sourceMeasures) {
+            // Do not attempt to refresh if the measure does not have a library
+            if (measure.hasLibrary()) {
+                resources.add(refreshGeneratedContent(measure, processor, libraryManager, cqlTranslatorOptions));
+            } else {
+                resources.add(measure);
             }
         }
+
+        return resources;
+    }
+
+    private Measure refreshGeneratedContent(Measure measure, MeasureRefreshProcessor processor, LibraryManager libraryManager, CqlTranslatorOptions cqlTranslatorOptions) {
+
+        String libraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
+        VersionedIdentifier primaryLibraryIdentifier = CanonicalUtils.toVersionedIdentifier(libraryUrl);
+
+        List<CqlCompilerException> errors = new CopyOnWriteArrayList<>();
+        CompiledLibrary CompiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, errors);
+
+        System.out.println(CqlProcessor.buildStatusMessage(errors, measure.getName(), includeErrors));
+
+        boolean hasSevereErrors = CqlProcessor.hasSevereErrors(errors);
+
+        //refresh measures without severe errors:
+        if (!hasSevereErrors) {
+            return processor.refreshMeasure(measure, libraryManager, CompiledLibrary, cqlTranslatorOptions.getCqlCompilerOptions());
+        }
+
         return measure;
-    }
-
-    //abstract methods to override:
-    @Override
-    protected void persistTestFiles(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri) {
-
-        String filesLoc = bundleDestPath + File.separator + libraryName + "-files";
-        File directory = new File(filesLoc);
-        if (directory.exists()) {
-
-            File[] filesInDir = directory.listFiles(new FilenameFilter() {
-                @Override
-                public boolean accept(File dir, String name) {
-                    return name.toLowerCase().startsWith("tests-");
-                }
-            });
-
-            if (!(filesInDir == null || filesInDir.length == 0)) {
-                for (File file : filesInDir) {
-                    if (file.getName().toLowerCase().startsWith("tests-")) {
-                        try {
-                            IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext, true);
-                            //ensure the resource can be posted
-                            if (BundleUtils.resourceIsTransactionBundle(resource)) {
-                                BundleUtils.postBundle(encoding, fhirContext, fhirUri, resource);
-                            }
-                        } catch (Exception e) {
-                            //resource is likely not IBaseResource
-                            logger.error("persistTestFiles", e);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    protected String getSourcePath(FhirContext fhirContext, Map.Entry<String, IBaseResource> resourceEntry) {
-        return IOUtils.getMeasurePathMap(fhirContext).get(resourceEntry.getKey());
-    }
-
-    @Override
-    protected Map<String, IBaseResource> getResources(FhirContext fhirContext) {
-        return IOUtils.getMeasures(fhirContext);
-    }
-
-    @Override
-    protected String getResourceProcessorType() {
-        return TYPE_MEASURE;
-    }
-
-    @Override
-    protected Set<String> getPaths(FhirContext fhirContext) {
-        return IOUtils.getMeasurePaths(fhirContext);
     }
 }

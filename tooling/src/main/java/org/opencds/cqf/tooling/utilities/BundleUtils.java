@@ -108,16 +108,6 @@ public class BundleUtils {
         return bundle;
     }
 
-    public static void postBundle(IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri, IBaseResource bundle) {
-        if (fhirUri != null && !fhirUri.isEmpty()) {
-            try {
-                HttpClientUtils.post(fhirUri, bundle, encoding, fhirContext);
-            } catch (IOException e) {
-                LogUtils.putException(bundle.getIdElement().getIdPart(), "Error posting to FHIR Server: " + fhirUri + ".  Bundle not posted.");
-            }
-        }
-    }
-
     public static List<Map.Entry<String, IBaseResource>> getBundlesInDir(String directoryPath, FhirContext fhirContext) {
         return getBundlesInDir(directoryPath, fhirContext, true);
     }

@@ -19,12 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.Validate;
-import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
-import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
-import org.cqframework.cql.cql2elm.LibraryManager;
-import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.cql2elm.*;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.ValueSetDef;
@@ -36,7 +31,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.opencds.cqf.tooling.cql.exception.CQLTranslatorException;
+import org.opencds.cqf.tooling.cql.exception.CqlTranslatorException;
 import org.opencds.cqf.tooling.processor.ValueSetsProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.slf4j.Logger;
@@ -291,7 +286,7 @@ public class ResourceUtils {
       }
    }
 
-   public static Map<String, IBaseResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext, boolean includeDependencies, Boolean includeVersion) throws CQLTranslatorException {
+   public static Map<String, IBaseResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext, boolean includeDependencies, Boolean includeVersion) throws CqlTranslatorException {
       Map<String, IBaseResource> valueSetResources = new HashMap<>();
 
       List<String> valueSetDefIDs = getDepELMValueSetDefIDs(cqlContentPath);
@@ -315,18 +310,17 @@ public class ResourceUtils {
       }
 
       if (dependencies.size() != valueSetResources.size()) {
-        List<String> missingValueSets = new ArrayList<>();
-        dependencies.removeAll(valueSetResources.keySet());
-        for (String valueSetUrl : dependencies) {
-          missingValueSets.add(valueSetUrl + " MISSING");
-        }
-        logger.error(missingValueSets.toString());
-        throw new CQLTranslatorException(missingValueSets);
+         List<String> missingValueSets = new ArrayList<>();
+         dependencies.removeAll(valueSetResources.keySet());
+         for (String valueSetUrl : dependencies) {
+            missingValueSets.add(valueSetUrl + " MISSING");
+         }
+         throw new CqlTranslatorException(missingValueSets, CqlCompilerException.ErrorSeverity.Warning);
       }
       return valueSetResources;
    }
 
-   public static List<String> getIncludedLibraryNames(String cqlContentPath, Boolean includeVersion) throws CQLTranslatorException{
+   public static List<String> getIncludedLibraryNames(String cqlContentPath, Boolean includeVersion) throws CqlTranslatorException {
       List<String> includedLibraryNames = new ArrayList<>();
       List<IncludeDef> includedDefs = getIncludedDefs(cqlContentPath);
       for (IncludeDef def : includedDefs) {
@@ -336,7 +330,7 @@ public class ResourceUtils {
       return includedLibraryNames;
    }
 
-   public static List<String> getDepELMValueSetDefIDs(String cqlContentPath) throws CQLTranslatorException {
+   public static List<String> getDepELMValueSetDefIDs(String cqlContentPath) throws CqlTranslatorException {
       List<String> includedValueSetDefIDs = new ArrayList<>();
       List<ValueSetDef> valueSetDefs = getValueSetDefs(cqlContentPath);
       for (ValueSetDef def : valueSetDefs) {
@@ -345,7 +339,7 @@ public class ResourceUtils {
       return includedValueSetDefIDs;
    }
 
-   public static List<IncludeDef> getIncludedDefs(String cqlContentPath) throws CQLTranslatorException{
+   public static List<IncludeDef> getIncludedDefs(String cqlContentPath) throws CqlTranslatorException {
       ArrayList<IncludeDef> includedDefs = new ArrayList<>();
       org.hl7.elm.r1.Library elm = getElmFromCql(cqlContentPath);
       if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
@@ -354,7 +348,7 @@ public class ResourceUtils {
       return includedDefs;
    }
 
-   public static List<ValueSetDef> getValueSetDefs(String cqlContentPath) throws CQLTranslatorException{
+   public static List<ValueSetDef> getValueSetDefs(String cqlContentPath) throws CqlTranslatorException {
       ArrayList<ValueSetDef> valueSetDefs = new ArrayList<>();
       org.hl7.elm.r1.Library elm;
       elm = getElmFromCql(cqlContentPath);
@@ -373,52 +367,73 @@ public class ResourceUtils {
          logger.debug("cql-options loaded from: {}", file.getAbsolutePath());
       }
       else {
-          options = CqlTranslatorOptions.defaultOptions();
-          if (!options.getFormats().contains(CqlTranslatorOptions.Format.XML)) {
-              options.getFormats().add(CqlTranslatorOptions.Format.XML);
-          }
-          logger.debug("cql-options not found. Using default options.");
+         options = CqlTranslatorOptions.defaultOptions();
+         if (!options.getFormats().contains(CqlTranslatorOptions.Format.XML)) {
+            options.getFormats().add(CqlTranslatorOptions.Format.XML);
+         }
+         logger.debug("cql-options not found. Using default options.");
       }
 
       return options;
    }
 
+   public static CqlProcesses getCQLCqlTranslator(String cqlContentPath) throws CqlTranslatorException {
+      return  getCQLCqlTranslator(new File(cqlContentPath));
+   }
+
+   public static CqlProcesses getCQLCqlTranslator(File file) throws CqlTranslatorException {
+      String cqlContentPath = file.getAbsolutePath();
+      String folder = IOUtils.getParentDirectoryPath(cqlContentPath);
+      CqlTranslatorOptions options = ResourceUtils.getTranslatorOptions(folder);
+      ModelManager modelManager = new ModelManager();
+      LibraryManager libraryManager = new LibraryManager(modelManager);
+      libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
+      libraryManager.getLibrarySourceLoader().registerProvider(new DefaultLibrarySourceProvider(Paths.get(folder)));
+      return  new CqlProcesses(options, modelManager, libraryManager, IOUtils.translate(file, libraryManager));
+   }
+
+   public static class CqlProcesses {
+      CqlTranslatorOptions options;
+      ModelManager modelManager;
+      LibraryManager libraryManager;
+      CqlTranslator translator;
+
+      public CqlProcesses(CqlTranslatorOptions options,
+                          ModelManager modelManager,
+                          LibraryManager libraryManager,
+                          CqlTranslator translator) {
+         this.options = options;
+         this.modelManager = modelManager;
+         this.libraryManager = libraryManager;
+         this.translator = translator;
+      }
+
+      public CqlTranslatorOptions getOptions() {
+         return options;
+      }
+
+      public ModelManager getModelManager() {
+         return modelManager;
+      }
+
+      public LibraryManager getLibraryManager() {
+         return libraryManager;
+      }
+
+      public CqlTranslator getTranslator() {
+         return translator;
+      }
+
+
+   }
+
    private static Map<String, org.hl7.elm.r1.Library> cachedElm = new HashMap<>();
-   public static org.hl7.elm.r1.Library getElmFromCql(String cqlContentPath) throws CQLTranslatorException {
+   public static org.hl7.elm.r1.Library getElmFromCql(String cqlContentPath) throws CqlTranslatorException {
       org.hl7.elm.r1.Library elm = cachedElm.get(cqlContentPath);
       if (elm != null) {
          return elm;
       }
-
-      String folder = IOUtils.getParentDirectoryPath(cqlContentPath);
-
-      CqlTranslatorOptions options = getTranslatorOptions(folder);
-
-      // Setup
-      // Construct DefaultLibrarySourceProvider
-      // Construct FhirLibrarySourceProvider
-      ModelManager modelManager = new ModelManager();
-      LibraryManager libraryManager = new LibraryManager(modelManager);
-      // if (packages != null) {
-      //    libraryManager.getLibrarySourceLoader().registerProvider(new NpmLibrarySourceProvider(packages, reader, logger));
-      // }
-      libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
-      libraryManager.getLibrarySourceLoader().registerProvider(new DefaultLibrarySourceProvider(Paths.get(folder)));
-
-      // loadNamespaces(libraryManager);
-
-      // foreach *.cql file
-      // for (File file : new File(folder).listFiles(getCqlFilenameFilter())) {
-      //     translateFile(modelManager, libraryManager, file, options);
-      // }
-
-
-      // ModelManager modelManager = new ModelManager();
-      // GenericLibrarySourceProvider sourceProvider = new GenericLibrarySourceProvider(folder);
-      // LibraryManager libraryManager = new LibraryManager(modelManager);
-      // libraryManager.getLibrarySourceLoader().registerProvider(sourceProvider);
-
-      CqlTranslator translator = IOUtils.translate(cqlContentPath, modelManager, libraryManager, options);
+      CqlTranslator translator = getCQLCqlTranslator(cqlContentPath).getTranslator();
       elm = translator.toELM();
       cachedElm.put(cqlContentPath, elm);
       return elm;
@@ -835,49 +850,49 @@ public class ResourceUtils {
       return fhirContext.getElementDefinition(elementName);
    }
 
-    //to keep track of output already written and avoid duplicate functionality slowing down performance:
-    private static ConcurrentHashMap<String, Boolean> outputResourceTracker = new ConcurrentHashMap<>();
-    public static final String separator = System.getProperty("file.separator");
-    public static void outputResource(IBaseResource resource, String encoding, FhirContext context, String outputPath) {
-        String resourceFileLocation = outputPath + separator +
-                resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() +
-                "." + encoding;
-        if (outputResourceTracker.containsKey(resource.getIdElement().getResourceType() + ":" + outputPath)){
-            LogUtils.info("This resource has already been processed: " + resource.getIdElement().getResourceType());
-            return;
-        }
+   //to keep track of output already written and avoid duplicate functionality slowing down performance:
+   private static ConcurrentHashMap<String, Boolean> outputResourceTracker = new ConcurrentHashMap<>();
+   public static final String separator = System.getProperty("file.separator");
+   public static void outputResource(IBaseResource resource, String encoding, FhirContext context, String outputPath) {
+      String resourceFileLocation = outputPath + separator +
+              resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() +
+              "." + encoding;
+      if (outputResourceTracker.containsKey(resource.getIdElement().getResourceType() + ":" + outputPath)){
+         LogUtils.info("This resource has already been processed: " + resource.getIdElement().getResourceType());
+         return;
+      }
 
-        try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding)) {
-            writer.write(
-                    encoding.equals("json")
-                            ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-                            : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-            );
-            writer.flush();
-            outputResourceTracker.put(resourceFileLocation, Boolean.TRUE);
+      try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding)) {
+         writer.write(
+                 encoding.equals("json")
+                         ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                         : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+         );
+         writer.flush();
+         outputResourceTracker.put(resourceFileLocation, Boolean.TRUE);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
-        }
-    }
+      } catch (IOException e) {
+         e.printStackTrace();
+         throw new RuntimeException(e.getMessage());
+      }
+   }
 
-    public static void outputResourceByName(IBaseResource resource, String encoding, FhirContext context, String outputPath, String name) {
-        try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + name + "." + encoding)) {
-            writer.write(
-                encoding.equals("json")
-                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-            );
-            writer.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
-        }
-    }
+   public static void outputResourceByName(IBaseResource resource, String encoding, FhirContext context, String outputPath, String name) {
+      try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + name + "." + encoding)) {
+         writer.write(
+                 encoding.equals("json")
+                         ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                         : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+         );
+         writer.flush();
+      } catch (IOException e) {
+         e.printStackTrace();
+         throw new RuntimeException(e.getMessage());
+      }
+   }
 
-    public static void cleanUp(){
-        outputResourceTracker = new ConcurrentHashMap<>();
-        cachedElm = new HashMap<String, org.hl7.elm.r1.Library>();
-    }
+   public static void cleanUp(){
+      outputResourceTracker = new ConcurrentHashMap<>();
+      cachedElm = new HashMap<String, org.hl7.elm.r1.Library>();
+   }
 }

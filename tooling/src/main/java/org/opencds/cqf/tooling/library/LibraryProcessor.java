@@ -73,7 +73,7 @@ public class LibraryProcessor extends BaseProcessor {
     }
 
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryPath, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
-        System.out.println("Refreshing libraries...");
+        System.out.println("\r\n[Refreshing Libraries]\r\n");
         // ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
 
         LibraryProcessor libraryProcessor;
@@ -90,7 +90,7 @@ public class LibraryProcessor extends BaseProcessor {
         }
 
         if (libraryPath == null) {
-            libraryPath = FilenameUtils.concat(parentContext.getRootDir(), IGProcessor.libraryPathElement);
+            libraryPath = FilenameUtils.concat(parentContext.getRootDir(), IGProcessor.LIBRARY_PATH_ELEMENT);
         }
         else if (!Utilities.isAbsoluteFileName(libraryPath)) {
             libraryPath = FilenameUtils.concat(parentContext.getRootDir(), libraryPath);

@@ -1,119 +1,216 @@
 package org.opencds.cqf.tooling.processor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.api.IFhirVersion;
+import jakarta.annotation.Nullable;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
+import org.opencds.cqf.tooling.common.ThreadUtils;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.*;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.IFhirVersion;
+public class TestCaseProcessor {
+    public static final String NEWLINE_INDENT = "\r\n\t";
+    public static final String NEWLINE = "\r\n";
 
-public class TestCaseProcessor
-{
+    public static final String separator = System.getProperty("file.separator");
     private static final Logger logger = LoggerFactory.getLogger(TestCaseProcessor.class);
 
-    public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext) {
-        refreshTestCases(path, encoding, fhirContext, null);
+    public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, Boolean includeErrors) {
+        refreshTestCases(path, encoding, fhirContext, null, includeErrors);
     }
 
-    public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, @Nullable List<String> refreshedResourcesNames)
-    {
-        logger.info("Refreshing tests");
-        List<String> resourceTypeTestGroups = IOUtils.getDirectoryPaths(path, false);
+    public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, @Nullable List<String> refreshedResourcesNames,
+                                 Boolean includeErrors) {
+        System.out.println("\r\n[Refreshing Tests]\r\n");
+
+
+        final Map<String, String> testCaseRefreshSuccessMap = new ConcurrentHashMap<>();
+        final Map<String, String> testCaseRefreshFailMap = new ConcurrentHashMap<>();
+        final Map<String, String> groupFileRefreshSuccessMap = new ConcurrentHashMap<>();
+        final Map<String, String> groupFileRefreshFailMap = new ConcurrentHashMap<>();
+
+        final List<Callable<Void>> testCaseRefreshTasks = new CopyOnWriteArrayList<>();
         IFhirVersion version = fhirContext.getVersion();
-
+        //build list of tasks via for loop:
+        List<Callable<Void>> testGroupTasks = new ArrayList<>();
+        ExecutorService testGroupExecutor = Executors.newCachedThreadPool();
+        List<String> resourceTypeTestGroups = IOUtils.getDirectoryPaths(path, false);
         for (String group : resourceTypeTestGroups) {
-            List<String> testArtifactPaths = IOUtils.getDirectoryPaths(group, false);
-            for (String testArtifactPath : testArtifactPaths) {
-                List<String> testCasePaths = IOUtils.getDirectoryPaths(testArtifactPath, false);
+            testGroupTasks.add(() -> {
+                List<String> testArtifactPaths = IOUtils.getDirectoryPaths(group, false);
 
-                org.hl7.fhir.r4.model.Group testGroup = null;
+                //build list of tasks via for loop:
+                List<Callable<Void>> testArtifactTasks = new CopyOnWriteArrayList<>();
+                ExecutorService testArtifactExecutor = Executors.newCachedThreadPool();
 
-                if (version.getVersion() == FhirVersionEnum.R4) {
-                    testGroup = new org.hl7.fhir.r4.model.Group();
-                    testGroup.setActive(true);
-                    testGroup.setType(Group.GroupType.PERSON);
-                    testGroup.setActual(true);
-                }
+                for (String testArtifactPath : testArtifactPaths) {
+                    testArtifactTasks.add(() -> {
+                        List<String> testCasePaths = IOUtils.getDirectoryPaths(testArtifactPath, false);
 
-                // For each test case we need to create a group
-                if (!testCasePaths.isEmpty()) {
-                    String measureName = IOUtils.getMeasureTestDirectory(testCasePaths.get(0));
-                    if (testGroup != null) {
-                        testGroup.setId(measureName);
-
-                        testGroup.addExtension("http://hl7.org/fhir/StructureDefinition/artifact-testArtifact",
-                                new CanonicalType("http://ecqi.healthit.gov/ecqms/Measure/" + measureName));
-                    }
-
-                    for (String testCasePath : testCasePaths) {
-                        try {
-                            List<String> paths = IOUtils.getFilePaths(testCasePath, true);
-                            List<IBaseResource> resources = IOUtils.readResources(paths, fhirContext);
-                            ensureIds(testCasePath, resources);
-
-                            // Loop through resources and any that are patients need to be added to the test Group
-                            // Handle individual resources when they exist
-                            for (IBaseResource resource : resources) {
-                                if ((resource.fhirType() == "Patient") && (version.getVersion() == FhirVersionEnum.R4)) {
-                                    org.hl7.fhir.r4.model.Patient patient = (org.hl7.fhir.r4.model.Patient) resource;
-                                    addPatientToGroupR4(testGroup, patient);
-                                }
-
-                                // Handle bundled resources when that is how they are provided
-                                if ((resource.fhirType() == "Bundle") && (version.getVersion() == FhirVersionEnum.R4)) {
-                                    org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle) resource;
-                                    var bundleResources =
-                                            BundleUtils.getR4ResourcesFromBundle(bundle);
-                                    for (IBaseResource bundleResource : bundleResources) {
-                                        if (bundleResource.fhirType() == "Patient") {
-                                            org.hl7.fhir.r4.model.Patient patient = (org.hl7.fhir.r4.model.Patient) bundleResource;
-                                            addPatientToGroupR4(testGroup, patient);
-                                        }
-                                    }
-                                }
-                            }
-
-                            // If the resource is a transaction bundle then don't bundle it again otherwise do
-                            String fileId = getId(FilenameUtils.getName(testCasePath));
-                            Object bundle;
-                            if ((resources.size() == 1) && (BundleUtils.resourceIsABundle(resources.get(0)))) {
-                                bundle = processTestBundle(fileId, resources.get(0), fhirContext);
-                            }else {
-                                bundle = BundleUtils.bundleArtifacts(fileId, resources, fhirContext, false);
-                            }
-                            IOUtils.writeBundle(bundle, testArtifactPath, encoding, fhirContext);
-
-                        } catch (Exception e) {
-                            LogUtils.putException(testCasePath, e);
-                        } finally {
-                            LogUtils.warn(testCasePath);
+                        org.hl7.fhir.r4.model.Group testGroup;
+                        if (version.getVersion() == FhirVersionEnum.R4) {
+                            testGroup = new org.hl7.fhir.r4.model.Group();
+                            testGroup.setActive(true);
+                            testGroup.setType(Group.GroupType.PERSON);
+                            testGroup.setActual(true);
+                        } else {
+                            testGroup = null;
                         }
-                    }
 
-                    // Need to output the Group if it exists
-                    if (testGroup != null) {
-                        IOUtils.writeResource(testGroup, testArtifactPath, encoding, fhirContext, true,
-                                "Group-" + measureName);
-                    }
+                        // For each test case we need to create a group
+                        if (!testCasePaths.isEmpty()) {
+                            String measureName = IOUtils.getMeasureTestDirectory(testCasePaths.get(0));
+
+                            if (testGroup != null) {
+                                testGroup.setId(measureName);
+
+                                testGroup.addExtension("http://hl7.org/fhir/StructureDefinition/artifact-testArtifact",
+                                        new CanonicalType("http://ecqi.healthit.gov/ecqms/Measure/" + measureName));
+                            }
+
+                            for (String testCasePath : testCasePaths) {
+                                testCaseRefreshTasks.add(() -> {
+                                    try {
+                                        List<String> paths = IOUtils.getFilePaths(testCasePath, true);
+                                        List<IBaseResource> resources = IOUtils.readResources(paths, fhirContext);
+                                        ensureIds(testCasePath, resources);
+
+                                        // Loop through resources and any that are patients need to be added to the test Group
+                                        // Handle individual resources when they exist
+                                        for (IBaseResource resource : resources) {
+                                            if ((resource.fhirType().equalsIgnoreCase("Patient")) && (version.getVersion() == FhirVersionEnum.R4)) {
+                                                org.hl7.fhir.r4.model.Patient patient = (org.hl7.fhir.r4.model.Patient) resource;
+                                                if (testGroup != null) {
+                                                    addPatientToGroupR4(testGroup, patient);
+                                                }
+                                            }
+
+                                            // Handle bundled resources when that is how they are provided
+                                            if ((resource.fhirType().equalsIgnoreCase("Bundle")) && (version.getVersion() == FhirVersionEnum.R4)) {
+                                                org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle) resource;
+                                                var bundleResources =
+                                                        BundleUtils.getR4ResourcesFromBundle(bundle);
+                                                for (IBaseResource bundleResource : bundleResources) {
+                                                    if (bundleResource.fhirType().equalsIgnoreCase("Patient")) {
+                                                        org.hl7.fhir.r4.model.Patient patient = (org.hl7.fhir.r4.model.Patient) bundleResource;
+                                                        if (testGroup != null) {
+                                                            addPatientToGroupR4(testGroup, patient);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        // If the resource is a transaction bundle then don't bundle it again otherwise do
+                                        String fileId = getId(FilenameUtils.getName(testCasePath));
+                                        Object bundle;
+                                        if ((resources.size() == 1) && (BundleUtils.resourceIsABundle(resources.get(0)))) {
+                                            bundle = processTestBundle(fileId, resources.get(0), fhirContext, testArtifactPath, testCasePath);
+                                        } else {
+                                            bundle = BundleUtils.bundleArtifacts(fileId, resources, fhirContext, false);
+                                        }
+                                        IOUtils.writeBundle(bundle, testArtifactPath, encoding, fhirContext);
+
+                                    } catch (Exception e) {
+                                        testCaseRefreshFailMap.put(testCasePath, e.getMessage());
+                                    }
+
+
+                                    testCaseRefreshSuccessMap.put(testCasePath, "");
+                                    reportProgress((testCaseRefreshFailMap.size() + testCaseRefreshSuccessMap.size()), testCaseRefreshTasks.size());
+                                    //task requires return statement
+                                    return null;
+                                });
+                            }//end for (String testCasePath : testCasePaths) {
+
+                            // Need to output the Group if it exists
+                            if (testGroup != null) {
+                                String groupFileName = "Group-" + measureName;
+                                String groupFileIdentifier = testArtifactPath + separator + groupFileName;
+
+                                try {
+                                    IOUtils.writeResource(testGroup, testArtifactPath, encoding, fhirContext, true,
+                                            groupFileName);
+
+                                    groupFileRefreshSuccessMap.put(groupFileIdentifier, "");
+
+                                } catch (Exception e) {
+
+                                    groupFileRefreshFailMap.put(groupFileIdentifier, e.getMessage());
+                                }
+
+                            }
+                        }
+                        //task requires return statement
+                        return null;
+                    });
+                }//
+                ThreadUtils.executeTasks(testArtifactTasks, testArtifactExecutor);
+
+                //task requires return statement
+                return null;
+            });
+        }//end for (String group : resourceTypeTestGroups) {
+        ThreadUtils.executeTasks(testGroupTasks, testGroupExecutor);
+        //Now with all possible tasks collected, progress can be reported instead of flooding the console.
+        ThreadUtils.executeTasks(testCaseRefreshTasks);
+        //ensure accurate progress at final stage:
+        reportProgress((testCaseRefreshFailMap.size() + testCaseRefreshSuccessMap.size()), testCaseRefreshTasks.size());
+
+        StringBuilder testCaseMessage = buildInformationMessage(testCaseRefreshFailMap, testCaseRefreshSuccessMap, "Test Case", "Refreshed", includeErrors);
+        if (!groupFileRefreshSuccessMap.isEmpty() || !groupFileRefreshFailMap.isEmpty()) {
+            testCaseMessage.append(buildInformationMessage(groupFileRefreshFailMap, groupFileRefreshSuccessMap, "Group File", "Created", includeErrors));
+        }
+        System.out.println(testCaseMessage);
+    }
+
+    /**
+     * Gives the user a nice report at the end of the refresh test case process (used to report group file status as well)
+     *
+     * @param failMap       which items failed
+     * @param successMap    which items succeeded
+     * @param type          group file or test case
+     * @param successType   created or refreshed
+     * @param includeErrors give the exception message if includeErrors is on
+     * @return built message for console
+     */
+    private StringBuilder buildInformationMessage(Map<String, String> failMap, Map<String, String> successMap, String type, String successType, boolean includeErrors) {
+        StringBuilder message = new StringBuilder();
+        if (!successMap.isEmpty() || !failMap.isEmpty()) {
+            message.append(NEWLINE).append(successMap.size()).append(" ").append(type).append("(s) successfully ").append(successType.toLowerCase()).append(":");
+            for (String refreshedTestCase : successMap.keySet()) {
+                message.append(NEWLINE_INDENT).append(refreshedTestCase).append(" ").append(successType.toUpperCase());
+            }
+            if (!failMap.isEmpty()) {
+                message.append(NEWLINE).append(failMap.size()).append(" ").append(type).append("(s) failed to be ").append(successType.toLowerCase()).append(":");
+                for (String failed : failMap.keySet()) {
+                    message.append(NEWLINE_INDENT).append(failed).append(" FAILED").append(includeErrors ? ": " + failMap.get(failed) : "");
                 }
             }
         }
+        return message;
     }
 
-    public static Object processTestBundle(String id, IBaseResource resource, FhirContext fhirContext) {
+    private void reportProgress(int count, int total) {
+        double percentage = (double) count / total * 100;
+        System.out.print("\rTest Refresh: " + String.format("%.2f%%", percentage) + " processed.");
+    }
+
+    public static Object processTestBundle(String id, IBaseResource resource, FhirContext fhirContext, String testArtifactPath, String testCasePath) {
         switch (fhirContext.getVersion().getVersion()) {
             case DSTU3:
                 org.hl7.fhir.dstu3.model.Bundle dstu3Bundle = (org.hl7.fhir.dstu3.model.Bundle) resource;
@@ -130,7 +227,7 @@ public class TestCaseProcessor
                 return dstu3Bundle;
 
             case R4:
-                org.hl7.fhir.r4.model.Bundle r4Bundle = (org.hl7.fhir.r4.model.Bundle)resource;
+                org.hl7.fhir.r4.model.Bundle r4Bundle = (org.hl7.fhir.r4.model.Bundle) resource;
                 ResourceUtils.setIgId(id, r4Bundle, false);
                 r4Bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
                 for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : r4Bundle.getEntry()) {
@@ -187,7 +284,7 @@ public class TestCaseProcessor
     public static Boolean bundleTestCases(String igPath, String contextResourceType, String libraryName, FhirContext fhirContext,
                                           Map<String, IBaseResource> resources) {
         Boolean shouldPersist = true;
-        String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), contextResourceType), libraryName);
+        String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(igPath, IGProcessor.TEST_CASE_PATH_ELEMENT), contextResourceType), libraryName);
 
         // this is breaking for bundle of a bundle. Replace with individual resources
         // until we can figure it out.
@@ -213,68 +310,26 @@ public class TestCaseProcessor
     }
 
 
-    static Set<String> copiedFilePaths = new HashSet<>();
-
     //TODO: the bundle needs to have -expectedresults added too
+
     /**
      * Bundles test case files from the specified path into a destination path.
      * The method copies relevant test case files, including expected results for MeasureReports,
      * and returns a summary message with the number of files copied.
      *
-     * @param igPath             The path to the Implementation Guide (IG) containing test case files.
+     * @param igPath              The path to the Implementation Guide (IG) containing test case files.
      * @param contextResourceType The resource type associated with the test cases.
-     * @param libraryName        The name of the library associated with the test cases.
-     * @param destPath           The destination path for the bundled test case files.
-     * @param fhirContext        The FHIR context used for reading and processing resources.
-     * @return A summary message indicating the number of files copied for the specified test case path.
+     * @param libraryName         The name of the library associated with the test cases.
+     * @param destPath            The destination path for the bundled test case files.
+     * @param fhirContext         The FHIR context used for reading and processing resources.
      */
-    public static String bundleTestCaseFiles(String igPath, String contextResourceType, String libraryName, String destPath, FhirContext fhirContext) {
-        String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(igPath, IGProcessor.testCasePathElement), contextResourceType), libraryName);
+    public static void bundleTestCaseFiles(String igPath, String contextResourceType, String libraryName, String destPath, FhirContext fhirContext) {
+        String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(igPath, IGProcessor.TEST_CASE_PATH_ELEMENT), contextResourceType), libraryName);
         List<String> testCasePaths = IOUtils.getFilePaths(igTestCasePath, false);
-        Set<String> measureReportPaths = IOUtils.getMeasureReportPaths(fhirContext);
-        List<String> testCaseDirectories = IOUtils.getDirectoryPaths(igTestCasePath, false);
-
-        int tracker = 0;
         for (String testPath : testCasePaths) {
             String bundleTestDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testPath));
-            if (IOUtils.copyFile(testPath, bundleTestDestPath)) {
-                tracker++;
-            }
-
-            for (String testCaseDirectory : testCaseDirectories) {
-                List<String> testContentPaths = IOUtils.getFilePaths(testCaseDirectory, false);
-                for (String testContentPath : testContentPaths) {
-                    // Copy the file if it hasn't been copied before (Set.add returns false if the Set already contains this entry)
-                    if (copiedFilePaths.add(testContentPath)) {
-
-                        Optional<String> matchingMeasureReportPath = measureReportPaths.stream()
-                                .filter(path -> path.equals(testContentPath))
-                                .findFirst();
-                        if (matchingMeasureReportPath.isPresent()) {
-                            IBaseResource measureReport = IOUtils.readResource(testContentPath, fhirContext);
-                            if (!measureReport.getIdElement().getIdPart().startsWith("measurereport") || !measureReport.getIdElement().getIdPart().endsWith("-expectedresults")) {
-                                Object measureReportStatus = ResourceUtils.resolveProperty(measureReport, "status", fhirContext);
-                                String measureReportStatusValue = ResourceUtils.resolveProperty(measureReportStatus, "value", fhirContext).toString();
-                                if (measureReportStatusValue.equals("COMPLETE")) {
-                                    String expectedResultsId = FilenameUtils.getBaseName(testContentPath) + (FilenameUtils.getBaseName(testContentPath).endsWith("-expectedresults") ? "" : "-expectedresults");
-                                    measureReport.setId(expectedResultsId);
-                                }
-                            }
-                            IOUtils.writeResource(measureReport, destPath, IOUtils.Encoding.JSON, fhirContext);
-                        } else {
-                            String bundleTestContentDestPath = FilenameUtils.concat(destPath, FilenameUtils.getName(testContentPath));
-                            if (IOUtils.copyFile(testContentPath, bundleTestContentDestPath)) {
-                                tracker++;
-                            }
-                        }
-                    }
-                }
-            }
+            IOUtils.copyFile(testPath, bundleTestDestPath);
         }
-        return "\nBundle Test Case Files: " + tracker + " files copied for " + igTestCasePath;
     }
 
-    public static void cleanUp() {
-        copiedFilePaths = new HashSet<>();
-    }
 }

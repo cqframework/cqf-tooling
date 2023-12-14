@@ -24,4 +24,6 @@ public interface IProcessorContext {
     List<String> getBinaryPaths();
 
     CqlProcessor getCqlProcessor();
+
+    Boolean getIncludeErrors();
 }
