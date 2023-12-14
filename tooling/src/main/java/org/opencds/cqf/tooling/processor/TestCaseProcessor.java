@@ -280,9 +280,8 @@ public class TestCaseProcessor {
         return "tests-" + baseId;
     }
 
-    public static Boolean bundleTestCases(String igPath, String contextResourceType, String libraryName, FhirContext fhirContext,
-                                          Map<String, IBaseResource> resources) {
-        Boolean shouldPersist = true;
+    public static void bundleTestCases(String igPath, String contextResourceType, String libraryName, FhirContext fhirContext,
+                                          Map<String, IBaseResource> resources) throws Exception {
         String igTestCasePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(igPath, IGProcessor.TEST_CASE_PATH_ELEMENT), contextResourceType), libraryName);
 
         // this is breaking for bundle of a bundle. Replace with individual resources
@@ -294,18 +293,12 @@ public class TestCaseProcessor {
         // resources, fhirContext);
         // }
 
-        try {
-            List<IBaseResource> testCaseResources = TestCaseProcessor.getTestCaseResources(igTestCasePath, fhirContext);
-            for (IBaseResource resource : testCaseResources) {
-                if ((!(resource instanceof org.hl7.fhir.dstu3.model.Bundle)) && (!(resource instanceof org.hl7.fhir.r4.model.Bundle))) {
-                    resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
-                }
+        List<IBaseResource> testCaseResources = TestCaseProcessor.getTestCaseResources(igTestCasePath, fhirContext);
+        for (IBaseResource resource : testCaseResources) {
+            if ((!(resource instanceof org.hl7.fhir.dstu3.model.Bundle)) && (!(resource instanceof org.hl7.fhir.r4.model.Bundle))) {
+                resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
             }
-        } catch (Exception e) {
-            shouldPersist = false;
-            logger.error(igTestCasePath, e);
         }
-        return shouldPersist;
     }
 
 

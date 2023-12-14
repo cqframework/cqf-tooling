@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -156,7 +157,6 @@ public abstract class AbstractBundler {
                 }
 
                 final String resourceSourcePath = getSourcePath(fhirContext, resourceEntry);
-
                 tasks.add(() -> {
                     //check if resourceSourcePath has been processed before:
                     if (processedResources.contains(resourceSourcePath)) {
@@ -167,7 +167,6 @@ public abstract class AbstractBundler {
 
                     try {
                         Map<String, IBaseResource> resources = new ConcurrentHashMap<>();
-
                         Boolean shouldPersist = ResourceUtils.safeAddResource(resourceSourcePath, resources, fhirContext);
                         if (!resources.containsKey(getResourceProcessorType() + "/" + resourceEntry.getKey())) {
                             throw new IllegalArgumentException(String.format("Could not retrieve base resource for " + getResourceProcessorType() + " %s", resourceName));
@@ -216,24 +215,23 @@ public abstract class AbstractBundler {
 
                         if (includeDependencies) {
                             if (libraryProcessor == null) libraryProcessor = new LibraryProcessor();
-
-                            boolean result = libraryProcessor.bundleLibraryDependencies(primaryLibrarySourcePath, fhirContext, resources, encoding, includeVersion);
-                            if (shouldPersist && !result) {
-                                failedExceptionMessages.put(resourceSourcePath, getResourceProcessorType() + " will not be bundled because Library Dependency bundling failed.");
+                            try {
+                                libraryProcessor.bundleLibraryDependencies(primaryLibrarySourcePath, fhirContext, resources, encoding, includeVersion);
+                            } catch (Exception bre) {
+                                failedExceptionMessages.put(resourceSourcePath, getResourceProcessorType() + " will not be bundled because Library Dependency bundling failed: " + bre.getMessage());
                                 //exit from task:
                                 return null;
                             }
-                            shouldPersist = shouldPersist & result;
                         }
 
                         if (includePatientScenarios) {
-                            boolean result = TestCaseProcessor.bundleTestCases(igPath, getResourceTestGroupName(), primaryLibraryName, fhirContext, resources);
-                            if (shouldPersist && !result) {
-                                failedExceptionMessages.put(resourceSourcePath, getResourceProcessorType() + " will not be bundled because Test Case bundling failed.");
+                            try {
+                                TestCaseProcessor.bundleTestCases(igPath, getResourceTestGroupName(), primaryLibraryName, fhirContext, resources);
+                            } catch (Exception tce) {
+                                failedExceptionMessages.put(resourceSourcePath, getResourceProcessorType() + " will not be bundled because Test Case bundling failed: " + tce.getMessage());
                                 //exit from task:
                                 return null;
                             }
-                            shouldPersist = shouldPersist & result;
                         }
 
                         if (shouldPersist) {
@@ -263,17 +261,12 @@ public abstract class AbstractBundler {
 
                     } catch (Exception e) {
                         String failMsg = "";
-                        if (e.getMessage() != null ){
+                        if (e.getMessage() != null) {
                             failMsg = e.getMessage();
-                        }else{
-                            failMsg = e.getClass().getName();
-                            e.printStackTrace();
-                        }
-                        if (resourceSourcePath == null || resourceSourcePath.isEmpty()) {
-                            failedExceptionMessages.put(resourceEntry.getValue().getIdElement().getIdPart(), failMsg);
                         } else {
-                            failedExceptionMessages.put(resourceSourcePath, failMsg);
+                            failMsg = e.getClass().getName();
                         }
+                        failedExceptionMessages.put(resourceSourcePath, failMsg);
                     }
 
                     processedResources.add(resourceSourcePath);
@@ -321,7 +314,7 @@ public abstract class AbstractBundler {
         List<String> resourcePathLibraryNames = new ArrayList<>(getPaths(fhirContext));
 
         //gather which resources didn't make it
-        ArrayList<String> failedResources = new ArrayList<>(resourcePathLibraryNames);
+        List<String> failedResources = new ArrayList<>(resourcePathLibraryNames);
 
         resourcePathLibraryNames.removeAll(bundledResources);
         resourcePathLibraryNames.retainAll(refreshedLibraryNames);
@@ -335,7 +328,7 @@ public abstract class AbstractBundler {
         failedResources.removeAll(resourcePathLibraryNames);
         message.append(NEWLINE).append(failedResources.size()).append(" ").append(getResourceProcessorType()).append("(s) failed refresh:");
         for (String failed : failedResources) {
-            if (failedExceptionMessages.containsKey(failed)) {
+            if (failedExceptionMessages.containsKey(failed) && verboseMessaging) {
                 message.append(NEWLINE_INDENT).append(failed).append(" FAILED: ").append(failedExceptionMessages.get(failed));
             } else {
                 message.append(NEWLINE_INDENT).append(failed).append(" FAILED");
