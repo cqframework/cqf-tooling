@@ -49,9 +49,8 @@ public class IGBundleProcessor {
 
         //run collected post calls last:
         if (HttpClientUtils.hasPostTasksInQueue()) {
-            System.out.println("\r\n[POST task(s) found in queue. POST task(s) started - " + getTime() + "]");
+            System.out.println("\r\n[Persisting Files to " + fhirUri + "]\r\n");
             HttpClientUtils.postTaskCollection();
-            System.out.println("\r\n[POST task(s) finished - " + getTime() + "]");
         }
 
         // run cleanup (maven runs all ci tests sequentially and static member variables could retain values from previous tests)

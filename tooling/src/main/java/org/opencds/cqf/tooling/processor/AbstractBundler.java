@@ -118,7 +118,7 @@ public abstract class AbstractBundler {
     public void bundleResources(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
                                 Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp,
                                 FhirContext fhirContext, String fhirUri, IOUtils.Encoding encoding, Boolean verboseMessaging) {
-        System.out.println("\r\n[Bundle " + getResourceBundlerType() + " has started - " + getTime() + "]\r\n");
+        System.out.println("\r\n[Bundling " + getResourceBundlerType() + "s]\r\n");
 
         final List<String> bundledResources = new CopyOnWriteArrayList<>();
 
@@ -373,7 +373,6 @@ public abstract class AbstractBundler {
         }
 
         System.out.println(message);
-        System.out.println("\r\n[Bundle " + getResourceBundlerType() + " has finished - " + getTime() + "]\r\n");
     }
 
 
