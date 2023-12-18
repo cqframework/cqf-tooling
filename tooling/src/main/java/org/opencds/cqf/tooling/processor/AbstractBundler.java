@@ -139,6 +139,11 @@ public abstract class AbstractBundler {
             final Map<String, IBaseResource> libraries = new ConcurrentHashMap<>(IOUtils.getLibraries(fhirContext));
             final Map<String, String> libraryPathMap = new ConcurrentHashMap<>(IOUtils.getLibraryPathMap(fhirContext));
 
+            if (resourcesMap.isEmpty()) {
+                System.out.println("[INFO] No " + getResourceProcessorType() + "s found. Continuing...");
+                return;
+            }
+
             for (Map.Entry<String, IBaseResource> resourceEntry : resourcesMap.entrySet()) {
                 String resourceId = "";
 
@@ -271,7 +276,7 @@ public abstract class AbstractBundler {
                         } else {
                             failMsg = e.getClass().getName() ;
                         }
-                        failedExceptionMessages.put(resourceSourcePath, failMsg + ":\r\n" + pw);
+                        failedExceptionMessages.put(resourceSourcePath, failMsg + ":\r\n" + pw.toString());
                     }
 
                     processedResources.add(resourceSourcePath);
@@ -293,17 +298,16 @@ public abstract class AbstractBundler {
         StringBuilder message = new StringBuilder(NEWLINE);
 
         //Give user a snapshot of the files each resource will have persisted to their FHIR server (if fhirUri is provided)
-        if (!persistedFileReport.isEmpty()) {
-            message.append(NEWLINE).append(persistedFileReport.size()).append(" ").append(getResourceProcessorType()).append("(s) have POST tasks in the queue:");
+        final int persistCount = persistedFileReport.size();
+        if (persistCount > 0) {
+            message.append(NEWLINE).append(persistCount).append(" ").append(getResourceProcessorType()).append("(s) have POST tasks in the queue for ").append(fhirUri).append(": ");
             int totalQueueCount = 0;
             for (String library : persistedFileReport.keySet()) {
                 totalQueueCount = totalQueueCount + persistedFileReport.get(library);
                 message.append(NEWLINE_INDENT)
-                        .append(library)
-                        .append(": ")
                         .append(persistedFileReport.get(library))
-                        .append(" File(s) will be posted to ")
-                        .append(fhirUri);
+                        .append(" File(s): ")
+                        .append(library);
             }
             message.append(NEWLINE_INDENT)
                     .append("Total: ")
@@ -311,37 +315,50 @@ public abstract class AbstractBundler {
                     .append(" File(s)");
         }
 
-        message.append(NEWLINE).append(bundledResources.size()).append(" ").append(getResourceProcessorType()).append("(s) successfully bundled:");
-        for (String bundledResource : bundledResources) {
-            message.append(NEWLINE_INDENT).append(bundledResource).append(" BUNDLED");
+
+        final int bundledCount = bundledResources.size();
+        if (bundledCount > 0) {
+            message.append(NEWLINE).append(bundledCount).append(" ").append(getResourceProcessorType()).append("(s) successfully bundled:");
+            for (String bundledResource : bundledResources) {
+                message.append(NEWLINE_INDENT).append(bundledResource).append(" BUNDLED");
+            }
         }
+
 
         List<String> resourcePathLibraryNames = new ArrayList<>(getPaths(fhirContext));
 
         //gather which resources didn't make it
         List<String> failedResources = new ArrayList<>(resourcePathLibraryNames);
-
         resourcePathLibraryNames.removeAll(bundledResources);
         resourcePathLibraryNames.retainAll(refreshedLibraryNames);
-        message.append(NEWLINE).append(resourcePathLibraryNames.size()).append(" ").append(getResourceProcessorType()).append("(s) refreshed, but not bundled (due to issues):");
-        for (String notBundled : resourcePathLibraryNames) {
-            message.append(NEWLINE_INDENT).append(notBundled).append(" REFRESHED");
+
+        final int refreshedNotBundledCount = resourcePathLibraryNames.size();
+        if (refreshedNotBundledCount > 0) {
+            message.append(NEWLINE).append(refreshedNotBundledCount).append(" ").append(getResourceProcessorType()).append("(s) refreshed, but not bundled (due to issues):");
+            for (String notBundled : resourcePathLibraryNames) {
+                message.append(NEWLINE_INDENT).append(notBundled).append(" REFRESHED");
+            }
         }
 
         //attempt to give some kind of informational message:
         failedResources.removeAll(bundledResources);
         failedResources.removeAll(resourcePathLibraryNames);
-        message.append(NEWLINE).append(failedResources.size()).append(" ").append(getResourceProcessorType()).append("(s) failed refresh:");
-        for (String failed : failedResources) {
-            if (failedExceptionMessages.containsKey(failed) && verboseMessaging) {
-                message.append(NEWLINE_INDENT).append(failed).append(" FAILED: ").append(failedExceptionMessages.get(failed));
-            } else {
-                message.append(NEWLINE_INDENT).append(failed).append(" FAILED");
+
+        final int failedCount = failedResources.size();
+        if (failedCount > 0) {
+            message.append(NEWLINE).append(failedCount).append(" ").append(getResourceProcessorType()).append("(s) failed refresh:");
+            for (String failed : failedResources) {
+                if (failedExceptionMessages.containsKey(failed) && verboseMessaging) {
+                    message.append(NEWLINE_INDENT).append(failed).append(" FAILED: ").append(failedExceptionMessages.get(failed));
+                } else {
+                    message.append(NEWLINE_INDENT).append(failed).append(" FAILED");
+                }
             }
         }
 
         //Exceptions stemming from IOUtils.translate that did not prevent process from completing for file:
-        if (!cqlTranslatorErrorMessages.isEmpty()) {
+        final int translateErrorCount = cqlTranslatorErrorMessages.size();
+        if (translateErrorCount > 0) {
             message.append(NEWLINE).append(cqlTranslatorErrorMessages.size()).append(" ").append(getResourceProcessorType()).append("(s) encountered CQL translator errors:");
 
             for (String library : cqlTranslatorErrorMessages.keySet()) {

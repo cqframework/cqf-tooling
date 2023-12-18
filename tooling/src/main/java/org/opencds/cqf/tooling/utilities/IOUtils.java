@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -197,7 +198,7 @@ public class IOUtils {
     }
 
 
-    private static final Map<String, String> alreadyCopied = new HashMap<>();
+    private static final Map<String, String> alreadyCopied = new ConcurrentHashMap<>();
 
     public static void copyFile(String inputPath, String outputPath) {
 
@@ -353,7 +354,7 @@ public class IOUtils {
     public static boolean isDirectory(String path) {
         return FileUtils.isDirectory(new File(path));
     }
-    private static final Map<String, List<String>> cachedFilePaths = new HashMap<>();
+    private static final Map<String, List<String>> cachedFilePaths = new ConcurrentHashMap<>();
 
     public static List<String> getFilePaths(String directoryPath, Boolean recursive) {
         List<String> filePaths = new ArrayList<>();
@@ -422,7 +423,7 @@ public class IOUtils {
         return file.getParent();
     }
 
-    private static final Map<String, List<String>> cachedDirectoryPaths = new HashMap<>();
+    private static final Map<String, List<String>> cachedDirectoryPaths = new ConcurrentHashMap<>();
 
     public static List<String> getDirectoryPaths(String path, Boolean recursive) {
         List<String> directoryPaths = new ArrayList<>();
