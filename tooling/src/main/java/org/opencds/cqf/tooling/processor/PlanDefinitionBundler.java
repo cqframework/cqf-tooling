@@ -31,7 +31,7 @@ public class PlanDefinitionBundler extends AbstractBundler {
     }
 
     @Override
-    protected String getResourceProcessorType() {
+    protected String getResourceBundlerType() {
         return TYPE_PLAN_DEFINITION;
     }
 

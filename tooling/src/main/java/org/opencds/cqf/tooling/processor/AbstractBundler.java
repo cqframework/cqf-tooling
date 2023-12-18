@@ -8,6 +8,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.common.ThreadUtils;
 import org.opencds.cqf.tooling.cql.exception.CqlTranslatorException;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
+import org.opencds.cqf.tooling.measure.MeasureBundler;
 import org.opencds.cqf.tooling.utilities.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,12 +16,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
 
 /**
  * An abstract base class for bundlers that handle the bundling of various types of resources within an ig.
@@ -82,7 +82,7 @@ public abstract class AbstractBundler {
     }
 
     private String getResourcePrefix() {
-        return getResourceProcessorType().toLowerCase() + "-";
+        return getResourceBundlerType().toLowerCase() + "-";
     }
 
     protected abstract Set<String> getPaths(FhirContext fhirContext);
@@ -94,8 +94,11 @@ public abstract class AbstractBundler {
      */
     protected abstract Map<String, IBaseResource> getResources(FhirContext fhirContext);
 
-    protected abstract String getResourceProcessorType();
+    protected abstract String getResourceBundlerType();
 
+    private String getTime() {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+    }
 
     /**
      * Bundles resources within an Implementation Guide based on specified options.
@@ -115,6 +118,7 @@ public abstract class AbstractBundler {
     public void bundleResources(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
                                 Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp,
                                 FhirContext fhirContext, String fhirUri, IOUtils.Encoding encoding, Boolean verboseMessaging) {
+        System.out.println("\r\n[Bundle " + getResourceBundlerType() + " has started - " + getTime() + "]\r\n");
 
         final List<String> bundledResources = new CopyOnWriteArrayList<>();
 
@@ -140,7 +144,7 @@ public abstract class AbstractBundler {
             final Map<String, String> libraryPathMap = new ConcurrentHashMap<>(IOUtils.getLibraryPathMap(fhirContext));
 
             if (resourcesMap.isEmpty()) {
-                System.out.println("[INFO] No " + getResourceProcessorType() + "s found. Continuing...");
+                System.out.println("[INFO] No " + getResourceBundlerType() + "s found. Continuing...");
                 return;
             }
 
@@ -167,7 +171,7 @@ public abstract class AbstractBundler {
                 tasks.add(() -> {
                     //check if resourceSourcePath has been processed before:
                     if (processedResources.contains(resourceSourcePath)) {
-                        System.out.println(getResourceProcessorType() + " processed already: " + resourceSourcePath);
+                        System.out.println(getResourceBundlerType() + " processed already: " + resourceSourcePath);
                         return null;
                     }
                     String resourceName = FilenameUtils.getBaseName(resourceSourcePath).replace(getResourcePrefix(), "");
@@ -175,11 +179,11 @@ public abstract class AbstractBundler {
                     try {
                         Map<String, IBaseResource> resources = new ConcurrentHashMap<>();
                         Boolean shouldPersist = ResourceUtils.safeAddResource(resourceSourcePath, resources, fhirContext);
-                        if (!resources.containsKey(getResourceProcessorType() + "/" + resourceEntry.getKey())) {
-                            throw new IllegalArgumentException(String.format("Could not retrieve base resource for " + getResourceProcessorType() + " %s", resourceName));
+                        if (!resources.containsKey(getResourceBundlerType() + "/" + resourceEntry.getKey())) {
+                            throw new IllegalArgumentException(String.format("Could not retrieve base resource for " + getResourceBundlerType() + " %s", resourceName));
                         }
 
-                        IBaseResource resource = resources.get(getResourceProcessorType() + "/" + resourceEntry.getKey());
+                        IBaseResource resource = resources.get(getResourceBundlerType() + "/" + resourceEntry.getKey());
                         String primaryLibraryUrl = ResourceUtils.getPrimaryLibraryUrl(resource, fhirContext);
                         IBaseResource primaryLibrary;
                         if (primaryLibraryUrl != null && primaryLibraryUrl.startsWith("http")) {
@@ -225,7 +229,7 @@ public abstract class AbstractBundler {
                             try {
                                 libraryProcessor.bundleLibraryDependencies(primaryLibrarySourcePath, fhirContext, resources, encoding, includeVersion);
                             } catch (Exception bre) {
-                                failedExceptionMessages.put(resourceSourcePath, getResourceProcessorType() + " will not be bundled because Library Dependency bundling failed: " + bre.getMessage());
+                                failedExceptionMessages.put(resourceSourcePath, getResourceBundlerType() + " will not be bundled because Library Dependency bundling failed: " + bre.getMessage());
                                 //exit from task:
                                 return null;
                             }
@@ -235,7 +239,7 @@ public abstract class AbstractBundler {
                             try {
                                 TestCaseProcessor.bundleTestCases(igPath, getResourceTestGroupName(), primaryLibraryName, fhirContext, resources);
                             } catch (Exception tce) {
-                                failedExceptionMessages.put(resourceSourcePath, getResourceProcessorType() + " will not be bundled because Test Case bundling failed: " + tce.getMessage());
+                                failedExceptionMessages.put(resourceSourcePath, getResourceBundlerType() + " will not be bundled because Test Case bundling failed: " + tce.getMessage());
                                 //exit from task:
                                 return null;
                             }
@@ -291,7 +295,7 @@ public abstract class AbstractBundler {
             ThreadUtils.executeTasks(tasks);
 
         } catch (Exception e) {
-            LogUtils.putException("bundleResources: " + getResourceProcessorType(), e);
+            LogUtils.putException("bundleResources: " + getResourceBundlerType(), e);
         }
 
         //Prepare final report:
@@ -300,7 +304,7 @@ public abstract class AbstractBundler {
         //Give user a snapshot of the files each resource will have persisted to their FHIR server (if fhirUri is provided)
         final int persistCount = persistedFileReport.size();
         if (persistCount > 0) {
-            message.append(NEWLINE).append(persistCount).append(" ").append(getResourceProcessorType()).append("(s) have POST tasks in the queue for ").append(fhirUri).append(": ");
+            message.append(NEWLINE).append(persistCount).append(" ").append(getResourceBundlerType()).append("(s) have POST tasks in the queue for ").append(fhirUri).append(": ");
             int totalQueueCount = 0;
             for (String library : persistedFileReport.keySet()) {
                 totalQueueCount = totalQueueCount + persistedFileReport.get(library);
@@ -318,7 +322,7 @@ public abstract class AbstractBundler {
 
         final int bundledCount = bundledResources.size();
         if (bundledCount > 0) {
-            message.append(NEWLINE).append(bundledCount).append(" ").append(getResourceProcessorType()).append("(s) successfully bundled:");
+            message.append(NEWLINE).append(bundledCount).append(" ").append(getResourceBundlerType()).append("(s) successfully bundled:");
             for (String bundledResource : bundledResources) {
                 message.append(NEWLINE_INDENT).append(bundledResource).append(" BUNDLED");
             }
@@ -334,7 +338,7 @@ public abstract class AbstractBundler {
 
         final int refreshedNotBundledCount = resourcePathLibraryNames.size();
         if (refreshedNotBundledCount > 0) {
-            message.append(NEWLINE).append(refreshedNotBundledCount).append(" ").append(getResourceProcessorType()).append("(s) refreshed, but not bundled (due to issues):");
+            message.append(NEWLINE).append(refreshedNotBundledCount).append(" ").append(getResourceBundlerType()).append("(s) refreshed, but not bundled (due to issues):");
             for (String notBundled : resourcePathLibraryNames) {
                 message.append(NEWLINE_INDENT).append(notBundled).append(" REFRESHED");
             }
@@ -346,7 +350,7 @@ public abstract class AbstractBundler {
 
         final int failedCount = failedResources.size();
         if (failedCount > 0) {
-            message.append(NEWLINE).append(failedCount).append(" ").append(getResourceProcessorType()).append("(s) failed refresh:");
+            message.append(NEWLINE).append(failedCount).append(" ").append(getResourceBundlerType()).append("(s) failed refresh:");
             for (String failed : failedResources) {
                 if (failedExceptionMessages.containsKey(failed) && verboseMessaging) {
                     message.append(NEWLINE_INDENT).append(failed).append(" FAILED: ").append(failedExceptionMessages.get(failed));
@@ -359,7 +363,7 @@ public abstract class AbstractBundler {
         //Exceptions stemming from IOUtils.translate that did not prevent process from completing for file:
         final int translateErrorCount = cqlTranslatorErrorMessages.size();
         if (translateErrorCount > 0) {
-            message.append(NEWLINE).append(cqlTranslatorErrorMessages.size()).append(" ").append(getResourceProcessorType()).append("(s) encountered CQL translator errors:");
+            message.append(NEWLINE).append(cqlTranslatorErrorMessages.size()).append(" ").append(getResourceBundlerType()).append("(s) encountered CQL translator errors:");
 
             for (String library : cqlTranslatorErrorMessages.keySet()) {
                 message.append(NEWLINE_INDENT).append(
@@ -369,16 +373,17 @@ public abstract class AbstractBundler {
         }
 
         System.out.println(message);
+        System.out.println("\r\n[Bundle " + getResourceBundlerType() + " has finished - " + getTime() + "]\r\n");
     }
 
 
     private void reportProgress(int count, int total) {
         double percentage = (double) count / total * 100;
-        System.out.print("\rBundle " + getResourceProcessorType() + "s: " + String.format("%.2f%%", percentage) + " processed.");
+        System.out.print("\rBundle " + getResourceBundlerType() + "s: " + String.format("%.2f%%", percentage) + " processed.");
     }
 
     private String getResourceTestGroupName() {
-        return getResourceProcessorType().toLowerCase();
+        return getResourceBundlerType().toLowerCase();
     }
 
     private void persistBundle(String bundleDestPath, String libraryName,

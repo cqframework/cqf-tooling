@@ -32,7 +32,7 @@ public class MeasureBundler extends AbstractBundler {
     }
 
     @Override
-    protected String getResourceProcessorType() {
+    protected String getResourceBundlerType() {
         return TYPE_MEASURE;
     }
 

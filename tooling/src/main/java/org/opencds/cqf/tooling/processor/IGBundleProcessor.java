@@ -34,34 +34,18 @@ public class IGBundleProcessor {
                          Boolean includeDependencies, Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned, Boolean addBundleTimestamp,
                          FhirContext fhirContext, String fhirUri) {
 
-        System.out.println("\n");
-
-        System.out.println("\r\n[Bundle Measures has started - " + getTime() + "]\r\n");
         new MeasureBundler().bundleResources(refreshedLibraryNames,
                 igPath, binaryPaths, includeDependencies, includeTerminology,
                 includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
                 fhirUri, encoding, verboseMessaging);
-
-        System.out.println("\r\n[Bundle Measures has finished - " + getTime() + "]\r\n");
-
-
-        System.out.println("\r\n[Bundle PlanDefinitions has started - " + getTime() + "]\r\n");
         new PlanDefinitionBundler(this.libraryProcessor, this.cdsHooksProcessor).bundleResources(refreshedLibraryNames,
                 igPath, binaryPaths, includeDependencies, includeTerminology,
                 includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
                 fhirUri, encoding, verboseMessaging);
-        System.out.println("\r\n[Bundle PlanDefinitions has finished - " + getTime() + "]\r\n");
-
-
-
-        System.out.println("\r\n[Bundle Questionnaires has started - " + getTime() + "]\r\n");
         new QuestionnaireBundler(this.libraryProcessor).bundleResources(refreshedLibraryNames,
                 igPath, binaryPaths, includeDependencies, includeTerminology,
                 includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
                 fhirUri, encoding, verboseMessaging);
-        System.out.println("\r\n[Bundle Questionnaires has finished - " + getTime() + "]\r\n");
-
-
 
         //run collected post calls last:
         if (HttpClientUtils.hasPostTasksInQueue()) {
