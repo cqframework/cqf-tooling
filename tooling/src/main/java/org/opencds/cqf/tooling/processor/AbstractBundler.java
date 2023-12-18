@@ -13,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -132,10 +134,10 @@ public abstract class AbstractBundler {
         List<Callable<Void>> tasks = new ArrayList<>();
 
         try {
-            final Map<String, IBaseResource> resourcesMap = getResources(fhirContext);
-            final Map<String, IBaseResource> libraryUrlMap = IOUtils.getLibraryUrlMap(fhirContext);
-            final Map<String, IBaseResource> libraries = IOUtils.getLibraries(fhirContext);
-            final Map<String, String> libraryPathMap = IOUtils.getLibraryPathMap(fhirContext);
+            final Map<String, IBaseResource> resourcesMap = new ConcurrentHashMap<>(getResources(fhirContext));
+            final Map<String, IBaseResource> libraryUrlMap = new ConcurrentHashMap<>(IOUtils.getLibraryUrlMap(fhirContext));
+            final Map<String, IBaseResource> libraries = new ConcurrentHashMap<>(IOUtils.getLibraries(fhirContext));
+            final Map<String, String> libraryPathMap = new ConcurrentHashMap<>(IOUtils.getLibraryPathMap(fhirContext));
 
             for (Map.Entry<String, IBaseResource> resourceEntry : resourcesMap.entrySet()) {
                 String resourceId = "";
@@ -260,13 +262,16 @@ public abstract class AbstractBundler {
 
 
                     } catch (Exception e) {
+                        PrintWriter pw = new PrintWriter(new StringWriter());
+                        e.printStackTrace(pw);
+
                         String failMsg = "";
                         if (e.getMessage() != null) {
                             failMsg = e.getMessage();
                         } else {
-                            failMsg = e.getClass().getName();
+                            failMsg = e.getClass().getName() ;
                         }
-                        failedExceptionMessages.put(resourceSourcePath, failMsg);
+                        failedExceptionMessages.put(resourceSourcePath, failMsg + ":\r\n" + pw);
                     }
 
                     processedResources.add(resourceSourcePath);
