@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.processor;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -271,16 +272,13 @@ public abstract class AbstractBundler {
 
 
                     } catch (Exception e) {
-                        PrintWriter pw = new PrintWriter(new StringWriter());
-                        e.printStackTrace(pw);
-
                         String failMsg = "";
                         if (e.getMessage() != null) {
                             failMsg = e.getMessage();
                         } else {
-                            failMsg = e.getClass().getName() ;
+                            failMsg = e.getClass().getName() + ":\r\n" + ExceptionUtils.getStackTrace(e);
                         }
-                        failedExceptionMessages.put(resourceSourcePath, failMsg + ":\r\n" + pw.toString());
+                        failedExceptionMessages.put(resourceSourcePath, failMsg);
                     }
 
                     processedResources.add(resourceSourcePath);
