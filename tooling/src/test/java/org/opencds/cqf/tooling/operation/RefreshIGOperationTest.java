@@ -1,8 +1,5 @@
 package org.opencds.cqf.tooling.operation;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -19,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -46,6 +44,10 @@ import com.google.gson.Gson;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+
+import static org.testng.Assert.*;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.Reference;
 public class RefreshIGOperationTest extends RefreshTest {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	public RefreshIGOperationTest() {
@@ -163,10 +165,27 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 			// loop through each file, determine resourceType and treat accordingly
 			Map<String, String> resourceTypeMap = new HashMap<>();
+			List<String> groupPatientList = new ArrayList<>();
 
 			try (final DirectoryStream<Path> dirStream = Files.newDirectoryStream(dir)) {
 				dirStream.forEach(path -> {
 					File file = new File(path.toString());
+
+					//Group file testing:
+					if (file.getName().equalsIgnoreCase("Group-BreastCancerScreeningFHIR.json")){
+						try{
+							org.hl7.fhir.r4.model.Group group = (org.hl7.fhir.r4.model.Group)IOUtils.readResource(file.getAbsolutePath(), fhirContext);
+							assertTrue(group.hasMember());
+							// Check if the group contains members
+								// Iterate through the members
+								for (Group.GroupMemberComponent member : group.getMember()) {
+									groupPatientList.add(member.getEntity().getDisplay());
+								}
+						}catch (Exception e){
+							fail("Group-BreastCancerScreeningFHIR.json did not parse to valid Group instance.");
+						}
+
+					}
 
 					if (file.getName().toLowerCase().endsWith(".json")) {
 
@@ -203,6 +222,9 @@ public class RefreshIGOperationTest extends RefreshTest {
 			} catch (IOException e) {
 				logger.info(e.getMessage());
 			}
+
+			//Group file should contain two patients:
+			assertEquals(groupPatientList.size(), 2);
 
 			// map out entries in the resulting single bundle file:
 			Map<?, ?> bundledJson = this.jsonMap(new File(bundledFileResult));
