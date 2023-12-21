@@ -17,6 +17,7 @@ import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,10 +26,30 @@ import java.util.concurrent.*;
 
 public class TestCaseProcessor {
     public static final String NEWLINE_INDENT = "\r\n\t";
+    public static final String NEWLINE_INDENT2 = "\r\n\t\t";
     public static final String NEWLINE = "\r\n";
 
     public static final String separator = System.getProperty("file.separator");
-    private static final Logger logger = LoggerFactory.getLogger(TestCaseProcessor.class);
+
+    private Map<String, String> getIgnoredTestList() {
+        Map<String, String> ignoredTestList = new HashMap<>();
+        File ignoreTestsFile = new File("ignore_tests.txt");
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(ignoreTestsFile))) {
+            String entry;
+            while ((entry = bufferedReader.readLine()) != null) {
+                if (entry.contains(":")) {
+                    String testCase = entry.split(":")[0];
+                    ignoredTestList.put(testCase,
+                            entry.replace(testCase, ""));
+                } else {
+                    ignoredTestList.put(entry, "");
+                }
+            }
+        } catch (Exception e) {
+            //no file exists, that's ok. Return a blank Map.
+        }
+        return ignoredTestList;
+    }
 
     public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, Boolean verboseMessaging) {
         refreshTestCases(path, encoding, fhirContext, null, verboseMessaging);
@@ -38,12 +59,11 @@ public class TestCaseProcessor {
                                  Boolean verboseMessaging) {
         System.out.println("\r\n[Refreshing Tests]\r\n");
 
-
         final Map<String, String> testCaseRefreshSuccessMap = new HashMap<>();
         final Map<String, String> testCaseRefreshFailMap = new HashMap<>();
+
         final Map<String, String> groupFileRefreshSuccessMap = new HashMap<>();
         final Map<String, String> groupFileRefreshFailMap = new HashMap<>();
-
 
         IFhirVersion version = fhirContext.getVersion();
 
@@ -52,11 +72,17 @@ public class TestCaseProcessor {
         //build list of tasks via for loop:
         List<String> resourceTypeTestGroups = IOUtils.getDirectoryPaths(path, false);
 
+        Map<String, String> ignoredTestList = getIgnoredTestList();
+        final Map<String, Map<String, String>> testCaseRefreshIgnoredMap = new HashMap<>();
+
         for (String group : resourceTypeTestGroups) {
 
             List<String> testArtifactPaths = IOUtils.getDirectoryPaths(group, false);
 
             for (String testArtifactPath : testArtifactPaths) {
+
+                String artifact = FilenameUtils.getName(testArtifactPath);
+
                 List<String> testCasePaths = IOUtils.getDirectoryPaths(testArtifactPath, false);
 
                 org.hl7.fhir.r4.model.Group testGroup;
@@ -81,6 +107,35 @@ public class TestCaseProcessor {
                     }
 
                     for (String testCasePath : testCasePaths) {
+                        String testCase = FilenameUtils.getName(testCasePath);
+                        String fileId = getId(testCase);
+
+                        if (ignoredTestList.containsKey(testCase)) {
+                            Map<String, String> artifactTestsIgnoredMap;
+                            //try to group the tests by artifact:
+                            if (testCaseRefreshIgnoredMap.containsKey(artifact)){
+                                artifactTestsIgnoredMap = new HashMap<>(testCaseRefreshIgnoredMap.get(artifact));
+                            }else{
+                               artifactTestsIgnoredMap = new HashMap<>();
+                            }
+                            //add the test case and reason specified in file:
+                            artifactTestsIgnoredMap.put(testCase, ignoredTestList.get(testCase));
+
+                            //add this map to collection of maps:
+                            testCaseRefreshIgnoredMap.put(artifact, artifactTestsIgnoredMap);
+
+                            //try to delete any existing tests-* files that may have been created in previous tests:
+                            File testCaseDeleteFile = new File(testArtifactPath + separator + fileId + "-bundle.json");
+                            if (testCaseDeleteFile.exists()) {
+                                try {
+                                    testCaseDeleteFile.delete();
+                                }catch (Exception e){
+                                    //something went wrong in deleting the old test file, it won't interfere with group file creation though
+                                }
+                            }
+                            continue;
+                        }
+
                         try {
                             List<String> paths = IOUtils.getFilePaths(testCasePath, true);
                             List<IBaseResource> resources = IOUtils.readResources(paths, fhirContext);
@@ -113,7 +168,6 @@ public class TestCaseProcessor {
                             }
 
                             // If the resource is a transaction bundle then don't bundle it again otherwise do
-                            String fileId = getId(FilenameUtils.getName(testCasePath));
                             Object bundle;
                             if ((resources.size() == 1) && (BundleUtils.resourceIsABundle(resources.get(0)))) {
                                 bundle = processTestBundle(fileId, resources.get(0), fhirContext, testArtifactPath, testCasePath);
@@ -141,19 +195,40 @@ public class TestCaseProcessor {
                             groupFileRefreshSuccessMap.put(groupFileIdentifier, "");
 
                         } catch (Exception e) {
-
                             groupFileRefreshFailMap.put(groupFileIdentifier, e.getMessage());
                         }
-
                     }
                 }
             }
-
         }
 
         StringBuilder testCaseMessage = buildInformationMessage(testCaseRefreshFailMap, testCaseRefreshSuccessMap, "Test Case", "Refreshed", verboseMessaging);
+
         if (!groupFileRefreshSuccessMap.isEmpty() || !groupFileRefreshFailMap.isEmpty()) {
             testCaseMessage.append(buildInformationMessage(groupFileRefreshFailMap, groupFileRefreshSuccessMap, "Group File", "Created", verboseMessaging));
+        }
+
+        //There were specified ignored tests, categorize by artifact:
+        if (!testCaseRefreshIgnoredMap.isEmpty()) {
+            int totalTestCaseIgnoredCount = 0;
+            for (Map<String, String> testCaseMap : testCaseRefreshIgnoredMap.values()) {
+                totalTestCaseIgnoredCount += testCaseMap.size();
+            }
+            testCaseMessage.append(NEWLINE).append(totalTestCaseIgnoredCount).append(" Test Case(s) were designated to be ignored:");
+            for (String artifact : testCaseRefreshIgnoredMap.keySet()) {
+                testCaseMessage.append(NEWLINE_INDENT)
+                        .append(artifact)
+                        .append(": ");
+
+                Map<String, String> testCaseIgnored = testCaseRefreshIgnoredMap.get(artifact);
+
+                for (Map.Entry<String, String> entry : testCaseIgnored.entrySet()){
+                    testCaseMessage.append(NEWLINE_INDENT2)
+                            .append(entry.getKey())
+                            //get the reason specified by the ignore file:
+                            .append(entry.getValue());
+                }
+            }
         }
         System.out.println(testCaseMessage);
     }
@@ -182,16 +257,16 @@ public class TestCaseProcessor {
      */
     private StringBuilder buildInformationMessage(Map<String, String> failMap, Map<String, String> successMap, String type, String successType, boolean verboseMessaging) {
         StringBuilder message = new StringBuilder();
-        if (!successMap.isEmpty() || !failMap.isEmpty()) {
+        if (!successMap.isEmpty()) {
             message.append(NEWLINE).append(successMap.size()).append(" ").append(type).append("(s) successfully ").append(successType.toLowerCase()).append(":");
             for (String refreshedTestCase : successMap.keySet()) {
                 message.append(NEWLINE_INDENT).append(refreshedTestCase).append(" ").append(successType.toUpperCase());
             }
-            if (!failMap.isEmpty()) {
-                message.append(NEWLINE).append(failMap.size()).append(" ").append(type).append("(s) failed to be ").append(successType.toLowerCase()).append(":");
-                for (String failed : failMap.keySet()) {
-                    message.append(NEWLINE_INDENT).append(failed).append(" FAILED").append(verboseMessaging ? ": " + failMap.get(failed) : "");
-                }
+        }
+        if (!failMap.isEmpty()) {
+            message.append(NEWLINE).append(failMap.size()).append(" ").append(type).append("(s) failed to be ").append(successType.toLowerCase()).append(":");
+            for (String failed : failMap.keySet()) {
+                message.append(NEWLINE_INDENT).append(failed).append(" FAILED").append(verboseMessaging ? ": " + failMap.get(failed) : "");
             }
         }
         return message;
