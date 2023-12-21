@@ -10,19 +10,15 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
-import org.opencds.cqf.tooling.common.ThreadUtils;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
 
 public class TestCaseProcessor {
     public static final String NEWLINE_INDENT = "\r\n\t";
@@ -30,6 +26,11 @@ public class TestCaseProcessor {
     public static final String NEWLINE = "\r\n";
 
     public static final String separator = System.getProperty("file.separator");
+    public static final String TEST_ARTIFACT_URL = "http://hl7.org/fhir/StructureDefinition/artifact-testArtifact";
+    public static final String MEASURE_URL = "http://ecqi.healthit.gov/ecqms/Measure/";
+    public static final String PATIENT_TYPE = "Patient";
+    public static final String BUNDLE_TYPE = "Bundle";
+    public static final String GROUP_FILE_SEPARATOR = "Group-";
 
     private Map<String, String> getIgnoredTestList() {
         Map<String, String> ignoredTestList = new HashMap<>();
@@ -102,8 +103,8 @@ public class TestCaseProcessor {
                     if (testGroup != null) {
                         testGroup.setId(measureName);
 
-                        testGroup.addExtension("http://hl7.org/fhir/StructureDefinition/artifact-testArtifact",
-                                new CanonicalType("http://ecqi.healthit.gov/ecqms/Measure/" + measureName));
+                        testGroup.addExtension(TEST_ARTIFACT_URL,
+                                new CanonicalType(MEASURE_URL + measureName));
                     }
 
                     for (String testCasePath : testCasePaths) {
@@ -144,7 +145,7 @@ public class TestCaseProcessor {
                             // Loop through resources and any that are patients need to be added to the test Group
                             // Handle individual resources when they exist
                             for (IBaseResource resource : resources) {
-                                if ((resource.fhirType().equalsIgnoreCase("Patient")) && (version.getVersion() == FhirVersionEnum.R4)) {
+                                if ((resource.fhirType().equalsIgnoreCase(PATIENT_TYPE)) && (version.getVersion() == FhirVersionEnum.R4)) {
                                     org.hl7.fhir.r4.model.Patient patient = (org.hl7.fhir.r4.model.Patient) resource;
                                     if (testGroup != null) {
                                         addPatientToGroupR4(testGroup, patient);
@@ -152,12 +153,12 @@ public class TestCaseProcessor {
                                 }
 
                                 // Handle bundled resources when that is how they are provided
-                                if ((resource.fhirType().equalsIgnoreCase("Bundle")) && (version.getVersion() == FhirVersionEnum.R4)) {
+                                if ((resource.fhirType().equalsIgnoreCase(BUNDLE_TYPE)) && (version.getVersion() == FhirVersionEnum.R4)) {
                                     org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle) resource;
                                     var bundleResources =
                                             BundleUtils.getR4ResourcesFromBundle(bundle);
                                     for (IBaseResource bundleResource : bundleResources) {
-                                        if (bundleResource.fhirType().equalsIgnoreCase("Patient")) {
+                                        if (bundleResource.fhirType().equalsIgnoreCase(PATIENT_TYPE)) {
                                             org.hl7.fhir.r4.model.Patient patient = (org.hl7.fhir.r4.model.Patient) bundleResource;
                                             if (testGroup != null) {
                                                 addPatientToGroupR4(testGroup, patient);
@@ -185,7 +186,7 @@ public class TestCaseProcessor {
 
                     // Need to output the Group if it exists
                     if (testGroup != null) {
-                        String groupFileName = "Group-" + measureName;
+                        String groupFileName = GROUP_FILE_SEPARATOR + measureName;
                         String groupFileIdentifier = testArtifactPath + separator + groupFileName;
 
                         try {
