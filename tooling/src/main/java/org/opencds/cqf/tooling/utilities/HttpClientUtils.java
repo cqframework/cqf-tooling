@@ -19,10 +19,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
@@ -241,7 +238,6 @@ public class HttpClientUtils {
      * } ]
      * }
      * It extracts the diagnostics and returns a string appendable to the response
-     *
      */
     private static String getDiagnosticString(String jsonString) {
         try {
@@ -343,8 +339,10 @@ public class HttpClientUtils {
 
                     //execute the remaining tasks:
                     executeTasks(executorService, tasks);
+
+                    reportProgress();
                     if (failedPostCalls.isEmpty()) {
-                        System.out.println("Retry successful, all tasks successfully posted");
+                        System.out.println("\r\nRetry successful, all tasks successfully posted");
                     }
                 }
             }
@@ -367,11 +365,26 @@ public class HttpClientUtils {
                 Collections.sort(failedMessages);
                 message = new StringBuilder();
 
+
                 for (String failedPost : failedMessages) {
                     message.append("\n").append(failedPost);
                 }
+
+
                 message.append("\r\n").append(failedMessages.size()).append(" resources failed to post.");
                 System.out.println(message);
+
+                if (!failedMessages.isEmpty()) {
+                    String httpFailLog = "httpfail.log";
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(httpFailLog))) {
+                        for (String str : failedMessages) {
+                            writer.write(str + "\n");
+                        }
+                        System.out.println("\r\nRecorded failed POST tasks to log file: " + new File(httpFailLog).getAbsolutePath() + "\r\n");
+                    } catch (IOException e) {
+                        System.out.println("\r\nRecording of failed POST tasks to log failed with exception: " + e.getMessage() + "\r\n");
+                    }
+                }
             }
 
         } finally {

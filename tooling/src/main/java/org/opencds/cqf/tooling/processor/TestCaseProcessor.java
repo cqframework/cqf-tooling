@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class TestCaseProcessor {
     public static final String NEWLINE_INDENT = "\r\n\t";
@@ -35,19 +38,23 @@ public class TestCaseProcessor {
     private Map<String, String> getIgnoredTestList() {
         Map<String, String> ignoredTestList = new HashMap<>();
         File ignoreTestsFile = new File("ignore_tests.txt");
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(ignoreTestsFile))) {
-            String entry;
-            while ((entry = bufferedReader.readLine()) != null) {
-                if (entry.contains(":")) {
-                    String testCase = entry.split(":")[0];
-                    ignoredTestList.put(testCase,
-                            entry.replace(testCase, ""));
-                } else {
-                    ignoredTestList.put(entry, "");
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(new File("ignore_tests.txt")))) {
+            for (String input : bufferedReader.lines().collect(Collectors.toList())) {
+                try {
+                    int startIndex = input.indexOf("tests-") + "tests-".length();
+                    int endIndex = input.indexOf("-bundle.json");
+                    String uuid = input.substring(startIndex, endIndex);
+
+                    int hapiIndex = input.indexOf("HAPI-");
+                    String hapiMessage = input.substring(hapiIndex);
+
+                    ignoredTestList.put(uuid, hapiMessage);
+                } catch (Exception e) {
+                    //parsing failed, that's ok, continue through the loop
                 }
             }
         } catch (Exception e) {
-            //no file exists, that's ok. Return a blank Map.
+            //no file exists, that's ok. ignoredTestList is simply blank and ignored later.
         }
         return ignoredTestList;
     }
@@ -73,7 +80,7 @@ public class TestCaseProcessor {
         //build list of tasks via for loop:
         List<String> resourceTypeTestGroups = IOUtils.getDirectoryPaths(path, false);
 
-        Map<String, String> ignoredTestList = getIgnoredTestList();
+        Map<String, String> ignoredTestsList = getIgnoredTestList();
         final Map<String, Map<String, String>> testCaseRefreshIgnoredMap = new HashMap<>();
 
         for (String group : resourceTypeTestGroups) {
@@ -108,37 +115,46 @@ public class TestCaseProcessor {
                     }
 
                     for (String testCasePath : testCasePaths) {
-                        String testCase = FilenameUtils.getName(testCasePath);
-                        String fileId = getId(testCase);
-
-                        if (ignoredTestList.containsKey(testCase)) {
-                            Map<String, String> artifactTestsIgnoredMap;
-                            //try to group the tests by artifact:
-                            if (testCaseRefreshIgnoredMap.containsKey(artifact)){
-                                artifactTestsIgnoredMap = new HashMap<>(testCaseRefreshIgnoredMap.get(artifact));
-                            }else{
-                               artifactTestsIgnoredMap = new HashMap<>();
-                            }
-                            //add the test case and reason specified in file:
-                            artifactTestsIgnoredMap.put(testCase, ignoredTestList.get(testCase));
-
-                            //add this map to collection of maps:
-                            testCaseRefreshIgnoredMap.put(artifact, artifactTestsIgnoredMap);
-
-                            //try to delete any existing tests-* files that may have been created in previous tests:
-                            File testCaseDeleteFile = new File(testArtifactPath + separator + fileId + "-bundle.json");
-                            if (testCaseDeleteFile.exists()) {
-                                try {
-                                    testCaseDeleteFile.delete();
-                                }catch (Exception e){
-                                    //something went wrong in deleting the old test file, it won't interfere with group file creation though
-                                }
-                            }
-                            continue;
-                        }
+                        reportProgress((testCaseRefreshSuccessMap.size() + testCaseRefreshFailMap.size()), totalTestFileCount);
 
                         try {
                             List<String> paths = IOUtils.getFilePaths(testCasePath, true);
+                            String testCase = FilenameUtils.getName(testCasePath);
+                            String fileId = getId(testCase);
+
+                            //ignore the test if specified in ignore_tests.txt in root dir:
+                            if (ignoredTestsList.containsKey(testCase)) {
+                                Map<String, String> artifactTestsIgnoredMap;
+                                //try to group the tests by artifact:
+                                if (testCaseRefreshIgnoredMap.containsKey(artifact)) {
+                                    artifactTestsIgnoredMap = new HashMap<>(testCaseRefreshIgnoredMap.get(artifact));
+                                } else {
+                                    artifactTestsIgnoredMap = new HashMap<>();
+                                }
+                                //add the test case and reason specified in file:
+                                StringBuilder pathsString = new StringBuilder();
+//                                //attach actual filename after uuid for easier identification:
+//                                for (String pathStr : paths){
+//                                    pathsString.append("(")
+//                                            .append(FilenameUtils.getName(pathStr))
+//                                            .append(")");
+//                                }
+                                artifactTestsIgnoredMap.put(testCase + pathsString, ignoredTestsList.get(testCase));
+
+                                //add this map to collection of maps:
+                                testCaseRefreshIgnoredMap.put(artifact, artifactTestsIgnoredMap);
+
+                                //try to delete any existing tests-* files that may have been created in previous tests:
+                                File testCaseDeleteFile = new File(testArtifactPath + separator + fileId + "-bundle.json");
+                                if (testCaseDeleteFile.exists()) {
+                                    try {
+                                        testCaseDeleteFile.delete();
+                                    } catch (Exception e) {
+                                        //something went wrong in deleting the old test file, it won't interfere with group file creation though
+                                    }
+                                }
+                                continue;
+                            }
                             List<IBaseResource> resources = IOUtils.readResources(paths, fhirContext);
                             ensureIds(testCasePath, resources);
 
@@ -181,7 +197,6 @@ public class TestCaseProcessor {
                             testCaseRefreshFailMap.put(testCasePath, e.getMessage());
                         }
                         testCaseRefreshSuccessMap.put(testCasePath, "");
-                        reportProgress((testCaseRefreshSuccessMap.size() + testCaseRefreshFailMap.size()), totalTestFileCount);
                     }
 
                     // Need to output the Group if it exists
@@ -223,9 +238,10 @@ public class TestCaseProcessor {
 
                 Map<String, String> testCaseIgnored = testCaseRefreshIgnoredMap.get(artifact);
 
-                for (Map.Entry<String, String> entry : testCaseIgnored.entrySet()){
+                for (Map.Entry<String, String> entry : testCaseIgnored.entrySet()) {
                     testCaseMessage.append(NEWLINE_INDENT2)
                             .append(entry.getKey())
+                            .append(": ")
                             //get the reason specified by the ignore file:
                             .append(entry.getValue());
                 }

@@ -70,10 +70,14 @@ public class ThreadUtils {
     }
 
     public static void shutdownRunningExecutors() {
-        if (runningExecutors.isEmpty()) return;
-        for (ExecutorService es : runningExecutors){
-            es.shutdownNow();
+        try {
+            if (runningExecutors.isEmpty()) return;
+            for (ExecutorService es : runningExecutors) {
+                es.shutdownNow();
+            }
+            runningExecutors = new ArrayList<>();
+        }catch (Exception e){
+            //fail silently, shutting down anyways
         }
-        runningExecutors = new ArrayList<>();
     }
 }
