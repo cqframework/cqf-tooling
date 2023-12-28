@@ -9,14 +9,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.common.ThreadUtils;
 import org.opencds.cqf.tooling.cql.exception.CqlTranslatorException;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
-import org.opencds.cqf.tooling.measure.MeasureBundler;
 import org.opencds.cqf.tooling.utilities.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -296,22 +293,55 @@ public abstract class AbstractBundler {
             LogUtils.putException("bundleResources: " + getResourceBundlerType(), e);
         }
 
-        //Prepare final report:
-        StringBuilder message = new StringBuilder(NEWLINE);
+        //Output final report:
+        System.out.println(
+                generateBundleProcessSummary(refreshedLibraryNames, fhirContext, fhirUri, verboseMessaging,
+                        persistedFileReport, bundledResources, failedExceptionMessages, cqlTranslatorErrorMessages)
+        );
+    }
+
+    /**
+     * Generates a summary message based on the processing results of bundling and persisting FHIR resources.
+     * The summary contains a list of measures that failed as well as which measures have tasks in the post queue.
+     * All summary lists are sorted for readability.
+     *
+     * @param refreshedLibraryNames      The list of refreshed library names.
+     * @param fhirContext                The FHIR context used for processing resources.
+     * @param fhirUri                    The FHIR server URI for persisting resources.
+     * @param verboseMessaging           A flag indicating whether to include verbose messaging.
+     * @param persistedFileReport        A map containing the count of files queued for each library during persistence.
+     * @param bundledResources           The list of successfully bundled resources.
+     * @param failedExceptionMessages    A map containing exception messages for failed resources.
+     * @param cqlTranslatorErrorMessages A map containing CQL translator error messages for each library.
+     * @return A StringBuilder containing the generated summary message.
+     */
+    private StringBuilder generateBundleProcessSummary(ArrayList<String> refreshedLibraryNames, FhirContext fhirContext,
+                                                       String fhirUri, Boolean verboseMessaging, Map<String, Integer> persistedFileReport,
+                                                       List<String> bundledResources, Map<String, String> failedExceptionMessages,
+                                                       Map<String, List<CqlCompilerException>> cqlTranslatorErrorMessages) {
+
+        StringBuilder summaryMessage = new StringBuilder(NEWLINE);
 
         //Give user a snapshot of the files each resource will have persisted to their FHIR server (if fhirUri is provided)
         final int persistCount = persistedFileReport.size();
         if (persistCount > 0) {
-            message.append(NEWLINE).append(persistCount).append(" ").append(getResourceBundlerType()).append("(s) have POST tasks in the queue for ").append(fhirUri).append(": ");
+            summaryMessage.append(NEWLINE).append(persistCount).append(" ").append(getResourceBundlerType()).append("(s) have POST tasks in the queue for ").append(fhirUri).append(": ");
             int totalQueueCount = 0;
+            List<String> persistMessages = new ArrayList<>();
             for (String library : persistedFileReport.keySet()) {
                 totalQueueCount = totalQueueCount + persistedFileReport.get(library);
-                message.append(NEWLINE_INDENT)
-                        .append(persistedFileReport.get(library))
-                        .append(" File(s): ")
-                        .append(library);
+                persistMessages.add(NEWLINE_INDENT
+                        + persistedFileReport.get(library)
+                        + " File(s): "
+                        + library);
             }
-            message.append(NEWLINE_INDENT)
+
+            persistMessages.sort(new FileComparator());
+
+            for (String persistMessage : persistMessages) {
+                summaryMessage.append(persistMessage);
+            }
+            summaryMessage.append(NEWLINE_INDENT)
                     .append("Total: ")
                     .append(totalQueueCount)
                     .append(" File(s)");
@@ -320,9 +350,14 @@ public abstract class AbstractBundler {
 
         final int bundledCount = bundledResources.size();
         if (bundledCount > 0) {
-            message.append(NEWLINE).append(bundledCount).append(" ").append(getResourceBundlerType()).append("(s) successfully bundled:");
+            summaryMessage.append(NEWLINE).append(bundledCount).append(" ").append(getResourceBundlerType()).append("(s) successfully bundled:");
+            List<String> bundledMessages = new ArrayList<>();
             for (String bundledResource : bundledResources) {
-                message.append(NEWLINE_INDENT).append(bundledResource).append(" BUNDLED");
+                bundledMessages.add(NEWLINE_INDENT + bundledResource + " BUNDLED");
+            }
+            Collections.sort(bundledMessages);
+            for (String bundledMessage : bundledMessages) {
+                summaryMessage.append(bundledMessage);
             }
         }
 
@@ -333,12 +368,16 @@ public abstract class AbstractBundler {
         List<String> failedResources = new ArrayList<>(resourcePathLibraryNames);
         resourcePathLibraryNames.removeAll(bundledResources);
         resourcePathLibraryNames.retainAll(refreshedLibraryNames);
-
         final int refreshedNotBundledCount = resourcePathLibraryNames.size();
         if (refreshedNotBundledCount > 0) {
-            message.append(NEWLINE).append(refreshedNotBundledCount).append(" ").append(getResourceBundlerType()).append("(s) refreshed, but not bundled (due to issues):");
+            List<String> refreshNotBundledMessages = new ArrayList<>();
+            summaryMessage.append(NEWLINE).append(refreshedNotBundledCount).append(" ").append(getResourceBundlerType()).append("(s) refreshed, but not bundled (due to issues):");
             for (String notBundled : resourcePathLibraryNames) {
-                message.append(NEWLINE_INDENT).append(notBundled).append(" REFRESHED");
+                refreshNotBundledMessages.add(NEWLINE_INDENT + notBundled + " REFRESHED");
+            }
+            Collections.sort(refreshNotBundledMessages);
+            for (String refreshNotBundledMessage : refreshNotBundledMessages) {
+                summaryMessage.append(refreshNotBundledMessage);
             }
         }
 
@@ -348,31 +387,58 @@ public abstract class AbstractBundler {
 
         final int failedCount = failedResources.size();
         if (failedCount > 0) {
-            message.append(NEWLINE).append(failedCount).append(" ").append(getResourceBundlerType()).append("(s) failed refresh:");
+            List<String> failedMessages = new ArrayList<>();
+            summaryMessage.append(NEWLINE).append(failedCount).append(" ").append(getResourceBundlerType()).append("(s) failed refresh:");
             for (String failed : failedResources) {
-                if (failedExceptionMessages.containsKey(failed) && verboseMessaging) {
-                    message.append(NEWLINE_INDENT).append(failed).append(" FAILED: ").append(failedExceptionMessages.get(failed));
+                String failMessage = NEWLINE_INDENT + failed + " FAILED";
+                if (verboseMessaging && failedExceptionMessages.containsKey(failed)) {
+                    failedMessages.add(failMessage + ": " + failedExceptionMessages.get(failed));
                 } else {
-                    message.append(NEWLINE_INDENT).append(failed).append(" FAILED");
+                    failedMessages.add(failMessage);
                 }
+            }
+            Collections.sort(failedMessages);
+            for (String failMessage : failedMessages) {
+                summaryMessage.append(failMessage);
             }
         }
 
         //Exceptions stemming from IOUtils.translate that did not prevent process from completing for file:
         final int translateErrorCount = cqlTranslatorErrorMessages.size();
         if (translateErrorCount > 0) {
-            message.append(NEWLINE).append(cqlTranslatorErrorMessages.size()).append(" ").append(getResourceBundlerType()).append("(s) encountered CQL translator errors:");
-
+            List<String> translateErrorMessages = new ArrayList<>();
+            summaryMessage.append(NEWLINE).append(cqlTranslatorErrorMessages.size()).append(" ").append(getResourceBundlerType()).append("(s) encountered CQL translator errors:");
             for (String library : cqlTranslatorErrorMessages.keySet()) {
-                message.append(NEWLINE_INDENT).append(
+                translateErrorMessages.add(NEWLINE_INDENT +
                         CqlProcessor.buildStatusMessage(cqlTranslatorErrorMessages.get(library), library, verboseMessaging, false, NEWLINE_INDENT2)
                 );
             }
+            Collections.sort(translateErrorMessages);
+            for (String translateErrorMessage : translateErrorMessages) {
+                summaryMessage.append(translateErrorMessage);
+            }
         }
 
-        System.out.println(message);
+        return summaryMessage;
     }
 
+    private class FileComparator implements Comparator<String> {
+        @Override
+        public int compare(String file1, String file2) {
+            int count1 = fileCount(file1);
+            int count2 = fileCount(file2);
+            return Integer.compare(count1, count2);
+        }
+
+        private int fileCount(String fileName) {
+            int endIndex = fileName.indexOf(" File(s):");
+            if (endIndex != -1) {
+                String countString = fileName.substring(0, endIndex).trim();
+                return Integer.parseInt(countString);
+            }
+            return 0;
+        }
+    }
 
     private void reportProgress(int count, int total) {
         double percentage = (double) count / total * 100;

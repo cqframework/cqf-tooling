@@ -3,14 +3,17 @@ package org.opencds.cqf.tooling.utilities;
 import ca.uhn.fhir.context.FhirContext;
 import com.google.gson.JsonParser;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -20,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.URI;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
@@ -212,19 +216,61 @@ public class HttpClientUtils {
                 String diagnosticString = getDiagnosticString(EntityUtils.toString(response.getEntity()));
 
                 if (statusCode >= 200 && statusCode < 300) {
-                    successfulPostCalls.add("[SUCCESS] Resource successfully posted to " + postComponent.fhirServerUrl + ": " + resourceIdentifier);
+                    successfulPostCalls.add(buildSuccessMessage(postComponent.fhirServerUrl, resourceIdentifier));
+                }else if (statusCode == 301){
+                    //redirected, find new location:
+                    Header locationHeader = response.getFirstHeader("Location");
+                    if (locationHeader != null) {
+                        postComponent.redirectFhirServerUrl = locationHeader.getValue();
+                        HttpPost redirectedPost = configureHttpPost(postComponent.redirectFhirServerUrl, postComponent.resource, postComponent.encoding, postComponent.fhirContext);
+                        String redirectLocationIdentifier = postComponent.redirectFhirServerUrl
+                                + "(redirected from " + postComponent.fhirServerUrl + ")";
+                        //attempt to post at location specified in redirect response:
+                        try (CloseableHttpClient redirectHttpClient = HttpClientBuilder.create().build()) {
+                            HttpResponse redirectResponse = redirectHttpClient.execute(redirectedPost);
+                            StatusLine redirectStatusLine = redirectResponse.getStatusLine();
+                            int redirectStatusCode = redirectStatusLine.getStatusCode();
+                            String redirectDiagnosticString = getDiagnosticString(EntityUtils.toString(redirectResponse.getEntity()));
+
+                            //treat new response same as we would before:
+                            if (redirectStatusCode >= 200 && redirectStatusCode < 300) {
+                                successfulPostCalls.add(buildSuccessMessage(redirectLocationIdentifier, resourceIdentifier));
+                            } else {
+                                failedPostCalls.add(buildFailedPostMessage(postComponent, redirectStatusCode, redirectLocationIdentifier, resourceIdentifier, redirectDiagnosticString));
+                            }
+                        } catch (Exception e) {
+                            failedPostCalls.add(buildExceptionMessage(postComponent, e, resourceIdentifier, redirectLocationIdentifier));
+                        }
+
+                    } else {
+                        //failed to extract a location from redirect message:
+                        failedPostCalls.add(Pair.of("[FAIL] Exception during " + resourceIdentifier + " POST request execution to "
+                                + postComponent.fhirServerUrl + ": Redirect, but no new location specified", postComponent));
+                    }
                 } else {
-                    failedPostCalls.add(Pair.of("[FAIL] Error " + statusCode + " from " + postComponent.fhirServerUrl + ": " + resourceIdentifier + ": " + diagnosticString, postComponent));
+                    failedPostCalls.add(buildFailedPostMessage(postComponent, statusCode, postComponent.fhirServerUrl, resourceIdentifier, diagnosticString));
                 }
 
             } catch (Exception e) {
-                failedPostCalls.add(Pair.of("[FAIL] Exception during " + resourceIdentifier + " POST request execution to " + postComponent.fhirServerUrl + ": " + e.getMessage(), postComponent));
+                failedPostCalls.add(buildExceptionMessage(postComponent, e, resourceIdentifier, postComponent.fhirServerUrl));
             }
 
             runningPostTaskList.remove(postComponent.resource);
             reportProgress();
             return null;
         };
+    }
+
+    private static Pair<String, PostComponent> buildExceptionMessage(PostComponent postComponent, Exception e, String resourceIdentifier, String locationIdentifier) {
+        return Pair.of("[FAIL] Exception during " + resourceIdentifier + " POST request execution to " + locationIdentifier + ": " + e.getMessage(), postComponent);
+    }
+
+    private static Pair<String, PostComponent> buildFailedPostMessage(PostComponent postComponent, int statusCode, String locationIdentifier, String resourceIdentifier, String diagnosticString) {
+        return Pair.of("[FAIL] Error " + statusCode + " from " + locationIdentifier + ": " + resourceIdentifier + ": " + diagnosticString, postComponent);
+    }
+
+    private static String buildSuccessMessage(String locationIdentifier, String resourceIdentifier) {
+        return "[SUCCESS] Resource successfully posted to " + locationIdentifier + ": " + resourceIdentifier;
     }
 
     /**
@@ -477,13 +523,13 @@ public class HttpClientUtils {
      * It includes the FHIR server URL, the FHIR resource to be posted, the encoding type, and the FHIR context.
      */
     private static class PostComponent {
-        String fhirServerUrl;
-        IBaseResource resource;
-        IOUtils.Encoding encoding;
-        FhirContext fhirContext;
-        String fileLocation;
-        boolean hasPriority;
-
+        private final String fhirServerUrl;
+        private String redirectFhirServerUrl;
+        private final IBaseResource resource;
+        private final IOUtils.Encoding encoding;
+        private final FhirContext fhirContext;
+        private final String fileLocation;
+        private final boolean hasPriority;
         public PostComponent(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation, boolean hasPriority) {
             this.fhirServerUrl = fhirServerUrl;
             this.resource = resource;
