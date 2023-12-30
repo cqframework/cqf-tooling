@@ -336,7 +336,7 @@ public abstract class AbstractBundler {
                         + library);
             }
 
-            persistMessages.sort(new FileComparator());
+            persistMessages.sort(new FileCountComparator());
 
             for (String persistMessage : persistMessages) {
                 summaryMessage.append(persistMessage);
@@ -422,24 +422,6 @@ public abstract class AbstractBundler {
         return summaryMessage;
     }
 
-    private class FileComparator implements Comparator<String> {
-        @Override
-        public int compare(String file1, String file2) {
-            int count1 = fileCount(file1);
-            int count2 = fileCount(file2);
-            return Integer.compare(count1, count2);
-        }
-
-        private int fileCount(String fileName) {
-            int endIndex = fileName.indexOf(" File(s):");
-            if (endIndex != -1) {
-                String countString = fileName.substring(0, endIndex).trim();
-                return Integer.parseInt(countString);
-            }
-            return 0;
-        }
-    }
-
     private void reportProgress(int count, int total) {
         double percentage = (double) count / total * 100;
         System.out.print("\rBundle " + getResourceBundlerType() + "s: " + String.format("%.2f%%", percentage) + " processed.");
@@ -511,5 +493,24 @@ public abstract class AbstractBundler {
 
     }
 
+    /**
+     * Simple comparator for sorting the post queue file count list:
+     */
+    private static class FileCountComparator implements Comparator<String> {
+        @Override
+        public int compare(String file1, String file2) {
+            int count1 = fileCount(file1);
+            int count2 = fileCount(file2);
+            return Integer.compare(count1, count2);
+        }
 
+        private int fileCount(String fileName) {
+            int endIndex = fileName.indexOf(" File(s):");
+            if (endIndex != -1) {
+                String countString = fileName.substring(0, endIndex).trim();
+                return Integer.parseInt(countString);
+            }
+            return 0;
+        }
+    }
 }

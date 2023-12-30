@@ -10,10 +10,8 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -23,8 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.URI;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
@@ -420,17 +418,7 @@ public class HttpClientUtils {
                 message.append("\r\n").append(failedMessages.size()).append(" resources failed to post.");
                 System.out.println(message);
 
-                if (!failedMessages.isEmpty()) {
-                    String httpFailLog = "httpfail.log";
-                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(httpFailLog))) {
-                        for (String str : failedMessages) {
-                            writer.write(str + "\n");
-                        }
-                        System.out.println("\r\nRecorded failed POST tasks to log file: " + new File(httpFailLog).getAbsolutePath() + "\r\n");
-                    } catch (IOException e) {
-                        System.out.println("\r\nRecording of failed POST tasks to log failed with exception: " + e.getMessage() + "\r\n");
-                    }
-                }
+                writeFailedPostAttemptsToLog(failedMessages);
             }
 
         } finally {
@@ -438,6 +426,26 @@ public class HttpClientUtils {
             executorService.shutdown();
         }
     }
+
+    /**
+     * Gives the user a log file containing failed POST attempts during postTaskCollection()
+     * @param failedMessages
+     */
+    private static void writeFailedPostAttemptsToLog(List<String> failedMessages) {
+        if (!failedMessages.isEmpty()) {
+            //generate a unique filename based on simple timestamp:
+            String httpFailLogFilename = "http_post_fail_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".log";
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(httpFailLogFilename))) {
+                for (String str : failedMessages) {
+                    writer.write(str + "\n");
+                }
+                System.out.println("\r\nRecorded failed POST tasks to log file: " + new File(httpFailLogFilename).getAbsolutePath() + "\r\n");
+            } catch (IOException e) {
+                System.out.println("\r\nRecording of failed POST tasks to log failed with exception: " + e.getMessage() + "\r\n");
+            }
+        }
+    }
+
 
     private static void executeTasks(ExecutorService executorService, Map<IBaseResource, Callable<Void>> executableTasksMap) {
         List<Future<Void>> futures = new ArrayList<>();
