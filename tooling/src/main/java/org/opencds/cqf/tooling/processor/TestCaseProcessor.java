@@ -15,10 +15,7 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -218,6 +215,8 @@ public class TestCaseProcessor {
             }
         }
 
+        reportProgress((testCaseRefreshSuccessMap.size() + testCaseRefreshFailMap.size()), totalTestFileCount);
+
         StringBuilder testCaseMessage = buildInformationMessage(testCaseRefreshFailMap, testCaseRefreshSuccessMap, "Test Case", "Refreshed", verboseMessaging);
 
         if (!groupFileRefreshSuccessMap.isEmpty() || !groupFileRefreshFailMap.isEmpty()) {
@@ -276,14 +275,18 @@ public class TestCaseProcessor {
         StringBuilder message = new StringBuilder();
         if (!successMap.isEmpty()) {
             message.append(NEWLINE).append(successMap.size()).append(" ").append(type).append("(s) successfully ").append(successType.toLowerCase()).append(":");
-            for (String refreshedTestCase : successMap.keySet()) {
-                message.append(NEWLINE_INDENT).append(refreshedTestCase).append(" ").append(successType.toUpperCase());
+            List<String> successKeys = new ArrayList<>(successMap.keySet());
+            Collections.sort(successKeys);
+            for (String successCase : successKeys) {
+                message.append(NEWLINE_INDENT).append(successCase).append(" ").append(successType.toUpperCase());
             }
         }
         if (!failMap.isEmpty()) {
             message.append(NEWLINE).append(failMap.size()).append(" ").append(type).append("(s) failed to be ").append(successType.toLowerCase()).append(":");
-            for (String failed : failMap.keySet()) {
-                message.append(NEWLINE_INDENT).append(failed).append(" FAILED").append(verboseMessaging ? ": " + failMap.get(failed) : "");
+            List<String> failKeys = new ArrayList<>(failMap.keySet());
+            Collections.sort(failKeys);
+            for (String failEntry : failKeys) {
+                message.append(NEWLINE_INDENT).append(failEntry).append(" FAILED").append(verboseMessaging ? ": " + failMap.get(failEntry) : "");
             }
         }
         return message;

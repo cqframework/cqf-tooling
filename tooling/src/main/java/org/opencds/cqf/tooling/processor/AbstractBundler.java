@@ -325,6 +325,7 @@ public abstract class AbstractBundler {
         //Give user a snapshot of the files each resource will have persisted to their FHIR server (if fhirUri is provided)
         final int persistCount = persistedFileReport.size();
         if (persistCount > 0) {
+            String fileDisplay = " File(s): ";
             summaryMessage.append(NEWLINE).append(persistCount).append(" ").append(getResourceBundlerType()).append("(s) have POST tasks in the queue for ").append(fhirUri).append(": ");
             int totalQueueCount = 0;
             List<String> persistMessages = new ArrayList<>();
@@ -332,11 +333,28 @@ public abstract class AbstractBundler {
                 totalQueueCount = totalQueueCount + persistedFileReport.get(library);
                 persistMessages.add(NEWLINE_INDENT
                         + persistedFileReport.get(library)
-                        + " File(s): "
+                        + fileDisplay
                         + library);
             }
 
-            persistMessages.sort(new FileCountComparator());
+            //anon comparator class to sort by the file count for better presentation
+            persistMessages.sort(new Comparator<>() {
+                @Override
+                public int compare(String displayFileCount1, String displayFileCount2) {
+                    int count1 = getFileCountFromString(displayFileCount1);
+                    int count2 = getFileCountFromString(displayFileCount2);
+                    return Integer.compare(count1, count2);
+                }
+
+                private int getFileCountFromString(String fileName) {
+                    int endIndex = fileName.indexOf(fileDisplay);
+                    if (endIndex != -1) {
+                        String countString = fileName.substring(0, endIndex).trim();
+                        return Integer.parseInt(countString);
+                    }
+                    return 0;
+                }
+            });
 
             for (String persistMessage : persistMessages) {
                 summaryMessage.append(persistMessage);
@@ -491,26 +509,5 @@ public abstract class AbstractBundler {
             TestCaseProcessor.bundleTestCaseFiles(igPath, getResourceTestGroupName(), primaryLibraryName, bundleDestFilesPath, fhirContext);
         }
 
-    }
-
-    /**
-     * Simple comparator for sorting the post queue file count list:
-     */
-    private static class FileCountComparator implements Comparator<String> {
-        @Override
-        public int compare(String file1, String file2) {
-            int count1 = fileCount(file1);
-            int count2 = fileCount(file2);
-            return Integer.compare(count1, count2);
-        }
-
-        private int fileCount(String fileName) {
-            int endIndex = fileName.indexOf(" File(s):");
-            if (endIndex != -1) {
-                String countString = fileName.substring(0, endIndex).trim();
-                return Integer.parseInt(countString);
-            }
-            return 0;
-        }
     }
 }
