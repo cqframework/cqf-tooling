@@ -230,6 +230,9 @@ package org.opencds.cqf.tooling.cli;
 //import org.opencds.cqf.tooling.operations.ExecutableOperation;
 //import org.opencds.cqf.tooling.operations.Operation;
 //import org.reflections.Reflections;
+
+import ca.uhn.fhir.parser.LenientErrorHandler;
+import ch.qos.logback.classic.Level;
 import org.opencds.cqf.tooling.common.ThreadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -279,6 +282,14 @@ public class Main {
 //    }
 
     public static void main(String[] args) {
+
+        //ca.uhn.fhir.parser.LenientErrorHandler warning suppression:
+        try {
+            suppressLogsFromLenientErrorHandler();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+
         //ensure any and all executors are shutdown cleanly when app is shutdown:
         Runtime.getRuntime().addShutdownHook(new Thread(ThreadUtils::shutdownRunningExecutors));
 
@@ -294,5 +305,10 @@ public class Main {
         }
 
         OperationFactory.createOperation(operation.substring(1)).execute(args);
+    }
+
+    private static void suppressLogsFromLenientErrorHandler() throws Exception {
+        Logger logger = LoggerFactory.getLogger(LenientErrorHandler.class);
+        logger.getClass().getMethod("setLevel", Level.class).invoke(logger, Level.ERROR);
     }
 }
