@@ -43,6 +43,28 @@ public class DTRContentTest extends BaseContentTest {
     }
 
     @Test
+    public void testContactDataElements() throws IOException {
+        assertTrue(cqlPath().resolve("ASLPContactDataElements.cql").toFile().exists());
+        var contactDataElementLines = Files.readAllLines(cqlPath().resolve("ASLPContactDataElements.cql"));
+        assertEquals(contactDataElementLines.get(0), "library ASLPContactDataElements");
+        assertEquals(contactDataElementLines.get(11), "context Encounter");
+    }
+
+    @Test
+    public void testDataElement() throws IOException {
+        assertTrue(cqlPath().resolve("ASLPDataElements.cql").toFile().exists());
+        var dataElementLines = Files.readAllLines(cqlPath().resolve("ASLPDataElements.cql"));
+        assertEquals(dataElementLines.get(0), "library ASLPDataElements");
+        assertEquals(dataElementLines.get(2), "using QICore version '4.1.1'");
+        assertEquals(dataElementLines.get(5), "include QICoreCommon called QC");
+        assertEquals(dataElementLines.get(18), "define \"BMI\":");
+        assertEquals(dataElementLines.get(19), "  [Observation: Cx.\"BMI\"] O");
+        assertEquals(dataElementLines.get(20), "    where O.status in { 'final', 'amended', 'corrected' }");
+        assertEquals(dataElementLines.get(24), "  @dataElement: ASLP.A1.DE16 Diagnosis of Obstructive Sleep Apnea");
+
+    }
+
+    @Test
     public void validateConceptsCqlContentIssueKALM62() throws IOException {
         assertTrue(cqlPath().resolve("ASLPConcepts.cql").toFile().exists());
         var cqlLines = Files.readAllLines(cqlPath().resolve("ASLPConcepts.cql"));

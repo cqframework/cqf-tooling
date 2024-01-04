@@ -3757,16 +3757,18 @@ public class Processor extends Operation {
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
 
-        sb.append(String.format("using FHIR version '4.0.1'"));
+        sb.append(String.format(retrieveProfileLibrary().get(0)));
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
         sb.append(String.format("include FHIRHelpers version '4.0.1'"));
         sb.append(System.lineSeparator());
-        sb.append(String.format("include FHIRCommon called FC"));
+        sb.append(String.format(retrieveProfileLibrary().get(1)));
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
 
-        sb.append("include WHOCommon called WC");
+        //TODO: How to chose between WHOCommon and
+//        sb.append("include WHOCommon called WC");
+        sb.append("include NACHCCommon called NC");
         sb.append(System.lineSeparator());
         sb.append(String.format("include %sCommon called AC", scope));
         sb.append(System.lineSeparator());
@@ -3775,13 +3777,14 @@ public class Processor extends Operation {
         sb.append(System.lineSeparator());
 
         // Context is always patient, will simulate Encounter context with parameterization...
-        if (context != null && context.equals("Encounter")) {
-            sb.append("parameter EncounterId String");
-            sb.append(System.lineSeparator());
-            sb.append(System.lineSeparator());
-        }
-        sb.append("context Patient");
-        //sb.append(String.format("context %s", context != null ? context : "Patient"));
+//        if (context != null && context.equals("Encounter")) {
+//            sb.append("parameter EncounterId String");
+//            sb.append(System.lineSeparator());
+//            sb.append(System.lineSeparator());
+//        }
+        //TODO: How to pick the context ?
+//        sb.append("context Patient");
+        sb.append(String.format("context %s", context != null ? context : "Patient"));
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
 
@@ -3827,6 +3830,15 @@ public class Processor extends Operation {
             e.printStackTrace();
             throw new IllegalArgumentException("Error writing profile activity index");
         }
+    }
+
+    private ArrayList<String> retrieveProfileLibrary() {
+        for(String profileKey: this.profilesByParentProfile.keySet()){
+            if(profileKey.contains("qicore")){
+                return new ArrayList<String>(Arrays.asList("using QICore version '4.1.1'", "include QICoreCommon called QC"));
+            }
+        }
+        return new ArrayList<String>(Arrays.asList("using FHIR version '4.0.1'", "include FHIRCommon version '1.1.000' called FC"));
     }
 
     public void writeIgJsonFragments(String path) {
