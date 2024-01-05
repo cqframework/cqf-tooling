@@ -37,6 +37,8 @@ public class DTRContentTest extends BaseContentTest {
 
         assertTrue(cqlPath().resolve("ASLPContactDataElements.cql").toFile().exists());
         assertTrue(cqlPath().resolve("ASLPDataElements.cql").toFile().exists());
+        assertTrue(cqlPath().resolve("ASLPConcepts.cql").toFile().exists());
+        assertTrue(cqlPath().resolve("ASLPDataElementsByActivity.md").toFile().exists());
 
         var cqlLines = Files.readAllLines(cqlPath().resolve("ASLPConcepts.cql"));
         assertEquals(cqlLines.get(0), "library ASLPConcepts");
@@ -47,7 +49,32 @@ public class DTRContentTest extends BaseContentTest {
         assertTrue(cqlPath().resolve("ASLPContactDataElements.cql").toFile().exists());
         var contactDataElementLines = Files.readAllLines(cqlPath().resolve("ASLPContactDataElements.cql"));
         assertEquals(contactDataElementLines.get(0), "library ASLPContactDataElements");
-        assertEquals(contactDataElementLines.get(11), "context Encounter");
+        assertEquals(contactDataElementLines.get(2), "using QICore version '4.1.1'");
+        assertEquals(contactDataElementLines.get(5), "include QICoreCommon called QC");
+        assertEquals(contactDataElementLines.get(10), "context Encounter");
+        assertEquals(contactDataElementLines.get(12), "/*");
+        assertEquals(contactDataElementLines.get(13), "  @dataElement: ASLP.A1.DE22 BMI");
+        assertEquals(contactDataElementLines.get(14), "  @activity: ASLP.A1 Adult Sleep Studies");
+        assertEquals(contactDataElementLines.get(15), "  @description: Body mass index (BMI)");
+        assertEquals(contactDataElementLines.get(16), "*/");
+        assertEquals(contactDataElementLines.get(17), "define \"BMI\":");
+        assertEquals(contactDataElementLines.get(18), "  WC.MostRecent(");
+        assertEquals(contactDataElementLines.get(19), "  [Observation: Cx.\"BMI\"] O");
+        assertEquals(contactDataElementLines.get(20), "    where O.status in { 'final', 'amended', 'corrected' }");
+        assertEquals(contactDataElementLines.get(21), "      and Last(Split(O.encounter.reference, '/')) = Encounter.id");
+        assertEquals(contactDataElementLines.get(22), "  ).value as FHIR.Quantity");
+
+        assertEquals(contactDataElementLines.get(117), "/*");
+        assertEquals(contactDataElementLines.get(118), "  @dataElement: ASLP.A1.DE21 Weight");
+        assertEquals(contactDataElementLines.get(119), "  @activity: ASLP.A1 Adult Sleep Studies");
+        assertEquals(contactDataElementLines.get(120), "  @description: Weight (in pounds)");
+        assertEquals(contactDataElementLines.get(121), "*/");
+        assertEquals(contactDataElementLines.get(122), "define \"Weight\":");
+        assertEquals(contactDataElementLines.get(123), "  WC.MostRecent(");
+        assertEquals(contactDataElementLines.get(124), "  [Observation: Cx.\"Weight\"] O");
+        assertEquals(contactDataElementLines.get(125), "    where O.status in { 'final', 'amended', 'corrected' }");
+        assertEquals(contactDataElementLines.get(126), "      and Last(Split(O.encounter.reference, '/')) = Encounter.id");
+        assertEquals(contactDataElementLines.get(127), "  ).value as FHIR.Quantity");
     }
 
     @Test
@@ -57,10 +84,17 @@ public class DTRContentTest extends BaseContentTest {
         assertEquals(dataElementLines.get(0), "library ASLPDataElements");
         assertEquals(dataElementLines.get(2), "using QICore version '4.1.1'");
         assertEquals(dataElementLines.get(5), "include QICoreCommon called QC");
-        assertEquals(dataElementLines.get(18), "define \"BMI\":");
-        assertEquals(dataElementLines.get(19), "  [Observation: Cx.\"BMI\"] O");
-        assertEquals(dataElementLines.get(20), "    where O.status in { 'final', 'amended', 'corrected' }");
-        assertEquals(dataElementLines.get(24), "  @dataElement: ASLP.A1.DE16 Diagnosis of Obstructive Sleep Apnea");
+        assertEquals(dataElementLines.get(7), "include SDHCommon called SC");
+        assertEquals(dataElementLines.get(8), "include ASLPConcepts called Cs");
+        assertEquals(dataElementLines.get(12), "/*");
+        assertEquals(dataElementLines.get(13), "  @dataElement: ASLP.A1.DE22 BMI");
+        assertEquals(dataElementLines.get(14), "  @activity: ASLP.A1 Adult Sleep Studies");
+        assertEquals(dataElementLines.get(15), "  @description: Body mass index (BMI)");
+        assertEquals(dataElementLines.get(16), "*/");
+        assertEquals(dataElementLines.get(17), "define \"BMI\":");
+        assertEquals(dataElementLines.get(18), "  [Observation: Cx.\"BMI\"] O");
+        assertEquals(dataElementLines.get(19), "    where O.status in { 'final', 'amended', 'corrected' }");
+        assertEquals(dataElementLines.get(23), "  @dataElement: ASLP.A1.DE16 Diagnosis of Obstructive Sleep Apnea");
 
     }
 
@@ -78,16 +112,5 @@ public class DTRContentTest extends BaseContentTest {
         assertEquals(cqlLines.get(27), "code \"Height\": 'ASLP.A1.DE20' from \"ASLP Codes\" display 'Height'");
     }
 
-    @Test
-    @Ignore
-    public void validateCodeSystem() {
-        var codeSystemActivity = resourceAtPath(
-                CodeSystem.class,
-                vocabularyPath().resolve("codesystem/codesystem-activity-codes.json"));
-        assertEquals(codeSystemActivity.getTitle(), "ASLP Activity Codes");
-        var codeSystemConcept = resourceAtPath(
-                CodeSystem.class,
-                vocabularyPath().resolve("codesystem/codesystem-concept-codes.json"));
-        assertEquals(codeSystemConcept.getTitle(), "ASLP Concept Codes");
-    }
+
 }

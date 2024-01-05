@@ -3766,13 +3766,13 @@ public class Processor extends Operation {
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
 
-        //TODO: How to chose between WHOCommon and
+        //TODO: How to chose between WHOCommon and NACHCCommon
 //        sb.append("include WHOCommon called WC");
-        sb.append("include NACHCCommon called NC");
+        sb.append(String.format("include %s called %s", commonLibraryName, retrieveLibraryShortName()));
         sb.append(System.lineSeparator());
-        sb.append(String.format("include %sCommon called AC", scope));
-        sb.append(System.lineSeparator());
-        sb.append(String.format("include %sConcepts called Cx", scope));
+//        sb.append(String.format("include %sCommon called AC", scope));
+//        sb.append(System.lineSeparator());
+        sb.append(String.format("include %sConcepts called Cs", scope));
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
 
@@ -3832,6 +3832,18 @@ public class Processor extends Operation {
         }
     }
 
+    private String retrieveLibraryShortName(){
+        switch (commonLibraryName) {
+            case "NACHCCommon":
+                return "NC";
+            case "WHOCommon":
+                return "WC";
+            case "SDHCommon":
+                return "SC";
+            default:
+                return "";
+        }
+    }
     private ArrayList<String> retrieveProfileLibrary() {
         for(String profileKey: this.profilesByParentProfile.keySet()){
             if(profileKey.contains("qicore")){
