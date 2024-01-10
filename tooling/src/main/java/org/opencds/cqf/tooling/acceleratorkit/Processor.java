@@ -15,6 +15,7 @@ import java.util.NoSuchElementException;
 
 import jakarta.annotation.Nonnull;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -3174,15 +3175,6 @@ public class Processor extends Operation {
         return "ANC";
     }
 
-    private String getActivityCodeSystemUrl(String scope) {
-        String canonicalBase = scopeCanonicalBaseMap.get(scope);
-        if (canonicalBase == null) {
-            return activityCodeSystemUrl;
-        }
-
-        return canonicalBase + "/CodeSystem/activity-codes";
-    }
-
     private String getScopeCodeSystemUrl(String scope) {
         String canonicalBase = scopeCanonicalBaseMap.get(scope);
         if (canonicalBase == null) {
@@ -3190,17 +3182,6 @@ public class Processor extends Operation {
         }
 
         return canonicalBase + String.format("/CodeSystem/%s-codes",scope);
-    }
-
-    private CodeSystem createActivityCodeSystem(String system) {
-        CodeSystem codeSystem = resolveCodeSystem(system);
-
-        if (codeSystem == null) {
-            codeSystem = createCodeSystem("activity-codes", String.format("%sActivityCodes", contentId), projectCodeSystemBase, String.format("%s Activity Codes", contentId),
-                    "Set of codes representing all activities used in the implementation guide");
-        }
-
-        return codeSystem;
     }
 
     private CodeSystem createScopeCodeSystem(String systemUrl, String scope) {
@@ -3455,24 +3436,14 @@ public class Processor extends Operation {
     }
 
     private void writeDataElement(StringBuilder sb, StructureDefinition sd, String context) {
-        // TODO: Consider writing this to an extension on the structuredefinition instead of to the retrieveInfo like this
-        //for (RetrieveInfo retrieve : retrieves) {
-        //    if (retrieve.structureDefinition.getId().equals(sd.getId())) {
-        // BTR -> Switched to drive off the data elements mapped into this profile
         List<DictionaryElement> lde = elementsByProfileId.get(sd.getId());
         if (lde != null) {
             for (DictionaryElement de : lde) {
-                //String title = sd.hasTitle() ? sd.getTitle() : sd.hasName() ? sd.getName() : sd.getId();
                 String title = de.getDataElementLabel();
                 sb.append("/*");
                 sb.append(System.lineSeparator());
                 sb.append("  @dataElement: ");
                 sb.append(String.format("%s ", de.getId()));
-                //Identifier dataElementIdentifier = getDataElementIdentifier(sd.getIdentifier());
-                //if (dataElementIdentifier != null) {
-                //    sb.append(String.format("%s ", dataElementIdentifier.getValue()));
-                //}
-                //sb.append(title);
                 sb.append(de.getDataElementLabel());
                 sb.append(System.lineSeparator());
 
@@ -3604,9 +3575,6 @@ public class Processor extends Operation {
                     sb.append(System.lineSeparator());
                     sb.append(String.format("    where %s.status in { 'final', 'amended', 'corrected' }", alias));
                     sb.append(System.lineSeparator());
-                    // TODO: Remove the who-notDone modifier from the observation, it should follow the QICore pattern of using a status of cancelled, rather than the notdone modifier
-                    //sb.append(String.format("      and Coalesce(WC.ModifierExtension(%s, 'who-notDone').value, false) is false", alias));
-                    //sb.append(System.lineSeparator());
                     if (context.equals("Encounter")) {
                         sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
                         sb.append(System.lineSeparator());
@@ -3618,7 +3586,6 @@ public class Processor extends Operation {
                     sb.append(String.format(" %s", alias));
                     sb.append(System.lineSeparator());
                     sb.append(String.format("    where %s.status = 'cancelled' }", alias));
-                    //sb.append(String.format("    where WC.ModifierExtension(%s, 'who-notDone').value is true", alias));
                     sb.append(System.lineSeparator());
                     if (context.equals("Encounter")) {
                         sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
@@ -3757,45 +3724,27 @@ public class Processor extends Operation {
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
 
-        sb.append(String.format(retrieveProfileLibrary().get(0)));
+        sb.append(retrieveProfileLibrary().get(0));
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
-        sb.append(String.format("include FHIRHelpers version '4.0.1'"));
+        sb.append("include FHIRHelpers version '4.0.1'");
         sb.append(System.lineSeparator());
-        sb.append(String.format(retrieveProfileLibrary().get(1)));
+        sb.append(retrieveProfileLibrary().get(1));
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
 
         //TODO: How to chose between WHOCommon and NACHCCommon
-//        sb.append("include WHOCommon called WC");
         sb.append(String.format("include %s called %s", commonLibraryName, retrieveLibraryShortName()));
         sb.append(System.lineSeparator());
-//        sb.append(String.format("include %sCommon called AC", scope));
-//        sb.append(System.lineSeparator());
         sb.append(String.format("include %sConcepts called Cs", scope));
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
 
-        // Context is always patient, will simulate Encounter context with parameterization...
-//        if (context != null && context.equals("Encounter")) {
-//            sb.append("parameter EncounterId String");
-//            sb.append(System.lineSeparator());
-//            sb.append(System.lineSeparator());
-//        }
         //TODO: How to pick the context ?
-//        sb.append("context Patient");
-        sb.append(String.format("context %s", context != null ? context : "Patient"));
+        sb.append(String.format("context %s", !StringUtils.isEmpty(context) ? context : "Patient"));
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
 
-        // For each StructureDefinition, generate an Expression Definition:
-        /*
-        // @dataElement: StructureDefinition.identifier
-        // @activity: StructureDefinition.useContext[task]
-        // @description: StructureDefinition.description
-        define "StructureDefinition.title":
-          [StructureDefinition.resourceType: terminologyIdentifier]
-         */
 
         List<String> activityIds = new ArrayList<String>(profilesByActivityId.keySet());
         activityIds.sort(activityIdComparator);
@@ -3847,28 +3796,10 @@ public class Processor extends Operation {
     private ArrayList<String> retrieveProfileLibrary() {
         for(String profileKey: this.profilesByParentProfile.keySet()){
             if(profileKey.contains("qicore")){
-                return new ArrayList<String>(Arrays.asList("using QICore version '4.1.1'", "include QICoreCommon called QC"));
+                return new ArrayList<>(Arrays.asList("using QICore version '4.1.1'", "include QICoreCommon called QC"));
             }
         }
-        return new ArrayList<String>(Arrays.asList("using FHIR version '4.0.1'", "include FHIRCommon version '1.1.000' called FC"));
+        return new ArrayList<>(Arrays.asList("using FHIR version '4.0.1'", "include FHIRCommon version '1.1.000' called FC"));
     }
 
-    public void writeIgJsonFragments(String path) {
-        try (FileOutputStream writer = new FileOutputStream(path + "/ig.json")) {
-            writer.write(String.format("{\r\n%s\r\n}", String.join(",\r\n", igJsonFragments)).getBytes());
-            writer.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("Error writing ig.json fragment");
-        }
-    }
-
-    public void writeIgResourceFragments(String path) {
-        try (FileOutputStream writer = new FileOutputStream(path + "/ig.xml")) {
-            writer.write(String.format(String.join("\r\n", igResourceFragments)).getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("Error writing ig.xml fragment");
-        }
-    }
 }
