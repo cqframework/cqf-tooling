@@ -1,0 +1,16 @@
+{
+  "resourceType": "Library",
+  "id": "library-Test",
+  "version": "1.0.0",
+  "name": "Test",
+  "status": "active",
+  "experimental": true,
+  "type": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/codesystem-library-type.html",
+        "code": "logic-library"
+      }
+    ]
+  }
+}
