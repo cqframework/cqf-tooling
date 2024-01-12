@@ -1,0 +1,17 @@
+{
+   "options":[
+      "EnableAnnotations",
+      "EnableLocators",
+      "DisableListDemotion",
+      "DisableListPromotion",
+      "EnableDateRangeOptimization"
+],
+   "formats":[
+   ],
+   "validateUnits":true,
+   "verifyOnly":false,
+   "errorLevel":"Info",
+   "signatureLevel":"None",
+   "analyzeDataRequirements":false,
+   "collapseDataRequirements":true
+}
