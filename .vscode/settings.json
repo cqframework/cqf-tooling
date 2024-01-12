@@ -12,6 +12,7 @@
         "opencds",
         "pagecontent",
         "plandefinition",
+        "qicore",
         "testng"
     ],
     "java.compile.nullAnalysis.mode": "automatic",
