@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ImplementationGuide xmlns="http://hl7.org/fhir">
+    <id value="com.example.cqloptions"/>
+    <url value="http://example.com/ImplementationGuide/com.example.cqloptions"/>
+    <packageId value="fhir.dbcg.connectathon-r4"/>
+	  <fhirVersion value="4.0.1"/>
+    <definition>
+        <!-- copyright year is a mandatory parameter -->
+        <parameter>
+          <code value="copyrightyear" />
+          <value value="2019+" />
+        </parameter>
+        <!-- releaselabel should be the ballot status for HL7-published IGs. -->
+        <parameter>
+          <code value="releaselabel" />
+          <value value="CI Build" />
+        </parameter>
+        <parameter>
+          <code value="path-resource" />
+          <value value="input/resources/library"/>
+        </parameter>
+    </definition>
+</ImplementationGuide>
