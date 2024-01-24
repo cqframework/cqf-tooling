@@ -43,6 +43,7 @@ abstract class BaseStripContent<T extends IBaseResource> implements IStripConten
     protected abstract Resource convertToR5(T resource);
     protected abstract T convertFromR5(Resource resource);
 
+    @SuppressWarnings("unchecked")
     public void stripFile(File inputFile, File outputFile) {
         var resource = parseResource(inputFile);
         var upgraded = convertToR5((T)resource);
@@ -57,7 +58,6 @@ abstract class BaseStripContent<T extends IBaseResource> implements IStripConten
         }
 
         try (var writer = new BufferedWriter(new FileWriter(f))) {
-            
             writer.write(content);
             writer.flush();
         } catch (IOException e) {
@@ -201,8 +201,6 @@ abstract class BaseStripContent<T extends IBaseResource> implements IStripConten
         content.setUrl(libraryOutputLocation.toPath().relativize(cqlFile.toPath()).toString());
         content.setDataElement(null);
         writeFile(cqlFile, cql);
-
-
     }
 
     private void exportCql(List<Attachment> content, File libraryOutputFile) {
