@@ -4,4 +4,4 @@
 set -euxo pipefail
 bash -n "$0"
 
-mvn install -U -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+./mvnw install -U -DskipTests=true -Dmaven.javadoc.skip=true -B -V
