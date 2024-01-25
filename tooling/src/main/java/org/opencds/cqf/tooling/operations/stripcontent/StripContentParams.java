@@ -2,34 +2,44 @@ package org.opencds.cqf.tooling.operations.stripcontent;
 
 public class StripContentParams {
 
-    private String inputPath;
-    private String outputPath;
-    private String version;
+    private String inputDirectory;
+    private String outputDirectory;
+    private String fhirVersion;
+    private String cqlExportDirectory;
 
-    public String inputPath() {
-        return inputPath;
+    public String inputDirectory() {
+        return inputDirectory;
     }
 
-    public StripContentParams inputPath(String inputPath) {
-        this.inputPath = inputPath;
+    public StripContentParams inputDirectory(String inputDirectory) {
+        this.inputDirectory = inputDirectory;
         return this;
     }
 
-    public String outputPath() {
-        return outputPath;
+    public String outputDirectory() {
+        return outputDirectory;
     }
 
-    public StripContentParams outputPath(String outputPath) {
-        this.outputPath = outputPath;
+    public StripContentParams outputDirectory(String outputDirectory) {
+        this.outputDirectory = outputDirectory;
         return this;
     }
 
-    public String version() {
-        return version;
+    public String fhirVersion() {
+        return fhirVersion;
     }
 
-    public StripContentParams version(String version) {
-        this.version = version;
+    public StripContentParams version(String fhirVersion) {
+        this.fhirVersion = fhirVersion;
+        return this;
+    }
+
+    public String cqlExportDirectory() {
+        return cqlExportDirectory;
+    }
+
+    public StripContentParams cqlExportDirectory(String cqlExportDirectory) {
+        this.cqlExportDirectory = cqlExportDirectory;
         return this;
     }
 }

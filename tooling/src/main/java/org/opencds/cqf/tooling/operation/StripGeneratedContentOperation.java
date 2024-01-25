@@ -2,7 +2,7 @@ package org.opencds.cqf.tooling.operation;
 
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.operations.stripcontent.StripContentParams;
-import org.opencds.cqf.tooling.operations.stripcontent.StripContentProcessor;
+import org.opencds.cqf.tooling.operations.stripcontent.StripContentExecutor;
 
 public class StripGeneratedContentOperation extends Operation {
     @Override
@@ -20,21 +20,24 @@ public class StripGeneratedContentOperation extends Operation {
             switch (flag.replace("-", "").toLowerCase()) {
                 case "outputpath":
                 case "op":
-                    params.outputPath(value);
+                    params.outputDirectory(value);
                     break;
                 case "pathtores":
                 case "ptr":
-                    params.inputPath(value);
+                    params.inputDirectory(value);
                     break;
                 case "version": case "v":
                     params.version(value);
+                    break;
+
+                case "cql":
+                    params.cqlExportDirectory(value);
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
        
-        var processor = new StripContentProcessor(params);
-        processor.execute();
+        new StripContentExecutor(params).execute();
     }
 }
