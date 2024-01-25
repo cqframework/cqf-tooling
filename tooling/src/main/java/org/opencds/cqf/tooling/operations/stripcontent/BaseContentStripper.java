@@ -9,7 +9,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -117,29 +116,20 @@ abstract class BaseContentStripper<T extends IAnyResource> implements ContentStr
         return "options".equals(parameters.getId());
     }
 
-    private List<Resource> filterContained(List<Resource> contained) {
-        return contained.stream()
-                .filter(this::isCqlOptionsParameters)
-                .collect(Collectors.toList());
+    private void filterContained(List<Resource> contained) {
+        contained.removeIf(this::isCqlOptionsParameters);
     }
 
-    private List<Extension> filterExtensions(List<Extension> extensions, Set<String> strippedExtensions) {
-        return extensions.stream()
-                .filter(extension -> !strippedExtensions.contains(extension.getUrl()))
-                .collect(Collectors.toList());
+    private void filterExtensions(List<Extension> extensions, Set<String> strippedExtensions) {
+        extensions.removeIf(x -> strippedExtensions.contains(x.getUrl()));
     }
 
-    private List<Attachment> filterContent(List<Attachment> attachments, Set<String> strippedContentTypes) {
-        return attachments.stream()
-                .filter(attachment -> !strippedContentTypes.contains(attachment.getContentType()))
-                .collect(Collectors.toList());
+    private void filterContent(List<Attachment> attachments, Set<String> strippedContentTypes) {
+        attachments.removeIf(x -> strippedContentTypes.contains(x.getContentType()));
     }
 
-    private List<RelatedArtifact> filterRelatedArtifacts(List<RelatedArtifact> artifacts) {
-        return artifacts
-                .stream()
-                .filter(x -> !RelatedArtifact.RelatedArtifactType.DEPENDSON.equals(x.getType()))
-                .collect(Collectors.toList());
+    private void filterRelatedArtifacts(List<RelatedArtifact> artifacts) {
+        artifacts.removeIf(x -> RelatedArtifact.RelatedArtifactType.DEPENDSON.equals(x.getType()));
     }
 
     // Strip library includes functionality to export the cql file,
@@ -148,33 +138,34 @@ abstract class BaseContentStripper<T extends IAnyResource> implements ContentStr
         stripResource(library, options);
         library.setParameter(null);
         library.setDataRequirement(null);
-        library.setRelatedArtifact(filterRelatedArtifacts(library.getRelatedArtifact()));
-        library.setContent(filterContent(library.getContent(), options.strippedContentTypes()));
+        filterRelatedArtifacts(library.getRelatedArtifact());
+        filterContent(library.getContent(), options.strippedContentTypes());
         exportCql(library.getContent(), library.getName(), libraryFile, options.cqlExportDirectory());
         return library;
     }
 
     private Measure stripMeasure(Measure measure, ContentStripperOptions options) {
         stripResource(measure, options);
-        measure.setRelatedArtifact(filterRelatedArtifacts(measure.getRelatedArtifact()));
+        filterRelatedArtifacts(measure.getRelatedArtifact());
         return measure;
     }
 
     private PlanDefinition stripPlanDefinition(PlanDefinition planDefinition, ContentStripperOptions options) {
         stripResource(planDefinition, options);
-        planDefinition.setRelatedArtifact(filterRelatedArtifacts(planDefinition.getRelatedArtifact()));
+        filterRelatedArtifacts(planDefinition.getRelatedArtifact());
         return planDefinition;
     }
 
     private Questionnaire stripQuestionnaire(Questionnaire questionnaire, ContentStripperOptions options) {
         stripResource(questionnaire, options);
+        filterRelatedArtifacts(questionnaire.getRelatedArtifact());
         return questionnaire;
     }
 
     private DomainResource stripResource(DomainResource resource, ContentStripperOptions options) {
         resource.setText(null);
-        resource.setExtension(filterExtensions(resource.getExtension(), options.strippedExtensionUrls()));
-        resource.setContained(filterContained(resource.getContained()));
+        filterExtensions(resource.getExtension(), options.strippedExtensionUrls());
+        filterContained(resource.getContained());
         return resource;
     }
 
