@@ -10,6 +10,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+import static org.opencds.cqf.tooling.utilities.converters.ResourceAndTypeConverter.convertFromR5Resource;
+import static org.opencds.cqf.tooling.utilities.converters.ResourceAndTypeConverter.convertToR5Resource;
+
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Attachment;
@@ -40,15 +43,15 @@ import ca.uhn.fhir.parser.IParser;
  */
 abstract class BaseContentStripper<T extends IAnyResource> implements ContentStripper {
     protected abstract FhirContext context();
-    protected abstract Resource convertToR5(T resource);
-    protected abstract T convertFromR5(Resource resource);
 
-    @SuppressWarnings("unchecked")
     public void stripFile(File inputFile, File outputFile, ContentStripperOptions options) {
         var resource = parseResource(inputFile);
-        var upgraded = convertToR5((T)resource);
+
+        var upgraded = convertToR5Resource(context(), resource);
         stripResource(upgraded, outputFile, options);
-        var downgraded = convertFromR5(upgraded);
+
+        @SuppressWarnings("unchecked")
+        var downgraded = (T) convertFromR5Resource(context(), upgraded);
         writeResource(outputFile, downgraded);
     }
 
