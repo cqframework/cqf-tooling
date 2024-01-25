@@ -29,7 +29,7 @@ public class StripContentParams {
         return fhirVersion;
     }
 
-    public StripContentParams version(String fhirVersion) {
+    public StripContentParams fhirVersion(String fhirVersion) {
         this.fhirVersion = fhirVersion;
         return this;
     }

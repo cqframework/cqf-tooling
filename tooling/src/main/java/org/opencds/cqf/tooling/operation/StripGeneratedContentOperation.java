@@ -27,7 +27,7 @@ public class StripGeneratedContentOperation extends Operation {
                     params.inputDirectory(value);
                     break;
                 case "version": case "v":
-                    params.version(value);
+                    params.fhirVersion(value);
                     break;
 
                 case "cql":
