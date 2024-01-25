@@ -10,7 +10,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import ca.uhn.fhir.context.FhirVersionEnum;
 
 /**
- * This class runs executes the StripContent command line operation. It picks the correct version
+ * This class executes the StripContent command line operation. It picks the correct version
  * of a ContentStripper based on the FHIR version specified in the command line arguments. It then
  * iterates over all the files in the input directory and runs the stripFile method on each file.
  */
