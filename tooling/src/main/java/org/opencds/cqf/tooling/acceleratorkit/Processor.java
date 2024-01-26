@@ -15,6 +15,7 @@ import java.util.NoSuchElementException;
 
 import jakarta.annotation.Nonnull;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -79,38 +80,37 @@ public class Processor extends Operation {
         canonicalBase = value;
         projectCodeSystemBase = canonicalBase;// + "/CodeSystem/anc-custom-codes"; //http://fhir.org/guides/who/anc-cds/CodeSystem/anc-custom-codes
     }
-    private Map<String, String> scopeCanonicalBaseMap = new LinkedHashMap<String, String>();
+    private Map<String, String> scopeCanonicalBaseMap = new LinkedHashMap<>();
 
     private String openMRSSystem = "http://openmrs.org/concepts";
 
     // NOTE: for now, disable open MRS system/codes
     private boolean enableOpenMRS = false;
-    private Map<String, String> supportedCodeSystems = new LinkedHashMap<String, String>();
+    private Map<String, String> supportedCodeSystems = new LinkedHashMap<>();
 
-    // private Map<String, StructureDefinition> fhirModelStructureDefinitions = new LinkedHashMap<String, StructureDefinition>();
-    private Map<String, DictionaryElement> elementMap = new LinkedHashMap<String, DictionaryElement>();
+    private Map<String, DictionaryElement> elementMap = new LinkedHashMap<>();
     private Map<String, DictionaryElement> elementsById = new HashMap<>();
-    private Map<String, Integer> elementIds = new LinkedHashMap<String, Integer>();
-    private Map<String, Coding> activityMap = new LinkedHashMap<String, Coding>();
+    private Map<String, Integer> elementIds = new LinkedHashMap<>();
+    private Map<String, Coding> activityMap = new LinkedHashMap<>();
     private List<DictionaryProfileElementExtension> profileExtensions = new ArrayList<>();
-    private List<StructureDefinition> extensions = new ArrayList<StructureDefinition>();
-    private List<StructureDefinition> profiles = new ArrayList<StructureDefinition>();
-    private Map<String, Resource> examples = new HashMap<String, Resource>();
-    private Map<String, List<Resource>> testCases = new LinkedHashMap<String, List<Resource>>();
-    private Map<String, StructureDefinition> profilesByElementId = new HashMap<String, StructureDefinition>();
-    private Map<String, List<DictionaryElement>> elementsByProfileId = new LinkedHashMap<String, List<DictionaryElement>>();
-    private Map<String, List<StructureDefinition>> profilesByActivityId = new LinkedHashMap<String, List<StructureDefinition>>();
-    private Map<String, List<StructureDefinition>> profilesByParentProfile = new LinkedHashMap<String, List<StructureDefinition>>();
-    private List<CodeSystem> codeSystems = new ArrayList<CodeSystem>();
-    private List<Questionnaire> questionnaires = new ArrayList<Questionnaire>();
-    private List<ValueSet> valueSets = new ArrayList<ValueSet>();
-    private Map<String, String> valueSetNameMap = new HashMap<String, String>();
-    private Map<String, ConceptMap> conceptMaps = new LinkedHashMap<String, ConceptMap>();
-    private Map<String, Coding> concepts = new LinkedHashMap<String, Coding>();
-    private Map<String, String> conceptNameMap = new HashMap<String, String>();
-    private List<RetrieveInfo> retrieves = new ArrayList<RetrieveInfo>();
-    private List<String> igJsonFragments = new ArrayList<String>();
-    private List<String> igResourceFragments = new ArrayList<String>();
+    private List<StructureDefinition> extensions = new ArrayList<>();
+    private List<StructureDefinition> profiles = new ArrayList<>();
+    private Map<String, Resource> examples = new HashMap<>();
+    private Map<String, List<Resource>> testCases = new LinkedHashMap<>();
+    private Map<String, StructureDefinition> profilesByElementId = new HashMap<>();
+    private Map<String, List<DictionaryElement>> elementsByProfileId = new LinkedHashMap<>();
+    private Map<String, List<StructureDefinition>> profilesByActivityId = new LinkedHashMap<>();
+    private Map<String, List<StructureDefinition>> profilesByParentProfile = new LinkedHashMap<>();
+    private List<CodeSystem> codeSystems = new ArrayList<>();
+    private List<Questionnaire> questionnaires = new ArrayList<>();
+    private List<ValueSet> valueSets = new ArrayList<>();
+    private Map<String, String> valueSetNameMap = new HashMap<>();
+    private Map<String, ConceptMap> conceptMaps = new LinkedHashMap<>();
+    private Map<String, Coding> concepts = new LinkedHashMap<>();
+    private Map<String, String> conceptNameMap = new HashMap<>();
+    private List<RetrieveInfo> retrieves = new ArrayList<>();
+    private List<String> igJsonFragments = new ArrayList<>();
+    private List<String> igResourceFragments = new ArrayList<>();
     private CanonicalResourceAtlas atlas;
 
     private Row currentInputOptionParentRow;
@@ -204,7 +204,7 @@ public class Processor extends Operation {
         // Load the "CONFIG" page of the spreadsheet if it is present
         Sheet sheet = workbook.getSheet("CONFIG");
         if (sheet == null) {
-            System.out.println(String.format("Sheet %s not found in the Workbook, so no processing was done.", "CONFIG"));
+            logger.info("Sheet {} not found in the Workbook, so no processing was done.", "CONFIG");
             return;
         }
 
@@ -230,7 +230,7 @@ public class Processor extends Operation {
                         registerProfile(key, value);
                     }
                     else {
-                        System.out.println(String.format("Unknown configuration key %s", key));
+                        logger.warn("Unknown configuration key {}", key);
                     }
             }
         }
@@ -243,7 +243,7 @@ public class Processor extends Operation {
     private void registerScope(String scopeValue) {
         String[] values = scopeValue.split("\\|");
         if (values.length != 2) {
-            System.out.println(String.format("Unrecognized format for scope %s. Should be <code>|<url>", scopeValue));
+            logger.warn("Unrecognized format for scope {}. Should be <code>|<url>", scopeValue);
         }
 
         scopeCanonicalBaseMap.put(values[0], values[1]);
@@ -252,18 +252,18 @@ public class Processor extends Operation {
     private void registerCodeSystem(String codeSystemValue) {
         String[] values = codeSystemValue.split("\\|");
         if (values.length != 2) {
-            System.out.println(String.format("Unrecognized format for code system %s. Should be <code>|<url>", codeSystemValue));
+            logger.warn("Unrecognized format for code system {}. Should be <code>|<url>", codeSystemValue);
         }
 
         supportedCodeSystems.put(values[0], values[1]);
     }
 
-    Map<String, List<String>> profileMap = new HashMap<String, List<String>>();
+    Map<String, List<String>> profileMap = new HashMap<>();
 
     private void registerProfile(String profileKey, String profileUrl) {
         List<String> profiles = profileMap.get(profileKey);
         if (profiles == null) {
-            profiles = new ArrayList<String>();
+            profiles = new ArrayList<>();
             profileMap.put(profileKey, profiles);
         }
 
@@ -991,7 +991,7 @@ public class Processor extends Operation {
         // If there are no custom codes created for the element, and there is only one terminology code provided, use that code as the code for the element
         if (codes.size() == 0) {
             if (mappings.size() > 1) {
-                System.out.println(String.format("Could not determine data element codes for element %s: %s because no custom code was provided and more than one terminology mapping is specified for the element.", elementId, elementLabel));
+                logger.warn("Could not determine data element codes for element {}: {} because no custom code was provided and more than one terminology mapping is specified for the element.", elementId, elementLabel);
             }
             if (mappings.size() == 1) {
                 codes.add(mappings.get(0));
@@ -1009,7 +1009,7 @@ public class Processor extends Operation {
     private void processDataElementPage(Workbook workbook, String page, String scope) {
         Sheet sheet = workbook.getSheet(page);
         if (sheet == null) {
-            logger.info(String.format("Sheet %s not found in the Workbook, so no processing was done.", page));
+            logger.info("Sheet {} not found in the Workbook, so no processing was done.", page);
             return;
         }
 
@@ -1017,7 +1017,7 @@ public class Processor extends Operation {
         Questionnaire questionnaire = createQuestionnaireForPage(sheet);
 
         Iterator<Row> it = sheet.rowIterator();
-        HashMap<String, Integer> colIds = new LinkedHashMap<String, Integer>();
+        HashMap<String, Integer> colIds = new LinkedHashMap<>();
         String currentGroup = null;
         while (it.hasNext()) {
             Row row = it.next();
@@ -1629,7 +1629,7 @@ public class Processor extends Operation {
 
         if (fhirType != null && !fhirType.isEmpty()) {
             valueTypeRefComponent.setCode(fhirType);
-            List<ElementDefinition.TypeRefComponent> valueTypeList = new ArrayList<ElementDefinition.TypeRefComponent>();
+            List<ElementDefinition.TypeRefComponent> valueTypeList = new ArrayList<>();
             valueTypeList.add(valueTypeRefComponent);
             valueElement.setType(valueTypeList);
         }
@@ -1956,7 +1956,7 @@ public class Processor extends Operation {
                 choicesPath = elementPath.getResourcePath();
                 break;
             default:
-                throw new IllegalArgumentException("Unrecognized baseType: " + resourceType.toString());
+                throw new IllegalArgumentException("Unrecognized baseType: " + resourceType);
         }
 
         try {
@@ -2169,7 +2169,7 @@ public class Processor extends Operation {
                 parentCustomValueSetName = dictionaryElement.getDataElementLabel();
             }
 
-            List<ValueSet> valueSets = new ArrayList<ValueSet>();
+            List<ValueSet> valueSets = new ArrayList<>();
             for (Map.Entry<String, List<DictionaryCode>> vs: valueSetCodes.entrySet()) {
                 ValueSet valueSet = ensureValueSetWithCodes(getValueSetId(vs.getKey()), vs.getKey(), new CodeCollection(vs.getValue()));
                 valueSets.add(valueSet);
@@ -2699,7 +2699,7 @@ public class Processor extends Operation {
         codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
         codeSystem.setCaseSensitive(true);
 
-        System.out.println(String.format("Creating CodeSystem: %s", codeSystem.getUrl()));
+        logger.info("Creating CodeSystem: {}", codeSystem.getUrl());
         codeSystems.add(codeSystem);
 
         return codeSystem;
@@ -2709,10 +2709,10 @@ public class Processor extends Operation {
         if (atlas == null) {
             atlas =
                     new CanonicalResourceAtlas()
-                            .setValueSets(new InMemoryCanonicalResourceProvider<ValueSet>(this.valueSets))
-                            .setCodeSystems(new InMemoryCanonicalResourceProvider<CodeSystem>(this.codeSystems))
-                            .setConceptMaps(new InMemoryCanonicalResourceProvider<ConceptMap>(this.conceptMaps.values()))
-                            .setExtensions(new InMemoryCanonicalResourceProvider<StructureDefinition>(this.extensions));
+                            .setValueSets(new InMemoryCanonicalResourceProvider<>(this.valueSets))
+                            .setCodeSystems(new InMemoryCanonicalResourceProvider<>(this.codeSystems))
+                            .setConceptMaps(new InMemoryCanonicalResourceProvider<>(this.conceptMaps.values()))
+                            .setExtensions(new InMemoryCanonicalResourceProvider<>(this.extensions));
         }
         return atlas;
     }
@@ -2773,7 +2773,7 @@ public class Processor extends Operation {
                         "base": "StructureDefinition-<id>.html"
                     }
                 */
-                igJsonFragments.add(String.format("\t\t\"StructureDefinition/%s\": {\r\n\t\t\t\"source\": \"structuredefinition/structuredefinition-%s.json\",\r\n\t\t\t\"defns\": \"StructureDefinition-%s-definitions.html\",\r\n\t\t\t\"base\": \"StructureDefinition-%s.html\"\r\n\t\t}",
+                igJsonFragments.add(String.format("\t\t\"StructureDefinition/%s\": {%n\t\t\t\"source\": \"structuredefinition/structuredefinition-%s.json\",%n\t\t\t\"defns\": \"StructureDefinition-%s-definitions.html\",%n\t\t\t\"base\": \"StructureDefinition-%s.html\"%n\t\t}",
                         sd.getId(), sd.getId(), sd.getId(), sd.getId()));
 
                 // Generate XML fragment for the IG resource:
@@ -2785,7 +2785,7 @@ public class Processor extends Operation {
                         <groupingId value="main"/>
                     </resource>
                  */
-                igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"StructureDefinition/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", sd.getId()));
+                igResourceFragments.add(String.format("\t\t\t<resource>%n\t\t\t\t<reference>%n\t\t\t\t\t<reference value=\"StructureDefinition/%s\"/>%n\t\t\t\t</reference>%n\t\t\t\t<groupingId value=\"main\"/>%n\t\t\t</resource>", sd.getId()));
             }
         }
     }
@@ -2795,7 +2795,7 @@ public class Processor extends Operation {
         if (activityId != null) {
             List<StructureDefinition> sds = profilesByActivityId.get(activityId);
             if (sds == null) {
-                sds = new ArrayList<StructureDefinition>();
+                sds = new ArrayList<>();
                 profilesByActivityId.put(activityId, sds);
             }
             if (!sds.contains(sd)) {
@@ -2807,7 +2807,7 @@ public class Processor extends Operation {
     private void indexProfileByParent(String parentUrl, StructureDefinition sd) {
         List<StructureDefinition> sds = profilesByParentProfile.get(parentUrl);
         if (sds == null) {
-            sds = new ArrayList<StructureDefinition>();
+            sds = new ArrayList<>();
             profilesByParentProfile.put(parentUrl, sds);
         }
         if (!sds.contains(sd)) {
@@ -2872,7 +2872,7 @@ public class Processor extends Operation {
                         "base": "StructureDefinition-<id>.html"
                     }
                  */
-                igJsonFragments.add(String.format("\t\t\"StructureDefinition/%s\": {\r\n\t\t\t\"source\": \"structuredefinition/structuredefinition-%s.json\",\r\n\t\t\t\"defns\": \"StructureDefinition-%s-definitions.html\",\r\n\t\t\t\"base\": \"StructureDefinition-%s.html\"\r\n\t\t}",
+                igJsonFragments.add(String.format("\t\t\"StructureDefinition/%s\": {%n\t\t\t\"source\": \"structuredefinition/structuredefinition-%s.json\",%n\t\t\t\"defns\": \"StructureDefinition-%s-definitions.html\",%n\t\t\t\"base\": \"StructureDefinition-%s.html\"%n\t\t}",
                         sd.getId(), sd.getId(), sd.getId(), sd.getId()));
 
                 // Generate XML fragment for the IG resource:
@@ -2884,7 +2884,7 @@ public class Processor extends Operation {
                         <groupingId value="main"/>
                     </resource>
                  */
-                igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"StructureDefinition/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", sd.getId()));
+                igResourceFragments.add(String.format("\t\t\t<resource>%n\t\t\t\t<reference>%n\t\t\t\t\t<reference value=\"StructureDefinition/%s\"/>%n\t\t\t\t</reference>%n\t\t\t\t<groupingId value=\"main\"/>%n\t\t\t</resource>", sd.getId()));
             }
         }
     }
@@ -2904,7 +2904,7 @@ public class Processor extends Operation {
                         "base": "CodeSystem-<id>.html"
                     }
                  */
-                igJsonFragments.add(String.format("\t\t\"CodeSystem/%s\": {\r\n\t\t\t\"source\": \"codesystem/codesystem-%s.json\",\r\n\t\t\t\"base\": \"CodeSystem-%s.html\"\r\n\t\t}",
+                igJsonFragments.add(String.format("\t\t\"CodeSystem/%s\": {%n\t\t\t\"source\": \"codesystem/codesystem-%s.json\",%n\t\t\t\"base\": \"CodeSystem-%s.html\"%n\t\t}",
                         cs.getId(), cs.getId(), cs.getId()));
 
                 // Generate XML fragment for the IG resource:
@@ -2916,7 +2916,7 @@ public class Processor extends Operation {
                         <groupingId value="main"/>
                     </resource>
                  */
-                igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"CodeSystem/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", cs.getId()));
+                igResourceFragments.add(String.format("\t\t\t<resource>%n\t\t\t\t<reference>%n\t\t\t\t\t<reference value=\"CodeSystem/%s\"/>%n\t\t\t\t</reference>%n\t\t\t\t<groupingId value=\"main\"/>%n\t\t\t</resource>", cs.getId()));
             }
         }
     }
@@ -2964,7 +2964,7 @@ public class Processor extends Operation {
                         "base": "Questionnaire-<id>.html"
                     }
                  */
-                igJsonFragments.add(String.format("\t\t\"Questionnaire/%s\": {\r\n\t\t\t\"source\": \"questionnaire/questionnaire-%s.json\",\r\n\t\t\t\"base\": \"Questionnaire-%s.html\"\r\n\t\t}",
+                igJsonFragments.add(String.format("\t\t\"Questionnaire/%s\": {%n\t\t\t\"source\": \"questionnaire/questionnaire-%s.json\",%n\t\t\t\"base\": \"Questionnaire-%s.html\"%n\t\t}",
                         q.getId(), q.getId(), q.getId()));
 
                 // Generate XML fragment for the IG resource:
@@ -2976,7 +2976,7 @@ public class Processor extends Operation {
                         <groupingId value="main"/>
                     </resource>
                  */
-                igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"Questionnaire/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", q.getId()));
+                igResourceFragments.add(String.format("\t\t\t<resource>%n\t\t\t\t<reference>%n\t\t\t\t\t<reference value=\"Questionnaire/%s\"/>%n\t\t\t\t</reference>%n\t\t\t\t<groupingId value=\"main\"/>%n\t\t\t</resource>", q.getId()));
             }
         }
     }
@@ -2996,7 +2996,7 @@ public class Processor extends Operation {
                         "base": "ValueSet-<id>.html"
                     }
                  */
-                igJsonFragments.add(String.format("\t\t\"ValueSet/%s\": {\r\n\t\t\t\"source\": \"valueset/valueset-%s.json\",\r\n\t\t\t\"base\": \"ValueSet-%s.html\"\r\n\t\t}",
+                igJsonFragments.add(String.format("\t\t\"ValueSet/%s\": {%n\t\t\t\"source\": \"valueset/valueset-%s.json\",%n\t\t\t\"base\": \"ValueSet-%s.html\"%n\t\t}",
                         vs.getId(), vs.getId(), vs.getId()));
 
                 // Generate XML fragment for the IG resource:
@@ -3008,7 +3008,7 @@ public class Processor extends Operation {
                         <groupingId value="main"/>
                     </resource>
                  */
-                igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"ValueSet/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", vs.getId()));
+                igResourceFragments.add(String.format("\t\t\t<resource>%n\t\t\t\t<reference>%n\t\t\t\t\t<reference value=\"ValueSet/%s\"/>%n\t\t\t\t</reference>%n\t\t\t\t<groupingId value=\"main\"/>%n\t\t\t</resource>", vs.getId()));
             }
         }
     }
@@ -3028,7 +3028,7 @@ public class Processor extends Operation {
                         "base": "ConceptMap-<id>.html"
                     }
                  */
-                igJsonFragments.add(String.format("\t\t\"ConceptMap/%s\": {\r\n\t\t\t\"source\": \"conceptmap/conceptmap-%s.json\",\r\n\t\t\t\"base\": \"ConceptMap-%s.html\"\r\n\t\t}",
+                igJsonFragments.add(String.format("\t\t\"ConceptMap/%s\": {%n\t\t\t\"source\": \"conceptmap/conceptmap-%s.json\",%n\t\t\t\"base\": \"ConceptMap-%s.html\"%n\t\t}",
                         cm.getId(), cm.getId(), cm.getId()));
 
                 // Generate XML fragment for the IG resource:
@@ -3040,7 +3040,7 @@ public class Processor extends Operation {
                         <groupingId value="main"/>
                     </resource>
                  */
-                igResourceFragments.add(String.format("\t\t\t<resource>\r\n\t\t\t\t<reference>\r\n\t\t\t\t\t<reference value=\"ConceptMap/%s\"/>\r\n\t\t\t\t</reference>\r\n\t\t\t\t<groupingId value=\"main\"/>\r\n\t\t\t</resource>", cm.getId()));
+                igResourceFragments.add(String.format("\t\t\t<resource>%n\t\t\t\t<reference>%n\t\t\t\t\t<reference value=\"ConceptMap/%s\"/>%n\t\t\t\t</reference>%n\t\t\t\t<groupingId value=\"main\"/>%n\t\t\t</resource>", cm.getId()));
             }
         }
     }
@@ -3174,15 +3174,6 @@ public class Processor extends Operation {
         return "ANC";
     }
 
-    private String getActivityCodeSystemUrl(String scope) {
-        String canonicalBase = scopeCanonicalBaseMap.get(scope);
-        if (canonicalBase == null) {
-            return activityCodeSystemUrl;
-        }
-
-        return canonicalBase + "/CodeSystem/activity-codes";
-    }
-
     private String getScopeCodeSystemUrl(String scope) {
         String canonicalBase = scopeCanonicalBaseMap.get(scope);
         if (canonicalBase == null) {
@@ -3190,17 +3181,6 @@ public class Processor extends Operation {
         }
 
         return canonicalBase + String.format("/CodeSystem/%s-codes",scope);
-    }
-
-    private CodeSystem createActivityCodeSystem(String system) {
-        CodeSystem codeSystem = resolveCodeSystem(system);
-
-        if (codeSystem == null) {
-            codeSystem = createCodeSystem("activity-codes", String.format("%sActivityCodes", contentId), projectCodeSystemBase, String.format("%s Activity Codes", contentId),
-                    "Set of codes representing all activities used in the implementation guide");
-        }
-
-        return codeSystem;
     }
 
     private CodeSystem createScopeCodeSystem(String systemUrl, String scope) {
@@ -3455,24 +3435,14 @@ public class Processor extends Operation {
     }
 
     private void writeDataElement(StringBuilder sb, StructureDefinition sd, String context) {
-        // TODO: Consider writing this to an extension on the structuredefinition instead of to the retrieveInfo like this
-        //for (RetrieveInfo retrieve : retrieves) {
-        //    if (retrieve.structureDefinition.getId().equals(sd.getId())) {
-        // BTR -> Switched to drive off the data elements mapped into this profile
         List<DictionaryElement> lde = elementsByProfileId.get(sd.getId());
         if (lde != null) {
             for (DictionaryElement de : lde) {
-                //String title = sd.hasTitle() ? sd.getTitle() : sd.hasName() ? sd.getName() : sd.getId();
                 String title = de.getDataElementLabel();
                 sb.append("/*");
                 sb.append(System.lineSeparator());
                 sb.append("  @dataElement: ");
                 sb.append(String.format("%s ", de.getId()));
-                //Identifier dataElementIdentifier = getDataElementIdentifier(sd.getIdentifier());
-                //if (dataElementIdentifier != null) {
-                //    sb.append(String.format("%s ", dataElementIdentifier.getValue()));
-                //}
-                //sb.append(title);
                 sb.append(de.getDataElementLabel());
                 sb.append(System.lineSeparator());
 
@@ -3604,9 +3574,6 @@ public class Processor extends Operation {
                     sb.append(System.lineSeparator());
                     sb.append(String.format("    where %s.status in { 'final', 'amended', 'corrected' }", alias));
                     sb.append(System.lineSeparator());
-                    // TODO: Remove the who-notDone modifier from the observation, it should follow the QICore pattern of using a status of cancelled, rather than the notdone modifier
-                    //sb.append(String.format("      and Coalesce(WC.ModifierExtension(%s, 'who-notDone').value, false) is false", alias));
-                    //sb.append(System.lineSeparator());
                     if (context.equals("Encounter")) {
                         sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
                         sb.append(System.lineSeparator());
@@ -3618,7 +3585,6 @@ public class Processor extends Operation {
                     sb.append(String.format(" %s", alias));
                     sb.append(System.lineSeparator());
                     sb.append(String.format("    where %s.status = 'cancelled' }", alias));
-                    //sb.append(String.format("    where WC.ModifierExtension(%s, 'who-notDone').value is true", alias));
                     sb.append(System.lineSeparator());
                     if (context.equals("Encounter")) {
                         sb.append(String.format("      and Last(Split(%s.encounter.reference, '/')) = Encounter.id", alias));
@@ -3757,44 +3723,29 @@ public class Processor extends Operation {
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
 
-        sb.append(String.format("using FHIR version '4.0.1'"));
+        sb.append(retrieveProfileLibrary().get(0));
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
-        sb.append(String.format("include FHIRHelpers version '4.0.1'"));
+        sb.append("include FHIRHelpers version '4.0.1'");
         sb.append(System.lineSeparator());
-        sb.append(String.format("include FHIRCommon called FC"));
-        sb.append(System.lineSeparator());
-        sb.append(System.lineSeparator());
-
-        sb.append("include WHOCommon called WC");
-        sb.append(System.lineSeparator());
-        sb.append(String.format("include %sCommon called AC", scope));
-        sb.append(System.lineSeparator());
-        sb.append(String.format("include %sConcepts called Cx", scope));
+        sb.append(retrieveProfileLibrary().get(1));
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
 
-        // Context is always patient, will simulate Encounter context with parameterization...
-        if (context != null && context.equals("Encounter")) {
-            sb.append("parameter EncounterId String");
-            sb.append(System.lineSeparator());
-            sb.append(System.lineSeparator());
-        }
-        sb.append("context Patient");
-        //sb.append(String.format("context %s", context != null ? context : "Patient"));
+        //TODO: How to chose between WHOCommon and NACHCCommon
+        sb.append(String.format("include %s called %s", commonLibraryName, retrieveLibraryShortName()));
+        sb.append(System.lineSeparator());
+        sb.append(String.format("include %sConcepts called Cs", scope));
         sb.append(System.lineSeparator());
         sb.append(System.lineSeparator());
 
-        // For each StructureDefinition, generate an Expression Definition:
-        /*
-        // @dataElement: StructureDefinition.identifier
-        // @activity: StructureDefinition.useContext[task]
-        // @description: StructureDefinition.description
-        define "StructureDefinition.title":
-          [StructureDefinition.resourceType: terminologyIdentifier]
-         */
+        //TODO: How to pick the context ?
+        sb.append(String.format("context %s", !StringUtils.isEmpty(context) ? context : "Patient"));
+        sb.append(System.lineSeparator());
+        sb.append(System.lineSeparator());
 
-        List<String> activityIds = new ArrayList<String>(profilesByActivityId.keySet());
+
+        List<String> activityIds = new ArrayList<>(profilesByActivityId.keySet());
         activityIds.sort(activityIdComparator);
         for (String activityId : activityIds) {
             writeActivityIndexHeader(activityIndex, activityId);
@@ -3829,22 +3780,24 @@ public class Processor extends Operation {
         }
     }
 
-    public void writeIgJsonFragments(String path) {
-        try (FileOutputStream writer = new FileOutputStream(path + "/ig.json")) {
-            writer.write(String.format("{\r\n%s\r\n}", String.join(",\r\n", igJsonFragments)).getBytes());
-            writer.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("Error writing ig.json fragment");
+    private String retrieveLibraryShortName(){
+        switch (commonLibraryName) {
+            case "NACHCCommon":
+                return "NC";
+            case "WHOCommon":
+                return "WC";
+            case "SDHCommon":
+                return "SC";
+            default:
+                return "";
         }
     }
-
-    public void writeIgResourceFragments(String path) {
-        try (FileOutputStream writer = new FileOutputStream(path + "/ig.xml")) {
-            writer.write(String.format(String.join("\r\n", igResourceFragments)).getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("Error writing ig.xml fragment");
+    private List<String> retrieveProfileLibrary() {
+        for(String profileKey: this.profilesByParentProfile.keySet()){
+            if(profileKey.contains("qicore")){
+                return Arrays.asList("using QICore version '4.1.1'", "include QICoreCommon called QC");
+            }
         }
+        return Arrays.asList("using FHIR version '4.0.1'", "include FHIRCommon version '1.1.000' called FC");
     }
 }

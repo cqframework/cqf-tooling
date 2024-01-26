@@ -3,9 +3,11 @@ package org.opencds.cqf.tooling.library;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Pattern;
@@ -14,6 +16,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions.Format;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.CodeableConcept;
@@ -198,14 +201,17 @@ public class LibraryProcessor extends BaseProcessor {
             sourceLibrary.getContent().clear();
             sourceLibrary.getContent().add(attachment);
             setLibraryType(sourceLibrary);
+
+            var translatorOptions = getCqlProcessor().getCqlTranslatorOptions();
+            var formats = translatorOptions.getFormats();
             CqlProcessor.CqlSourceFileInformation info = getCqlProcessor().getFileInformation(attachment.getUrl());
             attachment.setUrlElement(null);
             if (info != null) {
                 //f.getErrors().addAll(info.getErrors());
-                if (info.getElm() != null) {
+                if (info.getElm() != null && emptyIfNull(formats).contains(Format.XML)) {
                     sourceLibrary.addContent().setContentType("application/elm+xml").setData(info.getElm());
                 }
-                if (info.getJsonElm() != null) {
+                if (info.getJsonElm() != null && emptyIfNull(formats).contains(Format.JSON)) {
                     sourceLibrary.addContent().setContentType("application/elm+json").setData(info.getJsonElm());
                 }
                 sourceLibrary.getDataRequirement().clear();
@@ -215,7 +221,7 @@ public class LibraryProcessor extends BaseProcessor {
                 sourceLibrary.getParameter().clear();
                 sourceLibrary.getParameter().addAll(info.getParameters());
                 getCqlProcessor().getCqlTranslatorOptions();
-                setTranslatorOptions(sourceLibrary, getCqlProcessor().getCqlTranslatorOptions());
+                setTranslatorOptions(sourceLibrary, translatorOptions);
             } else {
                 logMessage(String.format("No cql info found for %s", fileName));
                 //f.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, ValidationMessage.IssueType.NOTFOUND, "Library", "No cql info found for "+f.getName(), ValidationMessage.IssueSeverity.ERROR));
@@ -223,6 +229,10 @@ public class LibraryProcessor extends BaseProcessor {
         }
 
         return sourceLibrary;
+    }
+
+    private <T> Set<T> emptyIfNull(Set<T> set) {
+        return set != null ? set : Collections.emptySet();
     }
 
     protected void setTranslatorOptions(Library sourceLibrary, CqlTranslatorOptions options) {
