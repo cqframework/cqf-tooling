@@ -17,23 +17,8 @@ import org.opencds.cqf.tooling.library.r4.LibraryGenerator;
 import org.opencds.cqf.tooling.measure.r4.RefreshR4MeasureOperation;
 import org.opencds.cqf.tooling.measure.stu3.RefreshStu3MeasureOperation;
 import org.opencds.cqf.tooling.modelinfo.StructureDefinitionToModelInfo;
-import org.opencds.cqf.tooling.operation.BundleResources;
-import org.opencds.cqf.tooling.operation.BundleToResources;
-import org.opencds.cqf.tooling.operation.BundleToTransactionOperation;
-import org.opencds.cqf.tooling.operation.ExecuteMeasureTestOperation;
-import org.opencds.cqf.tooling.operation.ExtractMatBundleOperation;
-import org.opencds.cqf.tooling.operation.GenerateCQLFromDroolOperation;
-import org.opencds.cqf.tooling.operation.IgBundler;
-import org.opencds.cqf.tooling.operation.PostBundlesInDirOperation;
-import org.opencds.cqf.tooling.operation.PostmanCollectionOperation;
-import org.opencds.cqf.tooling.operation.ProfilesToSpreadsheet;
-import org.opencds.cqf.tooling.operation.QICoreElementsToSpreadsheet;
-import org.opencds.cqf.tooling.operation.RefreshIGOperation;
-import org.opencds.cqf.tooling.operation.RefreshLibraryOperation;
-import org.opencds.cqf.tooling.operation.ScaffoldOperation;
-import org.opencds.cqf.tooling.operation.StripGeneratedContentOperation;
-import org.opencds.cqf.tooling.operation.TestIGOperation;
-import org.opencds.cqf.tooling.operation.VmrToFhirOperation;
+import org.opencds.cqf.tooling.operation.*;
+import org.opencds.cqf.tooling.operation.ig.NewRefreshIGOperation;
 import org.opencds.cqf.tooling.operations.ExecutableOperation;
 import org.opencds.cqf.tooling.operations.OperationParam;
 import org.opencds.cqf.tooling.qdm.QdmToQiCore;
@@ -174,6 +159,8 @@ class OperationFactory {
                 return new GenerateCQLFromDroolOperation();
             case "VmrToFhir":
                 return new VmrToFhirOperation();
+            case "NewRefreshIG":
+                return new NewRefreshIGOperation();
             case "RefreshIG":
                 return new RefreshIGOperation();
             case "RefreshLibrary":
@@ -214,6 +201,8 @@ class OperationFactory {
                 return new SpreadsheetToCQLOperation();
             case "PostmanCollection":
                 return new PostmanCollectionOperation();
+            case "PublishBundle":
+                return new BundlePublish();
             case "TransformErsd":
                 return new ErsdTransformer();
             case "RollTestsDataDates":

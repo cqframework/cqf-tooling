@@ -21,6 +21,9 @@ import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
 import org.cqframework.cql.elm.tracking.TrackBack;
+import org.cqframework.fhir.npm.ILibraryReader;
+import org.cqframework.fhir.npm.NpmLibrarySourceProvider;
+import org.cqframework.fhir.npm.NpmModelInfoProvider;
 import org.fhir.ucum.UcumService;
 import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -33,9 +36,6 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
-import org.opencds.cqf.tooling.npm.ILibraryReader;
-import org.opencds.cqf.tooling.npm.NpmLibrarySourceProvider;
-import org.opencds.cqf.tooling.npm.NpmModelInfoProvider;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 public class CqlProcessor {
@@ -44,18 +44,32 @@ public class CqlProcessor {
      * information about a cql file
      */
     public class CqlSourceFileInformation {
+        private CqlTranslatorOptions options;
         private VersionedIdentifier identifier;
+        private byte[] cql;
         private byte[] elm;
         private byte[] jsonElm;
         private List<ValidationMessage> errors = new ArrayList<>();
         private List<RelatedArtifact> relatedArtifacts = new ArrayList<>();
         private List<DataRequirement> dataRequirements = new ArrayList<>();
         private List<ParameterDefinition> parameters = new ArrayList<>();
+        public CqlTranslatorOptions getOptions() {
+            return options;
+        }
+        public void setOptions(CqlTranslatorOptions options) {
+            this.options = options;
+        }
         public VersionedIdentifier getIdentifier() {
             return identifier;
         }
         public void setIdentifier(VersionedIdentifier identifier) {
             this.identifier = identifier;
+        }
+        public byte[] getCql() {
+            return cql;
+        }
+        public void setCql(byte[] cql) {
+            this.cql = cql;
         }
         public byte[] getElm() {
             return elm;
@@ -202,6 +216,10 @@ public class CqlProcessor {
         }
 
         return this.fileMap.values();
+    }
+
+    public Map<String, CqlSourceFileInformation> getFileMap() {
+        return this.fileMap;
     }
 
     /**
@@ -369,6 +387,7 @@ public class CqlProcessor {
             }
             else {
                 try {
+                    result.setOptions(new CqlTranslatorOptions().withCqlCompilerOptions(options));
                     // convert to base64 bytes
                     // NOTE: Publication tooling requires XML content
                     result.setElm(translator.toXml().getBytes());

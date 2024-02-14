@@ -184,6 +184,12 @@
 
             <dependency>
                 <groupId>info.cqframework</groupId>
+                <artifactId>cqf-fhir-npm</artifactId>
+                <version>${cql.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>info.cqframework</groupId>
                 <artifactId>elm-fhir</artifactId>
                 <version>${cql.version}</version>
             </dependency>

@@ -4,6 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,6 +16,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.util.BundleBuilder;
+import org.cqframework.fhir.utilities.exception.IGInitializationException;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
@@ -22,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BundleUtils {
 
@@ -249,6 +256,23 @@ public class BundleUtils {
             }
         }
         return resourceArrayList;
+    }
+
+    public static IBaseBundle getBundleOfResourceTypeFromDirectory(String directoryPath, FhirContext fhirContext, Class<? extends IBaseResource> clazz) {
+        BundleBuilder builder = new BundleBuilder(fhirContext);
+        try (Stream<Path> walk = Files.walk(Paths.get(directoryPath), 1)) {
+            walk.filter(p -> !Files.isDirectory(p)).forEach(
+                    file -> {
+                        IBaseResource resource = IOUtils.readResource(file.toString(), fhirContext);
+                        if (resource != null && clazz.isAssignableFrom(resource.getClass())) {
+                            builder.addCollectionEntry(resource);
+                        }
+                    }
+            );
+        } catch (IOException ioe) {
+            throw new IGInitializationException("Error reading resources from path: " + directoryPath, ioe);
+        }
+        return builder.getBundle();
     }
 
 }
