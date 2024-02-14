@@ -16,11 +16,9 @@ import joptsimple.OptionSpecBuilder;
 
 
 public class RefreshIGArgumentProcessor {
-
     public static final String[] OPERATION_OPTIONS = {"RefreshIG"};
-
     public static final String[] INI_OPTIONS = {"ini"};
-    public static final String[] ROOT_DIR_OPTIONS = {"root-dir"};
+    public static final String[] ROOT_DIR_OPTIONS = {"root-dir", "rd"};
     public static final String[] IG_PATH_OPTIONS = {"ip", "ig-path"};
     public static final String[] IG_OUTPUT_ENCODING = {"e", "encoding"};
 
@@ -135,14 +133,14 @@ public class RefreshIGArgumentProcessor {
             measureOutputPath = "";
         }
 
-        Boolean shouldApplySoftwareSystemStamp = true;
+        boolean shouldApplySoftwareSystemStamp = true;
         String shouldApplySoftwareSystemStampValue = (String)options.valueOf(SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS[0]);
 
         if ((shouldApplySoftwareSystemStampValue != null) && shouldApplySoftwareSystemStampValue.equalsIgnoreCase("false")) {
             shouldApplySoftwareSystemStamp = false;
         }
 
-        Boolean addBundleTimestamp = false;
+        boolean addBundleTimestamp = false;
         String addBundleTimestampValue = (String)options.valueOf(SHOULD_ADD_TIMESTAMP_OPTIONS[0]);
 
         if ((addBundleTimestampValue != null) && addBundleTimestampValue.equalsIgnoreCase("true")) {
