@@ -106,6 +106,16 @@ public class StructureDefinitionToModelInfo extends Operation {
             -modelName="QICore"
             -modelVersion="5.0.0"
 
+        Arguments for producing USCore 6.1.0 Model Info
+            -resourcePaths="4.0.1;US-Core/6.1.0
+            -modelName="USCore"
+            -modelVersion="6.1.0"
+
+        Arguments for producing QICore 6.0.0 Model Info
+            -resourcePaths="4.0.1;US-Core/6.1.0;QI-Core/6.0.0"
+            -modelName="QICore"
+            -modelVersion="6.0.0"
+
         NOTE: Once the ModelInfo is produced, there is a bug in the Jackson XML deserializer that requires that the xsi:type attribute be the first
         attribute in an element with polymorphic child elements. In a regex-search/replace, the following command will address this issue on the
         resulting ModelInfo file:
