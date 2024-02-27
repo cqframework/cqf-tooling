@@ -1,14 +1,15 @@
 package org.opencds.cqf.tooling.qdm;
 
-import junit.framework.TestCase;
 import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import java.io.File;
 
-public class QdmToQiCoreTest extends TestCase {
+public class QdmToQiCoreTest {
 
     private final QdmToQiCore qdmToQiCore = new QdmToQiCore();
 
+    @Test
     public void testExecute_HtmlFilesCreated() {
         String projectPath = System.getProperty("user.dir");
         String relativePath = "tooling-cli/results";
