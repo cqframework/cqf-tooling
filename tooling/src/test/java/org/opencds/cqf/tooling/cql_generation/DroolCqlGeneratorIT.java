@@ -11,7 +11,7 @@ import org.opencds.cqf.tooling.cql_generation.drool.visitor.DroolToElmVisitor.CQ
 public class DroolCqlGeneratorIT {
 
     @Test
-    public void   test_worked() throws URISyntaxException {
+    public void test_worked() throws URISyntaxException {
         String dataInputPath = "default.json";
         String outputPath = "target/test-output/cql-from-drool";
         CQLTYPES cqlType = CQLTYPES.CONDITION;
