@@ -1,14 +1,11 @@
 package org.opencds.cqf.tooling.operation;
 
-import junit.framework.TestCase;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
 
-public class BundleToTransactionOperationTest extends TestCase {
+public class BundleToTransactionOperationTest {
     private final BundleToTransactionOperation bundleToTransactionOperation = new BundleToTransactionOperation();
     private final String PATH_ARGUMENT = "-p=";
     private final String OUTPUT_PATH_ARGUMENT = "-op=";

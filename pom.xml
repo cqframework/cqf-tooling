@@ -5,16 +5,15 @@
 
     <groupId>org.opencds.cqf</groupId>
     <artifactId>tooling-parent</artifactId>
-    <version>3.2.0-SNAPSHOT</version>
+    <version>3.2.0</version>
 
     <packaging>pom</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <cql.version>3.6.0</cql.version>
-        <hapi.version>6.10.2</hapi.version>
-        <core.version>6.1.2.2</core.version>
+        <cql.version>3.8.0</cql.version>
+        <hapi.version>7.0.0</hapi.version>
         <spring-boot.version>2.1.5.RELEASE</spring-boot.version>
         <slf4j.version>2.0.5</slf4j.version>
     </properties>
@@ -114,6 +113,14 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-bom</artifactId>
+                <version>${hapi.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>info.cqframework</groupId>
                 <artifactId>engine</artifactId>
                 <version>${cql.version}</version>
@@ -198,13 +205,11 @@
             <dependency>
                 <groupId>jakarta.xml.bind</groupId>
                 <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>4.0.1</version>
             </dependency>
 
             <dependency>
                 <groupId>jakarta.activation</groupId>
                 <artifactId>jakarta.activation-api</artifactId>
-                <version>2.1.2</version>
             </dependency>
 
             <dependency>
@@ -228,11 +233,6 @@
                 <groupId>com.sun.xml.fastinfoset</groupId>
                 <artifactId>FastInfoset</artifactId>
                 <version>1.2.18</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>2.15.2</version>
             </dependency>
 
             <dependency>
