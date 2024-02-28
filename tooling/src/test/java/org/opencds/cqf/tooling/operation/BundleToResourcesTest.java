@@ -9,6 +9,9 @@ import java.util.Set;
 
 public class BundleToResourcesTest {
     private final BundleToResources bundleToResources = new BundleToResources();
+    private final String PATH_ARGUMENT = "-p=";
+    private final String OUTPUT_PATH_ARGUMENT = "-op=";
+    private final String ENCODING_ARGUMENT = "-e=";
 
     @Test
     public void testExecute_BundleDecomposition() {
@@ -21,9 +24,9 @@ public class BundleToResourcesTest {
 
         String[] args = new String[4];
         args[0] = "-BundleToResources";
-        args[1] = "-p=" + jsonFilePath;
-        args[2] = "-e=json";
-        args[3] = "-op=" + projectPath + File.separator + relativePath;
+        args[1] = PATH_ARGUMENT + jsonFilePath;
+        args[2] = ENCODING_ARGUMENT+ "json";
+        args[3] = OUTPUT_PATH_ARGUMENT + projectPath + File.separator + relativePath;
         bundleToResources.execute(args);
 
         File resultDir = new File(projectPath + File.separator + relativePath);
