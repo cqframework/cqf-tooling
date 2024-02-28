@@ -130,6 +130,7 @@ package org.opencds.cqf.tooling.cli;
 
         - Bundle transaction - Converts a collection bundle to a transaction bundle
             - mvn exec:java -Dexec.args="-MakeTransaction [Bundle file path] (output encoding)
+            - Example: mvn -Dexec.mainClass="org.opencds.cqf.tooling.cli.Main" exec:java -Dexec.args="-MakeTransaction -p=/Users/daviddieppois/Documents/git/cqf-tooling/tooling/src/main/resources/libraryevaluationtest-bundle.json -e=json -op=/Users/daviddieppois/Documents/git/cqf-tooling/tooling-cli/bundleTransaction"
             - This tooling converts a collection bundle to a transaction bundle
             - Accepts bundles with .json or .xml extensions
 
