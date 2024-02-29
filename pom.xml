@@ -16,6 +16,7 @@
         <hapi.version>7.0.0</hapi.version>
         <spring-boot.version>2.1.5.RELEASE</spring-boot.version>
         <slf4j.version>2.0.5</slf4j.version>
+        <jetty.version>11.0.20</jetty.version>
     </properties>
 
     <name>CQF Tooling</name>
