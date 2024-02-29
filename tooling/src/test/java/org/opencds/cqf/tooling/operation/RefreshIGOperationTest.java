@@ -99,7 +99,7 @@ public class RefreshIGOperationTest extends RefreshTest {
      * This test breaks down refreshIG's process and can verify multiple bundles
      */
     @SuppressWarnings("unchecked")
-//    @Test commented out because it is failing and blocking other tests - Fixing DD
+    @Test
     //TODO: Fix separately, this is blocking a bunch of other higher priority things
     public void testBundledFiles() throws IOException {
         //we can assert how many bundles were posted by keeping track via WireMockServer
