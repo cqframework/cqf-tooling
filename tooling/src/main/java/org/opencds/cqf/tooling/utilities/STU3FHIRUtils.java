@@ -115,8 +115,8 @@ public class STU3FHIRUtils {
     }
 
     public static CompiledLibrary resolveLibrary(LibraryManager libraryManager, VersionedIdentifier libraryIdentifier) {
-        if (libraryManager.getCompiledLibraries().containsKey(libraryIdentifier.getId())) {
-            return libraryManager.getCompiledLibraries().get(libraryIdentifier.getId());
+        if (libraryManager.getCompiledLibraries().containsKey(libraryIdentifier)) {
+            return libraryManager.getCompiledLibraries().get(libraryIdentifier);
         }
 
         throw new IllegalArgumentException(String.format("Could not resolve reference to translated library %s", libraryIdentifier.getId()));

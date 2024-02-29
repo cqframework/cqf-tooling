@@ -18,7 +18,7 @@ public class BundleToTransactionOperationTest {
         String relativeJsonPath = "src/main/resources/libraryevaluationtest-bundle.json";
         String jsonFilePath = projectPath + File.separator + relativeJsonPath;
 
-        String relativePath = "tooling-cli/bundleTransactionResults";
+        String relativePath = "target/test-output/bundleTransactionResults";
 
         String[] args = new String[4];
         args[0] = "-MakeTransaction";
