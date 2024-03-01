@@ -84,13 +84,13 @@ public class SpreadsheetHelper {
         }
         result = result.trim();
         if(replace) {
-            result.replaceAll("\\p{Cntrl}", "?");
-            result.replaceAll("\\p{C}", "?");
+            result = result.replaceAll("\\p{Cntrl}", "?");
+            result = result.replaceAll("\\p{C}", "?");
             result = SpreadsheetHelper.cleanseString(result);
         }
         else{
-            result.replaceAll("\\p{Cntrl}", "");
-            result.replaceAll("\\p{C}", "");
+            result = result.replaceAll("\\p{Cntrl}", "");
+            result = result.replaceAll("\\p{C}", "");
             result = SpreadsheetHelper.cleanseStringNoReplacement(result);
         }
         return result;
