@@ -10,13 +10,16 @@ import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.processor.BaseProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BundleResources extends Operation {
-
+    private final static Logger logger = LoggerFactory.getLogger(BundleResources.class);
     private String encoding; // -encoding (-e)
     private String pathToDirectory; // -pathtodir (-ptd)
     private String version; // -version (-v) Can be dstu2, stu3, or
@@ -165,7 +168,7 @@ public class BundleResources extends Operation {
                 }
                 catch (Exception e) {
                     String message = String.format("'%s' will not be included in the bundle because the following error occurred: '%s'", resource.getName(), e.getMessage());
-                    System.out.println(message);
+                    logger.error(message, e);
                     continue;
                 }
             }
@@ -178,7 +181,7 @@ public class BundleResources extends Operation {
                 }
                 catch (Exception e) {
                     String message = String.format("'%s' will not be included in the bundle because the following error occurred: '%s'", resource.getName(), e.getMessage());
-                    System.out.println(message);
+                    logger.error(message, e);
                     continue;
                 }
             }

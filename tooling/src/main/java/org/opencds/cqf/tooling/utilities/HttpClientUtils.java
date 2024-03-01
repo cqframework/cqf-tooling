@@ -83,7 +83,7 @@ public class HttpClientUtils {
 
         if (!missingValues.isEmpty()) {
             String missingValueString = String.join(", ", missingValues);
-            System.out.println("An invalid HTTP POST call was attempted with a null value for: " + missingValueString +
+            logger.error("An invalid HTTP POST call was attempted with a null value for: " + missingValueString +
                     (!values.isEmpty() ? "\\nRemaining values are: " + String.join(", ", values) : ""));
             return;
         }
@@ -333,7 +333,7 @@ public class HttpClientUtils {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
 
         try {
-            System.out.println(getTotalTaskCount() + " POST calls to be made. Starting now. Please wait...");
+            logger.info(getTotalTaskCount() + " POST calls to be made. Starting now. Please wait...");
             double percentage = 0;
             System.out.print("\rPOST: " + String.format("%.2f%%", percentage) + " done. ");
 
@@ -345,7 +345,7 @@ public class HttpClientUtils {
 
             reportProgress();
 
-            System.out.println("Processing results...");
+            logger.info("Processing results...");
             Collections.sort(successfulPostCalls);
 
             StringBuilder message = new StringBuilder();
@@ -353,11 +353,11 @@ public class HttpClientUtils {
                 message.append("\n").append(successPost);
             }
             message.append("\r\n").append(successfulPostCalls.size()).append(" resources successfully posted.");
-            System.out.println(message);
+            logger.info(message.toString());
             successfulPostCalls = new ArrayList<>();
 
             if (!failedPostCalls.isEmpty()) {
-                System.out.println(failedPostCalls.size() + " tasks failed to POST. Retry these failed posts? (Y/N)");
+                logger.info(failedPostCalls.size() + " tasks failed to POST. Retry these failed posts? (Y/N)");
                 Scanner scanner = new Scanner(System.in);
                 String userInput = scanner.nextLine().trim().toLowerCase();
 
@@ -386,7 +386,7 @@ public class HttpClientUtils {
 
                     reportProgress();
                     if (failedPostCalls.isEmpty()) {
-                        System.out.println("\r\nRetry successful, all tasks successfully posted");
+                        logger.info("\r\nRetry successful, all tasks successfully posted");
                     }
                 }
             }
@@ -397,7 +397,7 @@ public class HttpClientUtils {
                     message.append("\n").append(successPost);
                 }
                 message.append("\r\n").append(successfulPostCalls.size()).append(" resources successfully posted.");
-                System.out.println(message);
+                logger.info(message.toString());
                 successfulPostCalls = new ArrayList<>();
             }
 
@@ -416,7 +416,7 @@ public class HttpClientUtils {
 
 
                 message.append("\r\n").append(failedMessages.size()).append(" resources failed to post.");
-                System.out.println(message);
+                logger.info(message.toString());
 
                 writeFailedPostAttemptsToLog(failedMessages);
             }
@@ -439,9 +439,9 @@ public class HttpClientUtils {
                 for (String str : failedMessages) {
                     writer.write(str + "\n");
                 }
-                System.out.println("\r\nRecorded failed POST tasks to log file: " + new File(httpFailLogFilename).getAbsolutePath() + "\r\n");
+               logger.info("\r\nRecorded failed POST tasks to log file: " + new File(httpFailLogFilename).getAbsolutePath() + "\r\n");
             } catch (IOException e) {
-                System.out.println("\r\nRecording of failed POST tasks to log failed with exception: " + e.getMessage() + "\r\n");
+                logger.info("\r\nRecording of failed POST tasks to log failed with exception: " + e.getMessage() + "\r\n");
             }
         }
     }

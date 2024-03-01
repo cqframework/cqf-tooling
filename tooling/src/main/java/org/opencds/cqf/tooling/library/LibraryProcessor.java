@@ -78,7 +78,7 @@ public class LibraryProcessor extends BaseProcessor {
     }
 
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryPath, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
-        System.out.println("\r\n[Refreshing Libraries]\r\n");
+        logger.info("[Refreshing Libraries]");
 
         LibraryProcessor libraryProcessor;
         switch (fhirContext.getVersion().getVersion()) {

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 public class BaseProcessor implements IProcessorContext, IWorkerContext.ILoggingService {
 
-    private static final Logger logger = LoggerFactory.getLogger(BaseProcessor.class);
+    protected static final Logger logger = LoggerFactory.getLogger(BaseProcessor.class);
 
     protected String rootDir;
 

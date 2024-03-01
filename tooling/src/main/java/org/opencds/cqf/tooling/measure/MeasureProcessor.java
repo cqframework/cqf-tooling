@@ -38,7 +38,7 @@ public class MeasureProcessor extends BaseProcessor {
                                                 Boolean versioned, FhirContext fhirContext, String measureToRefreshPath,
                                                 Boolean shouldApplySoftwareSystemStamp) {
 
-        System.out.println("\r\n[Refreshing Measures]\r\n");
+        logger.info("[Refreshing Measures]");
 
         MeasureProcessor measureProcessor;
         switch (fhirContext.getVersion().getVersion()) {
@@ -113,7 +113,7 @@ public class MeasureProcessor extends BaseProcessor {
         List<CqlCompilerException> errors = new CopyOnWriteArrayList<>();
         CompiledLibrary CompiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, errors);
 
-        System.out.println(CqlProcessor.buildStatusMessage(errors, measure.getName(), verboseMessaging));
+        logger.info(CqlProcessor.buildStatusMessage(errors, measure.getName(), verboseMessaging));
 
         boolean hasSevereErrors = CqlProcessor.hasSevereErrors(errors);
 

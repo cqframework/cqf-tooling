@@ -34,7 +34,7 @@ public abstract class AbstractBundler {
     /**
      * The logger for logging messages specific to the implementing class.
      */
-    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+    protected final static Logger logger = LoggerFactory.getLogger(AbstractBundler.class);
 
     /**
      * The resource type constant for Questionnaire.
@@ -116,7 +116,7 @@ public abstract class AbstractBundler {
     public void bundleResources(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
                                 Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp,
                                 FhirContext fhirContext, String fhirUri, IOUtils.Encoding encoding, Boolean verboseMessaging) {
-        System.out.println("\r\n[Bundling " + getResourceBundlerType() + "s]\r\n");
+        logger.info("\r\n[Bundling " + getResourceBundlerType() + "s]\r\n");
 
         final List<String> bundledResources = new CopyOnWriteArrayList<>();
 
@@ -142,7 +142,7 @@ public abstract class AbstractBundler {
             final Map<String, String> libraryPathMap = new ConcurrentHashMap<>(IOUtils.getLibraryPathMap(fhirContext));
 
             if (resourcesMap.isEmpty()) {
-                System.out.println("[INFO] No " + getResourceBundlerType() + "s found. Continuing...");
+                logger.info("[INFO] No " + getResourceBundlerType() + "s found. Continuing...");
                 return;
             }
 
@@ -169,7 +169,7 @@ public abstract class AbstractBundler {
                 tasks.add(() -> {
                     //check if resourceSourcePath has been processed before:
                     if (processedResources.contains(resourceSourcePath)) {
-                        System.out.println(getResourceBundlerType() + " processed already: " + resourceSourcePath);
+                        logger.info(getResourceBundlerType() + " processed already: " + resourceSourcePath);
                         return null;
                     }
                     String resourceName = FilenameUtils.getBaseName(resourceSourcePath).replace(getResourcePrefix(), "");
@@ -294,10 +294,9 @@ public abstract class AbstractBundler {
         }
 
         //Output final report:
-        System.out.println(
-                generateBundleProcessSummary(refreshedLibraryNames, fhirContext, fhirUri, verboseMessaging,
-                        persistedFileReport, bundledResources, failedExceptionMessages, cqlTranslatorErrorMessages)
-        );
+        String summaryOutput = generateBundleProcessSummary(refreshedLibraryNames, fhirContext, fhirUri, verboseMessaging,
+                persistedFileReport, bundledResources, failedExceptionMessages, cqlTranslatorErrorMessages).toString();
+        logger.info(summaryOutput);
     }
 
     /**

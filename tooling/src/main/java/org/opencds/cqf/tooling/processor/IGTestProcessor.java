@@ -172,7 +172,7 @@ public class IGTestProcessor extends BaseProcessor {
 
         CqfmSoftwareSystem testTargetSoftwareSystem =  getCqfRulerSoftwareSystem(params.fhirServerUri);
 
-        System.out.println("\r\n[Running IG Test Cases]\r\n");
+        logger.info("[Running IG Test Cases]");
 
         File testCasesDirectory = new File(params.testCasesPath);
         if (!testCasesDirectory.isDirectory()) {
@@ -180,7 +180,7 @@ public class IGTestProcessor extends BaseProcessor {
         }
 
         // refresh/generate test bundles
-        System.out.println("\r\n[Refreshing Test Cases]\r\n");
+        logger.info("[Refreshing Test Cases]");
 
         TestCaseProcessor testCaseProcessor = new TestCaseProcessor();
         testCaseProcessor.refreshTestCases(params.testCasesPath, IOUtils.Encoding.JSON, fhirContext, verboseMessaging);

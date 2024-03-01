@@ -1,0 +1,64 @@
+---
+# jekyll header
+---
+{% include header.html %}
+{% include container-start.html %}
+
+<a name="ConditionDiagnosisProblem"> </a>
+<h2>
+    <span class="sectioncount">7.7.0</span> Condition Diagnosis Problem <a href="ConditionDiagnosisProblem.html#ConditionDiagnosisProblem" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
+</h2>
+
+<p>This QDM to QI Core Mapping for the QDM Datatype &#34;Diagnosis&#34; was reviewed by the CQI WG on March 30, 2018 for QDM version 5.3. There are no changes in &#34;Condition/Diagnosis/Problem&#34; in QDM version 5.4.</p>
+
+<p>QDM defines Condition/Diagnosis/Problem as a practitioner’s identification of a patient’s disease, illness, injury, or condition. This category contains a single datatype to represent all of these concepts: Diagnosis. A practitioner determines the diagnosis by means of examination, diagnostic test results, patient history, and/or family history. Diagnoses are usually considered unfavorable, but may also represent neutral or favorable conditions that affect a patient’s plan of care (e.g., pregnancy).</p>
+
+
+
+
+
+<div style="page-break-inside: avoid;">
+<table border="1" cellpadding="2" cellspacing="0">
+<tr>
+<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
+<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
+<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
+<tr valign="top">
+<td>Diagnosis</td>
+<td>Condition (the Condition.clinicalStatus metadata allows conformance to the specific QDM datatype context)</td>
+<td>QDM defaults the status to active and prevalence period provides the evidence of activity. Note: The FHIR Condition resource does not specify a status for Condition.clinicalStatus; however, the QDM datatype Diagnosis default state is &#34;active&#34;; hence, the Condition.clinicalStatus should be constrained to &#34;active&#34;. Also, the Condition.verificationStatus should be constrained to &#34;confirmed&#34;.</td></tr>
+<tr>
+<td>Prevalence Period</td>
+<td>Condition.onset[x], OR Condition.asserted</td>
+<td>Use Condition.onset[x], if present, use Condition.asserted as a fallback. Note that it may not be appropriate to map Condition.asserted to Diagnosis.prevalencePeriod.start when Condition.status is inactive. QDM matched to QI Core / FHIR for start of Prevalence Period</td></tr>
+<tr>
+<td />
+<td>Condition.abatement[x]</td>
+<td>QDM matched to QI Core / FHIR for end of Prevalence Period</td></tr>
+<tr>
+<td>Anatomical Location Site</td>
+<td>Condition.bodySite</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Severity</td>
+<td>Condition.severity</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Code</td>
+<td>Condition.code</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Author dateTime</td>
+<td>Condition.assertedDate</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>id</td>
+<td>Condition.id</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Source</td>
+<td>Condition.asserter</td>
+<td>QDM matched to QI Core / FHIR</td></tr></table></div>
+
+{% include container-end.html %}
+{% include footer.html %}

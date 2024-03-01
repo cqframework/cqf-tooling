@@ -10,9 +10,12 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
+import org.opencds.cqf.tooling.operation.RefreshIGOperation;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
@@ -21,6 +24,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class TestCaseProcessor {
+    private final static Logger logger = LoggerFactory.getLogger(TestCaseProcessor.class);
     public static final String NEWLINE_INDENT = "\r\n\t";
     public static final String NEWLINE_INDENT2 = "\r\n\t\t";
     public static final String NEWLINE = "\r\n";
@@ -62,7 +66,7 @@ public class TestCaseProcessor {
 
     public void refreshTestCases(String path, IOUtils.Encoding encoding, FhirContext fhirContext, @Nullable List<String> refreshedResourcesNames,
                                  Boolean verboseMessaging) {
-        System.out.println("\r\n[Refreshing Tests]\r\n");
+        logger.info("[Refreshing Tests]");
 
         final Map<String, String> testCaseRefreshSuccessMap = new HashMap<>();
         final Map<String, String> testCaseRefreshFailMap = new HashMap<>();

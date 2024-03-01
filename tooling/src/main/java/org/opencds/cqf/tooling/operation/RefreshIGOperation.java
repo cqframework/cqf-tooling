@@ -4,9 +4,11 @@ import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.processor.IGProcessor;
 import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RefreshIGOperation extends Operation {
-
+    private final static Logger logger = LoggerFactory.getLogger(RefreshIGOperation.class);
     public RefreshIGOperation() {
     }
 
@@ -27,7 +29,7 @@ public class RefreshIGOperation extends Operation {
         }
 
         if (params.verboseMessaging == null || !params.verboseMessaging) {
-            System.out.println("\r\nRe-run with -x to for expanded reporting of errors, warnings, and informational messages.\r\n");
+            logger.info("Re-run with -x to for expanded reporting of errors, warnings, and informational messages.");
         }
 
         new IGProcessor().publishIG(params);

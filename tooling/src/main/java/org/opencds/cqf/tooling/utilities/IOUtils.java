@@ -834,7 +834,7 @@ public class IOUtils {
                     resources.put(path, resource);
                 } catch (Exception e) {
                     if(path.toLowerCase().contains("measure")) {
-                        System.out.println("Error reading in Measure from path: " + path + "\n" + e);
+                        logger.error("Error reading in Measure from path: " + path, e);
                     }
                 }
             }

@@ -409,7 +409,7 @@ public class CqlProcessor {
             }
 
             //output Success/Warn/Info/Fail message to user:
-            System.out.println(buildStatusMessage(translator.getErrors(), file.getName(), verboseMessaging));
+            logger.logMessage(buildStatusMessage(translator.getErrors(), file.getName(), verboseMessaging));
         }
         catch (Exception e) {
             result.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, IssueType.EXCEPTION, file.getName(), "CQL Processing failed with exception: "+e.getMessage(), IssueSeverity.ERROR));
