@@ -1,5 +1,7 @@
 package org.opencds.cqf.tooling.processor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -9,10 +11,10 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class PlanDefinitionProcessor extends AbstractResourceProcessor {
+public class PlanDefinitionBundler extends AbstractBundler {
 
     @SuppressWarnings("this-escape")
-    public PlanDefinitionProcessor(LibraryProcessor libraryProcessor, CDSHooksProcessor cdsHooksProcessor) {
+    public PlanDefinitionBundler(LibraryProcessor libraryProcessor, CDSHooksProcessor cdsHooksProcessor) {
         setLibraryProcessor(libraryProcessor);
         setCDSHooksProcessor(cdsHooksProcessor);
     }
@@ -29,8 +31,14 @@ public class PlanDefinitionProcessor extends AbstractResourceProcessor {
     }
 
     @Override
-    protected String getResourceProcessorType() {
+    protected String getResourceBundlerType() {
         return TYPE_PLAN_DEFINITION;
+    }
+
+    @Override
+    protected int persistFilesFolder(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri) {
+        //do nothing
+        return 0;
     }
 
     @Override
@@ -38,8 +46,4 @@ public class PlanDefinitionProcessor extends AbstractResourceProcessor {
         return IOUtils.getPlanDefinitionPaths(fhirContext);
     }
 
-    @Override
-    protected void persistTestFiles(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri) {
-        //not needed
-    }
 }

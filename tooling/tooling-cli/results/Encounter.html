@@ -1,0 +1,187 @@
+---
+# jekyll header
+---
+{% include header.html %}
+{% include container-start.html %}
+<ul id="markdown-toc"><li><a href="#Encounter.2C_Order">Encounter, Order</a></li><li><a href="#Encounter.2C_Recommended">Encounter, Recommended</a></li><li><a href="#Encounter.2C_Performed">Encounter, Performed</a></li></ul>
+<a name="Encounter"> </a>
+<h2>
+    <span class="sectioncount">7.10.0</span> Encounter <a href="Encounter.html#Encounter" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
+</h2>
+
+<p>The HL7 CQI Workgroup reviewed the content on this page in April 2018 referencing QDM version 5.3. There are no changes to the QDM Encounter category in QDM 5.4.</p>
+
+
+<p>QDM defines Encounter as an identifiable grouping of healthcare-related activities characterized by the entity relationship between the subject of care and a healthcare provider; such a grouping is determined by the healthcare provider.  A patient encounter represents interaction between a healthcare provider and a patient with a face-to-face patient visit to a clinician’s office, or any electronically remote interaction with a clinician for any form of diagnostic treatment or therapeutic event. Encounters can be billable events but are not limited to billable interactions. Each encounter has an associated location or modality within which it occurred (such as an office, home, electronic methods, phone encounter, or telemedicine methods). The encounter location is the patient’s location at the time of measurement. Different levels of interaction can be specified in the value associated with the element while modes of interaction (e.g., telephone) may be modeled using the data flow attribute. QDM defines three contexts for Encounter: Encounter, Order; Encounter, Performed; Encounter, Recommended. Note: Encounter, Performed; Encounter, Order; and Encounter, Recommended do not include a clear mechanism to address urgent, emergent or routine (scheduled) encounters. QDM is evaluating the possibility of adding Encounter,priority to address these issues. See the QDM Known Issues site to review the request and to link to the ONC Jira QDM Issues page to join in the discussion in consideration of the next version of QDM (5.5) <a class="external autonumber" href="https://github.com/esacinc/CQL-Formatting-and-Usage-Wiki/wiki/eCQM-Known-Issues#differentiating-elective-vs-emergent-or-urgent-encounters-or-procedures" rel="nofollow">[1]</a>.</p>
+
+
+
+<a name="Encounter.2C_Order"> </a>
+<h3>
+    <span class="sectioncount">7.10.1</span> Encounter, Order <a href="Encounter.html#Encounter.2C_Order" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
+</h3>
+
+
+<div style="page-break-inside: avoid;">
+<table border="1" cellpadding="2" cellspacing="0">
+<tr>
+<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
+<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
+<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
+<tr valign="top">
+<td>Encounter, Order</td>
+<td>ReferralRequest.intent - FHIR STU 4.0 updating to ServiceRequest.intent</td>
+<td>Referral Request intent uses the concepts proposal, plan, order, original-order, reflex-order, filler-order, instance-order, option. For QDM datatypes with the context &#34;order&#34; the ReferralRequest.intent value shall be constrained to &#34;order&#34;</td></tr>
+<tr>
+<td>FacilityLocation</td>
+<td>ReferralRequest.context</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Negation Rationale</td>
+<td>ProcedureRequest.extension (<a class="external free" href="http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused" rel="nofollow">http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused</a>)</td>
+<td>Modeled as a procedure request - there is no Encounter request in QI Core. Note FHIR STU 4.0 is updating ReferralRequest to Service.Request. See FHIR Tracker Item <a class="external text" href="https://gforge.hl7.org/gf/project/fhir/tracker/?action=TrackerItemEdit&#38;tracker_item_id=15940" rel="nofollow">15940</a> for negation rationale for ServiceRequest.</td></tr>
+<tr>
+<td>Reason</td>
+<td>ReferralRequest.reasonCode</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Author dateTime</td>
+<td>ReferralRequest.authoredOn</td>
+<td>Note - ProcedureRequest.occurrence[x] defines a dateTime when the event should occur - not addressed in QDM</td></tr>
+<tr>
+<td>Code</td>
+<td>ReferralRequest.type</td>
+<td>See also, Observation.category</td></tr>
+<tr>
+<td>id</td>
+<td>ReferralRequest.id</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Source</td>
+<td>ReferralRequest.requester</td>
+<td>Author, orderer - note also, ProcedureRequest.requester.agent for device, practitioner or organization who initiated the request; or ProcedureRequest.requester.onBehalfOf  - the organization on whose behalf the device or practitioner was acting</td></tr></table></div>
+
+
+<a name="Encounter.2C_Recommended"> </a>
+<h3>
+    <span class="sectioncount">7.10.2</span> Encounter, Recommended <a href="Encounter.html#Encounter.2C_Recommended" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
+</h3>
+
+
+<div style="page-break-inside: avoid;">
+<table border="1" cellpadding="2" cellspacing="0">
+<tr>
+<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
+<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
+<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
+<tr valign="top">
+<td>Encounter, Recommended</td>
+<td>ReferralRequest.intent</td>
+<td>Referral Request intent uses the concepts proposal, plan, order, original-order, reflex-order, filler-order, instance-order, option. For QDM datatypes with the context &#34;recommended&#34; the ReferralRequest.intent value shall be constrained to &#34;order&#34;</td></tr>
+<tr>
+<td>FacilityLocation</td>
+<td>ReferralRequest.context</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Negation Rationale</td>
+<td>ProcedureRequest.extension (<a class="external free" href="http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused" rel="nofollow">http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused</a>)</td>
+<td>Modeled as a procedure request - there is no Encounter request in QI Core. Note FHIR STU 4.0 is updating ReferralRequest to Service.Request. See FHIR Tracker Item <a class="external text" href="https://gforge.hl7.org/gf/project/fhir/tracker/?action=TrackerItemEdit&#38;tracker_item_id=15940" rel="nofollow">15940</a> for negation rationale for ServiceRequest.</td></tr>
+<tr>
+<td>Reason</td>
+<td>ReferralRequest.reasonCode</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Author dateTime</td>
+<td>ReferralRequest.authoredOn</td>
+<td>Note - ProcedureRequest.occurrence[x] defines a dateTime when the event should occur - not addressed in QDM</td></tr>
+<tr>
+<td>Code</td>
+<td>ReferralRequest.type</td>
+<td>See also, Observation.category</td></tr>
+<tr>
+<td>id</td>
+<td>ReferralRequest.id</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Source</td>
+<td>ReferralRequest.requester</td>
+<td>Author, orderer - note also, ProcedureRequest.requester.agent for device, practitioner or organization who initiated the request; or ProcedureRequest.requester.onBehalfOf  - the organization on whose behalf the device or practitioner was acting</td></tr></table></div>
+
+
+<a name="Encounter.2C_Performed"> </a>
+<h3>
+    <span class="sectioncount">7.10.3</span> Encounter, Performed <a href="Encounter.html#Encounter.2C_Performed" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
+</h3>
+
+
+<div style="page-break-inside: avoid;">
+<table border="1" cellpadding="2" cellspacing="0">
+<tr>
+<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
+<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
+<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
+<tr valign="top">
+<td>Encounter, Performed</td>
+<td>Encounter (the .status metadata allows conformance to the specific QDM datatype context)</td>
+<td>Constrained to status consistent with in-progress or finished.</td></tr>
+<tr>
+<td>Relevant Period</td>
+<td>Encounter.period</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Admission Source</td>
+<td>Encounter.hospitalization.admitSource</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Diagnosis</td>
+<td>Encounter.diagnosis</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Discharge Disposition</td>
+<td>Encounter.hospitalization.dischargeDisposition</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Length of Stay</td>
+<td>Encounter.length</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Negation Rationale</td>
+<td>Encounter.extension (<a class="external free" href="http://hl7.org/fhir/StructureDefinition/encounter-reasonCancelled" rel="nofollow">http://hl7.org/fhir/StructureDefinition/encounter-reasonCancelled</a>)</td>
+<td>Only applies to an encounter that was cancelled, not an encounter that was never planned for a specific reason.</td></tr>
+<tr>
+<td>Principal Diagnosis</td>
+<td>Encounter.diagnosis.role 
+
+Encounter.diagnosis.rank</td>
+<td>Constrain Encounter.diagnosis.role to &#34;Billing Diagnosis&#34; and require Encounter.diagnosis.rank =1. See FHIR Tracker Request <a class="external text" href="https://gforge.hl7.org/gf/project/fhir/tracker/?action=TrackerItemEdit&#38;tracker_item_id=15944" rel="nofollow">15944</a> requesting addition of Principal Diagnosis reference in US Core that is consistent with this QDM to QI Core mapping</td></tr>
+<tr>
+<td>Author dateTime</td>
+<td>FHIR.provenance.recorded</td>
+<td>FHIR references authorDatetime as part of the provenance resource for all resources. Note: FHIR Provenance generally addresses the author of the message; the identifier/source of the original resource element is defined by the resource. Individual resource element provenance is summarized in the FHIR W5 Report (<a class="external free" href="http://hl7.org/fhir/w5.html" rel="nofollow">http://hl7.org/fhir/w5.html</a>). The FHIR Encounter resource does not reference an author dateTime; hence the QDM mapping references FHIR.provenance.</td></tr>
+<tr>
+<td>Code</td>
+<td>Encounter.type</td>
+<td>Encounter.type fits best with the type of encounter. The Encounter.type value set includes codes from SNOMED CT decending from 308335008 patient encounter procedure (procedure) and codes from the Current Procedure and Terminology designated for Evaluation and Management (99200 – 99607) (subscription to AMA Required). Code systems included:
+<a class="external free" href="http://snomed.info/sct" rel="nofollow">http://snomed.info/sct</a>
+<a class="external free" href="http://www.ama-assn.org/go/cpt" rel="nofollow">http://www.ama-assn.org/go/cpt</a>
+
+<a class="external text" href="http://build.fhir.org/ig/cqframework/qi-core/StructureDefinition-qicore-encounter-definitions.html#Encounter.type" rel="nofollow">Encounter.type</a> indicates: The codes SHALL be taken from US Core Encounter Type; other codes may be used where these codes are not suitable</td></tr>
+<tr>
+<td>FacilityLocations</td>
+<td>Encounter.location</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>FacilityLocations code</td>
+<td>Location.type</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>FacilityLocations location period</td>
+<td>Location.period</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>id</td>
+<td>Encounter.id</td>
+<td>QDM matched to QI Core / FHIR</td></tr></table></div>
+
+{% include container-end.html %}
+{% include footer.html %}

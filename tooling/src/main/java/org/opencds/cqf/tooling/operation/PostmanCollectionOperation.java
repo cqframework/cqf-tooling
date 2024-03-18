@@ -32,9 +32,11 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PostmanCollectionOperation extends Operation {
-
+    private final static Logger logger = LoggerFactory.getLogger(PostmanCollectionOperation.class);
     private static final String POSTMAN_COLLECTION_SCHEMA = "https://schema.getpostman.com/json/collection/v2.1.0/collection.json";
     private String pathToBundlesDir;
     private FhirContext context;
@@ -512,7 +514,7 @@ public class PostmanCollectionOperation extends Operation {
         catch (Exception e) {
             e.printStackTrace();
             String message = String.format("'%s' will not be included in the bundle because the following error occurred: '%s'", resource.getName(), e.getMessage());
-            System.out.println(message);
+            logger.error(message, e);
         }
         return theResource;
     }
