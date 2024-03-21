@@ -548,6 +548,9 @@ public class ExampleBuilder {
         return null;
     }
 
+    // See https://errorprone.info/bugpattern/FromTemporalAccessor
+    // Some conversions of LocalDate, LocalDateTime, and Instant to Instant are not supported
+    @SuppressWarnings("FromTemporalAccessor")
     private Instant toInstant(Object value) {
         if (value instanceof Instant) {
             return (Instant)value;

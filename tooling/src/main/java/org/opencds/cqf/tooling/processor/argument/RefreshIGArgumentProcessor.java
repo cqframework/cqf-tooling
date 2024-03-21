@@ -38,6 +38,8 @@ public class RefreshIGArgumentProcessor {
     public static final String[] MEASURE_OUTPUT_PATH_OPTIONS = {"measureOutput", "measureOutputPath", "mop"};
     public static final String[] SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS = { "ss", "stamp" };
     public static final String[] SHOULD_ADD_TIMESTAMP_OPTIONS = { "ts", "timestamp" };
+    public static final String[] SHOULD_INCLUDE_ERRORS = { "x", "include-errors" };
+
 
     @SuppressWarnings("unused")
     public OptionParser build() {
@@ -55,6 +57,7 @@ public class RefreshIGArgumentProcessor {
         OptionSpecBuilder measureOutputPathBuilder = parser.acceptsAll(asList(MEASURE_OUTPUT_PATH_OPTIONS),"If omitted, the measures will overwrite any existing measures");
         OptionSpecBuilder shouldApplySoftwareSystemStampBuilder = parser.acceptsAll(asList(SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS),"Indicates whether refreshed Measure and Library resources should be stamped with the 'cqf-tooling' stamp via the cqfm-softwaresystem Extension.");
         OptionSpecBuilder shouldAddTimestampBuilder = parser.acceptsAll(asList(SHOULD_ADD_TIMESTAMP_OPTIONS),"Indicates whether refreshed Bundle should attach timestamp of creation.");
+        OptionSpecBuilder shouldVerboseMessaging = parser.acceptsAll(asList(SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS),"Indicates that a complete list of errors during library, measure, and test case refresh are included upon failure.");
 
         OptionSpec<String> ini = iniBuilder.withRequiredArg().describedAs("Path to the IG ini file");
         OptionSpec<String> rootDir = rootDirBuilder.withOptionalArg().describedAs("Root directory of the IG");
@@ -67,9 +70,11 @@ public class RefreshIGArgumentProcessor {
         OptionSpec<String> measureOutputPath = measureOutputPathBuilder.withOptionalArg().describedAs("path to the output directory for updated measures");
         OptionSpec<String> shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStampBuilder.withOptionalArg().describedAs("Indicates whether refreshed Measure and Library resources should be stamped with the 'cqf-tooling' stamp via the cqfm-softwaresystem Extension");
         OptionSpec<String> shouldAddTimestampOptions = shouldAddTimestampBuilder.withOptionalArg().describedAs("Indicates whether refreshed Bundle should attach timestamp of creation");
+        OptionSpec<String> shouldVerboseMessagingOptions = shouldVerboseMessaging.withOptionalArg().describedAs("Indicates that a complete list of errors during library, measure, and test case refresh are included upon failure.");
+
 
         //TODO: FHIR user / password (and other auth options)
-        OptionSpec<String> fhirUri = fhirUriBuilder.withOptionalArg().describedAs("uri of fhir server");  
+        OptionSpec<String> fhirUri = fhirUriBuilder.withOptionalArg().describedAs("uri of fhir server");
 
         parser.acceptsAll(asList(OPERATION_OPTIONS),"The operation to run.");
         parser.acceptsAll(asList(SKIP_PACKAGES_OPTIONS), "Specifies whether to skip packages building.");
@@ -78,6 +83,7 @@ public class RefreshIGArgumentProcessor {
         parser.acceptsAll(asList(INCLUDE_TERMINOLOGY_OPTIONS),"If omitted terminology will not be packaged.");
         parser.acceptsAll(asList(INCLUDE_PATIENT_SCENARIOS_OPTIONS),"If omitted patient scenario information will not be packaged.");
         parser.acceptsAll(asList(VERSIONED_OPTIONS),"If omitted resources must be uniquely named.");
+        parser.acceptsAll(asList(SHOULD_INCLUDE_ERRORS),"Specifies whether to show errors during library, measure, and test case refresh.");
 
         OptionSpec<Void> help = parser.acceptsAll(asList(ArgUtils.HELP_OPTIONS), "Show this help page").forHelp();
 
@@ -103,7 +109,7 @@ public class RefreshIGArgumentProcessor {
         if (libraryPaths != null && libraryPaths.size() == 1) {
             libraryPath = libraryPaths.get(0);
         }
-            
+
         //could not easily use the built-in default here because it is based on the value of the igPath argument.
         String igEncoding = (String)options.valueOf(IG_OUTPUT_ENCODING[0]);
         Encoding outputEncodingEnum = Encoding.JSON;
@@ -111,7 +117,7 @@ public class RefreshIGArgumentProcessor {
             outputEncodingEnum = Encoding.parse(igEncoding.toLowerCase());
         }
         Boolean skipPackages = options.has(SKIP_PACKAGES_OPTIONS[0]);
-        Boolean includeELM = options.has(INCLUDE_ELM_OPTIONS[0]);  
+        Boolean includeELM = options.has(INCLUDE_ELM_OPTIONS[0]);
         Boolean includeDependencies = options.has(INCLUDE_DEPENDENCY_LIBRARY_OPTIONS[0]);
         Boolean includeTerminology = options.has(INCLUDE_TERMINOLOGY_OPTIONS[0]);
         Boolean includePatientScenarios = options.has(INCLUDE_PATIENT_SCENARIOS_OPTIONS[0]);
@@ -143,6 +149,8 @@ public class RefreshIGArgumentProcessor {
             addBundleTimestamp = true;
         }
 
+        Boolean verboseMessaging = options.has(SHOULD_INCLUDE_ERRORS[0]);
+
         ArrayList<String> paths = new ArrayList<String>();
         if (resourcePaths != null && !resourcePaths.isEmpty()) {
             paths.addAll(resourcePaths);
@@ -150,7 +158,7 @@ public class RefreshIGArgumentProcessor {
         if (libraryPaths != null) {
             paths.addAll(libraryPaths);
         }
-    
+
         RefreshIGParameters ip = new RefreshIGParameters();
         ip.ini = ini;
         ip.rootDir = rootDir;
@@ -170,7 +178,8 @@ public class RefreshIGArgumentProcessor {
         ip.measureToRefreshPath = measureToRefreshPath;
         ip.libraryOutputPath = libraryOutputPath;
         ip.measureOutputPath = measureOutputPath;
-       
+        ip.verboseMessaging = verboseMessaging;
+
         return ip;
     }
 }

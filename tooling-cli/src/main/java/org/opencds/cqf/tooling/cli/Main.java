@@ -236,6 +236,8 @@ package org.opencds.cqf.tooling.cli;
 //import org.opencds.cqf.tooling.operations.ExecutableOperation;
 //import org.opencds.cqf.tooling.operations.Operation;
 //import org.reflections.Reflections;
+
+import org.opencds.cqf.tooling.common.ThreadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -284,6 +286,9 @@ public class Main {
 //    }
 
     public static void main(String[] args) {
+        //ensure any and all executors are shutdown cleanly when app is shutdown:
+        Runtime.getRuntime().addShutdownHook(new Thread(ThreadUtils::shutdownRunningExecutors));
+
         if (args.length == 0) {
             System.err.println("cqf-tooling version: " + Main.class.getPackage().getImplementationVersion());
             System.err.println("Requests must include which operation to run as a command line argument. See docs for examples on how to use this project.");

@@ -9,10 +9,10 @@ public class QdmToQiCoreTest {
 
     private final QdmToQiCore qdmToQiCore = new QdmToQiCore();
 
-    @Test
+    @Test(enabled = false, description = "Hangs in CI because it makes external network requests")
     public void testExecute_HtmlFilesCreated() {
         String projectPath = System.getProperty("user.dir");
-        String relativePath = "tooling-cli/results";
+        String relativePath = "target/test-output/results";
 
         String[] args = new String[2];
         args[0] = "-QdmToQiCore";

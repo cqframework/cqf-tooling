@@ -20,7 +20,7 @@ public class BundleToResourcesTest {
         String relativeJsonPath = "src/main/resources/libraryevaluationtest-bundle.json";
         String jsonFilePath = projectPath + File.separator + relativeJsonPath;
 
-        String relativePath = "tooling-cli/bundleResourcesResults";
+        String relativePath = "target/test-output/bundleResourcesResults";
 
         String[] args = new String[4];
         args[0] = "-BundleToResources";
