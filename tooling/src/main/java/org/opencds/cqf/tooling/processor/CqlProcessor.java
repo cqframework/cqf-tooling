@@ -3,8 +3,11 @@ package org.opencds.cqf.tooling.processor;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
@@ -149,9 +152,7 @@ public class CqlProcessor {
 
     private NamespaceInfo namespaceInfo;
 
-    private boolean verboseMessaging;
-
-    public CqlProcessor(List<NpmPackage> packages, List<String> folders, ILibraryReader reader, ILoggingService logger, UcumService ucumService, String packageId, String canonicalBase, Boolean verboseMessaging) {
+    public CqlProcessor(List<NpmPackage> packages, List<String> folders, ILibraryReader reader, ILoggingService logger, UcumService ucumService, String packageId, String canonicalBase) {
         super();
         this.packages = packages;
         this.folders = folders;
@@ -163,7 +164,6 @@ public class CqlProcessor {
         if (packageId != null && !packageId.isEmpty() && canonicalBase != null && !canonicalBase.isEmpty()) {
             this.namespaceInfo = new NamespaceInfo(packageId, canonicalBase);
         }
-        this.verboseMessaging = verboseMessaging;
     }
 
     /**
@@ -175,6 +175,7 @@ public class CqlProcessor {
      */
     public void execute() throws FHIRException {
         try {
+            logger.logMessage("Translating CQL source");
             fileMap = new HashMap<>();
 
             // foreach folder
@@ -267,7 +268,7 @@ public class CqlProcessor {
     }
 
     private void translateFolder(String folder) {
-        System.out.printf("Translating CQL source in folder %s%n", folder);
+        logger.logMessage(String.format("Translating CQL source in folder %s", folder));
 
         CqlTranslatorOptions options = ResourceUtils.getTranslatorOptions(folder);
 
@@ -276,9 +277,6 @@ public class CqlProcessor {
         // Construct FhirLibrarySourceProvider
         ModelManager modelManager = new ModelManager();
         LibraryManager libraryManager = new LibraryManager(modelManager, options.getCqlCompilerOptions());
-        if (options.getCqlCompilerOptions().getValidateUnits()) {
-            libraryManager.setUcumService(ucumService);
-        }
         if (packages != null) {
             modelManager.getModelInfoLoader().registerModelInfoProvider(new NpmModelInfoProvider(packages, reader, logger), true);
             libraryManager.getLibrarySourceLoader().registerProvider(new NpmLibrarySourceProvider(packages, reader, logger));
@@ -360,7 +358,7 @@ public class CqlProcessor {
     }
 
     private void translateFile(LibraryManager libraryManager, File file, CqlCompilerOptions options) {
-//        logger.logMessage(String.format("Translating CQL source in file %s", file.toString()));
+        logger.logMessage(String.format("Translating CQL source in file %s", file.toString()));
         CqlSourceFileInformation result = new CqlSourceFileInformation();
         fileMap.put(file.getAbsoluteFile().toString(), result);
 
@@ -378,12 +376,14 @@ public class CqlProcessor {
                 result.getErrors().add(exceptionToValidationMessage(file, exception));
             }
 
-            List<CqlCompilerException> severeErrorList = listBySeverity(translator.getErrors(), CqlCompilerException.ErrorSeverity.Error);
-
-
-            if (!severeErrorList.isEmpty()) {
+            if (!translator.getErrors().isEmpty()) {
                 result.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, IssueType.EXCEPTION, file.getName(),
                         String.format("CQL Processing failed with (%d) errors.", translator.getErrors().size()), IssueSeverity.ERROR));
+                logger.logMessage(String.format("Translation failed with (%d) errors; see the error log for more information.", translator.getErrors().size()));
+
+                for (CqlCompilerException error : translator.getErrors()) {
+                    logger.logMessage(String.format("Error: %s", error.getMessage()));
+                }
             }
             else {
                 try {
@@ -422,19 +422,15 @@ public class CqlProcessor {
                     // Extract dataRequirement data
                     result.dataRequirements.addAll(requirementsLibrary.getDataRequirement());
 
+                    logger.logMessage("CQL translation completed successfully.");
                 } catch (Exception ex) {
                     logger.logMessage(String.format("CQL Translation succeeded for file: '%s', but ELM generation failed with the following error: %s", file.getAbsolutePath(), ex.getMessage()));
                 }
             }
-
-            //output Success/Warn/Info/Fail message to user:
-            logger.logMessage(buildStatusMessage(translator.getErrors(), file.getName(), verboseMessaging));
         }
         catch (Exception e) {
             result.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, IssueType.EXCEPTION, file.getName(), "CQL Processing failed with exception: "+e.getMessage(), IssueSeverity.ERROR));
         }
-
-
     }
 
     private FilenameFilter getCqlFilenameFilter() {
@@ -444,75 +440,5 @@ public class CqlProcessor {
                 return name.endsWith(".cql");
             }
         };
-    }
-
-
-    private static List<String> listTranslatorErrors(List<CqlCompilerException> translatorErrors) {
-        List<String> errors = new ArrayList<>();
-        for (CqlCompilerException error : translatorErrors) {
-            errors.add(error.getSeverity().toString() + ": " +
-                    (error.getLocator() == null ? "" : String.format("[%d:%d, %d:%d] ",
-                            error.getLocator().getStartLine(),
-                            error.getLocator().getStartChar(),
-                            error.getLocator().getEndLine(),
-                            error.getLocator().getEndChar()))
-                    + error.getMessage().replace("\n", "").replace("\r", ""));
-        }
-        Collections.sort(errors);
-        return errors;
-    }
-
-    private static List<CqlCompilerException> listBySeverity(List<CqlCompilerException> errors, CqlCompilerException.ErrorSeverity errorSeverity) {
-        return errors.stream()
-                .filter(exception -> exception.getSeverity() == errorSeverity)
-                .collect(Collectors.toList());
-    }
-
-    public static String buildStatusMessage(List<CqlCompilerException> errors, String resourceName, boolean verboseMessaging){
-        return buildStatusMessage(errors, resourceName, verboseMessaging, true, "\n\t");
-    }
-
-    public static String buildStatusMessage(List<CqlCompilerException> errors, String resourceName, boolean verboseMessaging, boolean withStatusIndicator, String delimiter){
-        String successMsg = "[SUCCESS] CQL Processing of ";
-        String statusIndicatorMinor = " completed successfully";
-        String statusIndicator;
-
-        //empty list means no errors, so success
-        if (errors == null || errors.isEmpty()){
-            return successMsg + resourceName + statusIndicatorMinor;
-        }
-
-        //separate out exceptions by their severity to determine the messaging to the user:
-        List<CqlCompilerException> infosList = listBySeverity(errors, CqlCompilerException.ErrorSeverity.Info);
-        List<CqlCompilerException> warningsList = listBySeverity(errors, CqlCompilerException.ErrorSeverity.Warning);
-        List<CqlCompilerException> errorList = listBySeverity(errors, CqlCompilerException.ErrorSeverity.Error);
-
-        if (!errorList.isEmpty()) {
-            statusIndicator = "[FAIL] ";
-            statusIndicatorMinor = " failed";
-        } else if (!warningsList.isEmpty()) {
-            statusIndicator = "[WARN] ";
-        } else if (!infosList.isEmpty()) {
-            statusIndicator = "[INFO] ";
-        } else {
-            return successMsg + resourceName + statusIndicatorMinor;
-        }
-        List<String> fullSortedList = new ArrayList<>();
-        fullSortedList.addAll(CqlProcessor.listTranslatorErrors(infosList));
-        fullSortedList.addAll(CqlProcessor.listTranslatorErrors(warningsList));
-        fullSortedList.addAll(CqlProcessor.listTranslatorErrors(errorList));
-        Collections.sort(fullSortedList);
-        String fullSortedListMsg = String.join(delimiter, fullSortedList);
-
-        String errorsStatus =  errorList.size() + " Error(s)" ;
-        String infoStatus =  infosList.size() + " Information Message(s)" ;
-        String warningStatus =  warningsList.size() + " Warning(s)" ;
-
-        return (withStatusIndicator ? statusIndicator : "") + "CQL Processing of " + resourceName + statusIndicatorMinor + " with " + errorsStatus + ", "
-                +  warningStatus + ", and " + infoStatus + (verboseMessaging ? ": " + delimiter + fullSortedListMsg : "");
-    }
-
-    public static boolean hasSevereErrors(List<CqlCompilerException> errors) {
-        return errors.stream().anyMatch(error -> error.getSeverity() == CqlCompilerException.ErrorSeverity.Error);
     }
 }

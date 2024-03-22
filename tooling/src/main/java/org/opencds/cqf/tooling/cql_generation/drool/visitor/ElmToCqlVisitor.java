@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-import org.cqframework.cql.elm.visiting.BaseElmLibraryVisitor;
+import org.cqframework.cql.elm.visiting.ElmBaseLibraryVisitor;
 import org.hl7.elm.r1.*;
 import org.hl7.elm.r1.Library.Statements;
 import org.opencds.cqf.tooling.cql_generation.context.ElmContext;
@@ -19,7 +19,7 @@ import com.google.common.base.Strings;
  * @author Joshua Reynolds
  * @since 2021-04-05
  */
-public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
+public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
     private static final Logger logger = LoggerFactory.getLogger(ElmToCqlVisitor.class);
     private boolean useSpaces = true;
 
@@ -864,7 +864,7 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
                 query.getRelationship().stream().forEach(relationship -> visitRelationshipClause(relationship, context));
             }
             if (query.getWhere() != null) {
-                visitExpression(query.getWhere(), context);
+                visitWhereClause(query.getWhere(), context);
             }
             if (query.getReturn() != null) {
                 visitReturnClause(query.getReturn(), context);
@@ -959,6 +959,27 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
         super.visitLetClause(let, context);
         newLine();
         return null;
+    }
+
+    /**
+     * Visit WhereClause. This method will be called for
+     * WhereClause expression nodes.
+     *
+     * @param where     the Expression
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
+    @Override
+    public Void visitWhereClause(Expression where, ElmContext context) {
+        try {
+            enterClause();
+            output.append("where");
+            visitElement(where, context);
+            return null;
+        }
+        finally {
+            exitClause();
+        }
     }
 
     /**

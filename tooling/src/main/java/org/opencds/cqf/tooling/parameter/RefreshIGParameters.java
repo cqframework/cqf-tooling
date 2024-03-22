@@ -9,7 +9,6 @@ public class RefreshIGParameters {
     public String rootDir;
     public String igPath;
     public IOUtils.Encoding outputEncoding;
-    public Boolean skipPackages;
     public Boolean includeELM;
     public Boolean includeDependencies;
     public Boolean includeTerminology;
@@ -21,8 +20,6 @@ public class RefreshIGParameters {
     public ArrayList<String> resourceDirs;
     public Boolean conformant;
     public String measureToRefreshPath;
-    public String libraryPath;
     public String libraryOutputPath;
     public String measureOutputPath;
-    public Boolean verboseMessaging;
 }

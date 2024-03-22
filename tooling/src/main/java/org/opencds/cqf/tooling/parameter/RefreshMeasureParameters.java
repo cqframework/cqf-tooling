@@ -50,6 +50,4 @@ public class RefreshMeasureParameters {
     Directory target for writing output
      */
     public String measureOutputDirectory;
-
-    public Boolean verboseMessaging;
 }

@@ -35,7 +35,7 @@ public class RefreshR4MeasureOperationTest extends RefreshTest {
         }
     }
 
-    //@Test
+    @Test
     private void testRefreshOverwriteMeasures() throws Exception {
         setUp();
         copyResourcesToTargetDir(targetDirectoryPath, "r4");

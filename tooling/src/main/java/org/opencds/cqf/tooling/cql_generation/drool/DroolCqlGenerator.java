@@ -6,6 +6,8 @@ import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.JAXBException;
+
 import org.cdsframework.dto.ConditionDTO;
 import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -26,15 +28,13 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.xml.bind.JAXBException;
-
 /**
  * Implements the {@link CqlGenerator CqlGenerator} Interface, {@link Deserializer Deserializes} the {@link ConditionDTO ConditionDTO}
  * objects and Traverses the object graph by setting up the {@link VmrToModelElmBuilder ModelElmBuilder},
  * {@link Visitor Visitor}, and {@link DroolTraverser DroolTraverser}
  * May toggle Elm Library granularity with {@link CQLTYPES CQLTYPES}
  * @author  Joshua Reynolds
- * @since   2021-02-24
+ * @since   2021-02-24 
  */
 public class DroolCqlGenerator implements CqlGenerator {
     private static final Logger logger = LoggerFactory.getLogger(DroolCqlGenerator.class);
@@ -75,7 +75,7 @@ public class DroolCqlGenerator implements CqlGenerator {
         cqlOutput.mkdirs();
         VmrToModelElmBuilder modelBuilder = resolveModel(fhirVersion);
         ElmContext context = readAndGenerateCQL(file, modelBuilder);
-        writeElm(context, modelBuilder, output);
+        writeElm(context, modelBuilder, output);  
     }
 
     @Override

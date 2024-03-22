@@ -5,7 +5,9 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
+import org.opencds.cqf.tooling.quick.QuickPageGenerator;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
@@ -22,12 +24,12 @@ public class QuestionnaireProcessorTest extends RefreshTest {
     private final String TARGET_PATH = "target" + separator + "bundleQuestionnaires";
     private final String INI_PATH = TARGET_PATH + separator + "ig.ini";
     private ByteArrayOutputStream console = new ByteArrayOutputStream();
-    private QuestionnaireBundler questionnaireProcessor;
+    private QuestionnaireProcessor questionnaireProcessor;
 
     public QuestionnaireProcessorTest() {
         super(FhirContext.forCached(FhirVersionEnum.R4), "QuestionnaireProcessorTest");
         LibraryProcessor libraryProcessor = new LibraryProcessor();
-        questionnaireProcessor = new QuestionnaireBundler(libraryProcessor);
+        questionnaireProcessor = new QuestionnaireProcessor(libraryProcessor);
     }
 
     @BeforeMethod
@@ -40,7 +42,7 @@ public class QuestionnaireProcessorTest extends RefreshTest {
         }
     }
 
-    public QuestionnaireProcessorTest(QuestionnaireBundler questionnaireProcessor, FhirContext fhirContext) {
+    public QuestionnaireProcessorTest(QuestionnaireProcessor questionnaireProcessor, FhirContext fhirContext) {
         super(fhirContext);
         this.questionnaireProcessor = questionnaireProcessor;
     }
@@ -78,7 +80,7 @@ public class QuestionnaireProcessorTest extends RefreshTest {
                         "libraryevaluationtest" + separator + "libraryevaluationtest-bundle.json";
 
         questionnaireProcessor.bundleResources(refreshedLibraryNames, TARGET_PATH, binaryPaths, includeDependencies, includeTerminology,
-                includePatientScenarios, versioned, addBundleTimestamp, fhirContext, null, IOUtils.Encoding.JSON, true);
+                includePatientScenarios, versioned, addBundleTimestamp, fhirContext, null, IOUtils.Encoding.JSON);
 
         File outputBundleFile = new File(outputBundleFilePath);
 

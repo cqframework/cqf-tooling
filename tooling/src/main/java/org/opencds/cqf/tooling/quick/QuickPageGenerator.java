@@ -484,7 +484,7 @@ public class QuickPageGenerator extends Operation {
             case "Coding": return "Code";
             case "CodeableConcept": return "Concept";
             case "Period": return String.format("<a href='%s' target='_blank'>Interval</a>&lt;<a href='%s' target='_blank'>DateTime</a>&gt;", atlas.getCqlIntervalUrl(), atlas.getCqlDateTimeAndTimeUrl());
-            case "Range": return String.format("<a href='%s' target='_blank'>Interval</a>&lt;<a href='%s' target='_blank'>Quantity</a>&gt;", atlas.getCqlIntervalUrl(), atlas.getCqlQuantityUrl());
+            case "Range": return String.format("<a href='%s' target='_blank'>Interval</a>&lt;<a href='#s' target='_blank'>Quantity</a>&gt;", atlas.getCqlIntervalUrl(), atlas.getCqlQuantityUrl());
             default: return type;
         }
     }

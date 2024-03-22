@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -39,6 +38,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Operation(name = "RollTestDates")
@@ -190,7 +190,7 @@ public class RollTestDates implements ExecutableOperation {
                      thePathToElement.remove(thePathToElement.size() - 1);
                      thePathToElement.add(s);
                   }
-                  int daysToAdd = getDaysBetweenDates(getLastUpdatedDate(resource), LocalDate.now());
+                  int daysToAdd = getDaysBetweenDates(getLastUpdatedDate(resource), new Date());
                   if (theElement instanceof org.hl7.fhir.dstu3.model.BaseDateTimeType) {
                      TimeZone timeZone = ((org.hl7.fhir.dstu3.model.BaseDateTimeType) theElement).getTimeZone();
                      ((org.hl7.fhir.dstu3.model.BaseDateTimeType) theElement).setValue(DateUtils.addDays(
@@ -249,19 +249,22 @@ public class RollTestDates implements ExecutableOperation {
       return false;
    }
 
-   private int getDaysBetweenDates(LocalDate start, LocalDate end) {
-      return end.getDayOfYear() - start.getDayOfYear();
+   private int getDaysBetweenDates(Date start, Date end) {
+      long startInMs = start.getTime();
+      long endInMs = end.getTime();
+      long timeDiff = Math.abs(endInMs - startInMs);
+      return (int) TimeUnit.DAYS.convert(timeDiff, TimeUnit.MILLISECONDS);
    }
 
-   private LocalDate getLastUpdatedDate(IBaseResource resource) {
+   private Date getLastUpdatedDate(IBaseResource resource) {
       IBaseDatatype dateLastUpdated = ExtensionUtil.getExtensionByUrl(
               ExtensionUtil.getExtensionByUrl(resource, DATEROLLER_EXT_URL), "dateLastUpdated").getValue();
       if (dateLastUpdated instanceof org.hl7.fhir.dstu3.model.BaseDateTimeType) {
-         return LocalDate.parse(((org.hl7.fhir.dstu3.model.BaseDateTimeType) dateLastUpdated).getValueAsString().split("T")[0]);
+         return ((org.hl7.fhir.dstu3.model.BaseDateTimeType) dateLastUpdated).getValue();
       } else if (dateLastUpdated instanceof org.hl7.fhir.r4.model.BaseDateTimeType) {
-         return LocalDate.parse(((org.hl7.fhir.r4.model.BaseDateTimeType) dateLastUpdated).getValueAsString().split("T")[0]);
+         return ((org.hl7.fhir.r4.model.BaseDateTimeType) dateLastUpdated).getValue();
       } else if (dateLastUpdated instanceof org.hl7.fhir.r5.model.BaseDateTimeType) {
-         return LocalDate.parse(((org.hl7.fhir.r5.model.BaseDateTimeType) dateLastUpdated).getValueAsString().split("T")[0]);
+         return ((org.hl7.fhir.r5.model.BaseDateTimeType) dateLastUpdated).getValue();
       } else {
          throw new IllegalArgumentException("Unsupported type/version found for dateLastUpdated extension: "
                  + dateLastUpdated.fhirType());
@@ -301,7 +304,8 @@ public class RollTestDates implements ExecutableOperation {
    }
 
    private boolean doUpdate(IBaseResource resource) {
-      return getLastUpdatedDate(resource).isBefore(LocalDate.now());
+      Date today = new Date();
+      return DateUtils.addDays(getLastUpdatedDate(resource), getFrequencyInDays(resource)).before(today);
    }
 
    private void updateDateRollerExtension(FhirContext fhirContext, IBaseResource resource) {

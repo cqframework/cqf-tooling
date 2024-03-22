@@ -258,27 +258,6 @@ public class BundleUtils {
         return resourceArrayList;
     }
 
-    public static boolean resourceIsABundle(IBaseResource resource) {
-        return (
-                (resource instanceof org.hl7.fhir.dstu3.model.Bundle)
-//                      uncomment when R5 processing is accounted for
-//                      || (resource instanceof org.hl7.fhir.r5.model.Bundle)
-                        || (resource instanceof org.hl7.fhir.r4.model.Bundle)
-        );
-    }
-
-    public static boolean resourceIsTransactionBundle(IBaseResource inputResource) {
-        if (inputResource == null) return false;
-
-        if (inputResource instanceof org.hl7.fhir.dstu3.model.Bundle) {
-            return ((org.hl7.fhir.dstu3.model.Bundle) inputResource).getType().equals(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION);
-
-        } else if (inputResource instanceof org.hl7.fhir.r4.model.Bundle) {
-            return ((org.hl7.fhir.r4.model.Bundle) inputResource).getType().equals(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
-        }
-        return false;
-
-    }
     public static IBaseBundle getBundleOfResourceTypeFromDirectory(String directoryPath, FhirContext fhirContext, Class<? extends IBaseResource> clazz) {
         BundleBuilder builder = new BundleBuilder(fhirContext);
         try (Stream<Path> walk = Files.walk(Paths.get(directoryPath), 1)) {
@@ -295,4 +274,5 @@ public class BundleUtils {
         }
         return builder.getBundle();
     }
+
 }

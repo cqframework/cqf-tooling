@@ -3,7 +3,6 @@ package org.opencds.cqf.tooling.processor;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.cqframework.fhir.npm.LibraryLoader;
 import org.cqframework.fhir.npm.NpmPackageManager;
@@ -29,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class BaseProcessor implements IProcessorContext, IWorkerContext.ILoggingService {
 
-    protected static final Logger logger = LoggerFactory.getLogger(BaseProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(BaseProcessor.class);
 
     protected String rootDir;
 
@@ -75,12 +74,6 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
 
     protected IProcessorContext parentContext;
 
-    public Boolean verboseMessaging = false;
-
-    public Boolean getVerboseMessaging() {
-        return verboseMessaging;
-    }
-
     public void initialize(IProcessorContext context) {
         this.parentContext = context;
 
@@ -94,7 +87,6 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
             this.packageManager = parentContext.getPackageManager();
             this.binaryPaths = parentContext.getBinaryPaths();
             this.cqlProcessor = parentContext.getCqlProcessor();
-            this.verboseMessaging = parentContext.getVerboseMessaging();
         }
     }
 
@@ -167,9 +159,8 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
             if (packageManager == null) {
                 throw new IllegalStateException("packageManager is null. It should be initialized at this point.");
             }
-            cqlProcessor = new CqlProcessor(new CopyOnWriteArrayList<>(packageManager.getNpmList()),
-                    new CopyOnWriteArrayList<>(binaryPaths), reader, this, ucumService,
-                    packageId, canonicalBase, verboseMessaging);
+            cqlProcessor = new CqlProcessor(packageManager.getNpmList(), binaryPaths, reader, this, ucumService,
+                    packageId, canonicalBase);
         }
 
         return cqlProcessor;

@@ -4,7 +4,7 @@ import org.testng.annotations.Test;
 
 public class PlanDefinitionProcessorTest {
 
-    private PlanDefinitionBundler processor;
+    private PlanDefinitionProcessor processor;
 
     @Test
     private void testBundlePlanDefinitions() throws Exception {

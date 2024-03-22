@@ -1,7 +1,5 @@
 package org.opencds.cqf.tooling.utilities;
 
-import static org.testng.AssertJUnit.assertTrue;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,17 +9,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.cqframework.cql.cql2elm.CqlCompilerOptions;
-import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
-import org.cqframework.cql.cql2elm.LibraryManager;
-import org.cqframework.cql.cql2elm.ModelManager;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import org.cqframework.cql.cql2elm.*;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumService;
+
+
 import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.fhir.exceptions.UcumException;
+
 import org.hl7.fhir.r5.model.DataRequirement;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Library;
@@ -32,8 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
+import static org.testng.AssertJUnit.assertTrue;
 
 
 public class ECQMCreatorIT {

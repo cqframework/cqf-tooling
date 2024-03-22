@@ -1,31 +1,13 @@
 package org.opencds.cqf.tooling.library;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.regex.Pattern;
-
+import ca.uhn.fhir.context.FhirContext;
+import com.google.common.base.Strings;
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions.Format;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.Attachment;
-import org.hl7.fhir.r5.model.CodeableConcept;
-import org.hl7.fhir.r5.model.Coding;
-import org.hl7.fhir.r5.model.Extension;
-import org.hl7.fhir.r5.model.Library;
-import org.hl7.fhir.r5.model.Parameters;
-import org.hl7.fhir.r5.model.Reference;
-import org.hl7.fhir.r5.model.RelatedArtifact;
+import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.common.ThreadUtils;
@@ -41,22 +23,26 @@ import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Strings;
-
-import ca.uhn.fhir.context.FhirContext;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.regex.Pattern;
 
 public class LibraryProcessor extends BaseProcessor {
     private static final Logger logger = LoggerFactory.getLogger(LibraryProcessor.class);
     public static final String ResourcePrefix = "library-";
-
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
     }
-
     private static Pattern pattern;
 
     private static Pattern getPattern() {
-        if (pattern == null) {
+        if(pattern == null) {
             String regex = "^[a-zA-Z]+[a-zA-Z0-9_\\-\\.]*";
             pattern = Pattern.compile(regex);
         }
@@ -64,21 +50,17 @@ public class LibraryProcessor extends BaseProcessor {
     }
 
     public static void validateIdAlphaNumeric(String id) {
-        if (!getPattern().matcher(id).find()) {
+        if(!getPattern().matcher(id).find()) {
             throw new RuntimeException("The library id format is invalid.");
         }
     }
 
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
-        return refreshIgLibraryContent(parentContext, outputEncoding, null, null, versioned, fhirContext, shouldApplySoftwareSystemStamp);
+        return refreshIgLibraryContent(parentContext, outputEncoding, null, versioned, fhirContext, shouldApplySoftwareSystemStamp);
     }
-
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
-        return refreshIgLibraryContent(parentContext, outputEncoding, null, libraryOutputDirectory, versioned, fhirContext, shouldApplySoftwareSystemStamp);
-    }
-
-    public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryPath, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
-        logger.info("[Refreshing Libraries]");
+        logger.info("Refreshing libraries...");
+        // ArrayList<String> refreshedLibraryNames = new ArrayList<String>();
 
         LibraryProcessor libraryProcessor;
         switch (fhirContext.getVersion().getVersion()) {
@@ -93,11 +75,7 @@ public class LibraryProcessor extends BaseProcessor {
                         "Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
 
-        if (libraryPath == null) {
-            libraryPath = FilenameUtils.concat(parentContext.getRootDir(), IGProcessor.LIBRARY_PATH_ELEMENT);
-        } else if (!Utilities.isAbsoluteFileName(libraryPath)) {
-            libraryPath = FilenameUtils.concat(parentContext.getRootDir(), libraryPath);
-        }
+        String libraryPath = FilenameUtils.concat(parentContext.getRootDir(), IGProcessor.libraryPathElement);
         RefreshLibraryParameters params = new RefreshLibraryParameters();
         if (Strings.isNullOrEmpty(libraryOutputDirectory)) {
             logger.info("No output directory found for libraries.  Any existing libraries will be overwritten.");
@@ -117,51 +95,64 @@ public class LibraryProcessor extends BaseProcessor {
      * Bundles library dependencies for a given FHIR library file and populates the provided resource map.
      * This method executes asynchronously by invoking the associated task queue.
      *
-     * @param path        The path to the FHIR library file.
-     * @param fhirContext The FHIR context to use for processing resources.
-     * @param resources   The map to populate with library resources.
-     * @param encoding    The encoding to use for reading and processing resources.
-     * @param versioned   A boolean indicating whether to consider versioned resources.
+     * @param path          The path to the FHIR library file.
+     * @param fhirContext   The FHIR context to use for processing resources.
+     * @param resources     The map to populate with library resources.
+     * @param encoding      The encoding to use for reading and processing resources.
+     * @param versioned     A boolean indicating whether to consider versioned resources.
+     * @return True if the bundling of library dependencies is successful; false otherwise.
      */
-    public void bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
-                                          Encoding encoding, boolean versioned) throws Exception {
-        Queue<Callable<Void>> bundleLibraryDependenciesTasks = bundleLibraryDependenciesTasks(path, fhirContext, resources, encoding, versioned);
-        ThreadUtils.executeTasks(bundleLibraryDependenciesTasks);
+    public Boolean bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
+                                             Encoding encoding, boolean versioned) {
+        try{
+            Queue<Callable<Void>> bundleLibraryDependenciesTasks = bundleLibraryDependenciesTasks(path, fhirContext, resources, encoding, versioned);
+            ThreadUtils.executeTasks(bundleLibraryDependenciesTasks);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+
     }
 
     /**
      * Recursively bundles library dependencies for a given FHIR library file and populates the provided resource map.
      * Each dependency is added as a Callable task to be executed asynchronously.
      *
-     * @param path        The path to the FHIR library file.
-     * @param fhirContext The FHIR context to use for processing resources.
-     * @param resources   The map to populate with library resources.
-     * @param encoding    The encoding to use for reading and processing resources.
-     * @param versioned   A boolean indicating whether to consider versioned resources.
+     * @param path          The path to the FHIR library file.
+     * @param fhirContext   The FHIR context to use for processing resources.
+     * @param resources     The map to populate with library resources.
+     * @param encoding      The encoding to use for reading and processing resources.
+     * @param versioned     A boolean indicating whether to consider versioned resources.
      * @return A queue of Callable tasks, each representing the bundling of a library dependency.
-     * The Callable returns null (Void) and is meant for asynchronous execution.
+     *         The Callable returns null (Void) and is meant for asynchronous execution.
      */
     public Queue<Callable<Void>> bundleLibraryDependenciesTasks(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
-                                                                Encoding encoding, boolean versioned) throws Exception {
+                                                                Encoding encoding, boolean versioned) {
 
         Queue<Callable<Void>> returnTasks = new ConcurrentLinkedQueue<>();
 
         String fileName = FilenameUtils.getName(path);
         boolean prefixed = fileName.toLowerCase().startsWith("library-");
-        Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding, versioned, logger);
-        // String currentResourceID = IOUtils.getTypeQualifiedResourceId(path, fhirContext);
-        for (IBaseResource resource : dependencies.values()) {
-            returnTasks.add(() -> {
-                resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
+        try {
+            Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding, versioned, logger);
+            // String currentResourceID = IOUtils.getTypeQualifiedResourceId(path, fhirContext);
+            for (IBaseResource resource : dependencies.values()) {
+                returnTasks.add(() -> {
+                    resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
 
-                // NOTE: Assuming dependency library will be in directory of dependent.
-                String dependencyPath = IOUtils.getResourceFileName(IOUtils.getResourceDirectory(path), resource, encoding, fhirContext, versioned, prefixed);
+                    // NOTE: Assuming dependency library will be in directory of dependent.
+                    String dependencyPath = IOUtils.getResourceFileName(IOUtils.getResourceDirectory(path), resource, encoding, fhirContext, versioned, prefixed);
 
-                returnTasks.addAll(bundleLibraryDependenciesTasks(dependencyPath, fhirContext, resources, encoding, versioned));
+                    returnTasks.addAll(bundleLibraryDependenciesTasks(dependencyPath, fhirContext, resources, encoding, versioned));
 
-                //return statement needed for Callable<Void>
-                return null;
-            });
+                    //return statement needed for Callable<Void>
+                    return null;
+                });
+            }
+        } catch (Exception e) {
+            logger.error(path, e);
+            //purposely break addAll:
+            return null;
         }
         return returnTasks;
     }
@@ -201,17 +192,14 @@ public class LibraryProcessor extends BaseProcessor {
             sourceLibrary.getContent().clear();
             sourceLibrary.getContent().add(attachment);
             setLibraryType(sourceLibrary);
-
-            var translatorOptions = getCqlProcessor().getCqlTranslatorOptions();
-            var formats = translatorOptions.getFormats();
             CqlProcessor.CqlSourceFileInformation info = getCqlProcessor().getFileInformation(attachment.getUrl());
             attachment.setUrlElement(null);
             if (info != null) {
                 //f.getErrors().addAll(info.getErrors());
-                if (info.getElm() != null && emptyIfNull(formats).contains(Format.XML)) {
+                if (info.getElm() != null) {
                     sourceLibrary.addContent().setContentType("application/elm+xml").setData(info.getElm());
                 }
-                if (info.getJsonElm() != null && emptyIfNull(formats).contains(Format.JSON)) {
+                if (info.getJsonElm() != null) {
                     sourceLibrary.addContent().setContentType("application/elm+json").setData(info.getJsonElm());
                 }
                 sourceLibrary.getDataRequirement().clear();
@@ -221,7 +209,7 @@ public class LibraryProcessor extends BaseProcessor {
                 sourceLibrary.getParameter().clear();
                 sourceLibrary.getParameter().addAll(info.getParameters());
                 getCqlProcessor().getCqlTranslatorOptions();
-                setTranslatorOptions(sourceLibrary, translatorOptions);
+                setTranslatorOptions(sourceLibrary, getCqlProcessor().getCqlTranslatorOptions());
             } else {
                 logMessage(String.format("No cql info found for %s", fileName));
                 //f.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, ValidationMessage.IssueType.NOTFOUND, "Library", "No cql info found for "+f.getName(), ValidationMessage.IssueSeverity.ERROR));
@@ -229,10 +217,6 @@ public class LibraryProcessor extends BaseProcessor {
         }
 
         return sourceLibrary;
-    }
-
-    private <T> Set<T> emptyIfNull(Set<T> set) {
-        return set != null ? set : Collections.emptySet();
     }
 
     protected void setTranslatorOptions(Library sourceLibrary, CqlTranslatorOptions options) {
@@ -246,7 +230,7 @@ public class LibraryProcessor extends BaseProcessor {
             optionsReferenceValue = "#options";
             optionsReference.setReference(optionsReferenceValue);
         }
-        Parameters optionsParameters = (Parameters) sourceLibrary.getContained(optionsReferenceValue);
+        Parameters optionsParameters = (Parameters)sourceLibrary.getContained(optionsReferenceValue);
         if (optionsParameters == null) {
             optionsParameters = new Parameters();
             optionsParameters.setId(optionsReferenceValue.substring(1));
