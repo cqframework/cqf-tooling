@@ -240,6 +240,10 @@
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>
+            <artifactId>cqf-fhir-npm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
             <artifactId>cql-to-elm</artifactId>
         </dependency>
         <dependency>

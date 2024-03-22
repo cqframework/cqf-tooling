@@ -16,11 +16,9 @@ import joptsimple.OptionSpecBuilder;
 
 
 public class RefreshIGArgumentProcessor {
-
     public static final String[] OPERATION_OPTIONS = {"RefreshIG"};
-
     public static final String[] INI_OPTIONS = {"ini"};
-    public static final String[] ROOT_DIR_OPTIONS = {"root-dir"};
+    public static final String[] ROOT_DIR_OPTIONS = {"root-dir", "rd"};
     public static final String[] IG_PATH_OPTIONS = {"ip", "ig-path"};
     public static final String[] IG_OUTPUT_ENCODING = {"e", "encoding"};
 

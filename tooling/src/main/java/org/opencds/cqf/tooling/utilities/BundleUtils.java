@@ -4,6 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,6 +16,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.util.BundleBuilder;
+import org.cqframework.fhir.utilities.exception.IGInitializationException;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
@@ -22,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BundleUtils {
 
@@ -57,8 +64,6 @@ public class BundleUtils {
                 throw new IllegalArgumentException("Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
     }
-
-
 
     public static org.hl7.fhir.dstu3.model.Bundle bundleStu3Artifacts(String id, List<IBaseResource> resources) {
         org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
@@ -106,6 +111,17 @@ public class BundleUtils {
             );
         }
         return bundle;
+    }
+
+    public static void postBundle(IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri, IBaseResource bundle) {
+        if (fhirUri != null && !fhirUri.equals("")) {
+            try {
+                HttpClientUtils.post(fhirUri, bundle, encoding, fhirContext);
+            } catch (IOException e) {
+                e.printStackTrace();
+                LogUtils.putException(bundle.getIdElement().getIdPart(), "Error posting to FHIR Server: " + fhirUri + ".  Bundle not posted.");
+            }
+        }
     }
 
     public static List<Map.Entry<String, IBaseResource>> getBundlesInDir(String directoryPath, FhirContext fhirContext) {
@@ -262,5 +278,21 @@ public class BundleUtils {
         }
         return false;
 
+    }
+    public static IBaseBundle getBundleOfResourceTypeFromDirectory(String directoryPath, FhirContext fhirContext, Class<? extends IBaseResource> clazz) {
+        BundleBuilder builder = new BundleBuilder(fhirContext);
+        try (Stream<Path> walk = Files.walk(Paths.get(directoryPath), 1)) {
+            walk.filter(p -> !Files.isDirectory(p)).forEach(
+                    file -> {
+                        IBaseResource resource = IOUtils.readResource(file.toString(), fhirContext);
+                        if (resource != null && clazz.isAssignableFrom(resource.getClass())) {
+                            builder.addCollectionEntry(resource);
+                        }
+                    }
+            );
+        } catch (IOException ioe) {
+            throw new IGInitializationException("Error reading resources from path: " + directoryPath, ioe);
+        }
+        return builder.getBundle();
     }
 }
