@@ -10,12 +10,12 @@ import com.google.gson.JsonParser;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.*;
-import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.Utilities;
-import org.opencds.cqf.tooling.cql.exception.CQLTranslatorException;
+import org.opencds.cqf.tooling.cql.exception.CqlTranslatorException;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
+import org.opencds.cqf.tooling.processor.CqlProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -144,8 +145,8 @@ public class IOUtils {
             // Issue 96
             // If includeVersion is false then just use name and not id for the file baseName
 //            if (Boolean.FALSE.equals(versioned)) {
-                // Assumes that the id will be a string with - separating the version number
-                // baseName = baseName.split("-")[0];
+            // Assumes that the id will be a string with - separating the version number
+            // baseName = baseName.split("-")[0];
 //            }
             outputPath = FilenameUtils.concat(path, formatFileName(baseName, encoding, fhirContext));
         }
@@ -196,33 +197,31 @@ public class IOUtils {
         }
     }
 
-    private static final Map<String, String> alreadyCopied = new HashMap<>();
-    public static int copyFileCounter() {
-        return copyFileCounter;
-    }
-    private static int copyFileCounter = 0;
-    public static boolean copyFile(String inputPath, String outputPath) {
+
+    private static final Map<String, String> alreadyCopied = new ConcurrentHashMap<>();
+
+    public static void copyFile(String inputPath, String outputPath) {
 
         if ((inputPath == null || inputPath.isEmpty()) &&
                 (outputPath == null || outputPath.isEmpty())) {
             LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath and outputPath are missing!"));
-            return false;
+            return;
         }
 
         if (inputPath == null || inputPath.isEmpty()) {
             LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
-            return false;
+            return;
         }
 
         if (outputPath == null || outputPath.isEmpty()) {
             LogUtils.putException("IOUtils.copyFile", new IllegalArgumentException("IOUtils.copyFile: inputPath missing!"));
-            return false;
+            return;
         }
 
         String key = inputPath + ":" + outputPath;
         if (alreadyCopied.containsKey(key)) {
             // File already copied to destination, no need to do anything
-            return false;
+            return;
         }
 
         try {
@@ -230,21 +229,14 @@ public class IOUtils {
             Path dest = Paths.get(outputPath);
             Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
 
-            if (inputPath.toLowerCase().contains("tests-")){
-                copyFileCounter++;
-//                System.out.println("Total tests-*: " + testsCounter + ": " + inputPath);
-            }
-
             alreadyCopied.put(key, outputPath);
-            return true;
         } catch (IOException e) {
             logger.error(e.getMessage());
             LogUtils.putException("IOUtils.copyFile(" + inputPath + ", " + outputPath + "): ",
                     new RuntimeException("Error copying file: " + e.getMessage()));
-            return false;
         }
-
     }
+
 
     public static String getTypeQualifiedResourceId(String path, FhirContext fhirContext) {
         IBaseResource resource = readResource(path, fhirContext, true);
@@ -362,7 +354,7 @@ public class IOUtils {
     public static boolean isDirectory(String path) {
         return FileUtils.isDirectory(new File(path));
     }
-    private static final Map<String, List<String>> cachedFilePaths = new HashMap<>();
+    private static final Map<String, List<String>> cachedFilePaths = new ConcurrentHashMap<>();
 
     public static List<String> getFilePaths(String directoryPath, Boolean recursive) {
         List<String> filePaths = new ArrayList<>();
@@ -383,7 +375,7 @@ public class IOUtils {
                 //note: this is not the same as ANDing recursive to isDirectory as that would result in directories
                 // being added to the list if the request is not recursive.
                 if (Boolean.TRUE.equals(recursive)) {
-                    filePaths.addAll(getFilePaths(file.getPath(), recursive));
+                    filePaths.addAll(getFilePaths(file.getPath(), true));
                 }
             } else {
                 filePaths.add(file.getPath());
@@ -431,7 +423,7 @@ public class IOUtils {
         return file.getParent();
     }
 
-    private static final Map<String, List<String>> cachedDirectoryPaths = new HashMap<>();
+    private static final Map<String, List<String>> cachedDirectoryPaths = new ConcurrentHashMap<>();
 
     public static List<String> getDirectoryPaths(String path, Boolean recursive) {
         List<String> directoryPaths = new ArrayList<>();
@@ -521,7 +513,7 @@ public class IOUtils {
         return result;
     }
 
-    public static List<String> getDependencyCqlPaths(String cqlContentPath, Boolean includeVersion) throws CQLTranslatorException{
+    public static List<String> getDependencyCqlPaths(String cqlContentPath, Boolean includeVersion) throws CqlTranslatorException {
         List<File> dependencyFiles = getDependencyCqlFiles(cqlContentPath, includeVersion);
         List<String> dependencyPaths = new ArrayList<>();
         for (File file : dependencyFiles) {
@@ -530,7 +522,7 @@ public class IOUtils {
         return dependencyPaths;
     }
 
-    public static List<File> getDependencyCqlFiles(String cqlContentPath, Boolean includeVersion) throws CQLTranslatorException{
+    public static List<File> getDependencyCqlFiles(String cqlContentPath, Boolean includeVersion) throws CqlTranslatorException {
         File cqlContent = new File(cqlContentPath);
         File cqlContentDir = cqlContent.getParentFile();
         if (!cqlContentDir.isDirectory()) {
@@ -566,39 +558,29 @@ public class IOUtils {
     }
 
     private static final Map<String, CqlTranslator> cachedTranslator = new LinkedHashMap<>();
-    public static CqlTranslator translate(String cqlContentPath, ModelManager modelManager, LibraryManager libraryManager, CqlTranslatorOptions options) throws CQLTranslatorException {
+
+    public static CqlTranslator translate(File cqlFile, LibraryManager libraryManager) throws CqlTranslatorException {
+        String cqlContentPath = cqlFile.getAbsolutePath();
         CqlTranslator translator = cachedTranslator.get(cqlContentPath);
         if (translator != null) {
             return translator;
         }
         try {
-            File cqlFile = new File(cqlContentPath);
             if (!cqlFile.getName().endsWith(".cql")) {
-                throw new CQLTranslatorException("cqlContentPath must be a path to a .cql file");
+                throw new CqlTranslatorException("cqlContentPath must be a path to a .cql file");
             }
 
             translator = CqlTranslator.fromFile(cqlFile, libraryManager);
 
-            if (!translator.getErrors().isEmpty()) {
-                throw new CQLTranslatorException(listTranslatorErrors(translator));
+            if (CqlProcessor.hasSevereErrors(translator.getErrors())) {
+                throw new CqlTranslatorException(translator.getErrors());
             }
+
             cachedTranslator.put(cqlContentPath, translator);
             return translator;
         } catch (IOException e) {
-            throw new CQLTranslatorException(e);
+            throw new CqlTranslatorException(e);
         }
-    }
-
-    private static ArrayList<String> listTranslatorErrors(CqlTranslator translator) {
-        ArrayList<String> errors = new ArrayList<>();
-        for (CqlCompilerException error : translator.getErrors()) {
-            TrackBack tb = error.getLocator();
-            String lines = tb == null ? "[n/a]" : String.format("[%d:%d, %d:%d]",
-                    tb.getStartLine(), tb.getStartChar(), tb.getEndLine(), tb.getEndChar());
-            //System.err.printf("%s %s%n", lines, error.getMessage());
-            errors.add(lines + error.getMessage());
-        }
-        return errors;
     }
 
     public static String getCqlString(String cqlContentPath) {
@@ -852,7 +834,7 @@ public class IOUtils {
                     resources.put(path, resource);
                 } catch (Exception e) {
                     if(path.toLowerCase().contains("measure")) {
-                        System.out.println("Error reading in Measure from path: " + path + "\n" + e);
+                        logger.error("Error reading in Measure from path: " + path, e);
                     }
                 }
             }
@@ -1042,12 +1024,15 @@ public class IOUtils {
     }
 
     private static void setupDevicePaths(FhirContext fhirContext) {
-        devicePaths = new LinkedHashSet<>();
-        HashMap<String, IBaseResource> resources = new LinkedHashMap<>();
+        devicePaths = new LinkedHashSet <>();
+        Map<String, IBaseResource> resources = new LinkedHashMap<>();
         for (String dir : resourceDirectories) {
             for(String path : IOUtils.getFilePaths(dir, true)) {
                 try {
-                    resources.put(path, IOUtils.readResource(path, fhirContext, true));
+                    IBaseResource resource = IOUtils.readResource(path, fhirContext, true);
+                    if (resource != null) {
+                        resources.put(path, resource);
+                    }
                 } catch (Exception e) {
                     if(path.toLowerCase().contains("device")) {
                         logger.error("Error reading in Device from path: {} \n {}", path, e.getMessage());

@@ -1,0 +1,21 @@
+{
+  "resourceType": "ValueSet",
+  "id": "condition-problem-list-category",
+  "url": "http://mycontentig.com/fhir/ValueSet/condition-problem-list-category",
+  "version": "1.0.0",
+  "name": "Valueset_problem_list_condition_category",
+  "title": "ValueSet - Problem List Condition Category",
+  "status": "active",
+  "experimental": false,
+  "publisher": "Alphora",
+  "description": "Problem list condition category.",
+  "expansion": {
+    "identifier": "condition-problem-list-category-valueset-expansion",
+    "timestamp": "2021-12-06T13:47:55-07:00",
+    "contains": [ {
+      "system": "http://hl7.org/fhir/condition-category",
+      "code": "problem-list-item",
+      "display": "Problem List Item"
+    } ]
+  }
+}

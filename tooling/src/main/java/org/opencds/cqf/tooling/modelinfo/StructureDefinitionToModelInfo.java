@@ -7,10 +7,12 @@ import java.io.StringWriter;
 import java.nio.file.Paths;
 import java.util.Map;
 
-// import javax.xml.bind.JAXBContext;
-// import javax.xml.bind.JAXBElement;
-// import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 
 import org.hl7.elm_modelinfo.r1.ClassInfo;
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
@@ -28,10 +30,6 @@ import org.opencds.cqf.tooling.modelinfo.uscore.USCoreModelInfoBuilder;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Marshaller;
 
 public class StructureDefinitionToModelInfo extends Operation {
 
@@ -248,7 +246,7 @@ public class StructureDefinitionToModelInfo extends Operation {
             writer.flush();
         }
     }
-    
+
     public static void main(String[] args) {
         Operation op = new StructureDefinitionToModelInfo();
         op.execute(args);

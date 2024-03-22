@@ -21,13 +21,14 @@ package org.opencds.cqf.tooling.cli;
     This project provides tooling for the following use cases:
         - QDM to QiCore mapping generation
             - command: mvn exec:java -Dexec.args="[-QdmToQiCore] (output directory path)"
-            - Example: mvn exec:java -Dexec.args="-QdmToQiCore /Users/christopherschuler/Documents/workspace/QdmToQiCoreFiles"
+            - Example: mvn -Dexec.mainClass="org.opencds.cqf.tooling.cli.Main" exec:java -Dexec.args="-QdmToQiCore /Users/daviddieppois/Documents/git/cqf-tooling/tooling-cli/results"
             - This tooling generates HTML pages from http://wiki.hl7.org/index.php?title=Harmonization_of_Health_Quality_Information_models
               for the QiCore implementation guide
 
         - QiCore QUICK page generation
             - command: mvn exec:java -Dexec.args="[-QiCoreQUICK] [path to QiCore output directory] (output directory path)"
             - /Users/christopherschuler/Documents/workspace/harmoniq/repos/qi-core/output
+            - Example: mvn -Dexec.mainClass="org.opencds.cqf.tooling.cli.Main" exec:java -Dexec.args="-QiCoreQUICK /Users/daviddieppois/Documents/git/cqf-tooling/tooling-cli/results"
 
         - VSAC Excel spreadsheet to FHIR ValueSet resource conversion
             - command: mvn exec:java -Dexec.args="[-VsacXlsxToValueSet] [-pathtospreadsheet | -pts] (-outputpath | -op) (-encoding | -e) (-metasheetnum | -msn) (-metanamerow | -mnr) (-metaoidrow | -mor) (-metastewardrow | -msr) (-codesheetnum | -csn) (-codelistrow | -clr) (-codecol | -cc) (-descriptioncol | -dc) (-systemnamecol | -snc) (-versioncol | -vc) (-systemoidcol | -soc)"
@@ -36,7 +37,8 @@ package org.opencds.cqf.tooling.cli;
             - This operation is configurable and can be used with spreadsheets that do not conform to VSAC export format (although we suggest using the -XlsxToValueSet operation as it is much more flexible and configurable).
 
         - TemplateValuesetGenerator - WAS: XLSX Opioid ValueSet terminology generator
-            - command: mvn exec:java -Dexec.args="[-TemplateValuesetGenerator] [-pathtospreadsheet=<path> | -pts] (-outputpath | -op) (-encoding | -e) (-outputprefix | -opp) (-outputversion | -opv)"
+            - command: mvn exec:java -Dexec.args="[-TemplateToValueSetGenerator] [-pathtospreadsheet=<path> | -pts] (-outputpath | -op) (-encoding | -e) (-outputprefix | -opp) (-outputversion | -opv)"
+            - Example: mvn -Dexec.mainClass="org.opencds.cqf.tooling.cli.Main" exec:java -Dexec.args="-TemplateToValueSetGenerator -pts=/Users/daviddieppois/Documents/git/cqf-tooling/tooling-cli/src/main/resources/CDC_Opioid_Terminology_Master.xlsx -op=/Users/daviddieppois/Documents/git/cqf-tooling/tooling-cli/r4"
             - This tooling converts the CDC Opioid XLSX spreadsheet from MD Partners to valuesets.
             - Outputversion, if not specified, defaults to R4.
 
@@ -50,6 +52,7 @@ package org.opencds.cqf.tooling.cli;
         - CQL to FHIR Library conversion
             - command: mvn exec:java -Dexec.args="[-CqlToSTU3Library|-CqlToR4Library] [-pathtolibrarydirectory | -ptld] (-encoding | -e) (-outputpath | -op)"
             - Example: java -Dexec.args="-CqlToR4Library -ptld=/Users/christopherschuler/Src/cqframework/opioid-cds-r4/pages/cql/ -op=/Users/christopherschuler/Src/cqframework/opioid-cds-r4/resources"
+            - 2nd Example: mvn -Dexec.mainClass="org.opencds.cqf.tooling.cli.Main" -Dexec.args="-CqlToR4Library -ptld=/Users/daviddieppois/Documents/git/cqf-tooling/tooling-cli/output -op=/Users/daviddieppois/Documents/git/cqf-tooling/tooling-cli/r4"
             - This tooling converts CQL libraries to FHIR Library resources
             - The following elements will be populated in the FHIR Library resource:
                 - id (auto-generated)
@@ -67,6 +70,7 @@ package org.opencds.cqf.tooling.cli;
 
         - CQL to FHIR Measure conversion
             - command: mvn exec:java -Dexec.args="[-CqlToMeasure] [path to CQL library] (id) (encoding) (contentType encoding) (-ip=initial population criteria) {-nX=numerator X criteria} {-dX=denominator X criteria} {sX=stratifier X criteria} (org.opencds.cqf.qdm.output directory path)"
+            - Example: mvn -Dexec.mainClass="org.opencds.cqf.tooling.cli.Main" -Dexec.args="-CqlToMeasure -ptld=/Users/daviddieppois/Documents/git/cqf-tooling/tooling-cli/output/Antibiotic.cql"
             - NOTE: The 'X' for the numerator, denominator and stratifier params MUST be an Integer value
                 - If the numerator, denominator and stratifier params are not provided, the following criteria naming conventions MUST be followed:
                     - initial population: "Initial Population"
@@ -87,6 +91,7 @@ package org.opencds.cqf.tooling.cli;
 
         - Refresh Measure(s)
             - command: mvn exec:java -Dexec.args="[-RefreshStu3Measure|RefreshR4Measure] [-ptm| pathToMeasures] [-ptl|pathToLibraries] (-e|encoding) (-o|-output) (-ss|-stamp)"
+            - Example: mvn -Dexec.mainClass="org.opencds.cqf.tooling.cli.Main" -Dexec.args="-RefreshStu3Measure -ptm=/Users/daviddieppois/Documents/git/cqf-tooling/tooling/src/test/resources/org/opencds/cqf/tooling/stu3/input/resources/measure -ptl=/Users/daviddieppois/Documents/git/cqf-tooling/tooling/src/test/resources/org/opencds/cqf/tooling/stu3/input/resources/library -o=/Users/daviddieppois/Documents/git/cqf-tooling/tooling-cli/output"
 
         - Refresh Library
             - command: mvn exec:java -Dexec.args"-RefreshLibrary -ini -fv|fhir-version -lp|libraryPath (-ss|-stamp)
@@ -119,12 +124,13 @@ package org.opencds.cqf.tooling.cli;
 
         - Bundle decomposition
             - mvn exec:java -Dexec.args="[-BundleToResources] [Bundle file path] (output encoding)
-            - Example: mvn exec:java -Dexec.args="-BundleToResources /Users/christopherschuler/Documents/workspace/Bundles/bundle-1.json json /Users/christopherschuler/Documents/workspace/resources"
+            - Example: mvn -Dexec.mainClass="org.opencds.cqf.tooling.cli.Main" exec:java -Dexec.args="-BundleToResources -p=/Users/daviddieppois/Documents/git/cqf-tooling/tooling-cli/src/main/resources/libraryevaluationtest-bundle.json -e=json -op=/Users/daviddieppois/Documents/git/cqf-tooling/tooling-cli/output"
             - This tooling decomposes a Bundle entry into separate resource files
             - Accepts Bundles with .json or .xml extensions
 
         - Bundle transaction - Converts a collection bundle to a transaction bundle
             - mvn exec:java -Dexec.args="-MakeTransaction [Bundle file path] (output encoding)
+            - Example: mvn -Dexec.mainClass="org.opencds.cqf.tooling.cli.Main" exec:java -Dexec.args="-MakeTransaction -p=/Users/daviddieppois/Documents/git/cqf-tooling/tooling/src/main/resources/libraryevaluationtest-bundle.json -e=json -op=/Users/daviddieppois/Documents/git/cqf-tooling/tooling-cli/bundleTransaction"
             - This tooling converts a collection bundle to a transaction bundle
             - Accepts bundles with .json or .xml extensions
 
@@ -230,6 +236,8 @@ package org.opencds.cqf.tooling.cli;
 //import org.opencds.cqf.tooling.operations.ExecutableOperation;
 //import org.opencds.cqf.tooling.operations.Operation;
 //import org.reflections.Reflections;
+
+import org.opencds.cqf.tooling.common.ThreadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -278,6 +286,9 @@ public class Main {
 //    }
 
     public static void main(String[] args) {
+        //ensure any and all executors are shutdown cleanly when app is shutdown:
+        Runtime.getRuntime().addShutdownHook(new Thread(ThreadUtils::shutdownRunningExecutors));
+
         if (args.length == 0) {
             System.err.println("cqf-tooling version: " + Main.class.getPackage().getImplementationVersion());
             System.err.println("Requests must include which operation to run as a command line argument. See docs for examples on how to use this project.");

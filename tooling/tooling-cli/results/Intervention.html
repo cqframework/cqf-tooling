@@ -1,0 +1,315 @@
+---
+# jekyll header
+---
+{% include header.html %}
+{% include container-start.html %}
+<ul id="markdown-toc"><li><a href="#Intervention.2C_Order_.5BUsing_ProcedureRequest.5D">Intervention, Order [Using ProcedureRequest]</a></li><li><a href="#Intervention.2C_Recommended_.5BUsing_ProcedureRequest.5D">Intervention, Recommended [Using ProcedureRequest]</a></li><li><a href="#Intervention.2C_Performed_.5BUsing_Procedure.5D">Intervention, Performed [Using Procedure]</a></li><li><a href="#Intervention.2C_Order_.5BUsing_Task.5D">Intervention, Order [Using Task]</a></li><li><a href="#Intervention.2C_Recommended_.5BUsing_Task.5D">Intervention, Recommended [Using Task]</a></li><li><a href="#Intervention.2C_Performed_.5BUsing_Task.5D">Intervention, Performed [Using Task]</a></li></ul>
+<a name="Intervention"> </a>
+<h2>
+    <span class="sectioncount">7.14.0</span> Intervention <a href="Intervention.html#Intervention" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
+</h2>
+
+
+<p>The CQI Workgroup reviewed this page in April 2018 consistent with QDM version 5.3. There are no updates to the content required based on QDM version 5.4 (reviewed June 7, 2018); however, on June 15, 2018, the CQI Workgroup reviewed the QDM FHIR mappings for Intervention and determined there is some ambiguity requiring implementer comment.
+</p>
+<ul>
+<li>Note that while the QDM categories Intervention and Procedure have been modeled identically in previous versions of QI Core, the <a class="external text" href="http://hl7.org/fhir/task.html" rel="nofollow">FHIR Task Resource</a> provides a potentially more effective way to differentiate Interventions from Procedures. Both are retained in the QDM as they are more clinically expressive for clinicians to understand the measure intent. </li>
+<li>The QDM to FHIR mapping provided here show mapping to both Procedure/ProcedureRequest and to Task.</li>
+<li>The FHIR resource definitions for <a class="external text" href="http://build.fhir.org/procedure.html" rel="nofollow">Procedure</a> and <a class="external text" href="http://build.fhir.org/task.html" rel="nofollow">Task</a> seem to have significant overlap - see <a class="external text" href="https://gforge.hl7.org/gf/project/fhir/tracker/?action=TrackerItemEdit&#38;tracker_item_id=17359&#38;start=50" rel="nofollow">FHIR Tracker item 17359</a></li>
+<li>Both mappings (i.e., Intervention mapped to Procedure/ProcedureRequest and to Task) are shown here. Comments are welcome regarding the most appropriate use.</li>
+</ul>
+
+
+<p>QDM defines Intervention as a course of action intended to achieve a result in the care of persons with health problems that does not involve direct physical contact with a patient. Examples include patient education and therapeutic communication. QDM defines three contexts for intervention: Intervention, Order; Intervention, Performed; Intervention, Recommended.</p>
+
+
+
+<a name="Intervention.2C_Order_.5BUsing_ProcedureRequest.5D"> </a>
+<h3>
+    <span class="sectioncount">7.14.1</span> <b><i>Intervention, Order [Using ProcedureRequest]</i></b> <a href="Intervention.html#Intervention.2C_Order_.5BUsing_ProcedureRequest.5D" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
+</h3>
+
+
+<div style="page-break-inside: avoid;">
+<table border="1" cellpadding="2" cellspacing="0">
+<tr>
+<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
+<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
+<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
+<tr valign="top">
+<td>Intervention, Order</td>
+<td>ProcedureRequest.intent</td>
+<td>Procedure Request intent uses the concepts proposal, plan, order, original-order, reflex-order, filler-order, instance-order, option. Constrain to &#34;order&#34; from the intent value set for QDM datatypes with the order context.</td></tr>
+<tr>
+<td>Negation Rationale</td>
+<td>ProcedureRequest.extension (<a class="external free" href="http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused" rel="nofollow">http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused</a>)</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Reason</td>
+<td>ProcedureRequest.reasonCode</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Author dateTime</td>
+<td>ProcedureRequest.authoredOn</td>
+<td>Note - ProcedureRequest.occurrence[x] defines a dateTime when the event should occur - not addressed in QDM
+
+Note: FHIR Provenance generally addresses the author of the message; the identifier/source of the original resource element is defined by the resource. Individual resource element provenance is summarized in the FHIR W5 Report (<a class="external free" href="http://hl7.org/fhir/w5.html" rel="nofollow">http://hl7.org/fhir/w5.html</a>).</td></tr>
+<tr>
+<td>Code</td>
+<td>ProcedureRequest.code</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>id</td>
+<td>ProcedureRequest.id</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Source</td>
+<td>ProcedureRequest.requester</td>
+<td>Author, orderer - note also, ProcedureRequest.requester.agent for device, practitioner or organization who initiated the request; or ProcedureRequest.requester.onBehalfOf  - the organization the device or practitioner was acting on behalf of</td></tr></table></div>
+
+
+<a name="Intervention.2C_Recommended_.5BUsing_ProcedureRequest.5D"> </a>
+<h3>
+    <span class="sectioncount">7.14.2</span> <b><i>Intervention, Recommended [Using ProcedureRequest]</i></b> <a href="Intervention.html#Intervention.2C_Recommended_.5BUsing_ProcedureRequest.5D" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
+</h3>
+
+
+<div style="page-break-inside: avoid;">
+<table border="1" cellpadding="2" cellspacing="0">
+<tr>
+<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
+<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
+<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
+<tr valign="top">
+<td>Intervention, Recommended</td>
+<td>ProcedureRequest.intent</td>
+<td>Procedure Request intent uses the concepts proposal, plan, order, original-order, reflex-order, filler-order, instance-order, option. &#34;Proposal&#34; is most consistent with the ProcedureRequest when applied to clinical decision support (CDS) in which the CDS proposes an action to a provider or to a patient. The QDM concept Recommended addresses expectations a provider gives to a patient. Such recommendations are most consistent with the ProcedureRequest.intent value of &#34;plan&#34; (an intension to ensure something occurs without providing an authorization to act).</td></tr>
+<tr>
+<td>Negation Rationale</td>
+<td>ProcedureRequest.extension (<a class="external free" href="http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused" rel="nofollow">http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused</a>)</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Reason</td>
+<td>ProcedureRequest.reasonCode</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Author dateTime</td>
+<td>ProcedureRequest.authoredOn</td>
+<td>Note - ProcedureRequest.occurrence[x] defines a dateTime when the event should occur - not addressed in QDM
+
+Note: FHIR Provenance generally addresses the author of the message; the identifier/source of the original resource element is defined by the resource. Individual resource element provenance is summarized in the FHIR W5 Report (<a class="external free" href="http://hl7.org/fhir/w5.html" rel="nofollow">http://hl7.org/fhir/w5.html</a>).</td></tr>
+<tr>
+<td>Code</td>
+<td>ProcedureRequest.code</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>id</td>
+<td>ProcedureRequest.id</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Source</td>
+<td>ProcedureRequest.requester</td>
+<td>Author, orderer - note also, ProcedureRequest.requester.agent for device, practitioner or organization who initiated the request; or ProcedureRequest.requester.onBehalfOf  - the organization the device or practitioner was acting on behalf of</td></tr></table></div>
+
+
+<a name="Intervention.2C_Performed_.5BUsing_Procedure.5D"> </a>
+<h3>
+    <span class="sectioncount">7.14.3</span> <b><i>Intervention, Performed [Using Procedure]</i></b> <a href="Intervention.html#Intervention.2C_Performed_.5BUsing_Procedure.5D" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
+</h3>
+
+
+<div style="page-break-inside: avoid;">
+<table border="1" cellpadding="2" cellspacing="0">
+<tr>
+<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
+<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
+<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
+<tr valign="top">
+<td>Intervention, Performed</td>
+<td>Procedure (the .status metadata allows conformance to the specific QDM datatype context)</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Relevant Period</td>
+<td>Procedure.performed[x]</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Negation Rationale</td>
+<td>Procedure.notDoneReason</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Reason</td>
+<td>Procedure.reasonCode</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Result</td>
+<td>Procedure.outcome</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Author dateTime</td>
+<td>FHIR.provenance.recorded</td>
+<td>FHIR references authorDatetime as part of the provenance resource for all resources. Note: FHIR Provenance generally addresses the author of the message; the identifier/source of the original resource element is defined by the resource. Individual resource element provenance is summarized in the FHIR W5 Report (<a class="external free" href="http://hl7.org/fhir/w5.html" rel="nofollow">http://hl7.org/fhir/w5.html</a>). Hence, the QDM Procedure author dateTime references FHIR provenance.</td></tr>
+<tr>
+<td>Status</td>
+<td>Procedure.status</td>
+<td>QDM matched to QI Core / FHIR
+
+Note: Procedure.status allows specification of completed but it does not assure the procedure was completed successfully. The FHIR resource Proecedure.outcome does also specification of successful completion, but that element may be ambiguous. The Patient Care Workgroup is evaluating options to more clearly represent a procedure that successfully achieved its objective (objective is not currently available as a metadata element). Moreover, clinical care capture of success with respect to procedure completion is highly variable. See the QDM Known Issues for a description of the issue and a link to the ONC Jira QDM Issues page to join the discussion for QDM <a class="external autonumber" href="https://github.com/esacinc/CQL-Formatting-and-Usage-Wiki/wiki/eCQM-Known-Issues#qdm-procedure-performed-completion-time" rel="nofollow">[1]</a>.</td></tr>
+<tr>
+<td>Code</td>
+<td>Procedure.code</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>id</td>
+<td>Procedure.id</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Source</td>
+<td>Procedure.performer</td>
+<td>QDM matched to QI Core / FHIR</td></tr></table></div>
+
+
+<a name="Intervention.2C_Order_.5BUsing_Task.5D"> </a>
+<h3>
+    <span class="sectioncount">7.14.4</span> <b><i>Intervention, Order [Using Task]</i></b> <a href="Intervention.html#Intervention.2C_Order_.5BUsing_Task.5D" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
+</h3>
+
+
+<div style="page-break-inside: avoid;">
+<table border="1" cellpadding="2" cellspacing="0">
+<tr>
+<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
+<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
+<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
+<tr valign="top">
+<td>Intervention, Order</td>
+<td>Task.intent</td>
+<td>Task intent uses the concepts proposal, plan, order, original-order, reflex-order, filler-order, instance-order, option. Constrain to &#34;order&#34; from the intent value set for QDM datatypes with the order context.</td></tr>
+<tr>
+<td>Negation Rationale</td>
+<td>Task.statusReason</td>
+<td>QDM matched to QI Core/FHIR - Constrained to instances in which Task.status = rejected, cancelled, or failed <a class="external text" href="http://hl7.org/fhir/task-status" rel="nofollow">Task status value set (required)</a></td></tr>
+<tr>
+<td>Reason</td>
+<td>Task.reason</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Author dateTime</td>
+<td>Task.authoredOn</td>
+<td>QDM matched to QI Core / FHIR
+
+Note: FHIR Provenance generally addresses the author of the message; the identifier/source of the original resource element is defined by the resource. Individual resource element provenance is summarized in the FHIR W5 Report (<a class="external free" href="http://hl7.org/fhir/w5.html" rel="nofollow">http://hl7.org/fhir/w5.html</a>).</td></tr>
+<tr>
+<td>Code</td>
+<td>Task.code</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>id</td>
+<td>Task.id</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Source</td>
+<td>Task.requester</td>
+<td>Task also provides the opportunity to request Task.owner (the person responsible for the task) and task.performerType</td></tr></table></div>
+
+
+<a name="Intervention.2C_Recommended_.5BUsing_Task.5D"> </a>
+<h3>
+    <span class="sectioncount">7.14.5</span> <b><i>Intervention, Recommended [Using Task]</i></b> <a href="Intervention.html#Intervention.2C_Recommended_.5BUsing_Task.5D" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
+</h3>
+
+
+<div style="page-break-inside: avoid;">
+<table border="1" cellpadding="2" cellspacing="0">
+<tr>
+<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
+<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
+<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
+<tr valign="top">
+<td>Intervention, Order</td>
+<td>Task.intent</td>
+<td>Task intent uses the concepts proposal, plan, order, original-order, reflex-order, filler-order, instance-order, option. Constrain to &#34;plan&#34; from the intent value set for QDM datatypes with the recommended context.</td></tr>
+<tr>
+<td>Negation Rationale</td>
+<td>| row2cell2 | Task.statusReason</td>
+<td>QDM matched to QI Core/FHIR - Constrained to instances in which Task.status = rejected, cancelled, or failed <a class="external text" href="http://hl7.org/fhir/task-status" rel="nofollow">Task status value set (required)</a></td></tr>
+<tr>
+<td>Reason</td>
+<td>Task.reason</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Author dateTime</td>
+<td>Task.authoredOn</td>
+<td>QDM matched to QI Core / FHIR
+
+Note: FHIR Provenance generally addresses the author of the message; the identifier/source of the original resource element is defined by the resource. Individual resource element provenance is summarized in the FHIR W5 Report (<a class="external free" href="http://hl7.org/fhir/w5.html" rel="nofollow">http://hl7.org/fhir/w5.html</a>).</td></tr>
+<tr>
+<td>Code</td>
+<td>Task.code</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>id</td>
+<td>Task.id</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Source</td>
+<td>Task.requester</td>
+<td>Task also provides the opportunity to request Task.owner (the person responsible for the task) and task.performerType</td></tr></table></div>
+
+
+<a name="Intervention.2C_Performed_.5BUsing_Task.5D"> </a>
+<h3>
+    <span class="sectioncount">7.14.6</span> <b><i>Intervention, Performed [Using Task]</i></b> <a href="Intervention.html#Intervention.2C_Performed_.5BUsing_Task.5D" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
+</h3>
+
+
+<div style="page-break-inside: avoid;">
+<table border="1" cellpadding="2" cellspacing="0">
+<tr>
+<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
+<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
+<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
+<tr valign="top">
+<td>Intervention, Performed</td>
+<td>Task (the .status metadata allows conformance to the specific QDM datatype context)</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Relevant Period</td>
+<td>Task.executionPeriod</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Negation Rationale</td>
+<td>Task.statusReason</td>
+<td>QDM matched to QI Core/FHIR - Constrained to instances in which Task.status = rejected, cancelled, or failed <a class="external text" href="http://hl7.org/fhir/task-status" rel="nofollow">Task status value set (required)</a></td></tr>
+<tr>
+<td>Reason</td>
+<td>Task.reason</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Result</td>
+<td>Task.output.value[x]</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Author dateTime</td>
+<td>Task.authoredOn</td>
+<td>QDM matched to QI Core / FHIR
+
+Note: FHIR Provenance generally addresses the author of the message; the identifier/source of the original resource element is defined by the resource. Individual resource element provenance is summarized in the FHIR W5 Report (<a class="external free" href="http://hl7.org/fhir/w5.html" rel="nofollow">http://hl7.org/fhir/w5.html</a>).</td></tr>
+<tr>
+<td>Status</td>
+<td>Task.status</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Code</td>
+<td>Task.code</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>id</td>
+<td>Task.id</td>
+<td>QDM matched to QI Core / FHIR</td></tr>
+<tr>
+<td>Source</td>
+<td>Task.requester</td>
+<td>Task also provides the opportunity to request Task.owner (the person responsible for the task) and task.performerType</td></tr></table></div>
+
+{% include container-end.html %}
+{% include footer.html %}
