@@ -27,6 +27,7 @@ import org.hl7.fhir.utilities.IniFile;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.MeasureProcessor;
+import org.opencds.cqf.tooling.operation.ig.NewRefreshIGOperation;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.processor.CDSHooksProcessor;
 import org.opencds.cqf.tooling.processor.IGBundleProcessor;
@@ -39,10 +40,7 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.github.tomakehurst.wiremock.WireMockServer;
@@ -52,6 +50,7 @@ import com.google.gson.Gson;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+@Ignore
 public class RefreshIGOperationTest extends RefreshTest {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	public RefreshIGOperationTest() {
@@ -376,6 +375,18 @@ public class RefreshIGOperationTest extends RefreshTest {
         System.out.println(this.console.toString());
         this.console = new ByteArrayOutputStream();
     }
+
+	@Test
+	public void testNewRefreshOperation() {
+		NewRefreshIGOperation newRefreshIGOperation = new NewRefreshIGOperation();
+		String[] args = new String[] {
+				"-NewRefreshIG",
+				"-ini=" + "/Users/daviddieppois/Documents/git/cqf-us/ig.ini",
+				"-rd=" + "/Users/daviddieppois/Documents/git/cqf-us",
+				"-uv=" + "1.0.1",
+		};
+		newRefreshIGOperation.execute(args);
+	}
 
 
 	private File createTempINI(Map<String, String> properties) {

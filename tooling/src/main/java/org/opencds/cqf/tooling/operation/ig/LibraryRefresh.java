@@ -14,6 +14,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.processor.CqlProcessor;
 import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -55,6 +56,10 @@ public class LibraryRefresh extends Refresh {
 
    @Override
    public List<IBaseResource> refresh() {
+      return refresh(null);
+   }
+
+   public List<IBaseResource> refresh(RefreshIGParameters params) {
       List<IBaseResource> refreshedLibraries = new ArrayList<>();
       this.cqlProcessor.execute();
       if (getIgInfo().isRefreshLibraries()) {
@@ -72,6 +77,7 @@ public class LibraryRefresh extends Refresh {
                   //  experimental, type, publisher, contact, description, useContext, jurisdiction,
                   //  and profile(s) (http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-shareablelibrary)
                   refreshDate(library);
+                  refreshVersion(library, params);
                   refreshContent(library, info);
                   refreshDataRequirements(library, info);
                   refreshRelatedArtifacts(library, info);
@@ -87,6 +93,7 @@ public class LibraryRefresh extends Refresh {
       }
       return refreshedLibraries;
    }
+
 
    private void resolveLibraryPackages() {
       // See the comment below regarding terminology resolution below

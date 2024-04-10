@@ -22,4 +22,5 @@ public class RefreshIGParameters {
     public String measureToRefreshPath;
     public String libraryOutputPath;
     public String measureOutputPath;
+    public String updatedVersion;
 }

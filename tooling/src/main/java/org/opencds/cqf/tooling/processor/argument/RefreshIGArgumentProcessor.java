@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opencds.cqf.tooling.operation.ig.Refresh;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.utilities.ArgUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
@@ -13,10 +14,12 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class RefreshIGArgumentProcessor {
-    public static final String[] OPERATION_OPTIONS = {"RefreshIG"};
+    public static final String[] OPERATION_OPTIONS = {"NewRefreshIG"};
     public static final String[] INI_OPTIONS = {"ini"};
     public static final String[] ROOT_DIR_OPTIONS = {"root-dir", "rd"};
     public static final String[] IG_PATH_OPTIONS = {"ip", "ig-path"};
@@ -26,6 +29,7 @@ public class RefreshIGArgumentProcessor {
     public static final String[] INCLUDE_TERMINOLOGY_OPTIONS = {"t", "include-terminology"};
     public static final String[] INCLUDE_PATIENT_SCENARIOS_OPTIONS = {"p", "include-patients"};
     public static final String[] VERSIONED_OPTIONS = {"v", "versioned"};
+    public static final String[] UPDATED_VERSION_OPTIONS = {"uv", "updated-version"};
     public static final String[] FHIR_URI_OPTIONS = {"fs", "fhir-uri"};
     public static final String[] MEASURE_TO_REFRESH_PATH = {"mtrp", "measure-to-refresh-path"};
     public static final String[] RESOURCE_PATH_OPTIONS = {"rp", "resourcepath"};
@@ -34,12 +38,15 @@ public class RefreshIGArgumentProcessor {
     public static final String[] SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS = { "ss", "stamp" };
     public static final String[] SHOULD_ADD_TIMESTAMP_OPTIONS = { "ts", "timestamp" };
 
+    private static final Logger logger = LoggerFactory.getLogger(RefreshIGArgumentProcessor.class);
+
     @SuppressWarnings("unused")
     public OptionParser build() {
         OptionParser parser = new OptionParser();
 
         OptionSpecBuilder iniBuilder = parser.acceptsAll(asList(INI_OPTIONS), "Path to ig ini file");
         OptionSpecBuilder rootDirBuilder = parser.acceptsAll(asList(ROOT_DIR_OPTIONS), "Root directory of the ig");
+        OptionSpecBuilder updatedVersionBuilder = parser.acceptsAll(asList(UPDATED_VERSION_OPTIONS), "Version for the new libraries");
         OptionSpecBuilder igPathBuilder = parser.acceptsAll(asList(IG_PATH_OPTIONS),"Path to the IG, relative to the root directory");
         OptionSpecBuilder resourcePathBuilder = parser.acceptsAll(asList(RESOURCE_PATH_OPTIONS),"Use multiple times to define multiple resource directories.");
         OptionSpecBuilder igOutputEncodingBuilder = parser.acceptsAll(asList(IG_OUTPUT_ENCODING), "If omitted, output will be generated using JSON encoding.");
@@ -52,6 +59,7 @@ public class RefreshIGArgumentProcessor {
 
         OptionSpec<String> ini = iniBuilder.withRequiredArg().describedAs("Path to the IG ini file");
         OptionSpec<String> rootDir = rootDirBuilder.withOptionalArg().describedAs("Root directory of the IG");
+        OptionSpec<String> updatedVersion = updatedVersionBuilder.withOptionalArg().describedAs("Updated version of the IG");
         OptionSpec<String> igPath = igPathBuilder.withRequiredArg().describedAs("Path to the IG, relative to the root directory");
         OptionSpec<String> resourcePath = resourcePathBuilder.withOptionalArg().describedAs("directory of resources");
         OptionSpec<String> igOutputEncoding = igOutputEncodingBuilder.withOptionalArg().describedAs("desired output encoding for resources");
@@ -70,6 +78,7 @@ public class RefreshIGArgumentProcessor {
         parser.acceptsAll(asList(INCLUDE_TERMINOLOGY_OPTIONS),"If omitted terminology will not be packaged.");
         parser.acceptsAll(asList(INCLUDE_PATIENT_SCENARIOS_OPTIONS),"If omitted patient scenario information will not be packaged.");
         parser.acceptsAll(asList(VERSIONED_OPTIONS),"If omitted resources must be uniquely named.");
+        parser.acceptsAll(asList(UPDATED_VERSION_OPTIONS),"If ommited the library version will not be updated.");
 
         OptionSpec<Void> help = parser.acceptsAll(asList(ArgUtils.HELP_OPTIONS), "Show this help page").forHelp();
 
@@ -122,6 +131,12 @@ public class RefreshIGArgumentProcessor {
         boolean addBundleTimestamp = false;
         String addBundleTimestampValue = (String)options.valueOf(SHOULD_ADD_TIMESTAMP_OPTIONS[0]);
 
+        String updatedVersion = (String)options.valueOf(UPDATED_VERSION_OPTIONS[0]);
+        logger.info("Updated Version: param " + updatedVersion);
+        if(updatedVersion == null) {
+            updatedVersion = "";
+        }
+
         if ((addBundleTimestampValue != null) && addBundleTimestampValue.equalsIgnoreCase("true")) {
             addBundleTimestamp = true;
         }
@@ -148,6 +163,7 @@ public class RefreshIGArgumentProcessor {
         ip.measureToRefreshPath = measureToRefreshPath;
         ip.libraryOutputPath = libraryOutputPath;
         ip.measureOutputPath = measureOutputPath;
+        ip.updatedVersion = updatedVersion;
 
         return ip;
     }
