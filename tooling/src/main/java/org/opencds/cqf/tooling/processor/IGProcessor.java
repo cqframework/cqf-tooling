@@ -153,7 +153,7 @@ public class IGProcessor extends BaseProcessor {
 
         refreshedResourcesNames.addAll(new LibraryProcessor()
                 .refreshIgLibraryContent(this, encoding, params.libraryPath, params.libraryOutputPath,
-                        versioned, fhirContext, params.shouldApplySoftwareSystemStamp));
+                        versioned, fhirContext, params.shouldApplySoftwareSystemStamp, params.updatedVersion));
 
         if (Strings.isNullOrEmpty(measureOutputPath)) {
             refreshedResourcesNames.addAll(new MeasureProcessor().refreshIgMeasureContent(this, encoding, versioned,

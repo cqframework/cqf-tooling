@@ -55,4 +55,6 @@ public class RefreshLibraryParameters {
     Path to write updated Libraries to
     */
     public String libraryOutputDirectory;
+
+    public String updatedVersion;
 }

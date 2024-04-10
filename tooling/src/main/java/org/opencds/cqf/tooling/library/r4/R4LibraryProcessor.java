@@ -20,12 +20,16 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class R4LibraryProcessor extends LibraryProcessor {
     private String libraryPath;
     private FhirContext fhirContext;
     private Encoding encoding;
+    private String updatedVersion;
     private static CqfmSoftwareSystemHelper cqfmHelper;
+    private static final Logger logger = LoggerFactory.getLogger(R4LibraryProcessor.class);
 
     private String getLibraryPath(String libraryPath) {
         File f = new File(libraryPath);
@@ -41,7 +45,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
         all known library resources
     */
     protected List<String> refreshLibraries(String libraryPath, Encoding encoding, Boolean shouldApplySoftwareSystemStamp) {
-        return refreshLibraries(libraryPath, null, encoding, shouldApplySoftwareSystemStamp);
+        return refreshLibraries(libraryPath, null, encoding, shouldApplySoftwareSystemStamp, null);
     }
 
     /*
@@ -50,7 +54,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
         all known library resources, if no libraryOutputDirectory is specified,
         overwrite all known library resources
     */
-    protected List<String> refreshLibraries(String libraryPath, String libraryOutputDirectory, Encoding encoding, Boolean shouldApplySoftwareSystemStamp) {
+    protected List<String> refreshLibraries(String libraryPath, String libraryOutputDirectory, Encoding encoding, Boolean shouldApplySoftwareSystemStamp, String version) {
         File file = libraryPath != null ? new File(libraryPath) : null;
         Map<String, String> fileMap = new HashMap<String, String>();
         List<org.hl7.fhir.r5.model.Library> libraries = new ArrayList<>();
@@ -75,6 +79,8 @@ public class R4LibraryProcessor extends LibraryProcessor {
         List<org.hl7.fhir.r5.model.Library> refreshedLibraries = super.refreshGeneratedContent(libraries);
         VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
         for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
+            logger.info("Updated version: " + version );
+            refreshedLibrary.setVersion("1.0.1");
             Library library = (Library) versionConvertor_40_50.convertResource(refreshedLibrary);
             String filePath = null;
             Encoding fileEncoding = null;            
@@ -146,11 +152,12 @@ public class R4LibraryProcessor extends LibraryProcessor {
         fhirContext = params.fhirContext;
         encoding = params.encoding;
         versioned = params.versioned;
+        updatedVersion = params.updatedVersion;
 
         R4LibraryProcessor.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
 
         if (!Strings.isNullOrEmpty(params.libraryOutputDirectory)) {
-            return refreshLibraries(libraryPath, params.libraryOutputDirectory, encoding, params.shouldApplySoftwareSystemStamp);
+            return refreshLibraries(libraryPath, params.libraryOutputDirectory, encoding, params.shouldApplySoftwareSystemStamp, updatedVersion);
         } else {
             return refreshLibraries(libraryPath, encoding, params.shouldApplySoftwareSystemStamp);
         }

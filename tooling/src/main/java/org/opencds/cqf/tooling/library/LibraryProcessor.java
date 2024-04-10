@@ -70,14 +70,14 @@ public class LibraryProcessor extends BaseProcessor {
     }
 
     public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
-        return refreshIgLibraryContent(parentContext, outputEncoding, null, null, versioned, fhirContext, shouldApplySoftwareSystemStamp);
+        return refreshIgLibraryContent(parentContext, outputEncoding, null, null, versioned, fhirContext, shouldApplySoftwareSystemStamp, null);
     }
 
-    public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
-        return refreshIgLibraryContent(parentContext, outputEncoding, null, libraryOutputDirectory, versioned, fhirContext, shouldApplySoftwareSystemStamp);
+    public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp, String version) {
+        return refreshIgLibraryContent(parentContext, outputEncoding, null, libraryOutputDirectory, versioned, fhirContext, shouldApplySoftwareSystemStamp, version);
     }
 
-    public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryPath, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp) {
+    public List<String> refreshIgLibraryContent(BaseProcessor parentContext, Encoding outputEncoding, String libraryPath, String libraryOutputDirectory, Boolean versioned, FhirContext fhirContext, Boolean shouldApplySoftwareSystemStamp, String version) {
         logger.info("[Refreshing Libraries]");
 
         LibraryProcessor libraryProcessor;
@@ -110,6 +110,7 @@ public class LibraryProcessor extends BaseProcessor {
         params.encoding = outputEncoding;
         params.versioned = versioned;
         params.shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStamp;
+        params.updatedVersion = version;
         return libraryProcessor.refreshLibraryContent(params);
     }
 
