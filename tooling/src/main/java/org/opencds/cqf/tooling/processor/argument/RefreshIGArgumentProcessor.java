@@ -78,7 +78,6 @@ public class RefreshIGArgumentProcessor {
         parser.acceptsAll(asList(INCLUDE_TERMINOLOGY_OPTIONS),"If omitted terminology will not be packaged.");
         parser.acceptsAll(asList(INCLUDE_PATIENT_SCENARIOS_OPTIONS),"If omitted patient scenario information will not be packaged.");
         parser.acceptsAll(asList(VERSIONED_OPTIONS),"If omitted resources must be uniquely named.");
-        parser.acceptsAll(asList(UPDATED_VERSION_OPTIONS),"If ommited the library version will not be updated.");
 
         OptionSpec<Void> help = parser.acceptsAll(asList(ArgUtils.HELP_OPTIONS), "Show this help page").forHelp();
 
