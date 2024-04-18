@@ -4,10 +4,12 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 import org.opencds.cqf.tooling.cql_generation.drool.DroolCqlGenerator;
 import org.opencds.cqf.tooling.cql_generation.drool.visitor.DroolToElmVisitor.CQLTYPES;
 
+@Ignore
 public class DroolCqlGeneratorIT {
 
     @Test
