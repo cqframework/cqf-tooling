@@ -15,12 +15,7 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
-import org.hl7.elm.r1.ContextDef;
-import org.hl7.elm.r1.Expression;
-import org.hl7.elm.r1.ExpressionRef;
-import org.hl7.elm.r1.Library;
-import org.hl7.elm.r1.UsingDef;
-import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.elm.r1.*;
 import org.opencds.cqf.tooling.cql_generation.IOUtil;
 import org.opencds.cqf.tooling.cql_generation.builder.VmrToModelElmBuilder;
 
@@ -60,8 +55,7 @@ public class ElmContext {
             UcumService ucumService = new UcumEssenceService(
                     UcumEssenceService.class.getResourceAsStream("/ucum-essence.xml"));
             libraryManager.setUcumService(ucumService);
-            this.libraryBuilder = new LibraryBuilder(libraryManager);
-            this.libraryBuilder.setCompilerOptions(CqlCompilerOptions.defaultOptions());
+            this.libraryBuilder = new LibraryBuilder(libraryManager, new ObjectFactory());
             this.libraryBuilder.setLibraryIdentifier(libraryInfo.getLeft());
             this.libraryBuilder.getModel(new UsingDef().withUri(modelBuilder.getModelUri())
                     .withLocalIdentifier(modelBuilder.getModelIdentifier()).withVersion(modelBuilder.getModelVersion()));

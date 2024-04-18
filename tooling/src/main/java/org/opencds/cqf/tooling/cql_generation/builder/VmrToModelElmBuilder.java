@@ -585,7 +585,7 @@ public abstract class VmrToModelElmBuilder {
                     default:
                         // ERROR:
                         // WARNING:
-                        libraryBuilder.recordParsingException(new CqlSemanticException(String.format("Unknown code comparator % in retrieve", codeComparator),
+                        libraryBuilder.recordParsingException(new CqlSemanticException(String.format("Unknown code comparator %s in retrieve", codeComparator),
                                 useStrictRetrieveTyping ? CqlCompilerException.ErrorSeverity.Error : CqlCompilerException.ErrorSeverity.Warning));
                 }
 
@@ -847,7 +847,7 @@ public abstract class VmrToModelElmBuilder {
             BigDecimal result = (BigDecimal)decimalFormat.parse(value);
             return result;
         } catch (ParseException e) {
-            throw new IllegalArgumentException(String.format("Could not parse number literal: %s", value, e));
+            throw new IllegalArgumentException(String.format("Could not parse number literal: %s %s", value, e));
         }
     }
 
