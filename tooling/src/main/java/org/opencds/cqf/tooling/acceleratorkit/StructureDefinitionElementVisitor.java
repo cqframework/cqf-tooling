@@ -70,7 +70,7 @@ public class StructureDefinitionElementVisitor extends StructureDefinitionBaseVi
             sdeo.setSdName(sdName);
             sdeo.setSdURL(sdURL);
             sdeo.setSdVersion(sdVersion);
-            if (ed.hasMin()) {
+            if (ed.hasMin() && ed.hasMax()) {
                 String edCardinality = ed.getMin() + "..." + ed.getMax();
                 sdeo.setCardinality(edCardinality);
             }

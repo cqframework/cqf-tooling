@@ -583,6 +583,8 @@ public abstract class VmrToModelElmBuilder {
                     break;
 
                     default:
+                        // ERROR:
+                        // WARNING:
                         libraryBuilder.recordParsingException(new CqlSemanticException(String.format("Unknown code comparator %s in retrieve", codeComparator),
                                 useStrictRetrieveTyping ? CqlCompilerException.ErrorSeverity.Error : CqlCompilerException.ErrorSeverity.Warning));
                 }

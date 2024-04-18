@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -553,16 +554,13 @@ public class ExampleBuilder {
     @SuppressWarnings("FromTemporalAccessor")
     private Instant toInstant(Object value) {
         if (value instanceof Instant) {
-            return (Instant)value;
-        }
-        else if (value instanceof LocalDateTime) {
-            return Instant.from((LocalDateTime)value);
-        }
-        else if (value instanceof LocalDate) {
-            return Instant.from((LocalDate)value);
-        }
-        else if (value instanceof String) {
-            return Instant.parse((String)value);
+            return (Instant) value;
+        } else if (value instanceof LocalDateTime) {
+            return ((LocalDateTime) value).toInstant(ZoneOffset.UTC);
+        } else if (value instanceof LocalDate) {
+            return ((LocalDate) value).atStartOfDay(ZoneOffset.UTC).toInstant();
+        } else if (value instanceof String) {
+            return Instant.parse((String) value);
         }
         return null;
     }

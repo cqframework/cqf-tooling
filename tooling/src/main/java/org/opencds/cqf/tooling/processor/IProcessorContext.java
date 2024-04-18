@@ -1,8 +1,8 @@
 package org.opencds.cqf.tooling.processor;
 
-import org.cqframework.fhir.npm.NpmPackageManager;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.r5.model.ImplementationGuide;
+import org.opencds.cqf.tooling.npm.NpmPackageManager;
 
 import java.util.List;
 

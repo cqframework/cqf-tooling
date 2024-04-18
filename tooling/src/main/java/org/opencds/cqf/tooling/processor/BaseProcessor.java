@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.cqframework.fhir.npm.LibraryLoader;
-import org.cqframework.fhir.npm.NpmPackageManager;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
@@ -23,6 +21,8 @@ import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.VersionUtilities;
 import org.opencds.cqf.tooling.exception.IGInitializationException;
+import org.opencds.cqf.tooling.npm.LibraryLoader;
+import org.opencds.cqf.tooling.npm.NpmPackageManager;
 import org.opencds.cqf.tooling.utilities.IGUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,7 +122,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
         this.fhirVersion = sourceIg.getFhirVersion().get(0).getCode();
         packageId = sourceIg.getPackageId();
         canonicalBase = determineCanonical(sourceIg.getUrl());
-        packageManager = new NpmPackageManager(sourceIg);
+        packageManager = new NpmPackageManager(sourceIg, "4.3.0");
 
         // Setup binary paths (cql source directories)
         binaryPaths = IGUtils.extractBinaryPaths(rootDir, sourceIg);
