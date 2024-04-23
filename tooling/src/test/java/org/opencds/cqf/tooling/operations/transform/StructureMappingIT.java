@@ -22,7 +22,7 @@ public class StructureMappingIT {
    void testActivityDefinitionToSupplyRequest() {
       StructureMapping structureMapping = new StructureMapping();
       structureMapping.setFhirContext(fhirContext);
-      structureMapping.setPackageUrl("https://hl7.org/fhir/R4/hl7.fhir.r4.core.tgz");
+      structureMapping.setPackageUrl("https://packages.simplifier.net/hl7.fhir.r4.core/4.0.1");
       structureMapping.setDefaultStructureMapUtilities();
 
       IParser parser = fhirContext.newJsonParser();
