@@ -65,6 +65,8 @@ public class BundleUtils {
         }
     }
 
+
+
     public static org.hl7.fhir.dstu3.model.Bundle bundleStu3Artifacts(String id, List<IBaseResource> resources) {
         org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
         ResourceUtils.setIgId(id, bundle, false);
@@ -111,17 +113,6 @@ public class BundleUtils {
             );
         }
         return bundle;
-    }
-
-    public static void postBundle(IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri, IBaseResource bundle) {
-        if (fhirUri != null && !fhirUri.equals("")) {
-            try {
-                HttpClientUtils.post(fhirUri, bundle, encoding, fhirContext);
-            } catch (IOException e) {
-                e.printStackTrace();
-                LogUtils.putException(bundle.getIdElement().getIdPart(), "Error posting to FHIR Server: " + fhirUri + ".  Bundle not posted.");
-            }
-        }
     }
 
     public static List<Map.Entry<String, IBaseResource>> getBundlesInDir(String directoryPath, FhirContext fhirContext) {
@@ -275,4 +266,25 @@ public class BundleUtils {
         return builder.getBundle();
     }
 
+    public static boolean resourceIsABundle(IBaseResource resource) {
+        return (
+                (resource instanceof org.hl7.fhir.dstu3.model.Bundle)
+//                      uncomment when R5 processing is accounted for
+//                      || (resource instanceof org.hl7.fhir.r5.model.Bundle)
+                        || (resource instanceof org.hl7.fhir.r4.model.Bundle)
+        );
+    }
+
+    public static boolean resourceIsTransactionBundle(IBaseResource inputResource) {
+        if (inputResource == null) return false;
+
+        if (inputResource instanceof org.hl7.fhir.dstu3.model.Bundle) {
+            return ((org.hl7.fhir.dstu3.model.Bundle) inputResource).getType().equals(org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION);
+
+        } else if (inputResource instanceof org.hl7.fhir.r4.model.Bundle) {
+            return ((org.hl7.fhir.r4.model.Bundle) inputResource).getType().equals(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
+        }
+        return false;
+
+    }
 }

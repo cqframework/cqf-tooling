@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 public class VmrToFhirOperationTest {
     private String vmrFilePath = "vMROutput.xml";
 
-//    @Test
+    // @Test
     public void vmrOperationTest() throws URISyntaxException {
         String inputFilePath = VmrToFhirOperationTest.class.getResource(vmrFilePath).toURI().getPath();
         String operation = "VmrToFhir";

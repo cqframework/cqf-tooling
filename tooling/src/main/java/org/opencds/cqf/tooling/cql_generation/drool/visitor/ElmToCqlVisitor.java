@@ -864,7 +864,7 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
                 query.getRelationship().stream().forEach(relationship -> visitRelationshipClause(relationship, context));
             }
             if (query.getWhere() != null) {
-                visitWhereClause(query.getWhere(), context);
+                visitExpression(query.getWhere(), context);
             }
             if (query.getReturn() != null) {
                 visitReturnClause(query.getReturn(), context);

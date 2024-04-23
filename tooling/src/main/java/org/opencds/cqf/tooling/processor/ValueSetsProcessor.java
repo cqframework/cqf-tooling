@@ -2,7 +2,7 @@ package org.opencds.cqf.tooling.processor;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.tooling.cql.exception.CQLTranslatorException;
+import org.opencds.cqf.tooling.cql.exception.CqlTranslatorException;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
@@ -77,7 +77,7 @@ public class ValueSetsProcessor {
     }
 
     public static void bundleValueSets(String cqlContentPath, String igPath, FhirContext fhirContext,
-            Map<String, IBaseResource> resources, Encoding encoding, Boolean includeDependencies, Boolean includeVersion) throws CQLTranslatorException {
+            Map<String, IBaseResource> resources, Encoding encoding, Boolean includeDependencies, Boolean includeVersion) throws CqlTranslatorException {
             Map<String, IBaseResource> dependencies = ResourceUtils.getDepValueSetResources(cqlContentPath, igPath, fhirContext, includeDependencies, includeVersion);
             for (IBaseResource resource : dependencies.values()) {
                 resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);

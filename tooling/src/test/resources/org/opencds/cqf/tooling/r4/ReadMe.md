@@ -24,7 +24,7 @@ Refreshing the IG includes two steps:
            * a separate bundle for each set of associated Patient Scenario resources
            * a separate MeasureReport resource for each assocaited Patient Scenario (if present)
 
-* The default behavior of running _refresh can be adjusted by changing the options in the _refresh file.  One such usage is to post to a differnt FHIR Server (ex: local).  To do so, modify the -fs (FHIR Server) option in _refresh.  For more details on other options, run the CQF Tooling from the command line with -RefreshIG  -help.
+* The default behavior of running _refresh can be adjusted by changing the options in the _refresh file.  One such usage is to post to a different FHIR Server (ex: local).  To do so, modify the -fs (FHIR Server) option in _refresh.  For more details on other options, run the CQF Tooling from the command line with -RefreshIG  -help.
 
 ## Caveats:
 * If new ValueSet resources are posted to a CQF Ruler FHIR Server, they must be manually updated with {{serverurl}}$updateCodeSystems.  Due to the potentially long duration of invoking $updateCodeSystems, the tooling does not run it as part of posting new ValueSet resources.

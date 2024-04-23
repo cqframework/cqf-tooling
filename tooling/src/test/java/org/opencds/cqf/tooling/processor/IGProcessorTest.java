@@ -3,14 +3,32 @@ package org.opencds.cqf.tooling.processor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import com.google.gson.Gson;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.IniFile;
 import org.opencds.cqf.tooling.RefreshTest;
-import org.opencds.cqf.tooling.library.LibraryProcessor;
-import org.opencds.cqf.tooling.measure.MeasureProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
-import org.opencds.cqf.tooling.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -27,11 +45,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+
 import static org.testng.Assert.*;
 
 public class IGProcessorTest extends RefreshTest {
 
-	private final IGProcessor processor;
 	private final ByteArrayOutputStream console = new ByteArrayOutputStream();
 
 	private final String ID = "id";
@@ -46,13 +66,6 @@ public class IGProcessorTest extends RefreshTest {
 
 	public IGProcessorTest() {
 		super(FhirContext.forCached(FhirVersionEnum.R4), "IGProcessorTest");
-		LibraryProcessor libraryProcessor = new LibraryProcessor();
-		MeasureProcessor measureProcessor = new MeasureProcessor();
-		CDSHooksProcessor cdsHooksProcessor = new CDSHooksProcessor();
-		PlanDefinitionProcessor planDefinitionProcessor = new PlanDefinitionProcessor(libraryProcessor, cdsHooksProcessor);
-		QuestionnaireProcessor questionnaireProcessor = new QuestionnaireProcessor(libraryProcessor);
-		IGBundleProcessor igBundleProcessor = new IGBundleProcessor(measureProcessor, planDefinitionProcessor, questionnaireProcessor);
-		processor = new IGProcessor(igBundleProcessor, libraryProcessor, measureProcessor);
 	}
 
 	@BeforeMethod
@@ -88,7 +101,7 @@ public class IGProcessorTest extends RefreshTest {
 		params.versioned = false;
 		params.shouldApplySoftwareSystemStamp = true;
 		params.addBundleTimestamp = true;  //setting this true to test timestamp added in generated bundle
-		processor.publishIG(params);
+		new IGProcessor().publishIG(params);
 
 		// determine fhireContext for measure lookup
 		FhirContext fhirContext = IGProcessor.getIgFhirContext(getFhirVersion(ini));

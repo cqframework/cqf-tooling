@@ -21,6 +21,8 @@ public class RefreshIGArgumentProcessor {
     public static final String[] ROOT_DIR_OPTIONS = {"root-dir", "rd"};
     public static final String[] IG_PATH_OPTIONS = {"ip", "ig-path"};
     public static final String[] IG_OUTPUT_ENCODING = {"e", "encoding"};
+
+    public static final String[] SKIP_PACKAGES_OPTIONS = {"s", "skip-packages"};
     public static final String[] INCLUDE_ELM_OPTIONS = {"elm", "include-elm"};
     public static final String[] INCLUDE_DEPENDENCY_LIBRARY_OPTIONS = {"d", "include-dependencies"};
     public static final String[] INCLUDE_TERMINOLOGY_OPTIONS = {"t", "include-terminology"};
@@ -29,10 +31,13 @@ public class RefreshIGArgumentProcessor {
     public static final String[] FHIR_URI_OPTIONS = {"fs", "fhir-uri"};
     public static final String[] MEASURE_TO_REFRESH_PATH = {"mtrp", "measure-to-refresh-path"};
     public static final String[] RESOURCE_PATH_OPTIONS = {"rp", "resourcepath"};
+    public static final String[] LIBRARY_PATH_OPTIONS = {"lp", "librarypath"};
     public static final String[] LIBRARY_OUTPUT_PATH_OPTIONS = {"libraryOutput", "libraryOutputPath", "lop"};
     public static final String[] MEASURE_OUTPUT_PATH_OPTIONS = {"measureOutput", "measureOutputPath", "mop"};
     public static final String[] SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS = { "ss", "stamp" };
     public static final String[] SHOULD_ADD_TIMESTAMP_OPTIONS = { "ts", "timestamp" };
+    public static final String[] SHOULD_INCLUDE_ERRORS = { "x", "include-errors" };
+
 
     @SuppressWarnings("unused")
     public OptionParser build() {
@@ -41,7 +46,8 @@ public class RefreshIGArgumentProcessor {
         OptionSpecBuilder iniBuilder = parser.acceptsAll(asList(INI_OPTIONS), "Path to ig ini file");
         OptionSpecBuilder rootDirBuilder = parser.acceptsAll(asList(ROOT_DIR_OPTIONS), "Root directory of the ig");
         OptionSpecBuilder igPathBuilder = parser.acceptsAll(asList(IG_PATH_OPTIONS),"Path to the IG, relative to the root directory");
-        OptionSpecBuilder resourcePathBuilder = parser.acceptsAll(asList(RESOURCE_PATH_OPTIONS),"Use multiple times to define multiple resource directories.");
+        OptionSpecBuilder resourcePathBuilder = parser.acceptsAll(asList(RESOURCE_PATH_OPTIONS),"Use multiple times to define multiple resource directories, relative to the root directory.");
+        OptionSpecBuilder libraryPathBuilder = parser.acceptsAll(asList(LIBRARY_PATH_OPTIONS), "Provide a single path, relative to the root directory, for library resources. The path will be added to the resource directories available to the refresh processing.");
         OptionSpecBuilder igOutputEncodingBuilder = parser.acceptsAll(asList(IG_OUTPUT_ENCODING), "If omitted, output will be generated using JSON encoding.");
         OptionSpecBuilder fhirUriBuilder = parser.acceptsAll(asList(FHIR_URI_OPTIONS),"If omitted the final bundle will not be loaded to a FHIR server.");
         OptionSpecBuilder measureToRefreshPathBuilder = parser.acceptsAll(asList(MEASURE_TO_REFRESH_PATH), "Path to Measure to refresh.");
@@ -49,27 +55,33 @@ public class RefreshIGArgumentProcessor {
         OptionSpecBuilder measureOutputPathBuilder = parser.acceptsAll(asList(MEASURE_OUTPUT_PATH_OPTIONS),"If omitted, the measures will overwrite any existing measures");
         OptionSpecBuilder shouldApplySoftwareSystemStampBuilder = parser.acceptsAll(asList(SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS),"Indicates whether refreshed Measure and Library resources should be stamped with the 'cqf-tooling' stamp via the cqfm-softwaresystem Extension.");
         OptionSpecBuilder shouldAddTimestampBuilder = parser.acceptsAll(asList(SHOULD_ADD_TIMESTAMP_OPTIONS),"Indicates whether refreshed Bundle should attach timestamp of creation.");
+        OptionSpecBuilder shouldVerboseMessaging = parser.acceptsAll(asList(SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS),"Indicates that a complete list of errors during library, measure, and test case refresh are included upon failure.");
 
         OptionSpec<String> ini = iniBuilder.withRequiredArg().describedAs("Path to the IG ini file");
         OptionSpec<String> rootDir = rootDirBuilder.withOptionalArg().describedAs("Root directory of the IG");
         OptionSpec<String> igPath = igPathBuilder.withRequiredArg().describedAs("Path to the IG, relative to the root directory");
         OptionSpec<String> resourcePath = resourcePathBuilder.withOptionalArg().describedAs("directory of resources");
+        OptionSpec<String> libraryPath = libraryPathBuilder.withOptionalArg().describedAs("directory of library resources");
         OptionSpec<String> igOutputEncoding = igOutputEncodingBuilder.withOptionalArg().describedAs("desired output encoding for resources");
         OptionSpec<String> measureToRefreshPath = measureToRefreshPathBuilder.withOptionalArg().describedAs("Path to Measure to refresh.");
         OptionSpec<String> libraryOutputPath = libraryOutputPathBuilder.withOptionalArg().describedAs("path to the output directory for updated libraries");
         OptionSpec<String> measureOutputPath = measureOutputPathBuilder.withOptionalArg().describedAs("path to the output directory for updated measures");
         OptionSpec<String> shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStampBuilder.withOptionalArg().describedAs("Indicates whether refreshed Measure and Library resources should be stamped with the 'cqf-tooling' stamp via the cqfm-softwaresystem Extension");
         OptionSpec<String> shouldAddTimestampOptions = shouldAddTimestampBuilder.withOptionalArg().describedAs("Indicates whether refreshed Bundle should attach timestamp of creation");
+        OptionSpec<String> shouldVerboseMessagingOptions = shouldVerboseMessaging.withOptionalArg().describedAs("Indicates that a complete list of errors during library, measure, and test case refresh are included upon failure.");
+
 
         //TODO: FHIR user / password (and other auth options)
         OptionSpec<String> fhirUri = fhirUriBuilder.withOptionalArg().describedAs("uri of fhir server");
 
         parser.acceptsAll(asList(OPERATION_OPTIONS),"The operation to run.");
+        parser.acceptsAll(asList(SKIP_PACKAGES_OPTIONS), "Specifies whether to skip packages building.");
         parser.acceptsAll(asList(INCLUDE_ELM_OPTIONS),"If omitted ELM will not be produced or packaged.");
         parser.acceptsAll(asList(INCLUDE_DEPENDENCY_LIBRARY_OPTIONS),"If omitted only the primary CQL library will be packaged.");
         parser.acceptsAll(asList(INCLUDE_TERMINOLOGY_OPTIONS),"If omitted terminology will not be packaged.");
         parser.acceptsAll(asList(INCLUDE_PATIENT_SCENARIOS_OPTIONS),"If omitted patient scenario information will not be packaged.");
         parser.acceptsAll(asList(VERSIONED_OPTIONS),"If omitted resources must be uniquely named.");
+        parser.acceptsAll(asList(SHOULD_INCLUDE_ERRORS),"Specifies whether to show errors during library, measure, and test case refresh.");
 
         OptionSpec<Void> help = parser.acceptsAll(asList(ArgUtils.HELP_OPTIONS), "Show this help page").forHelp();
 
@@ -88,17 +100,27 @@ public class RefreshIGArgumentProcessor {
 
         List<String> resourcePaths = ArgUtils.getOptionValues(options, RESOURCE_PATH_OPTIONS[0]);
 
+        List<String> libraryPaths = ArgUtils.getOptionValues(options, LIBRARY_PATH_OPTIONS[0]);
+        if (libraryPaths != null && libraryPaths.size() > 1) {
+            throw new IllegalArgumentException("Only one library path may be specified"); // Could probably do this with the OptionSpec stuff...
+        }
+        String libraryPath = null;
+        if (libraryPaths != null && libraryPaths.size() == 1) {
+            libraryPath = libraryPaths.get(0);
+        }
+
         //could not easily use the built-in default here because it is based on the value of the igPath argument.
         String igEncoding = (String)options.valueOf(IG_OUTPUT_ENCODING[0]);
         Encoding outputEncodingEnum = Encoding.JSON;
         if (igEncoding != null) {
             outputEncodingEnum = Encoding.parse(igEncoding.toLowerCase());
         }
-        boolean includeELM = options.has(INCLUDE_ELM_OPTIONS[0]);
-        boolean includeDependencies = options.has(INCLUDE_DEPENDENCY_LIBRARY_OPTIONS[0]);
-        boolean includeTerminology = options.has(INCLUDE_TERMINOLOGY_OPTIONS[0]);
-        boolean includePatientScenarios = options.has(INCLUDE_PATIENT_SCENARIOS_OPTIONS[0]);
-        boolean versioned = options.has(VERSIONED_OPTIONS[0]);
+        Boolean skipPackages = options.has(SKIP_PACKAGES_OPTIONS[0]);
+        Boolean includeELM = options.has(INCLUDE_ELM_OPTIONS[0]);
+        Boolean includeDependencies = options.has(INCLUDE_DEPENDENCY_LIBRARY_OPTIONS[0]);
+        Boolean includeTerminology = options.has(INCLUDE_TERMINOLOGY_OPTIONS[0]);
+        Boolean includePatientScenarios = options.has(INCLUDE_PATIENT_SCENARIOS_OPTIONS[0]);
+        Boolean versioned = options.has(VERSIONED_OPTIONS[0]);
         String fhirUri = (String)options.valueOf(FHIR_URI_OPTIONS[0]);
         String measureToRefreshPath = (String)options.valueOf(MEASURE_TO_REFRESH_PATH[0]);
 
@@ -126,9 +148,15 @@ public class RefreshIGArgumentProcessor {
             addBundleTimestamp = true;
         }
 
-        ArrayList<String> paths = new ArrayList<>();
+        Boolean verboseMessaging = options.has(SHOULD_INCLUDE_ERRORS[0]);
+
+        ArrayList<String> paths = new ArrayList<String>();
         if (resourcePaths != null && !resourcePaths.isEmpty()) {
             paths.addAll(resourcePaths);
+        }
+
+        if (libraryPaths != null) {
+            paths.addAll(libraryPaths);
         }
 
         RefreshIGParameters ip = new RefreshIGParameters();
@@ -136,6 +164,7 @@ public class RefreshIGArgumentProcessor {
         ip.rootDir = rootDir;
         ip.igPath = igPath;
         ip.outputEncoding = outputEncodingEnum;
+        ip.skipPackages = skipPackages;
         ip.includeELM = includeELM;
         ip.includeDependencies = includeDependencies;
         ip.includeTerminology = includeTerminology;
@@ -143,12 +172,13 @@ public class RefreshIGArgumentProcessor {
         ip.versioned = versioned;
         ip.shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStamp;
         ip.addBundleTimestamp = addBundleTimestamp;
+        ip.libraryPath = libraryPath;
         ip.resourceDirs = paths;
         ip.fhirUri = fhirUri;
         ip.measureToRefreshPath = measureToRefreshPath;
         ip.libraryOutputPath = libraryOutputPath;
         ip.measureOutputPath = measureOutputPath;
-
+        ip.verboseMessaging = verboseMessaging;
         return ip;
     }
 }

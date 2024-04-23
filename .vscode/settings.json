@@ -1,13 +1,23 @@
 {
     "java.configuration.updateBuildConfiguration": "automatic",
     "cSpell.words": [
+        "acceleratorkit",
+        "ANCM",
+        "ASLP",
         "Careand",
+        "conceptmap",
+        "Cqfm",
+        "cqloptions",
+        "DEPENDSON",
+        "Dstu",
+        "Fhir",
+        "opencds",
         "pagecontent",
         "plandefinition",
+        "qicore",
+        "stripcontent",
         "testng"
     ],
-    "editor.codeActionsOnSave": {
-		"source.organizeImports": true,
-		"editor.formatOnSave": true
-	},
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable"
 }

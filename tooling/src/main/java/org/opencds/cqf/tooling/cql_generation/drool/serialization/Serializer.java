@@ -2,11 +2,11 @@ package org.opencds.cqf.tooling.cql_generation.drool.serialization;
 
 import java.io.StringWriter;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-
 import org.hl7.cql_annotations.r1.Annotation;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 
 /**
  * Serializes Objects to xml
@@ -28,7 +28,7 @@ public class Serializer {
         marshaller.marshal(object, writer);
         return writer.getBuffer().toString().replace("<xml version=\"1.0\"", "<xml version=\"1.1\"").replace("\f", "&#xc;");
     }
-    
+
     public JAXBContext getJaxbContext() {
         JAXBContext jaxbContext;
         try {

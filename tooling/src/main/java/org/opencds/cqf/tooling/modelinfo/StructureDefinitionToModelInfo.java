@@ -1,5 +1,19 @@
 package org.opencds.cqf.tooling.modelinfo;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.file.Paths;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+
 import org.hl7.elm_modelinfo.r1.ClassInfo;
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
@@ -243,7 +257,7 @@ public class StructureDefinitionToModelInfo extends Operation {
             writer.flush();
         }
     }
-    
+
     public static void main(String[] args) {
         Operation op = new StructureDefinitionToModelInfo();
         op.execute(args);

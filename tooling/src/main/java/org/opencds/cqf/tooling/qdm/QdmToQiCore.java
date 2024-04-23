@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.net.HttpURLConnection;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opencds.cqf.tooling.Operation;
@@ -191,12 +192,26 @@ public class QdmToQiCore extends Operation {
 
     private String getPageContent(URL url) throws IOException {
         StringBuilder content = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setInstanceFollowRedirects(true);
+
+        int status = conn.getResponseCode();
+        if (status != HttpURLConnection.HTTP_OK) {
+            if (status == HttpURLConnection.HTTP_MOVED_TEMP || status == HttpURLConnection.HTTP_MOVED_PERM || status == HttpURLConnection.HTTP_SEE_OTHER || status == 307 || status == 308) {
+                String newUrl = conn.getHeaderField("Location");
+                return getPageContent(new URL(newUrl));
+            } else {
+                throw new IOException("Unexpected response code: " + status);
+            }
+        }
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
             String line;
-            while((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 content.append(line).append(System.lineSeparator());
             }
         }
         return content.toString();
     }
+
 }
