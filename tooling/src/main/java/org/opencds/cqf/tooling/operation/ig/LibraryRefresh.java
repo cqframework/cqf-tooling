@@ -3,8 +3,6 @@ package org.opencds.cqf.tooling.operation.ig;
 import ca.uhn.fhir.util.TerserUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.FilenameUtils;
-import org.cqframework.fhir.npm.LibraryLoader;
-import org.cqframework.fhir.npm.NpmPackageManager;
 import org.cqframework.fhir.utilities.exception.IGInitializationException;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
@@ -14,6 +12,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.opencds.cqf.tooling.npm.LibraryLoader;
+import org.opencds.cqf.tooling.npm.NpmPackageManager;
 import org.opencds.cqf.tooling.processor.CqlProcessor;
 import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -34,12 +34,8 @@ public class LibraryRefresh extends Refresh {
 
    public LibraryRefresh(IGInfo igInfo) {
       super(igInfo);
-      try {
-         this.npmPackageManager = new NpmPackageManager(igInfo.getIgResource(), new FilesystemPackageCacheManager(true));
-      } catch (IOException e) {
-         throw new RuntimeException(e);
-      }
-      this.libraryPackages = new ArrayList<>();
+       this.npmPackageManager = new NpmPackageManager(igInfo.getIgResource(), "4.3.0" );
+       this.libraryPackages = new ArrayList<>();
       LibraryLoader libraryLoader = new LibraryLoader(igInfo.getFhirContext().getVersion().getVersion().getFhirVersionString());
       UcumEssenceService ucumService;
       try {

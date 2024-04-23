@@ -21,9 +21,6 @@ import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
 import org.cqframework.cql.elm.tracking.TrackBack;
-import org.cqframework.fhir.npm.ILibraryReader;
-import org.cqframework.fhir.npm.NpmLibrarySourceProvider;
-import org.cqframework.fhir.npm.NpmModelInfoProvider;
 import org.fhir.ucum.UcumService;
 import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -36,6 +33,9 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
+import org.opencds.cqf.tooling.npm.ILibraryReader;
+import org.opencds.cqf.tooling.npm.NpmLibrarySourceProvider;
+import org.opencds.cqf.tooling.npm.NpmModelInfoProvider;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 public class CqlProcessor {

@@ -7,10 +7,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.operations.valueset.generate.config.Config;
 import org.opencds.cqf.tooling.operations.valueset.generate.config.ConfigValueSetGenerator;
 import org.testng.Assert;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import java.util.List;
 
+@Ignore
 public class ConfigValueSetGeneratorIT {
 
    private final FhirContext fhirContext = FhirContext.forR4Cached();

@@ -1,17 +1,5 @@
 package org.opencds.cqf.tooling.modelinfo;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.nio.file.Paths;
-import java.util.Map;
-
-// import javax.xml.bind.JAXBContext;
-// import javax.xml.bind.JAXBElement;
-// import javax.xml.bind.Marshaller;
-import javax.xml.namespace.QName;
-
 import org.hl7.elm_modelinfo.r1.ClassInfo;
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
@@ -32,6 +20,13 @@ import org.slf4j.LoggerFactory;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.file.Paths;
+import java.util.Map;
 
 public class StructureDefinitionToModelInfo extends Operation {
 
