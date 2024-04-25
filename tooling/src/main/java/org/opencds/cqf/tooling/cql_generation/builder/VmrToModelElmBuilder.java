@@ -1,72 +1,22 @@
 package org.opencds.cqf.tooling.cql_generation.builder;
 
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang3.tuple.Pair;
-import org.cqframework.cql.cql2elm.CqlCompilerException;
-import org.cqframework.cql.cql2elm.CqlSemanticException;
-import org.cqframework.cql.cql2elm.DataTypes;
-import org.cqframework.cql.cql2elm.LibraryBuilder;
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
+import org.cqframework.cql.cql2elm.*;
 import org.cqframework.cql.cql2elm.model.QueryContext;
 import org.cqframework.cql.cql2elm.model.invocation.InValueSetInvocation;
-import org.hl7.cql.model.ClassType;
-import org.hl7.cql.model.DataType;
-import org.hl7.cql.model.ListType;
-import org.hl7.cql.model.NamedType;
-import org.hl7.cql.model.TupleType;
-import org.hl7.cql.model.TupleTypeElement;
-import org.hl7.elm.r1.AccessModifier;
-import org.hl7.elm.r1.AggregateClause;
-import org.hl7.elm.r1.AliasRef;
-import org.hl7.elm.r1.AliasedQuerySource;
-import org.hl7.elm.r1.And;
-import org.hl7.elm.r1.AnyInCodeSystem;
-import org.hl7.elm.r1.AnyInValueSet;
-import org.hl7.elm.r1.BinaryExpression;
-import org.hl7.elm.r1.ByDirection;
-import org.hl7.elm.r1.CodeDef;
-import org.hl7.elm.r1.CodeRef;
-import org.hl7.elm.r1.CodeSystemDef;
-import org.hl7.elm.r1.CodeSystemRef;
-import org.hl7.elm.r1.Contains;
-import org.hl7.elm.r1.Element;
-import org.hl7.elm.r1.Exists;
-import org.hl7.elm.r1.Expression;
-import org.hl7.elm.r1.In;
-import org.hl7.elm.r1.InCodeSystem;
-import org.hl7.elm.r1.InValueSet;
-import org.hl7.elm.r1.IncludeDef;
-import org.hl7.elm.r1.LetClause;
-import org.hl7.elm.r1.Not;
-import org.hl7.elm.r1.ObjectFactory;
-import org.hl7.elm.r1.Or;
-import org.hl7.elm.r1.Property;
-import org.hl7.elm.r1.Query;
-import org.hl7.elm.r1.RelationshipClause;
-import org.hl7.elm.r1.Retrieve;
-import org.hl7.elm.r1.ReturnClause;
-import org.hl7.elm.r1.SortByItem;
-import org.hl7.elm.r1.SortClause;
-import org.hl7.elm.r1.ToConcept;
-import org.hl7.elm.r1.ToList;
-import org.hl7.elm.r1.Tuple;
-import org.hl7.elm.r1.TupleElement;
-import org.hl7.elm.r1.ValueSetDef;
-import org.hl7.elm.r1.ValueSetRef;
-import org.hl7.elm.r1.Xor;
+import org.hl7.cql.model.*;
+import org.hl7.elm.r1.*;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
+
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.util.List;
+import java.util.*;
 
 // Some of these methods should probably live in LibraryBuilder... possible all
 /**
@@ -583,6 +533,8 @@ public abstract class VmrToModelElmBuilder {
                     break;
 
                     default:
+                        // ERROR:
+                        // WARNING:
                         libraryBuilder.recordParsingException(new CqlSemanticException(String.format("Unknown code comparator %s in retrieve", codeComparator),
                                 useStrictRetrieveTyping ? CqlCompilerException.ErrorSeverity.Error : CqlCompilerException.ErrorSeverity.Warning));
                 }

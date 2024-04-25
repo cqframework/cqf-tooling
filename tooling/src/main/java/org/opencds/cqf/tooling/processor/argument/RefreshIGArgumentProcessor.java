@@ -16,11 +16,9 @@ import joptsimple.OptionSpecBuilder;
 
 
 public class RefreshIGArgumentProcessor {
-
     public static final String[] OPERATION_OPTIONS = {"RefreshIG"};
-
     public static final String[] INI_OPTIONS = {"ini"};
-    public static final String[] ROOT_DIR_OPTIONS = {"root-dir"};
+    public static final String[] ROOT_DIR_OPTIONS = {"root-dir", "rd"};
     public static final String[] IG_PATH_OPTIONS = {"ip", "ig-path"};
     public static final String[] IG_OUTPUT_ENCODING = {"e", "encoding"};
 
@@ -101,6 +99,7 @@ public class RefreshIGArgumentProcessor {
         String igPath = (String)options.valueOf(IG_PATH_OPTIONS[0]);
 
         List<String> resourcePaths = ArgUtils.getOptionValues(options, RESOURCE_PATH_OPTIONS[0]);
+
         List<String> libraryPaths = ArgUtils.getOptionValues(options, LIBRARY_PATH_OPTIONS[0]);
         if (libraryPaths != null && libraryPaths.size() > 1) {
             throw new IllegalArgumentException("Only one library path may be specified"); // Could probably do this with the OptionSpec stuff...
@@ -135,14 +134,14 @@ public class RefreshIGArgumentProcessor {
             measureOutputPath = "";
         }
 
-        Boolean shouldApplySoftwareSystemStamp = true;
+        boolean shouldApplySoftwareSystemStamp = true;
         String shouldApplySoftwareSystemStampValue = (String)options.valueOf(SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS[0]);
 
         if ((shouldApplySoftwareSystemStampValue != null) && shouldApplySoftwareSystemStampValue.equalsIgnoreCase("false")) {
             shouldApplySoftwareSystemStamp = false;
         }
 
-        Boolean addBundleTimestamp = false;
+        boolean addBundleTimestamp = false;
         String addBundleTimestampValue = (String)options.valueOf(SHOULD_ADD_TIMESTAMP_OPTIONS[0]);
 
         if ((addBundleTimestampValue != null) && addBundleTimestampValue.equalsIgnoreCase("true")) {
@@ -155,6 +154,7 @@ public class RefreshIGArgumentProcessor {
         if (resourcePaths != null && !resourcePaths.isEmpty()) {
             paths.addAll(resourcePaths);
         }
+
         if (libraryPaths != null) {
             paths.addAll(libraryPaths);
         }
@@ -179,7 +179,6 @@ public class RefreshIGArgumentProcessor {
         ip.libraryOutputPath = libraryOutputPath;
         ip.measureOutputPath = measureOutputPath;
         ip.verboseMessaging = verboseMessaging;
-
         return ip;
     }
 }

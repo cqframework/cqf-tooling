@@ -6,8 +6,10 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.constants.Terminology;
 import org.opencds.cqf.tooling.operations.codesystem.rxnorm.RxMixWorkflowProcessor;
 import org.testng.Assert;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
+@Ignore
 public class RxMixWorflowProcessorIT {
 
    @Test

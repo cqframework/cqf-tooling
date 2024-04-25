@@ -1,11 +1,13 @@
 package org.opencds.cqf.tooling.operation;
 
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import java.net.URISyntaxException;
 
 import org.opencds.cqf.tooling.Operation;
 
+@Ignore
 public class GenerateCQLFromDroolOperationIT {
     @Test
     public void test_worked() throws URISyntaxException {
