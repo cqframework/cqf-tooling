@@ -34,7 +34,7 @@ public class LibraryRefresh extends Refresh {
 
    public LibraryRefresh(IGInfo igInfo) {
       super(igInfo);
-       this.npmPackageManager = new NpmPackageManager(igInfo.getIgResource(), "4.3.0" );
+       this.npmPackageManager = new NpmPackageManager(igInfo.getIgResource(), igInfo.getFhirContext().getVersion().getVersion().getFhirVersionString() );
        this.libraryPackages = new ArrayList<>();
       LibraryLoader libraryLoader = new LibraryLoader(igInfo.getFhirContext().getVersion().getVersion().getFhirVersionString());
       UcumEssenceService ucumService;
