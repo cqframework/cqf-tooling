@@ -122,7 +122,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
         this.fhirVersion = sourceIg.getFhirVersion().get(0).getCode();
         packageId = sourceIg.getPackageId();
         canonicalBase = determineCanonical(sourceIg.getUrl());
-        packageManager = new NpmPackageManager(sourceIg, "4.3.0");
+        packageManager = new NpmPackageManager(sourceIg, this.fhirVersion);
 
         // Setup binary paths (cql source directories)
         binaryPaths = IGUtils.extractBinaryPaths(rootDir, sourceIg);
