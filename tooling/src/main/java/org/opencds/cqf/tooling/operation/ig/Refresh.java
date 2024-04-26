@@ -37,7 +37,6 @@ public abstract class Refresh {
 
     public void refreshVersion(IBaseResource resource, RefreshIGParameters params) {
         if (params != null && params.updatedVersion != null && !params.updatedVersion.isEmpty()) {
-            logger.info("Updating version: " + params.updatedVersion);
             TerserUtil.clearField(getIgInfo().getFhirContext(), "version", resource);
             TerserUtil.setField(getIgInfo().getFhirContext(), "version", resource,
                     ResourceAndTypeConverter.convertType(getFhirContext(), new StringType(params.updatedVersion)));

@@ -72,11 +72,11 @@ public class LibraryRefresh extends Refresh {
                   //  experimental, type, publisher, contact, description, useContext, jurisdiction,
                   //  and profile(s) (http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-shareablelibrary)
                   refreshDate(library);
-                  refreshVersion(library, params);
                   refreshContent(library, info);
                   refreshDataRequirements(library, info);
                   refreshRelatedArtifacts(library, info);
                   refreshParameters(library, info);
+                  refreshVersion(library, params);
                   refreshedLibraries.add(library);
                   this.libraryPackages.add(new LibraryPackage(library, getFhirContext(), info));
                }
