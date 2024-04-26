@@ -7,6 +7,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.*;
+import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
 import org.opencds.cqf.tooling.utilities.constants.CqfmConstants;
 import org.opencds.cqf.tooling.utilities.converters.ResourceAndTypeConverter;
@@ -32,6 +33,14 @@ public abstract class Refresh {
       TerserUtil.setField(getIgInfo().getFhirContext(), "date", resource,
               ResourceAndTypeConverter.convertType(getFhirContext(), new DateTimeType(new Date())));
    }
+
+    public void refreshVersion(IBaseResource resource, RefreshIGParameters params) {
+        if (params != null && params.updatedVersion != null && !params.updatedVersion.isEmpty()) {
+            logger.info("Updating version: " + params.updatedVersion);
+            TerserUtil.setField(getIgInfo().getFhirContext(), "version", resource,
+                    ResourceAndTypeConverter.convertType(getFhirContext(), new StringType(params.updatedVersion)));
+        }
+    }
 
    public void validatePrimaryLibraryReference(IBaseResource resource) {
       if ((resource instanceof PlanDefinition && !((PlanDefinition) resource).hasLibrary())

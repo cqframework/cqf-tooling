@@ -23,7 +23,7 @@ public class NewRefreshIGOperation extends Operation {
          this.params = new RefreshIGArgumentProcessor().parseAndConvert(args);
          IGInfo info = new IGInfo(null, params);
          LibraryRefresh libraryRefresh = new LibraryRefresh(info);
-         publishLibraries(info, libraryRefresh.refresh());
+          publishLibraries(info, libraryRefresh.refresh(this.params));
          PlanDefinitionRefresh planDefinitionRefresh = new PlanDefinitionRefresh(info, libraryRefresh.getCqlProcessor(), libraryRefresh.getLibraryPackages());
          publishPlanDefinitions(info, planDefinitionRefresh.refresh());
          if (!planDefinitionRefresh.getPlanDefinitionPackages().isEmpty()) {
