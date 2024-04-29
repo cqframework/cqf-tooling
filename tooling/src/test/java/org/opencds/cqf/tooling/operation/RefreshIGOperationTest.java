@@ -61,7 +61,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 			"MBODAInitialExpressions.json", "USCoreCommon.json", "USCoreElements.json", "USCoreTests.json"
 	};
 
-	private static final String NEW_REFRESH_IG_LIBRARY_FOLDER_PATH = "target/NewRefreshIG/input/resources/library";
+	private static final String NEW_REFRESH_IG_LIBRARY_FOLDER_PATH = "src/test/resources/NewRefreshIG/input/resources/library";
 
 
 	// Store the original standard out before changing it.

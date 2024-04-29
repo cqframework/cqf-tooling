@@ -1,1 +1,0 @@
-This is the repository of vocabulary used by the evaluator. ValueSet resources can be in this folder, or any sub-folder, recursively. Resources can be in individual files in JSON or XML format, as well as in bundle files in either format.
