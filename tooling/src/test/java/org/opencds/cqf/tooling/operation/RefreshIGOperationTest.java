@@ -93,8 +93,8 @@ public class RefreshIGOperationTest extends RefreshTest {
 		NewRefreshIGOperation newRefreshIGOperation = new NewRefreshIGOperation();
 		String[] args = new String[] {
 				"-NewRefreshIG",
-				"-ini=" + "target" + separator + "NewRefreshIG" + separator + "ig.ini",
-				"-rd=" + "target" + separator + "NewRefreshIG",
+				"-ini=" + "src/test/resources/NewRefreshIG/ig.ini",
+				"-rd=" + "src/test/resources/NewRefreshIG",
 				"-uv=" + "1.0.1",
 				"-d",
 				"-p",
