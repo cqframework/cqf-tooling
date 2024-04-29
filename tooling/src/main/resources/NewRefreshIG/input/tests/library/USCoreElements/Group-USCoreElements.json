@@ -1,0 +1,17 @@
+{
+  "resourceType": "Group",
+  "id": "USCoreElements",
+  "extension": [ {
+    "url": "http://hl7.org/fhir/StructureDefinition/artifact-testArtifact",
+    "valueCanonical": "http://ecqi.healthit.gov/ecqms/Measure/USCoreElements"
+  } ],
+  "active": true,
+  "type": "person",
+  "actual": true,
+  "member": [ {
+    "entity": {
+      "reference": "Patient/example",
+      "display": "Peter James Chalmers"
+    }
+  } ]
+}

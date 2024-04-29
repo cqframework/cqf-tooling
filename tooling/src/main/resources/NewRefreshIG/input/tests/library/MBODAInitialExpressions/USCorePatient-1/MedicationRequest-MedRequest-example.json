@@ -1,0 +1,33 @@
+{
+  "resourceType": "MedicationRequest",
+  "id": "MedRequest-example",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest"
+    ]
+  },
+  "status": "active",
+  "intent": "order",
+  "medicationCodeableConcept": {
+    "coding": [
+      {
+        "code": "582620",
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "display": "Nizatidine 15 MG/ML Oral Solution [Axid]"
+      }
+    ],
+    "text": "Nizatidine 15 MG/ML Oral Solution [Axid]"
+  },
+  "subject": {
+    "reference": "Patient/USCorePatient-1"
+  },
+  "authoredOn": "2015-03-25T19:32:52-05:00",
+  "requester": {
+    "reference": "Practitioner/order-provider-USCorePatient-1"
+  },
+  "dosageInstruction": [
+    {
+      "text": "bid"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+Executing CQL...
+CQL path: /Users/work/Documents/GitHub/cqf-us/input/cql
+Data path: /Users/work/Documents/GitHub/cqf-us/input/tests/library/GMTPInitialExpressions
+Terminology path: /Users/work/Documents/GitHub/cqf-us/input/vocabulary/valueset
+Patient=Patient(id=USCorePatient-GMTP-1)
+Humana ID=member-id-from-identifier-slice-USCorePatient-GMTP-1
+Patient Name=Smith
+Date of Birth=1990-05-15
+Phone Number=+1 (555) 1234567
+All ServiceRequests=[ServiceRequest(id=service-request-2-USCorePatient-GMTP-1), ServiceRequest(id=service-request-USCorePatient-GMTP-1)]
+Most Recent ServiceRequest=ServiceRequest(id=service-request-USCorePatient-GMTP-1)
+Requesting Provider Practitioner=[Practitioner(id=requesting-provider-USCorePatient-GMTP-1)]
+Requesting Provider=[Practitioner(id=requesting-provider-USCorePatient-GMTP-1)]
+Requesting Provider Name=[Smart]
+Requesting Provider Phone=345-416-5672
+Requesting Provider NPI=[1144221867]
+Requesting Provider Fax=[345-416-5672]
+Servicing Provider=Organization(id=servicing-provider-GMTP-1)
+Servicing Provider Name=Healthcare Clinic
+Servicing Provider Phone=+1 (987) 6543210
+Servicing Provider NPI=[1564221867]
+Servicing Provider Fax=[+1 (987) 6543210]
+Test Coverage=[Coverage(id=coverage-GMTP-1)]
+Billing Provider=Organization(id=billing-provider-GMTP-1)
+Billing Provider Name=Oak Street Billing Provider
+Billing Provider Phone=+1 (123) 4567890
+Billing Provider NPI=[1144221849]
+Billing Provider Fax=[+1 (123) 4567890]
+Date of Service=2023-12-15T19:32:52
+Requested Test=CodeableConcept
+Test ID=[405825005, Z13.89, 81479]
+Test name=[Molecular genetic test (procedure), Encounter for screening for other disorder, Unlisted molecular pathology procedure]
+Test ICD Codes=[Coding]
+Test CPT Codes=[Coding]
+ALL ICD and CPT Test Codes=[Coding, Coding]
+Test Related Condition=[Condition(id=related-Condition-GMTP-1)]
+Diagnosis Descriptions=[Type 2 diabetes mellitus with other diabetic arthropathy]
+Billing Provider different from Servicing Provider=Yes
+Research Subject=[ResearchSubject(id=research-subject-GMTP-1)]
+Clinical Trial=[ResearchStudy(id=research-study-GMTP-1)]
+Clinical Trial Organization=Organization(id=billing-provider-GMTP-1)
+BillingProvider is Clinical Trial Organisation=true
+Is Research Subject=true
+Part of clinical trial=Yes
+All clinical Trials=[ResearchStudy(id=research-study-GMTP-1)]
+Clinical Trial ID=[NCT02326129]
+Previous genetic testing for condition=[service-request-2-USCorePatient-GMTP-1]
+
+
+Evaluation logs:
+14:31:49.317 [pool-2-thread-1] INFO  ca.uhn.fhir.context.FhirContext - Creating new FHIR context for FHIR version [R4]
+elapsed: 1.767 seconds
+

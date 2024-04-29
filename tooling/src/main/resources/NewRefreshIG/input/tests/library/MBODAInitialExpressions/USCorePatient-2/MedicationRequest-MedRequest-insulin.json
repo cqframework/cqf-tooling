@@ -1,0 +1,28 @@
+{
+  "resourceType": "MedicationRequest",
+  "id": "MedRequest-insulin",
+  "status": "active",
+  "intent": "order",
+  "medicationCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "92880",
+        "display": "Humulin N"
+      }
+    ],
+    "text": "Humulin N"
+  },
+  "subject": {
+    "reference": "Patient/USCorePatient-1"
+  },
+  "authoredOn": "2015-03-25T19:32:52-05:00",
+  "requester": {
+    "reference": "Practitioner/order-provider-USCorePatient-2"
+  },
+  "dosageInstruction": [
+    {
+      "text": "qhs"
+    }
+  ]
+}

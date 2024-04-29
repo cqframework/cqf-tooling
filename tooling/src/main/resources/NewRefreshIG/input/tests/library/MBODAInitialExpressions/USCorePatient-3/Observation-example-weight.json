@@ -1,0 +1,29 @@
+{
+  "resourceType": "Observation",
+  "id": "example-weight",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/bodyweight"
+    ]
+  },
+  "valueQuantity": {
+    "value": 180.3,
+    "code": "lb",
+    "system": "http://unitsofmeasure.org",
+    "unit": "lb"
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "29463-7",
+        "system": "http://loinc.org",
+        "display": "Body Weight"
+      }
+    ]
+  },
+  "status": "final",
+  "subject": {
+    "reference": "Patient/USCorePatient-3"
+  },
+  "effectiveDateTime": "2023-02-28T00:00:00-00:00"
+}

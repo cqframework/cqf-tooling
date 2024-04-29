@@ -1,0 +1,47 @@
+{
+  "resourceType": "Group",
+  "id": "MBODAInitialExpressions",
+  "extension": [ {
+    "url": "http://hl7.org/fhir/StructureDefinition/artifact-testArtifact",
+    "valueCanonical": "http://ecqi.healthit.gov/ecqms/Measure/MBODAInitialExpressions"
+  } ],
+  "active": true,
+  "type": "person",
+  "actual": true,
+  "member": [ {
+    "entity": {
+      "reference": "Patient/example-continued-therapy",
+      "display": "Peter James Chalmers"
+    }
+  }, {
+    "entity": {
+      "reference": "Patient/example",
+      "display": "Peter James Chalmers"
+    }
+  }, {
+    "entity": {
+      "reference": "Patient/USCorePatient-2",
+      "display": "Jennifer Elizabeth"
+    }
+  }, {
+    "entity": {
+      "reference": "Patient/USCorePatient-4",
+      "display": "Bénédicte du Marché"
+    }
+  }, {
+    "entity": {
+      "reference": "Patient/USCorePatient-3",
+      "display": "Jim Chalmers"
+    }
+  }, {
+    "entity": {
+      "reference": "Patient/USCorePatient-1",
+      "display": "Peter James Chalmers"
+    }
+  }, {
+    "entity": {
+      "reference": "Patient/example-new-therapy",
+      "display": "Peter James Chalmers"
+    }
+  } ]
+}

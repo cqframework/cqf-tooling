@@ -1,0 +1,19 @@
+{
+  "resourceType": "Medication",
+  "id": "uscore-med1",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medication"
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "206765",
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "display": "Lisinopril 10 MG Oral Tablet [Prinivil]"
+      }
+    ],
+    "text": "lisinopril oral 10 mg"
+  }
+}

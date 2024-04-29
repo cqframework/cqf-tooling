@@ -1,0 +1,29 @@
+{
+  "resourceType": "Observation",
+  "id": "example-height",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/bodyheight"
+    ]
+  },
+  "valueQuantity": {
+    "value": 69.4,
+    "code": "in",
+    "system": "http://unitsofmeasure.org",
+    "unit": "in"
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "8302-2",
+        "system": "http://loinc.org",
+        "display": "Body height"
+      }
+    ]
+  },
+  "status": "final",
+  "subject": {
+    "reference": "Patient/USCorePatient-4"
+  },
+  "effectiveDateTime": "2023-02-28T00:00:00-00:00"
+}

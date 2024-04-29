@@ -1,0 +1,29 @@
+{
+  "resourceType": "Observation",
+  "id": "example-height",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/bodyheight"
+    ]
+  },
+  "valueQuantity": {
+    "value": 175.4,
+    "code": "cm",
+    "system": "http://unitsofmeasure.org",
+    "unit": "cm"
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "8302-2",
+        "system": "http://loinc.org",
+        "display": "Body height"
+      }
+    ]
+  },
+  "status": "final",
+  "subject": {
+    "reference": "Patient/USCorePatient-1"
+  },
+  "effectiveDateTime": "2023-02-23T00:00:00-00:00"
+}

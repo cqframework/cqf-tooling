@@ -1,0 +1,28 @@
+{
+  "resourceType": "MedicationRequest",
+  "id": "MedRequest-insulin",
+  "status": "active",
+  "intent": "order",
+  "medicationCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "647241",
+        "display": "metformin Extended Release Oral Tablet [Glumetza]"
+      }
+    ],
+    "text": "metformin Extended Release Oral Tablet [Glumetza]"
+  },
+  "subject": {
+    "reference": "Patient/USCorePatient-3"
+  },
+  "authoredOn": "2016-03-25T19:32:52-05:00",
+  "requester": {
+    "reference": "Practitioner/order-provider-USCorePatient-3"
+  },
+  "dosageInstruction": [
+    {
+      "text": "qhs"
+    }
+  ]
+}

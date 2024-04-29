@@ -1,0 +1,922 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "MBODAQuestionnaire",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
+      "valueCanonical": "http://fhir.org/guides/cqf/us/common/Library/MBODAInitialExpressions"
+    }
+  ],
+  "url": "http://fhir.org/guides/cqf/us/common/Questionnaire/MBODAQuestionnaire",
+  "version": "0.1.0",
+  "name": "MBODAQuestionnaire",
+  "title": "Medical Benefit Outpatient Drug Authorization Form",
+  "status": "active",
+  "experimental": true,
+  "date": "2023-08-14T00:00:00+00:00",
+  "publisher": "Smile Digital Health",
+  "description": "Drugs administered by healthcare professionals in an outpatient setting are covered under the Medical Benefit. Information on drugs requiring prior authorization can be found on NaviNet.net or the For Providers section of the Geisinger Health Plan website.",
+  "item": [
+    {
+      "linkId": "patient-info",
+      "text": "Patient Information",
+      "type": "group",
+      "item": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Patient Name"
+              }
+            }
+          ],
+          "linkId": "patient-info|name",
+          "text": "Patient name",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Date of Birth"
+              }
+            }
+          ],
+          "linkId": "patient-info|dob",
+          "text": "DOB",
+          "type": "date"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Birth Sex"
+              }
+            }
+          ],
+          "linkId": "patient-info|gender",
+          "text": "Sex",
+          "type": "choice",
+          "answerValueSet": "http://hl7.org/fhir/us/core/ValueSet/birthsex"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Member ID"
+              }
+            }
+          ],
+          "linkId": "patient-info|member-id",
+          "text": "Member ID #",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Medical Record Number"
+              }
+            }
+          ],
+          "linkId": "patient-info|medical-record-number",
+          "text": "Medical record #",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Phone Number"
+              }
+            }
+          ],
+          "linkId": "patient-info|phone-number",
+          "text": "Member phone #",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Address"
+              }
+            }
+          ],
+          "linkId": "patient-info|address",
+          "text": "Address",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "City"
+              }
+            }
+          ],
+          "linkId": "patient-info|city",
+          "text": "City",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "State"
+              }
+            }
+          ],
+          "linkId": "patient-info|state",
+          "text": "State",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Zip"
+              }
+            }
+          ],
+          "linkId": "patient-info|zip-code",
+          "text": "Zip",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Allergies"
+              }
+            }
+          ],
+          "linkId": "patient-info|drug-allergies",
+          "text": "Drug allergies",
+          "type": "open-choice",
+          "repeats": true
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Height in [in_i]"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "[in_i]",
+                "display": "in"
+              }
+            }
+          ],
+          "linkId": "patient-info|height",
+          "text": "Height",
+          "type": "decimal"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Weight in [lb_av]"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "[lb_av]",
+                "display": "lbs"
+              }
+            }
+          ],
+          "linkId": "patient-info|weight",
+          "text": "Weight",
+          "type": "decimal"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "BSA in m2"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unit",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "[m2]",
+                "display": "m2"
+              }
+            }
+          ],
+          "linkId": "patient-info|bsa",
+          "text": "BSA",
+          "type": "decimal"
+        }
+      ]
+    },
+    {
+      "linkId": "provider-info",
+      "text": "Ordering Provider Information",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "provider-info|name",
+          "text": "Ordering provider name",
+          "type": "string"
+        },
+        {
+          "linkId": "provider-info|npi",
+          "text": "Ordering provider NPI #",
+          "type": "string"
+        },
+        {
+          "linkId": "provider-info|address",
+          "text": "Ordering provider address",
+          "type": "string"
+        },
+        {
+          "linkId": "provider-info|city",
+          "text": "City",
+          "type": "string"
+        },
+        {
+          "linkId": "provider-info|state",
+          "text": "State",
+          "type": "string"
+        },
+        {
+          "linkId": "provider-info|zip-code",
+          "text": "Zip",
+          "type": "string"
+        },
+        {
+          "linkId": "person-submitting-request",
+          "text": "Person submitting request",
+          "type": "group",
+          "item": [
+            {
+              "linkId": "person-submitting-request|name",
+              "text": "Name",
+              "type": "string"
+            },
+            {
+              "linkId": "person-submitting-request|phone-number",
+              "text": "Phone",
+              "type": "string"
+            },
+            {
+              "linkId": "person-submitting-request|fax",
+              "text": "Fax",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "linkId": "office-contact",
+          "text": "Office contact",
+          "type": "group",
+          "item": [
+            {
+              "linkId": "office-contact|name",
+              "text": "Name",
+              "type": "string"
+            },
+            {
+              "linkId": "office-contact|phone-number",
+              "text": "Phone",
+              "type": "string"
+            },
+            {
+              "linkId": "office-contact|fax",
+              "text": "Fax",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "servicing-provider-facility-info",
+      "text": "Servicing Provider/Facility Information",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "servicing-provider-facility-info|drug-admin",
+          "text": "Who is administering the drug?",
+          "type": "choice",
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "OrderingProvider",
+                "display": "Ordering Provider"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "ServicingProvider",
+                "display": "Servicing Provider"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "HomeHealthAgency",
+                "display": "Home Health Agency - if yes, name of agency"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "select-one",
+          "text": "Please select if the medication will be dispensed or administered",
+          "type": "choice",
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "AdministeredFromProviderStock",
+                "display": "Medication will be administered from provider stock and billed by provider (buy & bill)"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "DispensedByPharmacy",
+                "display": "Medication will be dispensed by a specialty pharmacy and billed by the pharmacy"
+              }
+            }
+          ],
+          "item": [
+            {
+              "linkId": "if-buy-bill",
+              "text": "If buy & bill, who will be billing for the drug?",
+              "type": "choice",
+              "enableWhen": [
+                {
+                  "question": "select-one",
+                  "operator": "=",
+                  "answerCoding": {
+                    "code": "AdministeredFromProviderStock"
+                  }
+                }
+              ],
+              "answerOption": [
+                {
+                  "valueCoding": {
+                    "code": "OrderingProvider",
+                    "display": "Ordering Provider"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "ServicingProvider",
+                    "display": "Servicing Provider"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "Facility",
+                    "display": "Facility"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "provider-participating-ghp",
+              "text": "Is the billing provider participating with GHP?",
+              "type": "choice",
+              "enableWhen": [
+                {
+                  "question": "select-one",
+                  "operator": "=",
+                  "answerCoding": {
+                    "code": "AdministeredFromProviderStock"
+                  }
+                }
+              ],
+              "answerOption": [
+                {
+                  "valueCoding": {
+                    "code": "Y",
+                    "display": "Yes"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "N",
+                    "display": "No"
+                  }
+                }
+              ],
+              "item": [
+                {
+                  "linkId": "no-ghp",
+                  "text": "If No, is this a request for out-of-network services?",
+                  "type": "choice",
+                  "enableWhen": [
+                    {
+                      "question": "provider-participating-ghp",
+                      "operator": "=",
+                      "answerCoding": {
+                        "code": "N"
+                      }
+                    }
+                  ],
+                  "answerOption": [
+                    {
+                      "valueCoding": {
+                        "code": "Y",
+                        "display": "Yes"
+                      }
+                    },
+                    {
+                      "valueCoding": {
+                        "code": "N",
+                        "display": "No"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "servicing-provider",
+      "text": "Servicing provider",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "servicing-provider|name",
+          "text": "Provider name",
+          "type": "string"
+        },
+        {
+          "linkId": "servicing-provider|npi",
+          "text": "NPI #",
+          "type": "string"
+        },
+        {
+          "linkId": "servicing-provider|address",
+          "text": "Address",
+          "type": "string"
+        },
+        {
+          "linkId": "servicing-provider|phone-number",
+          "text": "Phone",
+          "type": "string"
+        },
+        {
+          "linkId": "servicing-provider|fax",
+          "text": "Fax",
+          "type": "string"
+        },
+        {
+          "linkId": "servicing-provider|office-contact",
+          "text": "Office contact",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "linkId": "facility-of-service",
+      "text": "Facility/location of service",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "facility-of-service|name",
+          "text": "Facility/location name",
+          "type": "string"
+        },
+        {
+          "linkId": "facility-of-service|npi",
+          "text": "NPI #",
+          "type": "string"
+        },
+        {
+          "linkId": "facility-of-service|address",
+          "text": "Address",
+          "type": "string"
+        },
+        {
+          "linkId": "facility-of-service|phone-number",
+          "text": "Phone",
+          "type": "string"
+        },
+        {
+          "linkId": "facility-of-service|fax",
+          "text": "Fax",
+          "type": "string"
+        },
+        {
+          "linkId": "facility-of-service|office-contact",
+          "text": "Facility contact",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "linkId": "specialty-vendor",
+      "text": "Specialty vendor (if applicable)",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "specialty-vendor|name",
+          "text": "Specialty pharmacy name",
+          "type": "string"
+        },
+        {
+          "linkId": "specialty-vendor|npi",
+          "text": "NPI #",
+          "type": "string"
+        },
+        {
+          "linkId": "specialty-vendor|address",
+          "text": "Address",
+          "type": "string"
+        },
+        {
+          "linkId": "specialty-vendor|phone-number",
+          "text": "Phone",
+          "type": "string"
+        },
+        {
+          "linkId": "specialty-vendor|fax",
+          "text": "Fax",
+          "type": "string"
+        },
+        {
+          "linkId": "specialty-vendor|office-contact",
+          "text": "Pharmacy contact",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "linkId": "diagnosis-info",
+      "text": "Diagnosis Information",
+      "type": "group",
+      "item": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Diagnosis Codes"
+              }
+            }
+          ],
+          "linkId": "diagnosis-info|diagnosis-code",
+          "text": "Diagnosis/ICD-10 code(s)",
+          "type": "open-choice",
+          "repeats": true
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Diagnosis Descriptions"
+              }
+            }
+          ],
+          "linkId": "diagnosis-info|diagnosis-description",
+          "text": "Diagnosis description",
+          "type": "string",
+          "repeats": true
+        }
+      ]
+    },
+    {
+      "linkId": "medication-info",
+      "text": "Medication Information",
+      "type": "group",
+      "item": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Medication Name"
+              }
+            }
+          ],
+          "linkId": "medication-info|name",
+          "text": "Medication name",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "ug",
+                "display": "mcg"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "mg",
+                "display": "mg"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "g",
+                "display": "g"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "ml",
+                "display": "ml"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Medication Dose"
+              }
+            }
+          ],
+          "linkId": "medication-info|dose",
+          "text": "Dose",
+          "type": "quantity"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Medication Route"
+              }
+            }
+          ],
+          "linkId": "medication-info|route",
+          "text": "Route",
+          "type": "open-choice",
+          "repeats": true
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "hour",
+                "display": "Per Hour"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "day",
+                "display": "Per Day"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "week",
+                "display": "Per Week"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "month",
+                "display": "Per Month"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Medication Frequency"
+              }
+            }
+          ],
+          "linkId": "medication-info|frequency",
+          "text": "Frequency",
+          "type": "quantity"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "hour",
+                "display": "Hour(s)"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "day",
+                "display": "Day(s)"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "week",
+                "display": "Week(s)"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "month",
+                "display": "Month(s)"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption",
+              "valueCoding": {
+                "system": "http://unitsofmeasure.org",
+                "code": "year",
+                "display": "Year(s)"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Expected Therapy Length"
+              }
+            }
+          ],
+          "linkId": "medication-info|therapy-leng",
+          "text": "Expected length of therapy",
+          "type": "quantity"
+        },
+        {
+          "linkId": "medication-info|num-visits",
+          "text": "Quantity/number of requested visits",
+          "type": "integer"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Anticipated/actual date of service"
+              }
+            }
+          ],
+          "linkId": "medication-info|service-date",
+          "text": "Anticipated/actual date of service",
+          "type": "date"
+        },
+        {
+          "linkId": "medication-info|new-med",
+          "text": "New Medication or Continued Therapy",
+          "type": "choice",
+          "answerOption": [
+            {
+              "valueCoding": {
+                "code": "NewMedication",
+                "display": "New Medication"
+              }
+            },
+            {
+              "valueCoding": {
+                "code": "ContinuedTherapy",
+                "display": "Continuation of therapy"
+              }
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Initial date of therapy"
+              }
+            }
+          ],
+          "linkId": "medication-info|date-initiallized",
+          "text": "Date therapy initially started",
+          "type": "date",
+          "enableWhen": [
+            {
+              "question": "medication-info|new-med",
+              "operator": "=",
+              "answerCoding": {
+                "code": "ContinuedTherapy"
+              }
+            }
+          ]
+        },
+        {
+          "linkId": "medication-info|requested-drug-code",
+          "text": "HCPCS/CPT code/J code/NDC code of requested drug",
+          "type": "string"
+        },
+        {
+          "linkId": "medication-info|associated-procedure",
+          "text": "Associated procedure codes requiring prior auth",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "linkId": "request-for-expedited-review",
+      "text": "Request for Expedited Review",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "request-for-expedited-review|para",
+          "text": "When a request needs to be reviewed in an expedited manner because the standard review time frame may SERIOUSLY JEOPARDIZE THE LIFE OR HEALTH OF THE MEMBER OR THE MEMBER’S ABILITY TO REGAIN MAXIMUM FUNCTION, note this below by checking URGENT in the space provided, along with the reason the request is urgent. Requests will not be processed as urgent unless a rationale for urgency is provided.",
+          "type": "group",
+          "item": [
+            {
+              "linkId": "request-for-expedited-review|rationale",
+              "text": "URGENT - rationale",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "ordering-provider-signature",
+      "text": "Ordering Provider Signature",
+      "type": "group",
+      "item": [
+        {
+          "linkId": "ordering-provider-signature|author-signature",
+          "text": "Signature:",
+          "type": "attachment",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-signatureRequired",
+              "valueCoding": {
+                "system": "urn:iso-astm:E1762-95:2013",
+                "code": "1.2.840.10065.1.12.1.1",
+                "display": "Author's Signature"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-usageMode",
+              "valueCode": "capture"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

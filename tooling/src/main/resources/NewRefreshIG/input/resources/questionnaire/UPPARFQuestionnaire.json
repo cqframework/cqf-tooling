@@ -1,0 +1,627 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "UPPARFQuestionnaire",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
+      "valueCanonical": "http://fhir.org/guides/cqf/us/common/Library/UPPARFInitialExpressions"
+    }
+  ],
+  "url": "http://fhir.org/guides/cqf/us/common/Questionnaire/UPPARFQuestionnaire",
+  "version": "0.1.0",
+  "name": "UPPARFQuestionnaire",
+  "title": "Humana Uniform Pharmacy Prior Authorization Request Form",
+  "status": "active",
+  "experimental": true,
+  "date": "2023-10-19T00:00:00+00:00",
+  "publisher": "Smile Digital Health",
+  "description": "Humana Uniform Pharmacy Prior Authorization Request Form",
+  "item": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+          "valueExpression": {
+            "language": "text/cql-identifier",
+            "expression": "Urgency"
+          }
+        }
+      ],
+      "linkId": "urgency",
+      "text": "Urgency",
+      "type": "choice",
+      "answerOption": [
+        {
+          "valueCoding": {
+            "code": "urgent",
+            "display": "Urgent"
+          }
+        },
+        {
+          "valueCoding": {
+            "code": "routine",
+            "display": "Non-Urgent"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "drug-info",
+      "text": "Drug Information",
+      "type": "group",
+      "item": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Most Recent Medication Name"
+              }
+            }
+          ],
+          "linkId": "drug-info|drug-name",
+          "text": "Requested Drug Name",
+          "type": "string"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "expression": "Is Opioid Treatment"
+              }
+            }
+          ],
+          "linkId": "drug-info|drug-intention-opioid",
+          "text": "Is this drug intended to treat opioid dependence?",
+          "type": "boolean",
+          "item": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Is First Prior Authentication"
+                  }
+                }
+              ],
+              "linkId": "drug-info|drug-intention-opioid|first-prior-authentication",
+              "text": "Is this a first request for prior authorization for this drug?",
+              "type": "boolean",
+              "enableWhen": [
+                {
+                  "question": "drug-info|drug-intention-opioid",
+                  "operator": "=",
+                  "answerBoolean": true
+                }
+              ]
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Initial Request Date"
+                  }
+                }
+              ],
+              "linkId": "drug-info|drug-intention-opioid|date-first-request",
+              "text": "What was the date of the first request?",
+              "type": "date",
+              "enableWhen": [
+                {
+                  "question": "drug-info|drug-intention-opioid|first-prior-authentication",
+                  "operator": "=",
+                  "answerBoolean": false
+                }
+              ]
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Is First Request > 12 Months"
+                  }
+                }
+              ],
+              "linkId": "drug-info|drug-intention-opioid|twelve-months-since-request",
+              "text": "Has the date of the first request been greater than twelve months ago?",
+              "type": "boolean",
+              "enableWhen": [
+                {
+                  "question": "drug-info|drug-intention-opioid|first-prior-authentication",
+                  "operator": "=",
+                  "answerBoolean": false
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "completing-form",
+      "text": "Prior authentication is required and this form needs to be completed",
+      "type": "group",
+      "enableBehavior": "any",
+      "enableWhen": [
+        {
+          "question": "drug-info|drug-intention-opioid",
+          "operator": "=",
+          "answerBoolean": false
+        },
+        {
+          "question": "drug-info|drug-intention-opioid|twelve-months-since-request",
+          "operator": "=",
+          "answerBoolean": false
+        }
+      ],
+      "item": [
+        {
+          "linkId": "completing-form|patient-info",
+          "text": "Patient Info",
+          "type": "group",
+          "item": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Patient Name"
+                  }
+                }
+              ],
+              "linkId": "completing-form|patient-info|patient-name",
+              "text": "Patient Name",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Member ID"
+                  }
+                }
+              ],
+              "linkId": "completing-form|patient-info|member-number",
+              "text": "Member/Subscriber Number",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Policy Number"
+                  }
+                }
+              ],
+              "linkId": "completing-form|patient-info|policy-number",
+              "text": "Policy/Group Number",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Date of Birth"
+                  }
+                }
+              ],
+              "linkId": "completing-form|patient-info|dob",
+              "text": "Patient Date of Birth",
+              "type": "date"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Address"
+                  }
+                }
+              ],
+              "linkId": "completing-form|patient-info|address",
+              "text": "Patient Address",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Phone Number"
+                  }
+                }
+              ],
+              "linkId": "completing-form|patient-info|phone",
+              "text": "Patient Phone",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Email Address"
+                  }
+                }
+              ],
+              "linkId": "completing-form|patient-info|email",
+              "text": "Patient Email Address",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Prescription Date"
+                  }
+                }
+              ],
+              "linkId": "completing-form|patient-info|prescription-date",
+              "text": "Prescription Date",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "linkId": "completing-form|prescriber-info",
+          "text": "Prescriber Info",
+          "type": "group",
+          "item": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Prescriber Name"
+                  }
+                }
+              ],
+              "linkId": "completing-form|prescriber-info|prescriber-name",
+              "text": "Prescriber Name",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Prescriber Fax"
+                  }
+                }
+              ],
+              "linkId": "completing-form|prescriber-info|prescriber-fax",
+              "text": "Prescriber Fax",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Prescriber Phone"
+                  }
+                }
+              ],
+              "linkId": "completing-form|prescriber-info|prescriber-phone",
+              "text": "Prescriber Phone",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Prescriber Pager"
+                  }
+                }
+              ],
+              "linkId": "completing-form|prescriber-info|prescriber-pager",
+              "text": "Prescriber Pager",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Prescriber Address"
+                  }
+                }
+              ],
+              "linkId": "completing-form|prescriber-info|prescriber-address",
+              "text": "Prescriber Address",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Prescriber Contact"
+                  }
+                }
+              ],
+              "linkId": "completing-form|prescriber-info|prescriber-contact",
+              "text": "Prescriber Office Contact",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Prescriber NPI"
+                  }
+                }
+              ],
+              "linkId": "completing-form|prescriber-info|prescriber-npi",
+              "text": "Prescriber NPI",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Prescriber DEA"
+                  }
+                }
+              ],
+              "linkId": "completing-form|prescriber-info|prescriber-dea",
+              "text": "Prescriber DEA",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Prescriber Tax ID"
+                  }
+                }
+              ],
+              "linkId": "completing-form|prescriber-info|prescriber-tax-id",
+              "text": "Prescriber Tax ID",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Prescriber Specialty"
+                  }
+                }
+              ],
+              "linkId": "completing-form|prescriber-info|prescriber-specialty",
+              "text": "Specialty/Facility Name If applicable",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Prescriber Email Address"
+                  }
+                }
+              ],
+              "linkId": "completing-form|prescriber-info|prescriber-email",
+              "text": "Email Address",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "linkId": "completing-form|drug-benefit",
+          "text": "Prior Authorization Request for Drug Benefit",
+          "type": "group",
+          "item": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Request Type"
+                  }
+                }
+              ],
+              "linkId": "completing-form|drug-benefit|request-type",
+              "text": "New Request",
+              "type": "choice",
+              "answerOption": [
+                {
+                  "valueString": "New Request"
+                },
+                {
+                  "valueString": "Reauthorization"
+                }
+              ]
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "ICD-10 Codes"
+                  }
+                }
+              ],
+              "linkId": "completing-form|drug-benefit|diagnosis-codes",
+              "text": "Patient ICD Diagnostic Codes",
+              "type": "open-choice",
+              "repeats": true,
+              "answerValueSet": "http://hl7.org/fhir/sid/icd-10"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Diagnosis Descriptions"
+                  }
+                }
+              ],
+              "linkId": "completing-form|drug-benefit|diagnosis-descriptions",
+              "text": "Patient Diagnosis",
+              "type": "string",
+              "repeats": true
+            },
+            {
+              "linkId": "completing-form|drug-benefit|drugs",
+              "text": "Drugs Requested with J-Code; if applicable",
+              "type": "string",
+              "repeats": true
+            },
+            {
+              "linkId": "completing-form|drug-benefit|strength-route-frequency",
+              "text": "Strength/Route/Frequency",
+              "type": "string"
+            },
+            {
+              "linkId": "completing-form|drug-benefit|unit-volume",
+              "text": "Unit/Volume of Named Drugs",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-identifier",
+                    "expression": "Start Date and Length"
+                  }
+                }
+              ],
+              "linkId": "completing-form|drug-benefit|start-length",
+              "text": "Start Date and Length of Therapy",
+              "type": "string"
+            },
+            {
+              "linkId": "completing-form|drug-benefit|location",
+              "text": "Location of Treatment e.g. provider office; facility; home health; etc. including name; Type 2 NPI if applicable; address and tax ID:",
+              "type": "string"
+            },
+            {
+              "linkId": "completing-form|drug-benefit|criteria",
+              "text": "Clinical Criteria for Approval; Including other Pertinent Information to Support the Request; other Medications Tried; Their Names; Duration; and Patient Response:",
+              "type": "string"
+            },
+            {
+              "linkId": "completing-form|drug-benefit|for-trial",
+              "text": "For use in clinical trial?",
+              "type": "boolean"
+            },
+            {
+              "linkId": "completing-form|drug-benefit|for-trial|registration-number",
+              "text": "Provide trial name and registration number",
+              "type": "string",
+              "enableWhen": [
+                {
+                  "question": "completing-form|drug-benefit|for-trial",
+                  "operator": "=",
+                  "answerBoolean": true
+                }
+              ]
+            },
+            {
+              "linkId": "completing-form|drug-benefit|drug-name",
+              "text": "Drug Name Brand Name and Scientific Name/Strength:",
+              "type": "string"
+            },
+            {
+              "linkId": "completing-form|drug-benefit|dose",
+              "text": "Dose",
+              "type": "string"
+            },
+            {
+              "linkId": "completing-form|drug-benefit|route",
+              "text": "Route",
+              "type": "string"
+            },
+            {
+              "linkId": "completing-form|drug-benefit|frequency",
+              "text": "Frequency",
+              "type": "string"
+            },
+            {
+              "linkId": "completing-form|drug-benefit|quantity",
+              "text": "Quantity",
+              "type": "quantity"
+            },
+            {
+              "linkId": "completing-form|drug-benefit|refills",
+              "text": "Number of Refills",
+              "type": "integer"
+            },
+            {
+              "linkId": "completing-form|drug-benefit|delivery",
+              "text": "Product will be delivered to:",
+              "type": "choice",
+              "answerOption": [
+                {
+                  "valueString": "Patient’s Home"
+                },
+                {
+                  "valueString": "Physician Office"
+                },
+                {
+                  "valueString": "Other"
+                }
+              ]
+            },
+            {
+              "linkId": "completing-form|drug-benefit|signature",
+              "text": "Prescriber or Authorized Signature:",
+              "type": "attachment"
+            },
+            {
+              "linkId": "completing-form|drug-benefit|pharmacy",
+              "text": "Dispensing Pharmacy Name and Phone Number:",
+              "type": "string"
+            },
+            {
+              "linkId": "completing-form|drug-benefit|date",
+              "text": "Date",
+              "type": "date"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
