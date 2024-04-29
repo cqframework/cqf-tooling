@@ -1,31 +1,21 @@
 package org.opencds.cqf.tooling.operation;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.net.ServerSocket;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import com.fasterxml.jackson.core.StreamReadConstraints;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.common.Json;
+import com.google.gson.*;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.utilities.IniFile;
+import org.junit.jupiter.api.AfterEach;
 import org.opencds.cqf.tooling.RefreshTest;
+import org.opencds.cqf.tooling.operation.ig.NewRefreshIGOperation;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.processor.IGProcessor;
-import org.opencds.cqf.tooling.processor.TestCaseProcessor;
 import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
@@ -36,18 +26,18 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.common.Json;
-import com.google.gson.Gson;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
+import java.io.*;
+import java.net.ServerSocket;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.testng.Assert.*;
-import org.hl7.fhir.r4.model.Group;
-import org.hl7.fhir.r4.model.Reference;
 public class RefreshIGOperationTest extends RefreshTest {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	public RefreshIGOperationTest() {
@@ -65,6 +55,13 @@ public class RefreshIGOperationTest extends RefreshTest {
 	private final String MEASURE_TYPE = "Measure";
 
 	private final String INI_LOC = "target" + separator + "refreshIG" + separator + "ig.ini";
+
+	private static final String[] NEW_REFRESH_IG_LIBRARY_FILE_NAMES = {
+			"GMTPInitialExpressions.json", "GMTPInitialExpressions.json",
+			"MBODAInitialExpressions.json", "USCoreCommon.json", "USCoreElements.json", "USCoreTests.json"
+	};
+
+	private static final String NEW_REFRESH_IG_LIBRARY_FOLDER_PATH = "target/NewRefreshIG/input/resources/library";
 
 
 	// Store the original standard out before changing it.
@@ -91,6 +88,63 @@ public class RefreshIGOperationTest extends RefreshTest {
 		deleteTempINI();
 	}
 
+	@Test
+	public void testNewRefreshOperation() {
+		NewRefreshIGOperation newRefreshIGOperation = new NewRefreshIGOperation();
+		String[] args = new String[] {
+				"-NewRefreshIG",
+				"-ini=" + "target" + separator + "NewRefreshIG" + separator + "ig.ini",
+				"-rd=" + "target" + separator + "NewRefreshIG",
+				"-uv=" + "1.0.1",
+				"-d",
+				"-p",
+				"-t"
+		};
+		newRefreshIGOperation.execute(args);
+
+		File folder = new File(NEW_REFRESH_IG_LIBRARY_FOLDER_PATH);
+		assertTrue(folder.exists(), "Folder should be created");
+
+		for (String fileName : NEW_REFRESH_IG_LIBRARY_FILE_NAMES) {
+			// Check if the specific file exists
+			File jsonFile = new File(folder, fileName);
+			assertTrue(jsonFile.exists(), "JSON file " + fileName + " should be created");
+		}
+
+		try (FileReader reader = new FileReader(NEW_REFRESH_IG_LIBRARY_FOLDER_PATH + separator + "GMTPInitialExpressions.json")) {
+			JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+			String version = jsonObject.get("version").getAsString();
+			JsonArray relatedArtifacts = jsonObject.getAsJsonArray("relatedArtifact");
+
+			boolean foundFHIRHelpers = false;
+			for (JsonElement element : relatedArtifacts) {
+				JsonObject artifact = element.getAsJsonObject();
+				if (artifact.has("display") && artifact.get("display").getAsString().equals("Library FHIRHelpers")) {
+					String resource = artifact.get("resource").getAsString();
+					if (resource.equals("http://fhir.org/guides/cqf/common/Library/FHIRHelpers|4.0.1")) {
+						foundFHIRHelpers = true;
+						break;
+					}
+				}
+			}
+			assertTrue(foundFHIRHelpers, "Library FHIRHelpers not found with correct resource value");
+			assertEquals("1.0.1", version, "Version parameter should be modified correctly");
+		} catch (IOException e) {
+			fail("Error reading JSON file: " + e.getMessage());
+		}
+	}
+
+	@AfterEach
+	public void cleanup() {
+		// Delete the generated files
+		File folder = new File(NEW_REFRESH_IG_LIBRARY_FOLDER_PATH);
+		for (String fileName : NEW_REFRESH_IG_LIBRARY_FILE_NAMES) {
+			File jsonFile = new File(folder, fileName);
+			if (jsonFile.exists()) {
+				jsonFile.delete();
+			}
+		}
+	}
 	/**
 	 * This test breaks down refreshIG's process and can verify multiple bundles
 	 */
