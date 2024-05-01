@@ -1,6 +1,7 @@
 package org.opencds.cqf.tooling;
 
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,6 +60,17 @@ public abstract class RefreshTest implements CqfmSoftwareSystemTest {
             DomainResource domainResource = (DomainResource)resource;
             Extension softwareSystemExtension = domainResource.getExtensionByUrl(cqfmSoftwareSystemExtensionUrl);
             assertNotNull(softwareSystemExtension);
+        }
+    }
+
+    protected void validateNoCqfmSoftwareSystemExtension(String domainResourcePath) {
+        IBaseResource resource = IOUtils.readResource(domainResourcePath, getFhirContext());
+        if (resource == null || !(resource instanceof Library)) {
+            // log error
+        } else {
+            DomainResource domainResource = (DomainResource)resource;
+            Extension softwareSystemExtension = domainResource.getExtensionByUrl(cqfmSoftwareSystemExtensionUrl);
+            assertNull(softwareSystemExtension);
         }
     }
 

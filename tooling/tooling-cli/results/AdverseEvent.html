@@ -1,74 +1,0 @@
----
-# jekyll header
----
-{% include header.html %}
-{% include container-start.html %}
-
-<a name="AdverseEvent"> </a>
-<h2>
-    <span class="sectioncount">7.1.0</span> Adverse Event <a href="AdverseEvent.html#AdverseEvent" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h2>
-
-<p>This QDM to QI Core Mapping for the QDM Datatype &#34;Adverse Event&#34; was reviewed by the CQI WG on March 9, 2018 for QDM 5.3 and updated to QDM 5.4 on June 7, 2018. QDM for &#34;Adverse Event&#34; has no changes between versions 5.3 and 5.4.</p>
-
-<p>QDM defines Adverse Event as any untoward medical occurrence associated with the clinical care delivery, whether or not considered drug related.</p>
-
-
-
-
-
-
-<div style="page-break-inside: avoid;">
-<table border="1" cellpadding="2" cellspacing="0">
-<tr>
-<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
-<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
-<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
-<tr valign="top">
-<td>Author dateTime</td>
-<td>FHIR Provenance.recorded</td>
-<td>QDM match to QI Core / FHIR
-Note: FHIR Provenance generally addresses the author of the message; the identifier/source of the original resource element is defined by the resource. Individual resource element provenance is summarized in the FHIR W5 Report (<a class="external free" href="http://hl7.org/fhir/w5.html" rel="nofollow">http://hl7.org/fhir/w5.html</a>). The AdverseEvent resource does not include a &#34;when.recorded&#34; timing element. Therefore, this mapping uses FHIR provenance.recorded for the QDM attribute for Adverse Event.</td></tr>
-<tr>
-<td>Relevant Period</td>
-<td>AdverseEvent.date</td>
-<td>QDM references a relevant period:
-The Relevant Period references:
-
-startTime – the time the adverse event began
-
-stopTime – the time the adverse event completed
-
-The reason for indicating a period, or interval, is that adverse events may not be instantaneous (e.g., an incorrect intravenous infusion occurs throughout the infusion time). FHIR references a single point in time - not a Period in QI Core. Most likely the event will be recorded with a single point in time. QDM can reference the dateTime as the beginning of the Relevant Period but and endTime will not be available in QI Core or FHIR. 
-
-In general, the AdverseEvent.RelevantPeriod start and stop times in QDM should both map to AdverseEvent.date.</td></tr>
-<tr>
-<td>Code</td>
-<td>AdverseEvent.suspectEntity.Instance</td>
-<td>The QDM code attribute indicates a single code or a member of the value set used to represent the specific quality data element. The code attribute explicitly specifies the value set (or direct referenced code) filter such that the query will retrieve only values defined by the QDM data element value or value set. Previous versions of QDM datatypes implicitly refer to attributes about a set of items that are included in a value set. A QDM data element binds the Adverse Event  datatype to a value set (or to a direct reference code) indicating the suspect entity that might have caused the event. The reason is the measures have mostly been focused on Adverse Event as an exclusion criterion. Thus the &#34;code&#34; attribute is most consistent with AdverseEvent.suspectEntity.instance rather than the type of reaction.</td></tr>
-<tr>
-<td>Type</td>
-<td>AdverseEvent.reaction</td>
-<td>The QDM &#34;Type&#34; attribute definition addresses a value set (or a direct referenced code) that describes the reaction. Hence the mapping of QDM &#34;type&#34; to AdverseEvent.reaction in QI Core.
-<pre>Example - anaphylactic reaction, hives, etc.
-</pre>
-Greater clarity in definition in QDM descriptions in the CQL-based HQMF and in the QDM publication should be helpful. In the future, QDM might consider adding the FHIR concept AdverseEvent.type (incident, near-miss, unsafe condition) and AdverseEvent.category (AE - adverse event Vs PAE - Potential Adverse Event)</td></tr>
-<tr>
-<td>Severity</td>
-<td>AdverseEvent.seriousness</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>FacilityLocations</td>
-<td>AdverseEvent.location</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Recorder</td>
-<td>AdverseEvent.recorder</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>id</td>
-<td>AdvesreEvent.id</td>
-<td>QDM matched to QI Core / FHIR</td></tr></table></div>
-
-{% include container-end.html %}
-{% include footer.html %}

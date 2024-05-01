@@ -1,72 +1,0 @@
----
-# jekyll header
----
-{% include header.html %}
-{% include container-start.html %}
-
-<a name="AllergyIntolerance"> </a>
-<h2>
-    <span class="sectioncount">7.2.0</span> Allergy Intolerance <a href="AllergyIntolerance.html#AllergyIntolerance" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h2>
-
-<p>This QDM to QI Core Mapping for the QDM Datatype &#34;Allergy/Intolerance&#34; was reviewed by the CQI WG on March 9, 2018 for QDM 5.3 and updated to QDM 5.4 on June 7, 2018. QDM for &#34;Allergy Intolerance&#34; has no changes between versions 5.3 and 5.4.</p>
-
-<p>Allergy is used to address immune-mediated reactions to a substance such as type 1 hypersensitivity reactions, other allergy-like reactions, including pseudo-allergy.</p>
-
-<p>Intolerance is a record of a clinical assessment of a propensity, or a potential risk to an individual, to have a non-immune mediated adverse reaction on future exposure to the specified substance, or class of substance.</p>
-
-
-
-
-
-<div style="page-break-inside: avoid;">
-<table border="1" cellpadding="2" cellspacing="0">
-<tr>
-<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
-<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
-<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
-<tr valign="top">
-<td>Author dateTime</td>
-<td>AllergyIntolerance.assertedDate</td>
-<td>Note: FHIR Provenance generally addresses the author of the message; the identifier/source of the original resource element is defined by the resource. Individual resource element provenance is summarized in the FHIR W5 Report (<a class="external free" href="http://hl7.org/fhir/w5.html" rel="nofollow">http://hl7.org/fhir/w5.html</a>).</td></tr>
-<tr>
-<td>Prevalence Period</td>
-<td>AllergyIntolerance.onset[x]
-
-AllergyIntolerance.lastOccurrence</td>
-<td>QDM Prevalence Period addresses the onset dateTime and the abatement dateTime for an allergy.  The options provided in QI Core / FHIR include
-
-
-<ol>
-<li>AllergyIntolerance.reaction.onset,</li>
-<li>AllergyIntolerance.onset(x) (which allows a period) to allow expression of a timeframe during which the allergy began</li>
-</ol>
-
-QDM Guidance: The QDM Prevalence Period start should map to AllergyIntolerance.onset[x] and reference the start of the AllergyIntolerance.onset period. the QDM Allergy/Intolerance Prevalence Period end should map to allergyintolerance.lastOccurrence. Different clinical software products address asserted date indicating the time at which the allergy or intolerance is known.  That may be the same as the date entered into the software (i.e., assertedDate). However, providers have the option of entering the time the allergy or intolerance was known to occur.</td></tr>
-<tr>
-<td>Code</td>
-<td>AllergyIntolerance.code</td>
-<td>The AllergyIntolerance.code should reference the class of substance (perhaps using the substance hierarchy of SNOMED). The QDM &#34;Type&#34; attribute definition addresses a value set (or a direct referenced code) that describes the reaction. Hence the mapping of QDM &#34;type&#34; to AllergyIntolerance.reaction.manifestation in QI Core. QI Core and FHIR use &#34;type&#34; to describe the underlying physiologic mechanism for the reaction (i.e., allergy or intolerance). More clarity in the next version of Greater clarity in definition in QDM descriptions in the CQL-based HQMF and in the QDM publication should be helpful.</td></tr>
-<tr>
-<td>Type</td>
-<td>AllergyIntolerance.reaction.manifestation</td>
-<td>In the future, QDM might consider adding the FHIR concept AllergyIntolerance.type (Allergy, Intolerance) and AllergyIntolerance.category (food, medication, environment, biologic).</td></tr>
-<tr>
-<td>Severity</td>
-<td>Allergyintolerance.criticality</td>
-<td>QDM severity is more vague than the FHIR concept criticality which is most consistent with the intent of the QDM attribute (i.e., low risk, high risk).</td></tr>
-<tr>
-<td>Source</td>
-<td>AllergyIntolerance.asserter</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Recorder</td>
-<td>AllergyIntolerance.recorder</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>id</td>
-<td>Allergyintolerance.id</td>
-<td>QDM matched to QI Core / FHIR</td></tr></table></div>
-
-{% include container-end.html %}
-{% include footer.html %}

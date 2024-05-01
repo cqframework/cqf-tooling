@@ -33,7 +33,7 @@ public class R4LibraryProcessorTest extends LibraryProcessorTest {
     }
     
     @Test
-    void testRefreshOverwriteLibraries() throws Exception {
+    void testRefreshOverwriteLibrariesWithCqfmSoftwareSystemExtension() throws Exception {
         String targetDirectory = "target" + separator + "refreshLibraries" + separator + this.resourceDirectory;
         copyResourcesToTargetDir(targetDirectory, this.resourceDirectory);
         
@@ -46,6 +46,22 @@ public class R4LibraryProcessorTest extends LibraryProcessorTest {
         );
 
         validateCqfmSoftwareSystemExtension(targetDirectory + libraryPath);
+    }
+
+    @Test
+    void testRefreshOverwriteLibrariesWithoutCqfmSoftwareSystemExtension() throws Exception {
+        String targetDirectory = "target" + separator + "refreshLibraries" + separator + this.resourceDirectory;
+        copyResourcesToTargetDir(targetDirectory, this.resourceDirectory);
+
+        String libraryPath = separator + "input" + separator + "resources" + separator + "library" + separator + "library-EXM124_FHIR4-8.2.000.json";
+        runRefresh(
+                targetDirectory,
+                targetDirectory + libraryPath, null,
+                targetDirectory + separator + "input" + separator + "pagecontent" + separator + "cql" + separator + "EXM124_FHIR4-8.2.000.cql",
+                false, false
+        );
+
+        validateNoCqfmSoftwareSystemExtension(targetDirectory + libraryPath);
     }
 
     @Test

@@ -261,13 +261,13 @@
 
         <dependency>
             <groupId>info.cqframework</groupId>
-            <artifactId>elm-jackson</artifactId>
+            <artifactId>elm-jaxb</artifactId>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>info.cqframework</groupId>
-            <artifactId>model-jackson</artifactId>
+            <artifactId>model-jaxb</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
