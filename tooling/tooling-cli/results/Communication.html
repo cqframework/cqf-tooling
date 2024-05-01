@@ -1,223 +1,0 @@
----
-# jekyll header
----
-{% include header.html %}
-{% include container-start.html %}
-<ul id="markdown-toc"><li><a href="#QDM_5.4_ONLY_Communication.2C_Performed">QDM 5.4 ONLY Communication, Performed</a></li><li><a href="#QDM_5.3_ONLY_Communication.2C_Patient_to_Provider">QDM 5.3 ONLY Communication, Patient to Provider</a></li><li><a href="#QDM_5.3_ONLY_Communication.2C_Provider_to_Patient">QDM 5.3 ONLY Communication, Provider to Patient</a></li><li><a href="#QDM_5.3_ONLY_Communication.2C_Provider_to_Provider">QDM 5.3 ONLY Communication, Provider to Provider</a></li></ul>
-<a name="Communication"> </a>
-<h2>
-    <span class="sectioncount">7.6.0</span> Communication <a href="Communication.html#Communication" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h2>
-
-<p>The CQI Workgroup reviewed this content in April 2018 based on QDM version 5.3. The content has been updated to reflect a change in QDM version 5.4. QDM version 5.4 removes the previous QDM datatypes &#34;Communication, Patient to Provider&#34;, &#34;Communication, Provider to Patient&#34;, and &#34;Communication, Provider to Provider&#34;. QDM version 5.4 creates a new QDM datatype, &#34;Communication, Performed&#34;.  The previous QDM datatype mapping are retained for historical review. </p>
-
-<p>QDM defines Communication as the transmission, receipt, or acknowledgement of information sent from a source to a recipient, such as from one clinician to another regarding findings, assessments, plans of care, consultative advice, instructions, educational resources, etc. It also may include the receipt of response from a patient with respect to any aspect of the care provided. Furthermore, it may include the conveying of information from provider to patient (e.g., results, findings, plans for care, medical advice, instructions, educational resources, appointments). A time and date stamp is required. QDM defines on QDM datatype, Communication, Performed.</p>
-
-<p><b><i><a class="external text" href="http://hl7.org/fhir/communication.html" rel="nofollow">FHIR Communication Resource</a></i></b></p>
-<p>This resource is a record of a communication. A communication is a conveyance of information from one entity, a sender, to another entity, a receiver. The sender and receivers may be patients, practitioners, related persons, organizations, or devices. Communication use cases include:
-</p>
-<ul>
-<li>A reminder or alert delivered to a responsible provider</li>
-<li>A recorded notification from the nurse that a patient&#39;s temperature exceeds a value</li>
-<li>A notification to a public health agency of a patient presenting with a communicable disease reportable to the public health agency</li>
-<li>Patient educational material sent by a provider to a patient</li>
-<li>Non-patient specific communication use cases may include:</li>
-<li>A nurse call from a hall bathroom</li>
-<li>Advisory for battery service from a pump</li>
-</ul>
-
- 
-<p><b><i><a class="external text" href="http://hl7.org/fhir/procedure.html" rel="nofollow">HL7 FHIR Procedure Resource</a></i></b></p>
-<p>The boundary between determining whether an action is a Procedure (training or counseling) as opposed to a Communication is based on whether there&#39;s a specific intent to change the mind-set of the patient. Mere disclosure of information would be considered a Communication. A process that involves verification of the patient&#39;s comprehension or to change the patient&#39;s mental state would be a Procedure.</p>
-
-
-
-<a name="QDM_5.4_ONLY_Communication.2C_Performed"> </a>
-<h3>
-    <span class="sectioncount">7.6.1</span> <b><i>QDM 5.4 ONLY</i></b> Communication, Performed <a href="Communication.html#QDM_5.4_ONLY_Communication.2C_Performed" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h3>
-
-
-<div style="page-break-inside: avoid;">
-<table border="1" cellpadding="2" cellspacing="0">
-<tr>
-<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
-<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
-<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
-<tr valign="top">
-<td>Communication, Performed</td>
-<td>Communication.status</td>
-<td>QDM matched to FHIR / QI Core  (the .status metadata allows conformance to the specific QDM datatype context)</td></tr>
-<tr>
-<td>Code</td>
-<td>Communication.reasonCode</td>
-<td>Note - CommunicationRequest in QI Core could be considered but QDM does not differentiate a Communication recommended or ordered, only communication so the mapping assumes the communication has occurred, with or without a response.</td></tr>
-<tr>
-<td>Category</td>
-<td>Communication.category</td>
-<td>QDM matched to FHIR / QI Core</td></tr>
-<tr>
-<td>Sender</td>
-<td>Communication.sender</td>
-<td>QDM matched to FHIR / QI Core</td></tr>
-<tr>
-<td>Recipient</td>
-<td>Communication.recipient</td>
-<td>QDM matched to FHIR / QI Core</td></tr>
-<tr>
-<td>Negation Rationale</td>
-<td>Communication.notDoneReason</td>
-<td>QDM matched to FHIR / QI Core</td></tr>
-<tr>
-<td>Medium</td>
-<td>Communication.medium</td>
-<td>QDM matched to FHIR / QI Core</td></tr>
-<tr>
-<td>Relevant Period</td>
-<td>Communication.sent
-<pre>Communication.received
-</pre></td>
-<td>QDM matched to FHIR / QI Core; Note - if interoperability is not present, the sending system may not have acknowledgement that the communication was received. In such situation, the QDM relevant period will have no end dateTime.</td></tr>
-<tr>
-<td>Author dateTime</td>
-<td>Communication.sent</td>
-<td>QDM addresses authorDatetime as the time the communication is sent.</td></tr>
-<tr>
-<td>Related to</td>
-<td>Communication.basedOn</td>
-<td>An order, proposal or plan fulfilled in whole or in part by this Communication.</td></tr>
-<tr>
-<td>id</td>
-<td>Communication.id </td>
-<td>QDM matched to FHIR / QI Core</td></tr>
-<tr>
-<td>Source</td>
-<td>Communication.sender</td>
-<td>The entity (e.g. person, organization, clinical information system, or device) which was the source of the communication.</td></tr></table></div>
-
-
-<a name="QDM_5.3_ONLY_Communication.2C_Patient_to_Provider"> </a>
-<h3>
-    <span class="sectioncount">7.6.2</span> <b><i>QDM 5.3 ONLY</i></b> Communication, Patient to Provider <a href="Communication.html#QDM_5.3_ONLY_Communication.2C_Patient_to_Provider" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h3>
-
-
-<div style="page-break-inside: avoid;">
-<table border="1" cellpadding="2" cellspacing="0">
-<tr>
-<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
-<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
-<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
-<tr valign="top">
-<td>Communication, Patient to Provider</td>
-<td>Communication.status</td>
-<td>QDM matched to FHIR / QI Core  (the .status metadata allows conformance to the specific QDM datatype context)</td></tr>
-<tr>
-<td>Code</td>
-<td>Communication.reasonCode</td>
-<td>Note - CommunicationRequest in QI Core could be considered but QDM does not differentiate a Communication recommended or ordered, only communication so the mapping assumes the communication has occurred, with or without a response.</td></tr>
-<tr>
-<td>Negation Rationale</td>
-<td>Communication.notDoneReason</td>
-<td>QDM matched to FHIR / QI Core</td></tr>
-<tr>
-<td>Author dateTime</td>
-<td>Communication.sent</td>
-<td>QDM addresses authorDatetime as the time the communication is sent.</td></tr>
-<tr>
-<td>Related to</td>
-<td>Communication.basedOn</td>
-<td>An order, proposal or plan fulfilled in whole or in part by this Communication.</td></tr>
-<tr>
-<td>id</td>
-<td>Communication.id </td>
-<td>QDM matched to FHIR / QI Core</td></tr>
-<tr>
-<td>Source</td>
-<td>Communication.sender</td>
-<td>The entity (e.g. person, organization, clinical information system, or device) which was the source of the communication.</td></tr></table></div>
-
-<a name="QDM_5.3_ONLY_Communication.2C_Provider_to_Patient"> </a>
-<h3>
-    <span class="sectioncount">7.6.3</span> <b><i>QDM 5.3 ONLY</i></b> Communication, Provider to Patient <a href="Communication.html#QDM_5.3_ONLY_Communication.2C_Provider_to_Patient" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h3>
-
-
-<div style="page-break-inside: avoid;">
-<table border="1" cellpadding="2" cellspacing="0">
-<tr>
-<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
-<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
-<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
-<tr valign="top">
-<td>Communication, Provider to Patient</td>
-<td>Communication.status</td>
-<td>QDM matched to FHIR / QI Core  (the .status metadata allows conformance to the specific QDM datatype context)</td></tr>
-<tr>
-<td>Code</td>
-<td>Communication.reasonCode</td>
-<td>Note - CommunicationRequest in QI Core could be considered but QDM does not differentiate a Communication recommended or ordered, only communication so the mapping assumes the communication has occurred, with or without a response.</td></tr>
-<tr>
-<td>Negation Rationale</td>
-<td>Communication.notDoneReason</td>
-<td>QDM matched to FHIR / QI Core</td></tr>
-<tr>
-<td>Author dateTime</td>
-<td>Communication.sent</td>
-<td>QDM addresses authorDatetime as the time the communication is sent.</td></tr>
-<tr>
-<td>Related to</td>
-<td>Communication.basedOn</td>
-<td>An order, proposal or plan fulfilled in whole or in part by this Communication.</td></tr>
-<tr>
-<td>id</td>
-<td>Communication.id </td>
-<td>QDM matched to FHIR / QI Core</td></tr>
-<tr>
-<td>Source</td>
-<td>Communication.sender</td>
-<td>The entity (e.g. person, organization, clinical information system, or device) which was the source of the communication.</td></tr></table></div>
-
-<a name="QDM_5.3_ONLY_Communication.2C_Provider_to_Provider"> </a>
-<h3>
-    <span class="sectioncount">7.6.4</span> <b><i>QDM 5.3 ONLY</i></b> Communication, Provider to Provider <a href="Communication.html#QDM_5.3_ONLY_Communication.2C_Provider_to_Provider" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h3>
-
-
-<div style="page-break-inside: avoid;">
-<table border="1" cellpadding="2" cellspacing="0">
-<tr>
-<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
-<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
-<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
-<tr valign="top">
-<td>Communication, Provider to Provider</td>
-<td>Communication.status</td>
-<td>QDM matched to FHIR / QI Core  (the .status metadata allows conformance to the specific QDM datatype context)</td></tr>
-<tr>
-<td>Code</td>
-<td>Communication.reasonCode</td>
-<td>Note - CommunicationRequest in QI Core could be considered but QDM does not differentiate a Communication recommended or ordered, only communication so the mapping assumes the communication has occurred, with or without a response.</td></tr>
-<tr>
-<td>Negation Rationale</td>
-<td>Communication.notDoneReason</td>
-<td>QDM matched to FHIR / QI Core</td></tr>
-<tr>
-<td>Author dateTime</td>
-<td>Communication.sent</td>
-<td>QDM addresses authorDatetime as the time the communication is sent.</td></tr>
-<tr>
-<td>Related to</td>
-<td>Communication.basedOn</td>
-<td>An order, proposal or plan fulfilled in whole or in part by this Communication.</td></tr>
-<tr>
-<td>id</td>
-<td>Communication.id </td>
-<td>QDM matched to FHIR / QI Core</td></tr>
-<tr>
-<td>Source</td>
-<td>Communication.sender</td>
-<td>The entity (e.g. person, organization, clinical information system, or device) which was the source of the communication.</td></tr></table></div>
-
-{% include container-end.html %}
-{% include footer.html %}

@@ -30,12 +30,12 @@
 
         <dependency>
             <groupId>info.cqframework</groupId>
-            <artifactId>elm-jackson</artifactId>
+            <artifactId>elm-jaxb</artifactId>
         </dependency>
 
         <dependency>
             <groupId>info.cqframework</groupId>
-            <artifactId>model-jackson</artifactId>
+            <artifactId>model-jaxb</artifactId>
         </dependency>
 
         <dependency>
