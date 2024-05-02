@@ -59,6 +59,7 @@ public class RefreshIGOperationTest extends RefreshTest {
             "MBODAInitialExpressions.json", "USCoreCommon.json", "USCoreElements.json", "USCoreTests.json"
     };
 
+    private static final String NEW_REFRESH_IG_FOLDER_PATH = "src/test/resources/NewRefreshIG";
     private static final String NEW_REFRESH_IG_LIBRARY_FOLDER_PATH = "src/test/resources/NewRefreshIG/input/resources/library";
 
 
@@ -88,6 +89,11 @@ public class RefreshIGOperationTest extends RefreshTest {
 
     @Test
     public void testNewRefreshOperation() {
+        File folder = new File(NEW_REFRESH_IG_FOLDER_PATH);
+        assertTrue(folder.exists(), "Folder should be present");
+        File jsonFile = new File(folder, "ig.ini");
+        assertTrue(jsonFile.exists(), "ig.ini file should be present");
+
         NewRefreshIGOperation newRefreshIGOperation = new NewRefreshIGOperation();
         String[] args = new String[]{
                 "-NewRefreshIG",
@@ -100,12 +106,12 @@ public class RefreshIGOperationTest extends RefreshTest {
         };
         newRefreshIGOperation.execute(args);
 
-        File folder = new File(NEW_REFRESH_IG_LIBRARY_FOLDER_PATH);
+        folder = new File(NEW_REFRESH_IG_LIBRARY_FOLDER_PATH);
         assertTrue(folder.exists(), "Folder should be created");
 
         for (String fileName : NEW_REFRESH_IG_LIBRARY_FILE_NAMES) {
             // Check if the specific file exists
-            File jsonFile = new File(folder, fileName);
+            jsonFile = new File(folder, fileName);
             assertTrue(jsonFile.exists(), "JSON file " + fileName + " should be created");
         }
 
