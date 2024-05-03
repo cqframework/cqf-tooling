@@ -14,6 +14,7 @@ import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.opencds.cqf.tooling.npm.LibraryLoader;
 import org.opencds.cqf.tooling.npm.NpmPackageManager;
+import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.processor.CqlProcessor;
 import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -48,9 +49,12 @@ public class LibraryRefresh extends Refresh {
               Collections.singletonList(igInfo.getCqlBinaryPath()), libraryLoader, new IGLoggingService(logger), ucumService,
               igInfo.getPackageId(), igInfo.getCanonical(), true);
    }
-
    @Override
    public List<IBaseResource> refresh() {
+      return refresh(null);
+   }
+
+   public List<IBaseResource> refresh(RefreshIGParameters params) {
       List<IBaseResource> refreshedLibraries = new ArrayList<>();
       this.cqlProcessor.execute();
       if (getIgInfo().isRefreshLibraries()) {
@@ -72,6 +76,7 @@ public class LibraryRefresh extends Refresh {
                   refreshDataRequirements(library, info);
                   refreshRelatedArtifacts(library, info);
                   refreshParameters(library, info);
+                  refreshVersion(library, params);
                   refreshedLibraries.add(library);
                   this.libraryPackages.add(new LibraryPackage(library, getFhirContext(), info));
                }
