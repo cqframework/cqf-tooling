@@ -78,8 +78,7 @@ public abstract class RefreshTest implements CqfmSoftwareSystemTest {
         File outputDirectory = new File(targetDirectory);
         outputDirectory.mkdirs();
         URL url = RefreshTest.class.getResource(resourceDirectoryPath);
-        String path = url.getPath();
-        File resourceDirectory = new File(path);
+        File resourceDirectory = FileUtils.toFile(url);
         FileUtils.copyDirectory(resourceDirectory, outputDirectory);
     }
 
