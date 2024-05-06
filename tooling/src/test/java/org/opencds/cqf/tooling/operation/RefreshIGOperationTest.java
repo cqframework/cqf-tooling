@@ -25,7 +25,6 @@ import org.hl7.fhir.utilities.IniFile;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.processor.IGProcessor;
-import org.opencds.cqf.tooling.processor.TestCaseProcessor;
 import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
@@ -47,7 +46,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 
 import static org.testng.Assert.*;
 import org.hl7.fhir.r4.model.Group;
-import org.hl7.fhir.r4.model.Reference;
 public class RefreshIGOperationTest extends RefreshTest {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	public RefreshIGOperationTest() {
@@ -64,7 +62,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 	private final String LIB_TYPE = "Library";
 	private final String MEASURE_TYPE = "Measure";
 
-	private final String INI_LOC = "target" + separator + "refreshIG" + separator + "ig.ini";
+	private final String INI_LOC = Path.of("target","refreshIG","ig.ini").toString();
 
 
 	// Store the original standard out before changing it.
@@ -147,7 +145,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 			wireMockServer.stop();
 		}
 
-		// determine fhireContext for measure lookup
+		// determine fhirContext for measure lookup
 		FhirContext fhirContext = IGProcessor.getIgFhirContext(getFhirVersion(ini));
 
 		// get list of measures resulting from execution

@@ -16,11 +16,9 @@ import joptsimple.OptionSpecBuilder;
 
 
 public class RefreshIGArgumentProcessor {
-
-    public static final String[] OPERATION_OPTIONS = {"RefreshIG"};
-
+    public static final String[] OPERATION_OPTIONS = {"RefreshIG", "NewRefreshIG"};
     public static final String[] INI_OPTIONS = {"ini"};
-    public static final String[] ROOT_DIR_OPTIONS = {"root-dir"};
+    public static final String[] ROOT_DIR_OPTIONS = {"root-dir", "rd"};
     public static final String[] IG_PATH_OPTIONS = {"ip", "ig-path"};
     public static final String[] IG_OUTPUT_ENCODING = {"e", "encoding"};
 
@@ -30,6 +28,7 @@ public class RefreshIGArgumentProcessor {
     public static final String[] INCLUDE_TERMINOLOGY_OPTIONS = {"t", "include-terminology"};
     public static final String[] INCLUDE_PATIENT_SCENARIOS_OPTIONS = {"p", "include-patients"};
     public static final String[] VERSIONED_OPTIONS = {"v", "versioned"};
+    public static final String[] UPDATED_VERSION_OPTIONS = {"uv", "updated-version"};
     public static final String[] FHIR_URI_OPTIONS = {"fs", "fhir-uri"};
     public static final String[] MEASURE_TO_REFRESH_PATH = {"mtrp", "measure-to-refresh-path"};
     public static final String[] RESOURCE_PATH_OPTIONS = {"rp", "resourcepath"};
@@ -47,6 +46,7 @@ public class RefreshIGArgumentProcessor {
 
         OptionSpecBuilder iniBuilder = parser.acceptsAll(asList(INI_OPTIONS), "Path to ig ini file");
         OptionSpecBuilder rootDirBuilder = parser.acceptsAll(asList(ROOT_DIR_OPTIONS), "Root directory of the ig");
+        OptionSpecBuilder updatedVersionBuilder = parser.acceptsAll(asList(UPDATED_VERSION_OPTIONS), "Version for the new libraries");
         OptionSpecBuilder igPathBuilder = parser.acceptsAll(asList(IG_PATH_OPTIONS),"Path to the IG, relative to the root directory");
         OptionSpecBuilder resourcePathBuilder = parser.acceptsAll(asList(RESOURCE_PATH_OPTIONS),"Use multiple times to define multiple resource directories, relative to the root directory.");
         OptionSpecBuilder libraryPathBuilder = parser.acceptsAll(asList(LIBRARY_PATH_OPTIONS), "Provide a single path, relative to the root directory, for library resources. The path will be added to the resource directories available to the refresh processing.");
@@ -60,6 +60,7 @@ public class RefreshIGArgumentProcessor {
         OptionSpecBuilder shouldVerboseMessaging = parser.acceptsAll(asList(SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS),"Indicates that a complete list of errors during library, measure, and test case refresh are included upon failure.");
 
         OptionSpec<String> ini = iniBuilder.withRequiredArg().describedAs("Path to the IG ini file");
+        OptionSpec<String> updatedVersion = updatedVersionBuilder.withOptionalArg().describedAs("Updated version of the IG");
         OptionSpec<String> rootDir = rootDirBuilder.withOptionalArg().describedAs("Root directory of the IG");
         OptionSpec<String> igPath = igPathBuilder.withRequiredArg().describedAs("Path to the IG, relative to the root directory");
         OptionSpec<String> resourcePath = resourcePathBuilder.withOptionalArg().describedAs("directory of resources");
@@ -101,6 +102,7 @@ public class RefreshIGArgumentProcessor {
         String igPath = (String)options.valueOf(IG_PATH_OPTIONS[0]);
 
         List<String> resourcePaths = ArgUtils.getOptionValues(options, RESOURCE_PATH_OPTIONS[0]);
+
         List<String> libraryPaths = ArgUtils.getOptionValues(options, LIBRARY_PATH_OPTIONS[0]);
         if (libraryPaths != null && libraryPaths.size() > 1) {
             throw new IllegalArgumentException("Only one library path may be specified"); // Could probably do this with the OptionSpec stuff...
@@ -125,6 +127,11 @@ public class RefreshIGArgumentProcessor {
         String fhirUri = (String)options.valueOf(FHIR_URI_OPTIONS[0]);
         String measureToRefreshPath = (String)options.valueOf(MEASURE_TO_REFRESH_PATH[0]);
 
+        String updatedVersion = (String)options.valueOf(UPDATED_VERSION_OPTIONS[0]);
+        if(updatedVersion == null) {
+            updatedVersion = "";
+        }
+
         String libraryOutputPath = (String)options.valueOf(LIBRARY_OUTPUT_PATH_OPTIONS[0]);
         if (libraryOutputPath == null) {
             libraryOutputPath = "";
@@ -135,14 +142,14 @@ public class RefreshIGArgumentProcessor {
             measureOutputPath = "";
         }
 
-        Boolean shouldApplySoftwareSystemStamp = true;
+        boolean shouldApplySoftwareSystemStamp = true;
         String shouldApplySoftwareSystemStampValue = (String)options.valueOf(SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS[0]);
 
         if ((shouldApplySoftwareSystemStampValue != null) && shouldApplySoftwareSystemStampValue.equalsIgnoreCase("false")) {
             shouldApplySoftwareSystemStamp = false;
         }
 
-        Boolean addBundleTimestamp = false;
+        boolean addBundleTimestamp = false;
         String addBundleTimestampValue = (String)options.valueOf(SHOULD_ADD_TIMESTAMP_OPTIONS[0]);
 
         if ((addBundleTimestampValue != null) && addBundleTimestampValue.equalsIgnoreCase("true")) {
@@ -155,6 +162,7 @@ public class RefreshIGArgumentProcessor {
         if (resourcePaths != null && !resourcePaths.isEmpty()) {
             paths.addAll(resourcePaths);
         }
+
         if (libraryPaths != null) {
             paths.addAll(libraryPaths);
         }
@@ -178,8 +186,8 @@ public class RefreshIGArgumentProcessor {
         ip.measureToRefreshPath = measureToRefreshPath;
         ip.libraryOutputPath = libraryOutputPath;
         ip.measureOutputPath = measureOutputPath;
+        ip.updatedVersion = updatedVersion;
         ip.verboseMessaging = verboseMessaging;
-
         return ip;
     }
 }

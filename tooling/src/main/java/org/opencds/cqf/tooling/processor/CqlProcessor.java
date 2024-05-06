@@ -41,18 +41,32 @@ public class CqlProcessor {
      * information about a cql file
      */
     public class CqlSourceFileInformation {
+        private CqlTranslatorOptions options;
         private VersionedIdentifier identifier;
+        private byte[] cql;
         private byte[] elm;
         private byte[] jsonElm;
         private List<ValidationMessage> errors = new ArrayList<>();
         private List<RelatedArtifact> relatedArtifacts = new ArrayList<>();
         private List<DataRequirement> dataRequirements = new ArrayList<>();
         private List<ParameterDefinition> parameters = new ArrayList<>();
+        public CqlTranslatorOptions getOptions() {
+            return options;
+        }
+        public void setOptions(CqlTranslatorOptions options) {
+            this.options = options;
+        }
         public VersionedIdentifier getIdentifier() {
             return identifier;
         }
         public void setIdentifier(VersionedIdentifier identifier) {
             this.identifier = identifier;
+        }
+        public byte[] getCql() {
+            return cql;
+        }
+        public void setCql(byte[] cql) {
+            this.cql = cql;
         }
         public byte[] getElm() {
             return elm;
@@ -201,6 +215,10 @@ public class CqlProcessor {
         }
 
         return this.fileMap.values();
+    }
+
+    public Map<String, CqlSourceFileInformation> getFileMap() {
+        return this.fileMap;
     }
 
     /**
@@ -369,6 +387,7 @@ public class CqlProcessor {
             }
             else {
                 try {
+                    result.setOptions(new CqlTranslatorOptions().withCqlCompilerOptions(options));
                     // convert to base64 bytes
                     // NOTE: Publication tooling requires XML content
                     result.setElm(translator.toXml().getBytes());

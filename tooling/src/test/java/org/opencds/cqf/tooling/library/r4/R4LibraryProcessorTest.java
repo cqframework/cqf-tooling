@@ -1,12 +1,7 @@
 package org.opencds.cqf.tooling.library.r4;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Objects;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.library.LibraryProcessorTest;
@@ -14,8 +9,12 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Objects;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 public class R4LibraryProcessorTest extends LibraryProcessorTest {
     private final String resourceDirectory = "r4";
@@ -34,7 +33,7 @@ public class R4LibraryProcessorTest extends LibraryProcessorTest {
     }
     
     @Test
-    void testRefreshOverwriteLibraries() throws Exception {
+    void testRefreshOverwriteLibrariesWithCqfmSoftwareSystemExtension() throws Exception {
         String targetDirectory = "target" + separator + "refreshLibraries" + separator + this.resourceDirectory;
         copyResourcesToTargetDir(targetDirectory, this.resourceDirectory);
         
@@ -47,6 +46,22 @@ public class R4LibraryProcessorTest extends LibraryProcessorTest {
         );
 
         validateCqfmSoftwareSystemExtension(targetDirectory + libraryPath);
+    }
+
+    @Test
+    void testRefreshOverwriteLibrariesWithoutCqfmSoftwareSystemExtension() throws Exception {
+        String targetDirectory = "target" + separator + "refreshLibraries" + separator + this.resourceDirectory;
+        copyResourcesToTargetDir(targetDirectory, this.resourceDirectory);
+
+        String libraryPath = separator + "input" + separator + "resources" + separator + "library" + separator + "library-EXM124_FHIR4-8.2.000.json";
+        runRefresh(
+                targetDirectory,
+                targetDirectory + libraryPath, null,
+                targetDirectory + separator + "input" + separator + "pagecontent" + separator + "cql" + separator + "EXM124_FHIR4-8.2.000.cql",
+                false, false
+        );
+
+        validateNoCqfmSoftwareSystemExtension(targetDirectory + libraryPath);
     }
 
     @Test

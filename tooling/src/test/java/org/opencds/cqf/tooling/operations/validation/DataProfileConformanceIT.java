@@ -19,7 +19,7 @@ public class DataProfileConformanceIT {
    void testInvalidQiCorePatient() {
       DataProfileConformance dpc = new DataProfileConformance();
       dpc.setFhirContext(fhirContext);
-      dpc.setPackageUrlsList(List.of("http://hl7.org/fhir/us/qicore/4.1.1/package.tgz"));
+      dpc.setPackageUrlsList(List.of("https://packages.simplifier.net/hl7.fhir.us.qicore/4.1.1"));
       dpc.setGeneralValidator();
 
       Bundle bundle = new Bundle();
@@ -42,7 +42,7 @@ public class DataProfileConformanceIT {
    void testValidQiCorePatient() {
       DataProfileConformance dpc = new DataProfileConformance();
       dpc.setFhirContext(fhirContext);
-      dpc.setPackageUrlsList(List.of("http://hl7.org/fhir/us/qicore/4.1.1/package.tgz"));
+      dpc.setPackageUrlsList(List.of("https://packages.simplifier.net/hl7.fhir.us.qicore/4.1.1"));
       dpc.setGeneralValidator();
 
       Bundle bundle = new Bundle();

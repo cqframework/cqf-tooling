@@ -962,6 +962,26 @@ public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
     }
 
     /**
+     * Visit WhereClause. This method will be called for
+     * WhereClause expression nodes.
+     *
+     * @param where     the Expression
+     * @param context the context passed to the visitor
+     * @return the visitor result
+     */
+    public Void visitWhereClause(Expression where, ElmContext context) {
+        try {
+            enterClause();
+            output.append("where");
+            visitElement(where, context);
+            return null;
+        }
+        finally {
+            exitClause();
+        }
+    }
+
+    /**
      * Visit ReturnClause. This method will be called for
      * every node in the tree that is a ReturnClause.
      *

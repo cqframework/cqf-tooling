@@ -1,6 +1,7 @@
 package org.opencds.cqf.tooling;
 
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,12 +63,22 @@ public abstract class RefreshTest implements CqfmSoftwareSystemTest {
         }
     }
 
+    protected void validateNoCqfmSoftwareSystemExtension(String domainResourcePath) {
+        IBaseResource resource = IOUtils.readResource(domainResourcePath, getFhirContext());
+        if (resource == null || !(resource instanceof Library)) {
+            // log error
+        } else {
+            DomainResource domainResource = (DomainResource)resource;
+            Extension softwareSystemExtension = domainResource.getExtensionByUrl(cqfmSoftwareSystemExtensionUrl);
+            assertNull(softwareSystemExtension);
+        }
+    }
+
     protected void copyResourcesToTargetDir(String targetDirectory, String resourceDirectoryPath) throws IOException {
         File outputDirectory = new File(targetDirectory);
         outputDirectory.mkdirs();
         URL url = RefreshTest.class.getResource(resourceDirectoryPath);
-        String path = url.getPath();
-        File resourceDirectory = new File(path);
+        File resourceDirectory = FileUtils.toFile(url);
         FileUtils.copyDirectory(resourceDirectory, outputDirectory);
     }
 

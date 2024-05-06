@@ -1,199 +1,0 @@
----
-# jekyll header
----
-{% include header.html %}
-{% include container-start.html %}
-<ul id="markdown-toc"><li><a href="#Laboratory_Test.2C_Order">Laboratory Test, Order</a></li><li><a href="#Laboratory_Test.2C_Recommended">Laboratory Test, Recommended</a></li><li><a href="#Laboratory_Test.2C_Performed">Laboratory Test, Performed</a></li></ul>
-<a name="LaboratoryTest"> </a>
-<h2>
-    <span class="sectioncount">7.15.0</span> Laboratory Test <a href="LaboratoryTest.html#LaboratoryTest" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h2>
-
-
-<p>The content on this page was reviewed by the CQI Workgroup Conference call on April 6, 2018 for QDM version 5.3. The page is updated to reference QDM version 5.4. The only changes present in QDM version 5.4 is removal of the &#34;method&#34; attribute for &#34;Laboratory Test, Order&#34; and &#34;Laboratory Test, Recommended&#34;. The QDM datatype &#34;Laboratory Test, Performed&#34; retains the &#34;method&#34; attribute in QDM version 5.4. </p>
-
-<p>QDM defines Laboratory Test as a medical procedure that involves testing a sample of blood, urine, or other substance from the body. Tests can help determine a diagnosis, plan treatment, check to see if treatment is working, or monitor the disease over time.  This QDM data category for Laboratory Test is only used for information about the subject of record. QDM defines three contexts for Laboratory Test: Laboratory Test, Order; Laboratory Test, Performed; Laboratory Test, Recommended.</p>
-
-
-
-<a name="Laboratory_Test.2C_Order"> </a>
-<h3>
-    <span class="sectioncount">7.15.1</span> Laboratory Test, Order <a href="LaboratoryTest.html#Laboratory_Test.2C_Order" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h3>
-
-
-<div style="page-break-inside: avoid;">
-<table border="1" cellpadding="2" cellspacing="0">
-<tr>
-<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
-<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
-<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
-<tr valign="top">
-<td>Laboratory Test, Order</td>
-<td>ProcedureRequest.intent</td>
-<td>Procedure Request intent uses the concepts proposal, plan, order, original-order, reflex-order, filler-order, instance-order, option. Constrain to &#34;order&#34; from the intent value set for QDM datatypes with the order context.</td></tr>
-<tr>
-<td>Negation Rationale</td>
-<td>ProcedureRequest.extension (<a class="external free" href="http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused" rel="nofollow">http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused</a>)</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Reason</td>
-<td>ProcedureRequest.reasonCode, Use <a class="external free" href="http://hl7.org/fhir/us/qicore/qicore-procedurerequest-appropriatenessScore.html" rel="nofollow">http://hl7.org/fhir/us/qicore/qicore-procedurerequest-appropriatenessScore.html</a> to address RAND criteria for appropriate imaging usage criteria.</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Author dateTime</td>
-<td>ProcedureRequest.authoredOn</td>
-<td>QDM matched to QI Core/FHIR. Note - ProcedureRequest.occurrence[x] defines a dateTime when the event should occur - not addressed in QDM
-
-Note: FHIR Provenance generally addresses the author of the message; the identifier/source of the original resource element is defined by the resource. Individual resource element provenance is summarized in the FHIR W5 Report (<a class="external free" href="http://hl7.org/fhir/w5.html" rel="nofollow">http://hl7.org/fhir/w5.html</a>).</td></tr>
-<tr>
-<td>Code</td>
-<td>ProcedureRequest.code</td>
-<td>See also, Observation.category</td></tr>
-<tr>
-<td>id</td>
-<td>ProcedureRequest.id</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Source</td>
-<td>ProcedureRequest.requester</td>
-<td>Author, orderer - note also, ProcedureRequest.requester.agent for device, practitioner or organization who initiated the request; or ProcedureRequest.requester.onBehalfOf  - the organization on whose behalf the device or practitioner was acting</td></tr></table></div>
-
-
-<a name="Laboratory_Test.2C_Recommended"> </a>
-<h3>
-    <span class="sectioncount">7.15.2</span> Laboratory Test, Recommended <a href="LaboratoryTest.html#Laboratory_Test.2C_Recommended" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h3>
-
-
-<div style="page-break-inside: avoid;">
-<table border="1" cellpadding="2" cellspacing="0">
-<tr>
-<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
-<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
-<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
-<tr valign="top">
-<td>Laboratory Test, Recommended</td>
-<td>ProcedureRequest.intent</td>
-<td>Procedure Request intent uses the concepts proposal, plan, order, original-order, reflex-order, filler-order, instance-order, option. &#34;Proposal&#34; is most consistent with the ProcedureRequest when applied to clinical decision support (CDS) in which the CDS proposes an action to a provider or to a patient. The QDM concept Recommended addresses expectations a provider gives to a patient. Such recommendations are most consistent with the ProcedureRequest.intent value of &#34;plan&#34; (an intension to ensure something occurs without providing an authorization to act).</td></tr>
-<tr>
-<td>Negation Rationale</td>
-<td>ProcedureRequest.extension (<a class="external free" href="http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused" rel="nofollow">http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused</a>)</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Reason</td>
-<td>ProcedureRequest.reasonCode, Use <a class="external free" href="http://hl7.org/fhir/us/qicore/qicore-procedurerequest-appropriatenessScore.html" rel="nofollow">http://hl7.org/fhir/us/qicore/qicore-procedurerequest-appropriatenessScore.html</a> to address RAND criteria for appropriate imaging usage criteria.</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Author dateTime</td>
-<td>ProcedureRequest.authoredOn</td>
-<td>QDM matched to QI Core/FHIR. Note - ProcedureRequest.occurrence[x] defines a dateTime when the event should occur - not addressed in QDM
-
-Note: FHIR Provenance generally addresses the author of the message; the identifier/source of the original resource element is defined by the resource. Individual resource element provenance is summarized in the FHIR W5 Report (<a class="external free" href="http://hl7.org/fhir/w5.html" rel="nofollow">http://hl7.org/fhir/w5.html</a>).</td></tr>
-<tr>
-<td>Code</td>
-<td>ProcedureRequest.code</td>
-<td>See also, Observation.category</td></tr>
-<tr>
-<td>id</td>
-<td>ProcedureRequest.id</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Source</td>
-<td>ProcedureRequest.requester</td>
-<td>Author, orderer - note also, ProcedureRequest.requester.agent for device, practitioner or organization who initiated the request; or ProcedureRequest.requester.onBehalfOf  - the organization on whose behalf the device or practitioner was acting</td></tr></table></div>
-
-
-<a name="Laboratory_Test.2C_Performed"> </a>
-<h3>
-    <span class="sectioncount">7.15.3</span> Laboratory Test, Performed <a href="LaboratoryTest.html#Laboratory_Test.2C_Performed" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h3>
-
-
-<div style="page-break-inside: avoid;">
-<table border="1" cellpadding="2" cellspacing="0">
-<tr>
-<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
-<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
-<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
-<tr valign="top">
-<td>Laboratory Test, Performed</td>
-<td>Observation (the .status metadata allows conformance to the specific QDM datatype context)</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Method</td>
-<td>Observaton.method</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Negation Rationale</td>
-<td>Observation.dataAbsentReason</td>
-<td>The value set is required. Many eCQMs use a measure developer-specific value set. Note, component also has a Observation.component.dataAbsentReason in QI Core.</td></tr>
-<tr>
-<td>Reason</td>
-<td>Observation.basedOn</td>
-<td>This is the best fit in QI Core</td></tr>
-<tr>
-<td>Reference Range High</td>
-<td>Observation.referenceRange.high</td>
-<td>QI Core also references Observation.referenceRange.type - i.e. what part of the referenced target population it applies to (e.g., normal or therapeutic range); and Observation.referenceRange.appliesTo - i.e., the target population (normal population, or particular sex or race), and Observation.referenceRange.age. QI Core also addresses Observation.component.referenceRange. Should these options be considered for QDM?</td></tr>
-<tr>
-<td>Reference Range Low</td>
-<td>Observation.referenceRange.low</td>
-<td>QI Core also references Observation.referenceRange.type - i.e. what part of the referenced target population it applies to (e.g., normal or therapeutic range); and Observation.referenceRange.appliesTo - i.e., the target population (normal population, or particular sex or race), and Observation.referenceRange.age. QI Core also addresses Observation.component.referenceRange. Should these options be considered for QDM?</td></tr>
-<tr>
-<td>Result</td>
-<td>Observation.value(x)</td>
-<td>Observation.value(x) refers to QI Core Observation which is noted here. Note - QI Core also includes Observation.interpretation and Observation.comment - eCQMs have addressed interpretation as an implementation issue. Perhaps that approach should be reconsidered.</td></tr>
-<tr>
-<td>Result dateTime</td>
-<td>Observation.issued</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Relevant Period</td>
-<td>Observaton.effective[x]</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Status</td>
-<td>Observation.status</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Code</td>
-<td>Observation.code</td>
-<td>Note - QI Core includes Observation.specimen - eCQMs use the LOINC value set to determine the specimen source</td></tr>
-<tr>
-<td>Author dateTime</td>
-<td>Observation.issued</td>
-<td>QDM matched to QI Core / FHIR
-
-Note: FHIR Provenance generally addresses the author of the message; the identifier/source of the original resource element is defined by the resource. Individual resource element provenance is summarized in the FHIR W5 Report (<a class="external free" href="http://hl7.org/fhir/w5.html" rel="nofollow">http://hl7.org/fhir/w5.html</a>).</td></tr>
-<tr>
-<td>Components</td>
-<td>Observation.component</td>
-<td>QDM uses components to combine related observations to each other, e.g., a set of independent observations performed within an admission assessment for an inpatient admission. Each observation is unique (e.g., questions about tobacco usage, other substance usage, blood pressure, pulse, skin turgor, etc., etc.) but they are captured during the same patient-provider interaction. Such QDM components should map directly to QI Core / FHIR observations that can be linked to other observations. Other QDM component examples include multiple questions that are part of a validated evaluation tool (e.g., a Braden skin assessment scale). This latter example indicates individual questions that are inherently tied to the Braden scale instrument and the questions and answers do not have inherent value without being part of the instrument. QI Core / FHIR considers each such question as an Observation.component.  A general rule of thumb is QI Core / FHIR components apply only when the inherent value of the observation is defined by the parent observation. The result is that the content will determine if a QDM component maps to Observation.code or to Observation.component.code. </td></tr>
-<tr>
-<td>Component Code</td>
-<td>Observation.component.code</td>
-<td>See &#34;Component&#34; - Content-specific</td></tr>
-<tr>
-<td>Component Result</td>
-<td>Observation.component.value(x)</td>
-<td>See &#34;Component&#34; - Content-specific</td></tr>
-<tr>
-<td>Component Reference Range High</td>
-<td>Observation.component.referenceRange</td>
-<td>Refers back to Component.referenceRange</td></tr>
-<tr>
-<td>Component Reference Range Low</td>
-<td>Observation.component.referenceRange</td>
-<td>Refers back to Component.referenceRange</td></tr>
-<tr>
-<td>id</td>
-<td>Observation.id</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Source</td>
-<td>Observation.performer</td>
-<td>Note - QI Core includes Observation.subject - QDM should consider adding subject instead of health record field</td></tr></table></div>
-
-{% include container-end.html %}
-{% include footer.html %}

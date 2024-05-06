@@ -96,6 +96,7 @@ public class IGTestProcessor extends BaseProcessor {
             return result;
         }
         catch (Exception ex) {
+            //TODO: Error/Message handling
             LogUtils.putException(String.format("Error retrieving metadata from: '%s'.", path), ex);
             return null;
         }
@@ -150,6 +151,7 @@ public class IGTestProcessor extends BaseProcessor {
             }
         }
         catch (Exception ex) {
+            //TODO: Error/Message handling
             LogUtils.putException(String.format("Error retrieving CapabilityStatement from: '%s'.", testServerUri), ex);
             return null;
         }

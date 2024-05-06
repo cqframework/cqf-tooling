@@ -1,64 +1,0 @@
----
-# jekyll header
----
-{% include header.html %}
-{% include container-start.html %}
-
-<a name="CareGoal"> </a>
-<h2>
-    <span class="sectioncount">7.5.0</span> Care Goal <a href="CareGoal.html#CareGoal" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h2>
-
-<p>Reviewed by the CQI Workgroup in April, 2018 based on QDM version 5.3. There are no changes to apply based on QDM version 5.4.</p>
-
-<p>QDM defines Care Goal as a defined target or measure to be achieved in the process of patient care, that is, an expected outcome. A typical goal is expressed as a change in status expected at a defined future time. That change can be an observation represented by other QDM categories (diagnostic tests, laboratory tests, symptoms, etc.) scheduled for some time in the future and with a particular value. A goal can be found in the plan of care (care plan), the structure used by all stakeholders, including the patient, to define the management actions for the various conditions, problems, or issues identified for the target of the plan. This structure, through which the goals and care-planning actions and processes can be organized, planned, communicated, and checked for completion, is represented in the QDM categories as a Record Artifact. A time/date stamp is required.</p>
-
-
-
-
-
-
-<div style="page-break-inside: avoid;">
-<table border="1" cellpadding="2" cellspacing="0">
-<tr>
-<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
-<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
-<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
-<tr valign="top">
-<td>Care Goal</td>
-<td>Goal.status</td>
-<td>QDM matched to FHIR / QI Core</td></tr>
-<tr>
-<td>Code</td>
-<td>Goal.description</td>
-<td>QDM matched to FHIR / QI Core</td></tr>
-<tr>
-<td>Relevant Period</td>
-<td>Goal.start(x)</td>
-<td>The QDM Care Goal Relevant Period references the period between:
-
-
-<ul>
-<li>startTime – when the goal is recorded, and therefore should be considered effective,</li>
-<li>stopTime – when the target outcome is expected to be met </li>
-<li>Relevant Period should be calculated from the Goal.start(x) to the Goal.target.due(x)</li>
-</ul></td></tr>
-<tr>
-<td>Related to</td>
-<td>Goal.addresses</td>
-<td>QDM matched to FHIR / QI Core, Alternate name: fulfills</td></tr>
-<tr>
-<td>Target Outcome</td>
-<td>Goal.target.detail(x)</td>
-<td>QDM matched to FHIR</td></tr>
-<tr>
-<td>id</td>
-<td>Goal.id </td>
-<td>QDM matched to FHIR / QI Core</td></tr>
-<tr>
-<td>Source</td>
-<td>Goal.expressedBy</td>
-<td>The person responsible for setting the goal.</td></tr></table></div>
-
-{% include container-end.html %}
-{% include footer.html %}
