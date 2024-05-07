@@ -19,10 +19,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gson.*;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.IniFile;
 import org.opencds.cqf.tooling.RefreshTest;
+import org.opencds.cqf.tooling.operation.ig.NewRefreshIGOperation;
 import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
 import org.opencds.cqf.tooling.processor.IGProcessor;
 import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
@@ -30,16 +32,12 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.common.Json;
-import com.google.gson.Gson;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -64,6 +62,13 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 	private final String INI_LOC = Path.of("target","refreshIG","ig.ini").toString();
 
+	private static final String[] NEW_REFRESH_IG_LIBRARY_FILE_NAMES = {
+			"GMTPInitialExpressions.json", "GMTPInitialExpressions.json",
+			"MBODAInitialExpressions.json", "USCoreCommon.json", "USCoreElements.json", "USCoreTests.json"
+	};
+
+	private static final String NEW_REFRESH_IG_FOLDER_PATH = "src/test/resources/NewRefreshIG";
+	private static final String NEW_REFRESH_IG_LIBRARY_FOLDER_PATH = "src/test/resources/NewRefreshIG/input/resources/library";
 
 	// Store the original standard out before changing it.
 	private final PrintStream originalStdOut = System.out;
@@ -87,6 +92,68 @@ public class RefreshIGOperationTest extends RefreshTest {
 		}
 
 		deleteTempINI();
+	}
+	@Test
+	public void testNewRefreshOperation() {
+		File folder = new File(NEW_REFRESH_IG_FOLDER_PATH);
+		assertTrue(folder.exists(), "Folder should be present");
+		File jsonFile = new File(folder, "ig.ini");
+		assertTrue(jsonFile.exists(), "ig.ini file should be present");
+
+		NewRefreshIGOperation newRefreshIGOperation = new NewRefreshIGOperation();
+		String[] args = new String[]{
+				"-NewRefreshIG",
+				"-ini=" + "src/test/resources/NewRefreshIG/ig.ini",
+				"-rd=" + "src/test/resources/NewRefreshIG",
+				"-uv=" + "1.0.1",
+				"-d",
+				"-p",
+				"-t"
+		};
+		newRefreshIGOperation.execute(args);
+
+		folder = new File(NEW_REFRESH_IG_LIBRARY_FOLDER_PATH);
+		assertTrue(folder.exists(), "Folder should be created");
+
+		for (String fileName : NEW_REFRESH_IG_LIBRARY_FILE_NAMES) {
+			// Check if the specific file exists
+			jsonFile = new File(folder, fileName);
+			assertTrue(jsonFile.exists(), "JSON file " + fileName + " should be created");
+		}
+
+		try (FileReader reader = new FileReader(NEW_REFRESH_IG_LIBRARY_FOLDER_PATH + separator + "GMTPInitialExpressions.json")) {
+			JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+			String version = jsonObject.get("version").getAsString();
+			JsonArray relatedArtifacts = jsonObject.getAsJsonArray("relatedArtifact");
+
+			boolean foundFHIRHelpers = false;
+			for (JsonElement element : relatedArtifacts) {
+				JsonObject artifact = element.getAsJsonObject();
+				if (artifact.has("display") && artifact.get("display").getAsString().equals("Library FHIRHelpers")) {
+					String resource = artifact.get("resource").getAsString();
+					if (resource.equals("http://fhir.org/guides/cqf/common/Library/FHIRHelpers|4.0.1")) {
+						foundFHIRHelpers = true;
+						break;
+					}
+				}
+			}
+			assertTrue(foundFHIRHelpers, "Library FHIRHelpers not found with correct resource value");
+			assertEquals("1.0.1", version, "Version parameter should be modified correctly");
+		} catch (IOException e) {
+			fail("Error reading JSON file: " + e.getMessage());
+		}
+	}
+
+	@AfterSuite
+	public void cleanup() {
+		// Delete the generated files
+		File folder = new File(NEW_REFRESH_IG_LIBRARY_FOLDER_PATH);
+		for (String fileName : NEW_REFRESH_IG_LIBRARY_FILE_NAMES) {
+			File jsonFile = new File(folder, fileName);
+			if (jsonFile.exists()) {
+				jsonFile.delete();
+			}
+		}
 	}
 
 	/**
