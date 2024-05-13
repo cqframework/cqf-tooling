@@ -365,6 +365,12 @@ public class CqlProcessor {
         CqlSourceFileInformation result = new CqlSourceFileInformation();
         fileMap.put(file.getAbsoluteFile().toString(), result);
 
+        if(!file.exists()) {
+            var message = String.format("File %s does not exist", file.toString());
+            logger.logMessage(message);
+            throw new RuntimeException(message);
+        }
+
         if (options.getValidateUnits()) {
             libraryManager.setUcumService(ucumService);
         }
@@ -426,7 +432,6 @@ public class CqlProcessor {
 
                 } catch (Exception ex) {
                     logger.logMessage(String.format("CQL Translation succeeded for file: '%s', but ELM generation failed with the following error: %s", file.getAbsolutePath(), ex.getMessage()));
-                    throw ex;
                 }
             }
 
@@ -435,7 +440,6 @@ public class CqlProcessor {
         }
         catch (Exception e) {
             result.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, IssueType.EXCEPTION, file.getName(), "CQL Processing failed with exception: "+e.getMessage(), IssueSeverity.ERROR));
-            throw new RuntimeException(e);
         }
 
 
