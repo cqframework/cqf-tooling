@@ -365,12 +365,6 @@ public class CqlProcessor {
         CqlSourceFileInformation result = new CqlSourceFileInformation();
         fileMap.put(file.getAbsoluteFile().toString(), result);
 
-        if(!file.exists()) {
-            var message = String.format("File %s does not exist", file.toString());
-            logger.logMessage(message);
-            throw new RuntimeException(message);
-        }
-
         if (options.getValidateUnits()) {
             libraryManager.setUcumService(ucumService);
         }
