@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.processor;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -390,6 +391,7 @@ public class CqlProcessor {
                     result.setOptions(new CqlTranslatorOptions().withCqlCompilerOptions(options));
                     // convert to base64 bytes
                     // NOTE: Publication tooling requires XML content
+                    result.setCql(Files.readAllBytes(file.toPath()));
                     result.setElm(translator.toXml().getBytes());
                     result.setIdentifier(translator.toELM().getIdentifier());
                     result.setJsonElm(translator.toJson().getBytes());
