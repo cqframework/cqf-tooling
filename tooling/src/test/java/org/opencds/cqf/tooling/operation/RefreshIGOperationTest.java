@@ -1,27 +1,15 @@
 package org.opencds.cqf.tooling.operation;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.net.ServerSocket;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import com.fasterxml.jackson.core.StreamReadConstraints;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.common.Json;
 import com.google.gson.*;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.utilities.IniFile;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.operation.ig.NewRefreshIGOperation;
@@ -32,18 +20,23 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.common.Json;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
+import java.io.*;
+import java.net.ServerSocket;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.testng.Assert.*;
-import org.hl7.fhir.r4.model.Group;
 public class RefreshIGOperationTest extends RefreshTest {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	public RefreshIGOperationTest() {
@@ -67,7 +60,6 @@ public class RefreshIGOperationTest extends RefreshTest {
 			"MBODAInitialExpressions.json", "USCoreCommon.json", "USCoreElements.json", "USCoreTests.json"
 	};
 
-    private static final String NEW_REFRESH_IG_FOLDER_PATH = "src" + separator + "test" + separator + "resources" + separator + "org/opencds/cqf/tooling/NewRefreshIG";
     private static final String TARGET_OUTPUT_FOLDER_PATH = "target" + separator + "NewRefreshIg";
 	private static final String TARGET_OUTPUT_IG_CQL_FOLDER_PATH = TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "cql";
 	private static final String TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH = TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "resources" + separator + "library";
@@ -187,18 +179,6 @@ public class RefreshIGOperationTest extends RefreshTest {
         }
         return false;
     }
-
-//    @AfterSuite
-//    public void cleanup() {
-//        // Delete the generated files
-//        File folder = new File(TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH);
-//        for (String fileName : NEW_REFRESH_IG_LIBRARY_FILE_NAMES) {
-//            File jsonFile = new File(folder, fileName);
-//            if (jsonFile.exists()) {
-//                jsonFile.delete();
-//            }
-//        }
-//    }
 
     private void verifyFileContent(File file, String expectedContent) {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
