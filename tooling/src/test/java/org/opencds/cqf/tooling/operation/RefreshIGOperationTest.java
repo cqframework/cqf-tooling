@@ -20,10 +20,7 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -195,6 +192,11 @@ public class RefreshIGOperationTest extends RefreshTest {
             fail("Failed to read " + file.getName() + ": " + e.getMessage());
         }
     }
+
+	@AfterSuite
+	public void cleanup() {
+		deleteDirectory("null");
+	}
 
 	/**
 	 * This test breaks down refreshIG's process and can verify multiple bundles
