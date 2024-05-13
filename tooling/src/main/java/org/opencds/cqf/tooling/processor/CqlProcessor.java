@@ -7,7 +7,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.antlr.v4.parse.ANTLRParser.finallyClause_return;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -36,8 +35,11 @@ import org.opencds.cqf.tooling.npm.ILibraryReader;
 import org.opencds.cqf.tooling.npm.NpmLibrarySourceProvider;
 import org.opencds.cqf.tooling.npm.NpmModelInfoProvider;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
+import org.slf4j.Logger;
 
 public class CqlProcessor {
+
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(CqlProcessor.class);
 
     /**
      * information about a cql file
@@ -394,6 +396,8 @@ public class CqlProcessor {
 
 
             if (!severeErrorList.isEmpty()) {
+                var messages = severeErrorList.stream().map(x -> x.getMessage()).reduce("", (x, y) -> x + "\n" + y);
+                log.error("CQL Processing failed with errors count: {}, messages: {}", severeErrorList.size(), messages);
                 result.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, IssueType.EXCEPTION, file.getName(),
                         String.format("CQL Processing failed with (%d) errors.", translator.getErrors().size()), IssueSeverity.ERROR));
             }
