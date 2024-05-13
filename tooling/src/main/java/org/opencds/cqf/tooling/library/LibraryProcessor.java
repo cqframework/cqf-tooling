@@ -330,6 +330,11 @@ public class LibraryProcessor extends BaseProcessor {
                     sourceLibraries.add(newLibrary);
                 }
             }
+            else
+            {
+                logger.error("No identifier found for CQL file {}", fileInfo.getPath());
+            }
+            
         }
 
         List<Library> resources = new ArrayList<Library>();

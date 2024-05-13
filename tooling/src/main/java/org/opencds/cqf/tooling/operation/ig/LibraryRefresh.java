@@ -66,6 +66,10 @@ public class LibraryRefresh extends Refresh {
             logger.info("Refreshing {}", library.getIdElement());
 
             for (CqlProcessor.CqlSourceFileInformation info : cqlProcessor.getAllFileInformation()) {
+               if (info.getIdentifier() == null) {
+                  logger.error("No identifier found for CQL file {}", info.getPath());
+               }
+
                if (info.getIdentifier().getId().endsWith(name)) {
                   // TODO: should likely verify or resolve/refresh the following elements:
                   //  cpg-knowledgeCapability, cpg-knowledgeRepresentationLevel, url, identifier, status,

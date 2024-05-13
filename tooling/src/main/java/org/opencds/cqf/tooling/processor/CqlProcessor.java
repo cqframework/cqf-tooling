@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.antlr.v4.parse.ANTLRParser.finallyClause_return;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -42,6 +43,7 @@ public class CqlProcessor {
      * information about a cql file
      */
     public class CqlSourceFileInformation {
+        private final String path;
         private CqlTranslatorOptions options;
         private VersionedIdentifier identifier;
         private byte[] cql;
@@ -51,6 +53,15 @@ public class CqlProcessor {
         private List<RelatedArtifact> relatedArtifacts = new ArrayList<>();
         private List<DataRequirement> dataRequirements = new ArrayList<>();
         private List<ParameterDefinition> parameters = new ArrayList<>();
+
+        public CqlSourceFileInformation(String path) {
+            this.path = path;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
         public CqlTranslatorOptions getOptions() {
             return options;
         }
@@ -362,7 +373,7 @@ public class CqlProcessor {
 
     private void translateFile(LibraryManager libraryManager, File file, CqlCompilerOptions options) {
 //        logger.logMessage(String.format("Translating CQL source in file %s", file.toString()));
-        CqlSourceFileInformation result = new CqlSourceFileInformation();
+        CqlSourceFileInformation result = new CqlSourceFileInformation(file.getAbsolutePath());
         fileMap.put(file.getAbsoluteFile().toString(), result);
 
         if (options.getValidateUnits()) {
