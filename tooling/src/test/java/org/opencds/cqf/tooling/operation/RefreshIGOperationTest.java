@@ -105,8 +105,8 @@ public class RefreshIGOperationTest extends RefreshTest {
         NewRefreshIGOperation newRefreshIGOperation = new NewRefreshIGOperation();
         String[] args = new String[]{
                 "-NewRefreshIG",
-                "-ini=" + "src/test/resources/NewRefreshIG/ig.ini",
-                "-rd=" + "src/test/resources/NewRefreshIG",
+                "-ini=" + "src" + separator + "test" + separator + "resources" + separator + "NewRefreshIG" + separator + "ig.ini",
+                "-rd=" + "src" + separator + "test" + separator + "resources" + separator + "NewRefreshIG",
                 "-uv=" + "1.0.1",
                 "-d",
                 "-p",
@@ -230,7 +230,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 		}
 
 		// Call the method under test, which should use HttpClientUtils.post
-		copyResourcesToTargetDir("target" + separator + "refreshIG", "testfiles/refreshIG");
+		copyResourcesToTargetDir("target" + separator + "refreshIG", "testfiles" +separator + "refreshIG");
 		// build ini object
 		File iniFile = new File(INI_LOC);
 		String iniFileLocation = iniFile.getAbsolutePath();
