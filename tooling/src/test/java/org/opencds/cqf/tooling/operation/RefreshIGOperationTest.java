@@ -68,8 +68,8 @@ public class RefreshIGOperationTest extends RefreshTest {
 	};
 
     private static final String NEW_REFRESH_IG_FOLDER_PATH = "src" + separator + "test" + separator + "resources" + separator + "NewRefreshIG";
-    private static final String NEW_REFRESH_IG_CQL_FOLDER_PATH = "src" + separator + "test" + separator + "resources" + separator + "NewRefreshIG" + separator + "input" + separator + "cql";
-    private static final String NEW_REFRESH_IG_LIBRARY_FOLDER_PATH = "src" + separator + "test" + separator + "resources" + separator + "NewRefreshIG" + separator + "input" + separator + "resources" + separator + "library";
+    private static final String NEW_REFRESH_IG_CQL_FOLDER_PATH = NEW_REFRESH_IG_FOLDER_PATH + separator + "input" + separator + "cql";
+    private static final String NEW_REFRESH_IG_LIBRARY_FOLDER_PATH = NEW_REFRESH_IG_FOLDER_PATH + separator + "input" + separator + "resources" + separator + "library";
 
 	// Store the original standard out before changing it.
 	private final PrintStream originalStdOut = System.out;
