@@ -67,9 +67,10 @@ public class RefreshIGOperationTest extends RefreshTest {
 			"MBODAInitialExpressions.json", "USCoreCommon.json", "USCoreElements.json", "USCoreTests.json"
 	};
 
-    private static final String NEW_REFRESH_IG_FOLDER_PATH = "src" + separator + "test" + separator + "resources" + separator + "NewRefreshIG";
-    private static final String NEW_REFRESH_IG_CQL_FOLDER_PATH = NEW_REFRESH_IG_FOLDER_PATH + separator + "input" + separator + "cql";
-    private static final String NEW_REFRESH_IG_LIBRARY_FOLDER_PATH = NEW_REFRESH_IG_FOLDER_PATH + separator + "input" + separator + "resources" + separator + "library";
+    private static final String NEW_REFRESH_IG_FOLDER_PATH = "src" + separator + "test" + separator + "resources" + separator + "org/opencds/cqf/tooling/NewRefreshIG";
+    private static final String TARGET_OUTPUT_FOLDER_PATH = "target" + separator + "NewRefreshIg";
+	private static final String TARGET_OUTPUT_IG_CQL_FOLDER_PATH = TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "cql";
+	private static final String TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH = TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "resources" + separator + "library";
 
 	// Store the original standard out before changing it.
 	private final PrintStream originalStdOut = System.out;
@@ -96,8 +97,9 @@ public class RefreshIGOperationTest extends RefreshTest {
 	}
 
 	@Test
-    public void testNewRefreshOperation() {
-        File folder = new File(NEW_REFRESH_IG_FOLDER_PATH);
+    public void testNewRefreshOperation() throws IOException {
+		copyResourcesToTargetDir(TARGET_OUTPUT_FOLDER_PATH, "NewRefreshIG");
+        File folder = new File(TARGET_OUTPUT_FOLDER_PATH);
         assertTrue(folder.exists(), "Folder should be present");
         File jsonFile = new File(folder, "ig.ini");
         assertTrue(jsonFile.exists(), "ig.ini file should be present");
@@ -105,8 +107,8 @@ public class RefreshIGOperationTest extends RefreshTest {
         NewRefreshIGOperation newRefreshIGOperation = new NewRefreshIGOperation();
         String[] args = new String[]{
                 "-NewRefreshIG",
-                "-ini=" + "src" + separator + "test" + separator + "resources" + separator + "NewRefreshIG" + separator + "ig.ini",
-                "-rd=" + "src" + separator + "test" + separator + "resources" + separator + "NewRefreshIG",
+                "-ini=" + TARGET_OUTPUT_FOLDER_PATH + separator + "ig.ini",
+                "-rd=" + TARGET_OUTPUT_FOLDER_PATH,
                 "-uv=" + "1.0.1",
                 "-d",
                 "-p",
@@ -115,15 +117,15 @@ public class RefreshIGOperationTest extends RefreshTest {
         newRefreshIGOperation.execute(args);
 
         // Verify correct update of cql files following refresh
-        File cumulativeMedFile = new File(NEW_REFRESH_IG_CQL_FOLDER_PATH, "CumulativeMedicationDuration.cql");
+        File cumulativeMedFile = new File(TARGET_OUTPUT_IG_CQL_FOLDER_PATH, "CumulativeMedicationDuration.cql");
         assertTrue(cumulativeMedFile.exists(), "CumulativeMedicationDuration.cql should exist");
         verifyFileContent(cumulativeMedFile, "library CumulativeMedicationDuration version '1.0.1'");
 
-        File mbodaFile = new File(NEW_REFRESH_IG_CQL_FOLDER_PATH, "MBODAInitialExpressions.cql");
+        File mbodaFile = new File(TARGET_OUTPUT_IG_CQL_FOLDER_PATH, "MBODAInitialExpressions.cql");
         assertTrue(mbodaFile.exists(), "MBODAInitialExpressions.cql should exist");
         verifyFileContent(mbodaFile, "include CumulativeMedicationDuration version '1.0.1' called CMD");
 
-        folder = new File(NEW_REFRESH_IG_LIBRARY_FOLDER_PATH);
+        folder = new File(TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH);
         assertTrue(folder.exists(), "Folder should be created");
 
         for (String fileName : NEW_REFRESH_IG_LIBRARY_FILE_NAMES) {
@@ -131,7 +133,7 @@ public class RefreshIGOperationTest extends RefreshTest {
             assertTrue(jsonFile.exists(), "JSON file " + fileName + " should be created");
         }
 
-        File gmtpFile = new File(NEW_REFRESH_IG_LIBRARY_FOLDER_PATH, "GMTPInitialExpressions.json");
+        File gmtpFile = new File(TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH, "GMTPInitialExpressions.json");
         assertTrue(gmtpFile.exists(), "GMTPInitialExpressions.json file should exist");
         try (FileReader reader = new FileReader(gmtpFile)) {
             JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
@@ -174,7 +176,7 @@ public class RefreshIGOperationTest extends RefreshTest {
     @AfterSuite
     public void cleanup() {
         // Delete the generated files
-        File folder = new File(NEW_REFRESH_IG_LIBRARY_FOLDER_PATH);
+        File folder = new File(TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH);
         for (String fileName : NEW_REFRESH_IG_LIBRARY_FILE_NAMES) {
             File jsonFile = new File(folder, fileName);
             if (jsonFile.exists()) {
