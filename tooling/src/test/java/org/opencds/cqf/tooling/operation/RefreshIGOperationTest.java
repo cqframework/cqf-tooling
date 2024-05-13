@@ -102,7 +102,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 	@Test
     public void testNewRefreshOperation() throws IOException {
-		copyResourcesToTargetDir(TARGET_OUTPUT_FOLDER_PATH, "NewRefreshIG");
+		copyResourcesToTargetDir(TARGET_OUTPUT_FOLDER_PATH, "target/NewRefreshIG");
         File folder = new File(TARGET_OUTPUT_FOLDER_PATH);
         assertTrue(folder.exists(), "Folder should be present");
         File jsonFile = new File(folder, "ig.ini");
