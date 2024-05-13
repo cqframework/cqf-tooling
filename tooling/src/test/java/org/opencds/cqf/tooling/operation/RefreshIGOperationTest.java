@@ -57,7 +57,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 			"MBODAInitialExpressions.json", "USCoreCommon.json", "USCoreElements.json", "USCoreTests.json"
 	};
 
-    private static final String TARGET_OUTPUT_FOLDER_PATH = "target" + separator + "NewRefreshIg";
+    private static final String TARGET_OUTPUT_FOLDER_PATH = "target" + separator + "NewRefreshIG";
 	private static final String TARGET_OUTPUT_IG_CQL_FOLDER_PATH = TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "cql";
 	private static final String TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH = TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "resources" + separator + "library";
 
