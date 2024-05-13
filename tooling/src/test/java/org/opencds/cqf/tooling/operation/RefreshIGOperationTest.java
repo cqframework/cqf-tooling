@@ -88,12 +88,27 @@ public class RefreshIGOperationTest extends RefreshTest {
 		IOUtils.resourceDirectories = new ArrayList<String>();
 		IOUtils.clearDevicePaths();
 		System.setOut(new PrintStream(this.console));
-		File dir  = new File("target" + separator + "refreshIG");
-		if (dir.exists()) {
-			FileUtils.deleteDirectory(dir);
-		}
+
+		// Delete directories
+		deleteDirectory("target" + File.separator + "refreshIG");
+		deleteDirectory("target" + File.separator + "NewRefreshIG");
 
 		deleteTempINI();
+	}
+
+	/**
+	 * Attempts to delete a directory if it exists.
+	 * @param path The path to the directory to delete.
+	 */
+	private void deleteDirectory(String path) {
+		File dir = new File(path);
+		if (dir.exists()) {
+			try {
+				FileUtils.deleteDirectory(dir);
+			} catch (IOException e) {
+				System.err.println("Failed to delete directory: " + path + " - " + e.getMessage());
+			}
+		}
 	}
 
 	@Test
@@ -173,17 +188,17 @@ public class RefreshIGOperationTest extends RefreshTest {
         return false;
     }
 
-    @AfterSuite
-    public void cleanup() {
-        // Delete the generated files
-        File folder = new File(TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH);
-        for (String fileName : NEW_REFRESH_IG_LIBRARY_FILE_NAMES) {
-            File jsonFile = new File(folder, fileName);
-            if (jsonFile.exists()) {
-                jsonFile.delete();
-            }
-        }
-    }
+//    @AfterSuite
+//    public void cleanup() {
+//        // Delete the generated files
+//        File folder = new File(TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH);
+//        for (String fileName : NEW_REFRESH_IG_LIBRARY_FILE_NAMES) {
+//            File jsonFile = new File(folder, fileName);
+//            if (jsonFile.exists()) {
+//                jsonFile.delete();
+//            }
+//        }
+//    }
 
     private void verifyFileContent(File file, String expectedContent) {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
