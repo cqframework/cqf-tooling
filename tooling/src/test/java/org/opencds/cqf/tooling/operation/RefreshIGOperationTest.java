@@ -229,7 +229,7 @@ public class RefreshIGOperationTest extends RefreshTest {
 		}
 
 		// Call the method under test, which should use HttpClientUtils.post
-		copyResourcesToTargetDir("target" + separator + "refreshIG", "testfiles" +separator + "refreshIG");
+		copyResourcesToTargetDir("target" + separator + "refreshIG", "testfiles/refreshIG");
 		// build ini object
 		File iniFile = new File(INI_LOC);
 		String iniFileLocation = iniFile.getAbsolutePath();
