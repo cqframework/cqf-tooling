@@ -96,110 +96,108 @@ public class RefreshIGOperationTest extends RefreshTest {
 	}
 
 	@Test
-	public void testNewRefreshOperation() {
-		File folder = new File(NEW_REFRESH_IG_FOLDER_PATH);
-		assertTrue(folder.exists(), "Folder should be present");
-		File jsonFile = new File(folder, "ig.ini");
-		assertTrue(jsonFile.exists(), "ig.ini file should be present");
+    public void testNewRefreshOperation() {
+        File folder = new File(NEW_REFRESH_IG_FOLDER_PATH);
+        assertTrue(folder.exists(), "Folder should be present");
+        File jsonFile = new File(folder, "ig.ini");
+        assertTrue(jsonFile.exists(), "ig.ini file should be present");
 
-		NewRefreshIGOperation newRefreshIGOperation = new NewRefreshIGOperation();
-		String[] args = new String[]{
-				"-NewRefreshIG",
-				"-ini=" + "src/test/resources/NewRefreshIG/ig.ini",
-				"-rd=" + "src/test/resources/NewRefreshIG",
-				"-uv=" + "1.0.1",
-				"-d",
-				"-p",
-				"-t"
-		};
-		newRefreshIGOperation.execute(args);
+        NewRefreshIGOperation newRefreshIGOperation = new NewRefreshIGOperation();
+        String[] args = new String[]{
+                "-NewRefreshIG",
+                "-ini=" + "src/test/resources/NewRefreshIG/ig.ini",
+                "-rd=" + "src/test/resources/NewRefreshIG",
+                "-uv=" + "1.0.1",
+                "-d",
+                "-p",
+                "-t"
+        };
+        newRefreshIGOperation.execute(args);
 
-		// Verify correct update of cql files following refresh
-		File cumulativeMedFile = new File(NEW_REFRESH_IG_CQL_FOLDER_PATH, "CumulativeMedicationDuration.cql");
-		assertTrue(cumulativeMedFile.exists(), "CumulativeMedicationDuration.cql should exist");
-		verifyFileContent(cumulativeMedFile, "library CumulativeMedicationDuration version '1.0.1'");
+        // Verify correct update of cql files following refresh
+        File cumulativeMedFile = new File(NEW_REFRESH_IG_CQL_FOLDER_PATH, "CumulativeMedicationDuration.cql");
+        assertTrue(cumulativeMedFile.exists(), "CumulativeMedicationDuration.cql should exist");
+        verifyFileContent(cumulativeMedFile, "library CumulativeMedicationDuration version '1.0.1'");
 
-		File mbodaFile = new File(NEW_REFRESH_IG_CQL_FOLDER_PATH, "MBODAInitialExpressions.cql");
-		assertTrue(mbodaFile.exists(), "MBODAInitialExpressions.cql should exist");
-		verifyFileContent(mbodaFile, "include CumulativeMedicationDuration version '1.0.1' called CMD");
+        File mbodaFile = new File(NEW_REFRESH_IG_CQL_FOLDER_PATH, "MBODAInitialExpressions.cql");
+        assertTrue(mbodaFile.exists(), "MBODAInitialExpressions.cql should exist");
+        verifyFileContent(mbodaFile, "include CumulativeMedicationDuration version '1.0.1' called CMD");
 
-		folder = new File(NEW_REFRESH_IG_LIBRARY_FOLDER_PATH);
-		assertTrue(folder.exists(), "Folder should be created");
+        folder = new File(NEW_REFRESH_IG_LIBRARY_FOLDER_PATH);
+        assertTrue(folder.exists(), "Folder should be created");
 
-		for (String fileName : NEW_REFRESH_IG_LIBRARY_FILE_NAMES) {
-			jsonFile = new File(folder, fileName);
-			assertTrue(jsonFile.exists(), "JSON file " + fileName + " should be created");
-		}
+        for (String fileName : NEW_REFRESH_IG_LIBRARY_FILE_NAMES) {
+            jsonFile = new File(folder, fileName);
+            assertTrue(jsonFile.exists(), "JSON file " + fileName + " should be created");
+        }
 
-		// Verify the contents of the GMTPInitialExpressions.json file
-		File gmtpFile = new File(NEW_REFRESH_IG_LIBRARY_FOLDER_PATH, "GMTPInitialExpressions.json");
-		assertTrue(gmtpFile.exists(), "GMTPInitialExpressions.json file should exist");
-		try (FileReader reader = new FileReader(gmtpFile)) {
-			JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
-			verifyJsonContent(jsonObject, "GMTPInitialExpressions.json");
+        File gmtpFile = new File(NEW_REFRESH_IG_LIBRARY_FOLDER_PATH, "GMTPInitialExpressions.json");
+        assertTrue(gmtpFile.exists(), "GMTPInitialExpressions.json file should exist");
+        try (FileReader reader = new FileReader(gmtpFile)) {
+            JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+            verifyJsonContent(jsonObject, "GMTPInitialExpressions.json");
 
-			// Other JSON verifications already in the test
-			String version = jsonObject.get("version").getAsString();
-			assertEquals("1.0.1", version, "Version parameter should be modified correctly");
+            String version = jsonObject.get("version").getAsString();
+            assertEquals("1.0.1", version, "Version parameter should be modified correctly");
 
-			JsonArray relatedArtifacts = jsonObject.getAsJsonArray("relatedArtifact");
-			boolean foundFHIRHelpers = verifyRelatedArtifacts(relatedArtifacts);
-			assertTrue(foundFHIRHelpers, "Library FHIRHelpers not found with correct resource value");
-		} catch (IOException e) {
-			fail("Error reading GMTPInitialExpressions.json file: " + e.getMessage());
-		}
-	}
+            JsonArray relatedArtifacts = jsonObject.getAsJsonArray("relatedArtifact");
+            boolean foundFHIRHelpers = verifyRelatedArtifacts(relatedArtifacts);
+            assertTrue(foundFHIRHelpers, "Library FHIRHelpers not found with correct resource value");
+        } catch (IOException e) {
+            fail("Error reading GMTPInitialExpressions.json file: " + e.getMessage());
+        }
+    }
 
-	private void verifyJsonContent(JsonObject jsonObject, String jsonFileName) {
-		JsonArray contentArray = jsonObject.getAsJsonArray("content");
-		assertNotNull(contentArray, "Content array should not be null in " + jsonFileName);
-		assertTrue(contentArray.size() > 0, "Content array should not be empty in " + jsonFileName);
+    private void verifyJsonContent(JsonObject jsonObject, String jsonFileName) {
+        JsonArray contentArray = jsonObject.getAsJsonArray("content");
+        assertNotNull(contentArray, "Content array should not be null in " + jsonFileName);
+        assertTrue(contentArray.size() > 0, "Content array should not be empty in " + jsonFileName);
 
-		JsonObject contentObject = contentArray.get(0).getAsJsonObject();
-		assertEquals(contentObject.get("contentType").getAsString(), "text/cql", "Content type should be 'text/cql' in " + jsonFileName);
-		assertTrue(contentObject.has("data"), "Data field should exist in " + jsonFileName);
-	}
+        JsonObject contentObject = contentArray.get(0).getAsJsonObject();
+        assertEquals(contentObject.get("contentType").getAsString(), "text/cql", "Content type should be 'text/cql' in " + jsonFileName);
+        assertTrue(contentObject.has("data"), "Data field should exist in " + jsonFileName);
+    }
 
-	private boolean verifyRelatedArtifacts(JsonArray relatedArtifacts) {
-		for (JsonElement element : relatedArtifacts) {
-			JsonObject artifact = element.getAsJsonObject();
-			if (artifact.has("display") && artifact.get("display").getAsString().equals("Library FHIRHelpers")) {
-				String resource = artifact.get("resource").getAsString();
-				if (resource.equals("http://fhir.org/guides/cqf/common/Library/FHIRHelpers|4.0.1")) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+    private boolean verifyRelatedArtifacts(JsonArray relatedArtifacts) {
+        for (JsonElement element : relatedArtifacts) {
+            JsonObject artifact = element.getAsJsonObject();
+            if (artifact.has("display") && artifact.get("display").getAsString().equals("Library FHIRHelpers")) {
+                String resource = artifact.get("resource").getAsString();
+                if (resource.equals("http://fhir.org/guides/cqf/common/Library/FHIRHelpers|4.0.1")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
-	@AfterSuite
-	public void cleanup() {
-		// Delete the generated files
-		File folder = new File(NEW_REFRESH_IG_LIBRARY_FOLDER_PATH);
-		for (String fileName : NEW_REFRESH_IG_LIBRARY_FILE_NAMES) {
-			File jsonFile = new File(folder, fileName);
-			if (jsonFile.exists()) {
-				jsonFile.delete();
-			}
-		}
-	}
+    @AfterSuite
+    public void cleanup() {
+        // Delete the generated files
+        File folder = new File(NEW_REFRESH_IG_LIBRARY_FOLDER_PATH);
+        for (String fileName : NEW_REFRESH_IG_LIBRARY_FILE_NAMES) {
+            File jsonFile = new File(folder, fileName);
+            if (jsonFile.exists()) {
+                jsonFile.delete();
+            }
+        }
+    }
 
-	private void verifyFileContent(File file, String expectedContent) {
-		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-			String line;
-			boolean found = false;
-			while ((line = reader.readLine()) != null) {
-				if (line.contains(expectedContent)) {
-					found = true;
-					break;
-				}
-			}
-			assertTrue(found, "Expected content not found in " + file.getName());
-		} catch (IOException e) {
-			fail("Failed to read " + file.getName() + ": " + e.getMessage());
-		}
-	}
+    private void verifyFileContent(File file, String expectedContent) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            boolean found = false;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(expectedContent)) {
+                    found = true;
+                    break;
+                }
+            }
+            assertTrue(found, "Expected content not found in " + file.getName());
+        } catch (IOException e) {
+            fail("Failed to read " + file.getName() + ": " + e.getMessage());
+        }
+    }
 
 	/**
 	 * This test breaks down refreshIG's process and can verify multiple bundles
