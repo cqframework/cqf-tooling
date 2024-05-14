@@ -397,7 +397,7 @@ public class CqlProcessor {
 
             if (!severeErrorList.isEmpty()) {
                 var messages = severeErrorList.stream().map(x -> x.getMessage()).reduce("", (x, y) -> x + "\n" + y);
-                log.error("CQL Processing failed with errors count: {}, messages: {}", severeErrorList.size(), messages);
+                log.warn("CQL Processing failed with errors count: {}, messages: {}", severeErrorList.size(), messages);
                 result.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, IssueType.EXCEPTION, file.getName(),
                         String.format("CQL Processing failed with (%d) errors.", translator.getErrors().size()), IssueSeverity.ERROR));
             }

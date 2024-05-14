@@ -67,7 +67,7 @@ public class LibraryRefresh extends Refresh {
 
             for (CqlProcessor.CqlSourceFileInformation info : cqlProcessor.getAllFileInformation()) {
                if (info.getIdentifier() == null) {
-                  logger.error("No identifier found for CQL file {}", info.getPath());
+                  logger.warn("No identifier found for CQL file {}", info.getPath());
                }
 
                if (info.getIdentifier().getId().endsWith(name)) {
