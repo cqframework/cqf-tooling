@@ -203,6 +203,8 @@ public abstract class AbstractBundler {
                         shouldPersist = shouldPersist
                                 & ResourceUtils.safeAddResource(primaryLibrarySourcePath, resources, fhirContext);
 
+                        /*
+                        // Should not use CQL processing to determine value set dependencies
                         String cqlFileName = IOUtils.formatFileName(primaryLibraryName, IOUtils.Encoding.CQL, fhirContext);
 
                         String cqlLibrarySourcePath = IOUtils.getCqlLibrarySourcePath(primaryLibraryName, cqlFileName, binaryPaths);
@@ -212,11 +214,13 @@ public abstract class AbstractBundler {
                             //exit from task:
                             return null;
                         }
+                        */
 
                         if (includeTerminology) {
                             //throws CQLTranslatorException if failed with severe errors, which will be logged and reported it in the final summary
                             try {
-                                ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
+                                //ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
+                                ValueSetsProcessor.bundleValueSets(primaryLibrary, fhirContext, resources, encoding, includeDependencies, includeVersion);
                             } catch (CqlTranslatorException cqlTranslatorException) {
                                 cqlTranslatorErrorMessages.put(primaryLibraryName, cqlTranslatorException.getErrors());
                             }
@@ -225,7 +229,7 @@ public abstract class AbstractBundler {
                         if (includeDependencies) {
                             if (libraryProcessor == null) libraryProcessor = new LibraryProcessor();
                             try {
-                                libraryProcessor.bundleLibraryDependencies(primaryLibrarySourcePath, fhirContext, resources, encoding, includeVersion);
+                                libraryProcessor.bundleLibraryDependencies(primaryLibrary, fhirContext, resources, encoding, includeVersion);
                             } catch (Exception bre) {
                                 failedExceptionMessages.put(resourceSourcePath, getResourceBundlerType() + " will not be bundled because Library Dependency bundling failed: " + bre.getMessage());
                                 //exit from task:
@@ -248,9 +252,11 @@ public abstract class AbstractBundler {
 
                             persistBundle(bundleDestPath, resourceName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri, addBundleTimestamp);
 
-                            bundleFiles(igPath, bundleDestPath, resourceName, binaryPaths, resourceSourcePath,
-                                    primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios,
-                                    includeVersion, addBundleTimestamp, cqlTranslatorErrorMessages);
+                            // It's not clear at all why this is happening... we've already persisted the bundle? Why write out all the bundle files??
+                            // And if we _do_ need to write out the bundle files, why go through the whole assembling process again? Just write out the resources in the bundle we already have, right?
+                            //bundleFiles(igPath, bundleDestPath, resourceName, binaryPaths, resourceSourcePath,
+                            //        primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios,
+                            //        includeVersion, addBundleTimestamp, cqlTranslatorErrorMessages);
 
                             //If user supplied a fhir server url, inform them of total # of files to be persisted to the server:
                             if (fhirUri != null && !fhirUri.isEmpty()) {
