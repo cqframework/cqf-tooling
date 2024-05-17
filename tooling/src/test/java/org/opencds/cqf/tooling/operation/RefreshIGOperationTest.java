@@ -1,14 +1,28 @@
 package org.opencds.cqf.tooling.operation;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import com.fasterxml.jackson.core.StreamReadConstraints;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.common.Json;
+import com.google.gson.*;
+import org.apache.commons.io.FileUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.utilities.IniFile;
+import org.opencds.cqf.tooling.RefreshTest;
+import org.opencds.cqf.tooling.operation.ig.NewRefreshIGOperation;
+import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
+import org.opencds.cqf.tooling.processor.IGProcessor;
+import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
+import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.*;
+
+import java.io.*;
 import java.net.ServerSocket;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -19,33 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.utilities.IniFile;
-import org.opencds.cqf.tooling.RefreshTest;
-import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
-import org.opencds.cqf.tooling.processor.IGProcessor;
-import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
-import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.opencds.cqf.tooling.utilities.ResourceUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.common.Json;
-import com.google.gson.Gson;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-
 import static org.testng.Assert.*;
-import org.hl7.fhir.r4.model.Group;
 public class RefreshIGOperationTest extends RefreshTest {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	public RefreshIGOperationTest() {
@@ -64,6 +52,14 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 	private final String INI_LOC = Path.of("target","refreshIG","ig.ini").toString();
 
+	private static final String[] NEW_REFRESH_IG_LIBRARY_FILE_NAMES = {
+			"GMTPInitialExpressions.json", "GMTPInitialExpressions.json",
+			"MBODAInitialExpressions.json", "USCoreCommon.json", "USCoreElements.json", "USCoreTests.json"
+	};
+
+    private static final String TARGET_OUTPUT_FOLDER_PATH = "target" + separator + "NewRefreshIG";
+	private static final String TARGET_OUTPUT_IG_CQL_FOLDER_PATH = TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "cql";
+	private static final String TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH = TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "resources" + separator + "library";
 
 	// Store the original standard out before changing it.
 	private final PrintStream originalStdOut = System.out;
@@ -81,12 +77,125 @@ public class RefreshIGOperationTest extends RefreshTest {
 		IOUtils.resourceDirectories = new ArrayList<String>();
 		IOUtils.clearDevicePaths();
 		System.setOut(new PrintStream(this.console));
-		File dir  = new File("target" + separator + "refreshIG");
-		if (dir.exists()) {
-			FileUtils.deleteDirectory(dir);
-		}
+
+		// Delete directories
+		deleteDirectory("target" + File.separator + "refreshIG");
+		deleteDirectory("target" + File.separator + "NewRefreshIG");
 
 		deleteTempINI();
+	}
+
+	/**
+	 * Attempts to delete a directory if it exists.
+	 * @param path The path to the directory to delete.
+	 */
+	private void deleteDirectory(String path) {
+		File dir = new File(path);
+		if (dir.exists()) {
+			try {
+				FileUtils.deleteDirectory(dir);
+			} catch (IOException e) {
+				System.err.println("Failed to delete directory: " + path + " - " + e.getMessage());
+			}
+		}
+	}
+
+	@Test
+    public void testNewRefreshOperation() throws IOException {
+		copyResourcesToTargetDir(TARGET_OUTPUT_FOLDER_PATH, "testfiles/NewRefreshIG");
+        File folder = new File(TARGET_OUTPUT_FOLDER_PATH);
+        assertTrue(folder.exists(), "Folder should be present");
+        File jsonFile = new File(folder, "ig.ini");
+        assertTrue(jsonFile.exists(), "ig.ini file should be present");
+
+        NewRefreshIGOperation newRefreshIGOperation = new NewRefreshIGOperation();
+        String[] args = new String[]{
+                "-NewRefreshIG",
+                "-ini=" + TARGET_OUTPUT_FOLDER_PATH + separator + "ig.ini",
+                "-rd=" + TARGET_OUTPUT_FOLDER_PATH,
+                "-uv=" + "1.0.1",
+                "-d",
+                "-p",
+                "-t"
+        };
+        newRefreshIGOperation.execute(args);
+
+        // Verify correct update of cql files following refresh
+        File cumulativeMedFile = new File(TARGET_OUTPUT_IG_CQL_FOLDER_PATH, "CumulativeMedicationDuration.cql");
+        assertTrue(cumulativeMedFile.exists(), "CumulativeMedicationDuration.cql should exist");
+        verifyFileContent(cumulativeMedFile, "library CumulativeMedicationDuration version '1.0.1'");
+
+        File mbodaFile = new File(TARGET_OUTPUT_IG_CQL_FOLDER_PATH, "MBODAInitialExpressions.cql");
+        assertTrue(mbodaFile.exists(), "MBODAInitialExpressions.cql should exist");
+        verifyFileContent(mbodaFile, "include CumulativeMedicationDuration version '1.0.1' called CMD");
+
+        folder = new File(TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH);
+        assertTrue(folder.exists(), "Folder should be created");
+
+        for (String fileName : NEW_REFRESH_IG_LIBRARY_FILE_NAMES) {
+            jsonFile = new File(folder, fileName);
+            assertTrue(jsonFile.exists(), "JSON file " + fileName + " should be created");
+        }
+
+        File gmtpFile = new File(TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH, "GMTPInitialExpressions.json");
+        assertTrue(gmtpFile.exists(), "GMTPInitialExpressions.json file should exist");
+        try (FileReader reader = new FileReader(gmtpFile)) {
+            JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+            verifyJsonContent(jsonObject, "GMTPInitialExpressions.json");
+
+            String version = jsonObject.get("version").getAsString();
+            assertEquals("1.0.1", version, "Version parameter should be modified correctly");
+
+            JsonArray relatedArtifacts = jsonObject.getAsJsonArray("relatedArtifact");
+            boolean foundFHIRHelpers = verifyRelatedArtifacts(relatedArtifacts);
+            assertTrue(foundFHIRHelpers, "Library FHIRHelpers not found with correct resource value");
+        } catch (IOException e) {
+            fail("Error reading GMTPInitialExpressions.json file: " + e.getMessage());
+        }
+    }
+
+    private void verifyJsonContent(JsonObject jsonObject, String jsonFileName) {
+        JsonArray contentArray = jsonObject.getAsJsonArray("content");
+        assertNotNull(contentArray, "Content array should not be null in " + jsonFileName);
+        assertTrue(contentArray.size() > 0, "Content array should not be empty in " + jsonFileName);
+
+        JsonObject contentObject = contentArray.get(0).getAsJsonObject();
+        assertEquals(contentObject.get("contentType").getAsString(), "text/cql", "Content type should be 'text/cql' in " + jsonFileName);
+        assertTrue(contentObject.has("data"), "Data field should exist in " + jsonFileName);
+    }
+
+    private boolean verifyRelatedArtifacts(JsonArray relatedArtifacts) {
+        for (JsonElement element : relatedArtifacts) {
+            JsonObject artifact = element.getAsJsonObject();
+            if (artifact.has("display") && artifact.get("display").getAsString().equals("Library FHIRHelpers")) {
+                String resource = artifact.get("resource").getAsString();
+                if (resource.equals("http://fhir.org/guides/cqf/common/Library/FHIRHelpers|4.0.1")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void verifyFileContent(File file, String expectedContent) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            boolean found = false;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(expectedContent)) {
+                    found = true;
+                    break;
+                }
+            }
+            assertTrue(found, "Expected content not found in " + file.getName());
+        } catch (IOException e) {
+            fail("Failed to read " + file.getName() + ": " + e.getMessage());
+        }
+    }
+
+	@AfterSuite
+	public void cleanup() {
+		deleteDirectory("null");
 	}
 
 	/**
