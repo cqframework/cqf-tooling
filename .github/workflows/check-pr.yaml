@@ -26,7 +26,7 @@ jobs:
       - name: Compile
         run: ./mvnw --batch-mode --no-transfer-progress --update-snapshots -T 4 package -DskipTests=true
       - name: Tests and additional checks
-        run: ./mvnw --batch-mode --no-transfer-progress -T 4 verify -Ppackage
+        run: ./mvnw --batch-mode --no-transfer-progress -T 4 verify -Ppackage -Dorg.slf4j.simpleLogger.defaultLogLevel=info
       - name: Publish test report
         uses: mikepenz/action-junit-report@v4
         if: (success() || failure()) && matrix.os == 'ubuntu-latest'
