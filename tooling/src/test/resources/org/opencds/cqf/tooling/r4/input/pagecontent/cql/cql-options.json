@@ -1,0 +1,19 @@
+{
+   "options":[
+      "EnableAnnotations",
+      "EnableLocators",
+      "DisableListDemotion",
+      "DisableListPromotion",
+      "EnableDateRangeOptimization"
+],
+   "formats":[
+      "XML","JSON"
+   ],
+   "validateUnits":true,
+   "verifyOnly":false,
+   "errorLevel":"Info",
+   "signatureLevel":"None",
+   "analyzeDataRequirements":false,
+   "collapseDataRequirements":true,
+   "compatibilityLevel": "1.3"
+}

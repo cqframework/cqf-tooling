@@ -2,6 +2,7 @@ package org.opencds.cqf.tooling.processor;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,13 +35,17 @@ import org.opencds.cqf.tooling.npm.ILibraryReader;
 import org.opencds.cqf.tooling.npm.NpmLibrarySourceProvider;
 import org.opencds.cqf.tooling.npm.NpmModelInfoProvider;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
+import org.slf4j.Logger;
 
 public class CqlProcessor {
+
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(CqlProcessor.class);
 
     /**
      * information about a cql file
      */
     public class CqlSourceFileInformation {
+        private final String path;
         private CqlTranslatorOptions options;
         private VersionedIdentifier identifier;
         private byte[] cql;
@@ -50,6 +55,15 @@ public class CqlProcessor {
         private List<RelatedArtifact> relatedArtifacts = new ArrayList<>();
         private List<DataRequirement> dataRequirements = new ArrayList<>();
         private List<ParameterDefinition> parameters = new ArrayList<>();
+
+        public CqlSourceFileInformation(String path) {
+            this.path = path;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
         public CqlTranslatorOptions getOptions() {
             return options;
         }
@@ -361,7 +375,7 @@ public class CqlProcessor {
 
     private void translateFile(LibraryManager libraryManager, File file, CqlCompilerOptions options) {
 //        logger.logMessage(String.format("Translating CQL source in file %s", file.toString()));
-        CqlSourceFileInformation result = new CqlSourceFileInformation();
+        CqlSourceFileInformation result = new CqlSourceFileInformation(file.getAbsolutePath());
         fileMap.put(file.getAbsoluteFile().toString(), result);
 
         if (options.getValidateUnits()) {
@@ -382,6 +396,8 @@ public class CqlProcessor {
 
 
             if (!severeErrorList.isEmpty()) {
+                var messages = severeErrorList.stream().map(x -> x.getMessage()).reduce("", (x, y) -> x + "\n" + y);
+                log.warn("CQL Processing failed with errors count: {}, messages: {}", severeErrorList.size(), messages);
                 result.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, IssueType.EXCEPTION, file.getName(),
                         String.format("CQL Processing failed with (%d) errors.", translator.getErrors().size()), IssueSeverity.ERROR));
             }
@@ -390,6 +406,7 @@ public class CqlProcessor {
                     result.setOptions(new CqlTranslatorOptions().withCqlCompilerOptions(options));
                     // convert to base64 bytes
                     // NOTE: Publication tooling requires XML content
+                    result.setCql(Files.readAllBytes(file.toPath()));
                     result.setElm(translator.toXml().getBytes());
                     result.setIdentifier(translator.toELM().getIdentifier());
                     result.setJsonElm(translator.toJson().getBytes());

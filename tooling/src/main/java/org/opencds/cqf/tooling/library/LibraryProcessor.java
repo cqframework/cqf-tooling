@@ -42,7 +42,7 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class LibraryProcessor extends BaseProcessor {
     private static final Logger logger = LoggerFactory.getLogger(LibraryProcessor.class);
-    public static final String ResourcePrefix = "library-";
+    public static final String ResourcePrefix = "Library-";
 
     public static String getId(String baseId) {
         return ResourcePrefix + baseId;
@@ -270,14 +270,14 @@ public class LibraryProcessor extends BaseProcessor {
     }
 
     public List<Library> refreshGeneratedContent(String cqlDirectoryPath, String fhirVersion) {
-        List<String> result = new ArrayList<String>();
+        var result = new ArrayList<String>();
         File input = new File(cqlDirectoryPath);
         if (input.exists() && input.isDirectory()) {
             result.add(input.getAbsolutePath());
         }
         setBinaryPaths(result);
 
-        List<Library> libraries = new ArrayList<Library>();
+        var libraries = new ArrayList<Library>();
         return internalRefreshGeneratedContent(libraries);
     }
 
@@ -320,6 +320,11 @@ public class LibraryProcessor extends BaseProcessor {
                     sourceLibraries.add(newLibrary);
                 }
             }
+            else
+            {
+                logger.warn("No identifier found for CQL file {}", fileInfo.getPath());
+            }
+            
         }
 
         List<Library> resources = new ArrayList<Library>();
