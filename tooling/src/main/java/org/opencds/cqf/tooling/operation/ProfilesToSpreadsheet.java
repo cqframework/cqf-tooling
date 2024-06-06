@@ -85,7 +85,7 @@ public class ProfilesToSpreadsheet extends StructureDefinitionToSpreadsheetBase 
             addBindingObjectRowDataToCurrentSheet(firstSheet, rowCount.getAndAccumulate(1, ibo), bindingObject);
         });
         SpreadsheetCreatorHelper.writeSpreadSheet(workBook,
-                IOUtils.concatFilePath(getOutputPath(), modelName + modelVersion + ".xlsx"));
+                IOUtils.concatFilePath(getOutputPath(), modelName + " " + modelVersion + " Profile Elements.xlsx"));
     }
 
     private List<String> createHeaderNameList() {
@@ -95,7 +95,7 @@ public class ProfilesToSpreadsheet extends StructureDefinitionToSpreadsheetBase 
             add("Conformance");
             add("ValueSet");
             add("ValueSetURL");
-            add("Version");
+            add("Binding ValueSet Version");
             add("Code System URLs");
             add("Must Support Y/N");
             add("Cardinality");
