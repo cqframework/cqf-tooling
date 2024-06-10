@@ -1,199 +1,0 @@
----
-# jekyll header
----
-{% include header.html %}
-{% include container-start.html %}
-<ul id="markdown-toc"><li><a href="#Physical_Exam.2C_Order">Physical Exam, Order</a></li><li><a href="#Physical_Exam.2C_Recommended">Physical Exam, Recommended</a></li><li><a href="#Physical_Exam.2C_Performed">Physical Exam, Performed</a></li></ul>
-<a name="PhysicalExam"> </a>
-<h2>
-    <span class="sectioncount">7.18.0</span> Physical Exam <a href="PhysicalExam.html#PhysicalExam" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h2>
-
-
-<p>The CQI Workgroup reviewed the mapping to QDM version 5.3 in April 2018. The content is updated on June 7, 2018 based on QDM version 5.4. The changes based on QDM 5.4 include:
-</p>
-<ul>
-<li>Removal of the &#34;method&#34; attribute from &#34;Physical Exam, Order&#34; and &#34;Physical Exam, Recommended&#34;</li>
-</ul>
-
-
-<p>QDM defines Physical Exam as the evaluation of the patient&#39;s body and/or mental status exam to determine its state of health. The techniques of examination can include palpation (feeling with the hands or fingers), percussion (tapping with the fingers), auscultation (listening), visual inspection or observation, inquisition and smell. Measurements may include vital signs (blood pressure, pulse, respiration) as well as other clinical measures (such as expiratory flow rate and size of lesion). Physical exam includes psychiatric examinations. QDM defines three contexts for Physical Exam: Physical Exam, Order; Physical Exam, Performed; Physical Exam, Recommended.</p>
-
-
-
-<a name="Physical_Exam.2C_Order"> </a>
-<h3>
-    <span class="sectioncount">7.18.1</span> Physical Exam, Order <a href="PhysicalExam.html#Physical_Exam.2C_Order" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h3>
-
-
-<div style="page-break-inside: avoid;">
-<table border="1" cellpadding="2" cellspacing="0">
-<tr>
-<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
-<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
-<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
-<tr valign="top">
-<td>Physical Exam, Order</td>
-<td>ProcedureRequest.intent</td>
-<td>Procedure Request intent uses the concepts proposal, plan, order, original-order, reflex-order, filler-order, instance-order, option. Constrain to &#34;order&#34; from the intent value set for QDM datatypes with the order context.</td></tr>
-<tr>
-<td>Anatomical Location Site</td>
-<td>ProcedureRequest.extension (<a class="external free" href="http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedurerequest-approachBodySite" rel="nofollow">http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedurerequest-approachBodySite</a>)</td>
-<td>Note QI Core ProcedureRequest.extension (<a class="external free" href="http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedurerequest-appropriatenessScore" rel="nofollow">http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedurerequest-appropriatenessScore</a>) - not included in QDM but may potentially apply to Appropriate Use Criteria</td></tr>
-<tr>
-<td>Negation Rationale</td>
-<td>ProcedureRequest.extension (<a class="external free" href="http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused" rel="nofollow">http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused</a>)</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Reason</td>
-<td>ProcedureRequest.reasonCode</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Author dateTime</td>
-<td>ProcedureRequest.authoredOn</td>
-<td>Note - ProcedureRequest.occurrence[x] defines a dateTime when the event should occur - not addressed in QDM
-
-Note: FHIR Provenance generally addresses the author of the message; the identifier/source of the original resource element is defined by the resource. Individual resource element provenance is summarized in the FHIR W5 Report (<a class="external free" href="http://hl7.org/fhir/w5.html" rel="nofollow">http://hl7.org/fhir/w5.html</a>).</td></tr>
-<tr>
-<td>Code</td>
-<td>ProcedureRequest.code</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>id</td>
-<td>ProcedureRequest.id</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Source</td>
-<td>ProcedureRequest.requester</td>
-<td>Author, orderer - note also, ProcedureRequest.requester.agent for device, practitioner or organization who initiated the request; or ProcedureRequest.requester.onBehalfOf  - the organization the device or practitioner was acting on behalf of</td></tr></table></div>
-
-
-<a name="Physical_Exam.2C_Recommended"> </a>
-<h3>
-    <span class="sectioncount">7.18.2</span> Physical Exam, Recommended <a href="PhysicalExam.html#Physical_Exam.2C_Recommended" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h3>
-
-
-<div style="page-break-inside: avoid;">
-<table border="1" cellpadding="2" cellspacing="0">
-<tr>
-<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
-<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
-<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
-<tr valign="top">
-<td>Physical Exam, Recommended</td>
-<td>ProcedureRequest.intent</td>
-<td>Procedure Request intent uses the concepts proposal, plan, order, original-order, reflex-order, filler-order, instance-order, option. Constrain to &#34;order&#34; from the intent value set for QDM datatypes with the order context.</td></tr>
-<tr>
-<td>Anatomical Location Site</td>
-<td>ProcedureRequest.extension (<a class="external free" href="http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedurerequest-approachBodySite" rel="nofollow">http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedurerequest-approachBodySite</a>)</td>
-<td>Note QI Core ProcedureRequest.extension (<a class="external free" href="http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedurerequest-appropriatenessScore" rel="nofollow">http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedurerequest-appropriatenessScore</a>) - not included in QDM but may potentially apply to Appropriate Use Criteria</td></tr>
-<tr>
-<td>Negation Rationale</td>
-<td>ProcedureRequest.extension (<a class="external free" href="http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused" rel="nofollow">http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused</a>)</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Reason</td>
-<td>ProcedureRequest.reasonCode</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Author dateTime</td>
-<td>ProcedureRequest.authoredOn</td>
-<td>Note - ProcedureRequest.occurrence[x] defines a dateTime when the event should occur - not addressed in QDM
-
-Note: FHIR Provenance generally addresses the author of the message; the identifier/source of the original resource element is defined by the resource. Individual resource element provenance is summarized in the FHIR W5 Report (<a class="external free" href="http://hl7.org/fhir/w5.html" rel="nofollow">http://hl7.org/fhir/w5.html</a>).</td></tr>
-<tr>
-<td>Code</td>
-<td>ProcedureRequest.code</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>id</td>
-<td>ProcedureRequest.id</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Source</td>
-<td>ProcedureRequest.requester</td>
-<td>Author, orderer - note also, ProcedureRequest.requester.agent for device, practitioner or organization who initiated the request; or ProcedureRequest.requester.onBehalfOf  - the organization the device or practitioner was acting on behalf of</td></tr></table></div>
-
-
-<a name="Physical_Exam.2C_Performed"> </a>
-<h3>
-    <span class="sectioncount">7.18.3</span> Physical Exam, Performed <a href="PhysicalExam.html#Physical_Exam.2C_Performed" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h3>
-
-<ul>
-<li>Note - Physical Exam, Performed uses the US FHIR Core Observation Profile referenced by QI Core. Specifically for Vital Signs, QI Core addresses the <a class="external text" href="http://hl7.org/fhir/us/core/us-core-vitalsigns.html" rel="nofollow">US FHIR Core Vital Signs Profile</a> which specifies LOINC Codes and definitions for each references vital sign and Observation.component.code for each of diastolic blood pressure and systolic blood pressure.</li>
-</ul>
-
-<div style="page-break-inside: avoid;">
-<table border="1" cellpadding="2" cellspacing="0">
-<tr>
-<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
-<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
-<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
-<tr valign="top">
-<td>Physical Exam, Performed</td>
-<td>Observation (the .status metadata allows conformance to the specific QDM datatype context)</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Anatomical Location Site</td>
-<td>Observation.bodySite</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Method</td>
-<td>Observaton.method</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Relevant Period</td>
-<td>observation.effective.x</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Negation Rationale</td>
-<td>Observation.dataAbsentReason</td>
-<td>The value set is required. Many eCQMs use a measure developer-specific value set. Note, component also has a Observation.component.dataAbsentReason in QI Core.</td></tr>
-<tr>
-<td>Reason</td>
-<td>Observaton.basedOn</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Result</td>
-<td>Observation.value(x)</td>
-<td>Note - QI Core also includes Observation.interpretation and Observation.comment - eCQMs have addressed interpretation as an implementation issue. Perhaps that approach should be reconsidered.</td></tr>
-<tr>
-<td>Author dateTime</td>
-<td>Observation.issued</td>
-<td>QDM matched to QI Core / FHIR
-
-Note: FHIR Provenance generally addresses the author of the message; the identifier/source of the original resource element is defined by the resource. Individual resource element provenance is summarized in the FHIR W5 Report (<a class="external free" href="http://hl7.org/fhir/w5.html" rel="nofollow">http://hl7.org/fhir/w5.html</a>).</td></tr>
-<tr>
-<td>Status</td>
-<td>Procedure.status</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Components</td>
-<td>Observation.component</td>
-<td>QDM uses components to combine related observations to each other, e.g., a set of independent observations performed within an admission assessment for an inpatient admission. Each observation is unique (e.g., questions about tobacco usage, other substance usage, blood pressure, pulse, skin turgor, etc., etc.) but they are captured during the same patient-provider interaction. Such QDM components should map directly to QI Core / FHIR observations that can be linked to other observations. Other QDM component examples include multiple questions that are part of a validated evaluation tool (e.g., a Braden skin assessment scale). This latter example indicates individual questions that are inherently tied to the Braden scale instrument and the questions and answers do not have inherent value without being part of the instrument. QI Core / FHIR considers each such question as an Observation.component.  A general rule of thumb is QI Core / FHIR components apply only when the inherent value of the observation is defined by the parent observation. The result is that the content will determine if a QDM component maps to Observation.code or to Observation.component.code. </td></tr>
-<tr>
-<td>Component Code</td>
-<td>Observation.component.code</td>
-<td>See &#34;Component&#34; - Content-specific</td></tr>
-<tr>
-<td>Component Result</td>
-<td>Observation.component.value(x)</td>
-<td>See &#34;Component&#34; - Content-specific</td></tr>
-<tr>
-<td>Code</td>
-<td>Observation.code</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>id</td>
-<td>Observation.id</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Source</td>
-<td>Observation.performer</td>
-<td>QDM matched to QI Core / FHIR</td></tr></table></div>
-
-{% include container-end.html %}
-{% include footer.html %}

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.XmlParser;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.UsageContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.parameter.TransformErsdParameters;
@@ -146,6 +147,45 @@ public class ErsdTransformerIT {
                         && x.hasValueCodeableConcept()
                         && x.getValueCodeableConcept().getCodingFirstRep().getCode().equals("emergent")).findFirst().get();
         assertNotNull(usageContext);
+
+        logger.info("Transform");
+    }
+
+    @Test
+    public void testErsdTransformerManifestElementPresence() throws Exception {
+        TransformErsdParameters params = new TransformErsdParameters();
+        params.pathToBundle = "src/test/resources/casereporting/transformer/eRSDv1bundle.json";
+        params.outputPath = "src/test/resources/casereporting/transformer/output";
+        String outputBundleFileName = "rctc-release-2022-10-19-Bundle-rctc.json";
+        params.pathToV2PlanDefinition = "src/test/resources/casereporting/transformer/eRSDv2PlanDefinition/plandefinition-us-ecr-specification.json";
+
+        Bundle outputBundle = transformBundle(params, outputBundleFileName);
+
+        assertNotNull(outputBundle);
+        Library manifestLibrary;
+        manifestLibrary = (Library)outputBundle.getEntry().stream().filter(x -> x.hasResource()
+                && x.getResource().fhirType().equals("Library")
+                && x.getResource().getId().equals("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary")).findFirst().get().getResource();
+
+        assertNotNull(manifestLibrary);
+
+        List<UsageContext> useContexts = manifestLibrary.getUseContext();
+        UsageContext reportingUseContext = useContexts.stream().filter(x -> x.hasCode()
+                && x.getCode().getCode().equals("reporting")
+                && x.hasValueCodeableConcept()
+                && x.getValueCodeableConcept().getCodingFirstRep().getCode().equals("triggering")).findFirst().get();
+        assertNotNull(reportingUseContext);
+
+        UsageContext specificationTypeUseContext = useContexts.stream().filter(x -> x.hasCode()
+                && x.getCode().getCode().equals("reporting")
+                && x.hasValueCodeableConcept()
+                && x.getValueCodeableConcept().getCodingFirstRep().getCode().equals("triggering")).findFirst().get();
+        assertNotNull(specificationTypeUseContext);
+
+        assertNotNull(manifestLibrary.getDate());
+        assertNotNull(manifestLibrary.getEffectivePeriod());
+        assertNotNull(manifestLibrary.getEffectivePeriod().getStart());
+        assertNotNull(manifestLibrary.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel"));
 
         logger.info("Transform");
     }

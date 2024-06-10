@@ -14,12 +14,7 @@ import org.cqframework.cql.elm.IdObjectFactory;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
-import org.hl7.elm.r1.ContextDef;
-import org.hl7.elm.r1.Expression;
-import org.hl7.elm.r1.ExpressionRef;
-import org.hl7.elm.r1.Library;
-import org.hl7.elm.r1.UsingDef;
-import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.elm.r1.*;
 import org.opencds.cqf.tooling.cql_generation.IOUtil;
 import org.opencds.cqf.tooling.cql_generation.builder.VmrToModelElmBuilder;
 

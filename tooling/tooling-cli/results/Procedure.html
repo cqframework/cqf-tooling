@@ -1,210 +1,0 @@
----
-# jekyll header
----
-{% include header.html %}
-{% include container-start.html %}
-<ul id="markdown-toc"><li><a href="#Procedure.2C_Order">Procedure, Order</a></li><li><a href="#Procedure.2C_Recommended">Procedure, Recommended</a></li><li><a href="#Procedure.2C_Performed">Procedure, Performed</a></li></ul>
-<a name="Procedure"> </a>
-<h2>
-    <span class="sectioncount">7.19.0</span> Procedure <a href="Procedure.html#Procedure" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h2>
-
-
-<p>The CQI Workgroup reviewed this page in April 2018 consistent with QDM version 5.3. QDM version 5.4 updates were applied on June 7, 2018:
-</p>
-<ul>
-<li>Removal of &#34;anatomical approach site&#34; from &#34;Procedure, Performed&#34;, &#34;Procedure, Order&#34;, and &#34;Procedure, Recommended&#34;</li>
-<li>Removal of &#34;method&#34; from &#34;Procedure, Order&#34; and &#34;Procedure, Recommended&#34;</li>
-</ul>
-
-
-<pre>Note that while the QDM categories Intervention and Procedure are modeled identically and interoperability standards do not differentiate between them, both are retained in the QDM as they are more clinically expressive for clinicians to understand the measure intent.
-</pre>
-
-<p>QDM defines Procedure as “An Act whose immediate and primary outcome (post-condition) is the alteration of the physical condition of the subject. … Procedure is but one among several types of clinical activities such as observation, substance-administrations, and communicative interactions … Procedure does not comprise all acts of [sic] whose intent is intervention or treatment.�?  A procedure may be a surgery or other type of physical manipulation of a person’s body in whole or in part for purposes of making observations and diagnoses or providing treatment.   QDM defines three contexts for Procedure: Procedure, Order; Procedure, Performed; Procedure, Recommended.</p>
-
-
-
-<a name="Procedure.2C_Order"> </a>
-<h3>
-    <span class="sectioncount">7.19.1</span> Procedure, Order <a href="Procedure.html#Procedure.2C_Order" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h3>
-
-
-<div style="page-break-inside: avoid;">
-<table border="1" cellpadding="2" cellspacing="0">
-<tr>
-<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
-<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
-<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
-<tr valign="top">
-<td>Procedure, Order</td>
-<td>ProcedureRequest.intent</td>
-<td>Procedure Request intent uses the concepts proposal, plan, order, original-order, reflex-order, filler-order, instance-order, option. Constrain to &#34;order&#34; from the intent value set for QDM datatypes with the order context.</td></tr>
-<tr>
-<td>Negation Rationale</td>
-<td>ProcedureRequest.extension (<a class="external free" href="http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused" rel="nofollow">http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused</a>)</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Reason</td>
-<td>ProcedureRequest.reasonCode</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Author dateTime</td>
-<td>ProcedureRequest.authoredOn</td>
-<td>Note - ProcedureRequest.occurrence[x] defines a dateTime when the event should occur - not addressed in QDM
-
-Note: FHIR Provenance generally addresses the author of the message; the identifier/source of the original resource element is defined by the resource. Individual resource element provenance is summarized in the FHIR W5 Report (<a class="external free" href="http://hl7.org/fhir/w5.html" rel="nofollow">http://hl7.org/fhir/w5.html</a>).</td></tr>
-<tr>
-<td>Code</td>
-<td>ProcedureRequest.code</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>AnatomicalLocation</td>
-<td>ProcedureRequest.bodySite</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Ordinality</td>
-<td>.</td>
-<td>Not addressed in FHIR ProcedureRequest</td></tr>
-<tr>
-<td>id</td>
-<td>ProcedureRequest.id</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Source</td>
-<td>ProcedureRequest.requester</td>
-<td>Author, orderer - note also, ProcedureRequest.requester.agent for device, practitioner or organization who initiated the request; or ProcedureRequest.requester.onBehalfOf  - the organization the device or practitioner was acting on behalf of</td></tr></table></div>
-
-
-<a name="Procedure.2C_Recommended"> </a>
-<h3>
-    <span class="sectioncount">7.19.2</span> Procedure, Recommended <a href="Procedure.html#Procedure.2C_Recommended" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h3>
-
-
-<div style="page-break-inside: avoid;">
-<table border="1" cellpadding="2" cellspacing="0">
-<tr>
-<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
-<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
-<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
-<tr valign="top">
-<td>Procedure, Recommended</td>
-<td>ProcedureRequest.intent</td>
-<td>Procedure Request intent uses the concepts proposal, plan, order, original-order, reflex-order, filler-order, instance-order, option. &#34;Proposal&#34; is most consistent with the ProcedureRequest when applied to clinical decision support (CDS) in which the CDS proposes an action to a provider or to a patient. The QDM concept Recommended addresses expectations a provider gives to a patient. Such recommendations are most consistent with the ProcedureRequest.intent value of &#34;plan&#34; (an intension to ensure something occurs without providing an authorization to act).</td></tr>
-<tr>
-<td>Negation Rationale</td>
-<td>ProcedureRequest.extension (<a class="external free" href="http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused" rel="nofollow">http://hl7.org/fhir/StructureDefinition/procedurerequest-reasonRefused</a>)</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Reason</td>
-<td>ProcedureRequest.reasonCode</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Author dateTime</td>
-<td>ProcedureRequest.authoredOn</td>
-<td>Note - ProcedureRequest.occurrence[x] defines a dateTime when the event should occur - not addressed in QDM
-
-Note: FHIR Provenance generally addresses the author of the message; the identifier/source of the original resource element is defined by the resource. Individual resource element provenance is summarized in the FHIR W5 Report (<a class="external free" href="http://hl7.org/fhir/w5.html" rel="nofollow">http://hl7.org/fhir/w5.html</a>).</td></tr>
-<tr>
-<td>Code</td>
-<td>ProcedureRequest.code</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>AnatomicalLocation</td>
-<td>ProcedureRequest.bodySite</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Ordinality</td>
-<td>.</td>
-<td>Not addressed in FHIR ProcedureRequest</td></tr>
-<tr>
-<td>id</td>
-<td>ProcedureRequest.id</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Source</td>
-<td>ProcedureRequest.requester</td>
-<td>Author, orderer - note also, ProcedureRequest.requester.agent for device, practitioner or organization who initiated the request; or ProcedureRequest.requester.onBehalfOf  - the organization the device or practitioner was acting on behalf of</td></tr></table></div>
-
-
-<a name="Procedure.2C_Performed"> </a>
-<h3>
-    <span class="sectioncount">7.19.3</span> Procedure, Performed <a href="Procedure.html#Procedure.2C_Performed" title="link to here" class="self-link"> <img src="target.png" width="20" class="self-link" height="20"/></a>
-</h3>
-
-
-<div style="page-break-inside: avoid;">
-<table border="1" cellpadding="2" cellspacing="0">
-<tr>
-<td align="center" style="background:#f0f0f0;"><b>QDM Attribute</b></td>
-<td align="center" style="background:#f0f0f0;"><b>QI Core Metadata Element</b></td>
-<td align="center" style="background:#f0f0f0;"><b>Comment</b></td></tr>
-<tr valign="top">
-<td>Procedure, Performed</td>
-<td>Procedure (the .status metadata allows conformance to the specific QDM datatype context)</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Relevant Period</td>
-<td>Procedure.performed[x]</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Negation Rationale</td>
-<td>Procedure.notDoneReason</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Reason</td>
-<td>Procedure.reasonCode</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Result</td>
-<td>Procedure.outcome</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>AnatomicalLocation</td>
-<td>Procedure.bodySite</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>IncisionDateTime</td>
-<td>Procedure.extension ([CanonicalType<a class="external autonumber" href="http://hl7.org/fhir/StructureDefinition/procedure-incisionDateTime" rel="nofollow">[1]</a>]</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Method</td>
-<td>.</td>
-<td>Not addressed in FHIR</td></tr>
-<tr>
-<td>Ordinality</td>
-<td>.</td>
-<td>Not addressed in FHIR</td></tr>
-<tr>
-<td>Components</td>
-<td>.</td>
-<td>Not addressed in FHIR</td></tr>
-<tr>
-<td>Author dateTime</td>
-<td>FHIR.provenance.recorded</td>
-<td>FHIR references authorDatetime as part of the provenance resource for all resources.
-
-Note: FHIR Provenance generally addresses the author of the message; the identifier/source of the original resource element is defined by the resource. Individual resource element provenance is summarized in the FHIR W5 Report (<a class="external free" href="http://hl7.org/fhir/w5.html" rel="nofollow">http://hl7.org/fhir/w5.html</a>). The FHIR Procedure resource does not address an author time. Hence, the QDM Procedure, Performed datatype references FHIR provenance.</td></tr>
-<tr>
-<td>Status</td>
-<td>Procedure.status</td>
-<td>QDM matched to QI Core / FHIR
-
-Note: Procedure.status allows specification of completed but it does not assure the procedure was completed successfully. The FHIR resource Proecedure.outcome does also specification of successful completion but that element may be ambiguous. The Patient Care Workgroup is evaluating options to more clearly represent a procedure that successfully achieved its objective (objective is not currently available as a metadata element). Moreover, clinical care capture of success with respect to procedure completion is highly variable. See the QDM Known Issues for a description of the issue and a link to the ONC Jira QDM Issues page to join the discussion for QDM <a class="external autonumber" href="https://github.com/esacinc/CQL-Formatting-and-Usage-Wiki/wiki/eCQM-Known-Issues#qdm-procedure-performed-completion-time" rel="nofollow">[2]</a>.</td></tr>
-<tr>
-<td>Code</td>
-<td>Procedure.code</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>id</td>
-<td>Procedure.id</td>
-<td>QDM matched to QI Core / FHIR</td></tr>
-<tr>
-<td>Source</td>
-<td>Procedure.performer</td>
-<td>QDM matched to QI Core / FHIR</td></tr></table></div>
-
-{% include container-end.html %}
-{% include footer.html %}

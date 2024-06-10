@@ -1,19 +1,8 @@
 package org.opencds.cqf.tooling.modelinfo;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.nio.file.Paths;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
-
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
-import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
-
 import org.hl7.elm_modelinfo.r1.ClassInfo;
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
@@ -30,6 +19,14 @@ import org.opencds.cqf.tooling.modelinfo.uscore.USCoreModelInfoBuilder;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.file.Paths;
+import java.util.Map;
 
 public class StructureDefinitionToModelInfo extends Operation {
 
@@ -105,6 +102,16 @@ public class StructureDefinitionToModelInfo extends Operation {
             -resourcePaths="4.0.1;US-Core/5.0.1;QI-Core/5.0.0"
             -modelName="QICore"
             -modelVersion="5.0.0"
+
+        Arguments for producing USCore 6.1.0 Model Info
+            -resourcePaths="4.0.1;US-Core/6.1.0
+            -modelName="USCore"
+            -modelVersion="6.1.0"
+
+        Arguments for producing QICore 6.0.0 Model Info
+            -resourcePaths="4.0.1;US-Core/6.1.0;QI-Core/6.0.0"
+            -modelName="QICore"
+            -modelVersion="6.0.0"
 
         NOTE: Once the ModelInfo is produced, there is a bug in the Jackson XML deserializer that requires that the xsi:type attribute be the first
         attribute in an element with polymorphic child elements. In a regex-search/replace, the following command will address this issue on the

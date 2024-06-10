@@ -46,4 +46,18 @@ public abstract class LibraryProcessorTest extends RefreshTest {
         params.shouldApplySoftwareSystemStamp = true;
         getLibraryProcessor().refreshLibraryContent(params);
     }
+
+    protected void runRefresh(String targetDirectory, String libraryResourcePath, String libraryOutputDirectoryPath,
+                              String cqlResourcePath, boolean versioned, boolean shouldApplySoftwareSystemStamp) {
+        RefreshLibraryParameters params = new RefreshLibraryParameters();
+        params.encoding = Encoding.JSON;
+        params.fhirContext = getFhirContext();
+        params.libraryPath = libraryResourcePath;
+        params.libraryOutputDirectory = libraryOutputDirectoryPath;
+        params.cqlContentPath = cqlResourcePath;
+        params.ini = targetDirectory + separator + "ig.ini";
+        params.versioned = versioned;
+        params.shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStamp;
+        getLibraryProcessor().refreshLibraryContent(params);
+    }
 }
