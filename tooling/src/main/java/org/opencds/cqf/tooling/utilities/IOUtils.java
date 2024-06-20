@@ -799,7 +799,10 @@ public class IOUtils {
                         libraryPaths.add(entry.getKey());
                         libraries.put(entry.getValue().getIdElement().getIdPart(), entry.getValue());
                         libraryPathMap.put(entry.getValue().getIdElement().getIdPart(), entry.getKey());
-                        libraryUrlMap.put(ResourceUtils.getUrl(entry.getValue(), fhirContext), entry.getValue());
+                        String url = ResourceUtils.getUrl(entry.getValue(), fhirContext);
+                        if (url != null) {
+                            libraryUrlMap.put(ResourceUtils.getUrl(entry.getValue(), fhirContext), entry.getValue());
+                        }
                     });
         }
     }
