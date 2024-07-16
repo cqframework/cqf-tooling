@@ -1,23 +1,22 @@
 package org.opencds.cqf.tooling.measure.stu3;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.parser.JsonParser;
-import ca.uhn.fhir.parser.XmlParser;
-
-import org.apache.commons.io.FilenameUtils;
-import org.hl7.fhir.dstu3.model.Measure;
-import org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper;
-import org.opencds.cqf.tooling.operation.RefreshGeneratedContentOperation;
-import org.opencds.cqf.tooling.utilities.IOUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import org.hl7.fhir.dstu3.model.Measure;
+import org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper;
+import org.opencds.cqf.tooling.operation.RefreshGeneratedContentOperation;
+import org.opencds.cqf.tooling.utilities.IOUtils;
+
 import com.google.common.base.Strings;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.JsonParser;
+import ca.uhn.fhir.parser.XmlParser;
 
 public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperation {
 
@@ -30,10 +29,11 @@ public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperatio
         super("src/main/resources/org/opencds/cqf/tooling/measure/output/stu3",
                 "-RefreshStu3Measure", FhirContext.forCached(FhirVersionEnum.DSTU3));
         cqfmHelper = new CqfmSoftwareSystemHelper("src/main/resources/org/opencds/cqf/tooling/measure/output/r4");
-        jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
-        xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
+        jsonParser = (JsonParser)super.fhirContext.newJsonParser();
+        xmlParser = (XmlParser)super.fhirContext.newXmlParser();
     }
 
+    @SuppressWarnings("this-escape")
     public RefreshStu3MeasureOperation(String pathToMeasures) {
         super(pathToMeasures, "-RefreshStu3Measure", FhirContext.forCached(FhirVersionEnum.DSTU3),
                 null, pathToMeasures);

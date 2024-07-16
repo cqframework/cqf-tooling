@@ -8,13 +8,19 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.net.HttpURLConnection;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import info.bliki.wiki.model.WikiModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QdmToQiCore extends Operation {
+
+    private static final Logger logger = LoggerFactory.getLogger(QdmToQiCore.class);
 
     private final String[] typeURLS = {
             "Adverse_Event_(QDM)", "Allergy/Intolerance_(QDM)", "Assessment_(QDM)",
@@ -45,7 +51,7 @@ public class QdmToQiCore extends Operation {
             try {
                 url = new URL(fullURL);
             } catch (MalformedURLException e) {
-                System.err.println("Encountered the following malformed URL: " + fullURL);
+                logger.error("Encountered the following malformed URL: {}", fullURL);
                 e.printStackTrace();
                 return;
             }
@@ -54,7 +60,7 @@ public class QdmToQiCore extends Operation {
             try {
                 content = getCleanContent(getPageContent(url));
             } catch (IOException e) {
-                System.err.println("Encountered the following exception while scraping content from " + fullURL + ": " + e.getMessage());
+                logger.error("Encountered the following exception while scraping content from {} : {}", fullURL, e.getMessage());
                 e.printStackTrace();
                 return;
             }
@@ -85,7 +91,7 @@ public class QdmToQiCore extends Operation {
             try {
                 writeOutput(fileName, html);
             } catch (IOException e) {
-                System.err.println("Encountered the following exception while creating file " + fileName + ".html: " + e.getMessage());
+                logger.error("Encountered the following exception while creating file {}.html: {}", fileName, e.getMessage());
                 e.printStackTrace();
                 return;
             }
@@ -172,7 +178,8 @@ public class QdmToQiCore extends Operation {
     }
 
     private void writeOutput(String fileName, String content) throws IOException {
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + fileName + ".html")) {
+        try (FileOutputStream writer = new FileOutputStream(
+                IOUtils.concatFilePath(getOutputPath(),fileName + ".html"))) {
             writer.write(content.getBytes());
             writer.flush();
         }
@@ -185,12 +192,26 @@ public class QdmToQiCore extends Operation {
 
     private String getPageContent(URL url) throws IOException {
         StringBuilder content = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setInstanceFollowRedirects(true);
+
+        int status = conn.getResponseCode();
+        if (status != HttpURLConnection.HTTP_OK) {
+            if (status == HttpURLConnection.HTTP_MOVED_TEMP || status == HttpURLConnection.HTTP_MOVED_PERM || status == HttpURLConnection.HTTP_SEE_OTHER || status == 307 || status == 308) {
+                String newUrl = conn.getHeaderField("Location");
+                return getPageContent(new URL(newUrl));
+            } else {
+                throw new IOException("Unexpected response code: " + status);
+            }
+        }
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
             String line;
-            while((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 content.append(line).append(System.lineSeparator());
             }
         }
         return content.toString();
     }
+
 }

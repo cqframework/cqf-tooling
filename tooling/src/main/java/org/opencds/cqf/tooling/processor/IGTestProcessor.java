@@ -13,6 +13,8 @@ import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
 import org.opencds.cqf.tooling.measure.MeasureTestProcessor;
 import org.opencds.cqf.tooling.parameter.TestIGParameters;
 import org.opencds.cqf.tooling.utilities.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.*;
@@ -20,6 +22,8 @@ import java.util.stream.Collectors;
 
 
 public class IGTestProcessor extends BaseProcessor {
+
+    private static final Logger logger = LoggerFactory.getLogger(IGTestProcessor.class);
 
     public class TestCaseResultSummaryComparator implements Comparator<TestCaseResultSummary> {
         public int compare(TestCaseResultSummary o1, TestCaseResultSummary o2) {
@@ -92,8 +96,8 @@ public class IGTestProcessor extends BaseProcessor {
             return result;
         }
         catch (Exception ex) {
-            LogUtils.putException(String.format("Error retrieving metadata from: 's%'.", path), ex);
             //TODO: Error/Message handling
+            LogUtils.putException(String.format("Error retrieving metadata from: '%s'.", path), ex);
             return null;
         }
     }
@@ -115,12 +119,12 @@ public class IGTestProcessor extends BaseProcessor {
                     org.hl7.fhir.dstu3.model.CapabilityStatement capabilityStatement = (org.hl7.fhir.dstu3.model.CapabilityStatement)resource;
 
                     org.hl7.fhir.dstu3.model.Extension softwareModuleExtension =
-                        capabilityStatement.getSoftware()
-                            .getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-softwareModule")
-                            .stream()
-                            .filter(extension -> !extension.getExtensionString("name").equals(BaseCqfmSoftwareSystemHelper.cqfRulerDeviceName))
-                            .collect(Collectors.toList())
-                            .get(0);
+                            capabilityStatement.getSoftware()
+                                    .getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-softwareModule")
+                                    .stream()
+                                    .filter(extension -> !extension.getExtensionString("name").equals(BaseCqfmSoftwareSystemHelper.cqfRulerDeviceName))
+                                    .collect(Collectors.toList())
+                                    .get(0);
 
                     if (softwareModuleExtension != null) {
                         softwareVersion = softwareModuleExtension.getExtensionString("version");//.getValue().toString();
@@ -129,12 +133,12 @@ public class IGTestProcessor extends BaseProcessor {
                     org.hl7.fhir.r4.model.CapabilityStatement capabilityStatement = (org.hl7.fhir.r4.model.CapabilityStatement)resource;
 
                     org.hl7.fhir.r4.model.Extension softwareModuleExtension =
-                        capabilityStatement.getSoftware()
-                            .getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-softwareModule")
-                            .stream()
-                            .filter(extension -> !extension.getExtensionString("name").equals(BaseCqfmSoftwareSystemHelper.cqfRulerDeviceName))
-                            .collect(Collectors.toList())
-                            .get(0);
+                            capabilityStatement.getSoftware()
+                                    .getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-softwareModule")
+                                    .stream()
+                                    .filter(extension -> !extension.getExtensionString("name").equals(BaseCqfmSoftwareSystemHelper.cqfRulerDeviceName))
+                                    .collect(Collectors.toList())
+                                    .get(0);
 
                     if (softwareModuleExtension != null) {
                         softwareVersion = softwareModuleExtension.getExtensionString("version");//.getValue().toString();
@@ -147,8 +151,8 @@ public class IGTestProcessor extends BaseProcessor {
             }
         }
         catch (Exception ex) {
-            LogUtils.putException(String.format("Error retrieving CapabilityStatement from: 's%'.", testServerUri), ex);
             //TODO: Error/Message handling
+            LogUtils.putException(String.format("Error retrieving CapabilityStatement from: '%s'.", testServerUri), ex);
             return null;
         }
 
@@ -168,7 +172,7 @@ public class IGTestProcessor extends BaseProcessor {
 
         CqfmSoftwareSystem testTargetSoftwareSystem =  getCqfRulerSoftwareSystem(params.fhirServerUri);
 
-        System.out.println("Running IG test cases...");
+        logger.info("[Running IG Test Cases]");
 
         File testCasesDirectory = new File(params.testCasesPath);
         if (!testCasesDirectory.isDirectory()) {
@@ -176,97 +180,101 @@ public class IGTestProcessor extends BaseProcessor {
         }
 
         // refresh/generate test bundles
-        System.out.println("Refreshing test cases...");
+        logger.info("[Refreshing Test Cases]");
+
         TestCaseProcessor testCaseProcessor = new TestCaseProcessor();
-        testCaseProcessor.refreshTestCases(params.testCasesPath, IOUtils.Encoding.JSON, fhirContext);
+        testCaseProcessor.refreshTestCases(params.testCasesPath, IOUtils.Encoding.JSON, fhirContext, verboseMessaging);
 
         List<TestCaseResultSummary> TestResults = new ArrayList<TestCaseResultSummary>();
 
-        File[] resourceTypeTestGroups = testCasesDirectory.listFiles(file -> file.isDirectory());
+        File[] resourceTypeTestGroups = testCasesDirectory.listFiles(File::isDirectory);
         //TODO: How can we validate the set of directories here - that they're actually FHIR resources - and message when they're not. Really it doesn't matter, it can be any grouping so long as it has a corresponding path in /bundles.
 
-        for (File group : resourceTypeTestGroups) {
-            System.out.println(String.format("Processing %s test cases...", group.getName()));
+        if (resourceTypeTestGroups != null) {
+            for (File group : resourceTypeTestGroups) {
+                logger.info("Processing {} test cases...", group.getName());
 
-            // Get set of test artifacts
-            File[] testArtifactNames = group.listFiles(file -> file.isDirectory());
+                // Get set of test artifacts
+                File[] testArtifactNames = group.listFiles(File::isDirectory);
 
-            for (File testArtifact : testArtifactNames) {
-                System.out.println(String.format("  Processing test cases for %s: %s", group.getName(), testArtifact.getName()));
-                Boolean allTestArtifactTestsPassed = true;
+                if (testArtifactNames != null) {
+                    for (File testArtifact : testArtifactNames) {
+                        logger.info("Processing test cases for {}: {}", group.getName(), testArtifact.getName());
 
-                // Get content bundle
-                Map.Entry<String, IBaseResource> testArtifactContentBundleMap = getContentBundleForTestArtifact(group.getName(), testArtifact.getName());
+                        // Get content bundle
+                        Map.Entry<String, IBaseResource> testArtifactContentBundleMap = getContentBundleForTestArtifact(group.getName(), testArtifact.getName());
 
-                if ((testArtifactContentBundleMap == null) || testArtifactContentBundleMap.getValue() == null) {
-                    System.out.println(String.format("      No content bundle found for %s: %s", group.getName(), testArtifact.getName()));
-                    System.out.println(String.format("  Done processing all test cases for %s: %s", group.getName(), testArtifact.getName()));
-                    continue;
-                }
+                        if ((testArtifactContentBundleMap == null) || testArtifactContentBundleMap.getValue() == null) {
+                            logger.info("No content bundle found for {}: {}", group.getName(), testArtifact.getName());
+                            logger.info("Done processing all test cases for {}: {}", group.getName(), testArtifact.getName());
+                            continue;
+                        }
 
-                ITestProcessor testProcessor = getResourceTypeTestProcessor(group.getName());
-                List<Map.Entry<String, IBaseResource>> testCasesBundles =
-                    BundleUtils.GetBundlesInDir(testArtifact.getPath(), fhirContext, false);
+                        ITestProcessor testProcessor = getResourceTypeTestProcessor(group.getName());
+                        List<Map.Entry<String, IBaseResource>> testCasesBundles =
+                                BundleUtils.getBundlesInDir(testArtifact.getPath(), fhirContext, false);
 
-                for (Map.Entry<String, IBaseResource> testCaseBundleMapEntry : testCasesBundles) {
-                    IBaseResource testCaseBundle = testCaseBundleMapEntry.getValue();
-                    TestCaseResultSummary testCaseResult  = new TestCaseResultSummary(group.getName(), testArtifact.getName(),
-                        testCaseBundle.getIdElement().toString());
-                    try {
-                        System.out.println(String.format("      Starting processing of test case '%s' for %s: %s", testCaseBundle.getIdElement(), group.getName(), testArtifact.getName()));
-                        Parameters testResults = testProcessor.executeTest(testCaseBundle, testArtifactContentBundleMap.getValue(), params.fhirServerUri);
+                        for (Map.Entry<String, IBaseResource> testCaseBundleMapEntry : testCasesBundles) {
+                            IBaseResource testCaseBundle = testCaseBundleMapEntry.getValue();
+                            TestCaseResultSummary testCaseResult  = new TestCaseResultSummary(group.getName(), testArtifact.getName(),
+                                    testCaseBundle.getIdElement().toString());
+                            try {
+                                logger.info("Starting processing of test case '{}' for {}: {}", testCaseBundle.getIdElement(), group.getName(), testArtifact.getName());
+                                Parameters testResults = testProcessor.executeTest(testCaseBundle, testArtifactContentBundleMap.getValue(), params.fhirServerUri);
 
-                        Boolean testPassed = false;
-                        for (ParametersParameter param : testResults.getParameter()) {
-                            if (param.getName().getValue().indexOf(MeasureTestProcessor.TestPassedKey) >= 0) {
-                                testPassed = param.getValueBoolean().isValue();
-                                break;
+                                Boolean testPassed = false;
+                                for (ParametersParameter param : testResults.getParameter()) {
+                                    if (param.getName().getValue().contains(MeasureTestProcessor.TestPassedKey)) {
+                                        testPassed = param.getValueBoolean().isValue();
+                                        break;
+                                    }
+                                }
+                                testCaseResult.setTestPassed(testPassed);
+                                logger.info("Done processing test case '{}' for {}: {}", testCaseBundle.getIdElement(), group.getName(), testArtifact.getName());
+                            } catch (Exception ex) {
+                                testCaseResult.setTestPassed(false);
+                                testCaseResult.setMessage(ex.getMessage());
+                                logger.error("Error: Test case '{}' for {}: {} failed with message: {}", testCaseBundle.getIdElement(), group.getName(), testArtifact.getName(), ex.getMessage());
                             }
-                        }
-                        testCaseResult.setTestPassed(testPassed);
-                        System.out.println(String.format("      Done processing test case '%s' for %s: %s", testCaseBundle.getIdElement(), group.getName(), testArtifact.getName()));
-                    } catch (Exception ex) {
-                        testCaseResult.setTestPassed(false);
-                        testCaseResult.setMessage(ex.getMessage());
-                        System.out.println(String.format("      Error: Test case '%s' for %s: %s failed with message: %s", testCaseBundle.getIdElement(), group.getName(), testArtifact.getName(), ex.getMessage()));
-                    }
-                    TestResults.add(testCaseResult);
-                }
-
-                System.out.println(String.format("  Done processing all test cases for %s: %s", group.getName(), testArtifact.getName()));
-
-                if (allTestArtifactTestsPassed) {
-                    List<CqfmSoftwareSystem> softwareSystems = new ArrayList<CqfmSoftwareSystem>() {
-                        {
-                            add(testTargetSoftwareSystem);
-                        }
-                    };
-
-                    if ((fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) || (fhirContext.getVersion().getVersion() == FhirVersionEnum.R4)) {
-                        if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
-                            // Stamp the testContentBundle artifacts
-                            BundleUtils.stampDstu3BundleEntriesWithSoftwareSystems((org.hl7.fhir.dstu3.model.Bundle)testArtifactContentBundleMap.getValue(), softwareSystems, fhirContext, getRootDir());
-                        } else if (fhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
-                            BundleUtils.stampR4BundleEntriesWithSoftwareSystems((org.hl7.fhir.r4.model.Bundle)testArtifactContentBundleMap.getValue(), softwareSystems, fhirContext, getRootDir());
+                            TestResults.add(testCaseResult);
                         }
 
-                        String bundleFilePath = testArtifactContentBundleMap.getKey();
-                        IBaseResource bundle = testArtifactContentBundleMap.getValue();
-                        IOUtils.writeResource(bundle, bundleFilePath, IOUtils.getEncoding(bundleFilePath), fhirContext);
+                        logger.info(String.format("  Done processing all test cases for %s: %s", group.getName(), testArtifact.getName()));
+
+                        //all Test Artifact Tests Passed
+                        List<CqfmSoftwareSystem> softwareSystems = new ArrayList<CqfmSoftwareSystem>() {
+                            {
+                                add(testTargetSoftwareSystem);
+                            }
+                        };
+
+                        if ((fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) || (fhirContext.getVersion().getVersion() == FhirVersionEnum.R4)) {
+                            if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
+                                // Stamp the testContentBundle artifacts
+                                BundleUtils.stampDstu3BundleEntriesWithSoftwareSystems((org.hl7.fhir.dstu3.model.Bundle)testArtifactContentBundleMap.getValue(), softwareSystems, fhirContext, getRootDir());
+                            } else if (fhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
+                                BundleUtils.stampR4BundleEntriesWithSoftwareSystems((org.hl7.fhir.r4.model.Bundle)testArtifactContentBundleMap.getValue(), softwareSystems, fhirContext, getRootDir());
+                            }
+
+                            String bundleFilePath = testArtifactContentBundleMap.getKey();
+                            IBaseResource bundle = testArtifactContentBundleMap.getValue();
+                            IOUtils.writeResource(bundle, bundleFilePath, IOUtils.getEncoding(bundleFilePath), fhirContext);
+                        }
                     }
                 }
+
+                logger.info("Done processing {} test cases", group.getName());
             }
-
-            System.out.println(String.format("Done processing %s test cases", group.getName()));
         }
 
         TestCaseResultSummaryComparator comparator = new TestCaseResultSummaryComparator();
-        Collections.sort(TestResults, comparator);
+        TestResults.sort(comparator);
 
         List<TestCaseResultSummary> passedTests = new ArrayList<TestCaseResultSummary>();
         List<TestCaseResultSummary> failedTests = new ArrayList<TestCaseResultSummary>();
         for (TestCaseResultSummary result : TestResults) {
-            System.out.println(result.toString());
+            logger.info("TestCaseResultSummary: " + result.toString());
+
             if (result.testPassed) {
                 passedTests.add(result);
             } else {
@@ -274,8 +282,8 @@ public class IGTestProcessor extends BaseProcessor {
             }
         }
 
-        System.out.println(String.format("%d tests failed", failedTests.size()));
-        System.out.println(String.format("%d tests passed", passedTests.size()));
+        logger.info("{} tests failed", failedTests.size());
+        logger.info("{} tests passed", passedTests.size());
     }
 
     private Map.Entry<String, IBaseResource> getContentBundleForTestArtifact(String groupName, String testArtifactName) {
@@ -284,7 +292,7 @@ public class IGTestProcessor extends BaseProcessor {
         String contentBundlePath = getPathForContentBundleTestArtifact(groupName, testArtifactName);
         File testArtifactContentBundleDirectory = new File(contentBundlePath);
         if (testArtifactContentBundleDirectory != null && testArtifactContentBundleDirectory.exists()) {
-            List<Map.Entry<String, IBaseResource>> testArtifactContentBundles = BundleUtils.GetBundlesInDir(contentBundlePath, fhirContext, false);
+            List<Map.Entry<String, IBaseResource>> testArtifactContentBundles = BundleUtils.getBundlesInDir(contentBundlePath, fhirContext, false);
 
             // NOTE: Making the assumption that there will be a single bundle for the artifact.
             testArtifactContentBundle = testArtifactContentBundles.get(0);
@@ -308,7 +316,7 @@ public class IGTestProcessor extends BaseProcessor {
                 break;
             default:
                 // Currently unsupported/undocumented
-                System.out.println(String.format("No test processor implemented for resource type: $s", resourceTypeName));
+                logger.info("No test processor implemented for resource type: {}", resourceTypeName);
                 break;
         }
 

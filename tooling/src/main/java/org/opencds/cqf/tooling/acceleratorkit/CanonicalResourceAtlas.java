@@ -1,9 +1,6 @@
 package org.opencds.cqf.tooling.acceleratorkit;
 
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.*;
 
 public class CanonicalResourceAtlas {
     private CanonicalResourceProvider<StructureDefinition> structureDefinitions;
@@ -39,6 +36,15 @@ public class CanonicalResourceAtlas {
     }
     public CanonicalResourceAtlas setConceptMaps(CanonicalResourceProvider<ConceptMap> conceptMaps) {
         this.conceptMaps = conceptMaps;
+        return this;
+    }
+
+    private CanonicalResourceProvider<StructureDefinition> extensions;
+    public CanonicalResourceProvider<StructureDefinition> getExtensions() {
+        return extensions;
+    }
+    public CanonicalResourceAtlas setExtensions(CanonicalResourceProvider<StructureDefinition> extensions) {
+        this.extensions = extensions;
         return this;
     }
 }

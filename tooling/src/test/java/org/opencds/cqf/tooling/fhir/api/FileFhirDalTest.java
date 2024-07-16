@@ -1,19 +1,19 @@
 package org.opencds.cqf.tooling.fhir.api;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.BeforeClass;
 import org.opencds.cqf.tooling.CqfmSoftwareSystemTest;
 import org.opencds.cqf.tooling.parameter.FileFhirPlatformParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -25,7 +25,7 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
   private FileFhirDal dal;
   private Patient patient;
   private final String resourceDir = "target/FileFhirDalTest";
-  private Logger logger;
+  private static final Logger logger = LoggerFactory.getLogger(FileFhirDalTest.class);
 
   public FileFhirDalTest() {
     FileFhirPlatformParameters platformParams = new FileFhirPlatformParameters();
@@ -38,8 +38,6 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
 
     this.patient = (Patient) new Patient().setId("TestPatient");
     this.patient.setId(this.patient.getIdElement().withResourceType("Patient"));
-
-    this.logger = LoggerFactory.getLogger(this.getClass());
   }
 
   @BeforeClass
@@ -64,7 +62,7 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
     }
     logger.info("Finished Test: FileFhirDalTest");
   }
-  
+
   @Test(priority = 1) // Create
   public void create(){
     logger.info("Running: FileFhirDalTest.create...");
@@ -113,7 +111,7 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
   @Test //No ResourceType
   public void noResourceType(){
     logger.info("Running: FileFhirDalTest.noResourceType...");
-    
+
     Patient patient = (Patient) new Patient().setId("NoResourcePatient");
     dal.create(patient);
 
@@ -121,5 +119,4 @@ public class FileFhirDalTest implements CqfmSoftwareSystemTest {
 
     assertFalse(file.exists());
   }
-
 }

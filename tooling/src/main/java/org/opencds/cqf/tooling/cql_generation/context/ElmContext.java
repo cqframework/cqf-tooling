@@ -7,19 +7,14 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.elm.IdObjectFactory;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
-import org.hl7.elm.r1.ContextDef;
-import org.hl7.elm.r1.Expression;
-import org.hl7.elm.r1.ExpressionRef;
-import org.hl7.elm.r1.Library;
-import org.hl7.elm.r1.UsingDef;
-import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.elm.r1.*;
 import org.opencds.cqf.tooling.cql_generation.IOUtil;
 import org.opencds.cqf.tooling.cql_generation.builder.VmrToModelElmBuilder;
 
@@ -58,8 +53,8 @@ public class ElmContext {
         try {
             UcumService ucumService = new UcumEssenceService(
                     UcumEssenceService.class.getResourceAsStream("/ucum-essence.xml"));
-            this.libraryBuilder = new LibraryBuilder(modelManager, libraryManager, ucumService);
-            this.libraryBuilder.setTranslatorOptions(CqlTranslatorOptions.defaultOptions());
+            libraryManager.setUcumService(ucumService);
+            this.libraryBuilder = new LibraryBuilder(libraryManager, new IdObjectFactory());
             this.libraryBuilder.setLibraryIdentifier(libraryInfo.getLeft());
             this.libraryBuilder.getModel(new UsingDef().withUri(modelBuilder.getModelUri())
                     .withLocalIdentifier(modelBuilder.getModelIdentifier()).withVersion(modelBuilder.getModelVersion()));

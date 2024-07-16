@@ -19,7 +19,6 @@ import org.hl7.fhir.utilities.VersionUtilities;
 import org.hl7.fhir.utilities.json.JsonTrackingParser;
 import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
-import org.hl7.fhir.utilities.npm.ToolsVersion;
 import org.opencds.cqf.tooling.exception.NpmPackageManagerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +84,7 @@ public class NpmPackageManager {
         try {
             // userMode indicates whether the packageCache is within the working directory
             // or in the user home
-            pcm = new FilesystemPackageCacheManager(true, ToolsVersion.TOOLS_VERSION);
+            pcm = new FilesystemPackageCacheManager(true);
         } catch (IOException e) {
             throw new NpmPackageManagerException("error creating the FilesystemPackageCacheManager", e);
         }
@@ -134,9 +133,10 @@ public class NpmPackageManager {
     }
 
     private void loadIg(ImplementationGuide.ImplementationGuideDependsOnComponent dep, int index) throws IOException {
+        logger.info("Loading IG Dependency {}#{}", dep.getUri(), dep.getVersion());
         String name = dep.getId();
         if (!dep.hasId()) {
-            logger.info("Dependency '{}' has no id, so can't be referred to in markdown in the IG", idForDep(dep));
+            logger.warn("Dependency '{}' has no id, so can't be referred to in markdown in the IG", idForDep(dep));
             name = "u" + Utilities.makeUuidLC().replace("-", "");
         }
         if (!isValidIGToken(name)) {
@@ -156,10 +156,9 @@ public class NpmPackageManager {
             throw new IllegalArgumentException(
                     "You must specify a version for the IG " + packageId + " (" + canonical + ")");
 
-        NpmPackage pi = packageId == null ? null : pcm.loadPackageFromCacheOnly(packageId, igver);
-        if (pi != null)
-            npmList.add(pi);
+        NpmPackage pi = pcm.loadPackage(packageId, igver);
         if (pi == null) {
+            logger.warn("Dependency " + name + " (" + canonical + ") not found by FilesystemPackageCacheManager");
             pi = resolveDependency(canonical, packageId, igver);
             if (pi == null) {
                 if (Utilities.noString(packageId))
@@ -169,6 +168,8 @@ public class NpmPackageManager {
                     throw new IllegalArgumentException("Unknown Package " + packageId + "#" + igver);
             }
         }
+
+        npmList.add(pi);
 
         logger.debug(
                 "Load " + name + " (" + canonical + ") from " + packageId + "#" + igver);

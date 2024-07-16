@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativeProvider> {
 
+    @SuppressWarnings("this-escape")
     public LibraryGenerator() {
         setNarrativeProvider(new NarrativeProvider());
         setFhirContext(FhirContext.forR4Cached());

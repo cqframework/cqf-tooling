@@ -31,11 +31,10 @@ import org.slf4j.MarkerFactory;
  * @since 2021-02-24
  */
 public class DefinitionConverter {
-    private Logger logger;
+    private static final Logger logger = LoggerFactory.getLogger(DefinitionConverter.class);
     private Map<String, Marker> markers = new HashMap<String, Marker>();
 
     public DefinitionConverter() {
-        logger = LoggerFactory.getLogger(this.getClass());
         markers.put("ExpressionDef", MarkerFactory.getMarker("ExpressionDef"));
     }
     private String identifier;
@@ -153,7 +152,7 @@ public class DefinitionConverter {
                     index++;
                 }
             } else if (referenceStack.size() <= actualListSize.intValue()) {
-                logger.warn(markers.get("ExpressionDef"), "missing Expression Reference, expected " + actualListSize + " but found " + referenceStack.size() + ".");
+                logger.warn(markers.get("ExpressionDef"), "missing Expression Reference, expected {} but found {}.", actualListSize, referenceStack.size());
                 for (Pair<String, ExpressionRef> reference : referenceStack) {
                     if (expressionDef == null) {
                         expressionDef = adaptExpressionDef(libraryBuilder, modelBuilder, reference.getRight());

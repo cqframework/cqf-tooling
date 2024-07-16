@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-import org.cqframework.cql.elm.visiting.ElmBaseLibraryVisitor;
+import org.cqframework.cql.elm.visiting.BaseElmLibraryVisitor;
 import org.hl7.elm.r1.*;
 import org.hl7.elm.r1.Library.Statements;
 import org.opencds.cqf.tooling.cql_generation.context.ElmContext;
@@ -19,8 +19,8 @@ import com.google.common.base.Strings;
  * @author Joshua Reynolds
  * @since 2021-04-05
  */
-public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+public class ElmToCqlVisitor extends BaseElmLibraryVisitor<Void, ElmContext> {
+    private static final Logger logger = LoggerFactory.getLogger(ElmToCqlVisitor.class);
     private boolean useSpaces = true;
 
     public boolean getUseSpaces() {
@@ -268,7 +268,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
     }
 
     private void newConstruct(String section) {
-        logger.debug("Adding new construct: " + section);
+        logger.debug("Adding new construct: {}", section);
         resetIndentLevel();
         newLine();
         addToSection(section);
@@ -864,7 +864,7 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
                 query.getRelationship().stream().forEach(relationship -> visitRelationshipClause(relationship, context));
             }
             if (query.getWhere() != null) {
-                visitWhereClause(query.getWhere(), context);
+                visitExpression(query.getWhere(), context);
             }
             if (query.getReturn() != null) {
                 visitReturnClause(query.getReturn(), context);
@@ -969,7 +969,6 @@ public class ElmToCqlVisitor extends ElmBaseLibraryVisitor<Void, ElmContext> {
      * @param context the context passed to the visitor
      * @return the visitor result
      */
-    @Override
     public Void visitWhereClause(Expression where, ElmContext context) {
         try {
             enterClause();

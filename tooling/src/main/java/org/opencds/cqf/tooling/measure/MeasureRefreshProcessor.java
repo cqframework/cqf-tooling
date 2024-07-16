@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
@@ -19,10 +19,10 @@ import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.Resource;
 
 public class MeasureRefreshProcessor {
-    public Measure refreshMeasure(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary CompiledLibrary, CqlTranslatorOptions options) {
-        
+    public Measure refreshMeasure(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary CompiledLibrary, CqlCompilerOptions options) {
+
     	Library moduleDefinitionLibrary = getModuleDefinitionLibrary(measureToUse, libraryManager, CompiledLibrary, options);
-        
+
         measureToUse.setDate(new Date());
         // http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/measure-cqfm
         setMeta(measureToUse, moduleDefinitionLibrary);
@@ -38,13 +38,13 @@ public class MeasureRefreshProcessor {
         clearMeasureExtensions(measureToUse, "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-logicDefinition");
         clearMeasureExtensions(measureToUse, "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements");
         clearRelatedArtifacts(measureToUse);
-        
+
         setEffectiveDataRequirements(measureToUse, moduleDefinitionLibrary);
-        
+
         return measureToUse;
     }
 
-    private Library getModuleDefinitionLibrary(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary CompiledLibrary, CqlTranslatorOptions options){
+    private Library getModuleDefinitionLibrary(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary CompiledLibrary, CqlCompilerOptions options){
         Set<String> expressionList = getExpressions(measureToUse);
         DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
         return dqReqTrans.gatherDataRequirements(libraryManager, CompiledLibrary, options, expressionList, true);
@@ -76,9 +76,9 @@ public class MeasureRefreshProcessor {
     }
 
     private void setEffectiveDataRequirements(Measure measureToUse, Library moduleDefinitionLibrary) {
-    	
+
     	moduleDefinitionLibrary.setId("effective-data-requirements");
-    	
+
     	int delIndex = -1;
     	for (Resource res : measureToUse.getContained()) {
     		if (res instanceof Library && ((Library)res).getId().equalsIgnoreCase("effective-data-requirements")) {
@@ -86,13 +86,13 @@ public class MeasureRefreshProcessor {
     			break;
     		}
     	}
-    	
+
     	if (delIndex >= 0) {
     		measureToUse.getContained().remove(delIndex);
     	}
-    	
+
     	measureToUse.getContained().add(moduleDefinitionLibrary);
-        	
+
     	Extension effDataReqExtension = new Extension();
     	effDataReqExtension.setUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements");
         effDataReqExtension.setId("effective-data-requirements");
@@ -127,6 +127,6 @@ public class MeasureRefreshProcessor {
             measureToUse.getMeta().addProfile("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-measure-cqfm");
         }
     }
-    
-    
+
+
 }

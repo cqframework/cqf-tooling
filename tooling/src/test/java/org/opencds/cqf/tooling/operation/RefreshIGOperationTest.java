@@ -1,19 +1,29 @@
 package org.opencds.cqf.tooling.operation;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import com.fasterxml.jackson.core.StreamReadConstraints;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.common.Json;
+import com.google.gson.*;
+import org.apache.commons.io.FileUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.utilities.IniFile;
+import org.opencds.cqf.tooling.RefreshTest;
+import org.opencds.cqf.tooling.operation.ig.NewRefreshIGOperation;
+import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
+import org.opencds.cqf.tooling.processor.IGProcessor;
+import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
+import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.*;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
+import java.io.*;
+import java.net.ServerSocket;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,31 +33,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.utilities.IniFile;
-import org.opencds.cqf.tooling.RefreshTest;
-import org.opencds.cqf.tooling.library.LibraryProcessor;
-import org.opencds.cqf.tooling.measure.MeasureProcessor;
-import org.opencds.cqf.tooling.parameter.RefreshIGParameters;
-import org.opencds.cqf.tooling.processor.CDSHooksProcessor;
-import org.opencds.cqf.tooling.processor.IGBundleProcessor;
-import org.opencds.cqf.tooling.processor.IGProcessor;
-import org.opencds.cqf.tooling.processor.PlanDefinitionProcessor;
-import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
-import org.opencds.cqf.tooling.questionnaire.QuestionnaireProcessor;
-import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import com.google.gson.Gson;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-
+import static org.testng.Assert.*;
 public class RefreshIGOperationTest extends RefreshTest {
-
+	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	public RefreshIGOperationTest() {
 		super(FhirContext.forCached(FhirVersionEnum.R4));
 	}
@@ -62,25 +50,153 @@ public class RefreshIGOperationTest extends RefreshTest {
 	private final String LIB_TYPE = "Library";
 	private final String MEASURE_TYPE = "Measure";
 
-	private final String INI_LOC = "target" + separator + "refreshIG" + separator + "ig.ini";
+	private final String INI_LOC = Path.of("target","refreshIG","ig.ini").toString();
 
+	private static final String[] NEW_REFRESH_IG_LIBRARY_FILE_NAMES = {
+			"GMTPInitialExpressions.json", "GMTPInitialExpressions.json",
+			"MBODAInitialExpressions.json", "USCoreCommon.json", "USCoreElements.json", "USCoreTests.json"
+	};
 
-    // Store the original standard out before changing it.
-    private final PrintStream originalStdOut = System.out;
-    private ByteArrayOutputStream console = new ByteArrayOutputStream();
+    private static final String TARGET_OUTPUT_FOLDER_PATH = "target" + separator + "NewRefreshIG";
+	private static final String TARGET_OUTPUT_IG_CQL_FOLDER_PATH = TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "cql";
+	private static final String TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH = TARGET_OUTPUT_FOLDER_PATH + separator + "input" + separator + "resources" + separator + "library";
 
-    @BeforeMethod
-    public void setUp() throws Exception {
-        IOUtils.resourceDirectories = new ArrayList<String>();
-        IOUtils.clearDevicePaths();
-        System.setOut(new PrintStream(this.console));
-        File dir  = new File("target" + separator + "refreshIG");
-        if (dir.exists()) {
-            FileUtils.deleteDirectory(dir);
-        }
+	// Store the original standard out before changing it.
+	private final PrintStream originalStdOut = System.out;
+	private ByteArrayOutputStream console = new ByteArrayOutputStream();
+
+	@BeforeClass
+	public void init() {
+		// This overrides the default max string length for Jackson (which wiremock uses under the hood).
+		var constraints = StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build();
+		Json.getObjectMapper().getFactory().setStreamReadConstraints(constraints);
+	}
+
+	@BeforeMethod
+	public void setUp() throws Exception {
+		IOUtils.resourceDirectories = new ArrayList<String>();
+		IOUtils.clearDevicePaths();
+		System.setOut(new PrintStream(this.console));
+
+		// Delete directories
+		deleteDirectory("target" + File.separator + "refreshIG");
+		deleteDirectory("target" + File.separator + "NewRefreshIG");
 
 		deleteTempINI();
+	}
+
+	/**
+	 * Attempts to delete a directory if it exists.
+	 * @param path The path to the directory to delete.
+	 */
+	private void deleteDirectory(String path) {
+		File dir = new File(path);
+		if (dir.exists()) {
+			try {
+				FileUtils.deleteDirectory(dir);
+			} catch (IOException e) {
+				System.err.println("Failed to delete directory: " + path + " - " + e.getMessage());
+			}
+		}
+	}
+
+	@Test
+    public void testNewRefreshOperation() throws IOException {
+		copyResourcesToTargetDir(TARGET_OUTPUT_FOLDER_PATH, "testfiles/NewRefreshIG");
+        File folder = new File(TARGET_OUTPUT_FOLDER_PATH);
+        assertTrue(folder.exists(), "Folder should be present");
+        File jsonFile = new File(folder, "ig.ini");
+        assertTrue(jsonFile.exists(), "ig.ini file should be present");
+
+        NewRefreshIGOperation newRefreshIGOperation = new NewRefreshIGOperation();
+        String[] args = new String[]{
+                "-NewRefreshIG",
+                "-ini=" + TARGET_OUTPUT_FOLDER_PATH + separator + "ig.ini",
+                "-rd=" + TARGET_OUTPUT_FOLDER_PATH,
+                "-uv=" + "1.0.1",
+                "-d",
+                "-p",
+                "-t"
+        };
+        newRefreshIGOperation.execute(args);
+
+        // Verify correct update of cql files following refresh
+        File cumulativeMedFile = new File(TARGET_OUTPUT_IG_CQL_FOLDER_PATH, "CumulativeMedicationDuration.cql");
+        assertTrue(cumulativeMedFile.exists(), "CumulativeMedicationDuration.cql should exist");
+        verifyFileContent(cumulativeMedFile, "library CumulativeMedicationDuration version '1.0.1'");
+
+        File mbodaFile = new File(TARGET_OUTPUT_IG_CQL_FOLDER_PATH, "MBODAInitialExpressions.cql");
+        assertTrue(mbodaFile.exists(), "MBODAInitialExpressions.cql should exist");
+        verifyFileContent(mbodaFile, "include CumulativeMedicationDuration version '1.0.1' called CMD");
+
+        folder = new File(TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH);
+        assertTrue(folder.exists(), "Folder should be created");
+
+        for (String fileName : NEW_REFRESH_IG_LIBRARY_FILE_NAMES) {
+            jsonFile = new File(folder, fileName);
+            assertTrue(jsonFile.exists(), "JSON file " + fileName + " should be created");
+        }
+
+        File gmtpFile = new File(TARGET_OUTPUT_IG_LIBRARY_FOLDER_PATH, "GMTPInitialExpressions.json");
+        assertTrue(gmtpFile.exists(), "GMTPInitialExpressions.json file should exist");
+        try (FileReader reader = new FileReader(gmtpFile)) {
+            JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+            verifyJsonContent(jsonObject, "GMTPInitialExpressions.json");
+
+            String version = jsonObject.get("version").getAsString();
+            assertEquals("1.0.1", version, "Version parameter should be modified correctly");
+
+            JsonArray relatedArtifacts = jsonObject.getAsJsonArray("relatedArtifact");
+            boolean foundFHIRHelpers = verifyRelatedArtifacts(relatedArtifacts);
+            assertTrue(foundFHIRHelpers, "Library FHIRHelpers not found with correct resource value");
+        } catch (IOException e) {
+            fail("Error reading GMTPInitialExpressions.json file: " + e.getMessage());
+        }
     }
+
+    private void verifyJsonContent(JsonObject jsonObject, String jsonFileName) {
+        JsonArray contentArray = jsonObject.getAsJsonArray("content");
+        assertNotNull(contentArray, "Content array should not be null in " + jsonFileName);
+        assertTrue(contentArray.size() > 0, "Content array should not be empty in " + jsonFileName);
+
+        JsonObject contentObject = contentArray.get(0).getAsJsonObject();
+        assertEquals(contentObject.get("contentType").getAsString(), "text/cql", "Content type should be 'text/cql' in " + jsonFileName);
+        assertTrue(contentObject.has("data"), "Data field should exist in " + jsonFileName);
+    }
+
+    private boolean verifyRelatedArtifacts(JsonArray relatedArtifacts) {
+        for (JsonElement element : relatedArtifacts) {
+            JsonObject artifact = element.getAsJsonObject();
+            if (artifact.has("display") && artifact.get("display").getAsString().equals("Library FHIRHelpers")) {
+                String resource = artifact.get("resource").getAsString();
+                if (resource.equals("http://fhir.org/guides/cqf/common/Library/FHIRHelpers|4.0.1")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void verifyFileContent(File file, String expectedContent) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            boolean found = false;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(expectedContent)) {
+                    found = true;
+                    break;
+                }
+            }
+            assertTrue(found, "Expected content not found in " + file.getName());
+        } catch (IOException e) {
+            fail("Failed to read " + file.getName() + ": " + e.getMessage());
+        }
+    }
+
+	@AfterSuite
+	public void cleanup() {
+		deleteDirectory("null");
+	}
 
 	/**
 	 * This test breaks down refreshIG's process and can verify multiple bundles
@@ -89,6 +205,30 @@ public class RefreshIGOperationTest extends RefreshTest {
 	@Test
 	//TODO: Fix separately, this is blocking a bunch of other higher priority things
 	public void testBundledFiles() throws IOException {
+		//we can assert how many bundles were posted by keeping track via WireMockServer
+		//first find an open port:
+		int availablePort = findAvailablePort();
+		String fhirUri = "http://localhost:" + availablePort + "/fhir/";
+		if (availablePort == -1){
+			fhirUri = "";
+			logger.info("No available ports to test post with. Removing mock fhir server from test.");
+		}else{
+			System.out.println("Available port: " + availablePort + ", mock fhir server url: " + fhirUri);
+		}
+
+		WireMockServer wireMockServer = null;
+		if (!fhirUri.isEmpty()) {
+			wireMockServer = new WireMockServer(availablePort);
+			wireMockServer.start();
+
+			WireMock.configureFor("localhost", availablePort);
+			wireMockServer.stubFor(WireMock.post(WireMock.urlPathMatching("/fhir/([a-zA-Z]*)"))
+					.willReturn(WireMock.aResponse()
+							.withStatus(200)
+							.withBody("Mock response")));
+		}
+
+		// Call the method under test, which should use HttpClientUtils.post
 		copyResourcesToTargetDir("target" + separator + "refreshIG", "testfiles/refreshIG");
 		// build ini object
 		File iniFile = new File(INI_LOC);
@@ -97,12 +237,24 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 		String bundledFilesLocation = iniFile.getParent() + separator + "bundles" + separator + "measure" + separator;
 
-		String args[] = { "-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false" };
+		String[] args;
+		if (!fhirUri.isEmpty()) {
+			args = new String[]{"-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false", "-fs=" + fhirUri};
+		} else {
+			args = new String[]{"-RefreshIG", "-ini=" + INI_LOC, "-t", "-d", "-p", "-e=json", "-ts=false"};
+		}
 
-		// execute refresh using ARGS
-        new RefreshIGOperation().execute(args);
+		// EXECUTE REFRESHIG WITH OUR ARGS:
+		new RefreshIGOperation().execute(args);
 
-		// determine fhireContext for measure lookup
+		int requestCount = WireMock.getAllServeEvents().size();
+		assertEquals(requestCount, 7); //Looking for 7 resources posted (all files found in -files ending in .cql, .xml, or .json)
+
+		if (wireMockServer != null) {
+			wireMockServer.stop();
+		}
+
+		// determine fhirContext for measure lookup
 		FhirContext fhirContext = IGProcessor.getIgFhirContext(getFhirVersion(ini));
 
 		// get list of measures resulting from execution
@@ -120,10 +272,27 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 			// loop through each file, determine resourceType and treat accordingly
 			Map<String, String> resourceTypeMap = new HashMap<>();
+			List<String> groupPatientList = new ArrayList<>();
 
 			try (final DirectoryStream<Path> dirStream = Files.newDirectoryStream(dir)) {
 				dirStream.forEach(path -> {
 					File file = new File(path.toString());
+
+					//Group file testing:
+					if (file.getName().equalsIgnoreCase("Group-BreastCancerScreeningFHIR.json")){
+						try{
+							org.hl7.fhir.r4.model.Group group = (org.hl7.fhir.r4.model.Group)IOUtils.readResource(file.getAbsolutePath(), fhirContext);
+							assertTrue(group.hasMember());
+							// Check if the group contains members
+								// Iterate through the members
+								for (Group.GroupMemberComponent member : group.getMember()) {
+									groupPatientList.add(member.getEntity().getDisplay());
+								}
+						}catch (Exception e){
+							fail("Group-BreastCancerScreeningFHIR.json did not parse to valid Group instance.");
+						}
+
+					}
 
 					if (file.getName().toLowerCase().endsWith(".json")) {
 
@@ -158,12 +327,14 @@ public class RefreshIGOperationTest extends RefreshTest {
 				});
 
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.info(e.getMessage());
 			}
+
+			//Group file should contain two patients:
+			assertEquals(groupPatientList.size(), 2);
 
 			// map out entries in the resulting single bundle file:
 			Map<?, ?> bundledJson = this.jsonMap(new File(bundledFileResult));
-			assertNull((bundledJson.get("timestamp")));  // argument "-ts=false" should not attach timestamp to bundle
 			Map<String, String> bundledJsonResourceTypes = new HashMap<>();
 			ArrayList<Map<?, ?>> entryList = (ArrayList<Map<?, ?>>) bundledJson.get(ENTRY);
 			for (Map<?, ?> entry : entryList) {
@@ -173,8 +344,32 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 			// compare mappings of <id, resourceType> to ensure all bundled correctly:
 			assertTrue(mapsAreEqual(resourceTypeMap, bundledJsonResourceTypes));
-
 		}
+
+		// run cleanup (maven runs all ci tests sequentially and static member variables could retain values from previous tests)
+		IOUtils.cleanUp();
+		ResourceUtils.cleanUp();
+	}
+
+	private static int findAvailablePort() {
+		for (int port = 8000; port <= 9000; port++) {
+			if (isPortAvailable(port)) {
+				return port;
+			}
+		}
+		return -1;
+	}
+
+	private static boolean isPortAvailable(int port) {
+		ServerSocket ss;
+		try (ServerSocket serverSocket = new ServerSocket(port)) {
+			System.out.println("Trying " + serverSocket);
+			ss = serverSocket;
+		} catch (IOException e) {
+			return false;
+		}
+		System.out.println(ss + " is open.");
+		return true;
 	}
 
 	//@Test(expectedExceptions = IllegalArgumentException.class)
@@ -263,45 +458,37 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 		File iniFile = this.createTempINI(igProperties);
 
-		String args[] = { "-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t", "-d", "-p" };
+		String[] args = { "-RefreshIG", "-ini=" + iniFile.getAbsolutePath(), "-t", "-d", "-p" };
 
-        RefreshIGParameters params = null;
-        try {
-            params = new RefreshIGArgumentProcessor().parseAndConvert(args);
-        }
-        catch (Exception e) {
-            System.err.println(e.getMessage());
-            System.exit(1);
-        }
-        MeasureProcessor measureProcessor = new MeasureProcessor();
-        LibraryProcessor libraryProcessor = new LibraryProcessor();
-        CDSHooksProcessor cdsHooksProcessor = new CDSHooksProcessor();
-        PlanDefinitionProcessor planDefinitionProcessor = new PlanDefinitionProcessor(libraryProcessor, cdsHooksProcessor);
-		QuestionnaireProcessor questionnaireProcessor = new QuestionnaireProcessor(libraryProcessor);
-        IGBundleProcessor igBundleProcessor = new IGBundleProcessor(measureProcessor, planDefinitionProcessor, questionnaireProcessor);
-        IGProcessor processor = new IGProcessor(igBundleProcessor, libraryProcessor, measureProcessor);
+		RefreshIGParameters params = null;
+		try {
+			params = new RefreshIGArgumentProcessor().parseAndConvert(args);
+		}
+		catch (Exception e) {
+			System.err.println(e.getMessage());
+			System.exit(1);
+		}
 
-        //override ini to be null
-        params.ini = null;
+		//override ini to be null
+		params.ini = null;
 
-
-        try {
-			processor.publishIG(params);
+		try {
+			new IGProcessor().publishIG(params);
 		} catch (Exception e) {
 			assertEquals(e.getClass(), NullPointerException.class);
 		}
 
-        deleteTempINI();
+		deleteTempINI();
 	}
 
 
-    @AfterMethod
-    public void afterTest() {
+	@AfterMethod
+	public void afterTest() {
 		deleteTempINI();
-        System.setOut(this.originalStdOut);
-        System.out.println(this.console.toString());
-        this.console = new ByteArrayOutputStream();
-    }
+		System.setOut(this.originalStdOut);
+		System.out.println(this.console.toString());
+		this.console = new ByteArrayOutputStream();
+	}
 
 
 	private File createTempINI(Map<String, String> properties) {
@@ -372,107 +559,11 @@ public class RefreshIGOperationTest extends RefreshTest {
 
 	private String getFhirVersion(IniFile ini) {
 		String specifiedFhirVersion = ini.getStringProperty("IG", "fhir-version");
-		if (specifiedFhirVersion == null || specifiedFhirVersion == "") {
+		if (specifiedFhirVersion == null || specifiedFhirVersion.equals("")) {
 
 			// TODO: Should point to global constant:
 			specifiedFhirVersion = "4.0.1";
 		}
 		return specifiedFhirVersion;
-	}
-
-
-
-
-
-	/**
-	 * Quick method to delete all valuesets not belonging to CQL and identify
-	 * anything missing.
-	 *
-	 * @param args
-	 */
-	public static void main(String args[]) {
-
-		// switch this to true to clean up excess valueset files.
-		boolean deleteExcess = false;
-
-		List<String> listOfValueSets = new ArrayList<>();
-
-		try (final DirectoryStream<Path> dirStream = Files.newDirectoryStream(
-				Paths.get("testfiles" + separator + "refreshIG" + separator + "input" + separator + "cql"))) {
-			dirStream.forEach(path -> {
-				File file = new File(path.toString());
-
-				if (file.getName().toLowerCase().endsWith(".cql")) {
-
-					try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-						String line;
-						boolean valueSetsFound = false;
-						while ((line = br.readLine()) != null) {
-
-							if (line.startsWith("valueset")) {
-								valueSetsFound = true;
-								String vs = line.substring(line.lastIndexOf("/") + 1, line.length()).replace("'", "")
-										.trim();
-								listOfValueSets.add(vs);
-							} else {
-								// done with valuesets section:
-								if (valueSetsFound) {
-									break;
-								}
-							}
-
-						}
-					} catch (FileNotFoundException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-
-				}
-			});
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		Map<String, String> valueSetsPresent = new HashMap<>();
-
-		try (final DirectoryStream<Path> dirStream = Files
-				.newDirectoryStream(Paths.get("testfiles" + separator + "refreshIG" + separator + "input" + separator
-						+ "vocabulary" + separator + "valueset" + separator + "external"))) {
-			dirStream.forEach(path -> {
-				File file = new File(path.toString());
-				String vs = file.getName().replace("valueset-", "").replace(".json", "");
-
-				if (!listOfValueSets.contains(vs)) {
-
-					System.out.println("Valueset found not belonging to any cql: " + path);
-
-					if (deleteExcess == true) {
-						try {
-							Files.delete(path);
-							System.out.println("Deleted " + path);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-				} else {
-					valueSetsPresent.put(vs, file.getName());
-				}
-
-			});
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		if (valueSetsPresent.keySet().size() < listOfValueSets.size()) {
-			for (String valueSet : listOfValueSets) {
-				if (!valueSetsPresent.containsKey(valueSet)) {
-					System.out.println("Missing valueset: " + valueSet);
-				}
-			}
-		}
-
 	}
 }

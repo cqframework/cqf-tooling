@@ -6,9 +6,9 @@ import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.opencds.cqf.tooling.utilities.LogUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -16,17 +16,18 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 
 public class QuestionnaireProcessorTest extends RefreshTest {
+    private static final Logger logger = LoggerFactory.getLogger(QuestionnaireProcessorTest.class);
 
     public static final String separator = System.getProperty("file.separator");
     private final String TARGET_PATH = "target" + separator + "bundleQuestionnaires";
     private final String INI_PATH = TARGET_PATH + separator + "ig.ini";
     private ByteArrayOutputStream console = new ByteArrayOutputStream();
-    private QuestionnaireProcessor questionnaireProcessor;
+    private QuestionnaireBundler questionnaireProcessor;
 
     public QuestionnaireProcessorTest() {
         super(FhirContext.forCached(FhirVersionEnum.R4), "QuestionnaireProcessorTest");
         LibraryProcessor libraryProcessor = new LibraryProcessor();
-        questionnaireProcessor = new QuestionnaireProcessor(libraryProcessor);
+        questionnaireProcessor = new QuestionnaireBundler(libraryProcessor);
     }
 
     @BeforeMethod
@@ -39,7 +40,7 @@ public class QuestionnaireProcessorTest extends RefreshTest {
         }
     }
 
-    public QuestionnaireProcessorTest(QuestionnaireProcessor questionnaireProcessor, FhirContext fhirContext) {
+    public QuestionnaireProcessorTest(QuestionnaireBundler questionnaireProcessor, FhirContext fhirContext) {
         super(fhirContext);
         this.questionnaireProcessor = questionnaireProcessor;
     }
@@ -76,12 +77,12 @@ public class QuestionnaireProcessorTest extends RefreshTest {
                 TARGET_PATH + separator + "bundles" + separator + "questionnaire" + separator +
                         "libraryevaluationtest" + separator + "libraryevaluationtest-bundle.json";
 
-        questionnaireProcessor.bundleQuestionnaires(refreshedLibraryNames, TARGET_PATH, binaryPaths, includeDependencies, includeTerminology,
-                includePatientScenarios, versioned, addBundleTimestamp, fhirContext, null, IOUtils.Encoding.JSON);
+        questionnaireProcessor.bundleResources(refreshedLibraryNames, TARGET_PATH, binaryPaths, includeDependencies, includeTerminology,
+                includePatientScenarios, versioned, addBundleTimestamp, fhirContext, null, IOUtils.Encoding.JSON, true);
 
         File outputBundleFile = new File(outputBundleFilePath);
 
-        LogUtils.info(String.format("OutputBundleFilePath: %s", outputBundleFilePath));
+        logger.info(String.format("OutputBundleFilePath: %s", outputBundleFilePath));
         //TODO: more intelligently inspect the contents. For now just a naive check to see if the bundle file was successfully created.
         assert(outputBundleFile.exists());
     }

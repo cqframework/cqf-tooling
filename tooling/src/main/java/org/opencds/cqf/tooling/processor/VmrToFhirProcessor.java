@@ -7,10 +7,10 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.IdType;
@@ -31,7 +31,7 @@ import ca.uhn.fhir.util.BundleBuilder;
 
 /**
  * Provides Transformation processing from vMR to Fhir.
- * 
+ *
  * @author Joshua Reynolds
  * @since 2021-04-05
  */
@@ -58,7 +58,7 @@ public class VmrToFhirProcessor {
 
     private static void writeOutput(String fhirOutputPath, FhirContext context, Patient patient, List<IAnyResource> resources,
             BundleBuilder bundleBuilder) {
-        File outputDirectory = new File(fhirOutputPath + "/" + patient.getIdElement().getIdPart());
+        File outputDirectory = new File(IOUtils.concatFilePath(fhirOutputPath, patient.getIdElement().getIdPart()));
         if (!outputDirectory.isDirectory()) {
             outputDirectory.mkdirs();
         }
@@ -77,23 +77,17 @@ public class VmrToFhirProcessor {
 
     @SuppressWarnings("rawtypes")
     private static CDSOutput unmarshallCdsOutput(File file) {
-        CDSOutput cdsOutput = null;
-        String cdsCanonical = CDSOutput.class.getCanonicalName();
-        String classPackageName = cdsCanonical.substring(0, cdsCanonical.lastIndexOf("."));
         try {
-            Unmarshaller unmarshaller = JAXBContext.newInstance(classPackageName).createUnmarshaller();
+            Unmarshaller unmarshaller = JAXBContext.newInstance(CDSOutput.class, VMR.class).createUnmarshaller();
             InputStream inputStream = new FileInputStream(file);
             Object unmarshalledObject = unmarshaller.unmarshal(inputStream);
             if (unmarshalledObject instanceof JAXBElement) {
-                cdsOutput = (CDSOutput) ((JAXBElement) unmarshalledObject).getValue();
+                return (CDSOutput) ((JAXBElement) unmarshalledObject).getValue();
             } else {
-                cdsOutput = (CDSOutput) unmarshalledObject;
+                 return (CDSOutput) unmarshalledObject;
             }
-        } catch (JAXBException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-            return cdsOutput;
-        }
+    }
 }

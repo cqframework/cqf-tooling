@@ -30,6 +30,7 @@ public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativePro
 
     private Map<String, IBaseResource> libraryMap = new HashMap<>();
 
+    @SuppressWarnings("this-escape")
     public LibraryGenerator() {
         setNarrativeProvider(new NarrativeProvider());
         setFhirContext(FhirContext.forDstu3Cached());
@@ -48,7 +49,7 @@ public class LibraryGenerator extends BaseLibraryGenerator<Library, NarrativePro
         if (elm.getIncludes() != null && !elm.getIncludes().getDef().isEmpty()) {
             for (IncludeDef def : elm.getIncludes().getDef()) {
                 addRelatedArtifact(library, def);
-            }        
+            }
         }
 
         resolveDataRequirements(library, translator);

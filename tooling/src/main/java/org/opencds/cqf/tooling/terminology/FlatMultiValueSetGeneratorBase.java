@@ -20,6 +20,7 @@ import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -242,7 +243,7 @@ public abstract class FlatMultiValueSetGeneratorBase extends Operation {
                 ? FhirContext.forDstu3Cached().newJsonParser()
                 : FhirContext.forDstu3Cached().newXmlParser();
 
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + fileName)) {
+        try (FileOutputStream writer = new FileOutputStream(IOUtils.concatFilePath(getOutputPath(), fileName))) {
             writer.write(parser.setPrettyPrint(true).encodeResourceToString(vs).getBytes());
             writer.flush();
         }

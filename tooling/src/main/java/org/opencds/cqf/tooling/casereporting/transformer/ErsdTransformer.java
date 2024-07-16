@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -35,10 +36,12 @@ public class ErsdTransformer extends Operation {
     private final String usPhTriggeringValueSetLibraryProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset-library";
     private final String usPhTriggeringValueSetProfileUrl = "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset";
     private final String valueSetStewardExtensionUrl = "http://hl7.org/fhir/StructureDefinition/valueset-steward";
-
+    private final String artifactReleaseLabelExtensionUrl = "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel";
     private PlanDefinition v2PlanDefinition;
     private String version;
     private Period effectivePeriod;
+    private Date artifactsDate;
+    private String releaseLabel;
 
     public ErsdTransformer() {
         ctx = FhirContext.forR4();
@@ -140,10 +143,14 @@ public class ErsdTransformer extends Operation {
 
     private PlanDefinition getV2PlanDefinition(String pathToPlanDefinition) {
         PlanDefinition planDef = null;
-        System.out.println(String.format("PlanDefinitionPath: '%s'", pathToPlanDefinition));
+        logger.info(String.format("PlanDefinitionPath: '%s'", pathToPlanDefinition));
         if (pathToPlanDefinition != null && !pathToPlanDefinition.isEmpty()) {
             planDef = (PlanDefinition)IOUtils.readResource(pathToPlanDefinition, ctx, true);
             planDef.setEffectivePeriod(this.effectivePeriod);
+            Extension releaseLabelExtension = new Extension();
+            releaseLabelExtension.setUrl(artifactReleaseLabelExtensionUrl);
+            releaseLabelExtension.setValue(new StringType(this.releaseLabel));
+            planDef.addExtension(releaseLabelExtension);
         }
 
         return planDef;
@@ -192,6 +199,11 @@ public class ErsdTransformer extends Operation {
                     && ((Library)x.getResource()).getUrl().equals(RCTCLIBRARYURL)).findFirst().get().getResource();
 
         this.effectivePeriod = rctc.getEffectivePeriod();
+        this.artifactsDate = rctc.getDate();
+        Extension releaseLabelExtension = rctc.getExtensionByUrl(artifactReleaseLabelExtensionUrl);
+        if (releaseLabelExtension != null) {
+            this.releaseLabel = releaseLabelExtension.getValueAsPrimitive().getValueAsString();
+        }
 
         if (rctc.hasVersion()) {
             this.version = rctc.getVersion();
@@ -204,19 +216,29 @@ public class ErsdTransformer extends Operation {
 
     private Library createSpecificationLibrary() {
         Library specificationLibrary = new Library();
-        specificationLibrary.setId(new IdType("Library", "SpecificationLibrary", "1.0.0"));
+        specificationLibrary.setId(new IdType("Library", "SpecificationLibrary"));
         specificationLibrary.getMeta().addProfile(usPhSpecificationLibraryProfileUrl);
+
+        Extension releaseLabelExtension = new Extension();
+        releaseLabelExtension.setUrl(artifactReleaseLabelExtensionUrl);
+        releaseLabelExtension.setValue(new StringType(this.releaseLabel));
+        specificationLibrary.addExtension(releaseLabelExtension);
+
+        if (this.effectivePeriod != null) {
+            specificationLibrary.setEffectivePeriod(this.effectivePeriod);
+        }
+        specificationLibrary.setUrl("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary");
+        specificationLibrary.setVersion(this.version);
         specificationLibrary.setName("SpecificationLibrary");
         specificationLibrary.setTitle("Specification Library");
-        specificationLibrary.setVersion(this.version);
-        specificationLibrary.setDescription(
-                "Defines the asset-collection library containing the US Public Health specification assets.");
         specificationLibrary.setStatus(PublicationStatus.ACTIVE);
         specificationLibrary.setExperimental(false);
-        specificationLibrary.setPublisher(PUBLISHER);
-        specificationLibrary.setUrl("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary");
         specificationLibrary.setType(new CodeableConcept(
                 new Coding("http://terminology.hl7.org/CodeSystem/library-type", "asset-collection", null)));
+        specificationLibrary.setDate(this.artifactsDate);
+        specificationLibrary.setPublisher(PUBLISHER);
+        specificationLibrary.setDescription(
+                "Defines the asset-collection library containing the US Public Health specification assets.");
 
         UsageContext reportingUsageContext =
             new UsageContext(
@@ -429,7 +451,7 @@ public class ErsdTransformer extends Operation {
     }
 
     private Bundle resolveSpecificationBundle(Bundle bundle, Library specificationLibrary) {
-        System.out.println(FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true)
+        logger.info(FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true)
                 .encodeResourceToString(specificationLibrary));
         List<BundleEntryComponent> entries = new ArrayList<BundleEntryComponent>();
         entries.add(new BundleEntryComponent().setResource(specificationLibrary)

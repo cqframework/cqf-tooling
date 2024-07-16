@@ -9,16 +9,18 @@ import org.apache.commons.io.FilenameUtils;
 
 public class LogUtils {
     private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LogUtils.class);
-    private static final Map<String, String> resourceWarnings = new LinkedHashMap<String, String>();
+    private static final Map<String, String> resourceWarnings = new LinkedHashMap<>();
+
+    private LogUtils() {}
 
     public static void putException(String id, Exception e) {
         e.printStackTrace();
-        resourceWarnings.put(LocalDateTime.now().toString() + ": " + id,
+        resourceWarnings.put(LocalDateTime.now() + ": " + id,
                 e.getMessage() == null ? e.toString() : e.getMessage());
     }
 
     public static void putException(String id, String warning) {
-        resourceWarnings.put(LocalDateTime.now().toString() + ": " + id, warning);
+        resourceWarnings.put(LocalDateTime.now() + ": " + id, warning);
     }
 
     public static void info(String message) {
@@ -43,14 +45,14 @@ public class LogUtils {
         if (resourceWarnings.isEmpty()) {
             return;
         }
-        String exceptionMessage = "";
+        StringBuilder exceptionMessage = new StringBuilder();
         for (Map.Entry<String, String> resourceException : resourceWarnings.entrySet()) {
-            String resourceExceptionMessage = truncateMessage(resourceException.getValue());
-            String resource = FilenameUtils.getBaseName(stripTimestamp(resourceException.getKey()));
-            exceptionMessage += "\r\n          Resource could not be processed: " + resource
-                    + "\r\n                    " + resourceExceptionMessage;
+            exceptionMessage.append("\r\n          Resource could not be processed: ");
+            exceptionMessage.append(FilenameUtils.getBaseName(stripTimestamp(resourceException.getKey())));
+            exceptionMessage.append("\r\n                    ");
+            exceptionMessage.append(truncateMessage(resourceException.getValue()));
         }
-        ourLog.warn(libraryName + " could not be processed: " + exceptionMessage);
+        ourLog.warn("{} could not be processed: {}", libraryName, exceptionMessage);
         resourceWarnings.clear();
     }
 
@@ -63,7 +65,7 @@ public class LogUtils {
         int cutoffIndex = 0;
         for (String string : messages) {
             int stringIndex = cutoffIndex + string.length() + 4;
-            cutoffIndex = stringIndex > maxSize ? maxSize : stringIndex;
+            cutoffIndex = Math.min(stringIndex, maxSize);
             if (cutoffIndex == maxSize) {
                 break;
             }

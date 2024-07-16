@@ -332,11 +332,11 @@ public class DataRequirementsProvider {
 //            if (cqfMeasure.getGroup().size() == 1 || entry.getValue().stream().map(x -> x.getLeft()).distinct().count() > 1) {
 //                String code = entry.getValue().get(0).getMiddle();
 //                String display = HQMFProvider.measurePopulationValueSetMap.get(code).displayName;
-//                cqfMeasure.addSharedPopulationCritiera(criteria, display, entry.getValue().get(0).getRight());
+//                cqfMeasure.addSharedPopulationCriteroa(criteria, display, entry.getValue().get(0).getRight());
 //            }
 //        }
 //
-//        // If there's only one group every critieria was shared. Kill the group.
+//        // If there's only one group every criteria was shared. Kill the group.
 //        if (cqfMeasure.getGroup().size() == 1) {
 //            cqfMeasure.getGroup().clear();
 //        }
@@ -347,7 +347,7 @@ public class DataRequirementsProvider {
 //                List<MeasureGroupPopulationComponent> newMgpc = new ArrayList<MeasureGroupPopulationComponent>();
 //                for (int j = 0; j < mgc.getPopulation().size(); j++) {
 //                    MeasureGroupPopulationComponent mgpc = mgc.getPopulation().get(j);
-//                    if (mgpc.hasCriteria() && !mgpc.getCriteria().isEmpty() && !cqfMeasure.getSharedPopulationCritieria().containsKey(mgpc.getCriteria())) {
+//                    if (mgpc.hasCriteria() && !mgpc.getCriteria().isEmpty() && !cqfMeasure.getSharedPopulationCriteria().containsKey(mgpc.getCriteria())) {
 //                        String code = mgpc.getCode().getCodingFirstRep().getCode();
 //                        String display = HQMFProvider.measurePopulationValueSetMap.get(code).displayName;
 //                        mgpc.setName(display);

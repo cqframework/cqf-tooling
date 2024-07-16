@@ -1,17 +1,8 @@
 package org.opencds.cqf.tooling.modelinfo;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.nio.file.Paths;
-import java.util.Map;
-
-// import javax.xml.bind.JAXBContext;
-// import javax.xml.bind.JAXBElement;
-// import javax.xml.bind.Marshaller;
-import javax.xml.namespace.QName;
-
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.Marshaller;
 import org.hl7.elm_modelinfo.r1.ClassInfo;
 import org.hl7.elm_modelinfo.r1.ConversionInfo;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
@@ -25,12 +16,21 @@ import org.opencds.cqf.tooling.modelinfo.quick.QuickClassInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.quick.QuickModelInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.uscore.USCoreClassInfoBuilder;
 import org.opencds.cqf.tooling.modelinfo.uscore.USCoreModelInfoBuilder;
+import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Marshaller;
+import javax.xml.namespace.QName;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.file.Paths;
+import java.util.Map;
 
 public class StructureDefinitionToModelInfo extends Operation {
+
+    private static final Logger logger = LoggerFactory.getLogger(StructureDefinitionToModelInfo.class);
 
     private String inputPath;
     private String resourcePaths;
@@ -103,6 +103,16 @@ public class StructureDefinitionToModelInfo extends Operation {
             -modelName="QICore"
             -modelVersion="5.0.0"
 
+        Arguments for producing USCore 6.1.0 Model Info
+            -resourcePaths="4.0.1;US-Core/6.1.0
+            -modelName="USCore"
+            -modelVersion="6.1.0"
+
+        Arguments for producing QICore 6.0.0 Model Info
+            -resourcePaths="4.0.1;US-Core/6.1.0;QI-Core/6.0.0"
+            -modelName="QICore"
+            -modelVersion="6.0.0"
+
         NOTE: Once the ModelInfo is produced, there is a bug in the Jackson XML deserializer that requires that the xsi:type attribute be the first
         attribute in an element with polymorphic child elements. In a regex-search/replace, the following command will address this issue on the
         resulting ModelInfo file:
@@ -162,7 +172,8 @@ public class StructureDefinitionToModelInfo extends Operation {
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             ciBuilder.afterBuild();
 
-            String fhirHelpersPath = this.getOutputPath() + "/" + modelName + "Helpers-" + modelVersion + ".cql";
+            String fhirHelpersPath = IOUtils.concatFilePath(this.getOutputPath(),
+                    modelName + "Helpers-" + modelVersion + ".cql");
             miBuilder = new FHIRModelInfoBuilder(modelVersion, typeInfos, atlas, fhirHelpersPath);
             mi = miBuilder.build();
         }
@@ -173,7 +184,8 @@ public class StructureDefinitionToModelInfo extends Operation {
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             ciBuilder.afterBuild();
 
-            String helpersPath = this.getOutputPath() + "/" + modelName + "Helpers-" + modelVersion + ".cql";
+            String helpersPath = IOUtils.concatFilePath(this.getOutputPath(),
+                    modelName + "Helpers-" + modelVersion + ".cql");
             miBuilder = new USCoreModelInfoBuilder(modelVersion, typeInfos, atlas, helpersPath);
             mi = miBuilder.build();
         }
@@ -184,7 +196,8 @@ public class StructureDefinitionToModelInfo extends Operation {
             Map<String, TypeInfo> typeInfos = ciBuilder.build();
             ciBuilder.afterBuild();
 
-            String helpersPath = this.getOutputPath() + "/" + modelName + "Helpers-" + modelVersion + ".cql";
+            String helpersPath = IOUtils.concatFilePath(this.getOutputPath(),
+                    modelName + "Helpers-" + modelVersion + ".cql");
             miBuilder = new QICoreModelInfoBuilder(modelVersion, typeInfos, atlas, helpersPath);
             mi = miBuilder.build();
         }
@@ -229,18 +242,18 @@ public class StructureDefinitionToModelInfo extends Operation {
             String fileName = modelName.toLowerCase() + "-" + "modelinfo" + "-" + modelVersion + ".xml";
             writeOutput(fileName, sw.toString());
         } catch (Exception e) {
-            System.err.println("error" + e.getMessage());
+            logger.error("error: {}", e.getMessage());
             e.printStackTrace();
         }
     }
 
     private void writeOutput(String fileName, String content) throws IOException {
-        try (FileOutputStream writer = new FileOutputStream(getOutputPath() + "/" + fileName)) {
+        try (FileOutputStream writer = new FileOutputStream(IOUtils.concatFilePath(getOutputPath(), fileName))) {
             writer.write(content.getBytes());
             writer.flush();
         }
     }
-    
+
     public static void main(String[] args) {
         Operation op = new StructureDefinitionToModelInfo();
         op.execute(args);

@@ -1,14 +1,40 @@
 name: Check PR
-on: pull_request
+on:
+    pull_request:
+      types: [opened, reopened, synchronize]
+  
+permissions:
+    checks: write
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   maven:
-    runs-on: ubuntu-latest
+    strategy:
+        matrix:
+          os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: 11
-      - name: Run Checks
-        run: mvn --batch-mode --no-transfer-progress --update-snapshots verify
+            distribution: 'temurin'
+            java-version: '21'
+            cache: 'maven'
+      - name: Compile
+        run: ./mvnw --batch-mode --no-transfer-progress --update-snapshots -T 4 package -DskipTests=true
+      - name: Tests and additional checks
+        run: ./mvnw --batch-mode --no-transfer-progress -T 4 verify -Ppackage
+      - name: Publish test report
+        uses: mikepenz/action-junit-report@v4
+        if: (success() || failure()) && matrix.os == 'ubuntu-latest'
+        with:
+          report_paths: "**/target/surefire-reports/TEST-*.xml"
+          job_name: "Check PR"
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        if: matrix.os == 'ubuntu-latest'
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

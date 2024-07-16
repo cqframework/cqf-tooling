@@ -21,6 +21,8 @@ import org.hl7.fhir.r4.model.Coding;
 
 public class R4FHIRUtils {
 
+    private R4FHIRUtils() {}
+
     public static Coding toCoding(Code code, CompiledLibrary library, LibraryManager libraryManager) {
         CodeSystemDef codeSystemDef = resolveCodeSystemRef(code.getSystem(), library, libraryManager);
         Coding coding = new Coding();
@@ -49,7 +51,7 @@ public class R4FHIRUtils {
     }
 
     public static String parseId(String reference) {
-        String[] tokens = reference.split("[/]");
+        String[] tokens = reference.split("/");
         if (tokens.length > 1) {
             return tokens[1];
         }
@@ -121,8 +123,8 @@ public class R4FHIRUtils {
     }
 
     public static CompiledLibrary resolveLibrary(LibraryManager libraryManager, VersionedIdentifier libraryIdentifier) {
-        if (libraryManager.getCompiledLibraries().containsKey(libraryIdentifier.getId())) {
-            return libraryManager.getCompiledLibraries().get(libraryIdentifier.getId());
+        if (libraryManager.getCompiledLibraries().containsKey(libraryIdentifier)) {
+            return libraryManager.getCompiledLibraries().get(libraryIdentifier);
         }
 
         throw new IllegalArgumentException(String.format("Could not resolve reference to translated library %s", libraryIdentifier.getId()));

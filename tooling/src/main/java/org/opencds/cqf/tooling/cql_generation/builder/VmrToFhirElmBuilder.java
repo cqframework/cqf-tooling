@@ -38,6 +38,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
      * @param modelVersion modelVersion
      * @param decimalFormat decimalFormat
      */
+    @SuppressWarnings("this-escape")
     public VmrToFhirElmBuilder(String modelVersion, DecimalFormat decimalFormat) {
         super("FHIR", modelVersion, "http://hl7.org/FHIR", new FhirLibrarySourceProvider(), decimalFormat);
         IncludeDef includeHelper = of.createIncludeDef().withLocalIdentifier("FHIRHelpers").withPath("FHIRHelpers")
@@ -184,7 +185,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
         codeRefs.setResultType(new ListType(finalCodeRef.getResultType()));
 
         String filterPath = "status";
-        
+
         Retrieve retrieve = resolveRetrieve(libraryBuilder, resource, null, null, null);
         AliasedQuerySource source = of.createAliasedQuerySource().withAlias(retrieveAlias).withExpression(retrieve);
         source.setResultType(source.getExpression().getResultType());
@@ -200,7 +201,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
      * [MedicationAdministration] M return M.reasonCode // TODO: Work out the "include" capability
      *   union
      *   (
-     *     [MedicationAdministration] M 
+     *     [MedicationAdministration] M
      *       let reasonConditions: [Condition: id in (M.reasonReference R return GetTail(R.reference))]
      *       return reasonConditions.code
      *   )
@@ -535,7 +536,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
         Query query = resolveQuery(libraryBuilder, sources, elements);
 
         Expression right = query;
-        
+
         Expression where = libraryBuilder.resolveIn(left, right);
         return where;
     }
@@ -669,7 +670,7 @@ public class VmrToFhirElmBuilder extends VmrToModelElmBuilder {
         Expression idList = of.createList().withElement(letQuery);
         idList.setResultType(new ListType(letQuery.getResultType()));
         Retrieve conditionRetrieve = resolveRetrieve(libraryBuilder, "Condition", idList, "in", "id");
-        
+
         LetClause let = of.createLetClause().withIdentifier("reasonConditions").withExpression(conditionRetrieve);
         let.setResultType(conditionRetrieve.getResultType());
         elements.add(let);
