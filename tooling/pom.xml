@@ -333,12 +333,6 @@
             <artifactId>mockserver-client-java</artifactId>
             <version>5.14.0</version>
         </dependency>
-        <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>0.10.2</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
 
     <dependencyManagement>
