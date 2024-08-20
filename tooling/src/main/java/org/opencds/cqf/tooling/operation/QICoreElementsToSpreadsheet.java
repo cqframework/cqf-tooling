@@ -24,7 +24,7 @@ public class QICoreElementsToSpreadsheet extends StructureDefinitionToSpreadshee
     private int ConstraintColumn = 7;
     private int ConstraintColumnWidth = 85 * 256;
 
-    // example call: -ProfilesToSpreadsheet -ip=/Users/bryantaustin/Projects/FHIR-Spec -op=output -rp="4.0.1;US-Core/3.1.0;QI-Core/4.1.0" -sp=true -mn=QICore -mv=4.1.0
+    // example call: -QICoreElementsToSpreadsheet -ip=/Users/bryantaustin/Projects/FHIR-Spec -op=output -rp="4.0.1;US-Core/3.1.0;QI-Core/4.1.0" -sp=true -mn=QICore -mv=4.1.0
     @Override
     public void execute(String[] args) {
         for (String arg : args) {
@@ -93,7 +93,7 @@ public class QICoreElementsToSpreadsheet extends StructureDefinitionToSpreadshee
         firstSheet.setColumnWidth(ConstraintColumn, ConstraintColumnWidth);
 //        firstSheet.autoSizeColumn(ConstraintColumn);
         SpreadsheetCreatorHelper.writeSpreadSheet(workBook,
-                IOUtils.concatFilePath(getOutputPath(), modelName + modelVersion + ".xlsx"));
+                IOUtils.concatFilePath(getOutputPath(), modelName + modelVersion + " Data Elements" + ".xlsx"));
     }
 
     private List<String> createHeaderNameList() {
