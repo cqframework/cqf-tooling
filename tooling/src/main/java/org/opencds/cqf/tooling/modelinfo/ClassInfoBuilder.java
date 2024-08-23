@@ -1402,9 +1402,9 @@ public abstract class ClassInfoBuilder {
         logger.info("Building ClassInfo for {}", typeName);
         ClassInfo info = new ClassInfo().withName(typeName).withNamespace(modelName).withLabel(this.getLabel(sd))
                 .withIdentifier(sd.getUrl())
-                .withRetrievable(sd.getKind() == StructureDefinitionKind.RESOURCE);
+                .withRetrievable(isStructureDefinitionRetrievable(sd));
 
-        if (sd.getKind() == StructureDefinitionKind.RESOURCE) {
+        if (isStructureDefinitionResource(sd)) {
             String targetTypeName = getTargetTypeName(sd);
             if (targetTypeName != null) {
                 info.setTarget(targetTypeName);
@@ -1442,7 +1442,7 @@ public abstract class ClassInfoBuilder {
         }
 
         String baseDefinition = sd.getBaseDefinition();
-        String baseTypeName = sd.getKind() == StructureDefinitionKind.RESOURCE
+        String baseTypeName = isStructureDefinitionResource(sd)
                 ? resolveBaseTypeName(sd.getType()) : resolveTypeName(baseDefinition);
 
         if (baseTypeName != null && !this.typeInfos.containsKey(baseTypeName)) {
@@ -1471,6 +1471,14 @@ public abstract class ClassInfoBuilder {
 
         logger.info(String.format("Done building ClassInfo for %s", typeName));
         return info;
+    }
+
+    protected static boolean isStructureDefinitionRetrievable(StructureDefinition theStructureDefinition) {
+        return isStructureDefinitionResource(theStructureDefinition) && ! theStructureDefinition.getAbstract();
+    }
+
+    protected static boolean isStructureDefinitionResource(StructureDefinition theStructureDefinition) {
+        return theStructureDefinition.getKind() == StructureDefinitionKind.RESOURCE;
     }
 
     @SuppressWarnings("unused")
