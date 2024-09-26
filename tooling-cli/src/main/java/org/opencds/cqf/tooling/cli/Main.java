@@ -228,6 +228,17 @@ package org.opencds.cqf.tooling.cli;
                 So if you want both json and xml bundles, you would specify both -e=json and -e=xml. If no encoding argument
                 is supplied, the transformer will assume "json" as the default and output a single JSON-encoded bundle.
 
+- CaseReporting.TES.TESPackageGenerate
+            - command: mvn exec: java -Dexec.args="-CaseReporting.TES.TESPackageGenerate (-pathtoinputbundle | -ptib) (-outputpath | -op) [-encoding | -e]"
+            - This Operation takes an input Bundle, parses out the resources it contains and for each Reporting Specification Grouper ValueSet a corresponding Condition Grouper ValueSet is created and output.
+            - The operation expects -ptib is a path to a file containing the source bundle
+            - The -op is the output directory for output
+            -   The default output path is:
+                    <location of the CQF Tooling jar being invoked> + "src/main/resources/org/opencds/cqf/tooling/casereporting/output"
+            - The -e is the desired output encoding(s) for the output bundle. The supported output encodings are: { "json", "xml" }.
+                The "encoding" argument can be specified multiple times and the transformer will output a bundle for each encoding.
+                So if you want both json and xml bundles, you would specify both -e=json and -e=xml. If no encoding argument
+                is supplied, the transformer will assume "json" as the default and output a single JSON-encoded bundle.
         */
 
 //import org.opencds.cqf.tooling.exception.InvalidOperationArgs;
@@ -262,7 +273,7 @@ public class Main {
 //        // NOTE: we may want to use the Spring Context Library to find the annotated classes
 //        if (operationClassMap == null) {
 //            operationClassMap = new HashMap<>();
-//            Reflections reflections = new Reflections("org.opencds.cqf.tooling.operations");
+//            Reflections reflections = newReflections("org.opencds.cqf.tooling.operations");
 //            Set<Class<?>> operationClasses = reflections
 //                    .getTypesAnnotatedWith(Operation.class);
 //            operationClasses.forEach(clazz -> operationClassMap.put(clazz.getAnnotation(Operation.class).name(), clazz));
