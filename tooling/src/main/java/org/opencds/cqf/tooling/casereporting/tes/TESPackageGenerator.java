@@ -4,8 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.XmlParser;
 import ca.uhn.fhir.util.BundleBuilder;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -41,6 +39,7 @@ public class TESPackageGenerator extends Operation {
     private static final int REPORTINGSPECIFICATIONCONDITIONDESCRIPTIONINDEX = 4;
     private FhirContext fhirContext;
     private String version;
+    private String releaseLabel;
     private String pathToInputBundle;
     private String pathToConditionGrouperWorkbook;
     private String pathToConditionCodeValueSet;
@@ -56,7 +55,7 @@ public class TESPackageGenerator extends Operation {
         }
         return this.outputFileEncodings;
     }
-    private boolean prettyPrintOutput;
+    private boolean writeConditionGroupers;
 
     public TESPackageGenerator() {
         fhirContext = FhirContext.forR4();
@@ -85,6 +84,7 @@ public class TESPackageGenerator extends Operation {
 
             switch (flag.replace("-", "").toLowerCase()) {
                 case "version": case "v": version = value; break; // -version (-v)
+                case "releaselabel": case "rl": releaseLabel = value; break; // -releaselabel (-rl)
                 case "outputpath": case "op": this.setOutputPath(value); break; // -outputpath (-op)
                 case "outputfilename": case "ofn": outputFileName = value; break; // -outputfilename (-ofn)
                 case "pathtoinputbundle": case "ptib": pathToInputBundle = value; break; // -pathtoinputbundle (-ptib)
@@ -97,7 +97,7 @@ public class TESPackageGenerator extends Operation {
                     } else {
                         throw new IllegalArgumentException("Invalid encoding: " + value);
                     }
-                case "prettyprintoutput": case "ppo": prettyPrintOutput = Boolean.parseBoolean(value); break; // -prettyprintoutput (-ppo)
+                case "writeconditiongroupers": case "wcg": writeConditionGroupers = Boolean.parseBoolean(value); break; // -writeconditiongroupers (-wcg)
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
@@ -110,26 +110,28 @@ public class TESPackageGenerator extends Operation {
     private Bundle generatePackage() {
         TESPackageGenerateParameters inputParameters = new TESPackageGenerateParameters();
         inputParameters.version = version;
+        inputParameters.releaseLabel = releaseLabel;
         inputParameters.pathToInputBundle = pathToInputBundle;
         inputParameters.pathToConditionGrouperWorkbook = pathToConditionGrouperWorkbook;
         inputParameters.pathToConditionCodeValueSet = pathToConditionCodeValueSet;
         inputParameters.outputPath = this.getOutputPath();
         inputParameters.outputFileName = outputFileName;
         inputParameters.outputFileEncodings = outputFileEncodings;
-        inputParameters.prettyPrintOutput = prettyPrintOutput;
+        inputParameters.writeConditionGroupers = writeConditionGroupers;
 
         return generatePackage(inputParameters);
     }
 
     private void loadOperationArguments(TESPackageGenerateParameters params) {
         version = params.version;
+        releaseLabel = params.releaseLabel;
         pathToInputBundle = params.pathToInputBundle;
         pathToConditionGrouperWorkbook = params.pathToConditionGrouperWorkbook;
         pathToConditionCodeValueSet = params.pathToConditionCodeValueSet;
         setOutputPath(params.outputPath);
         outputFileName = params.outputFileName;
         outputFileEncodings = params.outputFileEncodings;
-        prettyPrintOutput = params.prettyPrintOutput;
+        writeConditionGroupers = params.writeConditionGroupers;
     }
 
     public Bundle generatePackage(TESPackageGenerateParameters params) {
@@ -141,8 +143,10 @@ public class TESPackageGenerator extends Operation {
         Library manifest = generateManifest(conditionGroupers, reportingSpecificationGroupers);
 
         // Write ConditionGroupers out to files (should be an argument)
-        for (IOUtils.Encoding encoding : getOutputFileEncodings()) {
-            IOUtils.writeResources(conditionGroupers, this.getOutputPath(), encoding, FhirContext.forR4Cached());
+        if (writeConditionGroupers) {
+            for (IOUtils.Encoding encoding : getOutputFileEncodings()) {
+                IOUtils.writeResources(conditionGroupers, this.getOutputPath(), encoding, FhirContext.forR4Cached());
+            }
         }
 
         List<IBaseResource> resourcesToBundle = new ArrayList<>();
@@ -162,12 +166,12 @@ public class TESPackageGenerator extends Operation {
 
         }
 
-        runValidation(manifest, conditionGroupers, reportingSpecificationGroupers);
+        runSimpleValidation(manifest, conditionGroupers, reportingSpecificationGroupers);
 
         return outputBundle;
     }
 
-    private void runValidation(Library manifest, List<ValueSet> conditionGroupers, List<ValueSet> reportingSpecificationGroupers) {
+    private void runSimpleValidation(Library manifest, List<ValueSet> conditionGroupers, List<ValueSet> reportingSpecificationGroupers) {
         for (ValueSet vs : conditionGroupers) {
             if (!vs.hasCompose()) {
                 System.out.println(String.format("%s has no compose", vs.getTitle()));
@@ -183,7 +187,7 @@ public class TESPackageGenerator extends Operation {
 
             for (ValueSet reportingSpecificationGrouper : reportingSpecificationGroupers) {
                 Optional<UsageContext> maybeUseContext =
-                        reportingSpecificationGrouper.getUseContext().stream().filter(uc -> uc.getCode().getCode().equalsIgnoreCase("focus")).findFirst();
+                    reportingSpecificationGrouper.getUseContext().stream().filter(uc -> uc.getCode().getCode().equalsIgnoreCase("focus")).findFirst();
 
                 if (maybeUseContext.isPresent()) {
                     var useContext = maybeUseContext.get().getValueCodeableConcept().getCodingFirstRep();
@@ -317,7 +321,7 @@ public class TESPackageGenerator extends Operation {
     private void addReportingSpecificationGrouperReferencesToConditionGroupers(List<ConditionGroupingEntry> conditionGroupingEntries, List<ValueSet> conditionGroupers, List<ValueSet> reportingSpecificationGroupers) {
         for (ValueSet reportingSpecificationGrouper : reportingSpecificationGroupers) {
             var relevantConditionGroupingEntry =
-                conditionGroupingEntries.stream().filter(cge -> (cge.getReportingSpecificationName()).equalsIgnoreCase(reportingSpecificationGrouper.getTitle())).collect(Collectors.toList()).stream().findFirst().orElse(null);
+                conditionGroupingEntries.stream().filter(cge -> (cge.getReportingSpecificationName()).equalsIgnoreCase(reportingSpecificationGrouper.getTitle().replace("\u2019","'"))).collect(Collectors.toList()).stream().findFirst().orElse(null);
             //conditionGroupingEntries.stream().filter(cge -> (cge.getReportingSpecificationName() + " Reporting Specification Grouper").equalsIgnoreCase(reportingSpecificationGrouper.getTitle())).collect(Collectors.toList()).stream().findFirst().orElse(null);
 
             if (relevantConditionGroupingEntry != null) {
@@ -377,23 +381,28 @@ public class TESPackageGenerator extends Operation {
             Row row = rowIterator.next();
 
             String conditionGroupingName = SpreadsheetHelper.protectedString(SpreadsheetHelper.getCellAsString(row, CONDITIONGROUPINGTITLEINDEX)
-                .replace("\u00a0"," ")
-                .replace("\u202F"," ")
+//                .replace("\u00a0"," ")
+//                .replace("\u202F"," ")
+                .replace("\u2019"," ")
                 .trim(), false);
             String reportingSpecificationName =
                 SpreadsheetHelper.protectedString(SpreadsheetHelper.getCellAsString(row, REPORTINGSPECIFICATIONNAMEINDEX)
-                    .replace("\u00a0"," ")
-                    .replace("\u202F"," ")
+//                    .replace("\u00a0"," ")
+//                    .replace("\u202F"," ")
+                    .replace("\u2019"," ")
                     .trim(), false);
             String reportingSpecificationCode =
                 SpreadsheetHelper.protectedString(SpreadsheetHelper.getCellAsString(row, REPORTINGSPECIFICATIONCONDITIONCODEINDEX)
-                    .replace("\u00a0"," ")
-                    .replace("\u202F"," ")
+//                    .replace("\u00a0"," ")
+//                    .replace("\u202F"," ")
+                    .replace("\u2019"," ")
+//                        \u00e9
                     .trim(), false);
             String reportingSpecificationDescription =
                 SpreadsheetHelper.protectedString(SpreadsheetHelper.getCellAsString(row, REPORTINGSPECIFICATIONCONDITIONDESCRIPTIONINDEX)
-                    .replace("\u00a0"," ")
-                    .replace("\u202F"," ")
+//                    .replace("\u00a0"," ")
+//                    .replace("\u202F"," ")
+                    .replace("\u2019"," ")
                     .trim(), false);
 
             if (!Objects.requireNonNull(conditionGroupingName).isEmpty()
@@ -508,10 +517,12 @@ public class TESPackageGenerator extends Operation {
         Library manifest = new Library();
 
         manifest.setId(MANIFESTID);
-        manifest.addExtension(
-            new Extension()
-                .setUrl("http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel")
-                .setValue(new StringType("<ReleaseLabel>")));
+        if (releaseLabel != null && !releaseLabel.isEmpty()) {
+            manifest.addExtension(
+                new Extension()
+                    .setUrl("http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel")
+                    .setValue(new StringType(releaseLabel)));
+        }
         manifest.setUrl(MANIFESTURL);
         manifest.setVersion(this.version);
         manifest.setName("TESContentLibrary");
