@@ -84,7 +84,7 @@ public class HttpClientUtils {
     }
 
     //POST in order: Bundle, Library-Deps, ValueSets, Tests, Group
-    private static List<HttpPOSTResourceType> resourceTypePostOrder = new ArrayList<>(Arrays.asList(
+    private static final List<HttpPOSTResourceType> resourceTypePostOrder = new ArrayList<>(Arrays.asList(
             HttpPOSTResourceType.BUNDLE,
             HttpPOSTResourceType.LIBRARY_DEPS,
             HttpPOSTResourceType.VALUESETS,
@@ -109,9 +109,8 @@ public class HttpClientUtils {
      * @param encoding      The encoding type of the resource.
      * @param fhirContext   The FHIR context for the resource.
      * @param fileLocation  Optional fileLocation indicator for identifying resources by raw filename
-     * @param priorityRank  A key in our mappedTasksByPriorityRank. Allows specification of the priority order in which
-     *                      this POST operation should occur, for example: Bundle, Library dependencies, value sets,
-     *                      tests, group files, then other resources...
+     * @param priorityRank  A key in our mappedTasksByPriorityRank using HttpPOSTResourceType. Allows specification of
+     *                      the resource type for priority ordering at execute.
      * @throws IOException If an I/O error occurs during the request.
      */
     public static void post(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation, HttpPOSTResourceType priorityRank) throws IOException {
