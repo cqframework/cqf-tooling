@@ -52,7 +52,6 @@ public class HttpClientUtils {
     //failedPostCalls needs to maintain the details built in the FAILED message, as well as a copy of the inputs for a retry by the user on failed posts.
     private static Queue<Pair<String, PostComponent>> failedPostCalls = new ConcurrentLinkedQueue<>();
     private static List<String> successfulPostCalls = new CopyOnWriteArrayList<>();
-//    private static Map<IBaseResource, Callable<Void>> tasks = new ConcurrentHashMap<>();
 
     //Parent map uses resourceType as key so that resourceTypes can have their tasks called in a specific order:
     private static ConcurrentHashMap<HttpPOSTResourceType, ConcurrentHashMap<IBaseResource, Callable<Void>>> mappedTasksByPriorityRank = new ConcurrentHashMap<>();
