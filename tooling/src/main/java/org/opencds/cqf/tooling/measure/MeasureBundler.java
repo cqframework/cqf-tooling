@@ -70,7 +70,7 @@ public class MeasureBundler extends AbstractBundler {
             if (!(filesInDir == null || filesInDir.length == 0)) {
                 for (File file : filesInDir) {
 
-                    if (!file.getName().endsWith(".json") || !file.getName().endsWith(".xml")){
+                    if (!file.getName().toLowerCase().endsWith(".json") && !file.getName().toLowerCase().endsWith(".xml")){
                         continue;
                     }
 
@@ -81,7 +81,7 @@ public class MeasureBundler extends AbstractBundler {
                         persistedResources.add(file.getAbsolutePath());
                     } catch (Exception e) {
                         //resource is likely not IBaseResource
-                        logger.error("MeasureBundler.persistTestFilesWithPriority", e);
+                        logger.error("MeasureBundler.persistFilesFolder", e);
                     }
                 }
             }
