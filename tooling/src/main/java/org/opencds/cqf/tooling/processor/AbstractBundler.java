@@ -458,7 +458,8 @@ public abstract class AbstractBundler {
 
         if (fhirUri != null && !fhirUri.isEmpty()) {
             String resourceWriteLocation = bundleDestPath + separator + libraryName + "-bundle." + encoding;
-            HttpClientUtils.post(fhirUri, (IBaseResource) bundle, encoding, fhirContext, resourceWriteLocation, true);
+            //give resource the highest priority (0):
+            HttpClientUtils.post(fhirUri, (IBaseResource) bundle, encoding, fhirContext, resourceWriteLocation, HttpClientUtils.HttpPOSTResourceType.BUNDLE);
         }
     }
 
@@ -476,7 +477,7 @@ public abstract class AbstractBundler {
         IOUtils.copyFile(librarySourcePath, FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(librarySourcePath)));
 
         String cqlFileName = IOUtils.formatFileName(FilenameUtils.getBaseName(librarySourcePath), IOUtils.Encoding.CQL, fhirContext);
-        if (cqlFileName.toLowerCase().startsWith("library-")) {
+        if (cqlFileName.toLowerCase().startsWith("library-") && !cqlFileName.toLowerCase().startsWith("library-deps-")) {
             cqlFileName = cqlFileName.substring(8);
         }
         String cqlLibrarySourcePath = IOUtils.getCqlLibrarySourcePath(primaryLibraryName, cqlFileName, binaryPaths);
