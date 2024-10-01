@@ -71,13 +71,9 @@ public class HttpClientUtils {
         OTHER("Everything Else");
 
         private final String displayName;
-
-        // Constructor to initialize the enum with a string value
         HttpPOSTResourceType(String displayName) {
             this.displayName = displayName;
         }
-
-        // Method to get the associated string value
         public String getDisplayName() {
             return displayName;
         }
