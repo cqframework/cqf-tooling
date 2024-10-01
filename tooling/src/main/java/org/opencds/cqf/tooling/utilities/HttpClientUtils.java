@@ -62,7 +62,7 @@ public class HttpClientUtils {
 
     //used for POST order by resource type:
     public enum HttpPOSTResourceType {
-        BUNDLE("Bundle"),
+        BUNDLE("Bundles"),
         LIBRARY_DEPS("Library Dependencies"),
         VALUESETS("Value Sets"),
         TESTS("Tests"),
@@ -298,7 +298,7 @@ public class HttpClientUtils {
             }
 
             runningPostTaskList.remove(postComponent.resource);
-            reportProgress(postComponent.type.getDisplayName());
+            reportProgress(postComponent.type);
             return null;
         };
     }
@@ -342,6 +342,32 @@ public class HttpClientUtils {
         }
     }
 
+    private static String getSectionPercentage(HttpPOSTResourceType postType) {
+        //processedPostCounter holds the count we're at.
+        //logically all preceding items up until this point are processed
+        //add all sections until we get to this type, subtract total processed from other type count
+        //get percentage from that using (processedPostCounter - theseTypesCount) / currentTypeProcessedCount
+
+        int otherTypesProcessedCount = 0;
+
+        for (int i = 0; i < resourceTypePostOrder.size(); i++) {
+            HttpPOSTResourceType iterType = resourceTypePostOrder.get(i);
+            if (iterType == postType){
+                break;
+            }
+            if (mappedTasksByPriorityRank.containsKey(iterType)) {
+                otherTypesProcessedCount = otherTypesProcessedCount + (mappedTasksByPriorityRank.get(iterType)).size();
+            }
+        }
+
+        int thisTypeProcessedCount = mappedTasksByPriorityRank.get(postType).size();
+        int currentCounter = processedPostCounter - otherTypesProcessedCount;
+
+        double percentage = (double) currentCounter / thisTypeProcessedCount * 100;
+
+        return String.format("%.2f%%", percentage);
+    }
+
     /**
      * Reports the progress of HTTP POST calls and the current thread pool size.
      * <p>
@@ -349,17 +375,20 @@ public class HttpClientUtils {
      * relative to the total number of tasks. It also displays the current size of the running thread pool. The progress
      * and pool size information is printed to the standard output.
      */
-    private static void reportProgress(String postType) {
+    private static void reportProgress(HttpPOSTResourceType postType) {
+        int currentCounter = processedPostCounter++;
+
         String fileGroup = "";
         if (postType != null) {
-            fileGroup = "Current resource type: " + postType + "                                                      ";
+            fileGroup = "Current POST group: " + postType.getDisplayName() + " " + getSectionPercentage(postType) + "                                                    ";
         }
-        int currentCounter = processedPostCounter++;
+
         double percentage = (double) currentCounter / getTotalTaskCount() * 100;
-        System.out.print("\rProgress: " + String.format("%.2f%%", percentage) + " processed. " +
+        System.out.print("\rOverall Progress: " + String.format("%.2f%%", percentage) + ". " +
                 "POST response pool size: " + runningPostTaskList.size() + ". " +
                 fileGroup);
     }
+
 
     private static void reportProgress(){
         reportProgress(null);
