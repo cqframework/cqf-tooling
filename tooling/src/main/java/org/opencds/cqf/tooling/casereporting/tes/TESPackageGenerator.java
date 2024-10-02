@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.text.Normalizer;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -309,7 +310,7 @@ public class TESPackageGenerator extends Operation {
                 UsageContext conditionGrouperUseContext =
                     new UsageContext(
                         new Coding(VSMUSAGECONTEXTTYPESYSTEMURL, "grouper-type", null),
-                        new CodeableConcept(new Coding(USPHUSAGECONTEXTURL, "condition-grouper", null))
+                        new CodeableConcept(new Coding(USPHUSAGECONTEXTURL, "condition-grouper", "Condition Grouper")).setText("Condition Grouper")
                     );
                 conditionGrouperValueSet.addUseContext(conditionGrouperUseContext);
                 conditionGroupers.add(conditionGrouperValueSet);
@@ -320,19 +321,34 @@ public class TESPackageGenerator extends Operation {
 
     private void addReportingSpecificationGrouperReferencesToConditionGroupers(List<ConditionGroupingEntry> conditionGroupingEntries, List<ValueSet> conditionGroupers, List<ValueSet> reportingSpecificationGroupers) {
         for (ValueSet reportingSpecificationGrouper : reportingSpecificationGroupers) {
+//            var relevantConditionGroupingEntry =
+//              conditionGroupingEntries.stream().filter(cge -> (Normalizer.normalize(cge.getReportingSpecificationName(), Normalizer.Form.NFKD).equalsIgnoreCase(java.text.Normalizer.normalize(reportingSpecificationGrouper.getTitle().replace("\u00a0"," "), Normalizer.Form.NFKD)))).collect(Collectors.toList()).stream().findFirst().orElse(null);
             var relevantConditionGroupingEntry =
-                conditionGroupingEntries.stream().filter(cge -> (cge.getReportingSpecificationName()).equalsIgnoreCase(reportingSpecificationGrouper.getTitle().replace("\u2019","'"))).collect(Collectors.toList()).stream().findFirst().orElse(null);
-            //conditionGroupingEntries.stream().filter(cge -> (cge.getReportingSpecificationName() + " Reporting Specification Grouper").equalsIgnoreCase(reportingSpecificationGrouper.getTitle())).collect(Collectors.toList()).stream().findFirst().orElse(null);
+                conditionGroupingEntries.stream()
+                    .filter(cge -> ("ReportingSpecificationGrouper" + cge.getReportingSpecificationConditionCode())
+                        .equalsIgnoreCase(reportingSpecificationGrouper.getName()))
+                    .collect(Collectors.toList())
+                    .stream()
+                    .findFirst()
+                    .orElse(null);
 
             if (relevantConditionGroupingEntry != null) {
                 var relevantConditionGrouper =
-                        conditionGroupers.stream().filter(cg -> cg.getTitle().equalsIgnoreCase(relevantConditionGroupingEntry.getConditionGroupingTitle())).collect(Collectors.toList()).stream().findFirst().orElse(null);
+                    conditionGroupers.stream().
+                        filter(cg -> cg.getTitle().equalsIgnoreCase(relevantConditionGroupingEntry.getConditionGroupingTitle()))
+                        .collect(Collectors.toList())
+                        .stream()
+                        .findFirst()
+                        .orElse(null);
+
                 if (relevantConditionGrouper != null) {
                     if (!relevantConditionGrouper.hasCompose()) {
                         relevantConditionGrouper.setCompose(new ValueSet.ValueSetComposeComponent());
                     }
-                    if (relevantConditionGrouper.getCompose().getInclude().stream().noneMatch(i -> i.getValueSet().contains(new CanonicalType(relevantConditionGrouper.getUrl())))) {
-                        relevantConditionGrouper.getCompose().addInclude(new ValueSet.ConceptSetComponent().addValueSet(reportingSpecificationGrouper.getUrl()));
+
+                    if (relevantConditionGrouper.getCompose().getInclude().stream().noneMatch(i -> i.getValueSet().contains(new CanonicalType(reportingSpecificationGrouper.getUrl())))) {
+                        relevantConditionGrouper.getCompose()
+                            .addInclude(new ValueSet.ConceptSetComponent().addValueSet(reportingSpecificationGrouper.getUrl()));
                     }
                 }
             }
@@ -380,30 +396,33 @@ public class TESPackageGenerator extends Operation {
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
 
-            String conditionGroupingName = SpreadsheetHelper.protectedString(SpreadsheetHelper.getCellAsString(row, CONDITIONGROUPINGTITLEINDEX)
+            String conditionGroupingName = SpreadsheetHelper.getCellAsString(row, CONDITIONGROUPINGTITLEINDEX)
 //                .replace("\u00a0"," ")
 //                .replace("\u202F"," ")
-                .replace("\u2019"," ")
-                .trim(), false);
+//                .replace("\u2019"," ")
+                .trim();
             String reportingSpecificationName =
-                SpreadsheetHelper.protectedString(SpreadsheetHelper.getCellAsString(row, REPORTINGSPECIFICATIONNAMEINDEX)
+//                SpreadsheetHelper.protectedString(
+                        SpreadsheetHelper.getCellAsString(row, REPORTINGSPECIFICATIONNAMEINDEX)
 //                    .replace("\u00a0"," ")
 //                    .replace("\u202F"," ")
-                    .replace("\u2019"," ")
-                    .trim(), false);
+//                    .replace("\u2019"," ")
+                    .trim();
+            row.getCell(REPORTINGSPECIFICATIONCONDITIONCODEINDEX).setCellType(CellType.STRING);
             String reportingSpecificationCode =
-                SpreadsheetHelper.protectedString(SpreadsheetHelper.getCellAsString(row, REPORTINGSPECIFICATIONCONDITIONCODEINDEX)
+                SpreadsheetHelper.getCellAsString(row, REPORTINGSPECIFICATIONCONDITIONCODEINDEX)
 //                    .replace("\u00a0"," ")
 //                    .replace("\u202F"," ")
-                    .replace("\u2019"," ")
-//                        \u00e9
-                    .trim(), false);
+//                    .replace("\u2019"," ")
+////                        \u00e9
+                    .trim();
             String reportingSpecificationDescription =
-                SpreadsheetHelper.protectedString(SpreadsheetHelper.getCellAsString(row, REPORTINGSPECIFICATIONCONDITIONDESCRIPTIONINDEX)
+//                SpreadsheetHelper.protectedString(
+                        SpreadsheetHelper.getCellAsString(row, REPORTINGSPECIFICATIONCONDITIONDESCRIPTIONINDEX)
 //                    .replace("\u00a0"," ")
 //                    .replace("\u202F"," ")
-                    .replace("\u2019"," ")
-                    .trim(), false);
+//                    .replace("\u2019"," ")
+                    .trim();
 
             if (!Objects.requireNonNull(conditionGroupingName).isEmpty()
                     || !Objects.requireNonNull(reportingSpecificationName).isEmpty()

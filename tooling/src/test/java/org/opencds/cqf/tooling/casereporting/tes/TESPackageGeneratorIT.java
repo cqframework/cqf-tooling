@@ -23,7 +23,7 @@ public class TESPackageGeneratorIT {
     @Test
     public void testTESPackageGenerate() throws Exception {
         TESPackageGenerateParameters params = new TESPackageGenerateParameters();
-        params.pathToInputBundle = "src/test/resources/casereporting/tes/reporting-specification-groupers-bundle-truncated.json";
+        params.pathToInputBundle = "src/test/resources/casereporting/tes/reporting-specification-groupers-bundle.json";
         params.pathToConditionGrouperWorkbook = "src/test/resources/casereporting/tes/TES_Condition_Groupers_20240920.xlsx";
         params.pathToConditionCodeValueSet = "src/test/resources/casereporting/tes/valueset-rckms-condition-codes.json";
         params.outputPath = "src/test/resources/casereporting/tes/output";
