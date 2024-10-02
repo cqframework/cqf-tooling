@@ -142,7 +142,7 @@ public abstract class AbstractBundler {
             final Map<String, String> libraryPathMap = new ConcurrentHashMap<>(IOUtils.getLibraryPathMap(fhirContext));
 
             if (resourcesMap.isEmpty()) {
-                logger.info("[INFO] No " + getResourceBundlerType() + "s found. Continuing...");
+                logger.info("\n\r" + "[INFO] No " + getResourceBundlerType() + "s found. Continuing...\n\r");
                 return;
             }
 
@@ -169,7 +169,7 @@ public abstract class AbstractBundler {
                 tasks.add(() -> {
                     //check if resourceSourcePath has been processed before:
                     if (processedResources.contains(resourceSourcePath)) {
-                        logger.info(getResourceBundlerType() + " processed already: " + resourceSourcePath);
+                        logger.info("\n\r" + getResourceBundlerType() + " processed already: " + resourceSourcePath);
                         return null;
                     }
                     String resourceName = FilenameUtils.getBaseName(resourceSourcePath).replace(getResourcePrefix(), "");
@@ -296,7 +296,7 @@ public abstract class AbstractBundler {
         //Output final report:
         String summaryOutput = generateBundleProcessSummary(refreshedLibraryNames, fhirContext, fhirUri, verboseMessaging,
                 persistedFileReport, bundledResources, failedExceptionMessages, cqlTranslatorErrorMessages).toString();
-        logger.info(summaryOutput);
+        logger.info("\n\r" + summaryOutput);
     }
 
     /**

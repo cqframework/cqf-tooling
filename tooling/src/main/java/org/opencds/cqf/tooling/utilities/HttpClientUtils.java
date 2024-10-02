@@ -380,13 +380,19 @@ public class HttpClientUtils {
 
         String fileGroup = "";
         if (postType != null) {
-            fileGroup = "Current POST group: " + postType.getDisplayName() + " " + getSectionPercentage(postType) + "                                                    ";
+            fileGroup = "Posting: " + postType.getDisplayName() + " (" + getSectionPercentage(postType) + ")";
         }
 
         double percentage = (double) currentCounter / getTotalTaskCount() * 100;
-        System.out.print("\rOverall Progress: " + String.format("%.2f%%", percentage) + ". " +
+        String progressStr = "\rOverall Progress: " + String.format("%.2f%%", percentage) + ". " +
                 "POST response pool size: " + runningPostTaskList.size() + ". " +
-                fileGroup);
+                fileGroup;
+
+
+        String repeatedString = " ".repeat(progressStr.length() * 2);
+        System.out.print(repeatedString);
+
+        System.out.print(progressStr);
     }
 
 
@@ -420,21 +426,11 @@ public class HttpClientUtils {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
 
         try {
-            logger.info(getTotalTaskCount() + " POST calls to be made. Starting now. Please wait...");
-            double percentage = 0;
-            System.out.print("\rPOST: " + String.format("%.2f%%", percentage) + " done. ");
+            logger.info("\n\r" + getTotalTaskCount() + " POST calls to be made. Starting now. Please wait..." + "\n\r");
+            runPostCalls(executorService);
 
-            //execute the tasks for each priority ranking, sorted:
-            for (int i = 0; i < resourceTypePostOrder.size(); i++) {
-                //execute the tasks in order specified
-                if (mappedTasksByPriorityRank.containsKey(resourceTypePostOrder.get(i))) {
-                    executeTasks(executorService, mappedTasksByPriorityRank.get(resourceTypePostOrder.get(i)));
-                }
-            }
 
-            reportProgress();
-
-            logger.info("Processing results...");
+            logger.info("\n\r" + "Processing results..."+ "\n\r");
             Collections.sort(successfulPostCalls);
 
             StringBuilder message = new StringBuilder();
@@ -446,7 +442,7 @@ public class HttpClientUtils {
             successfulPostCalls = new ArrayList<>();
 
             if (!failedPostCalls.isEmpty()) {
-                logger.info(failedPostCalls.size() + " tasks failed to POST. Retry these failed posts? (Y/N)");
+                logger.info("\n\r" + failedPostCalls.size() + " tasks failed to POST. Retry these failed posts? (Y/N)");
                 Scanner scanner = new Scanner(System.in);
                 String userInput = scanner.nextLine().trim().toLowerCase();
 
@@ -468,16 +464,8 @@ public class HttpClientUtils {
                         }
                     }
 
-                    //execute any tasks marked as having priority:
-                    //execute the tasks for each priority ranking, sorted:
-                    for (int i = 0; i < resourceTypePostOrder.size(); i++) {
-                        //execute the tasks in order specified
-                        if (mappedTasksByPriorityRank.containsKey(resourceTypePostOrder.get(i))) {
-                            executeTasks(executorService, mappedTasksByPriorityRank.get(resourceTypePostOrder.get(i)));
-                        }
-                    }
+                    runPostCalls(executorService);
 
-                    reportProgress();
                     if (failedPostCalls.isEmpty()) {
                         logger.info("\r\nRetry successful, all tasks successfully posted");
                     }
@@ -518,6 +506,22 @@ public class HttpClientUtils {
             cleanUp();
             executorService.shutdown();
         }
+    }
+
+    /**
+     * Executes the tasks for each priority ranking, sorted:
+     * @param executorService
+     */
+    private static void runPostCalls(ExecutorService executorService) {
+        //execute the tasks for each priority ranking, sorted:
+        for (int i = 0; i < resourceTypePostOrder.size(); i++) {
+            //execute the tasks in order specified
+            if (mappedTasksByPriorityRank.containsKey(resourceTypePostOrder.get(i))) {
+                executeTasks(executorService, mappedTasksByPriorityRank.get(resourceTypePostOrder.get(i)));
+            }
+        }
+
+        reportProgress();
     }
 
     /**
