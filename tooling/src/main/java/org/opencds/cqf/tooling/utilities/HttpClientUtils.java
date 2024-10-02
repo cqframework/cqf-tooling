@@ -70,9 +70,11 @@ public class HttpClientUtils {
         OTHER("Everything Else");
 
         private final String displayName;
+
         HttpPOSTResourceType(String displayName) {
             this.displayName = displayName;
         }
+
         public String getDisplayName() {
             return displayName;
         }
@@ -352,7 +354,7 @@ public class HttpClientUtils {
 
         for (int i = 0; i < resourceTypePostOrder.size(); i++) {
             HttpPOSTResourceType iterType = resourceTypePostOrder.get(i);
-            if (iterType == postType){
+            if (iterType == postType) {
                 break;
             }
             if (mappedTasksByPriorityRank.containsKey(iterType)) {
@@ -399,7 +401,7 @@ public class HttpClientUtils {
     }
 
 
-    private static void reportProgress(){
+    private static void reportProgress() {
         reportProgress(null);
     }
 
@@ -409,6 +411,21 @@ public class HttpClientUtils {
             totalCount += map.size();
         }
         return totalCount;
+    }
+
+    private static String getPresentTypesAndCounts() {
+        StringBuilder output = new StringBuilder();
+        for (int i = 0; i < resourceTypePostOrder.size(); i++) {
+            //execute the tasks in order specified
+            if (mappedTasksByPriorityRank.containsKey(resourceTypePostOrder.get(i))) {
+                output.append("\n\r - ")
+                        .append(resourceTypePostOrder.get(i).displayName)
+                        .append(": ")
+                        .append(mappedTasksByPriorityRank.get(resourceTypePostOrder.get(i)).size());
+            }
+        }
+
+        return output.toString();
     }
 
     /**
@@ -429,11 +446,15 @@ public class HttpClientUtils {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
 
         try {
-            logger.info("\n\r" + getTotalTaskCount() + " POST calls to be made. Starting now. Please wait..." + "\n\r");
+            logger.info("\n\r" + getTotalTaskCount() +
+                    " POST calls to be made: " +
+                    getPresentTypesAndCounts() +
+                    "\n\r Executing, please wait..." + "\n\r");
+
             runPostCalls(executorService);
 
 
-            logger.info("\n\r" + "Processing results..."+ "\n\r");
+            logger.info("\n\r" + "Processing results..." + "\n\r");
             Collections.sort(successfulPostCalls);
 
             StringBuilder message = new StringBuilder();
@@ -513,6 +534,7 @@ public class HttpClientUtils {
 
     /**
      * Executes the tasks for each priority ranking, sorted:
+     *
      * @param executorService
      */
     private static void runPostCalls(ExecutorService executorService) {
