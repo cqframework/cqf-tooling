@@ -342,7 +342,7 @@ public class HttpClientUtils {
         }
     }
 
-    private static String getSectionPercentage(HttpPOSTResourceType postType) {
+    private static String getSectionProgress(HttpPOSTResourceType postType) {
         //processedPostCounter holds the count we're at.
         //logically all preceding items up until this point are processed
         //add all sections until we get to this type, subtract total processed from other type count
@@ -365,7 +365,7 @@ public class HttpClientUtils {
 
         double percentage = (double) currentCounter / thisTypeProcessedCount * 100;
 
-        return String.format("%.2f%%", percentage);
+        return currentCounter + "/" + thisTypeProcessedCount + " (" + String.format("%.2f%%", percentage) + ")";
     }
 
     /**
@@ -380,13 +380,16 @@ public class HttpClientUtils {
 
         String fileGroup = "";
         if (postType != null) {
-            fileGroup = "Posting: " + postType.getDisplayName() + " (" + getSectionPercentage(postType) + ")";
+            fileGroup = " | Posting: " + postType.getDisplayName() + " " + getSectionProgress(postType);
         }
 
-        double percentage = (double) currentCounter / getTotalTaskCount() * 100;
-        String progressStr = "\rOverall Progress: " + String.format("%.2f%%", percentage) + ". " +
-                "POST response pool size: " + runningPostTaskList.size() + ". " +
-                fileGroup;
+        int taskCount = getTotalTaskCount();
+        double percentage = (double) currentCounter / taskCount * 100;
+        String percentOutput = String.format("%.2f%%", percentage);
+
+        String progressStr = "\rProgress: " + percentOutput + " (" + currentCounter + "/" + taskCount + ")" +
+                fileGroup +
+                " | Response pool: " + runningPostTaskList.size() + "";
 
 
         String repeatedString = " ".repeat(progressStr.length() * 2);
