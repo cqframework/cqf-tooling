@@ -27,6 +27,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
 
+
 /**
  * A utility class for collecting HTTP requests to a FHIR server and executing them collectively.
  */
@@ -51,16 +52,50 @@ public class HttpClientUtils {
     //failedPostCalls needs to maintain the details built in the FAILED message, as well as a copy of the inputs for a retry by the user on failed posts.
     private static Queue<Pair<String, PostComponent>> failedPostCalls = new ConcurrentLinkedQueue<>();
     private static List<String> successfulPostCalls = new CopyOnWriteArrayList<>();
-    private static Map<IBaseResource, Callable<Void>> tasks = new ConcurrentHashMap<>();
-    private static Map<IBaseResource, Callable<Void>> initialTasks = new ConcurrentHashMap<>();
+
+    //Parent map uses resourceType as key so that resourceTypes can have their tasks called in a specific order:
+    private static ConcurrentHashMap<HttpPOSTResourceType, ConcurrentHashMap<IBaseResource, Callable<Void>>> mappedTasksByPriorityRank = new ConcurrentHashMap<>();
+
     private static List<IBaseResource> runningPostTaskList = new CopyOnWriteArrayList<>();
     private static int processedPostCounter = 0;
+
+
+    //used for POST order by resource type:
+    public enum HttpPOSTResourceType {
+        BUNDLE("Bundles"),
+        LIBRARY_DEPS("Library Dependencies"),
+        VALUESETS("Value Sets"),
+        TESTS("Tests"),
+        GROUP("Patient Groups"),
+        OTHER("Everything Else");
+
+        private final String displayName;
+
+        HttpPOSTResourceType(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+    }
+
+    //POST in order: Bundle, Library-Deps, ValueSets, Tests, Group
+    private static final List<HttpPOSTResourceType> resourceTypePostOrder = new ArrayList<>(Arrays.asList(
+            HttpPOSTResourceType.BUNDLE,
+            HttpPOSTResourceType.LIBRARY_DEPS,
+            HttpPOSTResourceType.VALUESETS,
+            HttpPOSTResourceType.TESTS,
+            HttpPOSTResourceType.GROUP,
+            HttpPOSTResourceType.OTHER));
 
     private HttpClientUtils() {
     }
 
     public static boolean hasPostTasksInQueue() {
-        return !tasks.isEmpty();
+
+        return !mappedTasksByPriorityRank.isEmpty();
+
     }
 
     /**
@@ -71,9 +106,11 @@ public class HttpClientUtils {
      * @param encoding      The encoding type of the resource.
      * @param fhirContext   The FHIR context for the resource.
      * @param fileLocation  Optional fileLocation indicator for identifying resources by raw filename
+     * @param priorityRank  A key in our mappedTasksByPriorityRank using HttpPOSTResourceType. Allows specification of
+     *                      the resource type for priority ordering at execute.
      * @throws IOException If an I/O error occurs during the request.
      */
-    public static void post(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation, boolean withPriority) throws IOException {
+    public static void post(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation, HttpPOSTResourceType priorityRank) throws IOException {
         List<String> missingValues = new ArrayList<>();
         List<String> values = new ArrayList<>();
         validateAndAddValue(fhirServerUrl, FHIR_SERVER_URL, missingValues, values);
@@ -88,11 +125,11 @@ public class HttpClientUtils {
             return;
         }
 
-        createPostTask(fhirServerUrl, resource, encoding, fhirContext, fileLocation, withPriority);
+        createPostTask(fhirServerUrl, resource, encoding, fhirContext, fileLocation, priorityRank);
     }
 
     public static void post(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation) throws IOException {
-        post(fhirServerUrl, resource, encoding, fhirContext, fileLocation, false);
+        post(fhirServerUrl, resource, encoding, fhirContext, fileLocation, null);
     }
 
     /**
@@ -129,21 +166,30 @@ public class HttpClientUtils {
      * If any exceptions occur during task creation or configuration, an error message is logged.
      *
      * @param fhirServerUrl The URL of the FHIR server to which the POST request will be sent.
-     * @param resource      The FHIR resource to be posted.
      * @param encoding      The encoding type of the resource.
      * @param fhirContext   The FHIR context for the resource.
      */
-    private static void createPostTask(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation, boolean withPriority) {
+    private static void createPostTask(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation, HttpPOSTResourceType priorityRank) {
+
+        if (priorityRank == null) {
+            //added to last in the list:
+            priorityRank = HttpPOSTResourceType.OTHER;
+        }
+        ConcurrentHashMap<IBaseResource, Callable<Void>> theseTasks = new ConcurrentHashMap<>();
+
         try {
-            PostComponent postPojo = new PostComponent(fhirServerUrl, resource, encoding, fhirContext, fileLocation, withPriority);
+            PostComponent postPojo = new PostComponent(fhirServerUrl, resource, encoding, fhirContext, fileLocation, priorityRank);
             HttpPost post = configureHttpPost(fhirServerUrl, resource, encoding, fhirContext);
-            if (withPriority) {
-                initialTasks.put(resource, createPostCallable(post, postPojo));
-            } else {
-                tasks.put(resource, createPostCallable(post, postPojo));
-            }
+            theseTasks.put(resource, createPostCallable(post, postPojo));
         } catch (Exception e) {
             logger.error("Error while submitting the POST request: " + e.getMessage(), e);
+        }
+
+        //check if a callable tasks map has started based on this resourceType:
+        if (mappedTasksByPriorityRank.containsKey(priorityRank)) {
+            mappedTasksByPriorityRank.get(priorityRank).putAll(theseTasks);
+        } else {
+            mappedTasksByPriorityRank.put(priorityRank, theseTasks);
         }
     }
 
@@ -215,7 +261,7 @@ public class HttpClientUtils {
 
                 if (statusCode >= 200 && statusCode < 300) {
                     successfulPostCalls.add(buildSuccessMessage(postComponent.fhirServerUrl, resourceIdentifier));
-                }else if (statusCode == 301){
+                } else if (statusCode == 301) {
                     //redirected, find new location:
                     Header locationHeader = response.getFirstHeader("Location");
                     if (locationHeader != null) {
@@ -254,7 +300,7 @@ public class HttpClientUtils {
             }
 
             runningPostTaskList.remove(postComponent.resource);
-            reportProgress();
+            reportProgress(postComponent.type);
             return null;
         };
     }
@@ -298,6 +344,32 @@ public class HttpClientUtils {
         }
     }
 
+    private static String getSectionProgress(HttpPOSTResourceType postType) {
+        //processedPostCounter holds the count we're at.
+        //logically all preceding items up until this point are processed
+        //add all sections until we get to this type, subtract total processed from other type count
+        //get percentage from that using (processedPostCounter - theseTypesCount) / currentTypeProcessedCount
+
+        int otherTypesProcessedCount = 0;
+
+        for (int i = 0; i < resourceTypePostOrder.size(); i++) {
+            HttpPOSTResourceType iterType = resourceTypePostOrder.get(i);
+            if (iterType == postType) {
+                break;
+            }
+            if (mappedTasksByPriorityRank.containsKey(iterType)) {
+                otherTypesProcessedCount = otherTypesProcessedCount + (mappedTasksByPriorityRank.get(iterType)).size();
+            }
+        }
+
+        int thisTypeProcessedCount = mappedTasksByPriorityRank.get(postType).size();
+        int currentCounter = processedPostCounter - otherTypesProcessedCount;
+
+        double percentage = (double) currentCounter / thisTypeProcessedCount * 100;
+
+        return currentCounter + "/" + thisTypeProcessedCount + " (" + String.format("%.2f%%", percentage) + ")";
+    }
+
     /**
      * Reports the progress of HTTP POST calls and the current thread pool size.
      * <p>
@@ -305,14 +377,55 @@ public class HttpClientUtils {
      * relative to the total number of tasks. It also displays the current size of the running thread pool. The progress
      * and pool size information is printed to the standard output.
      */
-    private static void reportProgress() {
+    private static void reportProgress(HttpPOSTResourceType postType) {
         int currentCounter = processedPostCounter++;
-        double percentage = (double) currentCounter / getTotalTaskCount() * 100;
-        System.out.print("\rPOST calls: " + String.format("%.2f%%", percentage) + " processed. POST response pool size: " + runningPostTaskList.size() + ". ");
+
+        String fileGroup = "";
+        if (postType != null) {
+            fileGroup = " | Posting: " + postType.getDisplayName() + " " + getSectionProgress(postType);
+        }
+
+        int taskCount = getTotalTaskCount();
+        double percentage = (double) currentCounter / taskCount * 100;
+        String percentOutput = String.format("%.2f%%", percentage);
+
+        String progressStr = "\rProgress: " + percentOutput + " (" + currentCounter + "/" + taskCount + ")" +
+                fileGroup +
+                " | Response pool: " + runningPostTaskList.size() + "";
+
+
+        String repeatedString = " ".repeat(progressStr.length() * 2);
+        System.out.print(repeatedString);
+
+        System.out.print(progressStr);
+    }
+
+
+    private static void reportProgress() {
+        reportProgress(null);
     }
 
     private static int getTotalTaskCount() {
-        return tasks.size() + initialTasks.size();
+        int totalCount = 0;
+        for (ConcurrentHashMap<IBaseResource, Callable<Void>> map : mappedTasksByPriorityRank.values()) {
+            totalCount += map.size();
+        }
+        return totalCount;
+    }
+
+    private static String getPresentTypesAndCounts() {
+        StringBuilder output = new StringBuilder();
+        for (int i = 0; i < resourceTypePostOrder.size(); i++) {
+            //execute the tasks in order specified
+            if (mappedTasksByPriorityRank.containsKey(resourceTypePostOrder.get(i))) {
+                output.append("\n\r - ")
+                        .append(resourceTypePostOrder.get(i).displayName)
+                        .append(": ")
+                        .append(mappedTasksByPriorityRank.get(resourceTypePostOrder.get(i)).size());
+            }
+        }
+
+        return output.toString();
     }
 
     /**
@@ -333,19 +446,15 @@ public class HttpClientUtils {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
 
         try {
-            logger.info(getTotalTaskCount() + " POST calls to be made. Starting now. Please wait...");
-            double percentage = 0;
-            System.out.print("\rPOST: " + String.format("%.2f%%", percentage) + " done. ");
+            logger.info("\n\r" + getTotalTaskCount() +
+                    " POST calls to be made: " +
+                    getPresentTypesAndCounts() +
+                    "\n\r Executing, please wait..." + "\n\r");
 
-            //execute any tasks marked as having priority:
-            executeTasks(executorService, initialTasks);
+            runPostCalls(executorService);
 
-            //execute the remaining tasks:
-            executeTasks(executorService, tasks);
 
-            reportProgress();
-
-            logger.info("Processing results...");
+            logger.info("\n\r" + "Processing results..." + "\n\r");
             Collections.sort(successfulPostCalls);
 
             StringBuilder message = new StringBuilder();
@@ -357,7 +466,7 @@ public class HttpClientUtils {
             successfulPostCalls = new ArrayList<>();
 
             if (!failedPostCalls.isEmpty()) {
-                logger.info(failedPostCalls.size() + " tasks failed to POST. Retry these failed posts? (Y/N)");
+                logger.info("\n\r" + failedPostCalls.size() + " tasks failed to POST. Retry these failed posts? (Y/N)");
                 Scanner scanner = new Scanner(System.in);
                 String userInput = scanner.nextLine().trim().toLowerCase();
 
@@ -373,18 +482,14 @@ public class HttpClientUtils {
                                     postComponent.encoding,
                                     postComponent.fhirContext,
                                     postComponent.fileLocation,
-                                    postComponent.hasPriority);
+                                    postComponent.type);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
                     }
-                    //execute any tasks marked as having priority:
-                    executeTasks(executorService, initialTasks);
 
-                    //execute the remaining tasks:
-                    executeTasks(executorService, tasks);
+                    runPostCalls(executorService);
 
-                    reportProgress();
                     if (failedPostCalls.isEmpty()) {
                         logger.info("\r\nRetry successful, all tasks successfully posted");
                     }
@@ -428,7 +533,25 @@ public class HttpClientUtils {
     }
 
     /**
+     * Executes the tasks for each priority ranking, sorted:
+     *
+     * @param executorService
+     */
+    private static void runPostCalls(ExecutorService executorService) {
+        //execute the tasks for each priority ranking, sorted:
+        for (int i = 0; i < resourceTypePostOrder.size(); i++) {
+            //execute the tasks in order specified
+            if (mappedTasksByPriorityRank.containsKey(resourceTypePostOrder.get(i))) {
+                executeTasks(executorService, mappedTasksByPriorityRank.get(resourceTypePostOrder.get(i)));
+            }
+        }
+
+        reportProgress();
+    }
+
+    /**
      * Gives the user a log file containing failed POST attempts during postTaskCollection()
+     *
      * @param failedMessages
      */
     private static void writeFailedPostAttemptsToLog(List<String> failedMessages) {
@@ -439,7 +562,7 @@ public class HttpClientUtils {
                 for (String str : failedMessages) {
                     writer.write(str + "\n");
                 }
-               logger.info("\r\nRecorded failed POST tasks to log file: " + new File(httpFailLogFilename).getAbsolutePath() + "\r\n");
+                logger.info("\r\nRecorded failed POST tasks to log file: " + new File(httpFailLogFilename).getAbsolutePath() + "\r\n");
             } catch (IOException e) {
                 logger.info("\r\nRecording of failed POST tasks to log failed with exception: " + e.getMessage() + "\r\n");
             }
@@ -448,6 +571,8 @@ public class HttpClientUtils {
 
 
     private static void executeTasks(ExecutorService executorService, Map<IBaseResource, Callable<Void>> executableTasksMap) {
+
+
         List<Future<Void>> futures = new ArrayList<>();
         List<IBaseResource> resources = new ArrayList<>(executableTasksMap.keySet());
         for (int i = 0; i < resources.size(); i++) {
@@ -500,8 +625,7 @@ public class HttpClientUtils {
     private static void cleanUp() {
         failedPostCalls = new ConcurrentLinkedQueue<>();
         successfulPostCalls = new CopyOnWriteArrayList<>();
-        tasks = new ConcurrentHashMap<>();
-        initialTasks = new ConcurrentHashMap<>();
+        mappedTasksByPriorityRank = new ConcurrentHashMap<>();
         processedPostCounter = 0;
         runningPostTaskList = new CopyOnWriteArrayList<>();
     }
@@ -537,14 +661,16 @@ public class HttpClientUtils {
         private final IOUtils.Encoding encoding;
         private final FhirContext fhirContext;
         private final String fileLocation;
-        private final boolean hasPriority;
-        public PostComponent(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation, boolean hasPriority) {
+
+        private final HttpClientUtils.HttpPOSTResourceType type;
+
+        public PostComponent(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation, HttpClientUtils.HttpPOSTResourceType type) {
             this.fhirServerUrl = fhirServerUrl;
             this.resource = resource;
             this.encoding = encoding;
             this.fhirContext = fhirContext;
             this.fileLocation = fileLocation;
-            this.hasPriority = hasPriority;
+            this.type = type;
         }
     }
 
