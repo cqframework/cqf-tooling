@@ -303,6 +303,7 @@ public class TESPackageGenerator extends Operation {
                 conditionGrouperValueSet.setVersion(this.version);
                 conditionGrouperValueSet.setName(namify(conditionGroupingEntry.getConditionGroupingTitle()));
                 conditionGrouperValueSet.setTitle(conditionGroupingEntry.getConditionGroupingTitle());
+                conditionGrouperValueSet.setDescription(String.format("The set of all codes from value sets used in Reporting Specifications that are associated with the '%s' condition.", conditionGroupingEntry.getConditionGroupingTitle()));
                 conditionGrouperValueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
                 conditionGrouperValueSet.setExperimental(false);
                 conditionGrouperValueSet.setDate(new Date());
@@ -347,8 +348,12 @@ public class TESPackageGenerator extends Operation {
                     }
 
                     if (relevantConditionGrouper.getCompose().getInclude().stream().noneMatch(i -> i.getValueSet().contains(new CanonicalType(reportingSpecificationGrouper.getUrl())))) {
+                        StringBuilder reference = new StringBuilder(reportingSpecificationGrouper.getUrl());
+                        if (reportingSpecificationGrouper.hasVersion() && !reportingSpecificationGrouper.getVersion().isEmpty() && !reportingSpecificationGrouper.getVersion().isBlank()) {
+                            reference.append("|").append(reportingSpecificationGrouper.getVersion());
+                        }
                         relevantConditionGrouper.getCompose()
-                            .addInclude(new ValueSet.ConceptSetComponent().addValueSet(reportingSpecificationGrouper.getUrl()));
+                            .addInclude(new ValueSet.ConceptSetComponent().addValueSet(reference.toString()));
                     }
                 }
             }
