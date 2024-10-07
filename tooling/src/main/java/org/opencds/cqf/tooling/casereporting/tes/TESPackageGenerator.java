@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.text.Normalizer;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -72,7 +71,7 @@ public class TESPackageGenerator extends Operation {
         this.setOutputPath("src/main/resources/org/opencds/cqf/tooling/casereporting/tes/output"); // default
 
         for (String arg : args) {
-            if (arg.equals("-TransformErsd")) {
+            if (arg.equals("-CaseReportingTESGeneratePackage")) {
                 continue;
             }
 
@@ -164,7 +163,6 @@ public class TESPackageGenerator extends Operation {
             } catch (Exception ex) {
                 throw new RuntimeException("Unable to create condition code difference workbook file.");
             }
-
         }
 
         runSimpleValidation(manifest, conditionGroupers, reportingSpecificationGroupers);
@@ -205,8 +203,8 @@ public class TESPackageGenerator extends Operation {
             Sheet sheet1 = workbook.createSheet("In VS, not in Production");
             writeDifferencesToSheet(conditionCodeValueSetCodes, reportingSpecificationGrouperCodes, sheet1);
 
-            // Generate a Sheet with list of codes that are associated with current reporting specification implementations,
-            // but not in the RCKMS Condition Code ValueSet.
+            // Generate a Sheet with list of codes that are associated with current reporting
+            // specification implementations, but not in the RCKMS Condition Code ValueSet.
             Sheet sheet2 = workbook.createSheet("In Production, not in VS");
             writeDifferencesToSheet(reportingSpecificationGrouperCodes, conditionCodeValueSetCodes, sheet2);
 

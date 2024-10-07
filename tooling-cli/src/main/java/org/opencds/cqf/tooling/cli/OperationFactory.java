@@ -206,7 +206,7 @@ class OperationFactory {
                 return new BundlePublish();
             case "TransformErsd":
                 return new ErsdTransformer();
-            case "CaseReporting.TES.GenerateConditionGroupers":
+            case "CaseReportingTESGeneratePackage":
                 return new TESPackageGenerator();
             case "RollTestsDataDates":
                 return new DataDateRollerOperation();
