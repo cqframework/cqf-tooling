@@ -560,7 +560,7 @@ public class TESPackageGenerator extends Operation {
         manifest.setTitle("TES Content Library");
         manifest.setStatus(Enumerations.PublicationStatus.ACTIVE);
         manifest.setExperimental(false);
-        manifest.setType(new CodeableConcept(new Coding("http://terminology.hl7.org/CodeSystem/library-type", "asset-collection)", null)));
+        manifest.setType(new CodeableConcept(new Coding("http://terminology.hl7.org/CodeSystem/library-type", "asset-collection", null)));
         manifest.setPublisher(PUBLISHER);
         manifest.setDescription("This is the package manifest Library for a TES content release.");
         UsageContext specificationTypeUseContext =
@@ -585,7 +585,7 @@ public class TESPackageGenerator extends Operation {
             var componentRelatedArtifact = new RelatedArtifact().setType(RelatedArtifact.RelatedArtifactType.COMPOSEDOF);
             componentRelatedArtifact.addExtension(
                 new Extension()
-                    .setUrl("http://hl7.org/fhir/StructureDefinition/crmi-isOwned")
+                    .setUrl("http://hl7.org/fhir/StructureDefinition/artifact-isOwned")
                     .setValue(new BooleanType(true)));
             componentRelatedArtifact.setResource(component.getUrl() + "|" + component.getVersion());
             relatedArtifactsToAdd.add(componentRelatedArtifact);
