@@ -23,6 +23,8 @@ import static org.opencds.cqf.tooling.operations.bundle.BundleToResources.bundle
 public class TESPackageGenerator extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(TESPackageGenerator.class);
     private static final String PUBLISHER = "Association of Public Health Laboratories (APHL)";
+    private static final String VALUESETAUTHOREXTENSIONURL = "http://hl7.org/fhir/StructureDefinition/valueset-author";
+    private static final String CONDITIONGROUPERVALUESETAUTHOR = "CSTE Author";
     private static final String CANONICALBASE = "http://tes.aimsplatform.org/fhir";
     private static final String MANIFESTID = "tes-content-library";
     private static final String MANIFESTURL = CANONICALBASE + "/" + MANIFESTID;
@@ -289,11 +291,16 @@ public class TESPackageGenerator extends Operation {
     private List<ValueSet> generateConditionGroupers(List<ConditionGroupingEntry> conditionGroupingEntries) {
         List<ValueSet> conditionGroupers = new ArrayList<>();
 
+        Extension authorExtension = new Extension();
+        authorExtension.setUrl(VALUESETAUTHOREXTENSIONURL);
+        authorExtension.setValue(new StringType(CONDITIONGROUPERVALUESETAUTHOR));
+
         for (ConditionGroupingEntry conditionGroupingEntry : conditionGroupingEntries) {
             if (conditionGroupers.stream().noneMatch(cg -> cg.getTitle().equalsIgnoreCase(conditionGroupingEntry.getConditionGroupingTitle()))) {
                 String id = UUID.randomUUID().toString();
                 ValueSet conditionGrouperValueSet = new ValueSet();
                 conditionGrouperValueSet.setId(id);
+                conditionGrouperValueSet.addExtension(authorExtension);
                 conditionGrouperValueSet.setMeta(new Meta().addProfile("http://aphl.org/fhir/vsm/StructureDefinition/vsm-conditiongroupervalueset"));
                 conditionGrouperValueSet.getMeta().addTag(SEARCHPARAMSYSTEMLIBRARYDEPENDSON, MANIFESTURL + "|" + this.version, null);
                 conditionGrouperValueSet.getMeta().addTag(SEARCHPARAMSYSTEMLIBRARYCONTEXTTYPEVALUE, SEARCHPARAMUSECONTEXTVALUEGROUPERTYPECONDITIONGROUPER, null);
@@ -309,7 +316,7 @@ public class TESPackageGenerator extends Operation {
                 UsageContext conditionGrouperUseContext =
                     new UsageContext(
                         new Coding(VSMUSAGECONTEXTTYPESYSTEMURL, "grouper-type", null),
-                        new CodeableConcept(new Coding(USPHUSAGECONTEXTURL, "condition-grouper", "Condition Grouper")).setText("Condition Grouper")
+                        new CodeableConcept(new Coding(VSMUSAGECONTEXTTYPESYSTEMURL, "condition-grouper", "Condition Grouper")).setText("Condition Grouper")
                     );
                 conditionGrouperValueSet.addUseContext(conditionGrouperUseContext);
                 conditionGroupers.add(conditionGrouperValueSet);
