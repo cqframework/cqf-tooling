@@ -293,7 +293,9 @@ public class TESPackageGenerator extends Operation {
 
         Extension authorExtension = new Extension();
         authorExtension.setUrl(VALUESETAUTHOREXTENSIONURL);
-        authorExtension.setValue(new StringType(CONDITIONGROUPERVALUESETAUTHOR));
+        ContactDetail contactDetail = new ContactDetail();
+        contactDetail.setName(CONDITIONGROUPERVALUESETAUTHOR);
+        authorExtension.setValue(contactDetail);
 
         for (ConditionGroupingEntry conditionGroupingEntry : conditionGroupingEntries) {
             if (conditionGroupers.stream().noneMatch(cg -> cg.getTitle().equalsIgnoreCase(conditionGroupingEntry.getConditionGroupingTitle()))) {
