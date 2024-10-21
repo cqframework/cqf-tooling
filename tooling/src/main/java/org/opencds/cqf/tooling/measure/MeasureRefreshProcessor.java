@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Collections;
 
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -17,19 +18,13 @@ import org.hl7.fhir.r5.model.Meta;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.Resource;
+import org.hl7.fhir.r5.model.StringType;
 
 public class MeasureRefreshProcessor {
-    public Measure refreshMeasure(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary CompiledLibrary, CqlCompilerOptions options) {
 
-    	Library moduleDefinitionLibrary = getModuleDefinitionLibrary(measureToUse, libraryManager, CompiledLibrary, options);
+    public Boolean includePopulationDataRequirements = false;
 
-        measureToUse.setDate(new Date());
-        // http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/measure-cqfm
-        setMeta(measureToUse, moduleDefinitionLibrary);
-        // Don't need to do this... it is required information to perform this processing in the first place, should just be left alone
-        //setLibrary(measureToUse, CompiledLibrary);
-        // Don't need to do this... type isn't a computable attribute, it's just metadata and will come from the source measure
-        //setType(measureToUse);
+    public Measure refreshMeasure(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary compiledLibrary, CqlCompilerOptions options) {
 
         // Computable measure http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-measure-cqfm
         clearMeasureExtensions(measureToUse, "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-parameter");
@@ -39,29 +34,46 @@ public class MeasureRefreshProcessor {
         clearMeasureExtensions(measureToUse, "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements");
         clearRelatedArtifacts(measureToUse);
 
+    	Library moduleDefinitionLibrary = getModuleDefinitionLibrary(measureToUse, libraryManager, compiledLibrary, options);
+        measureToUse.setDate(new Date());
+        // http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/measure-cqfm
+        setMeta(measureToUse, moduleDefinitionLibrary);
+        moduleDefinitionLibrary.setId("effective-data-requirements");
         setEffectiveDataRequirements(measureToUse, moduleDefinitionLibrary);
+        setEffectiveDataRequirementsReference(measureToUse);
+        if (Boolean.TRUE.equals(includePopulationDataRequirements)) {
+            setPopulationDataRequirements(measureToUse, libraryManager, compiledLibrary, options);
+        }
 
         return measureToUse;
     }
 
-    private Library getModuleDefinitionLibrary(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary CompiledLibrary, CqlCompilerOptions options){
+    private Library getModuleDefinitionLibrary(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary compiledLibrary, CqlCompilerOptions options){
         Set<String> expressionList = getExpressions(measureToUse);
         DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
-        return dqReqTrans.gatherDataRequirements(libraryManager, CompiledLibrary, options, expressionList, true);
+        return dqReqTrans.gatherDataRequirements(libraryManager, compiledLibrary, options, expressionList, true);
+    }
+
+    private void setPopulationDataRequirements(Measure measureToUse, LibraryManager libraryManager, CompiledLibrary compiledLibrary, CqlCompilerOptions options) {
+        DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
+        measureToUse.getGroup().forEach(groupMember -> groupMember.getPopulation().forEach(population -> {
+            if (population.hasId()) { // Requirement for computable measures
+                var popMDL = dqReqTrans.gatherDataRequirements(libraryManager, compiledLibrary, options, Collections.singleton(population.getCriteria().getExpression()), false);
+                var mdlID = population.getId() + "-effectiveDataRequirements";
+                popMDL.setId(mdlID);
+                setEffectiveDataRequirements(measureToUse, popMDL);
+                population.getExtension().removeAll(population.getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/artifact-reference"));
+                population.addExtension("http://hl7.org/fhir/StructureDefinition/artifact-reference", new StringType("#" + mdlID));
+            }
+        }));
     }
 
     private Set<String> getExpressions(Measure measureToUse) {
         Set<String> expressionSet = new HashSet<>();
-        measureToUse.getSupplementalData().forEach(supData->{
-            expressionSet.add(supData.getCriteria().getExpression());
-        });
+        measureToUse.getSupplementalData().forEach(supData-> expressionSet.add(supData.getCriteria().getExpression()));
         measureToUse.getGroup().forEach(groupMember->{
-            groupMember.getPopulation().forEach(population->{
-                expressionSet.add(population.getCriteria().getExpression());
-            });
-            groupMember.getStratifier().forEach(stratifier->{
-                expressionSet.add(stratifier.getCriteria().getExpression());
-            });
+            groupMember.getPopulation().forEach(population-> expressionSet.add(population.getCriteria().getExpression()));
+            groupMember.getStratifier().forEach(stratifier-> expressionSet.add(stratifier.getCriteria().getExpression()));
         });
         return expressionSet;
     }
@@ -76,12 +88,9 @@ public class MeasureRefreshProcessor {
     }
 
     private void setEffectiveDataRequirements(Measure measureToUse, Library moduleDefinitionLibrary) {
-
-    	moduleDefinitionLibrary.setId("effective-data-requirements");
-
     	int delIndex = -1;
     	for (Resource res : measureToUse.getContained()) {
-    		if (res instanceof Library && ((Library)res).getId().equalsIgnoreCase("effective-data-requirements")) {
+    		if (res instanceof Library && res.getId().equalsIgnoreCase(moduleDefinitionLibrary.getId())) {
     			delIndex = measureToUse.getContained().indexOf(res);
     			break;
     		}
@@ -92,9 +101,11 @@ public class MeasureRefreshProcessor {
     	}
 
     	measureToUse.getContained().add(moduleDefinitionLibrary);
+    }
 
-    	Extension effDataReqExtension = new Extension();
-    	effDataReqExtension.setUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements");
+    private void setEffectiveDataRequirementsReference(Measure measureToUse) {
+        Extension effDataReqExtension = new Extension();
+        effDataReqExtension.setUrl("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements");
         effDataReqExtension.setId("effective-data-requirements");
         effDataReqExtension.setValue(new Reference().setReference("#effective-data-requirements"));
         measureToUse.addExtension(effDataReqExtension);

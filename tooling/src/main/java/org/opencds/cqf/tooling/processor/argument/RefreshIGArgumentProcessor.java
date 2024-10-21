@@ -38,6 +38,7 @@ public class RefreshIGArgumentProcessor {
     public static final String[] SHOULD_APPLY_SOFTWARE_SYSTEM_STAMP_OPTIONS = { "ss", "stamp" };
     public static final String[] SHOULD_ADD_TIMESTAMP_OPTIONS = { "ts", "timestamp" };
     public static final String[] SHOULD_INCLUDE_ERRORS = { "x", "include-errors" };
+    public static final String[] INCLUDE_POP_LEVEL_DATA_REQUIREMENTS_OPTIONS = { "pldr", "popDataRequirements" };
 
 
     @SuppressWarnings("unused")
@@ -85,6 +86,7 @@ public class RefreshIGArgumentProcessor {
         parser.acceptsAll(asList(INCLUDE_PATIENT_SCENARIOS_OPTIONS),"If omitted patient scenario information will not be packaged.");
         parser.acceptsAll(asList(VERSIONED_OPTIONS),"If omitted resources must be uniquely named.");
         parser.acceptsAll(asList(SHOULD_INCLUDE_ERRORS),"Specifies whether to show errors during library, measure, and test case refresh.");
+        parser.acceptsAll(asList(INCLUDE_POP_LEVEL_DATA_REQUIREMENTS_OPTIONS), "If omitted, the measures will not include population-level data requirements");
 
         OptionSpec<Void> help = parser.acceptsAll(asList(ArgUtils.HELP_OPTIONS), "Show this help page").forHelp();
 
@@ -118,12 +120,13 @@ public class RefreshIGArgumentProcessor {
         if (igEncoding != null) {
             outputEncodingEnum = Encoding.parse(igEncoding.toLowerCase());
         }
-        Boolean skipPackages = options.has(SKIP_PACKAGES_OPTIONS[0]);
-        Boolean includeELM = options.has(INCLUDE_ELM_OPTIONS[0]);
-        Boolean includeDependencies = options.has(INCLUDE_DEPENDENCY_LIBRARY_OPTIONS[0]);
-        Boolean includeTerminology = options.has(INCLUDE_TERMINOLOGY_OPTIONS[0]);
-        Boolean includePatientScenarios = options.has(INCLUDE_PATIENT_SCENARIOS_OPTIONS[0]);
-        Boolean versioned = options.has(VERSIONED_OPTIONS[0]);
+        boolean skipPackages = options.has(SKIP_PACKAGES_OPTIONS[0]);
+        boolean includeELM = options.has(INCLUDE_ELM_OPTIONS[0]);
+        boolean includeDependencies = options.has(INCLUDE_DEPENDENCY_LIBRARY_OPTIONS[0]);
+        boolean includeTerminology = options.has(INCLUDE_TERMINOLOGY_OPTIONS[0]);
+        boolean includePatientScenarios = options.has(INCLUDE_PATIENT_SCENARIOS_OPTIONS[0]);
+        boolean versioned = options.has(VERSIONED_OPTIONS[0]);
+        boolean includePopLevelDataRequirements = options.has(INCLUDE_POP_LEVEL_DATA_REQUIREMENTS_OPTIONS[0]);
         String fhirUri = (String)options.valueOf(FHIR_URI_OPTIONS[0]);
         String measureToRefreshPath = (String)options.valueOf(MEASURE_TO_REFRESH_PATH[0]);
 
@@ -156,7 +159,7 @@ public class RefreshIGArgumentProcessor {
             addBundleTimestamp = true;
         }
 
-        Boolean verboseMessaging = options.has(SHOULD_INCLUDE_ERRORS[0]);
+        boolean verboseMessaging = options.has(SHOULD_INCLUDE_ERRORS[0]);
 
         ArrayList<String> paths = new ArrayList<String>();
         if (resourcePaths != null && !resourcePaths.isEmpty()) {
@@ -188,6 +191,7 @@ public class RefreshIGArgumentProcessor {
         ip.measureOutputPath = measureOutputPath;
         ip.updatedVersion = updatedVersion;
         ip.verboseMessaging = verboseMessaging;
+        ip.includePopulationLevelDataRequirements = includePopLevelDataRequirements;
         return ip;
     }
 }
