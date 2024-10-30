@@ -49,7 +49,7 @@ public class IGBundleProcessor {
 
         //run collected post calls last:
         if (HttpClientUtils.hasPostTasksInQueue()) {
-            logger.info("[Persisting Files to " + fhirUri + "]");
+            logger.info("\n\r[Persisting Files to " + fhirUri + "]\n\r");
             HttpClientUtils.postTaskCollection();
         }
 
