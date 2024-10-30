@@ -32,7 +32,7 @@ public class RefreshMeasureParameters {
     public Encoding encoding;
 
     /*
-    Whether or not version is included in the name
+    Whether the version is included in the name
      */
     public Boolean versioned;
 
@@ -52,4 +52,8 @@ public class RefreshMeasureParameters {
     public String measureOutputDirectory;
 
     public Boolean verboseMessaging;
+
+    public Boolean shouldApplySoftwareSystemStamp;
+
+    public Boolean includePopulationDataRequirements;
 }

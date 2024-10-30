@@ -26,4 +26,5 @@ public class RefreshIGParameters {
     public String measureOutputPath;
     public Boolean verboseMessaging;
     public String updatedVersion;
+    public Boolean includePopulationLevelDataRequirements;
 }
