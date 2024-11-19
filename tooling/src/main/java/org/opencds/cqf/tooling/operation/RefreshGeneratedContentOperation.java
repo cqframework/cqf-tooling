@@ -13,7 +13,7 @@ public abstract class RefreshGeneratedContentOperation extends Operation {
     protected FhirContext fhirContext;
     private String pathToMeasures; // -ptm
     private String pathToLibraries; // -ptl
-    private String operationName;
+    private final String operationName;
 
     protected Boolean shouldApplySoftwareSystemStamp; // -ss
     protected Boolean addBundleTimestamp; // -ts

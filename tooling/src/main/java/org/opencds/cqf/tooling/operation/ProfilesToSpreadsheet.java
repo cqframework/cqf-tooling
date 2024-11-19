@@ -82,10 +82,14 @@ public class ProfilesToSpreadsheet extends StructureDefinitionToSpreadsheetBase 
         XSSFRow currentRow = firstSheet.createRow(rowCount.getAndAccumulate(1, ibo));
         SpreadsheetCreatorHelper.createHeaderRow(workBook, createHeaderNameList(), currentRow);
         bindingObjects.forEach((bindingObject) -> {
-            addBindingObjectRowDataToCurrentSheet(firstSheet, rowCount.getAndAccumulate(1, ibo), bindingObject);
+            try {
+                addBindingObjectRowDataToCurrentSheet(firstSheet, rowCount.getAndAccumulate(1, ibo), bindingObject);
+            }catch(Exception ex){
+                ex.printStackTrace();
+            }
         });
         SpreadsheetCreatorHelper.writeSpreadSheet(workBook,
-                IOUtils.concatFilePath(getOutputPath(), modelName + modelVersion + ".xlsx"));
+                IOUtils.concatFilePath(getOutputPath(), modelName + " " + modelVersion + " Profile Elements.xlsx"));
     }
 
     private List<String> createHeaderNameList() {
@@ -95,7 +99,7 @@ public class ProfilesToSpreadsheet extends StructureDefinitionToSpreadsheetBase 
             add("Conformance");
             add("ValueSet");
             add("ValueSetURL");
-            add("Version");
+            add("Binding ValueSet Version");
             add("Code System URLs");
             add("Must Support Y/N");
             add("Cardinality");
@@ -129,11 +133,13 @@ public class ProfilesToSpreadsheet extends StructureDefinitionToSpreadsheetBase 
         currentCell.setCellValue(bo.getBindingValueSetName());
 
         currentCell = currentRow.createCell(cellCount++);
-        currentCell.setCellValue(bo.getBindingValueSetURL());
-        link = (XSSFHyperlink)helper.createHyperlink(HyperlinkType.URL);
-        link.setAddress(bo.getBindingValueSetURL());
-        currentCell.setHyperlink(link);
-        currentCell.setCellStyle(linkStyle);
+        if(bo.getBindingValueSetURL() != null) {
+            currentCell.setCellValue(bo.getBindingValueSetURL());
+            link = (XSSFHyperlink) helper.createHyperlink(HyperlinkType.URL);
+            link.setAddress(bo.getBindingValueSetURL());
+            currentCell.setHyperlink(link);
+            currentCell.setCellStyle(linkStyle);
+        }
 
         currentCell = currentRow.createCell(cellCount++);
         currentCell.setCellValue(bo.getBindingValueSetVersion());

@@ -2,7 +2,10 @@ package org.opencds.cqf.tooling.acceleratorkit;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -40,7 +43,8 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
                 getBindings(sdName, eds, sdURL, sdVersion, bindingObjects);
             }
             if (sd.hasBaseDefinition()) {
-                bindingObjects.putAll(visitStructureDefinition(this.canonicalResourceDependenciesAtlas.getStructureDefinitions().getByCanonicalUrlWithVersion(sd.getBaseDefinition()), snapshotOnly));            }
+                bindingObjects.putAll(visitStructureDefinition(this.canonicalResourceDependenciesAtlas.getStructureDefinitions().getByCanonicalUrlWithVersion(sd.getBaseDefinition()), snapshotOnly));
+            }
         }
         return bindingObjects;
     }
@@ -68,7 +72,7 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
                 sdbo.setSdURL(sdURL);
                 sdbo.setSdVersion(sdVersion);
                 sdbo.setBindingStrength(ed.getBinding().getStrength().toString().toLowerCase());
-                if(ed.hasMin() && ed.hasMax()){
+                if (ed.hasMin() && ed.hasMax()) {
                     String edCardinality = ed.getMin() + "..." + ed.getMax();
                     sdbo.setCardinality(edCardinality);
                     if(ed.getMin() > 0){sdbo.setCardinalityMin(ed.getMin());}
@@ -99,16 +103,16 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
                     valueSetVersion = pipeVersion;
                 }
                 if (null != elementValueSet) {
-                    StringBuilder codeSystemURLs = new StringBuilder();;
+                    StringBuilder codeSystemURLs = new StringBuilder();
                     Map<String, String> codeSystemsMap = new HashMap<>();
                     getValueSetCodeSystems(elementValueSet, codeSystemsMap);
-                    if(null != codeSystemsMap && !codeSystemsMap.isEmpty()) {
-                        AtomicReference <Integer> valueCount = new AtomicReference<>(0);
-                        codeSystemsMap.values().forEach((url)->{
+                    if (null != codeSystemsMap && !codeSystemsMap.isEmpty()) {
+                        AtomicReference<Integer> valueCount = new AtomicReference<>(0);
+                        codeSystemsMap.values().forEach((url) -> {
                             codeSystemURLs.append(url);
                             valueCount.set(valueCount.get() + 1);
-                            if(valueCount.get() > 0 &&
-                                valueCount.get() < codeSystemsMap.size()) {
+                            if (valueCount.get() > 0 &&
+                                    valueCount.get() < codeSystemsMap.size()) {
                                 codeSystemURLs.append(";");
                             }
                         });
@@ -123,27 +127,18 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
                 sdbo.setBindingValueSetVersion(valueSetVersion);
                 bindingObjects.put(sdName + "." + sdbo.getElementId(), sdbo);
             }
+            else if (ed.hasExtension()) {
+                visitExtensions(ed, bindingObjects, sdName, sdURL, sdVersion);
+            }
             index.set(index.get() + 1);
         }
     }
-
-    private String getBindingObjectExtension(ElementDefinition ed) {
-        for (Extension ext : ed.getExtension()) {
-            if (!ext.getUrl().isEmpty()) {
-                if (ext.getUrl().contains("qicore-keyelement")) {
-                    return "qicore-keyelement";
-                }
-            }
-        }
-        return "";
-    }
-
 
     private void getValueSetCodeSystems(ValueSet elementValueSet, Map<String, String> codeSystemsMap) {
         ValueSet.ValueSetComposeComponent compose = elementValueSet.getCompose();
         if (null != compose) {
             for (ValueSet.ConceptSetComponent include : compose.getInclude()) {
-                if(include.hasSystem()){
+                if (include.hasSystem()) {
                     codeSystemsMap.put(include.getSystem(), include.getSystem());
                 }
                 for (CanonicalType r : include.getValueSet()) {
