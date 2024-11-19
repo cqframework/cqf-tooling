@@ -157,7 +157,7 @@ public class ProfilesToSpreadsheet extends StructureDefinitionToSpreadsheetBase 
         if ((null != bo.getBindingStrength() && bo.getBindingStrength().equalsIgnoreCase("required")) ||
                 null != bo.getMustSupport() && bo.getMustSupport().equalsIgnoreCase("Y") ||
                 null != bo.getBindingObjectExtension() && bo.getBindingObjectExtension().equalsIgnoreCase("qicore-keyElement") ||
-                bo.getCardinalityMin() >0
+                bo.getCardinalityMin() > 0
         ) {
             currentCell.setCellValue("Needed");
         }
