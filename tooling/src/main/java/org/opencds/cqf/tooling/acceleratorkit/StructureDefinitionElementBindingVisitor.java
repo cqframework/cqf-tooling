@@ -2,10 +2,7 @@ package org.opencds.cqf.tooling.acceleratorkit;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.ElementDefinition;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -74,6 +71,11 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
                 if(ed.hasMin() && ed.hasMax()){
                     String edCardinality = ed.getMin() + "..." + ed.getMax();
                     sdbo.setCardinality(edCardinality);
+                    if(ed.getMin() > 0){sdbo.setCardinalityMin(ed.getMin());}
+                }
+                if(getBindingObjectExtension(ed).equalsIgnoreCase("qicore-keyelement")){
+                    System.out.println("qicore-keyelement");
+                sdbo.setBindingObjectExtension("qicore-keyelement");
                 }
                 String bindingValueSet = ed.getBinding().getValueSet();
                 String pipeVersion = "";
@@ -124,6 +126,18 @@ public class StructureDefinitionElementBindingVisitor extends StructureDefinitio
             index.set(index.get() + 1);
         }
     }
+
+    private String getBindingObjectExtension(ElementDefinition ed) {
+        for (Extension ext : ed.getExtension()) {
+            if (!ext.getUrl().isEmpty()) {
+                if (ext.getUrl().contains("qicore-keyelement")) {
+                    return "qicore-keyelement";
+                }
+            }
+        }
+        return "";
+    }
+
 
     private void getValueSetCodeSystems(ValueSet elementValueSet, Map<String, String> codeSystemsMap) {
         ValueSet.ValueSetComposeComponent compose = elementValueSet.getCompose();

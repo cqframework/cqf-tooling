@@ -16,7 +16,7 @@ public class ValuesetComparator extends Comparator {
         if (!terminologyServerValueSet.getUrl()
                 .equals(sourceOfTruthValueSet.getUrl())) {
             Map<String, String> urlFailure = new HashMap<>();
-            urlFailure.put("URL", terminologyServerValueSet.getUrl() + " Does not equal IG URL " + sourceOfTruthValueSet.getUrl() + newLine);
+            urlFailure.put("URL", terminologyServerValueSet.getUrl() + "|" + terminologyServerValueSet.getVersion() + " Does not equal IG URL " + sourceOfTruthValueSet.getUrl() + newLine);
             fieldsWithErrors.add(urlFailure);
         }
         if (!terminologyServerValueSet.getVersion().equals(sourceOfTruthValueSet.getVersion())) {
@@ -53,7 +53,7 @@ public class ValuesetComparator extends Comparator {
         if (!compareComposes(terminologyServerValueSet.getCompose(), sourceOfTruthValueSet.getCompose())) {
         }
         if (!fieldsWithErrors.isEmpty()) {
-            vsFailureReport.put(terminologyServerValueSet.getName(), fieldsWithErrors);
+            vsFailureReport.put(terminologyServerValueSet.getUrl() + "|" +  terminologyServerValueSet.getVersion()  + " - " + terminologyServerValueSet.getName(), fieldsWithErrors);
         }
     }
 

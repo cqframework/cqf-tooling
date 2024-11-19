@@ -15,7 +15,7 @@ public class CodeSystemComparator extends Comparator {
         Set<Map<String, String>> fieldsWithErrors = new HashSet<>();
         if (!terminologyServerCodeSystem.getUrl().equals(sourceOfTruthCodeSystem.getUrl())) {
             Map<String, String> urlFailure = new HashMap<>();
-            urlFailure.put("URL", "\"" + terminologyServerCodeSystem.getUrl() + "\" Does not equal IG URL \"" + sourceOfTruthCodeSystem.getUrl() + "\"" + newLine);
+            urlFailure.put("URL", "\"" + terminologyServerCodeSystem.getUrl() + "|" + terminologyServerCodeSystem.getVersion() + "\" Does not equal IG URL \"" + sourceOfTruthCodeSystem.getUrl() + "\"" + newLine);
             fieldsWithErrors.add(urlFailure);
         }
         if (!terminologyServerCodeSystem.getVersion().equals(sourceOfTruthCodeSystem.getVersion())) {
@@ -64,7 +64,7 @@ public class CodeSystemComparator extends Comparator {
         }
         compareContacts(fieldsWithErrors, terminologyServerCodeSystem.getContact(), sourceOfTruthCodeSystem.getContact());
         if (!fieldsWithErrors.isEmpty()) {
-            csFailureReport.put(terminologyServerCodeSystem.getName(), fieldsWithErrors);
+            csFailureReport.put(terminologyServerCodeSystem.getUrl() + "|" + terminologyServerCodeSystem.getVersion() + " - " + terminologyServerCodeSystem.getName(), fieldsWithErrors);
         }
     }
 

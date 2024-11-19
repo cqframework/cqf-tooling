@@ -185,11 +185,10 @@ public class SpreadsheetValidateVSandCS extends Operation {
                 if (row.getCell(codeSystemURLCellNumber) != null) {
                     codeSystemURL = row.getCell(codeSystemURLCellNumber).getStringCellValue();
                 }
-                validateRow(valueSetURL, codeSystemURL, fhirClient, row.getRowNum() + 1); //add one row number due to header row
+                validateRow(valueSetURL, version, codeSystemURL, fhirClient, row.getRowNum() + 1); //add one row number due to header row
             } catch (NullPointerException | ConfigurationException ex) {
                 logger.debug(ex.getMessage());
                 logger.debug(ex.toString());
-                logger.debug(ex.getStackTrace().toString());
             }
         }
         LocalDateTime end = java.time.LocalDateTime.now();
@@ -197,7 +196,7 @@ public class SpreadsheetValidateVSandCS extends Operation {
 
     }
 
-    private void validateRow(String valueSetURL, String codeSystemURL, FhirTerminologyClient fhirClient, int rowNumber) {
+    private void validateRow(String valueSetURL, String version, String codeSystemURL, FhirTerminologyClient fhirClient, int rowNumber) {
         String vsServerUrl = urlToTestServer + "ValueSet/?url=" + valueSetURL;
         ValueSet vsToValidate = (ValueSet) fhirClient.getResource(vsServerUrl);
         if (vsToValidate != null) {
@@ -206,10 +205,10 @@ public class SpreadsheetValidateVSandCS extends Operation {
                 ValuesetComparator vsCompare = new ValuesetComparator();
                 vsCompare.compareValueSets(vsToValidate, vsSourceOfTruth, vsFailureReport);
             } else {
-                vsNotPresentInIG.add(vsToValidate.getId().substring(vsToValidate.getId().lastIndexOf(File.separator) + 1));
+                vsNotPresentInIG.add(vsToValidate.getUrl() + "|" + vsToValidate.getVersion());
             }
         } else {
-            vsNotInTestServer.add(vsServerUrl.substring(vsServerUrl.lastIndexOf("/") + 1));
+            vsNotInTestServer.add(vsServerUrl.substring(vsServerUrl.lastIndexOf("url=") + 4) + "|" + version);
         }
         if (codeSystemURL == null || codeSystemURL.isEmpty()) {
             spreadSheetErrors.add("Row " + rowNumber + " does not contain a codeSystem");

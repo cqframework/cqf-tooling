@@ -6,6 +6,8 @@ public class StructureDefinitionBindingObject extends StructureDefinitionBaseObj
     String bindingValueSetURL;
     String bindingValueSetVersion;
     String bindingValueSetName;
+    String bindingObjectExtension;
+    int cardinalityMin;
 
     public String getBindingStrength() {return bindingStrength;}
     public void setBindingStrength(String bindingStrength) {this.bindingStrength = bindingStrength;}
@@ -17,4 +19,8 @@ public class StructureDefinitionBindingObject extends StructureDefinitionBaseObj
     public void setBindingValueSetName(String bindingValueSetName) {this.bindingValueSetName = bindingValueSetName;}
     public String getCodeSystemsURLs() {return codeSystemsURLs;}
     public void setCodeSystemsURLs(String codeSystemsURLs) {this.codeSystemsURLs = codeSystemsURLs;}
+    public String getBindingObjectExtension() {return bindingObjectExtension;}
+    public void setBindingObjectExtension(String bindingObjectExtension) {this.bindingObjectExtension = bindingObjectExtension;}
+    public int getCardinalityMin(){return cardinalityMin;};
+    public void setCardinalityMin(int cardinalityMin){this.cardinalityMin = cardinalityMin;}
 }

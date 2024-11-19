@@ -149,7 +149,10 @@ public class ProfilesToSpreadsheet extends StructureDefinitionToSpreadsheetBase 
 
         currentCell = currentRow.createCell(cellCount++);
         if ((null != bo.getBindingStrength() && bo.getBindingStrength().equalsIgnoreCase("required")) ||
-                null != bo.getMustSupport() && bo.getMustSupport().equalsIgnoreCase("Y")) {
+                null != bo.getMustSupport() && bo.getMustSupport().equalsIgnoreCase("Y") ||
+                null != bo.getBindingObjectExtension() && bo.getBindingObjectExtension().equalsIgnoreCase("qicore-keyElement") ||
+                bo.getCardinalityMin() >0
+        ) {
             currentCell.setCellValue("Needed");
         }
     }

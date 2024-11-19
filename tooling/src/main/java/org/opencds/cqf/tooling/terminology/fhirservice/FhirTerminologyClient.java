@@ -201,11 +201,16 @@ public class FhirTerminologyClient implements TerminologyService {
 
     @Override
     public IBaseResource getResource(String url) {
-        Bundle readBundle = this.client.search().byUrl(url).returnBundle(Bundle.class).execute();
-        if (readBundle.hasEntry()) {
-            IBaseResource resourceToValidate = readBundle.getEntry().get(0).getResource();
-            return resourceToValidate;
-        }
+        try {
+            Bundle readBundle = this.client.search().byUrl(url).returnBundle(Bundle.class).execute();
+            if (readBundle.hasEntry()) {
+                IBaseResource resourceToValidate = null;
+                    resourceToValidate = readBundle.getEntry().get(0).getResource();
+                return resourceToValidate;
+            }
+        }catch(Exception ex){
+            ex.printStackTrace();
+        };
         return null;
     }
 }
