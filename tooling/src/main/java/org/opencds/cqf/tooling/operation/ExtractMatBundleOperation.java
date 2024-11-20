@@ -6,7 +6,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.common.ThreadUtils;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
-import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -23,7 +21,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 public class ExtractMatBundleOperation extends Operation {
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -62,7 +59,9 @@ public class ExtractMatBundleOperation extends Operation {
             } else if (i == 0 && !args[i].equalsIgnoreCase("-ExtractMatBundle")) {
                 throw new IllegalArgumentException("Insufficient argument structure. " +
                         "Usage Example: mvn exec:java -Dexec.args=\"-ExtractMatBundle " +
-                        "/Development/ecqm-content-r4/bundles/mat/EXM124/EXM124.json -v=r4");
+                        File.separator + "Development" + File.separator + "ecqm-content-r4" +
+                        File.separator + "bundles" + File.separator +  "mat" +
+                        File.separator + "EXM124" + File.separator + "EXM124.json -v=r4");
             }
 
             //position 1 is the location of file or directory. Determine which:
@@ -328,9 +327,9 @@ public class ExtractMatBundleOperation extends Operation {
                             , currentDirPath)
                             + File.separator + "input");
 
-            Path newLibraryDirectory = Paths.get(newOutputDirectory.toString(), "resources/library");
+            Path newLibraryDirectory = Paths.get(newOutputDirectory.toString(), "resources" + File.separator + "library");
             Path newCqlDirectory = Paths.get(newOutputDirectory.toString(), "cql");
-            Path newMeasureDirectory = Paths.get(newOutputDirectory.toString(), "resources/measure");
+            Path newMeasureDirectory = Paths.get(newOutputDirectory.toString(), "resources" + File.separator + "measure");
 
             if (version.equals(VERSION_STU3)) {
                 if (theResource instanceof org.hl7.fhir.dstu3.model.Library) {
@@ -394,7 +393,7 @@ public class ExtractMatBundleOperation extends Operation {
     private void extractStu3CQL(org.hl7.fhir.dstu3.model.Library theLibrary, String cqlFilename) {
         List<org.hl7.fhir.dstu3.model.Attachment> contents = theLibrary.getContent();
         for (org.hl7.fhir.dstu3.model.Attachment content : contents) {
-            if (content.getContentType().equals("text/cql")) {
+            if (content.getContentType().equals("text" + File.separator + "cql")) {
                 byte[] encodedBytes = content.getData();
                 String encodedString = Base64.getEncoder().encodeToString(encodedBytes);
                 byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
@@ -423,7 +422,7 @@ public class ExtractMatBundleOperation extends Operation {
     private void extractR4CQL(org.hl7.fhir.r4.model.Library theLibrary, String cqlFilename) {
         List<org.hl7.fhir.r4.model.Attachment> contents = theLibrary.getContent();
         for (org.hl7.fhir.r4.model.Attachment content : contents) {
-            if (content.getContentType().equals("text/cql")) {
+            if (content.getContentType().equals("text" + File.separator + "cql")) {
                 byte[] encodedBytes = content.getData();
                 String encodedString = Base64.getEncoder().encodeToString(encodedBytes);
                 byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
