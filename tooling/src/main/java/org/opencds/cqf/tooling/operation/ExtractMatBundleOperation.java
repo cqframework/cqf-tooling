@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -269,6 +270,23 @@ public class ExtractMatBundleOperation extends Operation {
     }
 
 
+    private Path getParentBundleDir(String directory){
+        Path parent = Paths.get(directory);
+        // Traverse to the parent of 'bundles'
+        while (parent != null &&
+                parent.getFileName() != null &&
+                !parent.getFileName().toString().equalsIgnoreCase("bundles")) {
+            parent = parent.getParent();
+        }
+
+        // Move one level up to get the directory before 'bundles'
+        if (parent != null) {
+            return parent.getParent();
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Iterates through the files and properly renames and moves them to the proper place
      *
@@ -302,25 +320,17 @@ public class ExtractMatBundleOperation extends Operation {
             // https://github.com/cqframework/cqf-tooling/issues/537
             // Bad assumption made in folder structure (looking for IG structure.) Validate base directory:
             Path currentDirPath = Paths.get("").toAbsolutePath();
-            Path outputDirPath = Paths.get(outputDir).toAbsolutePath();
 
             // Ensure "bundles" directory exists
-            Path bundlesDir = outputDirPath.resolve("bundles");
-            //there's no bundle directory, so we'll use currentDirPath (where jar is ran from) for input folder:
-            if (Files.notExists(bundlesDir)) {
-                outputDirPath = currentDirPath;
-            }
-            System.out.println("Setting path to " + outputDirPath );
+            //if there's no bundle directory (getParentBundleDir returned null) we'll use currentDirPath (where jar is ran from):
+            Path newOutputDirectory = Paths.get(
+                    Objects.requireNonNullElse(getParentBundleDir(outputDir)
+                            , currentDirPath)
+                            + File.separator + "input");
 
-            Path newOutputDirectory = Paths.get(outputDirPath + File.separator + "input");
             Path newLibraryDirectory = Paths.get(newOutputDirectory.toString(), "resources/library");
             Path newCqlDirectory = Paths.get(newOutputDirectory.toString(), "cql");
             Path newMeasureDirectory = Paths.get(newOutputDirectory.toString(), "resources/measure");
-
-
-            if (theResource != null) {
-                System.out.println("###" + theResource.getClass());
-            }
 
             if (version.equals(VERSION_STU3)) {
                 if (theResource instanceof org.hl7.fhir.dstu3.model.Library) {
