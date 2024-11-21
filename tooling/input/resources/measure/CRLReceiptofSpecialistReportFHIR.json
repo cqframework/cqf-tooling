@@ -1,0 +1,178 @@
+{
+  "resourceType": "Measure",
+  "id": "CRLReceiptofSpecialistReportFHIR",
+  "meta": {
+    "versionId": "22",
+    "lastUpdated": "2021-08-25T13:44:40.000+00:00",
+    "source": "#OhFmvRia3i1LugvJ",
+    "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/proportion-measure-cqfm" ]
+  },
+  "language": "en",
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+    "valueCode": "boolean"
+  } ],
+  "url": "http://ecqi.healthit.gov/ecqms/Measure/CRLReceiptofSpecialistReportFHIR",
+  "identifier": [ {
+    "use": "official",
+    "system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/guid",
+    "value": "f762a52d-4ed8-49ec-8600-99c352345494"
+  }, {
+    "use": "official",
+    "system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/cms",
+    "value": "50FHIR"
+  } ],
+  "version": "0.0.013",
+  "name": "CRLReceiptofSpecialistReportFHIR",
+  "title": "Closing the Referral Loop: Receipt of Specialist ReportFHIR",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Centers for Medicare & Medicaid Services (CMS)",
+  "contact": [ {
+    "telecom": [ {
+      "system": "url",
+      "value": "https://cms.gov"
+    } ]
+  } ],
+  "description": "Percentage of patients with referrals, regardless of age, for which the referring provider receives a report from the provider to whom the patient was referred",
+  "purpose": "Unknown",
+  "copyright": "Limited proprietary coding is contained in the Measure specifications for user convenience. Users of proprietary code sets should obtain all necessary licenses from the owners of the code sets. \n\nCPT(R) contained in the Measure specifications is copyright 2004-2020 American Medical Association. LOINC(R) is copyright 2004-2020 Regenstrief Institute, Inc. This material contains SNOMED Clinical Terms(R) (SNOMED CT[R]) copyright 2004-2020 International Health Terminology Standards Development Organisation.",
+  "effectivePeriod": {
+    "start": "2022-01-01",
+    "end": "2022-12-31"
+  },
+  "relatedArtifact": [ {
+    "type": "citation",
+    "citation": "Branger, P. J., van't Hooft, A., van der Wouden, J. C., Moorman, P. W., & van Bemmel, J. H. (1999). Shared care for diabetes: Supporting communication between primary and secondary care. International Journal of Medical Informatics, 53(2-3), 133-142. doi: 10.1016/s1386-5056(98)00154-3"
+  }, {
+    "type": "citation",
+    "citation": "Forrest, C. B., Glade, G. B., Baker, A. E., Bocian, A., von Schrader, S., & Starfield, B. (2000). Coordination of specialty referrals and physician satisfaction with referral care. Archives of Pediatrics and Adolescent Medicine, 154(5), 499-506. doi: 10.1001/archpedi.154.5.499"
+  }, {
+    "type": "citation",
+    "citation": "Gandhi, T. K., Sittig, D. F., Franklin, M., Sussman, A. J., Fairchild, D. G., & Bates, D. W. (2000). Communication breakdown in the outpatient referral process. Journal of General Internal Medicine, 15(9), 626-631. doi: 10.1046/j.1525-1497.2000.91119.x"
+  }, {
+    "type": "citation",
+    "citation": "MedPAC. (2006, March). Report to the Congress: Medicare payment policy. Retrieved from http://medpac.gov/docs/default-source/reports/Mar06_EntireReport.pdf?sfvrsn=0"
+  }, {
+    "type": "citation",
+    "citation": "National Priorities Partnership. (2008). National priorities and goals: Aligning our efforts to transform America’s healthcare. Washington, DC: National Quality Forum."
+  }, {
+    "type": "citation",
+    "citation": "Stille, C. J., Jerant, A., Bell, D., Meltzer, D., & Elmore, J. G. (2005). Coordinating care across diseases, settings, and clinicians: A key role for the generalist in practice. Annals of Internal Medicine, 142(8), 700-708. doi: 10.7326/0003-4819-142-8-200504190-00038"
+  } ],
+  "library": [ "http://ecqi.healthit.gov/ecqms/Library/CRLReceiptofSpecialistReportFHIR" ],
+  "disclaimer": "This performance Measure is not a clinical guideline, does not establish a standard of medical care, and has not been tested for all potential applications.\n\nTHE MEASURE AND SPECIFICATIONS ARE PROVIDED \"AS IS\" WITHOUT WARRANTY OF ANY KIND.\n\nDue to technical limitations, registered trademarks are indicated by (R) or [R] and unregistered trademarks are indicated by (TM) or [TM].",
+  "scoring": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-scoring",
+      "code": "proportion",
+      "display": "Proportion"
+    } ]
+  },
+  "type": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-type",
+      "code": "process"
+    } ]
+  } ],
+  "rationale": "Problems in the outpatient referral and consultation process have been documented, including lack of timeliness of information and inadequate provision of information between the specialist and the requesting physician (Gandhi et al., 2000; Forrest et al., 2000; Stille et al., 2005). In a study of physician satisfaction with the outpatient referral process, Gandhi et al. (2000) found that 68% of specialists reported receiving no information from the primary care provider prior to referral visits, and 25% of primary care providers had still not received any information from specialists 4 weeks after referral visits. In another study of 963 referrals (Forrest et al., 2000), pediatricians scheduled appointments with specialists for only 39% and sent patient information to the specialists in only 51% of the time.  \n\nIn a 2006 report to Congress, the Medicare Payment Advisory Commission (MedPAC) found that care coordination programs improved quality of care for patients, reduced hospitalizations, and improved adherence to evidence-based care guidelines, especially among patients with diabetes and CHD. Associations with cost-savings were less clear; this was attributed to how well the intervention group was chosen and defined, as well as the intervention put in place. Additionally, cost-savings were usually calculated in the short-term, while some argue that the greatest cost-savings accrue over time (MedPAC, 2006).\n\nImproved mechanisms for information exchange could facilitate communication between providers, whether for time-limited referrals or consultations, on-going co-management, or during care transitions. For example, a study by Branger, van’t Hooft, van der Wouden, Moorman & van Bemmel (1999) found that an electronic communication network that linked the computer-based patient records of physicians who had shared care of patients with diabetes significantly increased frequency of communications between physicians and availability of important clinical data. There was a 3-fold increase in the likelihood that the specialist provided written communication of results if the primary care physician scheduled appointments and sent patient information to the specialist (Forrest et al., 2000).\n\nCare coordination is a focal point in the current health care reform and our nation's ambulatory health information technology (HIT) framework. The National Priorities Partnership (2008) recently highlighted care coordination as one of the most critical areas for development of quality measurement and improvement.",
+  "clinicalRecommendationStatement": "None",
+  "improvementNotation": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-improvement-notation",
+      "code": "increase"
+    } ]
+  },
+  "guidance": "The provider who refers the patient to another provider is the provider who should be held accountable for the performance of this measure. \n\nThe provider to whom the patient was referred should be the same provider that sends the report.\n\nIf there are multiple referrals for a patient during the measurement period, use the first referral.\n\nThe provider to whom the patient was referred is responsible for sending the consultant report that will fulfill the communication. Note: this is not the same provider who would report on the measure. \n\nThe consultant report that will successfully close the referral loop should be related to the first referral for a patient during the measurement period. If there are multiple consultant reports received by the referring provider which pertain to a particular referral, use the first consultant report to satisfy the measure. Eligible professionals or eligible clinicians reporting on this measure should note that all data for the reporting year is to be submitted by the deadline established by CMS. Therefore, eligible professionals or eligible clinicians who refer patients towards the end of the reporting period (i.e., November - December), should request that providers to whom they referred their patients share their consult reports as soon as possible in order for those patients to be counted in the measure numerator during the measurement period. When providers to whom patients are referred communicate the consult report as soon as possible with the referring providers, it ensures that the communication loop is closed in a timely manner and that the data are included in the submission to CMS.\n\nThis eCQM is a patient-based measure.\nThis FHIR-based measure has been derived from the QDM-based measure:CMS50v10.",
+  "group": [ {
+    "population": [ {
+      "id": "2C5CBF9C-607F-4B4C-9C8A-3E5CAA559C29",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "initial-population",
+          "display": "Initial Population"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.identifier",
+        "expression": "Initial Population"
+      }
+    }, {
+      "id": "4D79D4BF-A688-4192-8FC0-AB9D9C635DFC",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "denominator",
+          "display": "Denominator"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.identifier",
+        "expression": "Denominator"
+      }
+    }, {
+      "id": "584B06F2-BAD0-4158-B6BD-22F57AA638EE",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "numerator",
+          "display": "Numerator"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.identifier",
+        "expression": "Numerator"
+      }
+    } ]
+  } ],
+  "supplementalData": [ {
+    "id": "E5237F21-78EA-4101-A47D-95DAAD2BE6D2",
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Ethnicity"
+    }
+  }, {
+    "id": "B7E88BF0-CC26-4B88-ABCA-E209B6B9ED56",
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Payer"
+    }
+  }, {
+    "id": "21926BF8-EEDF-43A7-A1B8-9BE5D742F23F",
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Race"
+    }
+  }, {
+    "id": "DCA05560-54E9-469C-B4F5-E691F18D3567",
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Sex"
+    }
+  } ]
+}

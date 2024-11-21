@@ -317,14 +317,12 @@ public class ExtractMatBundleOperation extends Operation {
             String resourceName;
 
             // https://github.com/cqframework/cqf-tooling/issues/537
-            // Bad assumption made in folder structure (looking for IG structure.) Validate base directory:
-            Path currentDirPath = Paths.get("").toAbsolutePath();
+            // if there's no bundle directory (getParentBundleDir returned null) we'll use resourceOutputDir (original outputDir):
+            Path resourceOutputDir = Paths.get(outputDir).toAbsolutePath();
 
-            // Ensure "bundles" directory exists
-            //if there's no bundle directory (getParentBundleDir returned null) we'll use currentDirPath (where jar is ran from):
             Path newOutputDirectory = Paths.get(
                     Objects.requireNonNullElse(getParentBundleDir(outputDir)
-                            , currentDirPath)
+                            , resourceOutputDir)
                             + File.separator + "input");
 
             Path newLibraryDirectory = Paths.get(newOutputDirectory.toString(), "resources" + File.separator + "library");
