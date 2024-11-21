@@ -391,7 +391,7 @@ public class ExtractMatBundleOperation extends Operation {
     private void extractStu3CQL(org.hl7.fhir.dstu3.model.Library theLibrary, String cqlFilename) {
         List<org.hl7.fhir.dstu3.model.Attachment> contents = theLibrary.getContent();
         for (org.hl7.fhir.dstu3.model.Attachment content : contents) {
-            if (content.getContentType().equals("text" + File.separator + "cql")) {
+            if (content.getContentType().equals("text/cql")) {
                 byte[] encodedBytes = content.getData();
                 String encodedString = Base64.getEncoder().encodeToString(encodedBytes);
                 byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
@@ -420,7 +420,7 @@ public class ExtractMatBundleOperation extends Operation {
     private void extractR4CQL(org.hl7.fhir.r4.model.Library theLibrary, String cqlFilename) {
         List<org.hl7.fhir.r4.model.Attachment> contents = theLibrary.getContent();
         for (org.hl7.fhir.r4.model.Attachment content : contents) {
-            if (content.getContentType().equals("text" + File.separator + "cql")) {
+            if (content.getContentType().equals("text/cql")) {
                 byte[] encodedBytes = content.getData();
                 String encodedString = Base64.getEncoder().encodeToString(encodedBytes);
                 byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
