@@ -11,6 +11,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -216,6 +217,13 @@ public class ExtractMatBundleOperationTest {
         assertEquals(17, files.length);
     }
 
+    /**
+     * In response to issue https://github.com/cqframework/cqf-tooling/issues/537
+     * The ExtractMATBundle process defaults to the location of the bundle file
+     * when no IG folder structure exists (no bundle folder found.)
+     *
+     * @throws IOException
+     */
     @Test
     public void TestExtractMatBundleWithNonIGStructuredDirectory() throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
@@ -225,7 +233,7 @@ public class ExtractMatBundleOperationTest {
             throw new IllegalArgumentException("Resource not found: " + resourcePath);
         }
 
-        // Create a temporary directory named "noIG"
+        // Create a temporary directory named "noIG" and does not include the name bundles
         File tempDir = Files.createTempDirectory("noIG").toFile();
         tempDir.deleteOnExit();
 
@@ -235,7 +243,8 @@ public class ExtractMatBundleOperationTest {
             throw new IllegalArgumentException("Resource path is not a directory: " + resourcePath);
         }
 
-        for (File file : sourceDir.listFiles()) {
+        //Copy our test files to the temp folder so the source location of the bundle is the temp folder
+        for (File file : Objects.requireNonNull(sourceDir.listFiles())) {
             File destFile = new File(tempDir, file.getName());
             Files.copy(file.toPath(), destFile.toPath());
         }
