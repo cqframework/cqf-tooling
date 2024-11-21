@@ -1,26 +1,20 @@
 package org.opencds.cqf.tooling.operation;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.fail;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Objects;
 
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import static org.testng.Assert.*;
 
 public class ExtractMatBundleOperationTest {
 
     private ExtractMatBundleOperation operation;
 
-    @BeforeClass
+    @BeforeMethod
     public void setUp() {
         operation = new ExtractMatBundleOperation();
     }
@@ -250,7 +244,7 @@ public class ExtractMatBundleOperationTest {
         }
 
         Thread executionThread = new Thread(() ->
-                operation.execute(new String[]{"-ExtractMATBundle", resourceUrl.getFile(), "-dir"})
+                operation.execute(new String[]{"-ExtractMATBundle", tempDir.getAbsolutePath(), "-dir"})
         );
 
         executionThread.start();
