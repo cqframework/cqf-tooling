@@ -1,23 +1,20 @@
 package org.opencds.cqf.tooling.operation;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.fail;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import static org.testng.Assert.*;
 
 public class ExtractMatBundleOperationTest {
 
     private ExtractMatBundleOperation operation;
 
-    @BeforeClass
+    @BeforeMethod
     public void setUp() {
         operation = new ExtractMatBundleOperation();
     }
@@ -211,8 +208,60 @@ public class ExtractMatBundleOperationTest {
         }
         File[] files = emptyDir.listFiles();
         assertNotNull(files);
-        assertEquals(16, files.length);
+        assertEquals(17, files.length);
     }
+
+    /**
+     * In response to issue https://github.com/cqframework/cqf-tooling/issues/537
+     * The ExtractMATBundle process defaults to the location of the bundle file
+     * when no IG folder structure exists (no bundle folder found.)
+     *
+     * @throws IOException
+     */
+    @Test
+    public void TestExtractMatBundleWithNonIGStructuredDirectory() throws IOException {
+        ClassLoader classLoader = getClass().getClassLoader();
+        String resourcePath = "org/opencds/cqf/tooling/operation/ExtractMatBundle/bundles_small/";
+        URL resourceUrl = classLoader.getResource(resourcePath);
+        if (resourceUrl == null) {
+            throw new IllegalArgumentException("Resource not found: " + resourcePath);
+        }
+
+        // Create a temporary directory named "noIG" and does not include the name bundles
+        File tempDir = Files.createTempDirectory("noIG").toFile();
+        tempDir.deleteOnExit();
+
+        // Copy files from resourcePath to the temporary directory
+        File sourceDir = new File(resourceUrl.getFile());
+        if (!sourceDir.isDirectory()) {
+            throw new IllegalArgumentException("Resource path is not a directory: " + resourcePath);
+        }
+
+        //Copy our test files to the temp folder so the source location of the bundle is the temp folder
+        for (File file : sourceDir.listFiles()) {
+            File destFile = new File(tempDir, file.getName());
+            Files.copy(file.toPath(), destFile.toPath());
+        }
+
+        Thread executionThread = new Thread(() ->
+                operation.execute(new String[]{"-ExtractMATBundle", tempDir.getAbsolutePath(), "-dir"})
+        );
+
+        executionThread.start();
+        try {
+            executionThread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Validate results in the temporary directory
+        File[] files = tempDir.listFiles();
+        assertNotNull(files);
+
+        //Directory should now include 1 input folder, original json bundles (6), and extracted files (16)
+        assertEquals(23, files.length);
+    }
+
 
     @Test
     public void TestExtractMatBundleWithDirectoryAndSubDirectories() throws IOException {
@@ -240,7 +289,7 @@ public class ExtractMatBundleOperationTest {
         }
         File[] files = emptyDir.listFiles();
         assertNotNull(files);
-        assertEquals(41, files.length);
+        assertEquals(42, files.length);
     }
 
     @Test
@@ -265,6 +314,6 @@ public class ExtractMatBundleOperationTest {
 
         File[] files = emptyDir.listFiles();
         assertNotNull(files);
-        assertEquals(files.length, 16);
+        assertEquals(files.length, 17);
     }
 }
