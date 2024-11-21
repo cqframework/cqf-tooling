@@ -244,7 +244,7 @@ public class ExtractMatBundleOperationTest {
         }
 
         //Copy our test files to the temp folder so the source location of the bundle is the temp folder
-        for (File file : Objects.requireNonNull(sourceDir.listFiles())) {
+        for (File file : sourceDir.listFiles()) {
             File destFile = new File(tempDir, file.getName());
             Files.copy(file.toPath(), destFile.toPath());
         }
