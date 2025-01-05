@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -33,8 +34,8 @@ public class BundleToResources extends Operation {
 
     @Override
     public void execute(String[] args) {
-        setOutputPath("src/main/resources/org/opencds/cqf/tooling/bundle/output"); // default
 
+        String outputPath = null;
         for (String arg : args) {
             if (arg.equals("-BundleToResources")) continue;
             String[] flagAndValue = arg.split("=");
@@ -44,6 +45,7 @@ public class BundleToResources extends Operation {
             String flag = flagAndValue[0];
             String value = flagAndValue[1];
 
+
             boolean processAsDirectory = false;
             switch (flag.replace("-", "").toLowerCase()) {
                 case "encoding":
@@ -52,7 +54,7 @@ public class BundleToResources extends Operation {
                     break;
                 case "outputpath":
                 case "op":
-                    setOutputPath(value);
+                    outputPath = value;
                     break; // -outputpath (-op)
                 case "path":
                 case "p":
@@ -109,20 +111,31 @@ public class BundleToResources extends Operation {
         }
 
 
+        // setting the output path seems to instantly create the directory, so pick one or the other (arg or default) and
+        // only if building up the map was successful:
+        if (!bundleResourceMap.isEmpty()){
+            if (outputPath != null){
+                setOutputPath(outputPath);
+            }else{
+                setOutputPath("src/main/resources/org/opencds/cqf/tooling/bundle/output"); // default
+            }
+        }
+
         //now we have a map of Bundle file locations and their associated resources, we
         //can iterate throught the map keys and output the resources to a subfolder inside specified
         //output location using original Bundle file name as the folder name to help organize
         //which resources came from where:
 
         for (File bundleFile : bundleResourceMap.keySet()) {
-            String directoryName = bundleFile.getName().replace(".xml", "").replace(".json", "");
+            String directoryName = bundleFile.getAbsolutePath().replace(path, "").replace(".xml", "").replace(".json", "");
 
             List<IBaseResource> listOfResources = bundleResourceMap.get(bundleFile);
 
             StringBuilder sb = new StringBuilder("Bundle: " + directoryName).append("\n\rResources:");
             for (IBaseResource resource : listOfResources) {
-                if (output(resource, context, directoryName) != null) {
-                    sb.append("\n\r\t - ").append(resource.getClass().toString()).append(" - ").append(resource.getIdElement().getIdPart());
+                String resourceOutputLocation = output(resource, context, directoryName);
+                if (resourceOutputLocation != null) {
+                    sb.append("\n\r\t - ").append(resourceOutputLocation);
                 }
             }
             System.out.println(sb);
@@ -130,33 +143,6 @@ public class BundleToResources extends Operation {
         }
 
 
-//        if (context.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
-//            // foreach resource, if it's a bundle, output all the resources it contains
-//            for (IBaseResource resource : theResources) {
-//                if (resource instanceof org.hl7.fhir.dstu3.model.Bundle) {
-//
-//                    org.hl7.fhir.dstu3.model.Bundle bundle = (org.hl7.fhir.dstu3.model.Bundle) resource;
-//                    for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
-//                        if (entry.getResource() != null) {
-//
-//                            output(entry.getResource(), context);
-//                        }
-//                    }
-//                }
-//            }
-//        } else if (context.getVersion().getVersion() == FhirVersionEnum.R4) {
-//            for (IBaseResource resource : theResources) {
-//                if (resource instanceof org.hl7.fhir.r4.model.Bundle) {
-//                    System.out.println("Resource is Bundle: " + resource.getIdElement().getIdPart());
-//                    org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle) resource;
-//                    for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
-//                        if (entry.getResource() != null) {
-//                            output(entry.getResource(), context);
-//                        }
-//                    }
-//                }
-//            }
-//        }
 
         // TODO: add DSTU2
     }
@@ -213,9 +199,9 @@ public class BundleToResources extends Operation {
 
         if (context.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
             // foreach resource, if it's a bundle, output all the resources it contains
-            if (resource instanceof org.hl7.fhir.dstu3.model.Bundle) {
-                org.hl7.fhir.dstu3.model.Bundle bundle = (org.hl7.fhir.dstu3.model.Bundle) resource;
-                for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+            if (resource instanceof Bundle) {
+                Bundle bundle = (Bundle) resource;
+                for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
                     if (entry.getResource() != null) {
                         listOfResources.add(entry.getResource());
                     }
@@ -237,45 +223,6 @@ public class BundleToResources extends Operation {
         }
     }
 
-    private void getResources(File[] resources) {
-        for (File resource : resources) {
-
-            System.out.println("Processing: " + resource.getAbsolutePath());
-
-            if (resource.isDirectory()) {
-
-                if (resource.listFiles() != null) {
-                    System.out.println("Treating as directory: " + resource.getAbsolutePath());
-
-                    getResources(resource.listFiles());
-                    continue;
-                }
-            }
-
-            if (resource.getPath().endsWith(".xml")) {
-                try {
-                    theResource = context.newXmlParser().parseResource(new FileReader(resource));
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e.getMessage());
-                } catch (Exception e) {
-                    continue;
-                }
-            } else if (resource.getPath().endsWith(".json")) {
-                try {
-                    theResource = context.newJsonParser().parseResource(new FileReader(resource));
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e.getMessage());
-                } catch (Exception e) {
-                    continue;
-                }
-            } else {
-                continue;
-            }
-            theResources.add(theResource);
-        }
-    }
 
     // Output
     public String output(IBaseResource resource, FhirContext context, String folderName) {
@@ -284,7 +231,7 @@ public class BundleToResources extends Operation {
         String fileName = "";
 
         if (!outputDirectory.exists()) {
-            if (!outputDirectory.mkdir()) {
+            if (!outputDirectory.mkdirs()) {
                 System.out.println("Could not make directory at " + outputDirectory.getAbsolutePath());
                 return null;
             }
