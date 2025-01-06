@@ -1,31 +1,20 @@
 package org.opencds.cqf.tooling.operation;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
+import java.io.*;
+import java.util.*;
 
 public class BundleToResources extends Operation {
 
     private String encoding; // -encoding (-e)
     private String path; // -path (-p)
     private String version; // -version (-v) Can be dstu2, stu3, or r4
-
-    private IBaseResource theResource;
-    private List<IBaseResource> theResources = new ArrayList<>();
     private FhirContext context;
 
 
@@ -46,7 +35,6 @@ public class BundleToResources extends Operation {
             String value = flagAndValue[1];
 
 
-            boolean processAsDirectory = false;
             switch (flag.replace("-", "").toLowerCase()) {
                 case "encoding":
                 case "e":
@@ -63,9 +51,6 @@ public class BundleToResources extends Operation {
                 case "version":
                 case "v":
                     version = value;
-                    break;
-                case "dir":
-                    processAsDirectory = true;
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown flag: " + flag);
@@ -107,16 +92,17 @@ public class BundleToResources extends Operation {
         }
 
         if (bundles != null) {
-            buildResourceMap(bundles);
+            String outputPathLocation = new File(outputPath).getAbsolutePath();
+            buildResourceMap(bundles, outputPathLocation);
         }
 
 
         // setting the output path seems to instantly create the directory, so pick one or the other (arg or default) and
         // only if building up the map was successful:
-        if (!bundleResourceMap.isEmpty()){
-            if (outputPath != null){
+        if (!bundleResourceMap.isEmpty()) {
+            if (outputPath != null) {
                 setOutputPath(outputPath);
-            }else{
+            } else {
                 setOutputPath("src/main/resources/org/opencds/cqf/tooling/bundle/output"); // default
             }
         }
@@ -131,11 +117,11 @@ public class BundleToResources extends Operation {
 
             List<IBaseResource> listOfResources = bundleResourceMap.get(bundleFile);
 
-            StringBuilder sb = new StringBuilder("Bundle: " + directoryName).append("\n\rResources:");
+            StringBuilder sb = new StringBuilder("Bundle " + bundleFile.getName()).append(" extracted the following resources:");
             for (IBaseResource resource : listOfResources) {
                 String resourceOutputLocation = output(resource, context, directoryName);
                 if (resourceOutputLocation != null) {
-                    sb.append("\n\r\t - ").append(resourceOutputLocation);
+                    sb.append("\n\r\t - ").append(resource.getClass().getName()).append(" - ").append(resource.getIdElement().getIdPart());
                 }
             }
             System.out.println(sb);
@@ -143,21 +129,28 @@ public class BundleToResources extends Operation {
         }
 
 
-
         // TODO: add DSTU2
     }
 
-    private void buildResourceMap(File[] resources) {
-        for (File resourceFile : resources) {
+    private void buildResourceMap(File[] resources, String outputPathLocation) {
 
-            System.out.println("Processing: " + resourceFile.getAbsolutePath());
+        for (File resourceFile : resources) {
+            //don't duplicate the output path's contents if this operation is being re-ran
+            if (resourceFile.getAbsolutePath().equals(outputPathLocation)) {
+                continue;
+            }
+
+            //skip any file not json or xml
+            if (!resourceFile.getName().endsWith(".json") || !resourceFile.getName().endsWith(".xml")){
+                continue;
+            }
+
+            System.out.println("Processing: " + resourceFile.getName());
 
             if (resourceFile.isDirectory()) {
 
                 if (resourceFile.listFiles() != null) {
-//                    System.out.println("Treating as directory: " + resourceFile.getAbsolutePath());
-
-                    buildResourceMap(resourceFile.listFiles());
+                    buildResourceMap(Objects.requireNonNull(resourceFile.listFiles()), outputPathLocation);
                     continue;
                 }
             }
@@ -232,7 +225,7 @@ public class BundleToResources extends Operation {
 
         if (!outputDirectory.exists()) {
             if (!outputDirectory.mkdirs()) {
-                System.out.println("Could not make directory at " + outputDirectory.getAbsolutePath());
+                //System.out.println("Could not make directory at " + outputDirectory.getAbsolutePath());
                 return null;
             }
         }
