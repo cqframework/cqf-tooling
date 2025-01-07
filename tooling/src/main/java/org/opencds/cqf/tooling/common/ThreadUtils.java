@@ -62,11 +62,19 @@ public class ThreadUtils {
     }
 
     public static void executeTasks(List<Callable<Void>> tasks) {
-        executeTasks(tasks, Executors.newCachedThreadPool());
+        int cores = Runtime.getRuntime().availableProcessors();
+        int threadPoolSize = cores * 2;
+        ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
+
+        executeTasks(tasks, executor);
     }
 
     public static void executeTasks(Queue<Callable<Void>> callables) {
-        executeTasks(new ArrayList<>(callables), Executors.newCachedThreadPool());
+        int cores = Runtime.getRuntime().availableProcessors();
+        int threadPoolSize = cores * 2;
+        ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
+
+        executeTasks(new ArrayList<>(callables), executor);
     }
 
     public static void shutdownRunningExecutors() {

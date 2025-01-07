@@ -2,13 +2,15 @@ package org.opencds.cqf.tooling.operation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
-import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.common.ThreadUtils;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 public class BundleToResources extends Operation {
 
@@ -17,9 +19,29 @@ public class BundleToResources extends Operation {
     private String version; // -version (-v) Can be dstu2, stu3, or r4
     private FhirContext context;
 
+    private final List<Callable<Void>> outputTasks = new CopyOnWriteArrayList<>();
+    private final List<Callable<Void>> discoverBundleTasks = new CopyOnWriteArrayList<>();
+
+    private final List<StringBuilder> outputReportList = new CopyOnWriteArrayList<>();
 
     //Map is of Bundle file as key, entry resources in array as value
-    private Map<File, List<IBaseResource>> bundleResourceMap = new HashMap<>();
+//    private final Map<File, List<IBaseResource>> bundleResourceMap = new ConcurrentHashMap<>();
+
+    private int totalBundleCount = 0;
+    private int processedBundleCount = 0;
+
+//    private final List<Callable<Void>> bundleResourceExtractionTasks = new ArrayList<>();
+
+    private void increaseBundleDiscoveredProgress() {
+        totalBundleCount++;
+        System.out.print("\rBundles discovered: " + totalBundleCount);
+    }
+
+    private void reportProgress() {
+        processedBundleCount++;
+        double percentage = (double) processedBundleCount / totalBundleCount * 100;
+        System.out.print("\r" + String.format("%.2f%%", percentage) + " processed.");
+    }
 
     @Override
     public void execute(String[] args) {
@@ -92,164 +114,224 @@ public class BundleToResources extends Operation {
         }
 
         if (bundles != null) {
+            if (outputPath == null) {
+                outputPath = "src/main/resources/org/opencds/cqf/tooling/bundle/output";
+
+            }
+            setOutputPath(outputPath);
             String outputPathLocation = new File(outputPath).getAbsolutePath();
-            buildResourceMap(bundles, outputPathLocation);
-        }
 
+            discoverBundles(bundles, outputPathLocation);
 
-        // setting the output path seems to instantly create the directory, so pick one or the other (arg or default) and
-        // only if building up the map was successful:
-        if (!bundleResourceMap.isEmpty()) {
-            if (outputPath != null) {
-                setOutputPath(outputPath);
-            } else {
-                setOutputPath("src/main/resources/org/opencds/cqf/tooling/bundle/output"); // default
+            if (!outputTasks.isEmpty()) {
+                System.out.println("\n\rExtracting resources from bundles...");
+
+                //outputTasks has been built up by discoverBundles
+                ThreadUtils.executeTasks(outputTasks);
+            }else{
+                System.out.println("\n\rNo files to extract.");
             }
         }
 
-        //now we have a map of Bundle file locations and their associated resources, we
-        //can iterate throught the map keys and output the resources to a subfolder inside specified
-        //output location using original Bundle file name as the folder name to help organize
-        //which resources came from where:
 
-        for (File bundleFile : bundleResourceMap.keySet()) {
-            String directoryName = bundleFile.getAbsolutePath().replace(path, "").replace(".xml", "").replace(".json", "");
+        //Organize and report final status:
+        outputReportList.sort((sb1, sb2) -> {
+            String fileLocation1 = getFileLocation(sb1);
+            String fileLocation2 = getFileLocation(sb2);
+            return fileLocation1.compareTo(fileLocation2);
+        });
 
-            List<IBaseResource> listOfResources = bundleResourceMap.get(bundleFile);
-
-            StringBuilder sb = new StringBuilder("Bundle " + bundleFile.getName()).append(" extracted the following resources:");
-            for (IBaseResource resource : listOfResources) {
-                String resourceOutputLocation = output(resource, context, directoryName);
-                if (resourceOutputLocation != null) {
-                    sb.append("\n\r\t - ").append(resource.getClass().getName()).append(" - ").append(resource.getIdElement().getIdPart());
-                }
-            }
-            System.out.println(sb);
-
+        // Print the sorted list
+        StringBuilder outputReportSB = new StringBuilder();
+        for (StringBuilder sb : outputReportList) {
+            outputReportSB.append(sb);
         }
 
+        System.out.println("\n\r" + outputReportSB);
+        System.out.println("\n\rProcess complete.");
 
         // TODO: add DSTU2
     }
 
-    private void buildResourceMap(File[] resources, String outputPathLocation) {
+    private static String getFileLocation(StringBuilder sb) {
+        String[] parts = sb.toString().split(": ");
+        return parts.length > 1 ? parts[1] : "";
+    }
 
+    public void discoverBundles(File[] resources, String outputPathLocation) {
+        List<Pair<IBaseResource, File>> bundleResourceList = new CopyOnWriteArrayList<>();
+        discoverBundlesRecursively(resources, outputPathLocation, bundleResourceList);
+        ThreadUtils.executeTasks(discoverBundleTasks);
+    }
+
+    private void discoverBundlesRecursively(File[] resources, String outputPathLocation, List<Pair<IBaseResource, File>> bundleResourceList) {
         for (File resourceFile : resources) {
-            //don't duplicate the output path's contents if this operation is being re-ran
             if (resourceFile.getAbsolutePath().equals(outputPathLocation)) {
                 continue;
             }
 
-            //skip any file not json or xml
-            if (!resourceFile.getName().endsWith(".json") || !resourceFile.getName().endsWith(".xml")){
-                continue;
-            }
-
-            System.out.println("Processing: " + resourceFile.getName());
-
             if (resourceFile.isDirectory()) {
-
-                if (resourceFile.listFiles() != null) {
-                    buildResourceMap(Objects.requireNonNull(resourceFile.listFiles()), outputPathLocation);
-                    continue;
+                File[] nestedFiles = resourceFile.listFiles();
+                if (nestedFiles != null) {
+                    //File is actually a directory, recursively call this method and add all files in THAT
+                    //folder to the discoverBundleTasks list.
+                    discoverBundlesRecursively(nestedFiles, outputPathLocation, bundleResourceList);
                 }
-            }
-
-            IBaseResource parsedResource;
-
-            if (resourceFile.getPath().endsWith(".xml")) {
-                try {
-                    parsedResource = context.newXmlParser().parseResource(new FileReader(resourceFile));
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e.getMessage());
-                } catch (Exception e) {
-                    continue;
-                }
-            } else if (resourceFile.getPath().endsWith(".json")) {
-                try {
-                    parsedResource = context.newJsonParser().parseResource(new FileReader(resourceFile));
-
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e.getMessage());
-                } catch (Exception e) {
-                    continue;
-                }
-            } else {
                 continue;
             }
 
-            if (parsedResource != null) {
-                mapEntriesWithThisResource(parsedResource, resourceFile);
+            // Skip unsupported files
+            if (!resourceFile.getAbsolutePath().endsWith(".json") && !resourceFile.getAbsolutePath().endsWith(".xml")) {
+                continue;
             }
+
+            // Submit file processing as a task
+            discoverBundleTasks.add(() -> {
+                try (FileReader reader = new FileReader(resourceFile)) {
+                    IBaseResource parsedResource;
+                    if (resourceFile.getPath().endsWith(".xml")) {
+                        parsedResource = context.newXmlParser().parseResource(reader);
+                    } else if (resourceFile.getPath().endsWith(".json")){
+                        parsedResource = context.newJsonParser().parseResource(reader);
+                    } else {
+                        parsedResource = null;
+                    }
+
+                    if (parsedResource instanceof Bundle || parsedResource instanceof org.hl7.fhir.r4.model.Bundle) {
+                        increaseBundleDiscoveredProgress();
+                        outputTasks.add(() -> {
+                            outputFiles(parsedResource, resourceFile);
+                            return null;
+                        });
+                    }
+                } catch (Exception e) {
+                    return null;
+                }
+                return null;
+            });
         }
     }
 
-    private void mapEntriesWithThisResource(IBaseResource resource, File resourceFile) {
+
+
+    private void outputFiles(IBaseResource bundleResource, File bundleResourceFile) {
 
         List<IBaseResource> listOfResources = new ArrayList<>();
 
         if (context.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
             // foreach resource, if it's a bundle, output all the resources it contains
-            if (resource instanceof Bundle) {
-                Bundle bundle = (Bundle) resource;
-                for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
-                    if (entry.getResource() != null) {
-                        listOfResources.add(entry.getResource());
-                    }
+            Bundle bundle = (Bundle) bundleResource;
+            for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+                if (entry.getResource() != null) {
+                    listOfResources.add(entry.getResource());
                 }
             }
         } else if (context.getVersion().getVersion() == FhirVersionEnum.R4) {
-            if (resource instanceof org.hl7.fhir.r4.model.Bundle) {
-                org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle) resource;
-                for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
-                    if (entry.getResource() != null) {
-                        listOfResources.add(entry.getResource());
-                    }
+            org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle) bundleResource;
+            for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+                if (entry.getResource() != null) {
+                    listOfResources.add(entry.getResource());
                 }
             }
         }
 
         if (!listOfResources.isEmpty()) {
-            bundleResourceMap.put(resourceFile, listOfResources);
+            String directoryName = bundleResourceFile.getAbsolutePath().replace(path, "").replace(".xml", "").replace(".json", "");
+            StringBuilder sb = new StringBuilder("\n\r\n\rBundle " + bundleResourceFile.getName()).append("\n\rResources:");
+            int extractionCount = 0;
+            for (IBaseResource thisResource : listOfResources) {
+                if (output(thisResource, context, directoryName) != null) {
+                    extractionCount++;
+                }
+            }
+            //give user information on resources extracted
+            synchronized (outputReportList) {
+                String extractionCountStr = "" + extractionCount;
+
+                //try to format to the thousandth
+                if (extractionCountStr.length() == 1){
+                    extractionCountStr = "   " + extractionCountStr;
+                }else if (extractionCountStr.length() == 2){
+                    extractionCountStr = "  " + extractionCountStr;
+                }else if (extractionCountStr.length() == 3){
+                    extractionCountStr = " " + extractionCountStr;
+                }
+
+                outputReportList.add(new StringBuilder("\n\r").append(extractionCountStr)
+                        .append(" resources extracted from: ")
+                        .append(bundleResourceFile.getAbsolutePath().replace(path, "")));
+                reportProgress();
+            }
+
         }
     }
 
 
     // Output
+
     public String output(IBaseResource resource, FhirContext context, String folderName) {
-
-        File outputDirectory = new File(getOutputPath() + File.separator + folderName);
-        String fileName = "";
-
-        if (!outputDirectory.exists()) {
-            if (!outputDirectory.mkdirs()) {
-                //System.out.println("Could not make directory at " + outputDirectory.getAbsolutePath());
-                return null;
-            }
+        // Precompute output directory and file name
+        String outputPath = getOutputPath();
+        File outputDirectory = new File(outputPath, folderName);
+        if (!outputDirectory.exists() && !outputDirectory.mkdirs()) {
+            // Directory creation failed
+            return null;
         }
-        try (FileOutputStream writer = new FileOutputStream(
-                IOUtils.concatFilePath(outputDirectory.getAbsolutePath(),
-                        resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding))) {
 
+        // Precompute file name
+        String resourceType = resource.getIdElement().getResourceType();
+        String resourceId = resource.getIdElement().getIdPart();
+        String fileName = String.format("%s-%s.%s", resourceType, resourceId, encoding);
+        File outputFile = new File(outputDirectory, fileName);
 
-            fileName = IOUtils.concatFilePath(outputDirectory.getAbsolutePath(),
-                    resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding);
+        // Write resource to file
+        try (FileOutputStream writer = new FileOutputStream(outputFile)) {
+            String encodedResource = encoding.equals("json")
+                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource)
+                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource);
 
-
-            writer.write(
-                    encoding.equals("json")
-                            ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-                            : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-            );
-
-            writer.flush();
+            writer.write(encodedResource.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
         }
 
-        return fileName;
+        return outputFile.getAbsolutePath();
     }
+
+
+//    public String output(IBaseResource resource, FhirContext context, String folderName) {
+//
+//        File outputDirectory = new File(getOutputPath() + File.separator + folderName);
+//        String fileName = "";
+//
+//        if (!outputDirectory.exists()) {
+//            if (!outputDirectory.mkdirs()) {
+//                //System.out.println("Could not make directory at " + outputDirectory.getAbsolutePath());
+//                return null;
+//            }
+//        }
+//        try (FileOutputStream writer = new FileOutputStream(
+//                IOUtils.concatFilePath(outputDirectory.getAbsolutePath(),
+//                        resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding))) {
+//
+//
+//            fileName = IOUtils.concatFilePath(outputDirectory.getAbsolutePath(),
+//                    resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding);
+//
+//
+//            writer.write(
+//                    encoding.equals("json")
+//                            ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+//                            : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+//            );
+//
+//            writer.flush();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            throw new RuntimeException(e.getMessage());
+//        }
+//
+//        return fileName;
+//    }
 }
