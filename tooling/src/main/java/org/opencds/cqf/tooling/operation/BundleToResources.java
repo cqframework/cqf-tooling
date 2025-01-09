@@ -7,6 +7,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.common.ThreadUtils;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
 import java.io.*;
 import java.util.*;
@@ -269,69 +270,65 @@ public class BundleToResources extends Operation {
 
     // Output
 
-    public String output(IBaseResource resource, FhirContext context, String folderName) {
-        // Precompute output directory and file name
-        String outputPath = getOutputPath();
-        File outputDirectory = new File(outputPath, folderName);
-        if (!outputDirectory.exists() && !outputDirectory.mkdirs()) {
-            // Directory creation failed
-            return null;
-        }
-
-        // Precompute file name
-        String resourceType = resource.getIdElement().getResourceType();
-        String resourceId = resource.getIdElement().getIdPart();
-        String fileName = String.format("%s-%s.%s", resourceType, resourceId, encoding);
-        File outputFile = new File(outputDirectory, fileName);
-
-        // Write resource to file
-        try (FileOutputStream writer = new FileOutputStream(outputFile)) {
-            String encodedResource = encoding.equals("json")
-                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource)
-                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource);
-
-            writer.write(encodedResource.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
-        }
-
-        return outputFile.getAbsolutePath();
-    }
-
-
 //    public String output(IBaseResource resource, FhirContext context, String folderName) {
-//
-//        File outputDirectory = new File(getOutputPath() + File.separator + folderName);
-//        String fileName = "";
-//
-//        if (!outputDirectory.exists()) {
-//            if (!outputDirectory.mkdirs()) {
-//                //System.out.println("Could not make directory at " + outputDirectory.getAbsolutePath());
-//                return null;
-//            }
+//        String outputPath = getOutputPath();
+//        File outputDirectory = new File(outputPath, folderName);
+//        if (!outputDirectory.exists() && !outputDirectory.mkdirs()) {
+//            return null;
 //        }
-//        try (FileOutputStream writer = new FileOutputStream(
-//                IOUtils.concatFilePath(outputDirectory.getAbsolutePath(),
-//                        resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding))) {
 //
+//        String resourceType = resource.getIdElement().getResourceType();
+//        String resourceId = resource.getIdElement().getIdPart();
+//        String fileName = String.format("%s-%s.%s", resourceType, resourceId, encoding);
+//        File outputFile = new File(outputDirectory, fileName);
 //
-//            fileName = IOUtils.concatFilePath(outputDirectory.getAbsolutePath(),
-//                    resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding);
+//        try (FileOutputStream writer = new FileOutputStream(outputFile)) {
+//            String encodedResource = encoding.equals("json")
+//                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource)
+//                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource);
 //
-//
-//            writer.write(
-//                    encoding.equals("json")
-//                            ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-//                            : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-//            );
-//
-//            writer.flush();
+//            writer.write(encodedResource.getBytes());
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //            throw new RuntimeException(e.getMessage());
 //        }
 //
-//        return fileName;
+//        return outputFile.getAbsolutePath();
 //    }
+
+
+    public String output(IBaseResource resource, FhirContext context, String folderName) {
+
+        File outputDirectory = new File(getOutputPath() + File.separator + folderName);
+        String fileName = "";
+
+        if (!outputDirectory.exists()) {
+            if (!outputDirectory.mkdirs()) {
+                //System.out.println("Could not make directory at " + outputDirectory.getAbsolutePath());
+                return null;
+            }
+        }
+        try (FileOutputStream writer = new FileOutputStream(
+                IOUtils.concatFilePath(outputDirectory.getAbsolutePath(),
+                        resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding))) {
+
+
+            fileName = IOUtils.concatFilePath(outputDirectory.getAbsolutePath(),
+                    resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding);
+
+
+            writer.write(
+                    encoding.equals("json")
+                            ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                            : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+            );
+
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
+
+        return fileName;
+    }
 }
