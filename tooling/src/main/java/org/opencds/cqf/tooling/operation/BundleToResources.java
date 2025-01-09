@@ -69,7 +69,13 @@ public class BundleToResources extends Operation {
                     break; // -outputpath (-op)
                 case "path":
                 case "p":
-                    path = value;
+                    //check value's validity
+                    File pathFile = new File(value);
+                    if (!pathFile.exists()){
+                        throw new RuntimeException("path set to invalid location: " + value);
+                    }
+
+                    path = pathFile.getAbsolutePath();
                     break;
                 case "version":
                 case "v":
@@ -237,8 +243,7 @@ public class BundleToResources extends Operation {
         }
 
         if (!listOfResources.isEmpty()) {
-            String directoryName = bundleResourceFile.getAbsolutePath().replace(path, "").replace(".xml", "").replace(".json", "");
-            StringBuilder sb = new StringBuilder("\n\r\n\rBundle " + bundleResourceFile.getName()).append("\n\rResources:");
+            String directoryName = bundleResourceFile.getAbsolutePath().replace(path, "").replace(bundleResourceFile.getName(),"");
             int extractionCount = 0;
             for (IBaseResource thisResource : listOfResources) {
                 if (output(thisResource, context, directoryName) != null) {
@@ -270,65 +275,35 @@ public class BundleToResources extends Operation {
 
     // Output
 
-//    public String output(IBaseResource resource, FhirContext context, String folderName) {
-//        String outputPath = getOutputPath();
-//        File outputDirectory = new File(outputPath, folderName);
-//        if (!outputDirectory.exists() && !outputDirectory.mkdirs()) {
-//            return null;
-//        }
-//
-//        String resourceType = resource.getIdElement().getResourceType();
-//        String resourceId = resource.getIdElement().getIdPart();
-//        String fileName = String.format("%s-%s.%s", resourceType, resourceId, encoding);
-//        File outputFile = new File(outputDirectory, fileName);
-//
-//        try (FileOutputStream writer = new FileOutputStream(outputFile)) {
-//            String encodedResource = encoding.equals("json")
-//                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource)
-//                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource);
-//
-//            writer.write(encodedResource.getBytes());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            throw new RuntimeException(e.getMessage());
-//        }
-//
-//        return outputFile.getAbsolutePath();
-//    }
-
-
     public String output(IBaseResource resource, FhirContext context, String folderName) {
-
-        File outputDirectory = new File(getOutputPath() + File.separator + folderName);
-        String fileName = "";
-
+        String outputPath = getOutputPath();
+        File outputDirectory = new File(outputPath, folderName);
         if (!outputDirectory.exists()) {
-            if (!outputDirectory.mkdirs()) {
-                //System.out.println("Could not make directory at " + outputDirectory.getAbsolutePath());
+            try{
+                outputDirectory.mkdirs();
+            }catch (Exception e){
+                e.printStackTrace();
                 return null;
             }
         }
-        try (FileOutputStream writer = new FileOutputStream(
-                IOUtils.concatFilePath(outputDirectory.getAbsolutePath(),
-                        resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding))) {
 
+        String resourceType = resource.getIdElement().getResourceType();
+        String resourceId = resource.getIdElement().getIdPart();
+        String fileName = String.format("%s-%s.%s", resourceType, resourceId, encoding);
+        File outputFile = new File(outputDirectory, fileName);
 
-            fileName = IOUtils.concatFilePath(outputDirectory.getAbsolutePath(),
-                    resource.getIdElement().getResourceType() + "-" + resource.getIdElement().getIdPart() + "." + encoding);
+        try (FileOutputStream writer = new FileOutputStream(outputFile)) {
+            String encodedResource = encoding.equals("json")
+                    ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource)
+                    : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource);
 
-
-            writer.write(
-                    encoding.equals("json")
-                            ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-                            : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-            );
-
-            writer.flush();
+            writer.write(encodedResource.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
         }
 
-        return fileName;
+        return outputFile.getAbsolutePath();
     }
+
 }
