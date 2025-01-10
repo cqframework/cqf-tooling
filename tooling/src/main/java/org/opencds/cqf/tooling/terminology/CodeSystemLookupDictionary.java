@@ -28,7 +28,7 @@ public class CodeSystemLookupDictionary {
             case "2.16.840.1.113883.5.45": return "http://terminology.hl7.org/CodeSystem/v3-EntityNameUse";
             case "2.16.840.1.113883.6.14": return "http://terminology.hl7.org/CodeSystem/HCPCS";
             case "2.16.840.1.113883.6.259": return "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html";
-            case "2.16.840.1.113883.6.285": return "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets";
+            case "2.16.840.1.113883.6.285": return "http://www.nlm.nih.gov/research/umls/hcpcs";
             case "2.16.840.1.113883.6.3": return "http://terminology.hl7.org/CodeSystem/icd10";
             case "2.16.840.1.113883.6.4": return "http://www.cms.gov/Medicare/Coding/ICD10";
             case "2.16.840.1.113883.6.90": return "http://hl7.org/fhir/sid/icd-10-cm";
