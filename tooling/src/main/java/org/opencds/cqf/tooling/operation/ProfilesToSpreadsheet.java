@@ -94,7 +94,7 @@ public class ProfilesToSpreadsheet extends StructureDefinitionToSpreadsheetBase 
 
     private List<String> createHeaderNameList() {
         List<String> headerNameList = new ArrayList<String>() {{
-            add("QI Core Profile");
+            add(modelName + " Profile");
             add("Id");
             add("Conformance");
             add("ValueSet");
