@@ -83,7 +83,7 @@ public class ThreadUtils {
             }
             runningExecutors = new ArrayList<>();
         }catch (Exception e){
-            //fail silently, shutting down anyways
+            //fail silently, shutting down anyway
         }
     }
 }

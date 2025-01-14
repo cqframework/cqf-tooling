@@ -7,11 +7,15 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.common.ThreadUtils;
-import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class BundleToResources extends Operation {
 
@@ -24,6 +28,9 @@ public class BundleToResources extends Operation {
     private final List<Callable<Void>> discoverBundleTasks = new CopyOnWriteArrayList<>();
 
     private final List<StringBuilder> outputReportList = new CopyOnWriteArrayList<>();
+
+    private final List<File> bundleFiles = new CopyOnWriteArrayList<>();
+
 
     //Map is of Bundle file as key, entry resources in array as value
 //    private final Map<File, List<IBaseResource>> bundleResourceMap = new ConcurrentHashMap<>();
@@ -48,6 +55,9 @@ public class BundleToResources extends Operation {
     public void execute(String[] args) {
 
         String outputPath = null;
+
+        boolean deleteBundles = false;
+
         for (String arg : args) {
             if (arg.equals("-BundleToResources")) continue;
             String[] flagAndValue = arg.split("=");
@@ -71,7 +81,7 @@ public class BundleToResources extends Operation {
                 case "p":
                     //check value's validity
                     File pathFile = new File(value);
-                    if (!pathFile.exists()){
+                    if (!pathFile.exists()) {
                         throw new RuntimeException("path set to invalid location: " + value);
                     }
 
@@ -80,6 +90,11 @@ public class BundleToResources extends Operation {
                 case "version":
                 case "v":
                     version = value;
+                    break;
+                case "db":
+                    if (value.equalsIgnoreCase("true")) {
+                        deleteBundles = true;
+                    }
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown flag: " + flag);
@@ -120,6 +135,8 @@ public class BundleToResources extends Operation {
             }
         }
 
+
+        StringBuilder deleteBundlesLog = new StringBuilder();
         if (bundles != null) {
             if (outputPath == null) {
                 outputPath = "src/main/resources/org/opencds/cqf/tooling/bundle/output";
@@ -130,12 +147,40 @@ public class BundleToResources extends Operation {
 
             discoverBundles(bundles, outputPathLocation);
 
+
             if (!outputTasks.isEmpty()) {
                 System.out.println("\n\rExtracting resources from bundles...");
 
                 //outputTasks has been built up by discoverBundles
                 ThreadUtils.executeTasks(outputTasks);
-            }else{
+
+
+                if (deleteBundles) {
+
+                    for (File bundleFile : bundleFiles) {
+                        if (deleteBundlesLog.length() == 0) {
+                            deleteBundlesLog.append("\n\rResult of deleting bundles (-db=true): ");
+                        }
+                        try {
+                            if (bundleFile.delete()) {
+                                deleteBundlesLog.append("\n\rDeleted: ")
+                                        .append(bundleFile.getAbsolutePath());
+                            } else {
+                                deleteBundlesLog.append("\n\rFailed to delete: ")
+                                        .append(bundleFile.getAbsolutePath());
+                            }
+                        } catch (SecurityException se) {
+                            deleteBundlesLog.append("\n\rPermission denied to delete: ")
+                                    .append(bundleFile.getAbsolutePath()).append("\n\r")
+                                    .append(se.getMessage());
+                        } catch (Exception e) {
+                            deleteBundlesLog.append("\n\rError occurred while deleting: ")
+                                    .append(bundleFile.getAbsolutePath()).append("\n\r")
+                                    .append(e.getMessage());
+                        }
+                    }
+                }
+            } else {
                 System.out.println("\n\rNo files to extract.");
             }
         }
@@ -152,6 +197,10 @@ public class BundleToResources extends Operation {
         StringBuilder outputReportSB = new StringBuilder();
         for (StringBuilder sb : outputReportList) {
             outputReportSB.append(sb);
+        }
+
+        if (deleteBundlesLog.length() > 0) {
+            outputReportSB.append("\n\r").append(deleteBundlesLog);
         }
 
         System.out.println("\n\r" + outputReportSB);
@@ -198,7 +247,7 @@ public class BundleToResources extends Operation {
                     IBaseResource parsedResource;
                     if (resourceFile.getPath().endsWith(".xml")) {
                         parsedResource = context.newXmlParser().parseResource(reader);
-                    } else if (resourceFile.getPath().endsWith(".json")){
+                    } else if (resourceFile.getPath().endsWith(".json")) {
                         parsedResource = context.newJsonParser().parseResource(reader);
                     } else {
                         parsedResource = null;
@@ -218,7 +267,6 @@ public class BundleToResources extends Operation {
             });
         }
     }
-
 
 
     private void outputFiles(IBaseResource bundleResource, File bundleResourceFile) {
@@ -243,7 +291,7 @@ public class BundleToResources extends Operation {
         }
 
         if (!listOfResources.isEmpty()) {
-            String directoryName = bundleResourceFile.getAbsolutePath().replace(path, "").replace(bundleResourceFile.getName(),"");
+            String directoryName = bundleResourceFile.getAbsolutePath().replace(path, "").replace(bundleResourceFile.getName(), "");
             int extractionCount = 0;
             for (IBaseResource thisResource : listOfResources) {
                 if (output(thisResource, context, directoryName) != null) {
@@ -255,17 +303,18 @@ public class BundleToResources extends Operation {
                 String extractionCountStr = "" + extractionCount;
 
                 //try to format to the thousandth
-                if (extractionCountStr.length() == 1){
+                if (extractionCountStr.length() == 1) {
                     extractionCountStr = "   " + extractionCountStr;
-                }else if (extractionCountStr.length() == 2){
+                } else if (extractionCountStr.length() == 2) {
                     extractionCountStr = "  " + extractionCountStr;
-                }else if (extractionCountStr.length() == 3){
+                } else if (extractionCountStr.length() == 3) {
                     extractionCountStr = " " + extractionCountStr;
                 }
 
                 outputReportList.add(new StringBuilder("\n\r").append(extractionCountStr)
                         .append(" resources extracted from: ")
                         .append(bundleResourceFile.getAbsolutePath().replace(path, "")));
+                bundleFiles.add(bundleResourceFile);
                 reportProgress();
             }
 
@@ -279,9 +328,9 @@ public class BundleToResources extends Operation {
         String outputPath = getOutputPath();
         File outputDirectory = new File(outputPath, folderName);
         if (!outputDirectory.exists()) {
-            try{
+            try {
                 outputDirectory.mkdirs();
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
                 return null;
             }
