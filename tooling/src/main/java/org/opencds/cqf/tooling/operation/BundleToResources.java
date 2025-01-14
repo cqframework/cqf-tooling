@@ -24,21 +24,14 @@ public class BundleToResources extends Operation {
     private String version; // -version (-v) Can be dstu2, stu3, or r4
     private FhirContext context;
 
+
     private final List<Callable<Void>> outputTasks = new CopyOnWriteArrayList<>();
     private final List<Callable<Void>> discoverBundleTasks = new CopyOnWriteArrayList<>();
-
     private final List<StringBuilder> outputReportList = new CopyOnWriteArrayList<>();
-
     private final List<File> bundleFiles = new CopyOnWriteArrayList<>();
-
-
-    //Map is of Bundle file as key, entry resources in array as value
-//    private final Map<File, List<IBaseResource>> bundleResourceMap = new ConcurrentHashMap<>();
 
     private int totalBundleCount = 0;
     private int processedBundleCount = 0;
-
-//    private final List<Callable<Void>> bundleResourceExtractionTasks = new ArrayList<>();
 
     private void increaseBundleDiscoveredProgress() {
         totalBundleCount++;
@@ -320,9 +313,6 @@ public class BundleToResources extends Operation {
 
         }
     }
-
-
-    // Output
 
     public String output(IBaseResource resource, FhirContext context, String folderName) {
         String outputPath = getOutputPath();
