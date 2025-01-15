@@ -68,11 +68,13 @@ public class BundleToResources extends Operation {
                     break;
                 case "outputpath":
                 case "op":
+                    value = value.replace("/", File.separator).replace("\\", File.separator);
                     outputPath = value;
                     break; // -outputpath (-op)
                 case "path":
                 case "p":
-                    //check value's validity
+                    value = value.replace("/", File.separator).replace("\\", File.separator);
+
                     File pathFile = new File(value);
                     if (!pathFile.exists()) {
                         throw new RuntimeException("path set to invalid location: " + value);

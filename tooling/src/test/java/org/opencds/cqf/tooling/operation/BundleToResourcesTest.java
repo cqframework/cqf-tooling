@@ -8,13 +8,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class BundleToResourcesTest {
-    private final BundleToResources bundleToResources = new BundleToResources();
+
     private final String PATH_ARGUMENT = "-p=";
     private final String OUTPUT_PATH_ARGUMENT = "-op=";
     private final String ENCODING_ARGUMENT = "-e=";
 
     @Test
     public void testExecute_BundleDecomposition() {
+
+        BundleToResources bundleToResources = new BundleToResources();
+
         String projectPath = System.getProperty("user.dir");
 
         String relativeJsonPath = "src/main/resources/libraryevaluationtest-bundle.json";
@@ -61,6 +64,8 @@ public class BundleToResourcesTest {
 
     @Test
     public void testExecute_BundleDecomposition_DeleteBundles() throws IOException {
+        BundleToResources bundleToResources = new BundleToResources();
+
         String projectPath = System.getProperty("user.dir");
 
         String relativeJsonPath = "src/main/resources/libraryevaluationtest-bundle.json";
