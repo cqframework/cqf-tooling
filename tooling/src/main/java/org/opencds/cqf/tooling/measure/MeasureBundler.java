@@ -74,10 +74,10 @@ public class MeasureBundler extends AbstractBundler {
                         continue;
                     }
 
-                    HttpClientUtils.HttpPOSTResourceType type = getHttpPOSTResourceType(file);
+                    HttpClientUtils.HttpRequestResourceType type = getHttpPOSTResourceType(file);
                     try {
                         IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext, true);
-                        HttpClientUtils.post(fhirUri, resource, encoding, fhirContext, file.getAbsolutePath(), type);
+                        HttpClientUtils.sendToServer(fhirUri, resource, encoding, fhirContext, file.getAbsolutePath(), type);
                         persistedResources.add(file.getAbsolutePath());
                     } catch (Exception e) {
                         //resource is likely not IBaseResource
@@ -89,17 +89,17 @@ public class MeasureBundler extends AbstractBundler {
         return persistedResources.size();
     }
 
-    private static HttpClientUtils.HttpPOSTResourceType getHttpPOSTResourceType(File file) {
-        HttpClientUtils.HttpPOSTResourceType type = HttpClientUtils.HttpPOSTResourceType.OTHER;
+    private static HttpClientUtils.HttpRequestResourceType getHttpPOSTResourceType(File file) {
+        HttpClientUtils.HttpRequestResourceType type = HttpClientUtils.HttpRequestResourceType.OTHER;
 
         if (file.getName().toLowerCase().startsWith(LIBRARY_DEPS)) {
-            type = HttpClientUtils.HttpPOSTResourceType.LIBRARY_DEPS;
+            type = HttpClientUtils.HttpRequestResourceType.LIBRARY_DEPS;
         } else if (file.getName().toLowerCase().startsWith(VALUESETS)) {
-            type = HttpClientUtils.HttpPOSTResourceType.VALUESETS;
+            type = HttpClientUtils.HttpRequestResourceType.VALUESETS;
         } else if (file.getName().toLowerCase().startsWith(TESTS)) {
-            type = HttpClientUtils.HttpPOSTResourceType.TESTS;
+            type = HttpClientUtils.HttpRequestResourceType.TESTS;
         } else if (file.getName().toLowerCase().startsWith(GROUP)) {
-            type = HttpClientUtils.HttpPOSTResourceType.GROUP;
+            type = HttpClientUtils.HttpRequestResourceType.GROUP;
         }
         return type;
     }

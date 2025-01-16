@@ -325,7 +325,7 @@ public abstract class AbstractBundler {
         final int persistCount = persistedFileReport.size();
         if (persistCount > 0) {
             String fileDisplay = " File(s): ";
-            summaryMessage.append(NEWLINE).append(persistCount).append(" ").append(getResourceBundlerType()).append("(s) have POST tasks in the queue for ").append(fhirUri).append(": ");
+            summaryMessage.append(NEWLINE).append(persistCount).append(" ").append(getResourceBundlerType()).append("(s) have PUT tasks in the queue for ").append(fhirUri).append(": ");
             int totalQueueCount = 0;
             List<String> persistMessages = new ArrayList<>();
             for (String library : persistedFileReport.keySet()) {
@@ -459,7 +459,7 @@ public abstract class AbstractBundler {
         if (fhirUri != null && !fhirUri.isEmpty()) {
             String resourceWriteLocation = bundleDestPath + separator + libraryName + "-bundle." + encoding;
             //give resource the highest priority (0):
-            HttpClientUtils.post(fhirUri, (IBaseResource) bundle, encoding, fhirContext, resourceWriteLocation, HttpClientUtils.HttpPOSTResourceType.BUNDLE);
+            HttpClientUtils.sendToServer(fhirUri, (IBaseResource) bundle, encoding, fhirContext, resourceWriteLocation, HttpClientUtils.HttpRequestResourceType.BUNDLE);
         }
     }
 
