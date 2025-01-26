@@ -84,7 +84,7 @@ public class NpmPackageManager {
         try {
             // userMode indicates whether the packageCache is within the working directory
             // or in the user home
-            pcm = new FilesystemPackageCacheManager(true);
+            pcm = new FilesystemPackageCacheManager.Builder().build();
         } catch (IOException e) {
             throw new NpmPackageManagerException("error creating the FilesystemPackageCacheManager", e);
         }

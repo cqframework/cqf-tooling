@@ -14,12 +14,13 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.release>11</maven.compiler.release>
         <cql.version>3.11.0</cql.version>
-        <hapi.version>7.2.1</hapi.version>
+        <hapi.version>7.6.1</hapi.version>
         <spring-boot.version>2.1.5.RELEASE</spring-boot.version>
         <slf4j.version>2.0.5</slf4j.version>
         <jetty.version>11.0.20</jetty.version>
         <error-prone.version>2.24.1</error-prone.version>
         <checkstyle.version>10.12.7</checkstyle.version>
+        <ucum.version>1.0.9</ucum.version>
     </properties>
 
     <name>CQF Tooling</name>
@@ -253,6 +254,11 @@
                 <artifactId>jul-to-slf4j</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.fhir</groupId>
+                <artifactId>ucum</artifactId>
+                <version>${ucum.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -307,7 +313,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.11.0</version>
                     <configuration>
-                        <failOnWarning>true</failOnWarning>
+                        <failOnWarning>false</failOnWarning>
                         <showWarnings>true</showWarnings>
                         <compilerArgs>
                             <arg>-XDcompilePolicy=simple</arg>

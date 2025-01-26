@@ -32,6 +32,10 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>org.fhir</groupId>
+            <artifactId>ucum</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>7.7.0</version>

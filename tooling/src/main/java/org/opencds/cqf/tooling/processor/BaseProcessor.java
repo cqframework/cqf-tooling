@@ -133,7 +133,13 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
      */
     public void initializeFromIni(String iniFile) {
         IniFile ini = new IniFile(new File(iniFile).getAbsolutePath());
-        String rootDir = Utilities.getDirectoryForFile(ini.getFileName());
+        String rootDir = "";
+        try {
+            rootDir = Utilities.getDirectoryForFile(ini.getFileName());
+        } catch (IOException e) {
+            logMessage("Utilities.getDirectoryForFile for getting the root directory throws exception");
+            throw new IGInitializationException("Utilities.getDirectoryForFile for getting the root directory throws exception", e);
+        }
         String igPath = ini.getStringProperty("IG", "ig");
         String specifiedFhirVersion = ini.getStringProperty("IG", "fhir-version");
         if (specifiedFhirVersion == null || specifiedFhirVersion == "") {
