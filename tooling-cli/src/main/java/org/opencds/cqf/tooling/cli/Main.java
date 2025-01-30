@@ -228,17 +228,25 @@ package org.opencds.cqf.tooling.cli;
                 So if you want both json and xml bundles, you would specify both -e=json and -e=xml. If no encoding argument
                 is supplied, the transformer will assume "json" as the default and output a single JSON-encoded bundle.
 
-- CaseReporting.TES.TESPackageGenerate
+        - CaseReportingTESTESPackageGenerate
             - command: mvn exec: java -Dexec.args="-CaseReporting.TES.TESPackageGenerate (-pathtoinputbundle | -ptib) (-outputpath | -op) [-encoding | -e]"
-            - This Operation takes an input Bundle, parses out the resources it contains and for each Reporting Specification Grouper ValueSet a corresponding Condition Grouper ValueSet is created and output.
-            - The operation expects -ptib is a path to a file containing the source bundle
+            - This Operation takes an input Bundle, parses out the resources it contains and for each Reporting
+            - Specification Grouper ValueSet a corresponding Condition Grouper ValueSet is created and output.
+            - The operation supports the following parameters:
+            - The -v is the version value to be assigned to the version element of the generated artifacts
+            - The -rl is a string value that will be used as value for the release label extension on generated artifacts
             - The -op is the output directory for output
             -   The default output path is:
                     <location of the CQF Tooling jar being invoked> + "src/main/resources/org/opencds/cqf/tooling/casereporting/output"
+            - The -ptib is a path to a file containing the source bundle
+            - The -ptcgw is the path to the workbook file that contains the mappings from reporting specification groupers to condition groupers
+            - The -ptccvs is the path to the RCKMS Condition Code value set. It is use to evaluate which condition codes are used and which are not to report, in output, those difference
             - The -e is the desired output encoding(s) for the output bundle. The supported output encodings are: { "json", "xml" }.
                 The "encoding" argument can be specified multiple times and the transformer will output a bundle for each encoding.
                 So if you want both json and xml bundles, you would specify both -e=json and -e=xml. If no encoding argument
                 is supplied, the transformer will assume "json" as the default and output a single JSON-encoded bundle.
+            - The -wcg flag is a boolean that indicates whether or not the generated condition grouper valuesets should be written
+            - to their own dedicated output file, in addition to being included in the generated bundle file.
         */
 
 //import org.opencds.cqf.tooling.exception.InvalidOperationArgs;

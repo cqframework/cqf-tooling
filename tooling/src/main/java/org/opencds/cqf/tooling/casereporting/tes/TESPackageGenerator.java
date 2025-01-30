@@ -24,8 +24,10 @@ public class TESPackageGenerator extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(TESPackageGenerator.class);
     private static final String PUBLISHER = "Association of Public Health Laboratories (APHL)";
     private static final String VALUESETAUTHOREXTENSIONURL = "http://hl7.org/fhir/StructureDefinition/valueset-author";
+    private static final String VALUESETSTEWARDEXTENSIONURL = "http://hl7.org/fhir/StructureDefinition/valueset-steward";
     private static final String CONDITIONGROUPERVALUESETAUTHOR = "CSTE Author";
-    private static final String CANONICALBASE = "http://tes.aimsplatform.org/fhir";
+    private static final String CONDITIONGROUPERVALUESETSTEWARD = "CSTE Steward";
+    private static final String CANONICALBASE = "https://tes.tools.aimsplatform.org/api/fhir";
     private static final String MANIFESTID = "tes-content-library";
     private static final String MANIFESTURL = CANONICALBASE + "/" + MANIFESTID;
     private static final String VSMUSAGECONTEXTTYPESYSTEMURL = "http://aphl.org/fhir/vsm/CodeSystem/usage-context-type";
@@ -179,6 +181,7 @@ public class TESPackageGenerator extends Operation {
             }
         }
     }
+
     private void generateConditionCodeUsageComparison(String pathToConditionCodeValueSet, List<ValueSet> reportingSpecificationGroupers) throws IOException {
         ValueSet conditionCodeValueSet = loadConditionCodeValueSet(pathToConditionCodeValueSet);
 
@@ -291,18 +294,16 @@ public class TESPackageGenerator extends Operation {
     private List<ValueSet> generateConditionGroupers(List<ConditionGroupingEntry> conditionGroupingEntries) {
         List<ValueSet> conditionGroupers = new ArrayList<>();
 
-        Extension authorExtension = new Extension();
-        authorExtension.setUrl(VALUESETAUTHOREXTENSIONURL);
-        ContactDetail contactDetail = new ContactDetail();
-        contactDetail.setName(CONDITIONGROUPERVALUESETAUTHOR);
-        authorExtension.setValue(contactDetail);
+        List<Extension> extensions = new ArrayList<>();
+        extensions.add(new Extension().setUrl(VALUESETAUTHOREXTENSIONURL).setValue(new ContactDetail().setName(CONDITIONGROUPERVALUESETAUTHOR)));
+        extensions.add(new Extension().setUrl(VALUESETSTEWARDEXTENSIONURL).setValue(new ContactDetail().setName(CONDITIONGROUPERVALUESETSTEWARD)));
 
         for (ConditionGroupingEntry conditionGroupingEntry : conditionGroupingEntries) {
             if (conditionGroupers.stream().noneMatch(cg -> cg.getTitle().equalsIgnoreCase(conditionGroupingEntry.getConditionGroupingTitle()))) {
                 String id = UUID.randomUUID().toString();
                 ValueSet conditionGrouperValueSet = new ValueSet();
                 conditionGrouperValueSet.setId(id);
-                conditionGrouperValueSet.addExtension(authorExtension);
+                conditionGrouperValueSet.setExtension(extensions);
                 conditionGrouperValueSet.setMeta(new Meta().addProfile("http://aphl.org/fhir/vsm/StructureDefinition/vsm-conditiongroupervalueset"));
                 conditionGrouperValueSet.getMeta().addTag(SEARCHPARAMSYSTEMLIBRARYDEPENDSON, MANIFESTURL + "|" + this.version, null);
                 conditionGrouperValueSet.getMeta().addTag(SEARCHPARAMSYSTEMLIBRARYCONTEXTTYPEVALUE, SEARCHPARAMUSECONTEXTVALUEGROUPERTYPECONDITIONGROUPER, null);
@@ -310,7 +311,7 @@ public class TESPackageGenerator extends Operation {
                 conditionGrouperValueSet.setVersion(this.version);
                 conditionGrouperValueSet.setName(namify(conditionGroupingEntry.getConditionGroupingTitle()));
                 conditionGrouperValueSet.setTitle(conditionGroupingEntry.getConditionGroupingTitle());
-                conditionGrouperValueSet.setDescription(String.format("The set of all codes from value sets used in Reporting Specifications that are associated with the '%s' condition.", conditionGroupingEntry.getConditionGroupingTitle()));
+                conditionGrouperValueSet.setDescription(String.format("The set of all codes from value sets used in Reporting Specifications that are associated with the '%s' condition. (NOTE: Generated Content)", conditionGroupingEntry.getConditionGroupingTitle()));
                 conditionGrouperValueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
                 conditionGrouperValueSet.setExperimental(false);
                 conditionGrouperValueSet.setDate(new Date());
@@ -333,8 +334,8 @@ public class TESPackageGenerator extends Operation {
 //              conditionGroupingEntries.stream().filter(cge -> (Normalizer.normalize(cge.getReportingSpecificationName(), Normalizer.Form.NFKD).equalsIgnoreCase(java.text.Normalizer.normalize(reportingSpecificationGrouper.getTitle().replace("\u00a0"," "), Normalizer.Form.NFKD)))).collect(Collectors.toList()).stream().findFirst().orElse(null);
             var relevantConditionGroupingEntry =
                 conditionGroupingEntries.stream()
-                    .filter(cge -> ("ReportingSpecificationGrouper" + cge.getReportingSpecificationConditionCode())
-                        .equalsIgnoreCase(reportingSpecificationGrouper.getName()))
+                    .filter(cge -> ("ReportingSpecificationGrouper" + cge.getReportingSpecificationConditionCode().replace('\u00A0', ' ').trim())
+                        .equalsIgnoreCase(reportingSpecificationGrouper.getName().replace('\u00A0', ' ').trim()))
                     .collect(Collectors.toList())
                     .stream()
                     .findFirst()

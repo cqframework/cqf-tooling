@@ -34,7 +34,7 @@ public class TESPackageGeneratorIT {
 
         Bundle tesPackage = generateTESPackage(params);
 
-//        assertEquals(tesPackage.getEntry().size(), 242);
+        assertEquals(tesPackage.getEntry().size(), 444);
         assertNotNull(tesPackage);
     }
 }
