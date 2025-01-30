@@ -146,16 +146,20 @@ public class ErsdTransformer extends Operation {
 
     private PlanDefinition getV2PlanDefinition(String pathToPlanDefinition) {
         PlanDefinition planDef = null;
-        logger.info(String.format("PlanDefinitionPath: '%s'", pathToPlanDefinition));
         if (pathToPlanDefinition != null && !pathToPlanDefinition.isEmpty()) {
+            if (logger.isInfoEnabled()) {
+                logger.info("PlanDefinitionPath: '{}'", pathToPlanDefinition);
+            }
             planDef = (PlanDefinition)IOUtils.readResource(pathToPlanDefinition, ctx, true);
-            planDef.setDate(this.artifactsDate);
-            planDef.setVersion(this.version);
-            planDef.setEffectivePeriod(this.effectivePeriod);
-            Extension releaseLabelExtension = new Extension();
-            releaseLabelExtension.setUrl(artifactReleaseLabelExtensionUrl);
-            releaseLabelExtension.setValue(new StringType(this.releaseLabel));
-            planDef.addExtension(releaseLabelExtension);
+            if (planDef != null) {
+                planDef.setDate(this.artifactsDate);
+                planDef.setVersion(this.version);
+                planDef.setEffectivePeriod(this.effectivePeriod);
+                Extension releaseLabelExtension = new Extension();
+                releaseLabelExtension.setUrl(artifactReleaseLabelExtensionUrl);
+                releaseLabelExtension.setValue(new StringType(this.releaseLabel));
+                planDef.addExtension(releaseLabelExtension);
+            }
         }
 
         return planDef;

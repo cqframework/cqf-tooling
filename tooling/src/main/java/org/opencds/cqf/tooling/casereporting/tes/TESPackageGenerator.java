@@ -48,7 +48,7 @@ public class TESPackageGenerator extends Operation {
     private String pathToConditionGrouperWorkbook;
     private String pathToConditionCodeValueSet;
     private String outputFileName;
-    private HashSet<IOUtils.Encoding> outputFileEncodings;
+    private Set<IOUtils.Encoding> outputFileEncodings;
     public Set<IOUtils.Encoding> getOutputFileEncodings() {
         if (outputFileEncodings == null) {
             outputFileEncodings = new HashSet<>();
