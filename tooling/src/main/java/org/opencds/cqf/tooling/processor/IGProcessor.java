@@ -146,7 +146,6 @@ public class IGProcessor extends BaseProcessor {
         Boolean includePatientScenarios = params.includePatientScenarios;
         Boolean versioned = params.versioned;
 
-
         IOUtils.resourceDirectories.addAll(resourceDirs);
         FhirContext fhirContext = IGProcessor.getIgFhirContext(fhirVersion);
         IGProcessor.ensure(rootDir, includePatientScenarios, params.includeTerminology, IOUtils.resourceDirectories);
@@ -157,10 +156,10 @@ public class IGProcessor extends BaseProcessor {
 
         if (Strings.isNullOrEmpty(measureOutputPath)) {
             refreshedResourcesNames.addAll(new MeasureProcessor().refreshIgMeasureContent(this, encoding, versioned,
-                    fhirContext, measureToRefreshPath, params.shouldApplySoftwareSystemStamp));
+                    fhirContext, measureToRefreshPath, params.shouldApplySoftwareSystemStamp, params.includePopulationLevelDataRequirements));
         } else {
             refreshedResourcesNames.addAll(new MeasureProcessor().refreshIgMeasureContent(this, encoding, measureOutputPath,
-                    versioned, fhirContext, measureToRefreshPath, params.shouldApplySoftwareSystemStamp));
+                    versioned, fhirContext, measureToRefreshPath, params.shouldApplySoftwareSystemStamp, params.includePopulationLevelDataRequirements));
         }
 
         if (refreshedResourcesNames.isEmpty()) {
