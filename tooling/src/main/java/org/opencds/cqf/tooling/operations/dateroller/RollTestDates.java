@@ -15,6 +15,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidOperationException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -32,6 +33,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -250,7 +252,11 @@ public class RollTestDates implements ExecutableOperation {
    }
 
    private int getDaysBetweenDates(LocalDate start, LocalDate end) {
-      return end.getDayOfYear() - start.getDayOfYear();
+      try {
+         return Math.toIntExact(ChronoUnit.DAYS.between(start, end));
+      } catch (ArithmeticException e) {
+         throw new InvalidOperationException("DateRoller getDaysBetweenDates calculated a different that is too large for an integer.");
+      }
    }
 
    private LocalDate getLastUpdatedDate(IBaseResource resource) {
