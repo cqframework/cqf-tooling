@@ -252,11 +252,7 @@ public class RollTestDates implements ExecutableOperation {
    }
 
    private int getDaysBetweenDates(LocalDate start, LocalDate end) {
-      try {
-         return Math.toIntExact(ChronoUnit.DAYS.between(start, end));
-      } catch (ArithmeticException e) {
-         throw new InvalidOperationException("DateRoller getDaysBetweenDates calculated a different that is too large for an integer.");
-      }
+      return (int) ChronoUnit.DAYS.between(start, end);
    }
 
    private LocalDate getLastUpdatedDate(IBaseResource resource) {
