@@ -177,7 +177,9 @@ public class TESPackageGenerator extends Operation {
     private void runSimpleValidation(Library manifest, List<ValueSet> conditionGroupers, List<ValueSet> reportingSpecificationGroupers) {
         for (ValueSet vs : conditionGroupers) {
             if (!vs.hasCompose()) {
-                System.out.println(String.format("%s has no compose", vs.getTitle()));
+                if (logger.isErrorEnabled()) {
+                    logger.error("'{}' has no compose.", vs.getTitle());
+                }
             }
         }
     }
@@ -216,14 +218,20 @@ public class TESPackageGenerator extends Operation {
             // Save the workbook to the file system
             try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
                 workbook.write(fileOut);
-                System.out.println("Excel file written successfully.");
+                if (logger.isInfoEnabled()) {
+                    logger.info("Excel file written successfully.");
+                }
             } catch (IOException e) {
-                System.out.println("Error writing Excel file: " + e.getMessage());
+                if (logger.isErrorEnabled()) {
+                    logger.error("Error writing Excel file: '{}'.", e.getMessage());
+                }
             } finally {
                 try {
                     workbook.close();
                 } catch (IOException e) {
-                    System.out.println("Error closing workbook: " + e.getMessage());
+                    if (logger.isErrorEnabled()) {
+                        logger.error("Error closing workbook: '{}'", e.getMessage());
+                    }
                 }
             }
         }
@@ -240,16 +248,16 @@ public class TESPackageGenerator extends Operation {
         headerDisplayCell.setCellValue("Text");
         rowCounter++;
 
-        for (int i = 0; i < baseList.size(); i++) {
-            String code = baseList.get(i).getCode();
+        for (Coding coding : baseList) {
+            String code = coding.getCode();
             if (comparisonList.stream().noneMatch(rscoding -> rscoding.getCode().equalsIgnoreCase(code))) {
                 Row row = sheet.createRow(rowCounter);
                 Cell systemCell = row.createCell(0);
-                systemCell.setCellValue(baseList.get(i).getSystem());
+                systemCell.setCellValue(coding.getSystem());
                 Cell codeCell = row.createCell(1);
-                codeCell.setCellValue(baseList.get(i).getCode());
+                codeCell.setCellValue(coding.getCode());
                 Cell displayCell = row.createCell(2);
-                displayCell.setCellValue(baseList.get(i).getDisplay());
+                displayCell.setCellValue(coding.getDisplay());
                 rowCounter++;
             }
         }
@@ -284,8 +292,9 @@ public class TESPackageGenerator extends Operation {
                     throw new IllegalArgumentException("Unsupported input file encoding. Currently, only .json and .xml supported for the input file.");
                 }
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                throw new RuntimeException("Error parsing " + valueSetFile.getName());
+                if (logger.isInfoEnabled()) {
+                    logger.error("Error reading condition code value set file: '{}'.", e.getMessage());
+                }
             }
         }
         return conditionCodeValueSet;
@@ -409,33 +418,16 @@ public class TESPackageGenerator extends Operation {
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
 
-            String conditionGroupingName = SpreadsheetHelper.getCellAsString(row, CONDITIONGROUPINGTITLEINDEX)
-//                .replace("\u00a0"," ")
-//                .replace("\u202F"," ")
-//                .replace("\u2019"," ")
-                .trim();
-            String reportingSpecificationName =
-//                SpreadsheetHelper.protectedString(
-                        SpreadsheetHelper.getCellAsString(row, REPORTINGSPECIFICATIONNAMEINDEX)
-//                    .replace("\u00a0"," ")
-//                    .replace("\u202F"," ")
-//                    .replace("\u2019"," ")
-                    .trim();
+            /* Note that getCellAsString can return a null value.
+            May want to use Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, CONDITIONGROUPINGTITLEINDEX)).trim()
+            to avoid possible null pointer exceptions here and subsequent uses of the getCellAsString method
+            */
+
+            String conditionGroupingName = Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, CONDITIONGROUPINGTITLEINDEX)).trim();
+            String reportingSpecificationName = Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, REPORTINGSPECIFICATIONNAMEINDEX)).trim();
             row.getCell(REPORTINGSPECIFICATIONCONDITIONCODEINDEX).setCellType(CellType.STRING);
-            String reportingSpecificationCode =
-                SpreadsheetHelper.getCellAsString(row, REPORTINGSPECIFICATIONCONDITIONCODEINDEX)
-//                    .replace("\u00a0"," ")
-//                    .replace("\u202F"," ")
-//                    .replace("\u2019"," ")
-////                        \u00e9
-                    .trim();
-            String reportingSpecificationDescription =
-//                SpreadsheetHelper.protectedString(
-                        SpreadsheetHelper.getCellAsString(row, REPORTINGSPECIFICATIONCONDITIONDESCRIPTIONINDEX)
-//                    .replace("\u00a0"," ")
-//                    .replace("\u202F"," ")
-//                    .replace("\u2019"," ")
-                    .trim();
+            String reportingSpecificationCode = Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, REPORTINGSPECIFICATIONCONDITIONCODEINDEX)).trim();
+            String reportingSpecificationDescription = Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, REPORTINGSPECIFICATIONCONDITIONDESCRIPTIONINDEX)).trim();
 
             if (!Objects.requireNonNull(conditionGroupingName).isEmpty()
                     || !Objects.requireNonNull(reportingSpecificationName).isEmpty()
@@ -479,9 +471,13 @@ public class TESPackageGenerator extends Operation {
                 && uc.getCode().getCode().equalsIgnoreCase("grouper-type")
                 && uc.hasValueCodeableConcept()
                 && uc.getValueCodeableConcept().hasCoding(VSMUSAGECONTEXTTYPESYSTEMURL, "reporting-specification-grouper"))) {
-                logger.info("ValueSet with id {} is not a reporting-specification-grouper and will be skipped.", rsGrouper.getIdPart());
+                if (logger.isInfoEnabled()) {
+                    logger.info("ValueSet with id {} is not a reporting-specification-grouper and will be skipped.", rsGrouper.getIdPart());
+                }
             } else {
-                logger.info("Creating a Condition Grouper ValueSet for Reporting Specification Grouper ID: {}", rsGrouper.getIdPart());
+                if (logger.isInfoEnabled()) {
+                    logger.info("Creating a Condition Grouper ValueSet for Reporting Specification Grouper ID: {}", rsGrouper.getIdPart());
+                }
             }
         }
     }
@@ -533,13 +529,17 @@ public class TESPackageGenerator extends Operation {
                 if (resource instanceof ValueSet) {
                     rsGrouperValueSets.add((ValueSet) resource); // Safe casting
                 } else {
-                    logger.info("A rsGrouper of type '{}', with ID '{}' was encountered. The Condition Grouper generator expects only ValueSet resources. This rsGrouper will be skipped.", resource.getIdElement().getResourceType(), resource.getIdElement().getIdPart());
+                    if (logger.isInfoEnabled()) {
+                        logger.info("A rsGrouper of type '{}', with ID '{}' was encountered. The Condition Grouper generator expects only ValueSet resources. This rsGrouper will be skipped.", resource.getIdElement().getResourceType(), resource.getIdElement().getIdPart());
+                    }
                 }
             }
 
             validateRSGroupers(rsGrouperValueSets);
         } else {
-            logger.info("Bundle at '{}' could not be found or loaded.", this.pathToInputBundle);
+            if (logger.isErrorEnabled()) {
+                logger.error("Bundle at '{}' could not be found or loaded.", this.pathToInputBundle);
+            }
         }
 
         return rsGrouperValueSets;
