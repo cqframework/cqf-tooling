@@ -9,6 +9,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.tooling.Operation;
+import org.opencds.cqf.tooling.constants.CaseReporting;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.slf4j.Logger;
@@ -22,25 +23,6 @@ import static org.opencds.cqf.tooling.operations.bundle.BundleToResources.bundle
 
 public class TESPackageGenerator extends Operation {
     private static final Logger logger = LoggerFactory.getLogger(TESPackageGenerator.class);
-    private static final String PUBLISHER = "Association of Public Health Laboratories (APHL)";
-    private static final String VALUESETAUTHOREXTENSIONURL = "http://hl7.org/fhir/StructureDefinition/valueset-author";
-    private static final String VALUESETSTEWARDEXTENSIONURL = "http://hl7.org/fhir/StructureDefinition/valueset-steward";
-    private static final String CONDITIONGROUPERVALUESETAUTHOR = "CSTE Author";
-    private static final String CONDITIONGROUPERVALUESETSTEWARD = "CSTE Steward";
-    private static final String CANONICALBASE = "https://tes.tools.aimsplatform.org/api/fhir";
-    private static final String MANIFESTID = "tes-content-library";
-    private static final String MANIFESTURL = CANONICALBASE + "/" + MANIFESTID;
-    private static final String VSMUSAGECONTEXTTYPESYSTEMURL = "http://aphl.org/fhir/vsm/CodeSystem/usage-context-type";
-    private static final String USAGECONTEXTTYPESYSTEMURL = "http://terminology.hl7.org/CodeSystem/usage-context-type";
-    private static final String USPHUSAGECONTEXTURL = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context";
-    private static final String SEARCHPARAMSYSTEMLIBRARYDEPENDSON = "http://hl7.org/fhir/Library#relatedArtifact.dependsOn";
-    private static final String SEARCHPARAMSYSTEMLIBRARYCONTEXTTYPEVALUE = "http://hl7.org/fhir/ValueSet#useContext.context-type-value";
-    private static final String SEARCHPARAMUSECONTEXTVALUEGROUPERTYPECONDITIONGROUPER = "grouper-type$http://aphl.org/fhir/vsm/CodeSystem/usage-context-type|condition-grouper";
-    private static final int CONDITIONGROUPINGSSHEETINDEX = 0;
-    private static final int CONDITIONGROUPINGTITLEINDEX = 1;
-    private static final int REPORTINGSPECIFICATIONNAMEINDEX = 2;
-    private static final int REPORTINGSPECIFICATIONCONDITIONCODEINDEX = 3;
-    private static final int REPORTINGSPECIFICATIONCONDITIONDESCRIPTIONINDEX = 4;
     private FhirContext fhirContext;
     private String version;
     private String releaseLabel;
@@ -169,12 +151,12 @@ public class TESPackageGenerator extends Operation {
             }
         }
 
-        runSimpleValidation(manifest, conditionGroupers, reportingSpecificationGroupers);
+        runSimpleValidation(conditionGroupers);
 
         return outputBundle;
     }
 
-    private void runSimpleValidation(Library manifest, List<ValueSet> conditionGroupers, List<ValueSet> reportingSpecificationGroupers) {
+    private void runSimpleValidation(List<ValueSet> conditionGroupers) {
         for (ValueSet vs : conditionGroupers) {
             if (!vs.hasCompose()) {
                 if (logger.isErrorEnabled()) {
@@ -184,7 +166,7 @@ public class TESPackageGenerator extends Operation {
         }
     }
 
-    private void generateConditionCodeUsageComparison(String pathToConditionCodeValueSet, List<ValueSet> reportingSpecificationGroupers) throws IOException {
+    private void generateConditionCodeUsageComparison(String pathToConditionCodeValueSet, List<ValueSet> reportingSpecificationGroupers) {
         ValueSet conditionCodeValueSet = loadConditionCodeValueSet(pathToConditionCodeValueSet);
 
         if (conditionCodeValueSet != null) {
@@ -203,7 +185,7 @@ public class TESPackageGenerator extends Operation {
 
             // Create a new workbook and sheet
             String filePath = getOutputPath() + "/condition-code-diff.xlsx";
-            Workbook workbook = new XSSFWorkbook(); //WorkbookFactory.create(conditionCodeDiffWorkbookFile);
+            Workbook workbook = new XSSFWorkbook();
 
             // Generate a Sheet with list of codes that are in the RCKMS Condition Code ValueSet,
             // but not implemented in any current reporting specifications
@@ -304,8 +286,8 @@ public class TESPackageGenerator extends Operation {
         List<ValueSet> conditionGroupers = new ArrayList<>();
 
         List<Extension> extensions = new ArrayList<>();
-        extensions.add(new Extension().setUrl(VALUESETAUTHOREXTENSIONURL).setValue(new ContactDetail().setName(CONDITIONGROUPERVALUESETAUTHOR)));
-        extensions.add(new Extension().setUrl(VALUESETSTEWARDEXTENSIONURL).setValue(new ContactDetail().setName(CONDITIONGROUPERVALUESETSTEWARD)));
+        extensions.add(new Extension().setUrl(CaseReporting.VALUESETAUTHOREXTENSIONURL).setValue(new ContactDetail().setName(CaseReporting.CONDITIONGROUPERVALUESETAUTHOR)));
+        extensions.add(new Extension().setUrl(CaseReporting.VALUESETSTEWARDEXTENSIONURL).setValue(new ContactDetail().setName(CaseReporting.CONDITIONGROUPERVALUESETSTEWARD)));
 
         for (ConditionGroupingEntry conditionGroupingEntry : conditionGroupingEntries) {
             if (conditionGroupers.stream().noneMatch(cg -> cg.getTitle().equalsIgnoreCase(conditionGroupingEntry.getConditionGroupingTitle()))) {
@@ -314,9 +296,9 @@ public class TESPackageGenerator extends Operation {
                 conditionGrouperValueSet.setId(id);
                 conditionGrouperValueSet.setExtension(extensions);
                 conditionGrouperValueSet.setMeta(new Meta().addProfile("http://aphl.org/fhir/vsm/StructureDefinition/vsm-conditiongroupervalueset"));
-                conditionGrouperValueSet.getMeta().addTag(SEARCHPARAMSYSTEMLIBRARYDEPENDSON, MANIFESTURL + "|" + this.version, null);
-                conditionGrouperValueSet.getMeta().addTag(SEARCHPARAMSYSTEMLIBRARYCONTEXTTYPEVALUE, SEARCHPARAMUSECONTEXTVALUEGROUPERTYPECONDITIONGROUPER, null);
-                conditionGrouperValueSet.setUrl(CANONICALBASE + "/ValueSet/" + id);
+                conditionGrouperValueSet.getMeta().addTag(CaseReporting.SEARCHPARAMSYSTEMLIBRARYDEPENDSON, CaseReporting.MANIFESTURL + "|" + this.version, null);
+                conditionGrouperValueSet.getMeta().addTag(CaseReporting.SEARCHPARAMSYSTEMLIBRARYCONTEXTTYPEVALUE, CaseReporting.SEARCHPARAMUSECONTEXTVALUEGROUPERTYPECONDITIONGROUPER, null);
+                conditionGrouperValueSet.setUrl(CaseReporting.CANONICALBASE + "/ValueSet/" + id);
                 conditionGrouperValueSet.setVersion(this.version);
                 conditionGrouperValueSet.setName(namify(conditionGroupingEntry.getConditionGroupingTitle()));
                 conditionGrouperValueSet.setTitle(conditionGroupingEntry.getConditionGroupingTitle());
@@ -324,11 +306,11 @@ public class TESPackageGenerator extends Operation {
                 conditionGrouperValueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
                 conditionGrouperValueSet.setExperimental(false);
                 conditionGrouperValueSet.setDate(new Date());
-                conditionGrouperValueSet.setPublisher(PUBLISHER);
+                conditionGrouperValueSet.setPublisher(CaseReporting.PUBLISHER);
                 UsageContext conditionGrouperUseContext =
                     new UsageContext(
-                        new Coding(VSMUSAGECONTEXTTYPESYSTEMURL, "grouper-type", null),
-                        new CodeableConcept(new Coding(VSMUSAGECONTEXTTYPESYSTEMURL, "condition-grouper", "Condition Grouper")).setText("Condition Grouper")
+                        new Coding(CaseReporting.VSMUSAGECONTEXTTYPESYSTEMURL, "grouper-type", null),
+                        new CodeableConcept(new Coding(CaseReporting.VSMUSAGECONTEXTTYPESYSTEMURL, "condition-grouper", "Condition Grouper")).setText("Condition Grouper")
                     );
                 conditionGrouperValueSet.addUseContext(conditionGrouperUseContext);
                 conditionGroupers.add(conditionGrouperValueSet);
@@ -410,7 +392,7 @@ public class TESPackageGenerator extends Operation {
 
         Iterator<Row> rowIterator;
 
-        Sheet groupingCodesSheet = workbook.getSheetAt(CONDITIONGROUPINGSSHEETINDEX);
+        Sheet groupingCodesSheet = workbook.getSheetAt(CaseReporting.CONDITIONGROUPINGSSHEETINDEX);
         rowIterator = groupingCodesSheet.iterator();
         // Skip header row
         rowIterator.next();
@@ -423,11 +405,11 @@ public class TESPackageGenerator extends Operation {
             to avoid possible null pointer exceptions here and subsequent uses of the getCellAsString method
             */
 
-            String conditionGroupingName = Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, CONDITIONGROUPINGTITLEINDEX)).trim();
-            String reportingSpecificationName = Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, REPORTINGSPECIFICATIONNAMEINDEX)).trim();
-            row.getCell(REPORTINGSPECIFICATIONCONDITIONCODEINDEX).setCellType(CellType.STRING);
-            String reportingSpecificationCode = Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, REPORTINGSPECIFICATIONCONDITIONCODEINDEX)).trim();
-            String reportingSpecificationDescription = Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, REPORTINGSPECIFICATIONCONDITIONDESCRIPTIONINDEX)).trim();
+            String conditionGroupingName = Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, CaseReporting.CONDITIONGROUPINGTITLEINDEX)).trim();
+            String reportingSpecificationName = Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, CaseReporting.REPORTINGSPECIFICATIONNAMEINDEX)).trim();
+            row.getCell(CaseReporting.REPORTINGSPECIFICATIONCONDITIONCODEINDEX).setCellType(CellType.STRING);
+            String reportingSpecificationCode = Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, CaseReporting.REPORTINGSPECIFICATIONCONDITIONCODEINDEX)).trim();
+            String reportingSpecificationDescription = Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, CaseReporting.REPORTINGSPECIFICATIONCONDITIONDESCRIPTIONINDEX)).trim();
 
             if (!Objects.requireNonNull(conditionGroupingName).isEmpty()
                     || !Objects.requireNonNull(reportingSpecificationName).isEmpty()
@@ -466,11 +448,11 @@ public class TESPackageGenerator extends Operation {
 
             if (useContexts.stream().noneMatch(uc ->
                 uc.hasCode()
-                && uc.getCode().getSystem().equalsIgnoreCase(VSMUSAGECONTEXTTYPESYSTEMURL)
+                && uc.getCode().getSystem().equalsIgnoreCase(CaseReporting.VSMUSAGECONTEXTTYPESYSTEMURL)
                 && uc.getCode().hasCode()
                 && uc.getCode().getCode().equalsIgnoreCase("grouper-type")
                 && uc.hasValueCodeableConcept()
-                && uc.getValueCodeableConcept().hasCoding(VSMUSAGECONTEXTTYPESYSTEMURL, "reporting-specification-grouper"))) {
+                && uc.getValueCodeableConcept().hasCoding(CaseReporting.VSMUSAGECONTEXTTYPESYSTEMURL, "reporting-specification-grouper"))) {
                 if (logger.isInfoEnabled()) {
                     logger.info("ValueSet with id {} is not a reporting-specification-grouper and will be skipped.", rsGrouper.getIdPart());
                 }
@@ -548,32 +530,32 @@ public class TESPackageGenerator extends Operation {
     private Library generateManifest(List<ValueSet> components, List<ValueSet> dependencies) {
         Library manifest = new Library();
 
-        manifest.setId(MANIFESTID);
+        manifest.setId(CaseReporting.MANIFESTID);
         if (releaseLabel != null && !releaseLabel.isEmpty()) {
             manifest.addExtension(
                 new Extension()
                     .setUrl("http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel")
                     .setValue(new StringType(releaseLabel)));
         }
-        manifest.setUrl(MANIFESTURL);
+        manifest.setUrl(CaseReporting.MANIFESTURL);
         manifest.setVersion(this.version);
         manifest.setName("TESContentLibrary");
         manifest.setTitle("TES Content Library");
         manifest.setStatus(Enumerations.PublicationStatus.ACTIVE);
         manifest.setExperimental(false);
         manifest.setType(new CodeableConcept(new Coding("http://terminology.hl7.org/CodeSystem/library-type", "asset-collection", null)));
-        manifest.setPublisher(PUBLISHER);
+        manifest.setPublisher(CaseReporting.PUBLISHER);
         manifest.setDescription("This is the package manifest Library for a TES content release.");
         UsageContext specificationTypeUseContext =
             new UsageContext(
                 new Coding("http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type", "specification-type", null),
-                new CodeableConcept(new Coding(USPHUSAGECONTEXTURL, "value-set-library", null))
+                new CodeableConcept(new Coding(CaseReporting.USPHUSAGECONTEXTURL, "value-set-library", null))
             );
         manifest.addUseContext(specificationTypeUseContext);
         UsageContext specificationCategoryUseContext =
             new UsageContext(
-                new Coding(VSMUSAGECONTEXTTYPESYSTEMURL, "specification-category", null),
-                new CodeableConcept(new Coding(VSMUSAGECONTEXTTYPESYSTEMURL, "tes-release", null))
+                new Coding(CaseReporting.VSMUSAGECONTEXTTYPESYSTEMURL, "specification-category", null),
+                new CodeableConcept(new Coding(CaseReporting.VSMUSAGECONTEXTTYPESYSTEMURL, "tes-release", null))
             );
         manifest.addUseContext(specificationCategoryUseContext);
         manifest.setPurpose("Collection of RCKMS Reporting Specification terminology.");
