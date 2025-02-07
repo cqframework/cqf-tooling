@@ -180,6 +180,21 @@ public class NpmPackageManager {
                 logger.warn("The correct canonical URL for this dependency is " + cu);
             }
         }
+
+        if (!pi.dependencies().isEmpty()) {
+            for (String dependency : pi.dependencies()) {
+                String[] idAndVersion = dependency.split("#");
+                NpmPackage pid = pcm.loadPackage(idAndVersion[0], idAndVersion[1]);
+                if (pid == null) {
+                    logger.warn("Dependency " + idAndVersion[0] + "not found by FilesystemPackageCacheManager");
+                }
+                npmList.add(pid);
+
+                logger.debug(
+                        "Load " + name + " (" + canonical + ") from " + packageId + "#" + igver);
+
+            }
+        }
     }
 
     private String determineCanonical(String url, String path) throws FHIRException {
