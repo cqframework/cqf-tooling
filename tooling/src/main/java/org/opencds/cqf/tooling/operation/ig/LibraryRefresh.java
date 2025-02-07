@@ -47,7 +47,7 @@ public class LibraryRefresh extends Refresh {
       List<NpmPackage> packageList = cleanPackageList(this.npmPackageManager.getNpmList());
       this.cqlProcessor = new CqlProcessor(packageList,
               Collections.singletonList(igInfo.getCqlBinaryPath()), libraryLoader, new IGLoggingService(logger), ucumService,
-              igInfo.getPackageId(), igInfo.getCanonical(), true);
+              igInfo.getIgResource(), getFhirContext().getVersion().toString(),true);
    }
    @Override
    public List<IBaseResource> refresh() {

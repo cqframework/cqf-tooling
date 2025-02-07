@@ -163,17 +163,23 @@ public class CqlProcessor {
 
     private NamespaceInfo namespaceInfo;
 
+    private ImplementationGuide sourceIg;
+
+    private String fhirVersion;
+
     private boolean verboseMessaging;
 
-    public CqlProcessor(List<NpmPackage> packages, List<String> folders, ILibraryReader reader, ILoggingService logger, UcumService ucumService, String packageId, String canonicalBase, Boolean verboseMessaging) {
+    public CqlProcessor(List<NpmPackage> packages, List<String> folders, ILibraryReader reader, ILoggingService logger, UcumService ucumService, ImplementationGuide sourceIg, String fhirVersion, Boolean verboseMessaging) {
         super();
         this.packages = packages;
         this.folders = folders;
         this.reader = reader;
         this.logger = logger;
         this.ucumService = ucumService;
-        this.packageId = packageId;
-        this.canonicalBase = canonicalBase;
+        this.sourceIg = sourceIg;
+        this.packageId = sourceIg.getId();
+        this.canonicalBase = sourceIg.getUrl();
+        this.fhirVersion = fhirVersion;
         if (packageId != null && !packageId.isEmpty() && canonicalBase != null && !canonicalBase.isEmpty()) {
             this.namespaceInfo = new NamespaceInfo(packageId, canonicalBase);
         }
