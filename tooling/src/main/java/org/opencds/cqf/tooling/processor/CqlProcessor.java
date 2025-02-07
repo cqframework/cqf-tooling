@@ -21,19 +21,19 @@ import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.fhir.ucum.UcumService;
 import org.hl7.cql.model.NamespaceInfo;
+import org.hl7.cql.model.NamespaceManager;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.context.IWorkerContext.ILoggingService;
 import org.hl7.fhir.r5.model.DataRequirement;
+import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.r5.model.ParameterDefinition;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
-import org.opencds.cqf.tooling.npm.ILibraryReader;
-import org.opencds.cqf.tooling.npm.NpmLibrarySourceProvider;
-import org.opencds.cqf.tooling.npm.NpmModelInfoProvider;
+import org.opencds.cqf.tooling.npm.*;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 
@@ -307,7 +307,26 @@ public class CqlProcessor {
         libraryManager.getLibrarySourceLoader().registerProvider(new FhirLibrarySourceProvider());
         modelManager.getModelInfoLoader().registerModelInfoProvider(new DefaultModelInfoProvider(Paths.get(folder)));
 
-        loadNamespaces(libraryManager);
+
+        NamespaceManager namespaceManager = libraryManager.getNamespaceManager();
+        NamespaceInfo namespaceInfo = null;
+        if (sourceIg != null) {
+            NpmPackageManager pm = new NpmPackageManager(sourceIg, fhirVersion);
+            pm.getNpmList().forEach(npm -> {
+                NamespaceInfo newNamespace = new NamespaceInfo(npm.id(), npm.canonical());
+                namespaceManager.ensureNamespaceRegistered(newNamespace);
+            });
+            LibraryLoader reader = new LibraryLoader(fhirVersion);
+            NpmLibrarySourceProvider sp = new NpmLibrarySourceProvider(pm.getNpmList(), reader, logger);
+            libraryManager.getLibrarySourceLoader().registerProvider(sp);
+
+            String packageId = this.packageId;
+            String canonicalBase = this.canonicalBase;
+
+            if (packageId != null && !packageId.isEmpty() && canonicalBase != null && !canonicalBase.isEmpty()) {
+                namespaceInfo = new NamespaceInfo(packageId, canonicalBase);
+            }
+        }
 
         // foreach *.cql file
         boolean hadCqlFiles = false;
