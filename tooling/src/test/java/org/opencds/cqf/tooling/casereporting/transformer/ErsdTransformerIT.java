@@ -165,7 +165,7 @@ public class ErsdTransformerIT {
         Library manifestLibrary;
         manifestLibrary = (Library)outputBundle.getEntry().stream().filter(x -> x.hasResource()
                 && x.getResource().fhirType().equals("Library")
-                && x.getResource().getId().equals("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary")).findFirst().get().getResource();
+                && x.getResource().getId().equals("Library/ersd-specification-library")).findFirst().get().getResource();
 
         assertNotNull(manifestLibrary);
 
