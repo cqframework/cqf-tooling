@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -250,7 +251,7 @@ public class RollTestDates implements ExecutableOperation {
    }
 
    private int getDaysBetweenDates(LocalDate start, LocalDate end) {
-      return end.getDayOfYear() - start.getDayOfYear();
+      return (int) ChronoUnit.DAYS.between(start, end);
    }
 
    private LocalDate getLastUpdatedDate(IBaseResource resource) {
