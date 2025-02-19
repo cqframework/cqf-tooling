@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.constants.CaseReporting;
 import org.opencds.cqf.tooling.terminology.SpreadsheetHelper;
+import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,10 +129,12 @@ public class TESPackageGenerator extends Operation {
         addReportingSpecificationGrouperReferencesToConditionGroupers(conditionGroupingEntries, conditionGroupers, reportingSpecificationGroupers);
         Library manifest = generateManifest(conditionGroupers, reportingSpecificationGroupers);
 
-        // Write ConditionGroupers out to files (should be an argument)
         if (writeConditionGroupers) {
             for (IOUtils.Encoding encoding : getOutputFileEncodings()) {
-                IOUtils.writeResources(conditionGroupers, this.getOutputPath(), encoding, FhirContext.forR4Cached());
+                for (ValueSet grouper : conditionGroupers) {
+                    String name = CanonicalUtils.getTail(grouper.getUrl());
+                    IOUtils.writeResource(grouper, this.getOutputPath(), encoding, FhirContext.forR4Cached(), true, name);
+                }
             }
         }
 
@@ -291,14 +294,24 @@ public class TESPackageGenerator extends Operation {
 
         for (ConditionGroupingEntry conditionGroupingEntry : conditionGroupingEntries) {
             if (conditionGroupers.stream().noneMatch(cg -> cg.getTitle().equalsIgnoreCase(conditionGroupingEntry.getConditionGroupingTitle()))) {
-                String id = UUID.randomUUID().toString();
+                // If an identifier was not provided for the Condition Grouper in the spreadsheet (i.e. it's a new grouper)
+                // then generate and use a new ID. Log the results so that the spreadsheet can be updated with these new ID (for now,
+                // the spreadsheet is the source of truth for mapping between Condition Grouping title and id).
+                String canonicalId = null;
+                if ((conditionGroupingEntry.getConditionGroupingIdentifier() != null)
+                        && !conditionGroupingEntry.getConditionGroupingIdentifier().isEmpty()) {
+                    canonicalId = conditionGroupingEntry.getConditionGroupingIdentifier();
+                } else {
+                    canonicalId = UUID.randomUUID().toString();
+                    logger.info("Condition Grouper '{0}' did not have an identifier specified and has been assigned: {1}", conditionGroupingEntry.getConditionGroupingTitle(), canonicalId);
+                }
+
                 ValueSet conditionGrouperValueSet = new ValueSet();
-                conditionGrouperValueSet.setId(id);
                 conditionGrouperValueSet.setExtension(extensions);
                 conditionGrouperValueSet.setMeta(new Meta().addProfile("http://aphl.org/fhir/vsm/StructureDefinition/vsm-conditiongroupervalueset"));
                 conditionGrouperValueSet.getMeta().addTag(CaseReporting.SEARCHPARAMSYSTEMLIBRARYDEPENDSON, CaseReporting.MANIFESTURL + "|" + this.version, null);
                 conditionGrouperValueSet.getMeta().addTag(CaseReporting.SEARCHPARAMSYSTEMLIBRARYCONTEXTTYPEVALUE, CaseReporting.SEARCHPARAMUSECONTEXTVALUEGROUPERTYPECONDITIONGROUPER, null);
-                conditionGrouperValueSet.setUrl(CaseReporting.CANONICALBASE + "/ValueSet/" + id);
+                conditionGrouperValueSet.setUrl(CaseReporting.CANONICALBASE + "/ValueSet/" + canonicalId);
                 conditionGrouperValueSet.setVersion(this.version);
                 conditionGrouperValueSet.setName(namify(conditionGroupingEntry.getConditionGroupingTitle()));
                 conditionGrouperValueSet.setTitle(conditionGroupingEntry.getConditionGroupingTitle());
@@ -321,8 +334,6 @@ public class TESPackageGenerator extends Operation {
 
     private void addReportingSpecificationGrouperReferencesToConditionGroupers(List<ConditionGroupingEntry> conditionGroupingEntries, List<ValueSet> conditionGroupers, List<ValueSet> reportingSpecificationGroupers) {
         for (ValueSet reportingSpecificationGrouper : reportingSpecificationGroupers) {
-//            var relevantConditionGroupingEntry =
-//              conditionGroupingEntries.stream().filter(cge -> (Normalizer.normalize(cge.getReportingSpecificationName(), Normalizer.Form.NFKD).equalsIgnoreCase(java.text.Normalizer.normalize(reportingSpecificationGrouper.getTitle().replace("\u00a0"," "), Normalizer.Form.NFKD)))).collect(Collectors.toList()).stream().findFirst().orElse(null);
             var relevantConditionGroupingEntry =
                 conditionGroupingEntries.stream()
                     .filter(cge -> ("ReportingSpecificationGrouper" + cge.getReportingSpecificationConditionCode().replace('\u00A0', ' ').trim())
@@ -359,16 +370,21 @@ public class TESPackageGenerator extends Operation {
         }
     }
 
-    private Bundle buildAndWriteBundle(List<IBaseResource> resourcesToBundle) {//Library manifest, List<ValueSet> conditionGroupers, List<ValueSet> inputBundleResources) {
+    private Bundle buildAndWriteBundle(List<IBaseResource> resourcesToBundle) {
         BundleBuilder builder = new BundleBuilder(this.fhirContext);
-        builder.setBundleField("id", "tes-content-bundle");
+        builder.setBundleField("id", "tes-content-bundle-" + this.version);
         for (IBaseResource resourceToBundle : resourcesToBundle) {
-            builder.addTransactionUpdateEntry(resourceToBundle);
+            if (resourceToBundle instanceof MetadataResource) {
+                String conditionalUrl = "url=" + ((MetadataResource) resourceToBundle).getUrl() + "&version=" + ((MetadataResource) resourceToBundle).getVersion();
+                builder.addTransactionCreateEntry(resourceToBundle).conditional(conditionalUrl);
+            } else {
+                builder.addTransactionUpdateEntry(resourceToBundle);
+            }
         }
 
         Bundle bundle = (Bundle)builder.getBundle();
         for (IOUtils.Encoding encoding : getOutputFileEncodings()) {
-            IOUtils.writeResource(bundle, this.getOutputPath(), encoding, FhirContext.forR4Cached());
+            IOUtils.writeResource(bundle, this.getOutputPath(), encoding, FhirContext.forR4Cached(), true, "tes-content-bundle");
         }
 
         return bundle;
@@ -394,29 +410,27 @@ public class TESPackageGenerator extends Operation {
 
         Sheet groupingCodesSheet = workbook.getSheetAt(CaseReporting.CONDITIONGROUPINGSSHEETINDEX);
         rowIterator = groupingCodesSheet.iterator();
+        // Skip information/instruction row
+        rowIterator.next();
         // Skip header row
         rowIterator.next();
 
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
 
-            /* Note that getCellAsString can return a null value.
-            May want to use Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, CONDITIONGROUPINGTITLEINDEX)).trim()
-            to avoid possible null pointer exceptions here and subsequent uses of the getCellAsString method
-            */
-
-            String conditionGroupingName = Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, CaseReporting.CONDITIONGROUPINGTITLEINDEX)).trim();
+            String conditionGroupingIdentifier = SpreadsheetHelper.getCellAsString(row, CaseReporting.CONDITIONGROUPINGIDENTIFIERINDEX);
+            String conditionGroupingTitle = Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, CaseReporting.CONDITIONGROUPINGTITLEINDEX)).trim();
             String reportingSpecificationName = Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, CaseReporting.REPORTINGSPECIFICATIONNAMEINDEX)).trim();
             row.getCell(CaseReporting.REPORTINGSPECIFICATIONCONDITIONCODEINDEX).setCellType(CellType.STRING);
             String reportingSpecificationCode = Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, CaseReporting.REPORTINGSPECIFICATIONCONDITIONCODEINDEX)).trim();
             String reportingSpecificationDescription = Objects.requireNonNull(SpreadsheetHelper.getCellAsString(row, CaseReporting.REPORTINGSPECIFICATIONCONDITIONDESCRIPTIONINDEX)).trim();
 
-            if (!Objects.requireNonNull(conditionGroupingName).isEmpty()
+            if (!Objects.requireNonNull(conditionGroupingTitle).isEmpty()
                     || !Objects.requireNonNull(reportingSpecificationName).isEmpty()
                     || !Objects.requireNonNull(reportingSpecificationCode).isEmpty()
                     || !Objects.requireNonNull(reportingSpecificationDescription).isEmpty()) {
                 ConditionGroupingEntry conditionGroupingEntry =
-                    new ConditionGroupingEntry(conditionGroupingName, reportingSpecificationName, reportingSpecificationCode, reportingSpecificationDescription);
+                    new ConditionGroupingEntry(conditionGroupingIdentifier, conditionGroupingTitle, reportingSpecificationName, reportingSpecificationCode, reportingSpecificationDescription);
                 conditionGroupingEntries.add(conditionGroupingEntry);
             }
         }
@@ -425,16 +439,44 @@ public class TESPackageGenerator extends Operation {
     }
 
     private static class ConditionGroupingEntry {
-        private String conditionGroupingTitle;
-        public String getConditionGroupingTitle() { return conditionGroupingTitle; }
-        private String reportingSpecificationName;
-        public String getReportingSpecificationName() { return reportingSpecificationName; }
-        private String reportingSpecificationConditionCode;
-        public String getReportingSpecificationConditionCode() { return reportingSpecificationConditionCode; }
-        private String reportingSpecificationConditionDescription;
-        public String getReportingSpecificationConditionDescription() { return reportingSpecificationConditionDescription; }
+        private String conditionGroupingIdentifier;
 
-        public ConditionGroupingEntry(String conditionGroupingTitle, String reportingSpecificationName, String reportingSpecificationConditionCode, String reportingSpecificationConditionDescription) {
+        public String getConditionGroupingIdentifier() {
+            return conditionGroupingIdentifier;
+        }
+
+        private String conditionGroupingName;
+
+        public String getConditionGroupingName() {
+            return conditionGroupingName;
+        }
+
+        private String conditionGroupingTitle;
+
+        public String getConditionGroupingTitle() {
+            return conditionGroupingTitle;
+        }
+
+        private String reportingSpecificationName;
+
+        public String getReportingSpecificationName() {
+            return reportingSpecificationName;
+        }
+
+        private String reportingSpecificationConditionCode;
+
+        public String getReportingSpecificationConditionCode() {
+            return reportingSpecificationConditionCode;
+        }
+
+        private String reportingSpecificationConditionDescription;
+
+        public String getReportingSpecificationConditionDescription() {
+            return reportingSpecificationConditionDescription;
+        }
+
+        public ConditionGroupingEntry(String conditionGroupingIdentifier, String conditionGroupingTitle, String reportingSpecificationName, String reportingSpecificationConditionCode, String reportingSpecificationConditionDescription) {
+            this.conditionGroupingIdentifier = conditionGroupingIdentifier;
             this.conditionGroupingTitle = conditionGroupingTitle;
             this.reportingSpecificationName = reportingSpecificationName;
             this.reportingSpecificationConditionCode = reportingSpecificationConditionCode;
@@ -454,11 +496,11 @@ public class TESPackageGenerator extends Operation {
                 && uc.hasValueCodeableConcept()
                 && uc.getValueCodeableConcept().hasCoding(CaseReporting.VSMUSAGECONTEXTTYPESYSTEMURL, "reporting-specification-grouper"))) {
                 if (logger.isInfoEnabled()) {
-                    logger.info("ValueSet with id {} is not a reporting-specification-grouper and will be skipped.", rsGrouper.getIdPart());
+                    logger.info("ValueSet: '{}' is not a reporting-specification-grouper and will be skipped.", rsGrouper.getUrl());
                 }
             } else {
                 if (logger.isInfoEnabled()) {
-                    logger.info("Creating a Condition Grouper ValueSet for Reporting Specification Grouper ID: {}", rsGrouper.getIdPart());
+                    logger.info("Creating a Condition Grouper ValueSet for Reporting Specification Grouper: '{}'", rsGrouper.getUrl());
                 }
             }
         }
@@ -512,7 +554,7 @@ public class TESPackageGenerator extends Operation {
                     rsGrouperValueSets.add((ValueSet) resource); // Safe casting
                 } else {
                     if (logger.isInfoEnabled()) {
-                        logger.info("A rsGrouper of type '{}', with ID '{}' was encountered. The Condition Grouper generator expects only ValueSet resources. This rsGrouper will be skipped.", resource.getIdElement().getResourceType(), resource.getIdElement().getIdPart());
+                        logger.info("A rsGrouper of type '{}' was encountered. The Condition Grouper generator expects only ValueSet resources. This rsGrouper will be skipped.", resource.fhirType());
                     }
                 }
             }
@@ -530,7 +572,6 @@ public class TESPackageGenerator extends Operation {
     private Library generateManifest(List<ValueSet> components, List<ValueSet> dependencies) {
         Library manifest = new Library();
 
-        manifest.setId(CaseReporting.MANIFESTID);
         if (releaseLabel != null && !releaseLabel.isEmpty()) {
             manifest.addExtension(
                 new Extension()
@@ -589,7 +630,7 @@ public class TESPackageGenerator extends Operation {
         manifest.setRelatedArtifact(relatedArtifactsToAdd);
 
         for (IOUtils.Encoding encoding : getOutputFileEncodings()) {
-            IOUtils.writeResource(manifest, this.getOutputPath(), encoding, FhirContext.forR4Cached());
+            IOUtils.writeResource(manifest, this.getOutputPath(), encoding, FhirContext.forR4Cached(), true, CanonicalUtils.getTail(manifest.getUrl()));
         }
 
         return manifest;
