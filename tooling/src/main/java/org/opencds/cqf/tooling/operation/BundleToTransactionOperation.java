@@ -4,6 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.Operation;
 
 import java.io.*;
@@ -15,6 +18,7 @@ public class BundleToTransactionOperation extends Operation {
     private String encoding; // -encoding (-e)
     private String path; // -path (-p)
     private String version; // -version (-v) Can be dstu2, stu3, or r4
+    private Boolean relativeRequestUrls; // -relativerequesturls (-rru_
 
     private IBaseResource theResource;
     private List<IBaseResource> theResources = new ArrayList<>();
@@ -49,6 +53,8 @@ public class BundleToTransactionOperation extends Operation {
                 case "version": case "v":
                     version = value;
                     break;
+                case "relativerequesturls": case "rru":
+                    relativeRequestUrls = Boolean.parseBoolean(value); break; // -relativerequesturls (-rru)
                 default: throw new IllegalArgumentException("Unknown flag: " + flag);
             }
         }
@@ -107,12 +113,54 @@ public class BundleToTransactionOperation extends Operation {
             }
         }
         else if (context.getVersion().getVersion() == FhirVersionEnum.R4) {
+//            for (IBaseResource resource : theResources) {
+//                if (resource instanceof org.hl7.fhir.r4.model.Bundle) {
+//                    org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle)resource;
+//                    for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+//                        if (entry.getResource() != null) {
+//                            entry.setRequest(
+//                                new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent()
+//                                    .setUrl(entry.getResource().getId())
+//                                    .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
+//                            );
+//                        }
+//                    }
+//                    bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
+//                    output(bundle, context);
+//                }
+//            }
             for (IBaseResource resource : theResources) {
                 if (resource instanceof org.hl7.fhir.r4.model.Bundle) {
                     org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle)resource;
                     for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
                         if (entry.getResource() != null) {
-                            entry.setRequest(new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent().setUrl(entry.getResource().getId()).setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT));
+                            if (entry.getResource().getResourceType().compareTo(ResourceType.ValueSet) == 0) {
+                                var valueSet = (org.hl7.fhir.r4.model.ValueSet)entry.getResource();
+                                ValueSet.ValueSetComposeComponent compose = valueSet.getCompose();
+                                ValueSet.ValueSetComposeComponent newCompose = new ValueSet.ValueSetComposeComponent();
+                                List<ValueSet.ConceptSetComponent> concepts = compose.getInclude();
+                                for (ValueSet.ConceptSetComponent concept : concepts) {
+                                    if (concept.hasValueSet()) {
+                                        List<CanonicalType> referencedValueSets = concept.getValueSet();
+                                        if (referencedValueSets.size() > 1) {
+
+                                            for (CanonicalType reference : referencedValueSets) {
+                                                List<CanonicalType> newInclude = new ArrayList<>();
+                                                newInclude.add(reference);
+                                                newCompose.addInclude(new ValueSet.ConceptSetComponent().setValueSet(newInclude));
+                                            }
+                                        }
+                                    }
+                                }
+                                valueSet.setCompose(newCompose);
+                            }
+
+                            entry.setRequest(
+                                    new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent()
+//                                    .setUrl(entry.getResource().getId())
+                                            .setUrl(entry.getResource().getResourceType() + "/" + entry.getResource().getIdPart())
+                                            .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
+                            );
                         }
                     }
                     bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION);
