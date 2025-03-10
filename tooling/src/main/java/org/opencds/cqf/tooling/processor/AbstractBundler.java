@@ -459,7 +459,7 @@ public abstract class AbstractBundler {
         if (fhirUri != null && !fhirUri.isEmpty()) {
             String resourceWriteLocation = bundleDestPath + separator + libraryName + "-bundle." + encoding;
             //give resource the highest priority (0):
-            HttpClientUtils.sendToServer(fhirUri, (IBaseResource) bundle, encoding, fhirContext, resourceWriteLocation, HttpClientUtils.HttpRequestResourceType.BUNDLE);
+            HttpClientUtils.sendToServer(fhirUri, (IBaseResource) bundle, encoding, fhirContext, resourceWriteLocation);
         }
     }
 

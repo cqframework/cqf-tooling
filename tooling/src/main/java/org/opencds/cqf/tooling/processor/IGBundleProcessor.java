@@ -48,9 +48,9 @@ public class IGBundleProcessor {
                 fhirUri, encoding, verboseMessaging);
 
         //run collected post calls last:
-        if (HttpClientUtils.hasPutTasksInQueue()) {
+        if (HttpClientUtils.hasHttpRequestTasksInQueue()) {
             logger.info("\n\r[Persisting Files to " + fhirUri + "]\n\r");
-            HttpClientUtils.putTaskCollection();
+            HttpClientUtils.executeHttpRequestTaskCollection();
         }
 
         // run cleanup (maven runs all ci tests sequentially and static member variables could retain values from previous tests)

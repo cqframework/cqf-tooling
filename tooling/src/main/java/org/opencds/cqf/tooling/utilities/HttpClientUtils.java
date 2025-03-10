@@ -1,6 +1,9 @@
 package org.opencds.cqf.tooling.utilities;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.Header;
@@ -17,6 +20,8 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -28,7 +33,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
-
 
 /**
  * A utility class for collecting HTTP requests to a FHIR server and executing them collectively.
@@ -61,16 +65,75 @@ public class HttpClientUtils {
     private static List<IBaseResource> runningRequestTaskList = new CopyOnWriteArrayList<>();
     private static int processedRequestCounter = 0;
 
+    private static final CloseableHttpClient httpClient;
 
-    //used for PUT order by resource type:
+    static {
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+        connectionManager.setMaxTotal(50); // Total max connections
+        connectionManager.setDefaultMaxPerRoute(10); // Max connections per route
+
+        httpClient = HttpClients.custom()
+                .setConnectionManager(connectionManager)
+                .build();
+    }
+
+
+    /**
+     * used for sending requests ordered by resource type (for reference validation):
+     * Terminology First:
+     * CODESYSTEM and VALUESET define critical terminologies that other resources may reference. For example, a Condition might reference a code from a CODESYSTEM.
+     * Logic Resources Next:
+     * LIBRARY resources are often foundational for clinical decision support or quality measures, and they might be referenced by PLANDEFINITION or MEASURE resources.
+     * Bundles:
+     * Transaction bundles need to be processed early to ensure their atomic operations complete and establish any interdependent resources before other resources reference them.
+     * Dependent Resources:
+     * Resources like PATIENT, GROUP, and CONDITION often serve as references for subsequent resources like OBSERVATION or CAREPLAN.
+     */
+    private static final List<HttpRequestResourceType> resourceTypeOrder = new ArrayList<>(Arrays.asList(
+            HttpRequestResourceType.CODESYSTEM,
+            HttpRequestResourceType.VALUESET,
+            HttpRequestResourceType.LIBRARY,
+            HttpRequestResourceType.MEASURE,
+            HttpRequestResourceType.PLANDEFINITION,
+            HttpRequestResourceType.PATIENT,
+            HttpRequestResourceType.GROUP,
+            HttpRequestResourceType.CONDITION,
+            HttpRequestResourceType.OBSERVATION,
+            HttpRequestResourceType.PROCEDURE,
+            HttpRequestResourceType.CAREPLAN,
+            HttpRequestResourceType.GOAL,
+            HttpRequestResourceType.SERVICEREQUEST,
+            HttpRequestResourceType.MEDICATION,
+            HttpRequestResourceType.MEDICATIONREQUEST,
+            HttpRequestResourceType.DIAGNOSTICREPORT,
+            HttpRequestResourceType.IMAGINGSTUDY,
+            HttpRequestResourceType.OTHER,
+            HttpRequestResourceType.TRANSACTION_BUNDLE,
+            HttpRequestResourceType.BUNDLE
+    ));
+
     public enum HttpRequestResourceType {
-        BUNDLE("Bundles"),
-        LIBRARY_DEPS("Library Dependencies"),
-        VALUESETS("Value Sets"),
-        TESTS("Tests"),
-        GROUP("Patient Groups"),
-        OTHER("Everything Else");
+        CODESYSTEM("Code Systems"),
+        VALUESET("Value Sets"),
+        LIBRARY("Libraries"),
 
+        MEASURE("Measures"),
+        PLANDEFINITION("Plan Definitions"),
+        PATIENT("Patients"),
+        GROUP("Groups"),
+        CONDITION("Conditions"),
+        OBSERVATION("Observations"),
+        PROCEDURE("Procedures"),
+        CAREPLAN("Care Plans"),
+        GOAL("Goals"),
+        SERVICEREQUEST("Service Requests"),
+        MEDICATION("Medications"),
+        MEDICATIONREQUEST("Medication Requests"),
+        DIAGNOSTICREPORT("Diagnostic Reports"),
+        IMAGINGSTUDY("Imaging Studies"),
+        OTHER("Everything Else"),
+        TRANSACTION_BUNDLE("Transaction Bundles"),
+        BUNDLE("Bundles");
         private final String displayName;
 
         HttpRequestResourceType(String displayName) {
@@ -82,22 +145,11 @@ public class HttpClientUtils {
         }
     }
 
-    //Send HTTP requests in order: Bundle, Library-Deps, ValueSets, Tests, Group
-    private static final List<HttpRequestResourceType> resourceTypeOrder = new ArrayList<>(Arrays.asList(
-            HttpRequestResourceType.BUNDLE,
-            HttpRequestResourceType.LIBRARY_DEPS,
-            HttpRequestResourceType.VALUESETS,
-            HttpRequestResourceType.TESTS,
-            HttpRequestResourceType.GROUP,
-            HttpRequestResourceType.OTHER));
-
     private HttpClientUtils() {
     }
 
-    public static boolean hasPutTasksInQueue() {
-
+    public static boolean hasHttpRequestTasksInQueue() {
         return !mappedTasksByPriorityRank.isEmpty();
-
     }
 
     /**
@@ -108,11 +160,14 @@ public class HttpClientUtils {
      * @param encoding      The encoding type of the resource.
      * @param fhirContext   The FHIR context for the resource.
      * @param fileLocation  Optional fileLocation indicator for identifying resources by raw filename
-     * @param priorityRank  A key in our mappedTasksByPriorityRank using HttpRequestResourceType. Allows specification of
-     *                      the resource type for priority ordering at execute.
      * @throws IOException If an I/O error occurs during the request.
      */
-    public static void sendToServer(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation, HttpRequestResourceType priorityRank) throws IOException {
+    public static void sendToServer(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation) throws IOException {
+
+        // A key in our mappedTasksByPriorityRank using HttpRequestResourceType. Allows specification of
+        // the resource type for priority ordering at execute.
+        HttpRequestResourceType priorityRank = categorizeResource(resource);
+
         List<String> missingValues = new ArrayList<>();
         List<String> values = new ArrayList<>();
         validateAndAddValue(fhirServerUrl, FHIR_SERVER_URL, missingValues, values);
@@ -128,10 +183,6 @@ public class HttpClientUtils {
         }
 
         createHttpRequestTask(fhirServerUrl, resource, encoding, fhirContext, fileLocation, priorityRank);
-    }
-
-    public static void sendToServer(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation) throws IOException {
-        sendToServer(fhirServerUrl, resource, encoding, fhirContext, fileLocation, null);
     }
 
     /**
@@ -261,7 +312,7 @@ public class HttpClientUtils {
      * 4. Handles exceptions related to the request and response.
      * 5. Updates the progress and status of the put task.
      *
-     * @param request          The HTTP PUT request to be executed.
+     * @param request              The HTTP PUT request to be executed.
      * @param httpRequestComponent A data object containing additional information about the PUT request.
      * @return A callable task for executing the HTTP PUT request.
      */
@@ -271,7 +322,7 @@ public class HttpClientUtils {
                     Paths.get(httpRequestComponent.fileLocation).getFileName().toString()
                     :
                     httpRequestComponent.resource.getIdElement().getIdPart());
-            try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
+            try {
 
                 HttpResponse response = httpClient.execute(request);
 
@@ -290,8 +341,8 @@ public class HttpClientUtils {
                         String redirectLocationIdentifier = httpRequestComponent.redirectFhirServerUrl
                                 + "(redirected from " + httpRequestComponent.fhirServerUrl + ")";
                         //attempt to put at location specified in redirect response:
-                        try (CloseableHttpClient redirectHttpClient = HttpClientBuilder.create().build()) {
-                            HttpResponse redirectResponse = redirectHttpClient.execute(redirectedHttpRequest);
+                        try {
+                            HttpResponse redirectResponse = httpClient.execute(redirectedHttpRequest);
                             StatusLine redirectStatusLine = redirectResponse.getStatusLine();
                             int redirectStatusCode = redirectStatusLine.getStatusCode();
                             String redirectDiagnosticString = getDiagnosticString(EntityUtils.toString(redirectResponse.getEntity()));
@@ -351,14 +402,21 @@ public class HttpClientUtils {
      */
     private static String getDiagnosticString(String jsonString) {
         try {
-            // Get the "diagnostics" property
-            return JsonParser.parseString(jsonString)
+            JsonArray issues = JsonParser.parseString(jsonString)
                     .getAsJsonObject()
-                    .getAsJsonArray("issue")
-                    .get(0)
-                    .getAsJsonObject()
-                    .getAsJsonPrimitive("diagnostics")
-                    .getAsString();
+                    .getAsJsonArray("issue");
+
+            StringBuilder diagnostics = new StringBuilder();
+            for (JsonElement issueElement : issues) {
+                if (diagnostics.length() > 0) {
+                    diagnostics.append("\n");
+                }
+                JsonObject issueObject = issueElement.getAsJsonObject();
+                String diagnostic = issueObject.getAsJsonPrimitive("diagnostics").getAsString();
+                diagnostics.append(diagnostic);
+            }
+
+            return diagnostics.toString();
         } catch (Exception e) {
             return "";
         }
@@ -411,7 +469,7 @@ public class HttpClientUtils {
 
         String progressStr = "\rProgress: " + percentOutput + " (" + currentCounter + "/" + taskCount + ")" +
                 fileGroup +
-                " | Response pool: " + runningRequestTaskList.size() ;
+                " | Response pool: " + runningRequestTaskList.size();
 
 
         String repeatedString = " ".repeat(progressStr.length() * 2);
@@ -462,7 +520,8 @@ public class HttpClientUtils {
      * <p>
      * This method serves as the entry point for sending tasks and provides progress monitoring and result reporting.
      */
-    public static void putTaskCollection() {
+    public static void executeHttpRequestTaskCollection() {
+
         ExecutorService executorService = Executors.newFixedThreadPool(1);
 
         try {
@@ -501,8 +560,7 @@ public class HttpClientUtils {
                                     httpRequestComponent.resource,
                                     httpRequestComponent.encoding,
                                     httpRequestComponent.fhirContext,
-                                    httpRequestComponent.fileLocation,
-                                    httpRequestComponent.type);
+                                    httpRequestComponent.fileLocation);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
@@ -545,6 +603,7 @@ public class HttpClientUtils {
 
                 writeFailedHttpRequestAttemptsToLog(failedMessages);
             }
+
 
         } finally {
             cleanUp();
@@ -650,6 +709,68 @@ public class HttpClientUtils {
         runningRequestTaskList = new CopyOnWriteArrayList<>();
     }
 
+
+    public static HttpRequestResourceType categorizeResource(IBaseResource inputResource) {
+        if (inputResource == null) {
+            return HttpRequestResourceType.OTHER;
+        }
+
+        // Check resource type and assign category
+        if (inputResource instanceof org.hl7.fhir.dstu3.model.Bundle || inputResource instanceof org.hl7.fhir.r4.model.Bundle) {
+            org.hl7.fhir.instance.model.api.IBaseBundle bundle = (org.hl7.fhir.instance.model.api.IBaseBundle) inputResource;
+            if (bundle instanceof org.hl7.fhir.dstu3.model.Bundle &&
+                    ((org.hl7.fhir.dstu3.model.Bundle) bundle).getType() == org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION) {
+                return HttpRequestResourceType.TRANSACTION_BUNDLE;
+            } else if (bundle instanceof org.hl7.fhir.r4.model.Bundle &&
+                    ((org.hl7.fhir.r4.model.Bundle) bundle).getType() == org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION) {
+                return HttpRequestResourceType.TRANSACTION_BUNDLE;
+            } else {
+                return HttpRequestResourceType.BUNDLE;
+            }
+
+
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.CodeSystem || inputResource instanceof org.hl7.fhir.r4.model.CodeSystem) {
+            return HttpRequestResourceType.CODESYSTEM;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.ValueSet || inputResource instanceof org.hl7.fhir.r4.model.ValueSet) {
+            return HttpRequestResourceType.VALUESET;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.Library || inputResource instanceof org.hl7.fhir.r4.model.Library) {
+            return HttpRequestResourceType.LIBRARY;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.Measure || inputResource instanceof org.hl7.fhir.r4.model.Measure) {
+            return HttpRequestResourceType.MEASURE;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.PlanDefinition || inputResource instanceof org.hl7.fhir.r4.model.PlanDefinition) {
+            return HttpRequestResourceType.PLANDEFINITION;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.Patient || inputResource instanceof org.hl7.fhir.r4.model.Patient) {
+            return HttpRequestResourceType.PATIENT;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.Group || inputResource instanceof org.hl7.fhir.r4.model.Group) {
+            return HttpRequestResourceType.GROUP;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.Condition || inputResource instanceof org.hl7.fhir.r4.model.Condition) {
+            return HttpRequestResourceType.CONDITION;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.Observation || inputResource instanceof org.hl7.fhir.r4.model.Observation) {
+            return HttpRequestResourceType.OBSERVATION;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.Procedure || inputResource instanceof org.hl7.fhir.r4.model.Procedure) {
+            return HttpRequestResourceType.PROCEDURE;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.CarePlan || inputResource instanceof org.hl7.fhir.r4.model.CarePlan) {
+            return HttpRequestResourceType.CAREPLAN;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.Goal || inputResource instanceof org.hl7.fhir.r4.model.Goal) {
+            return HttpRequestResourceType.GOAL;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.ProcedureRequest ||
+                inputResource instanceof org.hl7.fhir.r4.model.ServiceRequest) {
+            return HttpRequestResourceType.SERVICEREQUEST;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.ReferralRequest) {
+            return HttpRequestResourceType.SERVICEREQUEST;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.Medication || inputResource instanceof org.hl7.fhir.r4.model.Medication) {
+            return HttpRequestResourceType.MEDICATION;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.MedicationRequest || inputResource instanceof org.hl7.fhir.r4.model.MedicationRequest) {
+            return HttpRequestResourceType.MEDICATIONREQUEST;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.DiagnosticReport || inputResource instanceof org.hl7.fhir.r4.model.DiagnosticReport) {
+            return HttpRequestResourceType.DIAGNOSTICREPORT;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.ImagingStudy || inputResource instanceof org.hl7.fhir.r4.model.ImagingStudy) {
+            return HttpRequestResourceType.IMAGINGSTUDY;
+        }
+        return HttpRequestResourceType.OTHER;
+    }
+
+
     public static String get(String path) throws IOException {
         try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
             HttpGet get = new HttpGet(path);
@@ -693,6 +814,7 @@ public class HttpClientUtils {
             this.type = type;
         }
     }
+
 
     public static ResponseHandler<String> getDefaultResponseHandler() {
         return response -> {

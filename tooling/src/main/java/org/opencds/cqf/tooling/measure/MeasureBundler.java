@@ -74,10 +74,9 @@ public class MeasureBundler extends AbstractBundler {
                         continue;
                     }
 
-                    HttpClientUtils.HttpRequestResourceType type = getHttpPOSTResourceType(file);
                     try {
                         IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext, true);
-                        HttpClientUtils.sendToServer(fhirUri, resource, encoding, fhirContext, file.getAbsolutePath(), type);
+                        HttpClientUtils.sendToServer(fhirUri, resource, encoding, fhirContext, file.getAbsolutePath());
                         persistedResources.add(file.getAbsolutePath());
                     } catch (Exception e) {
                         //resource is likely not IBaseResource
@@ -88,20 +87,4 @@ public class MeasureBundler extends AbstractBundler {
         }
         return persistedResources.size();
     }
-
-    private static HttpClientUtils.HttpRequestResourceType getHttpPOSTResourceType(File file) {
-        HttpClientUtils.HttpRequestResourceType type = HttpClientUtils.HttpRequestResourceType.OTHER;
-
-        if (file.getName().toLowerCase().startsWith(LIBRARY_DEPS)) {
-            type = HttpClientUtils.HttpRequestResourceType.LIBRARY_DEPS;
-        } else if (file.getName().toLowerCase().startsWith(VALUESETS)) {
-            type = HttpClientUtils.HttpRequestResourceType.VALUESETS;
-        } else if (file.getName().toLowerCase().startsWith(TESTS)) {
-            type = HttpClientUtils.HttpRequestResourceType.TESTS;
-        } else if (file.getName().toLowerCase().startsWith(GROUP)) {
-            type = HttpClientUtils.HttpRequestResourceType.GROUP;
-        }
-        return type;
-    }
-
 }
