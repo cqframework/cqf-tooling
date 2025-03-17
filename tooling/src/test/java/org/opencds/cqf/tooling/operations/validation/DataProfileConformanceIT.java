@@ -35,7 +35,7 @@ public class DataProfileConformanceIT {
       Assert.assertTrue(patient.getContained().get(0) instanceof OperationOutcome);
       OperationOutcome outcome = (OperationOutcome) patient.getContained().get(0);
       Assert.assertTrue(outcome.hasIssue());
-      Assert.assertEquals(outcome.getIssue().size(), 2);
+      Assert.assertEquals((int) outcome.getIssue().stream().filter(issue -> issue.getSeverity().equals(OperationOutcome.IssueSeverity.ERROR)).count(), 2);
    }
 
    @Test

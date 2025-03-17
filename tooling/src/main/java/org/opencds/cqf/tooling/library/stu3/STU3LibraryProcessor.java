@@ -1,14 +1,7 @@
 package org.opencds.cqf.tooling.library.stu3;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import ca.uhn.fhir.context.FhirContext;
 import com.google.common.base.Strings;
-
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_50;
 import org.hl7.fhir.convertors.conv30_50.VersionConvertor_30_50;
 import org.hl7.fhir.dstu3.model.Library;
@@ -19,7 +12,9 @@ import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 public class STU3LibraryProcessor extends LibraryProcessor {
     private String libraryPath;
@@ -32,7 +27,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
     protected List<String> refreshLibraries(String libraryPath, Boolean shouldApplySoftwareSystemStamp) {
         return refreshLibraries(libraryPath, null, shouldApplySoftwareSystemStamp);
     }
-    
+
     /*
     Refresh all library resources in the given libraryPath and write to the given outputDirectory
      */
@@ -102,7 +97,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
                 if (resourceReference.contains("Library/")) {
                     resourceReference = resourceReference.substring(resourceReference.lastIndexOf("Library/"));
                 }
-      
+
                 if (resourceReference.contains("|")) {
                     if (this.versioned) {
                         String curatedResourceReference = resourceReference.replace("|", "-");
@@ -131,7 +126,7 @@ public class STU3LibraryProcessor extends LibraryProcessor {
     }
 
     @Override
-    public List<String> refreshLibraryContent(RefreshLibraryParameters params) {
+    public List<String> refreshLibraryContent(RefreshLibraryParameters params) throws IOException {
         if (params.parentContext != null) {
             initialize(params.parentContext);
         }

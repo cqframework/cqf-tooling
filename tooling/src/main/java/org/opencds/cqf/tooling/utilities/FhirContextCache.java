@@ -1,11 +1,11 @@
 package org.opencds.cqf.tooling.utilities;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 
 public class FhirContextCache {
 
@@ -30,13 +30,13 @@ public class FhirContextCache {
 
     /**
      * Fetches a FhirContext from a cache. If a context for a given version doesn't exist, one is created.
-     * 
+     *
      * @param fhirVersion The FHIR version to get a context for
      * @return A FhirContext that corresponds to the fhirVersion
      */
     public static synchronized FhirContext getContext(FhirVersionEnum fhirVersion) {
         Objects.requireNonNull(fhirVersion, "fhirVersion can not be null");
-        contextCache.computeIfAbsent(fhirVersion, k -> fhirVersion.newContext());
+        contextCache.computeIfAbsent(fhirVersion, k -> FhirContext.forVersion(fhirVersion));
         return contextCache.get(fhirVersion);
     }
 }

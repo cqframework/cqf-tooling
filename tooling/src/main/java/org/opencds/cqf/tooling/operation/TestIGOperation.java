@@ -14,13 +14,12 @@ public class TestIGOperation extends Operation {
         TestIGParameters params = null;
         try {
             params = new TestIGArgumentsProcessor().parseAndConvert(args);
+            new IGTestProcessor().testIg(params);
         }
         catch (Exception e) {
             System.err.println(e.getMessage());
             System.exit(1);
         }
-
-        new IGTestProcessor().testIg(params);
     }
 
     public static void main(String[] args) {

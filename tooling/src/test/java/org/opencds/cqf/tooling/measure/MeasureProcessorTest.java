@@ -1,14 +1,14 @@
 package org.opencds.cqf.tooling.measure;
 
-import java.io.File;
-
+import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.parameter.RefreshMeasureParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.testng.annotations.BeforeMethod;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.File;
+import java.io.IOException;
 
 public abstract class MeasureProcessorTest extends RefreshTest {
 
@@ -33,12 +33,12 @@ public abstract class MeasureProcessorTest extends RefreshTest {
     }
 
     protected void runRefresh(String targetDirectory, String measureResourcePath, String cqlResourcePath,
-            boolean versioned) {
+            boolean versioned) throws IOException {
         runRefresh(targetDirectory, measureResourcePath, null, cqlResourcePath, versioned);
     }
 
     protected void runRefresh(String targetDirectory, String measurePath, String measureOutputDirectory,
-            String cqlResourcePath, boolean versioned) {
+            String cqlResourcePath, boolean versioned) throws IOException {
         RefreshMeasureParameters params = new RefreshMeasureParameters();
         params.encoding = Encoding.JSON;
         params.fhirContext = getFhirContext();
