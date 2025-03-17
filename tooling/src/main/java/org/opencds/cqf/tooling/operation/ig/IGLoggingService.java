@@ -1,9 +1,9 @@
 package org.opencds.cqf.tooling.operation.ig;
 
-import org.hl7.fhir.r5.context.IWorkerContext;
+import org.hl7.fhir.r5.context.ILoggingService;
 import org.slf4j.Logger;
 
-public class IGLoggingService implements IWorkerContext.ILoggingService {
+public class IGLoggingService implements ILoggingService {
 
    private final Logger logger;
 
