@@ -838,13 +838,20 @@ public class ResourceUtils {
    }
 
    public static void outputResourceByName(IBaseResource resource, String encoding, FhirContext context, String outputPath, String name) {
-      try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + name + "." + encoding)) {
-         writer.write(
-                 encoding.equals("json")
-                         ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-                         : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
-         );
-         writer.flush();
+      try {
+         File directory = new File(outputPath);
+         if (!directory.exists()) {
+            directory.mkdirs(); // Ensure the directory exists
+         }
+
+         try (FileOutputStream writer = new FileOutputStream(outputPath + "/" + name + "." + encoding)) {
+            writer.write(
+                    encoding.equals("json")
+                            ? context.newJsonParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+                            : context.newXmlParser().setPrettyPrint(true).encodeResourceToString(resource).getBytes()
+            );
+            writer.flush();
+         }
       } catch (IOException e) {
          e.printStackTrace();
          throw new RuntimeException(e.getMessage());
