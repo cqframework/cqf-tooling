@@ -28,7 +28,7 @@ public class CodeSystemLookupDictionary {
             case "2.16.840.1.113883.5.45": return "http://terminology.hl7.org/CodeSystem/v3-EntityNameUse";
             case "2.16.840.1.113883.6.14": return "http://terminology.hl7.org/CodeSystem/HCPCS";
             case "2.16.840.1.113883.6.259": return "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html";
-            case "2.16.840.1.113883.6.285": return "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets";
+            case "2.16.840.1.113883.6.285": return "http://www.nlm.nih.gov/research/umls/hcpcs";
             case "2.16.840.1.113883.6.3": return "http://terminology.hl7.org/CodeSystem/icd10";
             case "2.16.840.1.113883.6.4": return "http://www.cms.gov/Medicare/Coding/ICD10";
             case "2.16.840.1.113883.6.90": return "http://hl7.org/fhir/sid/icd-10-cm";
@@ -61,9 +61,9 @@ public class CodeSystemLookupDictionary {
             case "2.16.840.1.113883.6.301.3": return "http://terminology.hl7.org/CodeSystem/v2-0456";
             case "2.16.840.1.113883.6.50": return "http://terminology.hl7.org/CodeSystem/POS";
             case "2.16.840.1.113883.6.238": return "urn:oid:2.16.840.1.113883.6.238";
-            case "2.16.840.1.113883.6.13": return "http://terminology.hl7.org/CodeSystem/CD2";
+            case "2.16.840.1.113883.6.13": return "http://www.ada.org/cdt";
             case "2.16.840.1.113883.5.79": return "http://terminology.hl7.org/CodeSystem/v3-mediatypes";
-            case "2.16.840.1.113883.3.221.5": return "urn:oid:2.16.840.1.113883.3.221.5";
+            case "2.16.840.1.113883.3.221.5": return "https://nahdo.org/sopt";
             case "1.3.6.1.4.1.12009.10.3.1": return "urn:oid:1.3.6.1.4.1.12009.10.3.1";
             case "2.16.840.1.113883.6.8": return "http://unitsofmeasure.org";
             case "2.16.840.1.113883.6.86": return "http://terminology.hl7.org/CodeSystem/umls";
@@ -91,7 +91,7 @@ public class CodeSystemLookupDictionary {
             case "EntityNameUse": return "http://terminology.hl7.org/CodeSystem/v3-EntityNameUse";
             case "HCPCS": return "http://terminology.hl7.org/CodeSystem/HCPCS";
             case "HCPCS Level I: CPT": return "http://terminology.hl7.org/CodeSystem/HCPCS";
-            case "HCPCS Level II": return "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets";
+            case "HCPCS Level II": return "http://www.nlm.nih.gov/research/umls/hcpcs";
             case "HSLOC": return "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html";
             case "ICD10": return "http://terminology.hl7.org/CodeSystem/icd10";
             case "ICD10CM": return "http://hl7.org/fhir/sid/icd-10-cm";
@@ -128,9 +128,9 @@ public class CodeSystemLookupDictionary {
             case "PYXIS": return "http://content.alphora.com/fhir/dqm/CodeSystem/Pyxis";
             case "CDCREC": return "urn:oid:2.16.840.1.113883.6.238";
             case "Modifier": return "http://www.ama-assn.org/go/cpt";
-            case "CDT": return "http://terminology.hl7.org/CodeSystem/CD2";
+            case "CDT": return "http://www.ada.org/cdt";
             case "mediaType": return "http://terminology.hl7.org/CodeSystem/v3-mediatypes";
-            case "SOP":  return "urn:oid:2.16.840.1.113883.3.221.5";
+            case "SOP":  return "https://nahdo.org/sopt";
             case "UCUM": return "http://unitsofmeasure.org";
             case "UMLS": return "http://terminology.hl7.org/CodeSystem/umls";
             default: throw new IllegalArgumentException("Unknown CodeSystem name: " + name);
