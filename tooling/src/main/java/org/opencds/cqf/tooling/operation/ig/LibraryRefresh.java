@@ -35,8 +35,9 @@ public class LibraryRefresh extends Refresh {
 
    public LibraryRefresh(IGInfo igInfo) {
       super(igInfo);
-       this.npmPackageManager = new NpmPackageManager(igInfo.getIgResource(), igInfo.getFhirContext().getVersion().getVersion().getFhirVersionString() );
-       this.libraryPackages = new ArrayList<>();
+
+      this.npmPackageManager = new NpmPackageManager(igInfo.getIgResource(), igInfo.getFhirContext().getVersion().getVersion().getFhirVersionString() );
+      this.libraryPackages = new ArrayList<>();
       LibraryLoader libraryLoader = new LibraryLoader(igInfo.getFhirContext().getVersion().getVersion().getFhirVersionString());
       UcumEssenceService ucumService;
       try {
@@ -46,8 +47,13 @@ public class LibraryRefresh extends Refresh {
       }
       List<NpmPackage> packageList = cleanPackageList(this.npmPackageManager.getNpmList());
       this.cqlProcessor = new CqlProcessor(packageList,
-              Collections.singletonList(igInfo.getCqlBinaryPath()), libraryLoader, new IGLoggingService(logger), ucumService,
-              igInfo.getIgResource(), getFhirContext().getVersion().toString(),true);
+              Collections.singletonList(igInfo.getCqlBinaryPath()),
+              libraryLoader,
+              new IGLoggingService(logger),
+              ucumService,
+              igInfo.getIgResource(),
+              igInfo.getFhirContext().getVersion().getVersion().getFhirVersionString(),
+              true);
    }
    @Override
    public List<IBaseResource> refresh() {
