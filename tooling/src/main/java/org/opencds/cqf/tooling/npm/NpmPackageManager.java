@@ -180,20 +180,42 @@ public class NpmPackageManager {
                 logger.warn("The correct canonical URL for this dependency is " + cu);
             }
         }
+        addDependencies(npmList, pi);
+    }
 
-        if (!pi.dependencies().isEmpty()) {
-            for (String dependency : pi.dependencies()) {
-                String[] idAndVersion = dependency.split("#");
-                NpmPackage pid = pcm.loadPackage(idAndVersion[0], idAndVersion[1]);
-                if (pid == null) {
-                    logger.warn("Dependency " + idAndVersion[0] + "not found by FilesystemPackageCacheManager");
+    private void addDependencies(List<NpmPackage> npmList, NpmPackage pi) throws IOException {
+        if (pi.dependencies().isEmpty()) {
+            return;
+        }
+
+        for (String dependency : pi.dependencies()) {
+            String[] idAndVersion = dependency.split("#");
+            String depId = idAndVersion[0];
+            String depVersion = idAndVersion[1];
+
+            if (!isDependencyPresent(npmList, depId, depVersion)) {
+                logger.info("Loading (sub) IG Dependency {}#{}", depId, depVersion);
+                NpmPackage pid = loadPackageSafely(depId, depVersion);
+
+                if (pid != null) {
+                    npmList.add(pid);
+                    addDependencies(npmList, pid);
                 }
-                npmList.add(pid);
-
-                logger.debug(
-                        "Load " + name + " (" + canonical + ") from " + packageId + "#" + igver);
-
             }
+        }
+    }
+
+
+    private boolean isDependencyPresent(List<NpmPackage> npmList, String id, String version) {
+        return npmList.stream().anyMatch(pkg -> pkg.id().equals(id) && pkg.version().equals(version));
+    }
+
+    private NpmPackage loadPackageSafely(String id, String version) {
+        try {
+            return pcm.loadPackage(id, version);
+        } catch (IOException e) {
+            logger.warn("Dependency {}#{} not found by FilesystemPackageCacheManager", id, version);
+            return null;
         }
     }
 
