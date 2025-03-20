@@ -169,7 +169,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
             }
             cqlProcessor = new CqlProcessor(new CopyOnWriteArrayList<>(packageManager.getNpmList()),
                     new CopyOnWriteArrayList<>(binaryPaths), reader, this, ucumService,
-                    packageId, canonicalBase, verboseMessaging);
+                    sourceIg, getFhirVersion(), verboseMessaging);
         }
 
         return cqlProcessor;

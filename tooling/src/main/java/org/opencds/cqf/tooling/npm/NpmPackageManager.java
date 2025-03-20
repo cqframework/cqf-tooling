@@ -180,6 +180,57 @@ public class NpmPackageManager {
                 logger.warn("The correct canonical URL for this dependency is " + cu);
             }
         }
+        addDependencies(npmList, pi);
+    }
+
+    private void addDependencies(List<NpmPackage> npmList, NpmPackage pi) throws IOException {
+        if (pi.dependencies().isEmpty()) {
+            return;
+        }
+
+        for (String dependency : pi.dependencies()) {
+            String[] idAndVersion = dependency.split("#");
+            String depId = idAndVersion[0];
+            String depVersion = idAndVersion[1];
+
+            if (idAndVersion[0] != null && idAndVersion[1] != null && shouldAddDependency(npmList, depId, depVersion)) {
+                logger.info("Loading (sub) IG Dependency {}#{}", depId, depVersion);
+                NpmPackage pid = loadPackageSafely(depId, depVersion);
+
+                if (pid != null) {
+                    npmList.add(pid);
+                    addDependencies(npmList, pid);
+                }
+            }
+        }
+    }
+
+    private static boolean matchAnyPattern(String text, String[] patterns) {
+        for (String pattern : patterns) {
+           if (text.matches(pattern))
+               return true;
+        }
+        return false;
+    }
+
+    private boolean shouldAddDependency(List<NpmPackage> npmList, String id, String version) {
+        String[] doNotAddPatterns = {
+                "^hl7\\.terminology\\..*$",
+                "^hl7\\.fhir.*\\.core$",
+                "^hl7\\.fhir.*\\.examples$"
+        };
+        boolean doNotAddList = matchAnyPattern(id, doNotAddPatterns);
+        boolean alreadyAddedToList = npmList.stream().anyMatch(pkg -> pkg.id().equals(id) && pkg.version().equals(version));
+        return ! (alreadyAddedToList || doNotAddList);
+    }
+
+    private NpmPackage loadPackageSafely(String id, String version) {
+        try {
+            return pcm.loadPackage(id, version);
+        } catch (IOException e) {
+            logger.warn("Dependency {}#{} not found by FilesystemPackageCacheManager", id, version);
+            return null;
+        }
     }
 
     private String determineCanonical(String url, String path) throws FHIRException {
