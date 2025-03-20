@@ -193,7 +193,7 @@ public class NpmPackageManager {
             String depId = idAndVersion[0];
             String depVersion = idAndVersion[1];
 
-            if (!isDependencyPresent(npmList, depId, depVersion)) {
+            if (idAndVersion[0] != null && idAndVersion[1] != null && shouldAddDependency(npmList, depId, depVersion)) {
                 logger.info("Loading (sub) IG Dependency {}#{}", depId, depVersion);
                 NpmPackage pid = loadPackageSafely(depId, depVersion);
 
@@ -205,14 +205,31 @@ public class NpmPackageManager {
         }
     }
 
+    private static boolean matchAnyPattern(String text, String[] patterns) {
+        for (String pattern : patterns) {
+           if (text.matches(pattern))
+               return true;
+        }
+        return false;
+    }
 
-    private boolean isDependencyPresent(List<NpmPackage> npmList, String id, String version) {
-        return npmList.stream().anyMatch(pkg -> pkg.id().equals(id) && pkg.version().equals(version));
+    private boolean shouldAddDependency(List<NpmPackage> npmList, String id, String version) {
+        String[] doNotAddPatterns = {
+                "^hl7\\.terminology\\..*$",
+                "^hl7\\.fhir.*\\.core$",
+                "^hl7\\.fhir.*\\.examples$"
+        };
+        boolean doNotAddList = matchAnyPattern(id, doNotAddPatterns);
+        boolean alreadyAddedToList = npmList.stream().anyMatch(pkg -> pkg.id().equals(id) && pkg.version().equals(version));
+        return ! (alreadyAddedToList || doNotAddList);
     }
 
     private NpmPackage loadPackageSafely(String id, String version) {
         try {
-            return pcm.loadPackage(id, version);
+            //if (!pcm.packageExists(id, version)) {
+                return pcm.loadPackage(id, version);
+            //}
+            //return null;
         } catch (IOException e) {
             logger.warn("Dependency {}#{} not found by FilesystemPackageCacheManager", id, version);
             return null;
