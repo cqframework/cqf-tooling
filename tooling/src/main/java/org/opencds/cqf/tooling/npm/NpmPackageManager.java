@@ -226,10 +226,7 @@ public class NpmPackageManager {
 
     private NpmPackage loadPackageSafely(String id, String version) {
         try {
-            //if (!pcm.packageExists(id, version)) {
-                return pcm.loadPackage(id, version);
-            //}
-            //return null;
+            return pcm.loadPackage(id, version);
         } catch (IOException e) {
             logger.warn("Dependency {}#{} not found by FilesystemPackageCacheManager", id, version);
             return null;
