@@ -1,17 +1,11 @@
 package org.opencds.cqf.tooling.processor;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.UUID;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
-import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
-
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -21,13 +15,15 @@ import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.vmrToFhir.VmrToFhirTransformer;
 import org.opencds.vmr.v1_0.schema.CDSOutput;
 import org.opencds.vmr.v1_0.schema.EvaluatedPerson;
-import org.opencds.vmr.v1_0.schema.VMR;
 import org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements;
 import org.opencds.vmr.v1_0.schema.EvaluatedPerson.Demographics;
+import org.opencds.vmr.v1_0.schema.VMR;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.util.BundleBuilder;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Provides Transformation processing from vMR to Fhir.
@@ -41,7 +37,7 @@ public class VmrToFhirProcessor {
      * @param params the {@link VmrToFhirParameters VmrToFhirParameters}
      */
     public static void transform(VmrToFhirParameters params) {
-        FhirContext context = FhirVersionEnum.forVersionString(params.fhirVersion).newContext();
+        FhirContext context = FhirContext.forVersion(FhirVersionEnum.valueOf(params.fhirVersion));
         File file = new File(params.vmrDataPath);
         CDSOutput cdsOutput = unmarshallCdsOutput(file);
         VMR vmrOutput = cdsOutput.getVmrOutput();

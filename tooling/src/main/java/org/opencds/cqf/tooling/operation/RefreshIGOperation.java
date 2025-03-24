@@ -7,6 +7,8 @@ import org.opencds.cqf.tooling.processor.argument.RefreshIGArgumentProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 public class RefreshIGOperation extends Operation {
     private final static Logger logger = LoggerFactory.getLogger(RefreshIGOperation.class);
     public RefreshIGOperation() {
@@ -32,7 +34,11 @@ public class RefreshIGOperation extends Operation {
             logger.info("Re-run with -x to for expanded reporting of errors, warnings, and informational messages.");
         }
 
-        new IGProcessor().publishIG(params);
+        try {
+            new IGProcessor().publishIG(params);
+        } catch (IOException e) {
+            logger.error("Error refreshing IG: ", e);
+        }
     }
 }
 

@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -160,7 +161,7 @@ public class IGTestProcessor extends BaseProcessor {
     }
 
     @SuppressWarnings("serial")
-    public void testIg(TestIGParameters params) {
+    public void testIg(TestIGParameters params) throws IOException {
         fhirContext = params.fhirContext;
 
         if (params.ini != null) {
