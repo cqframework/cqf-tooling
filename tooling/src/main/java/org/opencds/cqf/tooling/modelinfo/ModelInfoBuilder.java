@@ -31,8 +31,12 @@ public class ModelInfoBuilder {
         .sorted(Comparator.comparing(ClassInfo::getName))
         .collect(Collectors.toList());
 
-        ModelInfo mi = new ModelInfo().withRequiredModelInfo(new ModelSpecifier().withName("System").withVersion("1.0.0"))
-            .withTypeInfo(modelTypeInfos)
+        ModelInfo mi = new ModelInfo()
+            .withRequiredModelInfo(new ModelSpecifier().withName("System").withVersion("1.0.0"))
+            .withTypeInfo(modelTypeInfos.stream().filter(
+                    x -> x instanceof ClassInfo && ((ClassInfo)x).getNamespace() != null
+                            && ((ClassInfo)x).getNamespace().equals(this.settings.name)
+            ).collect(Collectors.toList()))
             .withConversionInfo(this.settings.conversionInfos)
             .withName(this.settings.name)
             .withVersion(this.settings.version)
