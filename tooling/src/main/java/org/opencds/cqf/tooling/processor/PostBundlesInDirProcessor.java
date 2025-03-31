@@ -63,15 +63,15 @@ public class PostBundlesInDirProcessor {
         List<Map.Entry<String, IBaseResource>> resources = BundleUtils.getBundlesInDir(params.directoryPath, fhirContext);
         resources.forEach(entry -> postBundleToFhirUri(fhirUri, encoding, fhirContext, entry.getValue()));
 
-        if (HttpClientUtils.hasPostTasksInQueue()){
-            HttpClientUtils.postTaskCollection();
+        if (HttpClientUtils.hasHttpRequestTasksInQueue()){
+            HttpClientUtils.executeHttpRequestTaskCollection();
         }
     }
 
     private static void postBundleToFhirUri(String fhirUri, Encoding encoding, FhirContext fhirContext, IBaseResource bundle) {
-        if (fhirUri != null && !fhirUri.equals("")) {
+        if (fhirUri != null && !fhirUri.isEmpty()) {
             try {
-                HttpClientUtils.post(fhirUri, bundle, encoding, fhirContext, null);
+                HttpClientUtils.sendToServer(fhirUri, bundle, encoding, fhirContext, null);
                 logger.info("Resource successfully posted to FHIR server ({}): {}", fhirUri, bundle.getIdElement().getIdPart());
             } catch (Exception e) {
                 logger.error("Error occurred for element {}: {}",bundle.getIdElement().getIdPart(), e.getMessage());

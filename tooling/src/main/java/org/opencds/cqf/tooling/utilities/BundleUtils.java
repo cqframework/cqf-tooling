@@ -287,4 +287,77 @@ public class BundleUtils {
         return false;
 
     }
+
+    public static List<String> getResourceIdsFromTransactionBundle(IBaseResource inputResource) {
+        List<String> returnedIDs = new ArrayList<>();
+
+        if (inputResource instanceof org.hl7.fhir.dstu3.model.Bundle) {
+            org.hl7.fhir.dstu3.model.Bundle bundle = (org.hl7.fhir.dstu3.model.Bundle) inputResource;
+            if (bundle.getType() == org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION) {
+                for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+                    if (entry.getResource() != null && entry.getResource().getIdElement() != null) {
+                        if (entry.getResource() != null) {
+                            String resourceId = entry.getResource().getIdElement().getIdPart();
+                            if (resourceId != null) {
+                                returnedIDs.add(resourceId);
+                            } else {
+                                // Log a message if ID is missing (optional)
+                                System.out.println("Resource in transaction bundle has no ID (likely a POST operation).");
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (inputResource instanceof org.hl7.fhir.r4.model.Bundle) {
+            org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle) inputResource;
+            if (bundle.getType() == org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION) {
+                for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+                    if (entry.getResource() != null && entry.getResource().getIdElement() != null) {
+                        if (entry.getResource() != null) {
+                            String resourceId = entry.getResource().getIdElement().getIdPart();
+                            if (resourceId != null) {
+                                returnedIDs.add(resourceId);
+                            } else {
+                                // Log a message if ID is missing (optional)
+                                System.out.println("Resource in transaction bundle has no ID (likely a POST operation).");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return returnedIDs;
+    }
+
+    public static List<IBaseResource> getResourcesFromTransactionBundle(IBaseResource inputResource) {
+        List<IBaseResource> returnedResources = new ArrayList<>();
+
+        if (inputResource instanceof org.hl7.fhir.dstu3.model.Bundle) {
+            org.hl7.fhir.dstu3.model.Bundle bundle = (org.hl7.fhir.dstu3.model.Bundle) inputResource;
+            if (bundle.getType() == org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION) {
+                for (org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+                    if (entry.getResource() != null && entry.getResource().getIdElement() != null) {
+                        if (entry.getResource() != null) {
+                            returnedResources.add(entry.getResource());
+                        }
+                    }
+                }
+            }
+        } else if (inputResource instanceof org.hl7.fhir.r4.model.Bundle) {
+            org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle) inputResource;
+            if (bundle.getType() == org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION) {
+                for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+                    if (entry.getResource() != null && entry.getResource().getIdElement() != null) {
+                        if (entry.getResource() != null) {
+                            returnedResources.add(entry.getResource());
+                        }
+                    }
+                }
+            }
+        }
+
+        return returnedResources;
+    }
+
 }
