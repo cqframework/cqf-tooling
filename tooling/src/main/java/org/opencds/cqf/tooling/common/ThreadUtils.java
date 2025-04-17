@@ -16,6 +16,8 @@ public class ThreadUtils {
 
     private static List<ExecutorService> runningExecutors = new ArrayList<>();
 
+    private static final int threadPoolCount = Runtime.getRuntime().availableProcessors() * 2;
+
     /**
      * Executes a list of tasks concurrently using a thread pool.
      * <p>
@@ -62,11 +64,15 @@ public class ThreadUtils {
     }
 
     public static void executeTasks(List<Callable<Void>> tasks) {
-        executeTasks(tasks, Executors.newCachedThreadPool());
+        ExecutorService executor = Executors.newFixedThreadPool(threadPoolCount);
+
+        executeTasks(tasks, executor);
     }
 
     public static void executeTasks(Queue<Callable<Void>> callables) {
-        executeTasks(new ArrayList<>(callables), Executors.newCachedThreadPool());
+        ExecutorService executor = Executors.newFixedThreadPool(threadPoolCount);
+
+        executeTasks(new ArrayList<>(callables), executor);
     }
 
     public static void shutdownRunningExecutors() {
@@ -77,7 +83,7 @@ public class ThreadUtils {
             }
             runningExecutors = new ArrayList<>();
         }catch (Exception e){
-            //fail silently, shutting down anyways
+            //fail silently, shutting down anyway
         }
     }
 }
