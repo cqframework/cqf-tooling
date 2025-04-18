@@ -142,7 +142,7 @@ public abstract class AbstractBundler {
             final Map<String, String> libraryPathMap = new ConcurrentHashMap<>(IOUtils.getLibraryPathMap(fhirContext));
 
             if (resourcesMap.isEmpty()) {
-                logger.info("[INFO] No " + getResourceBundlerType() + "s found. Continuing...");
+                logger.info("\n\r" + "[INFO] No " + getResourceBundlerType() + "s found. Continuing...\n\r");
                 return;
             }
 
@@ -169,7 +169,7 @@ public abstract class AbstractBundler {
                 tasks.add(() -> {
                     //check if resourceSourcePath has been processed before:
                     if (processedResources.contains(resourceSourcePath)) {
-                        logger.info(getResourceBundlerType() + " processed already: " + resourceSourcePath);
+                        logger.info("\n\r" + getResourceBundlerType() + " processed already: " + resourceSourcePath);
                         return null;
                     }
                     String resourceName = FilenameUtils.getBaseName(resourceSourcePath).replace(getResourcePrefix(), "");
@@ -296,7 +296,7 @@ public abstract class AbstractBundler {
         //Output final report:
         String summaryOutput = generateBundleProcessSummary(refreshedLibraryNames, fhirContext, fhirUri, verboseMessaging,
                 persistedFileReport, bundledResources, failedExceptionMessages, cqlTranslatorErrorMessages).toString();
-        logger.info(summaryOutput);
+        logger.info("\n\r" + summaryOutput);
     }
 
     /**
@@ -325,7 +325,7 @@ public abstract class AbstractBundler {
         final int persistCount = persistedFileReport.size();
         if (persistCount > 0) {
             String fileDisplay = " File(s): ";
-            summaryMessage.append(NEWLINE).append(persistCount).append(" ").append(getResourceBundlerType()).append("(s) have POST tasks in the queue for ").append(fhirUri).append(": ");
+            summaryMessage.append(NEWLINE).append(persistCount).append(" ").append(getResourceBundlerType()).append("(s) have PUT tasks in the queue for ").append(fhirUri).append(": ");
             int totalQueueCount = 0;
             List<String> persistMessages = new ArrayList<>();
             for (String library : persistedFileReport.keySet()) {
@@ -458,7 +458,8 @@ public abstract class AbstractBundler {
 
         if (fhirUri != null && !fhirUri.isEmpty()) {
             String resourceWriteLocation = bundleDestPath + separator + libraryName + "-bundle." + encoding;
-            HttpClientUtils.post(fhirUri, (IBaseResource) bundle, encoding, fhirContext, resourceWriteLocation, true);
+            //give resource the highest priority (0):
+            HttpClientUtils.sendToServer(fhirUri, (IBaseResource) bundle, encoding, fhirContext, resourceWriteLocation);
         }
     }
 
@@ -476,7 +477,7 @@ public abstract class AbstractBundler {
         IOUtils.copyFile(librarySourcePath, FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(librarySourcePath)));
 
         String cqlFileName = IOUtils.formatFileName(FilenameUtils.getBaseName(librarySourcePath), IOUtils.Encoding.CQL, fhirContext);
-        if (cqlFileName.toLowerCase().startsWith("library-")) {
+        if (cqlFileName.toLowerCase().startsWith("library-") && !cqlFileName.toLowerCase().startsWith("library-deps-")) {
             cqlFileName = cqlFileName.substring(8);
         }
         String cqlLibrarySourcePath = IOUtils.getCqlLibrarySourcePath(primaryLibraryName, cqlFileName, binaryPaths);
