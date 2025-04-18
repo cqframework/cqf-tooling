@@ -15,28 +15,31 @@ import org.opencds.cqf.tooling.processor.IGProcessor;
 import org.opencds.cqf.tooling.utilities.*;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MeasureProcessor extends BaseProcessor {
-    public static String ResourcePrefix = "measure-";
+    public static final String RESOURCE_PREFIX = "measure-";
     protected List<Object> identifiers;
 
     public static String getId(String baseId) {
-        return ResourcePrefix + baseId;
+        return RESOURCE_PREFIX + baseId;
     }
 
     public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext,
-                                                String measureToRefreshPath, Boolean shouldApplySoftwareSystemStamp) {
+                                                String measureToRefreshPath, Boolean shouldApplySoftwareSystemStamp, Boolean shouldIncludePopDataRequirements) throws IOException {
 
         return refreshIgMeasureContent(parentContext, outputEncoding, null, versioned, fhirContext, measureToRefreshPath,
-                shouldApplySoftwareSystemStamp);
+                shouldApplySoftwareSystemStamp, shouldIncludePopDataRequirements);
     }
+
+
 
     public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, String measureOutputDirectory,
                                                 Boolean versioned, FhirContext fhirContext, String measureToRefreshPath,
-                                                Boolean shouldApplySoftwareSystemStamp) {
+                                                Boolean shouldApplySoftwareSystemStamp, Boolean shouldIncludePopDataRequirements) throws IOException {
 
         logger.info("[Refreshing Measures]");
 
@@ -61,6 +64,8 @@ public class MeasureProcessor extends BaseProcessor {
         params.encoding = outputEncoding;
         params.versioned = versioned;
         params.measureOutputDirectory = measureOutputDirectory;
+        params.shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStamp;
+        params.includePopulationDataRequirements = shouldIncludePopDataRequirements;
         List<String> contentList = measureProcessor.refreshMeasureContent(params);
 
         if (!measureProcessor.getIdentifiers().isEmpty()) {
@@ -79,7 +84,7 @@ public class MeasureProcessor extends BaseProcessor {
     protected boolean versioned;
     protected FhirContext fhirContext;
 
-    public List<String> refreshMeasureContent(RefreshMeasureParameters params) {
+    public List<String> refreshMeasureContent(RefreshMeasureParameters params) throws IOException {
         return new ArrayList<>();
     }
 
@@ -111,7 +116,7 @@ public class MeasureProcessor extends BaseProcessor {
         VersionedIdentifier primaryLibraryIdentifier = CanonicalUtils.toVersionedIdentifier(libraryUrl);
 
         List<CqlCompilerException> errors = new CopyOnWriteArrayList<>();
-        CompiledLibrary CompiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, errors);
+        CompiledLibrary compiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, errors);
 
         logger.info(CqlProcessor.buildStatusMessage(errors, measure.getName(), verboseMessaging));
 
@@ -119,7 +124,7 @@ public class MeasureProcessor extends BaseProcessor {
 
         //refresh measures without severe errors:
         if (!hasSevereErrors) {
-            return processor.refreshMeasure(measure, libraryManager, CompiledLibrary, cqlTranslatorOptions.getCqlCompilerOptions());
+            return processor.refreshMeasure(measure, libraryManager, compiledLibrary, cqlTranslatorOptions.getCqlCompilerOptions());
         }
 
         return measure;

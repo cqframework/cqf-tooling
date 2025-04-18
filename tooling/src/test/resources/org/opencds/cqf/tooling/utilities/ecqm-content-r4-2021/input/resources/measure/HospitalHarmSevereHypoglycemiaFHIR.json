@@ -1,0 +1,182 @@
+{
+  "resourceType": "Measure",
+  "id": "HospitalHarmSevereHypoglycemiaFHIR",
+  "meta": {
+    "versionId": "20",
+    "lastUpdated": "2021-08-24T12:27:31.000+00:00",
+    "source": "#z1FHf1CzKUjZlAPy",
+    "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/proportion-measure-cqfm" ]
+  },
+  "language": "en",
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+    "valueCode": "Encounter"
+  } ],
+  "url": "http://ecqi.healthit.gov/ecqms/Measure/HospitalHarmSevereHypoglycemiaFHIR",
+  "identifier": [ {
+    "use": "official",
+    "system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/guid",
+    "value": "1238aa6c-b533-4289-9ab9-8bb9900e9736"
+  }, {
+    "use": "official",
+    "system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/cms",
+    "value": "816FHIR"
+  }, {
+    "use": "official",
+    "system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/nqf",
+    "value": "3503e"
+  } ],
+  "version": "0.0.010",
+  "name": "HospitalHarmSevereHypoglycemiaFHIR",
+  "title": "Hospital Harm - Severe HypoglycemiaFHIR",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Centers for Medicare & Medicaid Services (CMS)",
+  "contact": [ {
+    "telecom": [ {
+      "system": "url",
+      "value": "https://cms.gov"
+    } ]
+  } ],
+  "description": "The proportion of inpatient hospitalizations for patients 18 years of age or older at admission, who were administered at least one hypoglycemic medication during the encounter, who suffer the harm of a severe hypoglycemic event during the encounter. \n\nHarm (numerator) is defined as a laboratory or point-of-care (POC) test for blood glucose with a result less than 40 mg/dL, where the hypoglycemic medication was given within the 24 hours prior to the start of the low blood glucose event (and administered during the encounter). Only one severe hypoglycemic event is counted per inpatient hospitalization encounter.",
+  "purpose": "Unknown",
+  "copyright": "Limited proprietary coding is contained in the Measure specifications for user convenience. Users of proprietary code sets should obtain all necessary licenses from the owners of the code sets. IMPAQ disclaims all liability for use or accuracy of any third party codes contained in the specifications.\n\nLOINC(R) copyright 2004-2020 Regenstrief Institute, Inc. This material contains SNOMED Clinical Terms(R) (SNOMED CT[R]) copyright 2004-2020 International Health Terminology Standards Development Organisation. ICD-10 copyright 2020 World Health Organization. All Rights Reserved.",
+  "effectivePeriod": {
+    "start": "2022-01-01",
+    "end": "2022-12-31"
+  },
+  "relatedArtifact": [ {
+    "type": "citation",
+    "citation": "American Diabetes Association. 14. Diabetes Care in the Hospital: Standards of Medical Care in Diabetes—2018. Diabetes Care. 2018;41(Supplement 1):S144."
+  }, {
+    "type": "citation",
+    "citation": "American Diabetes Association. Hypoglycemia (Low Blood Glucose). 2015; http://diabetes.org/living-with-diabetes/treatment-and-care/blood-glucose-control/hypoglycemia-low-blood.html. Accessed August 20, 2018."
+  }, {
+    "type": "citation",
+    "citation": "Classen, D. C., Jaser, L., & Budnitz, D. S. (2010). Adverse drug events among hospitalized Medicare patients: epidemiology and national estimates from a new approach to surveillance. Jt Comm J Qual Patient Saf, 36(1), 12-21."
+  }, {
+    "type": "citation",
+    "citation": "National Quality Forum. (2010). Prioritization of High-Impact Medicare Conditions and Measure Gaps. Measure Prioritization Advisory Committee Report. May 2010. Retrieved August 29, 2011, from http://www.qualityforum.org/projects/prioritization.aspx?section= MeasurePrioritizatinAdvisoryCommitteeReport2010-05-24"
+  }, {
+    "type": "citation",
+    "citation": "Office of the Inspector General. (2010). Adverse Events in Hospitals: National Incidence Among Medicare Beneficiaries. Retrieved December 14, 2011, from http://oig.hhs.gov/oei/reports/oei-06-09-00090.pdf"
+  }, {
+    "type": "citation",
+    "citation": "Umpierrez, G. E., Hellman, R., Korytkowski, M. T., Kosiborod, M., Maynard, G. A., Montori, V. M., et al. (2012). Management of Hyperglycemia in Hospitalized Patients in Non-critical Care Setting: An Endocrine Society Clinical Practice Guideline. J Clin Endocrinol Metab, 97, 16-38."
+  } ],
+  "library": [ "http://ecqi.healthit.gov/ecqms/Library/HospitalHarmSevereHypoglycemiaFHIR" ],
+  "disclaimer": "This measure and specifications are subject to further revisions. \n\nThis performance measure is not a clinical guideline and does not establish a standard of medical care, and has not been tested for all potential applications.\n\nTHE MEASURES AND SPECIFICATIONS ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND.\n\nDue to technical limitations, registered trademarks are indicated by (R) or [R] and unregistered trademarks are indicated by (TM) or [TM].",
+  "scoring": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-scoring",
+      "code": "proportion",
+      "display": "Proportion"
+    } ]
+  },
+  "type": [ {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-type",
+      "code": "outcome"
+    } ]
+  } ],
+  "rationale": "This measure focuses on severe hypoglycemia as an outcome in the hospital inpatient setting. Hypoglycemia events in the hospital are among the most common adverse drug events. In 2004 an estimated 888,000 adverse drug events occurred among hospitalized Medicare patients in the United States (Classen et.al., 2010; National Quality Forum, 2010). In a recent study published by the Office of the Inspector General (OIG), adverse drug events represent one-third of all adverse events in hospitals among Medicare patients; of those events, hypoglycemia represented the third most common adverse drug events (Office of the Inspector General, 2010).\n\nRates of inpatient hypoglycemia events are considered an indicator of the quality of care provided by a hospital. Severe hypoglycemia events are largely avoidable by careful use of antihyperglycemic medication. Moreover, the rate of severe hypoglycemia varies across hospitals indicating an opportunity for improvement in care. The Agency for Healthcare Research and Quality (AHRQ) identified insulin and other hypoglycemic agents as high alert medications and associated adverse events to be included as a measure in the Medicare Patient Safety Monitoring System (MPSMS) (Classen et al., 2010). Hypoglycemic events are an adverse outcome that can cause patients to experience drowsiness, confusion, anxiety, irritability, sweating, weakness, increased heart rate, uncontrollable trembling, as well as loss of consciousness and seizure (Classen et al., 2010; American Diabetes Association, 2015).",
+  "clinicalRecommendationStatement": "From Section 14, Diabetes Care in the Hospital in the Standards of Medical Care in Diabetes by the American Diabetes Association, (American Diabetes Association, 2018) two recommendations listed under goals for blood glucose levels for critically ill patients are related to hypoglycemia, and two recommendations are related to the management of hypoglycemia:\n\nCritically ill patients: Insulin therapy should be initiated for treatment of persistent hyperglycemia starting at a threshold of no greater than 180 mg/dL (10 mmol/L). Once insulin therapy is started, a glucose range of 140 - 180 mg/dL (7.8 mmol/L) is recommended for the majority of critically ill patients.\n\nMore stringent goals, such as 110-140 mg/dL (6.1-7.8 mmol/L) may be appropriate for selected patients, as long as they can be achieved without significant hypoglycemia.\n\nA hypoglycemia management protocol should be adopted and implemented by each hospital or hospital system. A plan for preventing and treating hypoglycemia should be established for each patient. Episodes of hypoglycemia in the hospital should be documented in the medical record and tracked.\n\nThe treatment regimen should be reviewed and changed as necessary to prevent further hypoglycemia when a blood glucose value is <70 mg/dL (3.9 mmol/L). There should be a structured discharge plan tailored to the individual patient with diabetes.\n\nFrom the Endocrine Society clinical practice guideline on the Management of Hyperglycemia in Hospitalized Patients in Non-critical Care Setting (Umpierrez et al., 2012):\n\n3.1. We recommend a premeal glucose target of less than 140 mg/dL (7.8 mmol/liter) and a random BG of less than 180 mg/dL (10.0 mmol/liter) for the majority of hospitalized patients with non-critical illness.\n\n3.2. We suggest that glycemic targets be modified according to clinical status. For patients who are able to achieve and maintain glycemic control without hypoglycemia, a lower target range may be reasonable. For patients with terminal illness and/or with limited life expectancy or at high risk for hypoglycemia, a higher target range (BG <11.1 mmol/liter or 200 mg/dL) may be reasonable.\n\n3.3 For avoidance of hypoglycemia, we suggest that antidiabetic therapy be reassessed when BG values fall below 5.6 mmol/liter (100 mg/dL). Modification of glucose-lowering treatment is usually necessary when BG values are below 3.9 mmol/liter (70 mg/dL).",
+  "improvementNotation": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/measure-improvement-notation",
+      "code": "increase"
+    } ]
+  },
+  "guidance": "Note the measure is currently confined to using mg/dL as the unit of measurement for glucose results.\n\nTo calculate the hospital-level measure result, divide the total numerator events by the total number of qualifying inpatient hospitalizations (denominator). \n\nQualifying inpatient hospitalizations (denominator) include all patients 18 years of age or older at the start of the encounter, who had at least one hypoglycemic medication administered during the encounter.\n\nTo create the numerator, for each encounter identify: \n1. Any instance of a test for blood glucose with a result less than 40 mg/dL during the encounter (severe hypoglycemic event), with a hypoglycemic medication administered within 24 hours preceding the event and during the encounter (including emergency department and observation stays contiguous with the admission).\nA severe hypoglycemic event is defined as a test (laboratory or point-of-care (POC)) for blood glucose with a result less than 40 mg/dL. The 24-hour timeframe extends from the end of the medication administration to the start of the blood glucose test.\n2. Do not include any severe hypoglycemic events (identified in Step 1) which were followed by a repeat test for blood glucose with a result greater than 80 mg/dL within five minutes of the start of the initial low blood glucose test. \nRationale: This is done to remove false positives that can occur in POC testing. The 5-minute timeframe extends from the start of the severe hypoglycemic test to the start of the repeat hypoglycemic test. \n\nOnly the first qualifying severe hypoglycemic event is counted in the numerator, and only one severe hypoglycemic event is counted per encounter.\n\nThis eCQM is an episode-based measure. An episode is defined as each inpatient hospitalization or encounter that ends during the measurement period.\n\nThis FHIR-based measure has been derived from the QDM-based measure: CMS816v1.0",
+  "group": [ {
+    "population": [ {
+      "id": "4D00ADDA-73C0-4CDF-A2CD-DF3FE7B86354",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "initial-population",
+          "display": "Initial Population"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.identifier",
+        "expression": "Initial Population"
+      }
+    }, {
+      "id": "5A040BF1-BEB9-4F00-85D5-335B17B40500",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "denominator",
+          "display": "Denominator"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.identifier",
+        "expression": "Denominator"
+      }
+    }, {
+      "id": "C7B90DDC-DB4F-4E3D-AD80-375A7E08F22A",
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "numerator",
+          "display": "Numerator"
+        } ]
+      },
+      "criteria": {
+        "language": "text/cql.identifier",
+        "expression": "Numerator"
+      }
+    } ]
+  } ],
+  "supplementalData": [ {
+    "id": "d42867b5-a11e-4f8a-8e52-bed8f764980f",
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Ethnicity"
+    }
+  }, {
+    "id": "b729f23a-521c-4178-b6b8-f8204fb7c16f",
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Payer"
+    }
+  }, {
+    "id": "e2db46a2-f24c-4e70-9d54-f169b16897c7",
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Race"
+    }
+  }, {
+    "id": "4effe64a-715e-42e0-bae7-01a6d6e93955",
+    "usage": [ {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+        "code": "supplemental-data"
+      } ]
+    } ],
+    "criteria": {
+      "language": "text/cql.identifier",
+      "expression": "SDE Sex"
+    }
+  } ]
+}

@@ -1,21 +1,35 @@
 package org.opencds.cqf.tooling.measure.r4;
 
+import org.cqframework.cql.cql2elm.CqlCompilerException;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.LibraryManager;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.r4.formats.FormatUtilities;
+import org.hl7.fhir.r5.model.Measure;
 import org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper;
 import org.opencds.cqf.tooling.measure.MeasureProcessor;
+import org.opencds.cqf.tooling.measure.MeasureRefreshProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshMeasureParameters;
+import org.opencds.cqf.tooling.processor.CqlProcessor;
+import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class R4MeasureProcessor extends MeasureProcessor {
 
     private String measurePath;
     private String measureOutputDirectory;
     private IOUtils.Encoding encoding;
+    private Boolean shouldApplySoftwareSystemStamp;
+    private Boolean includePopulationDataRequirements;
     private static CqfmSoftwareSystemHelper cqfmHelper;
 
     private String getMeasurePath(String measurePath) {
@@ -60,11 +74,11 @@ public class R4MeasureProcessor extends MeasureProcessor {
             loadMeasure(fileMap, measures, file);
         }
 
-        List<String> refreshedMeasureNames = new ArrayList<String>();
-        List<org.hl7.fhir.r5.model.Measure> refreshedMeasures = super.refreshGeneratedContent(measures);
-        VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
+        List<String> refreshedMeasureNames = new ArrayList<>();
+        List<org.hl7.fhir.r5.model.Measure> refreshedMeasures = refreshGeneratedContent(measures);
+        VersionConvertor_40_50 versionConvertor = new VersionConvertor_40_50(new BaseAdvisor_40_50());
         for (org.hl7.fhir.r5.model.Measure refreshedMeasure : refreshedMeasures) {
-            org.hl7.fhir.r4.model.Measure measure = (org.hl7.fhir.r4.model.Measure) versionConvertor_40_50.convertResource(refreshedMeasure);
+            org.hl7.fhir.r4.model.Measure measure = (org.hl7.fhir.r4.model.Measure) versionConvertor.convertResource(refreshedMeasure);
             if (measure.hasIdentifier() && !measure.getIdentifier().isEmpty()) {
                 this.getIdentifiers().addAll(measure.getIdentifier());
             }
@@ -111,8 +125,8 @@ public class R4MeasureProcessor extends MeasureProcessor {
     private void loadMeasure(Map<String, String> fileMap, List<org.hl7.fhir.r5.model.Measure> measures, File measureFile) {
         try {
             org.hl7.fhir.r4.model.Resource resource = FormatUtilities.loadFile(measureFile.getAbsolutePath());
-            VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
-            org.hl7.fhir.r5.model.Measure measure = (org.hl7.fhir.r5.model.Measure) versionConvertor_40_50.convertResource(resource);
+            VersionConvertor_40_50 versionConvertor = new VersionConvertor_40_50(new BaseAdvisor_40_50());
+            org.hl7.fhir.r5.model.Measure measure = (org.hl7.fhir.r5.model.Measure) versionConvertor.convertResource(resource);
             fileMap.put(measure.getId(), measureFile.getAbsolutePath());
             measures.add(measure);
         } catch (Exception ex) {
@@ -121,7 +135,53 @@ public class R4MeasureProcessor extends MeasureProcessor {
     }
 
     @Override
-    public List<String> refreshMeasureContent(RefreshMeasureParameters params) {
+    protected List<Measure> refreshGeneratedContent(List<Measure> sourceMeasures) {
+        return internalRefreshGeneratedContent(sourceMeasures);
+    }
+
+    private List<Measure> internalRefreshGeneratedContent(List<Measure> sourceMeasures) {
+        // for each Measure, refresh the measure based on the primary measure library
+        List<Measure> resources = new ArrayList<>();
+        MeasureRefreshProcessor processor = new MeasureRefreshProcessor();
+        LibraryManager libraryManager = getCqlProcessor().getLibraryManager();
+        CqlTranslatorOptions cqlTranslatorOptions = getCqlProcessor().getCqlTranslatorOptions();
+        for (Measure measure : sourceMeasures) {
+            // Do not attempt to refresh if the measure does not have a library
+            if (measure.hasLibrary()) {
+                resources.add(refreshGeneratedContent(measure, processor, libraryManager, cqlTranslatorOptions));
+            } else {
+                resources.add(measure);
+            }
+        }
+
+        return resources;
+    }
+
+    private Measure refreshGeneratedContent(Measure measure, MeasureRefreshProcessor processor, LibraryManager libraryManager, CqlTranslatorOptions cqlTranslatorOptions) {
+
+        String libraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
+        VersionedIdentifier primaryLibraryIdentifier = CanonicalUtils.toVersionedIdentifier(libraryUrl);
+
+        List<CqlCompilerException> errors = new CopyOnWriteArrayList<>();
+        CompiledLibrary compiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, errors);
+
+        logger.info(CqlProcessor.buildStatusMessage(errors, measure.getName(), verboseMessaging));
+
+        boolean hasSevereErrors = CqlProcessor.hasSevereErrors(errors);
+
+        //refresh measures without severe errors:
+        if (!hasSevereErrors) {
+            if (includePopulationDataRequirements != null) {
+                processor.includePopulationDataRequirements = includePopulationDataRequirements;
+            }
+            return processor.refreshMeasure(measure, libraryManager, compiledLibrary, cqlTranslatorOptions.getCqlCompilerOptions());
+        }
+
+        return measure;
+    }
+
+    @Override
+    public List<String> refreshMeasureContent(RefreshMeasureParameters params) throws IOException {
         if (params.parentContext != null) {
             initialize(params.parentContext);
         }
@@ -134,6 +194,8 @@ public class R4MeasureProcessor extends MeasureProcessor {
         fhirContext = params.fhirContext;
         encoding = params.encoding;
         versioned = params.versioned;
+        shouldApplySoftwareSystemStamp = params.shouldApplySoftwareSystemStamp;
+        includePopulationDataRequirements = params.includePopulationDataRequirements;
 
         R4MeasureProcessor.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
 
