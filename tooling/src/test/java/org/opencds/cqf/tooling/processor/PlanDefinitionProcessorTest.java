@@ -8,7 +8,6 @@ import org.opencds.cqf.tooling.plandefinition.PlanDefinitionProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.FileReader;
@@ -23,15 +22,7 @@ public class PlanDefinitionProcessorTest {
     private Path iniPath;
     private Path planDefinitionDir;
     private Path libraryDir;
-    private BaseProcessor parentContext;
-    private PlanDefinitionProcessor processor;
     private final FhirContext fhirContext = FhirContext.forR4Cached();
-
-    @BeforeClass
-    public void setup() throws IOException {
-        parentContext = new BaseProcessor();
-        processor = new PlanDefinitionProcessor(new LibraryProcessor());
-    }
 
     @AfterMethod
     public void tearDown() throws IOException {
@@ -50,24 +41,27 @@ public class PlanDefinitionProcessorTest {
         Files.deleteIfExists(path);
     }
 
-    @Test(description = "Test PlanDefinition processor referencing an IG without any PlanDefinition resources")
+    @Test(priority = 0, description = "Test PlanDefinition processor referencing an IG without any PlanDefinition resources")
     void testEmptyIg() throws IOException {
         boilerplateIg();
+        var parentContext = new BaseProcessor();
         parentContext.initializeFromIni(iniPath);
+        var processor = new PlanDefinitionProcessor(new LibraryProcessor());
         var result = processor.refreshIgPlanDefinitionContent(parentContext, IOUtils.Encoding.JSON, false,
                 fhirContext, planDefinitionDir.toString(), false);
         Assert.assertEquals(result.size(), 0);
     }
 
-    @Test(description = "Test PlanDefinition processor referencing an IG with a very simple PlanDefinition resource")
+    @Test(priority = 1, description = "Test PlanDefinition processor referencing an IG with a very simple PlanDefinition resource")
     void testSimplePlanDefinition() throws IOException {
         buildSimpleIg();
+        var parentContext = new BaseProcessor();
         parentContext.initializeFromIni(iniPath);
         LibraryProcessor libraryProcessor = new LibraryProcessor();
         libraryProcessor.initializeFromIni(iniPath);
         libraryProcessor.refreshIgLibraryContent(parentContext, IOUtils.Encoding.JSON, libraryDir.toString(),
                 false, fhirContext, false);
-        processor = new PlanDefinitionProcessor(libraryProcessor);
+        PlanDefinitionProcessor processor = new PlanDefinitionProcessor(libraryProcessor);
         var result = processor.refreshIgPlanDefinitionContent(parentContext, IOUtils.Encoding.JSON, false,
                 fhirContext, planDefinitionDir.toString(), false);
 
@@ -82,15 +76,16 @@ public class PlanDefinitionProcessorTest {
         Assert.assertTrue(((PlanDefinition) planDefinition).hasExtension());
     }
 
-    @Test(description = "Test PlanDefinition processor referencing an IG with a more complex PlanDefinition resource")
+    @Test(priority = 2, description = "Test PlanDefinition processor referencing an IG with a more complex PlanDefinition resource")
     void testComplexPlanDefinition() throws IOException {
         buildComplexIg();
+        var parentContext = new BaseProcessor();
         parentContext.initializeFromIni(iniPath);
         LibraryProcessor libraryProcessor = new LibraryProcessor();
         libraryProcessor.initializeFromIni(iniPath);
         libraryProcessor.refreshIgLibraryContent(parentContext, IOUtils.Encoding.JSON, libraryDir.toString(),
                 false, fhirContext, false);
-        processor = new PlanDefinitionProcessor(libraryProcessor);
+        PlanDefinitionProcessor processor = new PlanDefinitionProcessor(libraryProcessor);
         var result = processor.refreshIgPlanDefinitionContent(parentContext, IOUtils.Encoding.JSON, false,
                 fhirContext, planDefinitionDir.toString(), false);
 
@@ -98,8 +93,6 @@ public class PlanDefinitionProcessorTest {
 
         var planDefinition = fhirContext.newJsonParser().parseResource(
                 new FileReader(planDefinitionDir.resolve("Complex.json").toFile()));
-        var library = fhirContext.newJsonParser().parseResource(
-                new FileReader(libraryDir.resolve("Complex.json").toFile()));
 
         Assert.assertNotNull(planDefinition);
         Assert.assertTrue(planDefinition instanceof PlanDefinition);
