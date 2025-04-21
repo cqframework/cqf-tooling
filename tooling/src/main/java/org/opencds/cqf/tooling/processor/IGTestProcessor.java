@@ -303,7 +303,7 @@ public class IGTestProcessor extends BaseProcessor {
     }
 
     private String getPathForContentBundleTestArtifact(String groupName, String testArtifactName) {
-        String contentBundlePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(getRootDir(), IGProcessor.bundlePathElement), groupName), testArtifactName);
+        String contentBundlePath = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(getRootDir(), IGProcessor.BUNDLE_PATH_ELEMENT), groupName), testArtifactName);
         return contentBundlePath;
     }
 

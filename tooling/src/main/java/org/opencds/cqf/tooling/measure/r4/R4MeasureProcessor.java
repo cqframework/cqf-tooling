@@ -3,8 +3,6 @@ package org.opencds.cqf.tooling.measure.r4;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
-import org.cqframework.cql.cql2elm.model.CompiledLibrary;
-import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.r4.formats.FormatUtilities;
@@ -19,21 +17,16 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class R4MeasureProcessor extends MeasureProcessor {
 
-    private String measurePath;
-    private String measureOutputDirectory;
-    private IOUtils.Encoding encoding;
-    private Boolean shouldApplySoftwareSystemStamp;
-    private Boolean includePopulationDataRequirements;
+    private RefreshMeasureParameters params;
     private static CqfmSoftwareSystemHelper cqfmHelper;
 
     private String getMeasurePath(String measurePath) {
-        File f = new File(measurePath);
+        var f = new File(measurePath);
         if (!f.exists() && f.getParentFile().isDirectory() && f.getParentFile().exists()) {
             return f.getParentFile().toString();
         }
@@ -54,17 +47,17 @@ public class R4MeasureProcessor extends MeasureProcessor {
         all known measure resources
     */
     protected List<String> refreshMeasures(String measurePath, String measureOutputDirectory, IOUtils.Encoding encoding) {
-        File file = measurePath != null ? new File(measurePath) : null;
-        Map<String, String> fileMap = new HashMap<String, String>();
-        List<org.hl7.fhir.r5.model.Measure> measures = new ArrayList<>();
+        var file = measurePath != null ? new File(measurePath) : null;
+        var fileMap = new HashMap<String, String>();
+        var measures = new ArrayList<org.hl7.fhir.r5.model.Measure>();
 
         if (file == null || !file.exists()) {
-            for (String path : IOUtils.getMeasurePaths(this.fhirContext)) {
+            for (var path : IOUtils.getMeasurePaths(params.fhirContext)) {
                 loadMeasure(fileMap, measures, new File(path));
             }
         }
         else if (file.isDirectory()) {
-            for (File libraryFile : file.listFiles()) {
+            for (var libraryFile : Objects.requireNonNull(file.listFiles())) {
                 if(IOUtils.isXMLOrJson(measurePath, libraryFile.getName())) {
                     loadMeasure(fileMap, measures, libraryFile);
                 }
@@ -74,16 +67,16 @@ public class R4MeasureProcessor extends MeasureProcessor {
             loadMeasure(fileMap, measures, file);
         }
 
-        List<String> refreshedMeasureNames = new ArrayList<>();
-        List<org.hl7.fhir.r5.model.Measure> refreshedMeasures = refreshGeneratedContent(measures);
+        var refreshedMeasureNames = new ArrayList<String>();
+        var refreshedMeasures = refreshGeneratedContent(measures);
         VersionConvertor_40_50 versionConvertor = new VersionConvertor_40_50(new BaseAdvisor_40_50());
-        for (org.hl7.fhir.r5.model.Measure refreshedMeasure : refreshedMeasures) {
-            org.hl7.fhir.r4.model.Measure measure = (org.hl7.fhir.r4.model.Measure) versionConvertor.convertResource(refreshedMeasure);
+        for (var refreshedMeasure : refreshedMeasures) {
+            var measure = (org.hl7.fhir.r4.model.Measure) versionConvertor.convertResource(refreshedMeasure);
             if (measure.hasIdentifier() && !measure.getIdentifier().isEmpty()) {
                 this.getIdentifiers().addAll(measure.getIdentifier());
             }
-            String filePath = null;
-            IOUtils.Encoding fileEncoding = null;
+            String filePath;
+            IOUtils.Encoding fileEncoding;
             if (fileMap.containsKey(refreshedMeasure.getId()))
             {
                 filePath = fileMap.get(refreshedMeasure.getId());
@@ -92,23 +85,23 @@ public class R4MeasureProcessor extends MeasureProcessor {
                 filePath = getMeasurePath(measurePath);
                 fileEncoding = encoding;
             }
-            cqfmHelper.ensureCQFToolingExtensionAndDevice(measure, fhirContext);
+            cqfmHelper.ensureCQFToolingExtensionAndDevice(measure, params.fhirContext);
             // Issue 96
             // Passing the includeVersion here to handle not using the version number in the filename
             if (new File(filePath).exists()) {
                 // TODO: This prevents mangled names from being output
                 // It would be nice for the tooling to generate library shells, we have enough information to,
                 // but the tooling gets confused about the ID and the filename and what gets written is garbage
-                String outputPath = filePath;
+                var outputPath = filePath;
                 if (measureOutputDirectory != null) {
-                    File measureDirectory = new File(measureOutputDirectory);
+                    var measureDirectory = new File(measureOutputDirectory);
                     if (!measureDirectory.exists()) {
-                        //TODO: add logger and log non existant directory for writing
+                        logger.warn("Unable to determine measure directory. Will write Measures to {}", outputPath);
                     } else {
                         outputPath = measureDirectory.getAbsolutePath();
                     }
                 }
-                IOUtils.writeResource(measure, outputPath, fileEncoding, fhirContext, this.versioned, true);
+                IOUtils.writeResource(measure, outputPath, fileEncoding, params.fhirContext, this.versioned, true);
                 String refreshedMeasureName;
                 if (this.versioned && refreshedMeasure.getVersion() != null) {
                     refreshedMeasureName = refreshedMeasure.getName() + "-" + refreshedMeasure.getVersion();
@@ -124,9 +117,9 @@ public class R4MeasureProcessor extends MeasureProcessor {
 
     private void loadMeasure(Map<String, String> fileMap, List<org.hl7.fhir.r5.model.Measure> measures, File measureFile) {
         try {
-            org.hl7.fhir.r4.model.Resource resource = FormatUtilities.loadFile(measureFile.getAbsolutePath());
-            VersionConvertor_40_50 versionConvertor = new VersionConvertor_40_50(new BaseAdvisor_40_50());
-            org.hl7.fhir.r5.model.Measure measure = (org.hl7.fhir.r5.model.Measure) versionConvertor.convertResource(resource);
+            var resource = FormatUtilities.loadFile(measureFile.getAbsolutePath());
+            var versionConvertor = new VersionConvertor_40_50(new BaseAdvisor_40_50());
+            var measure = (org.hl7.fhir.r5.model.Measure) versionConvertor.convertResource(resource);
             fileMap.put(measure.getId(), measureFile.getAbsolutePath());
             measures.add(measure);
         } catch (Exception ex) {
@@ -141,11 +134,11 @@ public class R4MeasureProcessor extends MeasureProcessor {
 
     private List<Measure> internalRefreshGeneratedContent(List<Measure> sourceMeasures) {
         // for each Measure, refresh the measure based on the primary measure library
-        List<Measure> resources = new ArrayList<>();
-        MeasureRefreshProcessor processor = new MeasureRefreshProcessor();
-        LibraryManager libraryManager = getCqlProcessor().getLibraryManager();
-        CqlTranslatorOptions cqlTranslatorOptions = getCqlProcessor().getCqlTranslatorOptions();
-        for (Measure measure : sourceMeasures) {
+        var resources = new ArrayList<Measure>();
+        var processor = new MeasureRefreshProcessor();
+        var libraryManager = getCqlProcessor().getLibraryManager();
+        var cqlTranslatorOptions = getCqlProcessor().getCqlTranslatorOptions();
+        for (var measure : sourceMeasures) {
             // Do not attempt to refresh if the measure does not have a library
             if (measure.hasLibrary()) {
                 resources.add(refreshGeneratedContent(measure, processor, libraryManager, cqlTranslatorOptions));
@@ -157,22 +150,22 @@ public class R4MeasureProcessor extends MeasureProcessor {
         return resources;
     }
 
-    private Measure refreshGeneratedContent(Measure measure, MeasureRefreshProcessor processor, LibraryManager libraryManager, CqlTranslatorOptions cqlTranslatorOptions) {
+    private Measure refreshGeneratedContent(Measure measure, MeasureRefreshProcessor processor,
+                                            LibraryManager libraryManager, CqlTranslatorOptions cqlTranslatorOptions) {
+        var libraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
+        var primaryLibraryIdentifier = CanonicalUtils.toVersionedIdentifier(libraryUrl);
 
-        String libraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
-        VersionedIdentifier primaryLibraryIdentifier = CanonicalUtils.toVersionedIdentifier(libraryUrl);
-
-        List<CqlCompilerException> errors = new CopyOnWriteArrayList<>();
-        CompiledLibrary compiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, errors);
+        var errors = new CopyOnWriteArrayList<CqlCompilerException>();
+        var compiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, errors);
 
         logger.info(CqlProcessor.buildStatusMessage(errors, measure.getName(), verboseMessaging));
 
-        boolean hasSevereErrors = CqlProcessor.hasSevereErrors(errors);
+        var hasSevereErrors = CqlProcessor.hasSevereErrors(errors);
 
         //refresh measures without severe errors:
         if (!hasSevereErrors) {
-            if (includePopulationDataRequirements != null) {
-                processor.includePopulationDataRequirements = includePopulationDataRequirements;
+            if (params.includePopulationDataRequirements != null) {
+                processor.includePopulationDataRequirements = params.includePopulationDataRequirements;
             }
             return processor.refreshMeasure(measure, libraryManager, compiledLibrary, cqlTranslatorOptions.getCqlCompilerOptions());
         }
@@ -181,7 +174,7 @@ public class R4MeasureProcessor extends MeasureProcessor {
     }
 
     @Override
-    public List<String> refreshMeasureContent(RefreshMeasureParameters params) throws IOException {
+    public List<String> refreshMeasureContent(RefreshMeasureParameters params) {
         if (params.parentContext != null) {
             initialize(params.parentContext);
         }
@@ -189,20 +182,13 @@ public class R4MeasureProcessor extends MeasureProcessor {
             initializeFromIni(params.ini);
         }
 
-        measurePath = params.measurePath;
-        measureOutputDirectory = params.measureOutputDirectory;
-        fhirContext = params.fhirContext;
-        encoding = params.encoding;
-        versioned = params.versioned;
-        shouldApplySoftwareSystemStamp = params.shouldApplySoftwareSystemStamp;
-        includePopulationDataRequirements = params.includePopulationDataRequirements;
-
+        this.params = params;
         R4MeasureProcessor.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
 
-        if (measureOutputDirectory != null) {
-            return refreshMeasures(measurePath, measureOutputDirectory, encoding);
+        if (params.measureOutputDirectory != null) {
+            return refreshMeasures(params.measurePath, params.measureOutputDirectory, params.encoding);
         } else {
-            return refreshMeasures(measurePath, encoding);
+            return refreshMeasures(params.measurePath, params.encoding);
         }
     }
 }

@@ -154,6 +154,7 @@ public class LibraryProcessor extends BaseProcessor {
 
     protected boolean versioned;
 
+
     /*
     Refreshes generated content in the given library.
     The name element of the library resource is used to find the cql file (filename = <name>.cql)
@@ -180,26 +181,13 @@ public class LibraryProcessor extends BaseProcessor {
             attachment = loadFile(fileName);
         } catch (IOException e) {
             logMessage(String.format("Error loading CQL source for library %s", libraryName));
-            e.printStackTrace();
         }
 
         if (attachment != null) {
-            sourceLibrary.getContent().clear();
-            sourceLibrary.getContent().add(attachment);
-            setLibraryType(sourceLibrary);
-
-            var translatorOptions = getCqlProcessor().getCqlTranslatorOptions();
-            var formats = translatorOptions.getFormats();
             CqlProcessor.CqlSourceFileInformation info = getCqlProcessor().getFileInformation(attachment.getUrl());
             attachment.setUrlElement(null);
             if (info != null) {
-                //f.getErrors().addAll(info.getErrors());
-                if (info.getElm() != null && emptyIfNull(formats).contains(Format.XML)) {
-                    sourceLibrary.addContent().setContentType("application/elm+xml").setData(info.getElm());
-                }
-                if (info.getJsonElm() != null && emptyIfNull(formats).contains(Format.JSON)) {
-                    sourceLibrary.addContent().setContentType("application/elm+json").setData(info.getJsonElm());
-                }
+                setLibraryType(sourceLibrary);
                 sourceLibrary.getDataRequirement().clear();
                 sourceLibrary.getDataRequirement().addAll(info.getDataRequirements());
                 sourceLibrary.getRelatedArtifact().removeIf(n -> n.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON);
@@ -207,15 +195,98 @@ public class LibraryProcessor extends BaseProcessor {
                 sourceLibrary.getParameter().clear();
                 sourceLibrary.getParameter().addAll(info.getParameters());
                 getCqlProcessor().getCqlTranslatorOptions();
-                setTranslatorOptions(sourceLibrary, translatorOptions);
+                setTranslatorOptions(sourceLibrary, getCqlProcessor().getCqlTranslatorOptions());
+
+                // Check for referenced CQL to be handled by publisher
+                if (sourceLibrary.hasContent() && sourceLibrary.getContent().size() == 1
+                        && sourceLibrary.getContentFirstRep().hasId() && sourceLibrary.getContentFirstRep().getId().startsWith("ig-loader")) {
+                    return sourceLibrary;
+                } else {
+                    // Refresh content
+                    sourceLibrary.getContent().clear();
+                    sourceLibrary.getContent().add(attachment);
+                    if (info.getElm() != null && emptyIfNull(getCqlProcessor().getCqlTranslatorOptions().getFormats()).contains(Format.XML)) {
+                        sourceLibrary.addContent().setContentType("application/elm+xml").setData(info.getElm());
+                    }
+                    if (info.getJsonElm() != null && emptyIfNull(getCqlProcessor().getCqlTranslatorOptions().getFormats()).contains(Format.JSON)) {
+                        sourceLibrary.addContent().setContentType("application/elm+json").setData(info.getJsonElm());
+                    }
+                }
             } else {
                 logMessage(String.format("No cql info found for %s", fileName));
-                //f.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, ValidationMessage.IssueType.NOTFOUND, "Library", "No cql info found for "+f.getName(), ValidationMessage.IssueSeverity.ERROR));
             }
         }
 
         return sourceLibrary;
     }
+
+    /*
+    Refreshes generated content in the given library.
+    The name element of the library resource is used to find the cql file (filename = <name>.cql)
+    The CqlProcessor is used to get the CqlSourceFileInformation
+    Sets
+        * cqlContent
+        * elmXmlContent
+        * elmJsonContent
+        * dataRequirements
+        * relatedArtifacts
+        * parameters
+
+     Does not set publisher-level information (id, name, url, version, publisher, contact, jurisdiction)
+     Does not generate narrative
+     */
+//    protected Library refreshGeneratedContent(Library sourceLibrary) {
+//        // Check for referenced CQL to be handled by publisher
+//        if (sourceLibrary.hasContent() && sourceLibrary.getContent().size() == 1
+//                && sourceLibrary.getContentFirstRep().hasId() && sourceLibrary.getContentFirstRep().getId().startsWith("ig-loader")) {
+//            return sourceLibrary;
+//        }
+//        String libraryName = sourceLibrary.getName();
+//        if (versioned) {
+//            libraryName += "-" + sourceLibrary.getVersion();
+//        }
+//        String fileName = libraryName + ".cql";
+//        Attachment attachment = null;
+//        try {
+//            attachment = loadFile(fileName);
+//        } catch (IOException e) {
+//            logMessage(String.format("Error loading CQL source for library %s", libraryName));
+//            e.printStackTrace();
+//        }
+//
+//        if (attachment != null) {
+//            sourceLibrary.getContent().clear();
+//            sourceLibrary.getContent().add(attachment);
+//            setLibraryType(sourceLibrary);
+//
+//            var translatorOptions = getCqlProcessor().getCqlTranslatorOptions();
+//            var formats = translatorOptions.getFormats();
+//            CqlProcessor.CqlSourceFileInformation info = getCqlProcessor().getFileInformation(attachment.getUrl());
+//            attachment.setUrlElement(null);
+//            if (info != null) {
+//                //f.getErrors().addAll(info.getErrors());
+//                if (info.getElm() != null && emptyIfNull(formats).contains(Format.XML)) {
+//                    sourceLibrary.addContent().setContentType("application/elm+xml").setData(info.getElm());
+//                }
+//                if (info.getJsonElm() != null && emptyIfNull(formats).contains(Format.JSON)) {
+//                    sourceLibrary.addContent().setContentType("application/elm+json").setData(info.getJsonElm());
+//                }
+//                sourceLibrary.getDataRequirement().clear();
+//                sourceLibrary.getDataRequirement().addAll(info.getDataRequirements());
+//                sourceLibrary.getRelatedArtifact().removeIf(n -> n.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON);
+//                sourceLibrary.getRelatedArtifact().addAll(info.getRelatedArtifacts());
+//                sourceLibrary.getParameter().clear();
+//                sourceLibrary.getParameter().addAll(info.getParameters());
+//                getCqlProcessor().getCqlTranslatorOptions();
+//                setTranslatorOptions(sourceLibrary, translatorOptions);
+//            } else {
+//                logMessage(String.format("No cql info found for %s", fileName));
+//                //f.getErrors().add(new ValidationMessage(ValidationMessage.Source.Publisher, ValidationMessage.IssueType.NOTFOUND, "Library", "No cql info found for "+f.getName(), ValidationMessage.IssueSeverity.ERROR));
+//            }
+//        }
+//
+//        return sourceLibrary;
+//    }
 
     private <T> Set<T> emptyIfNull(Set<T> set) {
         return set != null ? set : Collections.emptySet();
