@@ -1,14 +1,7 @@
 package org.opencds.cqf.tooling.processor;
 
-import static java.util.Objects.requireNonNull;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import ca.uhn.fhir.context.FhirContext;
 import com.google.common.base.Strings;
-
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.utilities.Utilities;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
@@ -18,10 +11,15 @@ import org.opencds.cqf.tooling.utilities.IGUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.LogUtils;
-
-import ca.uhn.fhir.context.FhirContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
 
 public class IGProcessor extends BaseProcessor {
     private static final Logger logger = LoggerFactory.getLogger(IGProcessor.class);
@@ -35,7 +33,7 @@ public class IGProcessor extends BaseProcessor {
     public static final String DEVICE_PATH_ELEMENT = "input/resources/device/";
 
     //mega ig method
-    public void publishIG(RefreshIGParameters params) {
+    public void publishIG(RefreshIGParameters params) throws IOException {
         if (params.skipPackages == null) {
             params.skipPackages = false;
         }
@@ -120,7 +118,7 @@ public class IGProcessor extends BaseProcessor {
 
     public ArrayList<String> refreshedResourcesNames = new ArrayList<String>();
 
-    public void refreshIG(RefreshIGParameters params) {
+    public void refreshIG(RefreshIGParameters params) throws IOException {
         if (params.ini != null) {
             initializeFromIni(params.ini);
         } else {

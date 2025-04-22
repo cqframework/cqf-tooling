@@ -233,10 +233,13 @@
             <version>2.22.0</version>
         </dependency>
 
-        <!-- FHIR DAL -->
         <dependency>
             <groupId>info.cqframework</groupId>
             <artifactId>cqf-fhir</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>info.cqframework</groupId>
+            <artifactId>cqf-fhir-npm</artifactId>
         </dependency>
         <dependency>
             <groupId>info.cqframework</groupId>

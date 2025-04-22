@@ -1,13 +1,7 @@
 package org.opencds.cqf.tooling.library.r4;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import ca.uhn.fhir.context.FhirContext;
 import com.google.common.base.Strings;
-
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.r4.formats.FormatUtilities;
@@ -19,7 +13,12 @@ import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class R4LibraryProcessor extends LibraryProcessor {
     private String libraryPath;
@@ -77,7 +76,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
         for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
             Library library = (Library) versionConvertor_40_50.convertResource(refreshedLibrary);
             String filePath = null;
-            Encoding fileEncoding = null;            
+            Encoding fileEncoding = null;
             if (fileMap.containsKey(refreshedLibrary.getId()))
             {
                 filePath = fileMap.get(refreshedLibrary.getId());
@@ -134,7 +133,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
     }
 
     @Override
-    public List<String> refreshLibraryContent(RefreshLibraryParameters params) {
+    public List<String> refreshLibraryContent(RefreshLibraryParameters params) throws IOException {
         if (params.parentContext != null) {
             initialize(params.parentContext);
         }

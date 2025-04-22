@@ -6,7 +6,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.common.ThreadUtils;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
-import org.opencds.cqf.tooling.utilities.LogUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +18,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 public class ExtractMatBundleOperation extends Operation {
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -60,7 +59,9 @@ public class ExtractMatBundleOperation extends Operation {
             } else if (i == 0 && !args[i].equalsIgnoreCase("-ExtractMatBundle")) {
                 throw new IllegalArgumentException("Insufficient argument structure. " +
                         "Usage Example: mvn exec:java -Dexec.args=\"-ExtractMatBundle " +
-                        "/Development/ecqm-content-r4/bundles/mat/EXM124/EXM124.json -v=r4");
+                        File.separator + "Development" + File.separator + "ecqm-content-r4" +
+                        File.separator + "bundles" + File.separator +  "mat" +
+                        File.separator + "EXM124" + File.separator + "EXM124.json -v=r4");
             }
 
             //position 1 is the location of file or directory. Determine which:
@@ -135,7 +136,7 @@ public class ExtractMatBundleOperation extends Operation {
             if (filesInDir != null && filesInDir.length > 0) {
                 //use recursive calls to build up task list:
                 ThreadUtils.executeTasks(processFilesInDir(filesInDir, version, suppressNarrative));
-            }else{
+            } else {
                 logger.info(ERROR_DIR_IS_EMPTY);
                 return;
             }
@@ -146,7 +147,7 @@ public class ExtractMatBundleOperation extends Operation {
 
         if (!processedBundleCollection.isEmpty()) {
             logger.info("Successfully extracted " + processedBundleCollection.size() + " resource(s): \n" + String.join("\n", processedBundleCollection));
-        }else{
+        } else {
             logger.info("ExtractMatBundleOperation ended with no resources extracted!");
         }
     }
@@ -268,6 +269,22 @@ public class ExtractMatBundleOperation extends Operation {
     }
 
 
+    private Path getParentBundleDir(String directory){
+        Path parent = Paths.get(directory);
+        // Traverse to the parent of 'bundles'
+        while (parent != null &&
+                parent.getFileName() != null &&
+                !parent.getFileName().toString().equalsIgnoreCase("bundles")) {
+            parent = parent.getParent();
+        }
+
+        // Move one level up to get the directory before 'bundles'
+        if (parent != null) {
+            return parent.getParent();
+        } else {
+            return null;
+        }
+    }
 
     /**
      * Iterates through the files and properly renames and moves them to the proper place
@@ -298,14 +315,21 @@ public class ExtractMatBundleOperation extends Operation {
             // The extractor code names them using the resource type and ID
             // We want to name them without the resource type, use name, and if needed version
             String resourceName;
-            Path newOutputDirectory = Paths.get(outputDir.substring(0, outputDir.indexOf("bundles")), "input");
-            Path newLibraryDirectory = Paths.get(newOutputDirectory.toString(), "resources/library");
-            newLibraryDirectory.toFile().mkdirs();
+
+            // https://github.com/cqframework/cqf-tooling/issues/537
+            // if there's no bundle directory (getParentBundleDir returned null) we'll use resourceOutputDir (original outputDir):
+            Path resourceOutputDir = Paths.get(outputDir).toAbsolutePath();
+
+            Path newOutputDirectory = Paths.get(
+                    Objects.requireNonNullElse(getParentBundleDir(outputDir)
+                            , resourceOutputDir)
+                            + File.separator + "input");
+
+            Path newLibraryDirectory = Paths.get(newOutputDirectory.toString(), "resources" + File.separator + "library");
             Path newCqlDirectory = Paths.get(newOutputDirectory.toString(), "cql");
-            newCqlDirectory.toFile().mkdirs();
-            Path newMeasureDirectory = Paths.get(newOutputDirectory.toString(), "resources/measure");
-            newMeasureDirectory.toFile().mkdirs();
-            if (version == "stu3) ") {
+            Path newMeasureDirectory = Paths.get(newOutputDirectory.toString(), "resources" + File.separator + "measure");
+
+            if (version.equals(VERSION_STU3)) {
                 if (theResource instanceof org.hl7.fhir.dstu3.model.Library) {
                     org.hl7.fhir.dstu3.model.Library theLibrary = (org.hl7.fhir.dstu3.model.Library) theResource;
                     resourceName = theLibrary.getName();
@@ -329,7 +353,7 @@ public class ExtractMatBundleOperation extends Operation {
                     // Forcing the encoding to JSON here to make everything the same in input directory
                     ResourceUtils.outputResourceByName(theResource, "json", context, newMeasureDirectory.toString(), resourceName);
                 }
-            } else if (version == VERSION_R4) {
+            } else if (version.equals(VERSION_R4)) {
                 if (theResource instanceof org.hl7.fhir.r4.model.Library) {
                     org.hl7.fhir.r4.model.Library theLibrary = (org.hl7.fhir.r4.model.Library) theResource;
                     resourceName = theLibrary.getName();
@@ -372,7 +396,13 @@ public class ExtractMatBundleOperation extends Operation {
                 String encodedString = Base64.getEncoder().encodeToString(encodedBytes);
                 byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
                 try {
-                    FileUtils.writeByteArrayToFile(new File(cqlFilename), decodedBytes);
+                    File outputFile = new File(cqlFilename);
+                    // Ensure the parent directory exists
+                    File parentDir = outputFile.getParentFile();
+                    if (parentDir != null && !parentDir.exists()) {
+                        parentDir.mkdirs();
+                    }
+                    FileUtils.writeByteArrayToFile(outputFile, decodedBytes);
                 } catch (IOException e) {
                     throw new RuntimeException(cqlFilename + ": " + e.getMessage());
                 }
@@ -395,7 +425,13 @@ public class ExtractMatBundleOperation extends Operation {
                 String encodedString = Base64.getEncoder().encodeToString(encodedBytes);
                 byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
                 try {
-                    FileUtils.writeByteArrayToFile(new File(cqlFilename), decodedBytes);
+                    File outputFile = new File(cqlFilename);
+                    // Ensure the parent directory exists
+                    File parentDir = outputFile.getParentFile();
+                    if (parentDir != null && !parentDir.exists()) {
+                        parentDir.mkdirs();
+                    }
+                    FileUtils.writeByteArrayToFile(outputFile, decodedBytes);
                 } catch (IOException e) {
                     throw new RuntimeException(cqlFilename + ": " + e.getMessage());
                 }

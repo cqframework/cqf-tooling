@@ -19,6 +19,7 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -180,7 +181,7 @@ public class R4MeasureProcessor extends MeasureProcessor {
     }
 
     @Override
-    public List<String> refreshMeasureContent(RefreshMeasureParameters params) {
+    public List<String> refreshMeasureContent(RefreshMeasureParameters params) throws IOException {
         if (params.parentContext != null) {
             initialize(params.parentContext);
         }

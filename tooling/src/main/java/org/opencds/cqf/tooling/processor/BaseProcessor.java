@@ -1,10 +1,7 @@
 package org.opencds.cqf.tooling.processor;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
+import org.cqframework.fhir.npm.LibraryLoader;
+import org.cqframework.fhir.npm.NpmPackageManager;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
@@ -13,7 +10,7 @@ import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.conv30_50.VersionConvertor_30_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r5.context.IWorkerContext;
+import org.hl7.fhir.r5.context.ILoggingService;
 import org.hl7.fhir.r5.elementmodel.Manager;
 import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.utilities.IniFile;
@@ -21,13 +18,16 @@ import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.VersionUtilities;
 import org.opencds.cqf.tooling.exception.IGInitializationException;
-import org.opencds.cqf.tooling.npm.LibraryLoader;
-import org.opencds.cqf.tooling.npm.NpmPackageManager;
 import org.opencds.cqf.tooling.utilities.IGUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BaseProcessor implements IProcessorContext, IWorkerContext.ILoggingService {
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class BaseProcessor implements IProcessorContext, ILoggingService {
 
     protected static final Logger logger = LoggerFactory.getLogger(BaseProcessor.class);
 
@@ -122,7 +122,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
         this.fhirVersion = sourceIg.getFhirVersion().get(0).getCode();
         packageId = sourceIg.getPackageId();
         canonicalBase = determineCanonical(sourceIg.getUrl());
-        packageManager = new NpmPackageManager(sourceIg, this.fhirVersion);
+        packageManager = new NpmPackageManager(sourceIg);
 
         // Setup binary paths (cql source directories)
         binaryPaths = IGUtils.extractBinaryPaths(rootDir, sourceIg);
@@ -131,7 +131,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
     /*
      * Initializes from an ig.ini file in the root directory
      */
-    public void initializeFromIni(String iniFile) {
+    public void initializeFromIni(String iniFile) throws IOException {
         IniFile ini = new IniFile(new File(iniFile).getAbsolutePath());
         String rootDir = Utilities.getDirectoryForFile(ini.getFileName());
         String igPath = ini.getStringProperty("IG", "ig");
@@ -242,7 +242,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
     }
 
     @Override
-    public void logDebugMessage(IWorkerContext.ILoggingService.LogCategory category, String msg) {
+    public void logDebugMessage(ILoggingService.LogCategory category, String msg) {
         logger.debug("Category: {} Message: {}", category.name(), msg);
     }
 

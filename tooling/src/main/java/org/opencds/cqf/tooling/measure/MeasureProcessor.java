@@ -15,6 +15,7 @@ import org.opencds.cqf.tooling.processor.IGProcessor;
 import org.opencds.cqf.tooling.utilities.*;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -28,7 +29,7 @@ public class MeasureProcessor extends BaseProcessor {
     }
 
     public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, Boolean versioned, FhirContext fhirContext,
-                                                String measureToRefreshPath, Boolean shouldApplySoftwareSystemStamp, Boolean shouldIncludePopDataRequirements) {
+                                                String measureToRefreshPath, Boolean shouldApplySoftwareSystemStamp, Boolean shouldIncludePopDataRequirements) throws IOException {
 
         return refreshIgMeasureContent(parentContext, outputEncoding, null, versioned, fhirContext, measureToRefreshPath,
                 shouldApplySoftwareSystemStamp, shouldIncludePopDataRequirements);
@@ -38,7 +39,7 @@ public class MeasureProcessor extends BaseProcessor {
 
     public List<String> refreshIgMeasureContent(BaseProcessor parentContext, Encoding outputEncoding, String measureOutputDirectory,
                                                 Boolean versioned, FhirContext fhirContext, String measureToRefreshPath,
-                                                Boolean shouldApplySoftwareSystemStamp, Boolean shouldIncludePopDataRequirements) {
+                                                Boolean shouldApplySoftwareSystemStamp, Boolean shouldIncludePopDataRequirements) throws IOException {
 
         logger.info("[Refreshing Measures]");
 
@@ -83,7 +84,7 @@ public class MeasureProcessor extends BaseProcessor {
     protected boolean versioned;
     protected FhirContext fhirContext;
 
-    public List<String> refreshMeasureContent(RefreshMeasureParameters params) {
+    public List<String> refreshMeasureContent(RefreshMeasureParameters params) throws IOException {
         return new ArrayList<>();
     }
 
