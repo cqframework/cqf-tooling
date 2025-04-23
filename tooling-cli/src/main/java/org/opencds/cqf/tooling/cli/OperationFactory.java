@@ -1,5 +1,10 @@
 package org.opencds.cqf.tooling.cli;
 
+//import org.opencds.cqf.tooling.jsonschema.SchemaGenerator;
+import org.opencds.cqf.tooling.casereporting.transformer.ErsdTransformer;
+import org.opencds.cqf.tooling.dateroller.DataDateRollerOperation;
+import org.opencds.cqf.tooling.terminology.*;
+import org.opencds.cqf.tooling.terminology.templateToValueSetGenerator.TemplateToValueSetGenerator;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -9,6 +14,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.opencds.cqf.tooling.Operation;
 import org.opencds.cqf.tooling.acceleratorkit.DTProcessor;
 import org.opencds.cqf.tooling.acceleratorkit.Processor;
+import org.opencds.cqf.tooling.casereporting.tes.TESPackageGenerator;
 import org.opencds.cqf.tooling.casereporting.transformer.ErsdTransformer;
 import org.opencds.cqf.tooling.dateroller.DataDateRollerOperation;
 import org.opencds.cqf.tooling.exception.InvalidOperationArgs;
@@ -205,6 +211,8 @@ class OperationFactory {
                 return new BundlePublish();
             case "TransformErsd":
                 return new ErsdTransformer();
+            case "CaseReportingTESGeneratePackage":
+                return new TESPackageGenerator();
             case "RollTestsDataDates":
                 return new DataDateRollerOperation();
             case "ProfilesToSpreadsheet":
@@ -213,6 +221,8 @@ class OperationFactory {
                 return new QICoreElementsToSpreadsheet();
             case "StripGeneratedContent":
                 return new StripGeneratedContentOperation();
+            case "SpreadsheetValidateVSandCS":
+                return new SpreadsheetValidateVSandCS();
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operationName);
         }
