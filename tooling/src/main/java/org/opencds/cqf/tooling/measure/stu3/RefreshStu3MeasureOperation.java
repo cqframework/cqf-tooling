@@ -1,34 +1,32 @@
 package org.opencds.cqf.tooling.measure.stu3;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.JsonParser;
+import ca.uhn.fhir.parser.XmlParser;
+import com.google.common.base.Strings;
+import org.hl7.fhir.dstu3.model.Measure;
+import org.opencds.cqf.tooling.common.stu3.SoftwareSystemHelper;
+import org.opencds.cqf.tooling.operation.RefreshGeneratedContentOperation;
+import org.opencds.cqf.tooling.utilities.IOUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import org.hl7.fhir.dstu3.model.Measure;
-import org.opencds.cqf.tooling.common.stu3.CqfmSoftwareSystemHelper;
-import org.opencds.cqf.tooling.operation.RefreshGeneratedContentOperation;
-import org.opencds.cqf.tooling.utilities.IOUtils;
-
-import com.google.common.base.Strings;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.parser.JsonParser;
-import ca.uhn.fhir.parser.XmlParser;
-
 public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperation {
 
     private JsonParser jsonParser;
     private XmlParser xmlParser;
-    private CqfmSoftwareSystemHelper cqfmHelper;
+    private SoftwareSystemHelper softwareSystemHelper;
 
     //NOTE: Only consumed from OperationFactory - that call should come through a proper Operation that calls a processor.
     public RefreshStu3MeasureOperation() {
         super("src/main/resources/org/opencds/cqf/tooling/measure/output/stu3",
                 "-RefreshStu3Measure", FhirContext.forCached(FhirVersionEnum.DSTU3));
-        cqfmHelper = new CqfmSoftwareSystemHelper("src/main/resources/org/opencds/cqf/tooling/measure/output/r4");
+        softwareSystemHelper = new SoftwareSystemHelper("src/main/resources/org/opencds/cqf/tooling/measure/output/r4");
         jsonParser = (JsonParser)super.fhirContext.newJsonParser();
         xmlParser = (XmlParser)super.fhirContext.newXmlParser();
     }
@@ -38,9 +36,9 @@ public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperatio
         super(pathToMeasures, "-RefreshStu3Measure", FhirContext.forCached(FhirVersionEnum.DSTU3),
                 null, pathToMeasures);
         if (!Strings.isNullOrEmpty(getOutputPath())) {
-            cqfmHelper = new CqfmSoftwareSystemHelper(getOutputPath());
+            softwareSystemHelper = new SoftwareSystemHelper(getOutputPath());
         } else {
-            cqfmHelper = new CqfmSoftwareSystemHelper();
+            softwareSystemHelper = new SoftwareSystemHelper();
         }
         jsonParser = (JsonParser)this.getFhirContext().newJsonParser();
         xmlParser = (XmlParser)this.getFhirContext().newXmlParser();
@@ -50,7 +48,7 @@ public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperatio
     public void refreshGeneratedContent() {
         File measureDir = new File(this.getPathToMeasures());
         if (measureDir.isDirectory()) {
-            for (File f : Optional.ofNullable(measureDir.listFiles()).<NoSuchElementException>orElseThrow(() -> new NoSuchElementException())) {
+            for (File f : Optional.ofNullable(measureDir.listFiles()).orElseThrow(NoSuchElementException::new)) {
                 refreshMeasureFromFile(f);
             }
         }
@@ -86,7 +84,7 @@ public class RefreshStu3MeasureOperation extends RefreshGeneratedContentOperatio
 
     public Measure refreshMeasure(Measure measure) {
         if (shouldApplySoftwareSystemStamp) {
-            cqfmHelper.ensureCQFToolingExtensionAndDevice(measure, this.getFhirContext());
+            softwareSystemHelper.ensureCQFToolingExtensionAndDevice(measure, this.getFhirContext());
         }
 //        CqfMeasure cqfMeasure = this.dataRequirementsProvider.createCqfMeasure(measure, this.libraryResourceProvider);
 //
