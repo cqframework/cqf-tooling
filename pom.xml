@@ -20,6 +20,7 @@
         <jetty.version>11.0.20</jetty.version>
         <error-prone.version>2.24.1</error-prone.version>
         <checkstyle.version>10.12.7</checkstyle.version>
+        <poi.version>5.4.0</poi.version>
     </properties>
 
     <name>CQF Tooling</name>
