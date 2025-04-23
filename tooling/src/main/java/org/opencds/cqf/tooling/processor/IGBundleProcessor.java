@@ -3,6 +3,7 @@ package org.opencds.cqf.tooling.processor;
 import ca.uhn.fhir.context.FhirContext;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.measure.MeasureBundler;
+import org.opencds.cqf.tooling.plandefinition.PlanDefinitionBundler;
 import org.opencds.cqf.tooling.questionnaire.QuestionnaireBundler;
 import org.opencds.cqf.tooling.utilities.HttpClientUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -12,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class IGBundleProcessor {
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
     public static final String bundleFilesPathElement = "files/";
 
-    private Boolean verboseMessaging = true;
+    private final Boolean verboseMessaging;
     LibraryProcessor libraryProcessor;
     CDSHooksProcessor cdsHooksProcessor;
 
@@ -30,7 +30,7 @@ public class IGBundleProcessor {
         this.cdsHooksProcessor = cdsHooksProcessor;
     }
 
-    public void bundleIg(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Encoding encoding, Boolean includeELM,
+    public void bundleIg(List<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Encoding encoding, Boolean includeELM,
                          Boolean includeDependencies, Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned, Boolean addBundleTimestamp,
                          FhirContext fhirContext, String fhirUri) {
 
@@ -49,7 +49,7 @@ public class IGBundleProcessor {
 
         //run collected post calls last:
         if (HttpClientUtils.hasPostTasksInQueue()) {
-            logger.info("[Persisting Files to " + fhirUri + "]");
+            logger.info("[Persisting Files to {}]", fhirUri);
             HttpClientUtils.postTaskCollection();
         }
 

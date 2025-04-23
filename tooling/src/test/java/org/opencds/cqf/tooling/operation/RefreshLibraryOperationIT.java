@@ -34,7 +34,7 @@ public class RefreshLibraryOperationIT extends RefreshTest {
     private void testRefreshOverwriteLibraries() throws Exception {
         String targetDirectory = "target" + separator + "refreshLibraries" + separator + "r4";
         copyResourcesToTargetDir(targetDirectory, "r4");
-        
+
         String libraryPath = separator + "input" + separator + "resources" + separator + "library" + separator + "library-EXM124_FHIR4-8.2.000.json";
 
 		String args[] = {
@@ -43,13 +43,13 @@ public class RefreshLibraryOperationIT extends RefreshTest {
             "-lp=" + targetDirectory + libraryPath,
             "-cql=" + targetDirectory + separator + "input" + separator + "pagecontent" + separator + "cql" + separator + "EXM124_FHIR4-8.2.000.cql",
             "-e=json",
-            "-fv=4.0.1" 
+            "-fv=4.0.1"
         };
 
         RefreshLibraryOperation refreshLibraryOperation = new RefreshLibraryOperation();
         refreshLibraryOperation.execute(args);
 
-        validateCqfmSoftwareSystemExtension(targetDirectory + libraryPath);
+        validateSoftwareSystemExtension(targetDirectory + libraryPath);
     }
 
     //@Test
@@ -72,7 +72,7 @@ public class RefreshLibraryOperationIT extends RefreshTest {
             "-lop=" + targetDirectory.getAbsolutePath(),
             "-cql=" + resourceDirPath + separator + "input" + separator + "pagecontent" + separator + "cql" + separator + "EXM124_FHIR4-8.2.000.cql",
             "-e=json",
-            "-fv=4.0.1" 
+            "-fv=4.0.1"
         };
 
         RefreshLibraryOperation refreshLibraryOperation = new RefreshLibraryOperation();

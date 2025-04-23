@@ -113,7 +113,7 @@ public abstract class AbstractBundler {
      * @param fhirUri                 The FHIR server URI.
      * @param encoding                The encoding type for processing resources.
      */
-    public void bundleResources(ArrayList<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
+    public void bundleResources(List<String> refreshedLibraryNames, String igPath, List<String> binaryPaths, Boolean includeDependencies,
                                 Boolean includeTerminology, Boolean includePatientScenarios, Boolean includeVersion, Boolean addBundleTimestamp,
                                 FhirContext fhirContext, String fhirUri, IOUtils.Encoding encoding, Boolean verboseMessaging) {
         logger.info("\r\n[Bundling " + getResourceBundlerType() + "s]\r\n");
@@ -314,7 +314,7 @@ public abstract class AbstractBundler {
      * @param cqlTranslatorErrorMessages A map containing CQL translator error messages for each library.
      * @return A StringBuilder containing the generated summary message.
      */
-    private StringBuilder generateBundleProcessSummary(ArrayList<String> refreshedLibraryNames, FhirContext fhirContext,
+    private StringBuilder generateBundleProcessSummary(List<String> refreshedLibraryNames, FhirContext fhirContext,
                                                        String fhirUri, Boolean verboseMessaging, Map<String, Integer> persistedFileReport,
                                                        List<String> bundledResources, Map<String, String> failedExceptionMessages,
                                                        Map<String, List<CqlCompilerException>> cqlTranslatorErrorMessages) {
