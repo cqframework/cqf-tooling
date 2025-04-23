@@ -44,8 +44,9 @@ public class PlanDefinitionRefreshProcessor {
             if (extension.hasUrl() && extension.getUrl().equals(CqfmConstants.DIRECT_REF_CODE_EXT_URL)) {
                 // update to use extension pack extension
                 extension.setUrl(CqfConstants.DIRECT_REF_CODE_EXT_URL);
-            } else if (extension.hasUrl() && extension.getUrl().equals(CqfConstants.DIRECT_REF_CODE_EXT_URL)) {
-                continue;
+            } else if (extension.hasUrl() && extension.getUrl().equals(CqfmConstants.LOGIC_DEFINITION_EXT_URL)) {
+                // update to use extension pack extension
+                extension.setUrl(CqfConstants.LOGIC_DEFINITION_EXT_URL);
             }
             planToUse.addExtension(extension);
         }

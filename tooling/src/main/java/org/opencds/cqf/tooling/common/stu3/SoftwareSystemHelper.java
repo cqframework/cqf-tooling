@@ -1,73 +1,50 @@
-package org.opencds.cqf.tooling.common.r4;
+package org.opencds.cqf.tooling.common.stu3;
 
-import java.io.File;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.JsonParser;
+import ca.uhn.fhir.parser.XmlParser;
+import org.hl7.fhir.dstu3.model.*;
+import org.opencds.cqf.tooling.common.BaseSoftwareSystemHelper;
+import org.opencds.cqf.tooling.common.SoftwareSystem;
+import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.constants.CqfConstants;
+import org.opencds.cqf.tooling.utilities.constants.CrmiConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.cqframework.cql.Main;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Device;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.ResourceType;
-import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.tooling.common.BaseCqfmSoftwareSystemHelper;
-import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
-import org.opencds.cqf.tooling.utilities.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+public class SoftwareSystemHelper extends BaseSoftwareSystemHelper {
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.JsonParser;
-import ca.uhn.fhir.parser.XmlParser;
+    private static final Logger logger = LoggerFactory.getLogger(SoftwareSystemHelper.class);
 
+    public SoftwareSystemHelper() { }
 
-public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
-
-    private static Logger logger = LoggerFactory.getLogger(CqfmSoftwareSystemHelper.class);
-
-    public CqfmSoftwareSystemHelper() { }
-
-    public CqfmSoftwareSystemHelper(String rootDir) {
+    public SoftwareSystemHelper(String rootDir) {
         super(rootDir);
     }
 
-    @SuppressWarnings("serial")
-    protected <T extends DomainResource> void validateResourceForSoftwareSystemExtension(T resource) {
+    private <T extends DomainResource> void validateResourceForSoftwareSystemExtension(T resource) {
         if (resource == null) {
             throw new IllegalArgumentException("No resource provided.");
         }
-
-        List<String> eligibleResourceTypes = new ArrayList<String>() { {
-            add("Library");
-            add("Measure");
-        } };
-
-        String eligibleResourceTypesList = String.join(", ", eligibleResourceTypes);
-        String fhirType = "Library";//resource.get resource.fhirType();
-        if (!eligibleResourceTypes.contains(fhirType)) {
-            throw new IllegalArgumentException(String.format("cqfm-softwaresystem extension is only supported for the following resources: { %s }, not %s", eligibleResourceTypesList, fhirType));
-        }
     }
 
-    public <T extends DomainResource> void ensureSoftwareSystemExtensionAndDevice(T resource, List<CqfmSoftwareSystem> softwareSystems, FhirContext fhirContext) {
+    public <T extends DomainResource> void ensureSoftwareSystemExtensionAndDevice(T resource, List<SoftwareSystem> softwareSystems, FhirContext fhirContext) {
         validateResourceForSoftwareSystemExtension(resource);
 
         if (softwareSystems != null && !softwareSystems.isEmpty()) {
-            for (CqfmSoftwareSystem system : softwareSystems) {
+            for (SoftwareSystem system : softwareSystems) {
                 ensureSoftwareSystemExtensionAndDevice(resource, system, fhirContext);
             }
         }
     }
 
-    public <T extends DomainResource> void ensureSoftwareSystemExtensionAndDevice(T resource, CqfmSoftwareSystem system, FhirContext fhirContext) {
+    public <T extends DomainResource> void ensureSoftwareSystemExtensionAndDevice(T resource, SoftwareSystem system, FhirContext fhirContext) {
         validateResourceForSoftwareSystemExtension(resource);
 
         if (this.getSystemIsValid(system)) {
@@ -85,28 +62,28 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
                 if (path.endsWith("xml")) {
                     deviceOutputEncoding = IOUtils.Encoding.XML;
                     XmlParser xmlParser = (XmlParser)fhirContext.newXmlParser();
-                    try (FileReader reader = new FileReader(new File(path))) {
+                    try (FileReader reader = new FileReader(path)) {
                         resourceInPath = (DomainResource) xmlParser.parseResource(reader);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.warn("Error parsing " + e.getLocalizedMessage(), e);
                         throw new RuntimeException("Error parsing " + e.getLocalizedMessage());
                     }
                 }
                 else {
                     JsonParser jsonParser = (JsonParser)fhirContext.newJsonParser();
-                    try (FileReader reader = new FileReader(new File(path))) {
+                    try (FileReader reader = new FileReader(path)) {
                         resourceInPath = (DomainResource) jsonParser.parseResource(reader);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.warn("Error parsing " + e.getLocalizedMessage(), e);
                         throw new RuntimeException("Error parsing " + e.getLocalizedMessage());
                     }
                 }
 
-                // NOTE: Takes the first device that matches on ID.
-                if (resourceInPath.getResourceType().toString().toLowerCase().equals("device")) {
+                // NOTE: Takes the first device that matches on ID and Version.
+                if (resourceInPath.getResourceType().toString().equalsIgnoreCase("device")) {
                     Device prospectDevice = (Device)resourceInPath;
                     if (prospectDevice.getIdElement().getIdPart().equals(systemDeviceId)) {
-                        device = (Device)resourceInPath;
+                        device = (Device) resourceInPath;
                         deviceOutputPath = path;
                         break;
                     }
@@ -115,25 +92,11 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 
             /* Create the device if one doesn't already exist */
             if (device == null) {
-                logger.debug("Creating Device");
                 device = createSoftwareSystemDevice(system);
             }
 
             /* Ensure that device has the current/proposed version */
-            Device.DeviceVersionComponent proposedVersion = new Device.DeviceVersionComponent(new StringType(system.getVersion()));
-            List<Device.DeviceVersionComponent> proposedVersionList = new ArrayList<Device.DeviceVersionComponent>();
-            proposedVersionList.add(proposedVersion);
-            device.setVersion(proposedVersionList);
-
-            /* Ensure that device has a name */
-            Device.DeviceDeviceNameComponent proposedName = new Device.DeviceDeviceNameComponent();
-            proposedName.setName(system.getName());
-            proposedName.setType(Device.DeviceNameType.MANUFACTURERNAME);
-            device.getDeviceName().clear();
-            device.addDeviceName(proposedName);
-
-            /* Ensure that device has a manufacturer */
-            device.setManufacturer(system.getManufacturer());
+            device.setVersion(system.getVersion());
 
             /* Persist the new/updated Device */
             EnsureDevicePath();
@@ -143,37 +106,33 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
             final List<Extension> extensions = resource.getExtension();
             Extension softwareSystemExtension = null;
             for (Extension ext : extensions) {
-                if(ext.getValue() != null
-                    && ext.getValue().fhirType() != null
-                    && ext.getValue().fhirType().equals("Reference")
-                    && ((Reference)ext.getValue()).getReference() != null
-                    && ((Reference) ext.getValue()).getReference().endsWith(systemDeviceId)) {
-                        softwareSystemExtension = ext;
-                        ((Reference) softwareSystemExtension.getValue()).setResource(null);
+                if (ext.getValue().fhirType().equals("Reference") && ((Reference) ext.getValue()).getReference().endsWith(systemDeviceId)) {
+                    softwareSystemExtension = ext;
+                    ((Reference)softwareSystemExtension.getValue()).setResource(null);
                 }
             }
 
-            if (softwareSystemExtension == null && device != null) {
+            if (softwareSystemExtension == null) {
                 softwareSystemExtension = new Extension();
-                softwareSystemExtension.setUrl(this.getCqfmSoftwareSystemExtensionUrl());
+                softwareSystemExtension.setUrl(CrmiConstants.SOFTWARE_SYSTEM_EXT_URL);
                 final Reference reference = new Reference();
                 reference.setReference(systemReference);
                 softwareSystemExtension.setValue(reference);
 
                 resource.addExtension(softwareSystemExtension);
             }
-            else if (softwareSystemExtension != null && !systemReference.equals(((Reference)softwareSystemExtension.getValue()).getReference())) {
+            else if (!systemReference.equals(((Reference)softwareSystemExtension.getValue()).getReference())) {
                 ((Reference)softwareSystemExtension.getValue()).setReference(systemReference);
             }
-            else if (device == null) {
-                if (resource.hasExtension(this.getCqfmSoftwareSystemExtensionUrl())) {
+            // Remove Extension if device does not exist in IG and we have not been able to create it for some reason.
+            else {
+                if (resource.hasExtension()) {
                     resource.setExtension(extensions.stream()
-                        .filter(extension -> !extension.getUrl().equals(this.getCqfmSoftwareSystemExtensionUrl()))
+                        .filter(extension -> !extension.getUrl().equals(CrmiConstants.SOFTWARE_SYSTEM_EXT_URL))
                         .collect(Collectors.toList()));
                 }
             }
 
-            // NOTE: This seems like a cleanup from a previous implementation. Should it remain? If so, for how long?
             // If Contained only contains the proposed device then set it to null, else set it to include the other
             // entries that it contained. i.e. remove any Contained entries for the proposed device/system
             if (resource.hasContained()) {
@@ -210,7 +169,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
         }
     }
 
-    public Device createSoftwareSystemDevice(CqfmSoftwareSystem system) {
+    public Device createSoftwareSystemDevice(SoftwareSystem system) {
         Device device = null;
 
         if (this.getSystemIsValid(system)) {
@@ -219,15 +178,15 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 
             /* meta.profile */
             Meta meta = new Meta();
-            meta.addProfile("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/device-softwaresystem-cqfm");
+            meta.addProfile(CrmiConstants.SOFTWARE_SYSTEM_DEVICE_PROFILE_URL);
             device.setMeta(meta);
 
-            device.addDeviceName().setName(system.getName()).setType(Device.DeviceNameType.MANUFACTURERNAME);
-            device.setManufacturer(system.getName());
+            device.setManufacturer(system.getManufacturer());
+            device.setModel(system.getName());
 
             /* type */
             Coding typeCoding = new Coding();
-            typeCoding.setSystem("http://hl7.org/fhir/us/cqfmeasures/CodeSystem/software-system-type");
+            typeCoding.setSystem(CrmiConstants.SOFTWARE_SYSTEM_DEVICE_TYPE_SYSTEM_URL);
             typeCoding.setCode("tooling");
 
             List<Coding> typeCodingList = new ArrayList<>();
@@ -238,7 +197,8 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
             device.setType(type);
 
             /* version */
-            addVersion(device, system.getVersion());
+            String version = system.getVersion();
+            device.setVersion(version);
         }
 
         return device;
@@ -253,16 +213,7 @@ public class CqfmSoftwareSystemHelper extends BaseCqfmSoftwareSystemHelper {
 //    }
 
     public <T extends DomainResource> void ensureCQFToolingExtensionAndDevice(T resource, FhirContext fhirContext) {
-        CqfmSoftwareSystem cqfToolingSoftwareSystem = new CqfmSoftwareSystem(this.getCqfToolingDeviceName(), CqfmSoftwareSystemHelper.class.getPackage().getImplementationVersion(), Main.class.getPackage().getImplementationVendor());
+        SoftwareSystem cqfToolingSoftwareSystem = new SoftwareSystem(CqfConstants.CQF_TOOLING_DEVICE_NAME, SoftwareSystemHelper.class.getPackage().getImplementationVersion(), SoftwareSystemHelper.class.getPackage().getImplementationVendor());
         ensureSoftwareSystemExtensionAndDevice(resource, cqfToolingSoftwareSystem, fhirContext);
-    }
-
-    private void addVersion(Device device, String version) {
-        // NOTE: The cqfm-softwaresystem extension restricts the cardinality of version to 0..1, so we overwrite any existing version entries each time
-        Device.DeviceVersionComponent versionComponent = new Device.DeviceVersionComponent(new StringType(version));
-        List<Device.DeviceVersionComponent> versionList = new ArrayList<Device.DeviceVersionComponent>();
-        versionList.add(versionComponent);
-
-        device.setVersion(versionList);
     }
 }

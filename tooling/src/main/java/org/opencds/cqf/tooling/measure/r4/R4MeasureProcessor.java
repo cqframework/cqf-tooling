@@ -7,7 +7,7 @@ import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.r4.formats.FormatUtilities;
 import org.hl7.fhir.r5.model.Measure;
-import org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper;
+import org.opencds.cqf.tooling.common.r4.SoftwareSystemHelper;
 import org.opencds.cqf.tooling.measure.MeasureProcessor;
 import org.opencds.cqf.tooling.measure.MeasureRefreshProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshMeasureParameters;
@@ -23,7 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class R4MeasureProcessor extends MeasureProcessor {
 
     private RefreshMeasureParameters params;
-    private static CqfmSoftwareSystemHelper cqfmHelper;
+    private static SoftwareSystemHelper cqfmHelper;
 
     private String getMeasurePath(String measurePath) {
         var f = new File(measurePath);
@@ -183,7 +183,7 @@ public class R4MeasureProcessor extends MeasureProcessor {
         }
 
         this.params = params;
-        R4MeasureProcessor.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
+        R4MeasureProcessor.cqfmHelper = new SoftwareSystemHelper(rootDir);
 
         if (params.measureOutputDirectory != null) {
             return refreshMeasures(params.measurePath, params.measureOutputDirectory, params.encoding);

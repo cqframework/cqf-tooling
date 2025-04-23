@@ -8,8 +8,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.Parameters;
 import org.hl7.fhir.ParametersParameter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.tooling.common.BaseCqfmSoftwareSystemHelper;
-import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
+import org.opencds.cqf.tooling.common.BaseSoftwareSystemHelper;
+import org.opencds.cqf.tooling.common.SoftwareSystem;
 import org.opencds.cqf.tooling.measure.MeasureTestProcessor;
 import org.opencds.cqf.tooling.parameter.TestIGParameters;
 import org.opencds.cqf.tooling.utilities.*;
@@ -103,8 +103,8 @@ public class IGTestProcessor extends BaseProcessor {
         }
     }
 
-    private CqfmSoftwareSystem getCqfRulerSoftwareSystem(String testServerUri) {
-        CqfmSoftwareSystem softwareSystem = null;
+    private SoftwareSystem getCqfRulerSoftwareSystem(String testServerUri) {
+        SoftwareSystem softwareSystem = null;
 
         try {
             IBaseResource resource = getServerMetadata(testServerUri);
@@ -123,7 +123,7 @@ public class IGTestProcessor extends BaseProcessor {
                             capabilityStatement.getSoftware()
                                     .getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-softwareModule")
                                     .stream()
-                                    .filter(extension -> !extension.getExtensionString("name").equals(BaseCqfmSoftwareSystemHelper.cqfRulerDeviceName))
+                                    .filter(extension -> !extension.getExtensionString("name").equals(BaseSoftwareSystemHelper.cqfRulerDeviceName))
                                     .collect(Collectors.toList())
                                     .get(0);
 
@@ -137,7 +137,7 @@ public class IGTestProcessor extends BaseProcessor {
                             capabilityStatement.getSoftware()
                                     .getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/capabilitystatement-softwareModule")
                                     .stream()
-                                    .filter(extension -> !extension.getExtensionString("name").equals(BaseCqfmSoftwareSystemHelper.cqfRulerDeviceName))
+                                    .filter(extension -> !extension.getExtensionString("name").equals(BaseSoftwareSystemHelper.cqfRulerDeviceName))
                                     .collect(Collectors.toList())
                                     .get(0);
 
@@ -147,7 +147,7 @@ public class IGTestProcessor extends BaseProcessor {
                 }
 
                 if (softwareVersion != null && !softwareVersion.isEmpty()) {
-                    softwareSystem = new CqfmSoftwareSystem(BaseCqfmSoftwareSystemHelper.cqfRulerDeviceName, softwareVersion, "CQFramework");
+                    softwareSystem = new SoftwareSystem(BaseSoftwareSystemHelper.cqfRulerDeviceName, softwareVersion, "CQFramework");
                 }
             }
         }
@@ -171,7 +171,7 @@ public class IGTestProcessor extends BaseProcessor {
             initializeFromIg(params.rootDir, params.igPath, fhirContext.getVersion().toString());
         }
 
-        CqfmSoftwareSystem testTargetSoftwareSystem =  getCqfRulerSoftwareSystem(params.fhirServerUri);
+        SoftwareSystem testTargetSoftwareSystem =  getCqfRulerSoftwareSystem(params.fhirServerUri);
 
         logger.info("[Running IG Test Cases]");
 
@@ -243,7 +243,7 @@ public class IGTestProcessor extends BaseProcessor {
                         logger.info(String.format("  Done processing all test cases for %s: %s", group.getName(), testArtifact.getName()));
 
                         //all Test Artifact Tests Passed
-                        List<CqfmSoftwareSystem> softwareSystems = new ArrayList<CqfmSoftwareSystem>() {
+                        List<SoftwareSystem> softwareSystems = new ArrayList<SoftwareSystem>() {
                             {
                                 add(testTargetSoftwareSystem);
                             }

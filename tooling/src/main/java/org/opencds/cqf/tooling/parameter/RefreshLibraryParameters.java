@@ -37,7 +37,7 @@ public class RefreshLibraryParameters {
     public Boolean versioned;
 
     /*
-    Whether the Software System Stamp should be applied via the cqfm-softwaresystem Extension
+    Whether the Software System Stamp should be applied via the crmi-softwaresystem Extension
     */
     public Boolean shouldApplySoftwareSystemStamp;
 

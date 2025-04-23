@@ -3,7 +3,7 @@ package org.opencds.cqf.tooling.plandefinition.r4;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.r4.formats.FormatUtilities;
-import org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper;
+import org.opencds.cqf.tooling.common.r4.SoftwareSystemHelper;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshPlanDefinitionParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -15,7 +15,7 @@ import java.util.*;
 
 public class PlanDefinitionProcessor extends org.opencds.cqf.tooling.plandefinition.PlanDefinitionProcessor {
     private static final Logger logger = LoggerFactory.getLogger(PlanDefinitionProcessor.class);
-    private static CqfmSoftwareSystemHelper cqfmHelper;
+    private static SoftwareSystemHelper cqfmHelper;
 
     private RefreshPlanDefinitionParameters params;
     public PlanDefinitionProcessor(LibraryProcessor libraryProcessor) {
@@ -135,7 +135,7 @@ public class PlanDefinitionProcessor extends org.opencds.cqf.tooling.plandefinit
 
         this.params = params;
 
-        cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
+        cqfmHelper = new SoftwareSystemHelper(rootDir);
 
         if (params.planDefinitionOutputDirectory != null) {
             return refreshPlanDefinitions(params.planDefinitionPath, params.planDefinitionOutputDirectory, params.encoding);
