@@ -7,7 +7,7 @@ import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.plandefinition.PlanDefinitionProcessor;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import java.io.FileReader;
@@ -24,7 +24,7 @@ public class PlanDefinitionProcessorTest {
     private Path libraryDir;
     private final FhirContext fhirContext = FhirContext.forR4Cached();
 
-    @AfterMethod
+    @AfterClass
     public void tearDown() throws IOException {
         // Recursively delete the temporary directory.
         deleteRecursively(tempDir);
