@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,7 +39,17 @@ public class PlanDefinitionProcessorTest {
                 }
             }
         }
-        Files.deleteIfExists(path);
+
+        for (int i = 0; i < 3; i++) {
+            try {
+                Files.deleteIfExists(path);
+                break;
+            } catch (IOException e) {
+                try {
+                    Thread.sleep(100); // Give OS time to release handle
+                } catch (InterruptedException ignored) {}
+            }
+        }
     }
 
     @Test(priority = 0, description = "Test PlanDefinition processor referencing an IG without any PlanDefinition resources")
@@ -67,13 +78,13 @@ public class PlanDefinitionProcessorTest {
 
         Assert.assertEquals(result.size(), 1);
 
-        var planDefinition = fhirContext.newJsonParser().parseResource(
-                new FileReader(planDefinitionDir.resolve("Simple.json").toFile()));
-
-        Assert.assertNotNull(planDefinition);
-        Assert.assertTrue(planDefinition instanceof PlanDefinition);
-        Assert.assertTrue(((PlanDefinition) planDefinition).hasContained());
-        Assert.assertTrue(((PlanDefinition) planDefinition).hasExtension());
+        try (Reader reader = new FileReader(planDefinitionDir.resolve("Simple.json").toFile())) {
+            var planDefinition = fhirContext.newJsonParser().parseResource(reader);
+            Assert.assertNotNull(planDefinition);
+            Assert.assertTrue(planDefinition instanceof PlanDefinition);
+            Assert.assertTrue(((PlanDefinition) planDefinition).hasContained());
+            Assert.assertTrue(((PlanDefinition) planDefinition).hasExtension());
+        }
     }
 
     @Test(priority = 2, description = "Test PlanDefinition processor referencing an IG with a more complex PlanDefinition resource")
@@ -91,18 +102,18 @@ public class PlanDefinitionProcessorTest {
 
         Assert.assertEquals(result.size(), 1);
 
-        var planDefinition = fhirContext.newJsonParser().parseResource(
-                new FileReader(planDefinitionDir.resolve("Complex.json").toFile()));
-
-        Assert.assertNotNull(planDefinition);
-        Assert.assertTrue(planDefinition instanceof PlanDefinition);
-        Assert.assertTrue(((PlanDefinition) planDefinition).hasContained());
-        Assert.assertTrue(((PlanDefinition) planDefinition).getContained().get(0) instanceof Library);
-        var effectiveDateRequirements = (Library) ((PlanDefinition) planDefinition).getContained().get(0);
-        Assert.assertTrue(effectiveDateRequirements.hasDataRequirement());
-        Assert.assertTrue(effectiveDateRequirements.hasRelatedArtifact());
-        Assert.assertTrue(effectiveDateRequirements.hasParameter());
-        Assert.assertTrue(((PlanDefinition) planDefinition).hasExtension());
+        try (Reader reader = new FileReader(planDefinitionDir.resolve("Complex.json").toFile())) {
+            var planDefinition = fhirContext.newJsonParser().parseResource(reader);
+            Assert.assertNotNull(planDefinition);
+            Assert.assertTrue(planDefinition instanceof PlanDefinition);
+            Assert.assertTrue(((PlanDefinition) planDefinition).hasContained());
+            Assert.assertTrue(((PlanDefinition) planDefinition).getContained().get(0) instanceof Library);
+            var effectiveDateRequirements = (Library) ((PlanDefinition) planDefinition).getContained().get(0);
+            Assert.assertTrue(effectiveDateRequirements.hasDataRequirement());
+            Assert.assertTrue(effectiveDateRequirements.hasRelatedArtifact());
+            Assert.assertTrue(effectiveDateRequirements.hasParameter());
+            Assert.assertTrue(((PlanDefinition) planDefinition).hasExtension());
+        }
     }
 
     private void boilerplateIg() throws IOException {
