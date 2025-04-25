@@ -161,7 +161,7 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>5.1.0</version>
+            <version>${poi.version}</version>
         </dependency>
 
         <!-- Narrative Generation -->
@@ -395,6 +395,12 @@
                 <groupId>org.eclipse.jetty.http2</groupId>
                 <artifactId>http2-hpack</artifactId>
                 <version>${jetty.version}</version>
+            </dependency>
+            <!-- Define correct version for nested poi dependency -->
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>${poi.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
