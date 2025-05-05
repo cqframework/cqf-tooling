@@ -16,7 +16,7 @@ public class ThreadUtils {
 
     private static List<ExecutorService> runningExecutors = new ArrayList<>();
 
-    private static final int threadPoolCount = Runtime.getRuntime().availableProcessors() * 2;
+    private static final int threadPoolCount = Integer.getInteger("threadutils.pool.count", Runtime.getRuntime().availableProcessors());
 
     /**
      * Executes a list of tasks concurrently using a thread pool.
