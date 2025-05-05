@@ -246,8 +246,6 @@ public abstract class AbstractBundler {
                         if (shouldPersist) {
                             String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), getResourceTestGroupName()), resourceName);
 
-                            persistBundle(bundleDestPath, resourceName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri, addBundleTimestamp);
-
                             bundleFiles(igPath, bundleDestPath, resourceName, binaryPaths, resourceSourcePath,
                                     primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios,
                                     includeVersion, addBundleTimestamp, cqlTranslatorErrorMessages);
@@ -263,6 +261,8 @@ public abstract class AbstractBundler {
                                 List<String> activityDefinitionPaths = CDSHooksProcessor.bundleActivityDefinitions(resourceSourcePath, fhirContext, resources, encoding, includeVersion, shouldPersist);
                                 cdsHooksProcessor.addActivityDefinitionFilesToBundle(igPath, bundleDestPath, activityDefinitionPaths, fhirContext, encoding);
                             }
+
+                            persistBundle(bundleDestPath, resourceName, encoding, fhirContext, new ArrayList<>(resources.values()), fhirUri, addBundleTimestamp);
 
                             bundledResources.add(resourceSourcePath);
                         }

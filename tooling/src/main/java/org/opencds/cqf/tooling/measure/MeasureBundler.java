@@ -62,29 +62,30 @@ public class MeasureBundler extends AbstractBundler {
      */
     @Override
     protected int persistFilesFolder(String bundleDestPath, String libraryName, Encoding encoding, FhirContext fhirContext, String fhirUri) {
-        List<String> persistedResources = new ArrayList<>();
-        String filesLoc = bundleDestPath + File.separator + libraryName + "-files";
-        File directory = new File(filesLoc);
-        if (directory.exists()) {
-            File[] filesInDir = directory.listFiles();
-            if (!(filesInDir == null || filesInDir.length == 0)) {
-                for (File file : filesInDir) {
-
-                    if (!file.getName().toLowerCase().endsWith(".json") && !file.getName().toLowerCase().endsWith(".xml")){
-                        continue;
-                    }
-
-                    try {
-                        IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext, true);
-                        HttpClientUtils.sendToServer(fhirUri, resource, encoding, fhirContext, file.getAbsolutePath());
-                        persistedResources.add(file.getAbsolutePath());
-                    } catch (Exception e) {
-                        //resource is likely not IBaseResource
-                        logger.error("MeasureBundler.persistFilesFolder", e);
-                    }
-                }
-            }
-        }
-        return persistedResources.size();
+//        List<String> persistedResources = new ArrayList<>();
+//        String filesLoc = bundleDestPath + File.separator + libraryName + "-files";
+//        File directory = new File(filesLoc);
+//        if (directory.exists()) {
+//            File[] filesInDir = directory.listFiles();
+//            if (!(filesInDir == null || filesInDir.length == 0)) {
+//                for (File file : filesInDir) {
+//
+//                    if (!file.getName().toLowerCase().endsWith(".json") && !file.getName().toLowerCase().endsWith(".xml")){
+//                        continue;
+//                    }
+//
+//                    try {
+//                        IBaseResource resource = IOUtils.readResource(file.getAbsolutePath(), fhirContext, true);
+//                        HttpClientUtils.sendToServer(fhirUri, resource, encoding, fhirContext, file.getAbsolutePath());
+//                        persistedResources.add(file.getAbsolutePath());
+//                    } catch (Exception e) {
+//                        //resource is likely not IBaseResource
+//                        logger.error("MeasureBundler.persistFilesFolder", e);
+//                    }
+//                }
+//            }
+//        }
+//        return persistedResources.size();
+        return 0;
     }
 }
