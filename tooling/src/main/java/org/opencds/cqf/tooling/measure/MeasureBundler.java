@@ -11,10 +11,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MeasureBundler extends AbstractBundler {
     public static final String ResourcePrefix = "measure-";
-    public static final String LIBRARY_DEPS = "library-deps-";
-    public static final String VALUESETS = "valuesets-";
-    public static final String TESTS = "tests-";
-    public static final String GROUP = "group-";
 
     protected CopyOnWriteArrayList<Object> identifiers;
 
