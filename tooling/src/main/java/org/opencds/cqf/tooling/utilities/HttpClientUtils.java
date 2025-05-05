@@ -1,6 +1,9 @@
 package org.opencds.cqf.tooling.utilities;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.Header;
@@ -10,11 +13,15 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -43,37 +50,124 @@ public class HttpClientUtils {
     private static final String ENCODING_TYPE = "Encoding Type";
     private static final String FHIR_CONTEXT = "FHIR Context";
 
-    //This is not to maintain a thread count, but rather to maintain the maximum number of POST calls that can simultaneously be waiting for a response from the server.
-    //This gives us some control over how many POSTs we're making so we don't crash the server.
-    //possible TODO:Allow users to specify this value on their own with arg passed into operation so that more robust servers can process post list faster
-    private static final int MAX_SIMULTANEOUS_POST_COUNT = 10;
+    //This is not to maintain a thread count, but rather to maintain the maximum number of HTTP calls that can simultaneously be waiting for a response from the server.
+    //This gives us some control over how many HTTP requests we're making so we don't crash the server.
+    //possible TODO:Allow users to specify this value on their own with arg passed into operation so that more robust servers can process put list faster
+    private static final int MAX_SIMULTANEOUS_REQUEST_COUNT = 10;
 
-    //failedPostCalls needs to maintain the details built in the FAILED message, as well as a copy of the inputs for a retry by the user on failed posts.
-    private static Queue<Pair<String, PostComponent>> failedPostCalls = new ConcurrentLinkedQueue<>();
-    private static List<String> successfulPostCalls = new CopyOnWriteArrayList<>();
-    private static Map<IBaseResource, Callable<Void>> tasks = new ConcurrentHashMap<>();
-    private static Map<IBaseResource, Callable<Void>> initialTasks = new ConcurrentHashMap<>();
-    private static List<IBaseResource> runningPostTaskList = new CopyOnWriteArrayList<>();
-    private static int processedPostCounter = 0;
+    //failedHttptCalls needs to maintain the details built in the FAILED message, as well as a copy of the inputs for a retry by the user on failed puts.
+    private static Queue<Pair<String, HttpRequestComponent>> failedHttpCalls = new ConcurrentLinkedQueue<>();
+    private static List<String> successfulHttpCalls = new CopyOnWriteArrayList<>();
+
+    //Parent map uses resourceType as key so that resourceTypes can have their tasks called in a specific order:
+    private static ConcurrentHashMap<HttpRequestResourceType, ConcurrentHashMap<IBaseResource, Callable<Void>>> mappedTasksByPriorityRank = new ConcurrentHashMap<>();
+
+    private static List<IBaseResource> runningRequestTaskList = new CopyOnWriteArrayList<>();
+    private static int processedRequestCounter = 0;
+
+    private static final CloseableHttpClient httpClient;
+
+    static {
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+        connectionManager.setMaxTotal(50); // Total max connections
+        connectionManager.setDefaultMaxPerRoute(10); // Max connections per route
+
+        httpClient = HttpClients.custom()
+                .setConnectionManager(connectionManager)
+                .build();
+    }
+
+
+    /**
+     * used for sending requests ordered by resource type (for reference validation):
+     * Terminology First:
+     * CODESYSTEM and VALUESET define critical terminologies that other resources may reference. For example, a Condition might reference a code from a CODESYSTEM.
+     * Logic Resources Next:
+     * LIBRARY resources are often foundational for clinical decision support or quality measures, and they might be referenced by PLANDEFINITION or MEASURE resources.
+     * Bundles:
+     * Transaction bundles need to be processed early to ensure their atomic operations complete and establish any interdependent resources before other resources reference them.
+     * Dependent Resources:
+     * Resources like PATIENT, GROUP, and CONDITION often serve as references for subsequent resources like OBSERVATION or CAREPLAN.
+     */
+    private static final List<HttpRequestResourceType> resourceTypeOrder = new ArrayList<>(Arrays.asList(
+            HttpRequestResourceType.CODESYSTEM,
+            HttpRequestResourceType.VALUESET,
+            HttpRequestResourceType.LIBRARY,
+            HttpRequestResourceType.MEASURE,
+            HttpRequestResourceType.PLANDEFINITION,
+            HttpRequestResourceType.PATIENT,
+            HttpRequestResourceType.GROUP,
+            HttpRequestResourceType.CONDITION,
+            HttpRequestResourceType.OBSERVATION,
+            HttpRequestResourceType.PROCEDURE,
+            HttpRequestResourceType.CAREPLAN,
+            HttpRequestResourceType.GOAL,
+            HttpRequestResourceType.SERVICEREQUEST,
+            HttpRequestResourceType.MEDICATION,
+            HttpRequestResourceType.MEDICATIONREQUEST,
+            HttpRequestResourceType.DIAGNOSTICREPORT,
+            HttpRequestResourceType.IMAGINGSTUDY,
+            HttpRequestResourceType.OTHER,
+            HttpRequestResourceType.TRANSACTION_BUNDLE,
+            HttpRequestResourceType.BUNDLE
+    ));
+
+    public enum HttpRequestResourceType {
+        CODESYSTEM("Code Systems"),
+        VALUESET("Value Sets"),
+        LIBRARY("Libraries"),
+
+        MEASURE("Measures"),
+        PLANDEFINITION("Plan Definitions"),
+        PATIENT("Patients"),
+        GROUP("Groups"),
+        CONDITION("Conditions"),
+        OBSERVATION("Observations"),
+        PROCEDURE("Procedures"),
+        CAREPLAN("Care Plans"),
+        GOAL("Goals"),
+        SERVICEREQUEST("Service Requests"),
+        MEDICATION("Medications"),
+        MEDICATIONREQUEST("Medication Requests"),
+        DIAGNOSTICREPORT("Diagnostic Reports"),
+        IMAGINGSTUDY("Imaging Studies"),
+        OTHER("Everything Else"),
+        TRANSACTION_BUNDLE("Transaction Bundles"),
+        BUNDLE("Bundles");
+        private final String displayName;
+
+        HttpRequestResourceType(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+    }
 
     private HttpClientUtils() {
     }
 
-    public static boolean hasPostTasksInQueue() {
-        return !tasks.isEmpty();
+    public static boolean hasHttpRequestTasksInQueue() {
+        return !mappedTasksByPriorityRank.isEmpty();
     }
 
     /**
-     * Initiates an HTTP POST request to a FHIR server with the specified parameters.
+     * Initiates an HTTP request to a FHIR server with the specified parameters.
      *
-     * @param fhirServerUrl The URL of the FHIR server to which the POST request will be sent.
-     * @param resource      The FHIR resource to be posted.
+     * @param fhirServerUrl The URL of the FHIR server to which the request will be sent.
+     * @param resource      The FHIR resource to be sent.
      * @param encoding      The encoding type of the resource.
      * @param fhirContext   The FHIR context for the resource.
      * @param fileLocation  Optional fileLocation indicator for identifying resources by raw filename
      * @throws IOException If an I/O error occurs during the request.
      */
-    public static void post(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation, boolean withPriority) throws IOException {
+    public static void sendToServer(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation) throws IOException {
+
+        // A key in our mappedTasksByPriorityRank using HttpRequestResourceType. Allows specification of
+        // the resource type for priority ordering at execute.
+        HttpRequestResourceType priorityRank = categorizeResource(resource);
+
         List<String> missingValues = new ArrayList<>();
         List<String> values = new ArrayList<>();
         validateAndAddValue(fhirServerUrl, FHIR_SERVER_URL, missingValues, values);
@@ -83,16 +177,12 @@ public class HttpClientUtils {
 
         if (!missingValues.isEmpty()) {
             String missingValueString = String.join(", ", missingValues);
-            logger.error("An invalid HTTP POST call was attempted with a null value for: " + missingValueString +
+            logger.error("An invalid HTTP request was attempted with a null value for: " + missingValueString +
                     (!values.isEmpty() ? "\\nRemaining values are: " + String.join(", ", values) : ""));
             return;
         }
 
-        createPostTask(fhirServerUrl, resource, encoding, fhirContext, fileLocation, withPriority);
-    }
-
-    public static void post(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation) throws IOException {
-        post(fhirServerUrl, resource, encoding, fhirContext, fileLocation, false);
+        createHttpRequestTask(fhirServerUrl, resource, encoding, fhirContext, fileLocation, priorityRank);
     }
 
     /**
@@ -122,153 +212,180 @@ public class HttpClientUtils {
     }
 
     /**
-     * Creates a task for handling an HTTP POST request to a FHIR server with the specified parameters.
+     * Creates a task for handling an HTTP request to a FHIR server with the specified parameters.
      * <p>
-     * This method is responsible for creating a task that prepares and executes an HTTP POST request to the provided FHIR server
+     * This method is responsible for creating a task that prepares and executes an HTTP request to the provided FHIR server
      * with the given FHIR resource, encoding type, and FHIR context. It adds the task to the queue of tasks for later execution.
      * If any exceptions occur during task creation or configuration, an error message is logged.
      *
-     * @param fhirServerUrl The URL of the FHIR server to which the POST request will be sent.
-     * @param resource      The FHIR resource to be posted.
+     * @param fhirServerUrl The URL of the FHIR server to which the request will be sent.
      * @param encoding      The encoding type of the resource.
      * @param fhirContext   The FHIR context for the resource.
      */
-    private static void createPostTask(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation, boolean withPriority) {
+    private static void createHttpRequestTask(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation, HttpRequestResourceType priorityRank) {
+
+        if (priorityRank == null) {
+            //added to last in the list:
+            priorityRank = HttpRequestResourceType.OTHER;
+        }
+        ConcurrentHashMap<IBaseResource, Callable<Void>> theseTasks = new ConcurrentHashMap<>();
+
         try {
-            PostComponent postPojo = new PostComponent(fhirServerUrl, resource, encoding, fhirContext, fileLocation, withPriority);
-            HttpPost post = configureHttpPost(fhirServerUrl, resource, encoding, fhirContext);
-            if (withPriority) {
-                initialTasks.put(resource, createPostCallable(post, postPojo));
-            } else {
-                tasks.put(resource, createPostCallable(post, postPojo));
-            }
+            HttpRequestComponent httpRequestPojo = new HttpRequestComponent(fhirServerUrl, resource, encoding, fhirContext, fileLocation, priorityRank);
+            HttpEntityEnclosingRequestBase httpRequest = configureHttpRequest(fhirServerUrl, resource, encoding, fhirContext);
+            theseTasks.put(resource, createHttpRequestCallable(httpRequest, httpRequestPojo));
         } catch (Exception e) {
-            logger.error("Error while submitting the POST request: " + e.getMessage(), e);
+            logger.error("Error while submitting the HTTP request: " + e.getMessage(), e);
+        }
+
+        //check if a callable tasks map has started based on this resourceType:
+        if (mappedTasksByPriorityRank.containsKey(priorityRank)) {
+            mappedTasksByPriorityRank.get(priorityRank).putAll(theseTasks);
+        } else {
+            mappedTasksByPriorityRank.put(priorityRank, theseTasks);
         }
     }
 
     /**
-     * Configures and prepares an HTTP POST request with the specified parameters.
+     * Configures and prepares an HTTP request with the specified parameters.
      * <p>
-     * This method creates and configures an HTTP POST request to be used for posting a FHIR resource to the given FHIR server.
+     * This method creates and configures an HTTP request to be used for sending a FHIR resource to the given FHIR server.
      * It sets the request's headers, encodes the FHIR resource, and sets request timeouts. If an unsupported encoding type is
      * encountered, it throws a runtime exception.
      *
-     * @param fhirServerUrl The URL of the FHIR server to which the POST request will be sent.
-     * @param resource      The FHIR resource to be posted.
+     * @param fhirServerUrl The URL of the FHIR server to which the request will be sent.
+     * @param resource      The FHIR resource to be sent.
      * @param encoding      The encoding type of the resource.
      * @param fhirContext   The FHIR context for the resource.
-     * @return An HTTP POST request configured for the FHIR server and resource.
+     * @return An HTTP request configured for the FHIR server and resource.
      */
-    private static HttpPost configureHttpPost(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext) {
+    private static HttpEntityEnclosingRequestBase configureHttpRequest(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext) {
 
-        //Transaction bundles get posted to /fhir but other resources get posted to /fhir/resourceType ie fhir/Group
-        String fhirServer = fhirServerUrl;
-        if (!BundleUtils.resourceIsTransactionBundle(resource)) {
-            fhirServer = fhirServer +
-                    (fhirServerUrl.endsWith("/") ? resource.fhirType()
-                            : "/" + resource.fhirType());
+        //Transaction bundles get POST to /fhir but other resources get PUT to /fhir/resourceType/id ie fhir/Group/Group-123456
+        String fhirUrl = fhirServerUrl.endsWith("/") ? fhirServerUrl : fhirServerUrl + "/";
+
+        if (BundleUtils.resourceIsTransactionBundle(resource)) {
+            HttpPost post = new HttpPost(fhirUrl);
+            post.addHeader("content-type", "application/" + encoding.toString());
+            String resourceString = IOUtils.encodeResourceAsString(resource, encoding, fhirContext);
+            StringEntity input;
+            try {
+                input = new StringEntity(resourceString);
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+            post.setEntity(input);
+            post.setConfig(requestConfig);
+
+            return post;
+
+        } else {
+
+            String fhirServer = fhirUrl + "/" + resource.fhirType() + "/" + resource.getIdElement().getIdPart();
+
+            HttpPut put = new HttpPut(fhirServer);
+            put.addHeader("content-type", "application/" + encoding.toString());
+            String resourceString = IOUtils.encodeResourceAsString(resource, encoding, fhirContext);
+            StringEntity input;
+            try {
+                input = new StringEntity(resourceString);
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+            put.setEntity(input);
+            put.setConfig(requestConfig);
+
+            return put;
+
+
         }
-
-        HttpPost post = new HttpPost(fhirServer);
-        post.addHeader("content-type", "application/" + encoding.toString());
-        String resourceString = IOUtils.encodeResourceAsString(resource, encoding, fhirContext);
-        StringEntity input;
-        try {
-            input = new StringEntity(resourceString);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-        post.setEntity(input);
-        post.setConfig(requestConfig);
-
-        return post;
     }
 
+
     /**
-     * Creates a callable task for executing an HTTP POST request and handling the response.
+     * Creates a callable task for executing an HTTP PUT request and handling the response.
      * <p>
      * This method constructs a callable task that performs the following steps:
-     * 1. Executes an HTTP POST request using the provided parameters.
+     * 1. Executes an HTTP PUT request using the provided parameters.
      * 2. Processes the HTTP response, checking the status code and reason phrase.
      * 3. Logs success or failure messages based on the response status.
      * 4. Handles exceptions related to the request and response.
-     * 5. Updates the progress and status of the post task.
+     * 5. Updates the progress and status of the put task.
      *
-     * @param post          The HTTP POST request to be executed.
-     * @param postComponent A data object containing additional information about the POST request.
-     * @return A callable task for executing the HTTP POST request.
+     * @param request              The HTTP PUT request to be executed.
+     * @param httpRequestComponent A data object containing additional information about the PUT request.
+     * @return A callable task for executing the HTTP PUT request.
      */
-    private static Callable<Void> createPostCallable(HttpPost post, PostComponent postComponent) {
+    private static Callable<Void> createHttpRequestCallable(HttpEntityEnclosingRequestBase request, HttpRequestComponent httpRequestComponent) {
         return () -> {
-            String resourceIdentifier = (postComponent.fileLocation != null ?
-                    Paths.get(postComponent.fileLocation).getFileName().toString()
+            String resourceIdentifier = (httpRequestComponent.fileLocation != null ?
+                    Paths.get(httpRequestComponent.fileLocation).getFileName().toString()
                     :
-                    postComponent.resource.getIdElement().getIdPart());
-            try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
+                    httpRequestComponent.resource.getIdElement().getIdPart());
+            try {
 
-                HttpResponse response = httpClient.execute(post);
+                HttpResponse response = httpClient.execute(request);
 
                 StatusLine statusLine = response.getStatusLine();
                 int statusCode = statusLine.getStatusCode();
                 String diagnosticString = getDiagnosticString(EntityUtils.toString(response.getEntity()));
 
                 if (statusCode >= 200 && statusCode < 300) {
-                    successfulPostCalls.add(buildSuccessMessage(postComponent.fhirServerUrl, resourceIdentifier));
-                }else if (statusCode == 301){
+                    successfulHttpCalls.add(buildSuccessMessage(httpRequestComponent.fhirServerUrl, resourceIdentifier));
+                } else if (statusCode == 301) {
                     //redirected, find new location:
                     Header locationHeader = response.getFirstHeader("Location");
                     if (locationHeader != null) {
-                        postComponent.redirectFhirServerUrl = locationHeader.getValue();
-                        HttpPost redirectedPost = configureHttpPost(postComponent.redirectFhirServerUrl, postComponent.resource, postComponent.encoding, postComponent.fhirContext);
-                        String redirectLocationIdentifier = postComponent.redirectFhirServerUrl
-                                + "(redirected from " + postComponent.fhirServerUrl + ")";
-                        //attempt to post at location specified in redirect response:
-                        try (CloseableHttpClient redirectHttpClient = HttpClientBuilder.create().build()) {
-                            HttpResponse redirectResponse = redirectHttpClient.execute(redirectedPost);
+                        httpRequestComponent.redirectFhirServerUrl = locationHeader.getValue();
+                        HttpEntityEnclosingRequestBase redirectedHttpRequest = configureHttpRequest(httpRequestComponent.redirectFhirServerUrl, httpRequestComponent.resource, httpRequestComponent.encoding, httpRequestComponent.fhirContext);
+                        String redirectLocationIdentifier = httpRequestComponent.redirectFhirServerUrl
+                                + "(redirected from " + httpRequestComponent.fhirServerUrl + ")";
+                        //attempt to put at location specified in redirect response:
+                        try {
+                            HttpResponse redirectResponse = httpClient.execute(redirectedHttpRequest);
                             StatusLine redirectStatusLine = redirectResponse.getStatusLine();
                             int redirectStatusCode = redirectStatusLine.getStatusCode();
                             String redirectDiagnosticString = getDiagnosticString(EntityUtils.toString(redirectResponse.getEntity()));
 
                             //treat new response same as we would before:
                             if (redirectStatusCode >= 200 && redirectStatusCode < 300) {
-                                successfulPostCalls.add(buildSuccessMessage(redirectLocationIdentifier, resourceIdentifier));
+                                successfulHttpCalls.add(buildSuccessMessage(redirectLocationIdentifier, resourceIdentifier));
                             } else {
-                                failedPostCalls.add(buildFailedPostMessage(postComponent, redirectStatusCode, redirectLocationIdentifier, resourceIdentifier, redirectDiagnosticString));
+                                failedHttpCalls.add(buildFailedHTTPMessage(httpRequestComponent, redirectStatusCode, redirectLocationIdentifier, resourceIdentifier, redirectDiagnosticString));
                             }
                         } catch (Exception e) {
-                            failedPostCalls.add(buildExceptionMessage(postComponent, e, resourceIdentifier, redirectLocationIdentifier));
+                            failedHttpCalls.add(buildExceptionMessage(httpRequestComponent, e, resourceIdentifier, redirectLocationIdentifier));
                         }
 
                     } else {
                         //failed to extract a location from redirect message:
-                        failedPostCalls.add(Pair.of("[FAIL] Exception during " + resourceIdentifier + " POST request execution to "
-                                + postComponent.fhirServerUrl + ": Redirect, but no new location specified", postComponent));
+                        failedHttpCalls.add(Pair.of("[FAIL] Exception during " + resourceIdentifier + " HTTP request execution to "
+                                + httpRequestComponent.fhirServerUrl + ": Redirect, but no new location specified", httpRequestComponent));
                     }
                 } else {
-                    failedPostCalls.add(buildFailedPostMessage(postComponent, statusCode, postComponent.fhirServerUrl, resourceIdentifier, diagnosticString));
+                    failedHttpCalls.add(buildFailedHTTPMessage(httpRequestComponent, statusCode, httpRequestComponent.fhirServerUrl, resourceIdentifier, diagnosticString));
                 }
 
             } catch (Exception e) {
-                failedPostCalls.add(buildExceptionMessage(postComponent, e, resourceIdentifier, postComponent.fhirServerUrl));
+                failedHttpCalls.add(buildExceptionMessage(httpRequestComponent, e, resourceIdentifier, httpRequestComponent.fhirServerUrl));
             }
 
-            runningPostTaskList.remove(postComponent.resource);
-            reportProgress();
+            runningRequestTaskList.remove(httpRequestComponent.resource);
+            reportProgress(httpRequestComponent.type);
             return null;
         };
     }
 
-    private static Pair<String, PostComponent> buildExceptionMessage(PostComponent postComponent, Exception e, String resourceIdentifier, String locationIdentifier) {
-        return Pair.of("[FAIL] Exception during " + resourceIdentifier + " POST request execution to " + locationIdentifier + ": " + e.getMessage(), postComponent);
+    private static Pair<String, HttpRequestComponent> buildExceptionMessage(HttpRequestComponent requestComponent, Exception e, String resourceIdentifier, String locationIdentifier) {
+        return Pair.of("[FAIL] Exception during " + resourceIdentifier + " PUT request execution to " + locationIdentifier + ": " + e.getMessage(), requestComponent);
     }
 
-    private static Pair<String, PostComponent> buildFailedPostMessage(PostComponent postComponent, int statusCode, String locationIdentifier, String resourceIdentifier, String diagnosticString) {
-        return Pair.of("[FAIL] Error " + statusCode + " from " + locationIdentifier + ": " + resourceIdentifier + ": " + diagnosticString, postComponent);
+    private static Pair<String, HttpRequestComponent> buildFailedHTTPMessage(HttpRequestComponent requestComponent, int statusCode, String locationIdentifier, String resourceIdentifier, String diagnosticString) {
+        return Pair.of("[FAIL] Error " + statusCode + " from " + locationIdentifier + ": " + resourceIdentifier + ": " + diagnosticString, requestComponent);
     }
 
     private static String buildSuccessMessage(String locationIdentifier, String resourceIdentifier) {
-        return "[SUCCESS] Resource successfully posted to " + locationIdentifier + ": " + resourceIdentifier;
+        return "[SUCCESS] Resource successfully sent to " + locationIdentifier + ": " + resourceIdentifier;
     }
 
     /**
@@ -285,141 +402,208 @@ public class HttpClientUtils {
      */
     private static String getDiagnosticString(String jsonString) {
         try {
-            // Get the "diagnostics" property
-            return JsonParser.parseString(jsonString)
+            JsonArray issues = JsonParser.parseString(jsonString)
                     .getAsJsonObject()
-                    .getAsJsonArray("issue")
-                    .get(0)
-                    .getAsJsonObject()
-                    .getAsJsonPrimitive("diagnostics")
-                    .getAsString();
+                    .getAsJsonArray("issue");
+
+            StringBuilder diagnostics = new StringBuilder();
+            for (JsonElement issueElement : issues) {
+                if (diagnostics.length() > 0) {
+                    diagnostics.append("\n");
+                }
+                JsonObject issueObject = issueElement.getAsJsonObject();
+                String diagnostic = issueObject.getAsJsonPrimitive("diagnostics").getAsString();
+                diagnostics.append(diagnostic);
+            }
+
+            return diagnostics.toString();
         } catch (Exception e) {
             return "";
         }
     }
 
+    private static String getSectionProgress(HttpRequestResourceType httpRequestResourceType) {
+        //processedPutCounter holds the count we're at.
+        //logically all preceding items up until this point are processed
+        //add all sections until we get to this type, subtract total processed from other type count
+        //get percentage from that using (processedPutCounter - theseTypesCount) / currentTypeProcessedCount
+
+        int otherTypesProcessedCount = 0;
+
+        for (int i = 0; i < resourceTypeOrder.size(); i++) {
+            HttpRequestResourceType iterType = resourceTypeOrder.get(i);
+            if (iterType == httpRequestResourceType) {
+                break;
+            }
+            if (mappedTasksByPriorityRank.containsKey(iterType)) {
+                otherTypesProcessedCount = otherTypesProcessedCount + (mappedTasksByPriorityRank.get(iterType)).size();
+            }
+        }
+
+        int thisTypeProcessedCount = mappedTasksByPriorityRank.get(httpRequestResourceType).size();
+        int currentCounter = processedRequestCounter - otherTypesProcessedCount;
+
+        double percentage = (double) currentCounter / thisTypeProcessedCount * 100;
+
+        return currentCounter + "/" + thisTypeProcessedCount + " (" + String.format("%.2f%%", percentage) + ")";
+    }
+
     /**
-     * Reports the progress of HTTP POST calls and the current thread pool size.
+     * Reports the progress of HTTP calls and the current thread pool size.
      * <p>
-     * This method updates and prints the progress of HTTP POST calls by calculating the percentage of completed tasks
+     * This method updates and prints the progress of HTTP calls by calculating the percentage of completed tasks
      * relative to the total number of tasks. It also displays the current size of the running thread pool. The progress
      * and pool size information is printed to the standard output.
      */
+    private static void reportProgress(HttpRequestResourceType httpRequestResourceType) {
+        int currentCounter = processedRequestCounter++;
+
+        String fileGroup = "";
+        if (httpRequestResourceType != null) {
+            fileGroup = " | Sending: " + httpRequestResourceType.getDisplayName() + " " + getSectionProgress(httpRequestResourceType);
+        }
+
+        int taskCount = getTotalTaskCount();
+        double percentage = (double) currentCounter / taskCount * 100;
+        String percentOutput = String.format("%.2f%%", percentage);
+
+        String progressStr = "\rProgress: " + percentOutput + " (" + currentCounter + "/" + taskCount + ")" +
+                fileGroup +
+                " | Response pool: " + runningRequestTaskList.size();
+
+
+        String repeatedString = " ".repeat(progressStr.length() * 2);
+        System.out.print(repeatedString);
+
+        System.out.print(progressStr);
+    }
+
+
     private static void reportProgress() {
-        int currentCounter = processedPostCounter++;
-        double percentage = (double) currentCounter / getTotalTaskCount() * 100;
-        System.out.print("\rPOST calls: " + String.format("%.2f%%", percentage) + " processed. POST response pool size: " + runningPostTaskList.size() + ". ");
+        reportProgress(null);
     }
 
     private static int getTotalTaskCount() {
-        return tasks.size() + initialTasks.size();
+        int totalCount = 0;
+        for (ConcurrentHashMap<IBaseResource, Callable<Void>> map : mappedTasksByPriorityRank.values()) {
+            totalCount += map.size();
+        }
+        return totalCount;
+    }
+
+    private static String getPresentTypesAndCounts() {
+        StringBuilder output = new StringBuilder();
+        for (int i = 0; i < resourceTypeOrder.size(); i++) {
+            //execute the tasks in order specified
+            if (mappedTasksByPriorityRank.containsKey(resourceTypeOrder.get(i))) {
+                output.append("\n\r - ")
+                        .append(resourceTypeOrder.get(i).displayName)
+                        .append(": ")
+                        .append(mappedTasksByPriorityRank.get(resourceTypeOrder.get(i)).size());
+            }
+        }
+
+        return output.toString();
     }
 
     /**
-     * Posts a collection of tasks to execute HTTP POST requests to a FHIR server.
+     * Puts a collection of tasks to execute HTTP requests to a FHIR server.
      * <p>
-     * This method orchestrates the execution of a collection of HTTP POST requests, each represented as a task.
+     * This method orchestrates the execution of a collection of HTTP requests, each represented as a task.
      * The method performs the following steps:
      * 1. Creates a thread pool using a fixed number of threads (usually 1).
-     * 2. Initiates the HTTP POST tasks for FHIR resources and monitors their progress.
+     * 2. Initiates the HTTP tasks for FHIR resources and monitors their progress.
      * 3. Collects and logs success or failure messages for each task.
-     * 4. Sorts and reports the results of the post tasks, both successful and failed.
+     * 4. Sorts and reports the results of the tasks, both successful and failed.
      * 5. Offers the option to retry failed tasks, if desired by the user.
      * 6. Cleans up resources and shuts down the thread pool when finished.
      * <p>
-     * This method serves as the entry point for posting tasks and provides progress monitoring and result reporting.
+     * This method serves as the entry point for sending tasks and provides progress monitoring and result reporting.
      */
-    public static void postTaskCollection() {
+    public static void executeHttpRequestTaskCollection() {
+
         ExecutorService executorService = Executors.newFixedThreadPool(1);
 
         try {
-            logger.info(getTotalTaskCount() + " POST calls to be made. Starting now. Please wait...");
-            double percentage = 0;
-            System.out.print("\rPOST: " + String.format("%.2f%%", percentage) + " done. ");
+            logger.info("\n\r" + getTotalTaskCount() +
+                    " HTTP calls to be made: " +
+                    getPresentTypesAndCounts() +
+                    "\n\r Executing, please wait..." + "\n\r");
 
-            //execute any tasks marked as having priority:
-            executeTasks(executorService, initialTasks);
+            runHttpRequestCalls(executorService);
 
-            //execute the remaining tasks:
-            executeTasks(executorService, tasks);
 
-            reportProgress();
-
-            logger.info("Processing results...");
-            Collections.sort(successfulPostCalls);
+            logger.info("\n\r" + "Processing results..." + "\n\r");
+            Collections.sort(successfulHttpCalls);
 
             StringBuilder message = new StringBuilder();
-            for (String successPost : successfulPostCalls) {
-                message.append("\n").append(successPost);
+            for (String successRequest : successfulHttpCalls) {
+                message.append("\n").append(successRequest);
             }
-            message.append("\r\n").append(successfulPostCalls.size()).append(" resources successfully posted.");
+            message.append("\r\n").append(successfulHttpCalls.size()).append(" resources successfully sent.");
             logger.info(message.toString());
-            successfulPostCalls = new ArrayList<>();
+            successfulHttpCalls = new ArrayList<>();
 
-            if (!failedPostCalls.isEmpty()) {
-                logger.info(failedPostCalls.size() + " tasks failed to POST. Retry these failed posts? (Y/N)");
+            if (!failedHttpCalls.isEmpty()) {
+                logger.info("\n\r" + failedHttpCalls.size() + " tasks failed to send. Retry these failed requests? (Y/N)");
                 Scanner scanner = new Scanner(System.in);
                 String userInput = scanner.nextLine().trim().toLowerCase();
 
                 if (userInput.equalsIgnoreCase("y")) {
-                    List<Pair<String, PostComponent>> failedPostCallList = new ArrayList<>(failedPostCalls);
+                    List<Pair<String, HttpRequestComponent>> failedPutCallList = new ArrayList<>(failedHttpCalls);
                     cleanUp(); //clear the queue, reset the counter, start fresh
 
-                    for (Pair<String, PostComponent> pair : failedPostCallList) {
-                        PostComponent postComponent = pair.getRight();
+                    for (Pair<String, HttpRequestComponent> pair : failedPutCallList) {
+                        HttpRequestComponent httpRequestComponent = pair.getRight();
                         try {
-                            post(postComponent.fhirServerUrl,
-                                    postComponent.resource,
-                                    postComponent.encoding,
-                                    postComponent.fhirContext,
-                                    postComponent.fileLocation,
-                                    postComponent.hasPriority);
+                            sendToServer(httpRequestComponent.fhirServerUrl,
+                                    httpRequestComponent.resource,
+                                    httpRequestComponent.encoding,
+                                    httpRequestComponent.fhirContext,
+                                    httpRequestComponent.fileLocation);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
                     }
-                    //execute any tasks marked as having priority:
-                    executeTasks(executorService, initialTasks);
 
-                    //execute the remaining tasks:
-                    executeTasks(executorService, tasks);
+                    runHttpRequestCalls(executorService);
 
-                    reportProgress();
-                    if (failedPostCalls.isEmpty()) {
-                        logger.info("\r\nRetry successful, all tasks successfully posted");
+                    if (failedHttpCalls.isEmpty()) {
+                        logger.info("\r\nRetry successful, all tasks successfully sent.");
                     }
                 }
             }
 
-            if (!successfulPostCalls.isEmpty()) {
+            if (!successfulHttpCalls.isEmpty()) {
                 message = new StringBuilder();
-                for (String successPost : successfulPostCalls) {
-                    message.append("\n").append(successPost);
+                for (String successPut : successfulHttpCalls) {
+                    message.append("\n").append(successPut);
                 }
-                message.append("\r\n").append(successfulPostCalls.size()).append(" resources successfully posted.");
+                message.append("\r\n").append(successfulHttpCalls.size()).append(" resources successfully sent.");
                 logger.info(message.toString());
-                successfulPostCalls = new ArrayList<>();
+                successfulHttpCalls = new ArrayList<>();
             }
 
-            if (!failedPostCalls.isEmpty()) {
+            if (!failedHttpCalls.isEmpty()) {
                 List<String> failedMessages = new ArrayList<>();
-                for (Pair<String, PostComponent> pair : failedPostCalls) {
+                for (Pair<String, HttpRequestComponent> pair : failedHttpCalls) {
                     failedMessages.add(pair.getLeft());
                 }
                 Collections.sort(failedMessages);
                 message = new StringBuilder();
 
 
-                for (String failedPost : failedMessages) {
-                    message.append("\n").append(failedPost);
+                for (String failedRequest : failedMessages) {
+                    message.append("\n").append(failedRequest);
                 }
 
 
-                message.append("\r\n").append(failedMessages.size()).append(" resources failed to post.");
+                message.append("\r\n").append(failedMessages.size()).append(" resources failed to send.");
                 logger.info(message.toString());
 
-                writeFailedPostAttemptsToLog(failedMessages);
+                writeFailedHttpRequestAttemptsToLog(failedMessages);
             }
+
 
         } finally {
             cleanUp();
@@ -428,32 +612,52 @@ public class HttpClientUtils {
     }
 
     /**
-     * Gives the user a log file containing failed POST attempts during postTaskCollection()
+     * Executes the tasks for each priority ranking, sorted:
+     *
+     * @param executorService
+     */
+    private static void runHttpRequestCalls(ExecutorService executorService) {
+        //execute the tasks for each priority ranking, sorted:
+        for (int i = 0; i < resourceTypeOrder.size(); i++) {
+            //execute the tasks in order specified
+            if (mappedTasksByPriorityRank.containsKey(resourceTypeOrder.get(i))) {
+                executeTasks(executorService, mappedTasksByPriorityRank.get(resourceTypeOrder.get(i)));
+            }
+        }
+
+        reportProgress();
+    }
+
+    /**
+     * Gives the user a log file containing failed attempts during requestTaskCollection()
+     *
      * @param failedMessages
      */
-    private static void writeFailedPostAttemptsToLog(List<String> failedMessages) {
+    private static void writeFailedHttpRequestAttemptsToLog(List<String> failedMessages) {
         if (!failedMessages.isEmpty()) {
             //generate a unique filename based on simple timestamp:
-            String httpFailLogFilename = "http_post_fail_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".log";
+            String httpFailLogFilename = "http_request_fail_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".log";
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(httpFailLogFilename))) {
                 for (String str : failedMessages) {
                     writer.write(str + "\n");
                 }
-               logger.info("\r\nRecorded failed POST tasks to log file: " + new File(httpFailLogFilename).getAbsolutePath() + "\r\n");
+                logger.info("\r\nRecorded failed HTTP tasks to log file: " + new File(httpFailLogFilename).getAbsolutePath() + "\r\n");
             } catch (IOException e) {
-                logger.info("\r\nRecording of failed POST tasks to log failed with exception: " + e.getMessage() + "\r\n");
+                logger.info("\r\nRecording of failed HTTP tasks to log failed with exception: " + e.getMessage() + "\r\n");
             }
         }
     }
 
 
     private static void executeTasks(ExecutorService executorService, Map<IBaseResource, Callable<Void>> executableTasksMap) {
+
+
         List<Future<Void>> futures = new ArrayList<>();
         List<IBaseResource> resources = new ArrayList<>(executableTasksMap.keySet());
         for (int i = 0; i < resources.size(); i++) {
             IBaseResource thisResource = resources.get(i);
-            if (runningPostTaskList.size() < MAX_SIMULTANEOUS_POST_COUNT) {
-                runningPostTaskList.add(thisResource);
+            if (runningRequestTaskList.size() < MAX_SIMULTANEOUS_REQUEST_COUNT) {
+                runningRequestTaskList.add(thisResource);
                 futures.add(executorService.submit(executableTasksMap.get(thisResource)));
             } else {
                 threadSleep(10);
@@ -481,30 +685,91 @@ public class HttpClientUtils {
         try {
             Thread.sleep(i);
         } catch (InterruptedException e) {
-            logger.error("postTaskCollection", new RuntimeException(e));
+            logger.error("httpRequestTaskCollection", new RuntimeException(e));
         }
     }
 
     /**
-     * Cleans up and resets internal data structures after processing HTTP POST tasks.
+     * Cleans up and resets internal data structures after processing HTTP PUT tasks.
      * <p>
-     * This method is responsible for resetting various data structures used during the processing of HTTP POST tasks. It performs the following actions:
-     * 1. Clears the queue of failed POST calls.
-     * 2. Clears the list of successful POST call results.
+     * This method is responsible for resetting various data structures used during the processing of HTTP PUT tasks. It performs the following actions:
+     * 1. Clears the queue of failed PUT calls.
+     * 2. Clears the list of successful PUT call results.
      * 3. Resets the map of tasks to be executed.
-     * 4. Resets the counter that tracks the number of processed POST calls.
-     * 5. Clears the list of resources currently being posted.
+     * 4. Resets the counter that tracks the number of processed PUT calls.
+     * 5. Clears the list of resources currently being puted.
      * <p>
-     * This method ensures a clean state and prepares the system for potential subsequent POST calls or retries.
+     * This method ensures a clean state and prepares the system for potential subsequent PUT calls or retries.
      */
     private static void cleanUp() {
-        failedPostCalls = new ConcurrentLinkedQueue<>();
-        successfulPostCalls = new CopyOnWriteArrayList<>();
-        tasks = new ConcurrentHashMap<>();
-        initialTasks = new ConcurrentHashMap<>();
-        processedPostCounter = 0;
-        runningPostTaskList = new CopyOnWriteArrayList<>();
+        failedHttpCalls = new ConcurrentLinkedQueue<>();
+        successfulHttpCalls = new CopyOnWriteArrayList<>();
+        mappedTasksByPriorityRank = new ConcurrentHashMap<>();
+        processedRequestCounter = 0;
+        runningRequestTaskList = new CopyOnWriteArrayList<>();
     }
+
+
+    public static HttpRequestResourceType categorizeResource(IBaseResource inputResource) {
+        if (inputResource == null) {
+            return HttpRequestResourceType.OTHER;
+        }
+
+        // Check resource type and assign category
+        if (inputResource instanceof org.hl7.fhir.dstu3.model.Bundle || inputResource instanceof org.hl7.fhir.r4.model.Bundle) {
+            org.hl7.fhir.instance.model.api.IBaseBundle bundle = (org.hl7.fhir.instance.model.api.IBaseBundle) inputResource;
+            if (bundle instanceof org.hl7.fhir.dstu3.model.Bundle &&
+                    ((org.hl7.fhir.dstu3.model.Bundle) bundle).getType() == org.hl7.fhir.dstu3.model.Bundle.BundleType.TRANSACTION) {
+                return HttpRequestResourceType.TRANSACTION_BUNDLE;
+            } else if (bundle instanceof org.hl7.fhir.r4.model.Bundle &&
+                    ((org.hl7.fhir.r4.model.Bundle) bundle).getType() == org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION) {
+                return HttpRequestResourceType.TRANSACTION_BUNDLE;
+            } else {
+                return HttpRequestResourceType.BUNDLE;
+            }
+
+
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.CodeSystem || inputResource instanceof org.hl7.fhir.r4.model.CodeSystem) {
+            return HttpRequestResourceType.CODESYSTEM;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.ValueSet || inputResource instanceof org.hl7.fhir.r4.model.ValueSet) {
+            return HttpRequestResourceType.VALUESET;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.Library || inputResource instanceof org.hl7.fhir.r4.model.Library) {
+            return HttpRequestResourceType.LIBRARY;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.Measure || inputResource instanceof org.hl7.fhir.r4.model.Measure) {
+            return HttpRequestResourceType.MEASURE;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.PlanDefinition || inputResource instanceof org.hl7.fhir.r4.model.PlanDefinition) {
+            return HttpRequestResourceType.PLANDEFINITION;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.Patient || inputResource instanceof org.hl7.fhir.r4.model.Patient) {
+            return HttpRequestResourceType.PATIENT;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.Group || inputResource instanceof org.hl7.fhir.r4.model.Group) {
+            return HttpRequestResourceType.GROUP;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.Condition || inputResource instanceof org.hl7.fhir.r4.model.Condition) {
+            return HttpRequestResourceType.CONDITION;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.Observation || inputResource instanceof org.hl7.fhir.r4.model.Observation) {
+            return HttpRequestResourceType.OBSERVATION;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.Procedure || inputResource instanceof org.hl7.fhir.r4.model.Procedure) {
+            return HttpRequestResourceType.PROCEDURE;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.CarePlan || inputResource instanceof org.hl7.fhir.r4.model.CarePlan) {
+            return HttpRequestResourceType.CAREPLAN;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.Goal || inputResource instanceof org.hl7.fhir.r4.model.Goal) {
+            return HttpRequestResourceType.GOAL;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.ProcedureRequest ||
+                inputResource instanceof org.hl7.fhir.r4.model.ServiceRequest) {
+            return HttpRequestResourceType.SERVICEREQUEST;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.ReferralRequest) {
+            return HttpRequestResourceType.SERVICEREQUEST;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.Medication || inputResource instanceof org.hl7.fhir.r4.model.Medication) {
+            return HttpRequestResourceType.MEDICATION;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.MedicationRequest || inputResource instanceof org.hl7.fhir.r4.model.MedicationRequest) {
+            return HttpRequestResourceType.MEDICATIONREQUEST;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.DiagnosticReport || inputResource instanceof org.hl7.fhir.r4.model.DiagnosticReport) {
+            return HttpRequestResourceType.DIAGNOSTICREPORT;
+        } else if (inputResource instanceof org.hl7.fhir.dstu3.model.ImagingStudy || inputResource instanceof org.hl7.fhir.r4.model.ImagingStudy) {
+            return HttpRequestResourceType.IMAGINGSTUDY;
+        }
+        return HttpRequestResourceType.OTHER;
+    }
+
 
     public static String get(String path) throws IOException {
         try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
@@ -525,28 +790,31 @@ public class HttpClientUtils {
     }
 
     /**
-     * A data class representing information needed for HTTP POST requests.
+     * A data class representing information needed for HTTP requests.
      * <p>
-     * The PostComponent class encapsulates the essential information required for making an HTTP POST request to a FHIR server.
-     * It includes the FHIR server URL, the FHIR resource to be posted, the encoding type, and the FHIR context.
+     * The httpRequestComponent class encapsulates the essential information required for making an HTTP request to a FHIR server.
+     * It includes the FHIR server URL, the FHIR resource to be sent, the encoding type, and the FHIR context.
      */
-    private static class PostComponent {
+    private static class HttpRequestComponent {
         private final String fhirServerUrl;
         private String redirectFhirServerUrl;
         private final IBaseResource resource;
         private final IOUtils.Encoding encoding;
         private final FhirContext fhirContext;
         private final String fileLocation;
-        private final boolean hasPriority;
-        public PostComponent(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation, boolean hasPriority) {
+
+        private final HttpRequestResourceType type;
+
+        public HttpRequestComponent(String fhirServerUrl, IBaseResource resource, IOUtils.Encoding encoding, FhirContext fhirContext, String fileLocation, HttpRequestResourceType type) {
             this.fhirServerUrl = fhirServerUrl;
             this.resource = resource;
             this.encoding = encoding;
             this.fhirContext = fhirContext;
             this.fileLocation = fileLocation;
-            this.hasPriority = hasPriority;
+            this.type = type;
         }
     }
+
 
     public static ResponseHandler<String> getDefaultResponseHandler() {
         return response -> {

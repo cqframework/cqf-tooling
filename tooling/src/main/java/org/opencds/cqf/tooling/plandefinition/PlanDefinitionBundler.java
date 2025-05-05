@@ -37,8 +37,4 @@ public class PlanDefinitionBundler extends AbstractBundler {
         return TYPE_PLAN_DEFINITION;
     }
 
-    @Override
-    protected int persistFilesFolder(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri) {
-        return 0;
-    }
 }

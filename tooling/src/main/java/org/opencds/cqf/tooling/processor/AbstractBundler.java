@@ -130,7 +130,7 @@ public abstract class AbstractBundler {
         final Map<String, List<CqlCompilerException>> cqlTranslatorErrorMessages = new ConcurrentHashMap<>();
 
         //used to summarize file count user can expect to see in POST queue for each resource:
-        final Map<String, Integer> persistedFileReport = new ConcurrentHashMap<>();
+        final List<String> persistedFileReport = new CopyOnWriteArrayList<>();
 
         //build list of executable tasks to be sent to thread pool:
         List<Callable<Void>> tasks = new ArrayList<>();
@@ -142,7 +142,7 @@ public abstract class AbstractBundler {
             final Map<String, String> libraryPathMap = new ConcurrentHashMap<>(IOUtils.getLibraryPathMap(fhirContext));
 
             if (resourcesMap.isEmpty()) {
-                logger.info("[INFO] No " + getResourceBundlerType() + "s found. Continuing...");
+                logger.info("\n\r" + "[INFO] No " + getResourceBundlerType() + "s found. Continuing...\n\r");
                 return;
             }
 
@@ -169,7 +169,7 @@ public abstract class AbstractBundler {
                 tasks.add(() -> {
                     //check if resourceSourcePath has been processed before:
                     if (processedResources.contains(resourceSourcePath)) {
-                        logger.info(getResourceBundlerType() + " processed already: " + resourceSourcePath);
+                        logger.info("\n\r" + getResourceBundlerType() + " processed already: " + resourceSourcePath);
                         return null;
                     }
                     String resourceName = FilenameUtils.getBaseName(resourceSourcePath).replace(getResourcePrefix(), "");
@@ -246,23 +246,21 @@ public abstract class AbstractBundler {
                         if (shouldPersist) {
                             String bundleDestPath = FilenameUtils.concat(FilenameUtils.concat(IGProcessor.getBundlesPath(igPath), getResourceTestGroupName()), resourceName);
 
-                            persistBundle(bundleDestPath, resourceName, encoding, fhirContext, new ArrayList<IBaseResource>(resources.values()), fhirUri, addBundleTimestamp);
-
                             bundleFiles(igPath, bundleDestPath, resourceName, binaryPaths, resourceSourcePath,
                                     primaryLibrarySourcePath, fhirContext, encoding, includeTerminology, includeDependencies, includePatientScenarios,
                                     includeVersion, addBundleTimestamp, cqlTranslatorErrorMessages);
 
                             //If user supplied a fhir server url, inform them of total # of files to be persisted to the server:
                             if (fhirUri != null && !fhirUri.isEmpty()) {
-                                persistedFileReport.put(resourceName,
-                                        //+1 to account for -bundle
-                                        persistFilesFolder(bundleDestPath, resourceName, encoding, fhirContext, fhirUri) + 1);
+                                persistedFileReport.add(resourceName);
                             }
 
                             if (cdsHooksProcessor != null) {
                                 List<String> activityDefinitionPaths = CDSHooksProcessor.bundleActivityDefinitions(resourceSourcePath, fhirContext, resources, encoding, includeVersion, shouldPersist);
                                 cdsHooksProcessor.addActivityDefinitionFilesToBundle(igPath, bundleDestPath, activityDefinitionPaths, fhirContext, encoding);
                             }
+
+                            persistBundle(bundleDestPath, resourceName, encoding, fhirContext, new ArrayList<>(resources.values()), fhirUri, addBundleTimestamp);
 
                             bundledResources.add(resourceSourcePath);
                         }
@@ -296,7 +294,7 @@ public abstract class AbstractBundler {
         //Output final report:
         String summaryOutput = generateBundleProcessSummary(refreshedLibraryNames, fhirContext, fhirUri, verboseMessaging,
                 persistedFileReport, bundledResources, failedExceptionMessages, cqlTranslatorErrorMessages).toString();
-        logger.info(summaryOutput);
+        logger.info("\n\r" + summaryOutput);
     }
 
     /**
@@ -315,7 +313,7 @@ public abstract class AbstractBundler {
      * @return A StringBuilder containing the generated summary message.
      */
     private StringBuilder generateBundleProcessSummary(List<String> refreshedLibraryNames, FhirContext fhirContext,
-                                                       String fhirUri, Boolean verboseMessaging, Map<String, Integer> persistedFileReport,
+                                                       String fhirUri, Boolean verboseMessaging, List<String> persistedFileReport,
                                                        List<String> bundledResources, Map<String, String> failedExceptionMessages,
                                                        Map<String, List<CqlCompilerException>> cqlTranslatorErrorMessages) {
 
@@ -323,45 +321,8 @@ public abstract class AbstractBundler {
 
         //Give user a snapshot of the files each resource will have persisted to their FHIR server (if fhirUri is provided)
         final int persistCount = persistedFileReport.size();
-        if (persistCount > 0) {
-            String fileDisplay = " File(s): ";
-            summaryMessage.append(NEWLINE).append(persistCount).append(" ").append(getResourceBundlerType()).append("(s) have POST tasks in the queue for ").append(fhirUri).append(": ");
-            int totalQueueCount = 0;
-            List<String> persistMessages = new ArrayList<>();
-            for (String library : persistedFileReport.keySet()) {
-                totalQueueCount = totalQueueCount + persistedFileReport.get(library);
-                persistMessages.add(NEWLINE_INDENT
-                        + persistedFileReport.get(library)
-                        + fileDisplay
-                        + library);
-            }
-
-            //anon comparator class to sort by the file count for better presentation
-            persistMessages.sort(new Comparator<>() {
-                @Override
-                public int compare(String displayFileCount1, String displayFileCount2) {
-                    int count1 = getFileCountFromString(displayFileCount1);
-                    int count2 = getFileCountFromString(displayFileCount2);
-                    return Integer.compare(count1, count2);
-                }
-
-                private int getFileCountFromString(String fileName) {
-                    int endIndex = fileName.indexOf(fileDisplay);
-                    if (endIndex != -1) {
-                        String countString = fileName.substring(0, endIndex).trim();
-                        return Integer.parseInt(countString);
-                    }
-                    return 0;
-                }
-            });
-
-            for (String persistMessage : persistMessages) {
-                summaryMessage.append(persistMessage);
-            }
-            summaryMessage.append(NEWLINE_INDENT)
-                    .append("Total: ")
-                    .append(totalQueueCount)
-                    .append(" File(s)");
+        if (!persistedFileReport.isEmpty()) {
+            summaryMessage.append(NEWLINE).append(persistCount).append(" ").append(getResourceBundlerType()).append("(s) have HTTP request tasks in the queue for ").append(fhirUri);
         }
 
 
@@ -452,18 +413,15 @@ public abstract class AbstractBundler {
                                IOUtils.Encoding encoding, FhirContext fhirContext,
                                List<IBaseResource> resources, String fhirUri,
                                Boolean addBundleTimestamp) throws IOException {
-        IOUtils.initializeDirectory(bundleDestPath);
         Object bundle = BundleUtils.bundleArtifacts(libraryName, resources, fhirContext, addBundleTimestamp, this.getIdentifiers());
         IOUtils.writeBundle(bundle, bundleDestPath, encoding, fhirContext);
 
         if (fhirUri != null && !fhirUri.isEmpty()) {
             String resourceWriteLocation = bundleDestPath + separator + libraryName + "-bundle." + encoding;
-            HttpClientUtils.post(fhirUri, (IBaseResource) bundle, encoding, fhirContext, resourceWriteLocation, true);
+            //give resource the highest priority (0):
+            HttpClientUtils.sendToServer(fhirUri, (IBaseResource) bundle, encoding, fhirContext, resourceWriteLocation);
         }
     }
-
-
-    protected abstract int persistFilesFolder(String bundleDestPath, String libraryName, IOUtils.Encoding encoding, FhirContext fhirContext, String fhirUri);
 
     private void bundleFiles(String igPath, String bundleDestPath, String primaryLibraryName, List<String> binaryPaths, String resourceFocusSourcePath,
                              String librarySourcePath, FhirContext fhirContext, IOUtils.Encoding encoding, Boolean includeTerminology, Boolean includeDependencies, Boolean includePatientScenarios,
@@ -476,7 +434,7 @@ public abstract class AbstractBundler {
         IOUtils.copyFile(librarySourcePath, FilenameUtils.concat(bundleDestFilesPath, FilenameUtils.getName(librarySourcePath)));
 
         String cqlFileName = IOUtils.formatFileName(FilenameUtils.getBaseName(librarySourcePath), IOUtils.Encoding.CQL, fhirContext);
-        if (cqlFileName.toLowerCase().startsWith("library-")) {
+        if (cqlFileName.toLowerCase().startsWith("library-") && !cqlFileName.toLowerCase().startsWith("library-deps-")) {
             cqlFileName = cqlFileName.substring(8);
         }
         String cqlLibrarySourcePath = IOUtils.getCqlLibrarySourcePath(primaryLibraryName, cqlFileName, binaryPaths);
