@@ -2,9 +2,9 @@ package org.opencds.cqf.tooling.measure;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FilenameUtils;
-import org.cqframework.cql.cql2elm.*;
-import org.cqframework.cql.cql2elm.model.CompiledLibrary;
-import org.hl7.elm.r1.VersionedIdentifier;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.LibraryManager;
 import org.hl7.fhir.r5.model.Measure;
 import org.opencds.cqf.tooling.measure.r4.R4MeasureProcessor;
 import org.opencds.cqf.tooling.measure.stu3.STU3MeasureProcessor;
@@ -12,8 +12,9 @@ import org.opencds.cqf.tooling.parameter.RefreshMeasureParameters;
 import org.opencds.cqf.tooling.processor.BaseProcessor;
 import org.opencds.cqf.tooling.processor.CqlProcessor;
 import org.opencds.cqf.tooling.processor.IGProcessor;
-import org.opencds.cqf.tooling.utilities.*;
+import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
+import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,8 +57,8 @@ public class MeasureProcessor extends BaseProcessor {
                         "Unknown fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
         }
 
-        String measurePath = FilenameUtils.concat(parentContext.getRootDir(), IGProcessor.MEASURE_PATH_ELEMENT);
-        RefreshMeasureParameters params = new RefreshMeasureParameters();
+        var measurePath = FilenameUtils.concat(parentContext.getRootDir(), IGProcessor.MEASURE_PATH_ELEMENT);
+        var params = new RefreshMeasureParameters();
         params.measurePath = measurePath;
         params.parentContext = parentContext;
         params.fhirContext = fhirContext;
@@ -66,7 +67,7 @@ public class MeasureProcessor extends BaseProcessor {
         params.measureOutputDirectory = measureOutputDirectory;
         params.shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStamp;
         params.includePopulationDataRequirements = shouldIncludePopDataRequirements;
-        List<String> contentList = measureProcessor.refreshMeasureContent(params);
+        var contentList = measureProcessor.refreshMeasureContent(params);
 
         if (!measureProcessor.getIdentifiers().isEmpty()) {
             this.getIdentifiers().addAll(measureProcessor.getIdentifiers());
@@ -94,11 +95,11 @@ public class MeasureProcessor extends BaseProcessor {
 
     private List<Measure> internalRefreshGeneratedContent(List<Measure> sourceMeasures) {
         // for each Measure, refresh the measure based on the primary measure library
-        List<Measure> resources = new ArrayList<>();
-        MeasureRefreshProcessor processor = new MeasureRefreshProcessor();
-        LibraryManager libraryManager = getCqlProcessor().getLibraryManager();
-        CqlTranslatorOptions cqlTranslatorOptions = getCqlProcessor().getCqlTranslatorOptions();
-        for (Measure measure : sourceMeasures) {
+       var resources = new ArrayList<Measure>();
+        var processor = new MeasureRefreshProcessor();
+        var libraryManager = getCqlProcessor().getLibraryManager();
+        var cqlTranslatorOptions = getCqlProcessor().getCqlTranslatorOptions();
+        for (var measure : sourceMeasures) {
             // Do not attempt to refresh if the measure does not have a library
             if (measure.hasLibrary()) {
                 resources.add(refreshGeneratedContent(measure, processor, libraryManager, cqlTranslatorOptions));
@@ -110,16 +111,13 @@ public class MeasureProcessor extends BaseProcessor {
         return resources;
     }
 
-    private Measure refreshGeneratedContent(Measure measure, MeasureRefreshProcessor processor, LibraryManager libraryManager, CqlTranslatorOptions cqlTranslatorOptions) {
-
-        String libraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
-        VersionedIdentifier primaryLibraryIdentifier = CanonicalUtils.toVersionedIdentifier(libraryUrl);
-
-        List<CqlCompilerException> errors = new CopyOnWriteArrayList<>();
-        CompiledLibrary compiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, errors);
-
+    private Measure refreshGeneratedContent(Measure measure, MeasureRefreshProcessor processor,
+                                            LibraryManager libraryManager, CqlTranslatorOptions cqlTranslatorOptions) {
+        var libraryUrl = ResourceUtils.getPrimaryLibraryUrl(measure, fhirContext);
+        var primaryLibraryIdentifier = CanonicalUtils.toVersionedIdentifier(libraryUrl);
+        var errors = new CopyOnWriteArrayList<CqlCompilerException>();
+        var compiledLibrary = libraryManager.resolveLibrary(primaryLibraryIdentifier, errors);
         logger.info(CqlProcessor.buildStatusMessage(errors, measure.getName(), verboseMessaging));
-
         boolean hasSevereErrors = CqlProcessor.hasSevereErrors(errors);
 
         //refresh measures without severe errors:

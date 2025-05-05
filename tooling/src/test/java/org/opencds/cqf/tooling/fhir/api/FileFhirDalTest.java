@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.r4.model.Patient;
-import org.opencds.cqf.tooling.CqfmSoftwareSystemTest;
+import org.opencds.cqf.tooling.SoftwareSystemTest;
 import org.opencds.cqf.tooling.parameter.FileFhirPlatformParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 
 
-public class FileFhirDalTest implements CqfmSoftwareSystemTest {
+public class FileFhirDalTest implements SoftwareSystemTest {
   private FileFhirPlatform platform;
   private FileFhirDal dal;
   private Patient patient;

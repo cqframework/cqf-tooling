@@ -1,6 +1,6 @@
 package org.opencds.cqf.tooling.operation;
 
-import static org.opencds.cqf.tooling.CqfmSoftwareSystemTest.separator;
+import static org.opencds.cqf.tooling.SoftwareSystemTest.separator;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;

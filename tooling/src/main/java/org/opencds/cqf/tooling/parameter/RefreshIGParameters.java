@@ -1,8 +1,8 @@
 package org.opencds.cqf.tooling.parameter;
 
-import java.util.ArrayList;
-
 import org.opencds.cqf.tooling.utilities.IOUtils;
+
+import java.util.List;
 
 public class RefreshIGParameters {
     public String ini;
@@ -18,12 +18,14 @@ public class RefreshIGParameters {
     public Boolean shouldApplySoftwareSystemStamp;
     public Boolean addBundleTimestamp;
     public String fhirUri;
-    public ArrayList<String> resourceDirs;
+    public List<String> resourceDirs;
     public Boolean conformant;
     public String measureToRefreshPath;
     public String libraryPath;
+    public String planDefinitionToRefreshPath;
     public String libraryOutputPath;
     public String measureOutputPath;
+    public String planDefinitionOutputPath;
     public Boolean verboseMessaging;
     public String updatedVersion;
     public Boolean includePopulationLevelDataRequirements;

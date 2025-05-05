@@ -32,12 +32,12 @@ public class STU3LibraryProcessorTest extends LibraryProcessorTest {
             FileUtils.deleteDirectory(dir);
         }
     }
-    
+
     @Test
     void testRefreshOverwriteLibraries() throws Exception {
         String targetDirectory = "target" + separator + "refreshLibraries" + separator + this.resourceDirectory;
         copyResourcesToTargetDir(targetDirectory, this.resourceDirectory);
-        
+
         String libraryPath = separator + "input" + separator + "resources" + separator + "library" + separator + "library-EXM105-FHIR3-8.0.000.json";
         runRefresh(
             targetDirectory,
@@ -46,7 +46,7 @@ public class STU3LibraryProcessorTest extends LibraryProcessorTest {
             false
         );
 
-        validateCqfmSoftwareSystemExtension(targetDirectory + libraryPath);
+        validateSoftwareSystemExtension(targetDirectory + libraryPath);
     }
 
     @Test
