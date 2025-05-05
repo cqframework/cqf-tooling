@@ -1,14 +1,13 @@
 package org.opencds.cqf.tooling.parameter;
 
-import org.opencds.cqf.tooling.processor.IProcessorContext;
-import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
-
 import ca.uhn.fhir.context.FhirContext;
+import org.opencds.cqf.tooling.processor.IProcessorContext;
+import org.opencds.cqf.tooling.utilities.IOUtils;
 
-public class RefreshLibraryParameters {
+public class RefreshPlanDefinitionParameters {
     /*
-    The ig ini file
-     */
+     The ig ini file
+      */
     public String ini;
 
     /*
@@ -29,7 +28,7 @@ public class RefreshLibraryParameters {
     /*
     The target encoding for the output
      */
-    public Encoding encoding;
+    public IOUtils.Encoding encoding;
 
     /*
     Whether or not version is included in the name
@@ -37,14 +36,9 @@ public class RefreshLibraryParameters {
     public Boolean versioned;
 
     /*
-    Whether the Software System Stamp should be applied via the crmi-softwaresystem Extension
-    */
-    public Boolean shouldApplySoftwareSystemStamp;
-
-    /*
-    The path to the library resource(s)
+    The path to the measure resource(s)
      */
-    public String libraryPath;
+    public String planDefinitionPath;
 
     /*
     An initialized processor context that can provide the IG context directly
@@ -52,7 +46,7 @@ public class RefreshLibraryParameters {
     public IProcessorContext parentContext;
 
     /*
-    Path to write updated Libraries to
-    */
-    public String libraryOutputDirectory;
+    Directory target for writing output
+     */
+    public String planDefinitionOutputDirectory;
 }

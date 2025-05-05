@@ -1,6 +1,6 @@
 package org.opencds.cqf.tooling.parameter;
 
-import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
+import org.opencds.cqf.tooling.common.SoftwareSystem;
 
 import java.util.List;
 import java.util.Map;
@@ -19,5 +19,5 @@ public class ScaffoldParameters {
     // Probably ought to be some common type for the set of resources we'll be scaffolding rather than list of Strings for class names.
     // NOTE: Map<NameOfArtifact, List<ResourceTypesToCreate>> E.e., { "CMS_130", { "Measure", "Library" } }
     public Map<String, List<String>> resourcesToScaffold;
-    public List<CqfmSoftwareSystem> softwareSystems;
+    public List<SoftwareSystem> softwareSystems;
 }

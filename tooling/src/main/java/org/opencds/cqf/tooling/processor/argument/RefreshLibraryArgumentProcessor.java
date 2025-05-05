@@ -37,7 +37,7 @@ public class RefreshLibraryArgumentProcessor {
         OptionSpecBuilder libraryOutputDirectoryBuilder = parser.acceptsAll(asList(Library_Output_DIRECTORY_OPTIONS),"If omitted, the libraries will overwrite any existing libraries");
         OptionSpecBuilder fhirVersionBuilder = parser.acceptsAll(asList(FHIR_VERSION_OPTIONS),"Limited to a single version of FHIR.");
         OptionSpecBuilder outputEncodingBuilder = parser.acceptsAll(asList(OUTPUT_ENCODING), "If omitted, output will be generated using JSON encoding.");
-        OptionSpecBuilder shouldApplySoftwareSystemStampBuilder = parser.acceptsAll(asList(SOFTWARE_STAMP),"Indicates whether refreshed Library resources should be stamped with the 'cqf-tooling' stamp via the cqfm-softwaresystem Extension.");
+        OptionSpecBuilder shouldApplySoftwareSystemStampBuilder = parser.acceptsAll(asList(SOFTWARE_STAMP),"Indicates whether refreshed Library resources should be stamped with the 'cqf-tooling' stamp via the crmi-softwaresystem Extension.");
 
         OptionSpec<String> ini = iniBuilder.withOptionalArg().describedAs("IG ini file");
         OptionSpec<String> igCanonicalBasePath = igCanonicalBaseBuilder.withOptionalArg().describedAs("resource canonical base");
@@ -46,7 +46,7 @@ public class RefreshLibraryArgumentProcessor {
         OptionSpec<String> libraryOutputDirectoryPath = libraryOutputDirectoryBuilder.withOptionalArg().describedAs("path to the output directory for updated libraries");
         OptionSpec<String> fhirVersion = fhirVersionBuilder.withOptionalArg().describedAs("fhir version");
         OptionSpec<String> outputEncoding = outputEncodingBuilder.withOptionalArg().describedAs("desired output encoding for resources");
-        OptionSpec<String> shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStampBuilder.withOptionalArg().describedAs("Indicates whether refreshed Library resources should be stamped with the 'cqf-tooling' stamp via the cqfm-softwaresystem Extension");
+        OptionSpec<String> shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStampBuilder.withOptionalArg().describedAs("Indicates whether refreshed Library resources should be stamped with the 'cqf-tooling' stamp via the crmi-softwaresystem Extension");
 
         parser.acceptsAll(asList(OPERATION_OPTIONS),"The operation to run.");
         parser.acceptsAll(asList(VERSIONED_OPTIONS),"If omitted resources must be uniquely named.");
@@ -85,7 +85,7 @@ public class RefreshLibraryArgumentProcessor {
         if ((softwareStamp != null) && softwareStamp.equalsIgnoreCase("false")) {
             shouldApplySoftwareSystemStamp = false;
         }
-    
+
         RefreshLibraryParameters lp = new RefreshLibraryParameters();
         lp.ini = ini;
         lp.igCanonicalBase = igCanonicalBase;
@@ -96,7 +96,7 @@ public class RefreshLibraryArgumentProcessor {
         lp.libraryPath = libraryPath;
         lp.libraryOutputDirectory = libraryOutputDirectory;
         lp.shouldApplySoftwareSystemStamp = shouldApplySoftwareSystemStamp;
-       
+
         return lp;
     }
 }

@@ -9,7 +9,6 @@ import org.apache.commons.io.FileUtils;
 import org.opencds.cqf.tooling.RefreshTest;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -39,7 +38,7 @@ public class RefreshR4MeasureOperationTest extends RefreshTest {
     private void testRefreshOverwriteMeasures() throws Exception {
         setUp();
         copyResourcesToTargetDir(targetDirectoryPath, "r4");
-        
+
         String measureDirectoryPath = separator + "input" + separator + "resources" + separator + "measure";
         String libraryDirectoryPath = separator + "input" + separator + "resources" + separator + "library";
 
@@ -57,7 +56,7 @@ public class RefreshR4MeasureOperationTest extends RefreshTest {
         //Currently tooling writes output file with a "-" rather than an "_" for "measure-EXM124_FHIR4-8.2.000.json" vs "measure-EXM124-FHIR4-8.2.000.json"
         String measureValidationPath = separator + "output" + separator + "refreshedMeasureBundles" + separator + "measure-EXM124-FHIR4-8.2.000.json";
 
-        validateCqfmSoftwareSystemExtension(targetDirectoryPath + measureValidationPath);
+        validateSoftwareSystemExtension(targetDirectoryPath + measureValidationPath);
     }
 
     //@Test
@@ -71,7 +70,7 @@ public class RefreshR4MeasureOperationTest extends RefreshTest {
         }
         String resourceDirPath = RefreshTest.class.getResource("r4").getPath();
         assertTrue(targetDirectory.listFiles().length == 0);
-        
+
         String measureDirectoryPath = separator + "input" + separator + "resources" + separator + "measure";
         String libraryDirectoryPath = separator + "input" + separator + "resources" + separator + "library";
 
