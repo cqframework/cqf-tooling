@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.Validate;
@@ -234,12 +235,11 @@ public class ResourceUtils {
       return dependencyLibraries;
    }
 
-   public static List<String> getStu3TerminologyDependencies(List<org.hl7.fhir.dstu3.model.RelatedArtifact> relatedArtifacts) {
+   public static List<String> getStu3Dependencies(List<org.hl7.fhir.dstu3.model.RelatedArtifact> relatedArtifacts) {
       List<String> urls = new ArrayList<>();
       for (org.hl7.fhir.dstu3.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
          if (relatedArtifact.hasType() && relatedArtifact.getType() == org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.DEPENDSON) {
-            if (relatedArtifact.hasResource() && relatedArtifact.getResource().hasReference()
-                    && (relatedArtifact.getResource().getReference().contains("CodeSystem/") || relatedArtifact.getResource().getReference().contains("ValueSet/"))) {
+            if (relatedArtifact.hasResource() && relatedArtifact.getResource().hasReference()) {
                urls.add(relatedArtifact.getResource().getReference());
             }
          }
@@ -247,11 +247,11 @@ public class ResourceUtils {
       return urls;
    }
 
-   public static List<String> getR4TerminologyDependencies(List<org.hl7.fhir.r4.model.RelatedArtifact> relatedArtifacts) {
+   public static List<String> getR4Dependencies(List<org.hl7.fhir.r4.model.RelatedArtifact> relatedArtifacts) {
       List<String> urls = new ArrayList<>();
       for (org.hl7.fhir.r4.model.RelatedArtifact relatedArtifact : relatedArtifacts) {
          if (relatedArtifact.hasType() && relatedArtifact.getType() == org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.DEPENDSON) {
-            if (relatedArtifact.hasResource() && (relatedArtifact.getResource().contains("CodeSystem/") || relatedArtifact.getResource().contains("ValueSet/"))) {
+            if (relatedArtifact.hasResource()) {
                urls.add(relatedArtifact.getResource());
             }
          }
@@ -259,31 +259,108 @@ public class ResourceUtils {
       return urls;
    }
 
-   public static List<String> getTerminologyDependencies(IBaseResource resource, FhirContext fhirContext) {
+   public static List<String> getDependencies(IBaseResource resource, FhirContext fhirContext) {
       switch (fhirContext.getVersion().getVersion()) {
          case DSTU3:
             switch (resource.fhirType()) {
                case "Library": {
-                  return getStu3TerminologyDependencies(((org.hl7.fhir.dstu3.model.Library)resource).getRelatedArtifact());
+                  return getStu3Dependencies(((org.hl7.fhir.dstu3.model.Library)resource).getRelatedArtifact());
                }
                case "Measure": {
-                  return getStu3TerminologyDependencies(((org.hl7.fhir.dstu3.model.Measure)resource).getRelatedArtifact());
+                  return getStu3Dependencies(((org.hl7.fhir.dstu3.model.Measure)resource).getRelatedArtifact());
                }
                default: throw new IllegalArgumentException(String.format("Could not retrieve relatedArtifacts from %s", resource.fhirType()));
             }
          case R4:
             switch (resource.fhirType()) {
                case "Library": {
-                  return getR4TerminologyDependencies(((org.hl7.fhir.r4.model.Library)resource).getRelatedArtifact());
+                  return getR4Dependencies(((org.hl7.fhir.r4.model.Library)resource).getRelatedArtifact());
                }
                case "Measure": {
-                  return getR4TerminologyDependencies(((org.hl7.fhir.r4.model.Measure)resource).getRelatedArtifact());
+                  return getR4Dependencies(((org.hl7.fhir.r4.model.Measure)resource).getRelatedArtifact());
                }
                default: throw new IllegalArgumentException(String.format("Could not retrieve relatedArtifacts from %s", resource.fhirType()));
             }
          default:
             throw new IllegalArgumentException("Unsupported fhir version: " + fhirContext.getVersion().getVersion().getFhirVersionString());
       }
+   }
+
+   public static List<String> getTerminologyDependencies(IBaseResource resource, FhirContext fhirContext) {
+      return
+         getDependencies(resource, fhirContext).stream()
+                 .filter(url -> url.contains("/CodeSystem") || url.contains("/ValueSet"))
+                 .collect(Collectors.toList());
+   }
+
+   public static List<String> getLibraryDependencies(IBaseResource resource, FhirContext fhirContext) {
+      return
+        getDependencies(resource, fhirContext).stream()
+                .filter(url -> url.contains("/Library"))
+                .collect(Collectors.toList());
+   }
+
+   public static Map<String, IBaseResource> getDepLibraryResources(IBaseResource resource, FhirContext fhirContext, Boolean includeDependencies, Boolean includeVersion, Set<String> missingDependencies) {
+      Map<String, IBaseResource> libraryResources = new HashMap<>();
+
+      List<String> libraryUrls = getLibraryDependencies(resource, fhirContext);
+
+      for (String libraryUrl : libraryUrls) {
+         IBaseResource library = IOUtils.getLibraryUrlMap(fhirContext).get(libraryUrl);
+         if (library != null) {
+            libraryResources.putIfAbsent(libraryUrl, library);
+
+            if (includeDependencies) {
+               Map<String, IBaseResource> libraryDependencies = getDepLibraryResources(library, fhirContext, includeDependencies, includeVersion, missingDependencies);
+               for (Entry<String, IBaseResource> entry : libraryDependencies.entrySet()) {
+                  libraryResources.putIfAbsent(entry.getKey(), entry.getValue());
+               }
+            }
+         }
+         else {
+            missingDependencies.add(libraryUrl);
+         }
+      }
+
+      return libraryResources;
+   }
+
+   public static Map<String, IBaseResource> getDepValueSetResources(IBaseResource resource, FhirContext fhirContext, Boolean includeDependencies, Boolean includeVersion, Set<String> missingDependencies) {
+      Map<String, IBaseResource> valueSetResources = new HashMap<>();
+
+      List<String> valueSetUrls = getTerminologyDependencies(resource, fhirContext);
+
+      for (String valueSetUrl : valueSetUrls) {
+         ValueSetsProcessor.getCachedValueSets(fhirContext).entrySet().stream()
+                 .filter(entry -> entry.getKey().equals(valueSetUrl))
+                 .forEach(entry -> valueSetResources.put(entry.getKey(), entry.getValue()));
+      }
+      Set<String> dependencies = new HashSet<>(valueSetUrls);
+
+      if (includeDependencies) {
+         List<String> libraryUrls = getLibraryDependencies(resource, fhirContext);
+         for (String url : libraryUrls) {
+            IBaseResource library = IOUtils.getLibraryUrlMap(fhirContext).get(url);
+            if (library != null) {
+               Map<String, IBaseResource> dependencyValueSets = getDepValueSetResources(library, fhirContext, includeDependencies, includeVersion, missingDependencies);
+               dependencies.addAll(dependencyValueSets.keySet());
+               for (Entry<String, IBaseResource> entry : dependencyValueSets.entrySet()) {
+                  valueSetResources.putIfAbsent(entry.getKey(), entry.getValue());
+               }
+            }
+            else {
+               missingDependencies.add(url);
+            }
+         }
+      }
+
+      if (dependencies.size() != valueSetResources.size()) {
+         dependencies.removeAll(valueSetResources.keySet());
+         for (String valueSetUrl : dependencies) {
+            missingDependencies.add(valueSetUrl);
+         }
+      }
+      return valueSetResources;
    }
 
    public static Map<String, IBaseResource> getDepValueSetResources(String cqlContentPath, String igPath, FhirContext fhirContext, boolean includeDependencies, Boolean includeVersion) throws CqlTranslatorException {
