@@ -1,23 +1,7 @@
 package org.opencds.cqf.tooling.utilities;
 
-import static org.opencds.cqf.tooling.utilities.CanonicalUtils.getTail;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
+import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.util.TerserUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.Validate;
 import org.cqframework.cql.cql2elm.*;
@@ -25,12 +9,7 @@ import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseElement;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.opencds.cqf.tooling.cql.exception.CqlTranslatorException;
 import org.opencds.cqf.tooling.processor.ValueSetsProcessor;
@@ -38,15 +17,18 @@ import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
-import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.util.TerserUtil;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
+import static org.opencds.cqf.tooling.utilities.CanonicalUtils.getTail;
 
 public class ResourceUtils {
    private static final Logger logger = LoggerFactory.getLogger(ResourceUtils.class);
@@ -307,6 +289,18 @@ public class ResourceUtils {
 
       for (String libraryUrl : libraryUrls) {
          IBaseResource library = IOUtils.getLibraryUrlMap(fhirContext).get(libraryUrl);
+         if (library == null) {
+            var id = CanonicalUtils.getId(libraryUrl);
+            var version = CanonicalUtils.getVersion(libraryUrl);
+            library = IOUtils.getLibraries(fhirContext).get(id);
+            if (library != null) {
+               var libraryVersion = ResourceUtils.getVersion(library, fhirContext);
+               if (libraryVersion != null && !libraryVersion.equals(version)) {
+                  logger.warn("Mismatch library version for {}, expected {}, found {}", libraryUrl, version, libraryVersion);
+                  library = null;
+               }
+            }
+         }
          if (library != null) {
             libraryResources.putIfAbsent(libraryUrl, library);
 
@@ -331,9 +325,14 @@ public class ResourceUtils {
       List<String> valueSetUrls = getTerminologyDependencies(resource, fhirContext);
 
       for (String valueSetUrl : valueSetUrls) {
-         ValueSetsProcessor.getCachedValueSets(fhirContext).entrySet().stream()
-                 .filter(entry -> entry.getKey().equals(valueSetUrl))
-                 .forEach(entry -> valueSetResources.put(entry.getKey(), entry.getValue()));
+         var cachedVs = ValueSetsProcessor.getCachedValueSets(fhirContext);
+         if (cachedVs.entrySet().stream().filter(
+                 entry -> entry.getKey().equals(valueSetUrl)).findAny().isEmpty()) {
+            missingDependencies.add(valueSetUrl);
+         } else {
+              cachedVs.entrySet().stream().filter(entry -> entry.getKey().equals(valueSetUrl))
+                      .forEach(entry -> valueSetResources.put(entry.getKey(), entry.getValue()));
+         }
       }
       Set<String> dependencies = new HashSet<>(valueSetUrls);
 
@@ -341,6 +340,18 @@ public class ResourceUtils {
          List<String> libraryUrls = getLibraryDependencies(resource, fhirContext);
          for (String url : libraryUrls) {
             IBaseResource library = IOUtils.getLibraryUrlMap(fhirContext).get(url);
+            if (library == null) {
+               var id = CanonicalUtils.getId(url);
+               var version = CanonicalUtils.getVersion(url);
+               library = IOUtils.getLibraries(fhirContext).get(id);
+               if (library != null) {
+                  var libraryVersion = ResourceUtils.getVersion(library, fhirContext);
+                  if (libraryVersion != null && !libraryVersion.equals(version)) {
+                     logger.warn("Mismatch library version for {}, expected {}, found {}", url, version, libraryVersion);
+                     library = null;
+                  }
+               }
+            }
             if (library != null) {
                Map<String, IBaseResource> dependencyValueSets = getDepValueSetResources(library, fhirContext, includeDependencies, includeVersion, missingDependencies);
                dependencies.addAll(dependencyValueSets.keySet());
@@ -938,5 +949,10 @@ public class ResourceUtils {
    public static void cleanUp(){
       outputResourceTracker = new ConcurrentHashMap<>();
       cachedElm = new HashMap<String, org.hl7.elm.r1.Library>();
+   }
+
+   public static String getCqlFromR4Library(org.hl7.fhir.r4.model.Library library) {
+      var cqlContent = library.getContent().stream().filter(content -> content.hasContentType() && content.getContentType().equals("text/cql")).findFirst();
+      return cqlContent.map(attachment -> new String(attachment.getData(), StandardCharsets.UTF_8)).orElse(null);
    }
 }

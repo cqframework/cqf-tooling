@@ -197,6 +197,15 @@ public class IOUtils {
         }
     }
 
+    public static void writeCqlToFile(String cql, String filePath) {
+        try (FileOutputStream writer = new FileOutputStream(filePath)) {
+            writer.write(cql.getBytes(StandardCharsets.UTF_8));
+            writer.flush();
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            throw new RuntimeException("Error writing Resource to file: " + e.getMessage());
+        }
+    }
 
     private static final Map<String, String> alreadyCopied = new ConcurrentHashMap<>();
 
@@ -342,11 +351,44 @@ public class IOUtils {
         }
     }
 
+    public static List<IBaseResource> getResourcesInDirectory(String directoryPath, FhirContext fhirContext, Boolean recursive) {
+        var resources = new ArrayList<IBaseResource>();
+        var fileIterator = FileUtils.iterateFiles(new File(directoryPath), new String[]{ "xml", "json" }, recursive);
+        while (fileIterator.hasNext()) {
+            var resource = readResource(fileIterator.next().getAbsolutePath(), fhirContext, true);
+            if (resource != null) {
+                resources.add(resource);
+            }
+        }
+        return resources;
+    }
+
+    public static List<IBaseResource> getResourcesOfTypeInDirectory(String directoryPath, FhirContext fhirContext, Class<? extends IBaseResource> clazz, Boolean recursive) {
+        var resources = new ArrayList<IBaseResource>();
+        var fileIterator = FileUtils.iterateFiles(new File(directoryPath), new String[]{ "xml", "json" }, recursive);
+        while (fileIterator.hasNext()) {
+            var resource = readResource(fileIterator.next().getAbsolutePath(), fhirContext, true);
+            if (resource != null && resource.getClass().isAssignableFrom(clazz)) {
+                resources.add(resource);
+            }
+        }
+        return resources;
+    }
+
     public static IBaseBundle bundleResourcesInDirectory(String directoryPath, FhirContext fhirContext, Boolean recursive) {
         BundleBuilder builder = new BundleBuilder(fhirContext);
         Iterator<File> fileIterator = FileUtils.iterateFiles(new File(directoryPath), new String[]{ "xml", "json" }, recursive);
         while (fileIterator.hasNext()) {
             builder.addCollectionEntry(readResource(fileIterator.next().getAbsolutePath(), fhirContext));
+        }
+        return builder.getBundle();
+    }
+
+    public static IBaseBundle bundleResourcesInDirectoryAsTransaction(String directoryPath, FhirContext fhirContext, Boolean recursive) {
+        BundleBuilder builder = new BundleBuilder(fhirContext);
+        Iterator<File> fileIterator = FileUtils.iterateFiles(new File(directoryPath), new String[]{ "xml", "json" }, recursive);
+        while (fileIterator.hasNext()) {
+            builder.addTransactionUpdateEntry(readResource(fileIterator.next().getAbsolutePath(), fhirContext));
         }
         return builder.getBundle();
     }
@@ -800,8 +842,12 @@ public class IOUtils {
                         libraries.put(entry.getValue().getIdElement().getIdPart(), entry.getValue());
                         libraryPathMap.put(entry.getValue().getIdElement().getIdPart(), entry.getKey());
                         String url = ResourceUtils.getUrl(entry.getValue(), fhirContext);
+                        var version = ResourceUtils.getVersion(entry.getValue(), fhirContext);
                         if (url != null) {
                             libraryUrlMap.put(ResourceUtils.getUrl(entry.getValue(), fhirContext), entry.getValue());
+                            if (version != null) {
+                                libraryUrlMap.put(ResourceUtils.getUrl(entry.getValue(), fhirContext) + "|" + version, entry.getValue());
+                            }
                         }
                     });
         }
@@ -973,6 +1019,22 @@ public class IOUtils {
         }
     }
 
+    private static final Map<String, String> activityDefinitionPathMap = new LinkedHashMap<>();
+    public static Map<String, String> getActivityDefinitionPathMap(FhirContext fhirContext) {
+        if (activityDefinitionPathMap.isEmpty()) {
+            setupQuestionnairePaths(fhirContext);
+        }
+        return activityDefinitionPathMap;
+    }
+
+    private static final Map<String, IBaseResource> activityDefinitions = new LinkedHashMap<>();
+    public static Map<String, IBaseResource> getActivityDefinitions(FhirContext fhirContext) {
+        if (activityDefinitions.isEmpty()) {
+            setupActivityDefinitionPaths(fhirContext);
+        }
+        return activityDefinitions;
+    }
+
     private static final Set<String> activityDefinitionPaths = new LinkedHashSet<>();
     public static Set<String> getActivityDefinitionPaths(FhirContext fhirContext) {
         if (activityDefinitionPaths.isEmpty()) {
@@ -1000,7 +1062,11 @@ public class IOUtils {
             resources.entrySet().stream()
                     .filter(entry -> entry.getValue() != null)
                     .filter(entry ->  activityDefinitionClassName.equals(entry.getValue().getClass().getName()))
-                    .forEach(entry -> activityDefinitionPaths.add(entry.getKey()));
+                    .forEach(entry -> {
+                        activityDefinitionPaths.add(entry.getKey());
+                        activityDefinitions.put(entry.getValue().getIdElement().getIdPart(), entry.getValue());
+                        activityDefinitionPathMap.put(entry.getValue().getIdElement().getIdPart(), entry.getKey());
+                    });
         }
     }
 

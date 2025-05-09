@@ -2,12 +2,6 @@ package org.opencds.cqf.tooling.library;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.google.common.base.Strings;
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.regex.Pattern;
 import org.apache.commons.io.FilenameUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -24,11 +18,17 @@ import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.processor.BaseProcessor;
 import org.opencds.cqf.tooling.processor.CqlProcessor;
 import org.opencds.cqf.tooling.processor.IGProcessor;
-import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.regex.Pattern;
 
 public class LibraryProcessor extends BaseProcessor {
     private static final Logger logger = LoggerFactory.getLogger(LibraryProcessor.class);

@@ -147,7 +147,7 @@ public abstract class AbstractBundler {
             }
 
             for (Map.Entry<String, IBaseResource> resourceEntry : resourcesMap.entrySet()) {
-                String resourceId = "";
+                String resourceId;
 
                 if (resourceEntry.getValue() != null) {
                     resourceId = resourceEntry.getValue()
@@ -203,23 +203,9 @@ public abstract class AbstractBundler {
                         shouldPersist = shouldPersist
                                 & ResourceUtils.safeAddResource(primaryLibrarySourcePath, resources, fhirContext);
 
-                        /*
-                        // Should not use CQL processing to determine value set dependencies
-                        String cqlFileName = IOUtils.formatFileName(primaryLibraryName, IOUtils.Encoding.CQL, fhirContext);
-
-                        String cqlLibrarySourcePath = IOUtils.getCqlLibrarySourcePath(primaryLibraryName, cqlFileName, binaryPaths);
-
-                        if (cqlLibrarySourcePath == null) {
-                            failedExceptionMessages.put(resourceSourcePath, String.format("Could not determine CqlLibrarySource path for library %s", primaryLibraryName));
-                            //exit from task:
-                            return null;
-                        }
-                        */
-
                         if (includeTerminology) {
                             //throws CQLTranslatorException if failed with severe errors, which will be logged and reported it in the final summary
                             try {
-                                //ValueSetsProcessor.bundleValueSets(cqlLibrarySourcePath, igPath, fhirContext, resources, encoding, includeDependencies, includeVersion);
                                 ValueSetsProcessor.bundleValueSets(primaryLibrary, fhirContext, resources, encoding, includeDependencies, includeVersion);
                             } catch (CqlTranslatorException cqlTranslatorException) {
                                 cqlTranslatorErrorMessages.put(primaryLibraryName, cqlTranslatorException.getErrors());
@@ -275,7 +261,7 @@ public abstract class AbstractBundler {
 
 
                     } catch (Exception e) {
-                        String failMsg = "";
+                        String failMsg;
                         if (e.getMessage() != null) {
                             failMsg = e.getMessage();
                         } else {
