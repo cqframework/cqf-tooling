@@ -222,7 +222,8 @@ public class BundleUtils {
         ArrayList <Resource> resourceArrayList = new ArrayList<>();
         for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entry : bundle.getEntry()) {
             org.hl7.fhir.r4.model.Resource entryResource = entry.getResource();
-            if (entryResource != null) {
+            // TODO: How to handle nested bundles? Recursively or skip? Skipping for now...
+            if (entryResource != null && !(entryResource instanceof Bundle)) {
                 resourceArrayList.add(entryResource);
             }
         }

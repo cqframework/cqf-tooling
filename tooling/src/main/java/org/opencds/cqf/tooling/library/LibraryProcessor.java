@@ -18,7 +18,6 @@ import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.processor.BaseProcessor;
 import org.opencds.cqf.tooling.processor.CqlProcessor;
 import org.opencds.cqf.tooling.processor.IGProcessor;
-import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 import org.slf4j.Logger;
@@ -103,15 +102,15 @@ public class LibraryProcessor extends BaseProcessor {
      * Bundles library dependencies for a given FHIR library file and populates the provided resource map.
      * This method executes asynchronously by invoking the associated task queue.
      *
-     * @param path        The path to the FHIR library file.
+     * @param library     The Library resource.
      * @param fhirContext The FHIR context to use for processing resources.
      * @param resources   The map to populate with library resources.
      * @param encoding    The encoding to use for reading and processing resources.
      * @param versioned   A boolean indicating whether to consider versioned resources.
      */
-    public void bundleLibraryDependencies(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
+    public void bundleLibraryDependencies(IBaseResource library, FhirContext fhirContext, Map<String, IBaseResource> resources,
                                           Encoding encoding, boolean versioned) throws Exception {
-        Queue<Callable<Void>> bundleLibraryDependenciesTasks = bundleLibraryDependenciesTasks(path, fhirContext, resources, encoding, versioned);
+        Queue<Callable<Void>> bundleLibraryDependenciesTasks = bundleLibraryDependenciesTasks(library, fhirContext, resources, encoding, versioned);
         ThreadUtils.executeTasks(bundleLibraryDependenciesTasks);
     }
 
@@ -119,7 +118,7 @@ public class LibraryProcessor extends BaseProcessor {
      * Recursively bundles library dependencies for a given FHIR library file and populates the provided resource map.
      * Each dependency is added as a Callable task to be executed asynchronously.
      *
-     * @param path        The path to the FHIR library file.
+     * @param library     The Library resource
      * @param fhirContext The FHIR context to use for processing resources.
      * @param resources   The map to populate with library resources.
      * @param encoding    The encoding to use for reading and processing resources.
@@ -127,28 +126,23 @@ public class LibraryProcessor extends BaseProcessor {
      * @return A queue of Callable tasks, each representing the bundling of a library dependency.
      * The Callable returns null (Void) and is meant for asynchronous execution.
      */
-    public Queue<Callable<Void>> bundleLibraryDependenciesTasks(String path, FhirContext fhirContext, Map<String, IBaseResource> resources,
+    public Queue<Callable<Void>> bundleLibraryDependenciesTasks(IBaseResource library, FhirContext fhirContext, Map<String, IBaseResource> resources,
                                                                 Encoding encoding, boolean versioned) throws Exception {
 
         Queue<Callable<Void>> returnTasks = new ConcurrentLinkedQueue<>();
 
-        String fileName = FilenameUtils.getName(path);
-        boolean prefixed = fileName.toLowerCase().startsWith("library-");
-        Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(path, fhirContext, encoding, versioned, logger);
-        // String currentResourceID = IOUtils.getTypeQualifiedResourceId(path, fhirContext);
-        for (IBaseResource resource : dependencies.values()) {
-            returnTasks.add(() -> {
-                resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
+        returnTasks.add(() -> {
+            Set<String> missingDependencies = new HashSet<>();
+            Map<String, IBaseResource> dependencies = ResourceUtils.getDepLibraryResources(library, fhirContext, true, versioned, missingDependencies);
+            for (IBaseResource resource : dependencies.values()) {
+                resources.putIfAbsent(resource.fhirType() + '/' + resource.getIdElement().getIdPart(), resource);
+            }
 
-                // NOTE: Assuming dependency library will be in directory of dependent.
-                String dependencyPath = IOUtils.getResourceFileName(IOUtils.getResourceDirectory(path), resource, encoding, fhirContext, versioned, prefixed);
+            // TODO: Return missing dependencies as translator warnings...
 
-                returnTasks.addAll(bundleLibraryDependenciesTasks(dependencyPath, fhirContext, resources, encoding, versioned));
-
-                //return statement needed for Callable<Void>
-                return null;
-            });
-        }
+            //return statement needed for Callable<Void>
+            return null;
+        });
         return returnTasks;
     }
 

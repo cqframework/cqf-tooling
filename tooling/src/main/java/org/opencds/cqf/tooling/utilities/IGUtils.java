@@ -1,16 +1,6 @@
 package org.opencds.cqf.tooling.utilities;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +11,16 @@ import org.opencds.cqf.tooling.utilities.converters.ResourceAndTypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class IGUtils {
     private static final Logger logger = LoggerFactory.getLogger(IGUtils.class);
@@ -170,7 +169,7 @@ public class IGUtils {
             try (Stream<Path> walk = Files.walk(Paths.get(this.rootDir))) {
                 List<String> pathList = walk.filter(p -> !Files.isDirectory(p))
                         .map(p -> p.toString().toLowerCase())
-                        .filter(f -> f.endsWith("ig.ini"))
+                        .filter(f -> f.endsWith("ig.ini") && !f.endsWith(IOUtils.concatFilePath("template", "ig.ini")))
                         .collect(Collectors.toList());
                 if (pathList.isEmpty()) {
                     logger.error("Unable to determine path to IG ini file");
@@ -295,7 +294,7 @@ public class IGUtils {
             if (this.measureResourcePath != null) {
                 return this.measureResourcePath;
             }
-            if (refreshPlanDefinitions) {
+            if (refreshMeasures) {
                 String candidate = FilenameUtils.concat(getResourcePath(), "measure");
                 if (new File(candidate).isDirectory()) {
                     return candidate;

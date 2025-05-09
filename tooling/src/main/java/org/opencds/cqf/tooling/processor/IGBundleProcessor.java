@@ -2,8 +2,8 @@ package org.opencds.cqf.tooling.processor;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
-import org.opencds.cqf.tooling.measure.MeasureBundler;
-import org.opencds.cqf.tooling.plandefinition.PlanDefinitionBundler;
+import org.opencds.cqf.tooling.packaging.PackageMeasures;
+import org.opencds.cqf.tooling.packaging.PackagePlanDefinitions;
 import org.opencds.cqf.tooling.questionnaire.QuestionnaireBundler;
 import org.opencds.cqf.tooling.utilities.HttpClientUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -34,14 +34,16 @@ public class IGBundleProcessor {
                          Boolean includeDependencies, Boolean includeTerminology, Boolean includePatientScenarios, Boolean versioned, Boolean addBundleTimestamp,
                          FhirContext fhirContext, String fhirUri) {
 
-        new MeasureBundler().bundleResources(refreshedLibraryNames,
-                igPath, binaryPaths, includeDependencies, includeTerminology,
-                includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
-                fhirUri, encoding, verboseMessaging);
-        new PlanDefinitionBundler(this.libraryProcessor, this.cdsHooksProcessor).bundleResources(refreshedLibraryNames,
-                igPath, binaryPaths, includeDependencies, includeTerminology,
-                includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
-                fhirUri, encoding, verboseMessaging);
+//        new MeasureBundler().bundleResources(refreshedLibraryNames,
+//                igPath, binaryPaths, includeDependencies, includeTerminology,
+//                includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
+//                fhirUri, encoding, verboseMessaging);
+        new PackageMeasures(igPath, fhirContext, includeDependencies, includeTerminology, includePatientScenarios, fhirUri);
+//        new PlanDefinitionBundler(this.libraryProcessor, this.cdsHooksProcessor).bundleResources(refreshedLibraryNames,
+//                igPath, binaryPaths, includeDependencies, includeTerminology,
+//                includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
+//                fhirUri, encoding, verboseMessaging);
+        new PackagePlanDefinitions(igPath, fhirContext, includeDependencies, includeTerminology, includePatientScenarios, fhirUri);
         new QuestionnaireBundler(this.libraryProcessor).bundleResources(refreshedLibraryNames,
                 igPath, binaryPaths, includeDependencies, includeTerminology,
                 includePatientScenarios, versioned, addBundleTimestamp, fhirContext,
