@@ -419,7 +419,7 @@ public class CqlProcessor {
 
                     DataRequirementsProcessor drp = new DataRequirementsProcessor();
                     org.hl7.fhir.r5.model.Library requirementsLibrary =
-                            drp.gatherDataRequirements(libraryManager, translator.getTranslatedLibrary(), options, null, false);
+                            drp.gatherDataRequirements(libraryManager, translator.getTranslatedLibrary(), options, null, false, false);
 
                     // TODO: Report context, requires 1.5 translator (ContextDef)
                     // NOTE: In STU3, only Patient context is supported
