@@ -8,7 +8,11 @@ import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ValueSetsProcessor {
@@ -84,9 +88,9 @@ public class ValueSetsProcessor {
     }
 
     public static void bundleValueSets(IBaseResource resource, FhirContext fhirContext,
-           Map<String, IBaseResource> resources, Encoding encoding, Boolean includeDependencies, Boolean includeVersion) throws CqlTranslatorException {
+           Map<String, IBaseResource> resources, Encoding encoding, Boolean includeDependencies) throws CqlTranslatorException {
         Set<String> missingDependencies = new HashSet<>();
-        Map<String, IBaseResource> dependencies = ResourceUtils.getDepValueSetResources(resource, fhirContext, includeDependencies, includeVersion, missingDependencies);
+        Map<String, IBaseResource> dependencies = ResourceUtils.getDepValueSetResources(resource, fhirContext, includeDependencies, missingDependencies);
         for (IBaseResource dependency : dependencies.values()) {
             resources.putIfAbsent(resource.fhirType() + '/' + dependency.getIdElement().getIdPart(), resource);
         }

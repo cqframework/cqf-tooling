@@ -92,7 +92,7 @@ public abstract class Package<T extends IBaseResource> {
 
         if (includeTerminology) {
             var dependencyValueSets = ResourceUtils.getDepValueSetResources(
-                    primaryLibrary, fhirContext, true, false, missingDependencies);
+                    primaryLibrary, fhirContext, true, missingDependencies);
             dependencies.addAll(dependencyValueSets.values());
         }
 

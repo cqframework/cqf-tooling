@@ -3,7 +3,11 @@ package org.opencds.cqf.tooling.packaging.r4;
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.FilenameUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.tooling.packaging.Package;
 import org.opencds.cqf.tooling.packaging.TestPackage;
 import org.opencds.cqf.tooling.utilities.BundleUtils;
@@ -13,7 +17,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class PackageMeasure extends Package<Measure> {

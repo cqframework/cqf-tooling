@@ -1,15 +1,34 @@
 package org.opencds.cqf.tooling.utilities;
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
+import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.util.TerserUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.Validate;
-import org.cqframework.cql.cql2elm.*;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
+import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
+import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
+import org.cqframework.cql.cql2elm.LibraryManager;
+import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.ValueSetDef;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseElement;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.opencds.cqf.tooling.cql.exception.CqlTranslatorException;
 import org.opencds.cqf.tooling.processor.ValueSetsProcessor;
@@ -22,8 +41,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -98,7 +123,7 @@ public class ResourceUtils {
       }
    }
 
-   private static List<org.hl7.fhir.dstu3.model.RelatedArtifact> getStu3RelatedArtifacts(String pathToLibrary, FhirContext fhirContext) {
+   private static List<RelatedArtifact> getStu3RelatedArtifacts(String pathToLibrary, FhirContext fhirContext) {
       Object mainLibrary = IOUtils.readResource(pathToLibrary, fhirContext);
       if (!(mainLibrary instanceof org.hl7.fhir.dstu3.model.Library)) {
          throw new IllegalArgumentException("pathToLibrary must be a path to a Library type Resource");
@@ -319,7 +344,7 @@ public class ResourceUtils {
       return libraryResources;
    }
 
-   public static Map<String, IBaseResource> getDepValueSetResources(IBaseResource resource, FhirContext fhirContext, Boolean includeDependencies, Boolean includeVersion, Set<String> missingDependencies) {
+   public static Map<String, IBaseResource> getDepValueSetResources(IBaseResource resource, FhirContext fhirContext, Boolean includeDependencies, Set<String> missingDependencies) {
       Map<String, IBaseResource> valueSetResources = new HashMap<>();
 
       List<String> valueSetUrls = getTerminologyDependencies(resource, fhirContext);
@@ -353,7 +378,7 @@ public class ResourceUtils {
                }
             }
             if (library != null) {
-               Map<String, IBaseResource> dependencyValueSets = getDepValueSetResources(library, fhirContext, includeDependencies, includeVersion, missingDependencies);
+               Map<String, IBaseResource> dependencyValueSets = getDepValueSetResources(library, fhirContext, includeDependencies, missingDependencies);
                dependencies.addAll(dependencyValueSets.keySet());
                for (Entry<String, IBaseResource> entry : dependencyValueSets.entrySet()) {
                   valueSetResources.putIfAbsent(entry.getKey(), entry.getValue());

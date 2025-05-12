@@ -206,7 +206,7 @@ public abstract class AbstractBundler {
                         if (includeTerminology) {
                             //throws CQLTranslatorException if failed with severe errors, which will be logged and reported it in the final summary
                             try {
-                                ValueSetsProcessor.bundleValueSets(primaryLibrary, fhirContext, resources, encoding, includeDependencies, includeVersion);
+                                ValueSetsProcessor.bundleValueSets(primaryLibrary, fhirContext, resources, encoding, includeDependencies);
                             } catch (CqlTranslatorException cqlTranslatorException) {
                                 cqlTranslatorErrorMessages.put(primaryLibraryName, cqlTranslatorException.getErrors());
                             }
