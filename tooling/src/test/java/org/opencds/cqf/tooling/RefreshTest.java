@@ -1,32 +1,31 @@
 package org.opencds.cqf.tooling;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-
+import ca.uhn.fhir.context.FhirContext;
+import com.google.common.base.Strings;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Library;
 import org.opencds.cqf.tooling.utilities.IOUtils;
+import org.opencds.cqf.tooling.utilities.constants.CrmiConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
-import com.google.common.base.Strings;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 
-import ca.uhn.fhir.context.FhirContext;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
-public abstract class RefreshTest implements CqfmSoftwareSystemTest {
+public abstract class RefreshTest implements SoftwareSystemTest {
 
     private static final Logger logger = LoggerFactory.getLogger(RefreshTest.class);
 
-    private FhirContext fhirContext;
+    private final FhirContext fhirContext;
     private String testName;
 
     public RefreshTest(FhirContext fhirContext, String testName) {
@@ -52,24 +51,24 @@ public abstract class RefreshTest implements CqfmSoftwareSystemTest {
         }
     }
 
-    protected void validateCqfmSoftwareSystemExtension(String domainResourcePath) {
+    protected void validateSoftwareSystemExtension(String domainResourcePath) {
         IBaseResource resource = IOUtils.readResource(domainResourcePath, getFhirContext());
-        if (resource == null || !(resource instanceof Library)) {
-            // log error
+        if (!(resource instanceof Library)) {
+            logger.warn("Expected Library resource, found {}", resource.fhirType());
         } else {
             DomainResource domainResource = (DomainResource)resource;
-            Extension softwareSystemExtension = domainResource.getExtensionByUrl(cqfmSoftwareSystemExtensionUrl);
+            Extension softwareSystemExtension = domainResource.getExtensionByUrl(CrmiConstants.SOFTWARE_SYSTEM_EXT_URL);
             assertNotNull(softwareSystemExtension);
         }
     }
 
     protected void validateNoCqfmSoftwareSystemExtension(String domainResourcePath) {
         IBaseResource resource = IOUtils.readResource(domainResourcePath, getFhirContext());
-        if (resource == null || !(resource instanceof Library)) {
-            // log error
+        if (!(resource instanceof Library)) {
+            logger.warn("Expected Library resource, found {}", resource.fhirType());
         } else {
             DomainResource domainResource = (DomainResource)resource;
-            Extension softwareSystemExtension = domainResource.getExtensionByUrl(cqfmSoftwareSystemExtensionUrl);
+            Extension softwareSystemExtension = domainResource.getExtensionByUrl(CrmiConstants.SOFTWARE_SYSTEM_EXT_URL);
             assertNull(softwareSystemExtension);
         }
     }

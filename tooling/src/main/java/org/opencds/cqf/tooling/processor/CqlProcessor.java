@@ -190,7 +190,7 @@ public class CqlProcessor {
             }
         }
         catch (Exception E) {
-            logger.logDebugMessage(ILoggingService.LogCategory.PROGRESS, String.format("Errors occurred attempting to translate CQL content: %s", E.getMessage()));
+            logger.logMessage(String.format("Errors occurred attempting to translate CQL content: %s", E.getMessage()));
         }
     }
 
@@ -329,7 +329,15 @@ public class CqlProcessor {
             for (NpmPackage p : packages) {
                 if (p.name() != null && !p.name().isEmpty() && p.canonical() != null && !p.canonical().isEmpty()) {
                     NamespaceInfo ni = new NamespaceInfo(p.name(), p.canonical());
-                    libraryManager.getNamespaceManager().addNamespace(ni);
+                    if (libraryManager.getNamespaceManager().resolveNamespaceUri(ni.getName()) != null) {
+                        logger.logMessage(String.format("Skipped loading namespace info for name %s because it is already registered", ni.getName()));
+                    }
+                    else if (libraryManager.getNamespaceManager().getNamespaceInfoFromUri(ni.getUri()) != null) {
+                        logger.logMessage(String.format("Skipped loading namespace info for uri %s because it is already registered", ni.getUri()));
+                    }
+                    else {
+                        libraryManager.getNamespaceManager().addNamespace(ni);
+                    }
                 }
             }
         }
@@ -411,7 +419,7 @@ public class CqlProcessor {
 
                     DataRequirementsProcessor drp = new DataRequirementsProcessor();
                     org.hl7.fhir.r5.model.Library requirementsLibrary =
-                            drp.gatherDataRequirements(libraryManager, translator.getTranslatedLibrary(), options, null, false);
+                            drp.gatherDataRequirements(libraryManager, translator.getTranslatedLibrary(), options, null, false, false);
 
                     // TODO: Report context, requires 1.5 translator (ContextDef)
                     // NOTE: In STU3, only Patient context is supported
