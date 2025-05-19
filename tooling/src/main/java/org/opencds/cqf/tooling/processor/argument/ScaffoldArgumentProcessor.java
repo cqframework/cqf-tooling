@@ -4,7 +4,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
-import org.opencds.cqf.tooling.common.CqfmSoftwareSystem;
+import org.opencds.cqf.tooling.common.SoftwareSystem;
 import org.opencds.cqf.tooling.parameter.ScaffoldParameters;
 import org.opencds.cqf.tooling.utilities.ArgUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -58,11 +58,11 @@ public class ScaffoldArgumentProcessor {
 		String igPath = (String)options.valueOf(IG_PATH_OPTIONS[0]);
 		List<String> namesOfResources = (List<String>)options.valuesOf(NAME_OF_RESOURCE_CREATE_OPTIONS[0]);
 		List<String> softwareSystems = (List<String>)options.valuesOf(SOFTWARE_SYSTEM_OPTIONS[0]);
-		ArrayList<CqfmSoftwareSystem> softwareSystemsList = new ArrayList<CqfmSoftwareSystem>();
+		ArrayList<SoftwareSystem> softwareSystemsList = new ArrayList<SoftwareSystem>();
 		for (String system : softwareSystems) {
 			String name = system.split("=")[0];
 			String version = system.split("=")[1];
-			CqfmSoftwareSystem softwareSystem = new CqfmSoftwareSystem(name, version, "CQFramework");
+			SoftwareSystem softwareSystem = new SoftwareSystem(name, version, "CQFramework");
 			softwareSystemsList.add(softwareSystem);
 		}
 

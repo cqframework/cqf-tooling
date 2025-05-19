@@ -31,12 +31,12 @@ public class R4LibraryProcessorTest extends LibraryProcessorTest {
             FileUtils.deleteDirectory(dir);
         }
     }
-    
+
     @Test
     void testRefreshOverwriteLibrariesWithCqfmSoftwareSystemExtension() throws Exception {
         String targetDirectory = "target" + separator + "refreshLibraries" + separator + this.resourceDirectory;
         copyResourcesToTargetDir(targetDirectory, this.resourceDirectory);
-        
+
         String libraryPath = separator + "input" + separator + "resources" + separator + "library" + separator + "library-EXM124_FHIR4-8.2.000.json";
         runRefresh(
             targetDirectory,
@@ -45,7 +45,7 @@ public class R4LibraryProcessorTest extends LibraryProcessorTest {
             false
         );
 
-        validateCqfmSoftwareSystemExtension(targetDirectory + libraryPath);
+        validateSoftwareSystemExtension(targetDirectory + libraryPath);
     }
 
     @Test

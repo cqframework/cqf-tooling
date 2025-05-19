@@ -1,31 +1,26 @@
 package org.opencds.cqf.tooling.library.r4;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import ca.uhn.fhir.context.FhirContext;
 import com.google.common.base.Strings;
-
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.r4.formats.FormatUtilities;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Resource;
-import org.opencds.cqf.tooling.common.r4.CqfmSoftwareSystemHelper;
+import org.opencds.cqf.tooling.common.r4.SoftwareSystemHelper;
 import org.opencds.cqf.tooling.library.LibraryProcessor;
 import org.opencds.cqf.tooling.parameter.RefreshLibraryParameters;
 import org.opencds.cqf.tooling.utilities.IOUtils;
 import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.io.File;
+import java.util.*;
 
 public class R4LibraryProcessor extends LibraryProcessor {
     private String libraryPath;
     private FhirContext fhirContext;
     private Encoding encoding;
-    private static CqfmSoftwareSystemHelper cqfmHelper;
+    private static SoftwareSystemHelper softwareSystemHelper;
 
     private String getLibraryPath(String libraryPath) {
         File f = new File(libraryPath);
@@ -61,7 +56,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
             }
         }
         else if (file.isDirectory()) {
-            for (File libraryFile : file.listFiles()) {
+            for (File libraryFile : Objects.requireNonNull(file.listFiles())) {
                 if(IOUtils.isXMLOrJson(libraryPath, libraryFile.getName())) {
                     loadLibrary(fileMap, libraries, libraryFile);
                 }
@@ -77,7 +72,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
         for (org.hl7.fhir.r5.model.Library refreshedLibrary : refreshedLibraries) {
             Library library = (Library) versionConvertor_40_50.convertResource(refreshedLibrary);
             String filePath = null;
-            Encoding fileEncoding = null;            
+            Encoding fileEncoding = null;
             if (fileMap.containsKey(refreshedLibrary.getId()))
             {
                 filePath = fileMap.get(refreshedLibrary.getId());
@@ -87,7 +82,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
                 fileEncoding = encoding;
             }
             if (shouldApplySoftwareSystemStamp) {
-                cqfmHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
+                softwareSystemHelper.ensureCQFToolingExtensionAndDevice(library, fhirContext);
             }
             // Issue 96
             // Passing the includeVersion here to handle not using the version number in the filename
@@ -147,7 +142,7 @@ public class R4LibraryProcessor extends LibraryProcessor {
         encoding = params.encoding;
         versioned = params.versioned;
 
-        R4LibraryProcessor.cqfmHelper = new CqfmSoftwareSystemHelper(rootDir);
+        R4LibraryProcessor.softwareSystemHelper = new SoftwareSystemHelper(rootDir);
 
         if (!Strings.isNullOrEmpty(params.libraryOutputDirectory)) {
             return refreshLibraries(libraryPath, params.libraryOutputDirectory, encoding, params.shouldApplySoftwareSystemStamp);

@@ -1,10 +1,7 @@
 package org.opencds.cqf.tooling.processor;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
+import org.cqframework.fhir.npm.LibraryLoader;
+import org.cqframework.fhir.npm.NpmPackageManager;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
@@ -13,21 +10,30 @@ import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.conv30_50.VersionConvertor_30_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r5.context.IWorkerContext;
-import org.hl7.fhir.r5.elementmodel.Manager;
+import org.hl7.fhir.r5.context.ILoggingService;
 import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.utilities.IniFile;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.VersionUtilities;
+import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.opencds.cqf.tooling.exception.IGInitializationException;
-import org.opencds.cqf.tooling.npm.LibraryLoader;
-import org.opencds.cqf.tooling.npm.NpmPackageManager;
 import org.opencds.cqf.tooling.utilities.IGUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BaseProcessor implements IProcessorContext, IWorkerContext.ILoggingService {
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
+
+public class BaseProcessor implements IProcessorContext, ILoggingService {
 
     protected static final Logger logger = LoggerFactory.getLogger(BaseProcessor.class);
 
@@ -104,7 +110,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
         try {
             igPath = Utilities.path(rootDir, igPath);
         } catch (IOException e) {
-            String message = String.format(
+            var message = String.format(
                     "Exceptions occurred creating igPath from source rootDir: %s, and igPath: %s", rootDir, igPath);
             logMessage(message);
             throw new IGInitializationException(message, e);
@@ -122,7 +128,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
         this.fhirVersion = sourceIg.getFhirVersion().get(0).getCode();
         packageId = sourceIg.getPackageId();
         canonicalBase = determineCanonical(sourceIg.getUrl());
-        packageManager = new NpmPackageManager(sourceIg, this.fhirVersion);
+        packageManager = new NpmPackageManager(sourceIg);
 
         // Setup binary paths (cql source directories)
         binaryPaths = IGUtils.extractBinaryPaths(rootDir, sourceIg);
@@ -132,16 +138,37 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
      * Initializes from an ig.ini file in the root directory
      */
     public void initializeFromIni(String iniFile) {
-        IniFile ini = new IniFile(new File(iniFile).getAbsolutePath());
-        String rootDir = Utilities.getDirectoryForFile(ini.getFileName());
-        String igPath = ini.getStringProperty("IG", "ig");
-        String specifiedFhirVersion = ini.getStringProperty("IG", "fhir-version");
+        var ini = new IniFile(new File(iniFile).getAbsolutePath());
+        String iniRootDir;
+        try {
+            iniRootDir = Utilities.getDirectoryForFile(ini.getFileName());
+        } catch (IOException ioe) {
+            logger.error("Error determining containing directory for INI file", ioe);
+            throw new IGInitializationException("Error determining containing directory for INI file", ioe);
+        }
+        var igPath = ini.getStringProperty("IG", "ig");
+        var specifiedFhirVersion = ini.getStringProperty("IG", "fhir-version");
         if (specifiedFhirVersion == null || specifiedFhirVersion == "") {
             logMessage("fhir-version was not specified in the ini file. Trying FHIR version 4.0.1");
             specifiedFhirVersion = "4.0.1";
         }
 
-        initializeFromIg(rootDir, igPath, specifiedFhirVersion);
+        initializeFromIg(iniRootDir, igPath, specifiedFhirVersion);
+    }
+
+    public void initializeFromIni(Path iniPath) throws FileNotFoundException {
+        var iniFile = iniPath.toFile();
+        var ini = new IniFile(new FileInputStream(iniPath.toFile()));
+        String iniRootDir;
+        iniRootDir = iniPath.getParent().toString();
+        var igPath = ini.getStringProperty("IG", "ig");
+        var specifiedFhirVersion = ini.getStringProperty("IG", "fhir-version");
+        if (specifiedFhirVersion == null || specifiedFhirVersion == "") {
+            logMessage("fhir-version was not specified in the ini file. Trying FHIR version 4.0.1");
+            specifiedFhirVersion = "4.0.1";
+        }
+
+        initializeFromIg(iniRootDir, igPath, specifiedFhirVersion);
     }
 
     private List<String> binaryPaths;
@@ -158,7 +185,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
 
     public CqlProcessor getCqlProcessor() {
         if (cqlProcessor == null) {
-            LibraryLoader reader = new LibraryLoader(fhirVersion);
+            var reader = new LibraryLoader(fhirVersion);
             try {
                 ucumService = new UcumEssenceService(UcumEssenceService.class.getResourceAsStream("/ucum-essence.xml"));
             } catch (UcumException e) {
@@ -167,12 +194,18 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
             if (packageManager == null) {
                 throw new IllegalStateException("packageManager is null. It should be initialized at this point.");
             }
-            cqlProcessor = new CqlProcessor(new CopyOnWriteArrayList<>(packageManager.getNpmList()),
+            cqlProcessor = new CqlProcessor(new CopyOnWriteArrayList<>(cleanPackageList(packageManager.getNpmList())),
                     new CopyOnWriteArrayList<>(binaryPaths), reader, this, ucumService,
                     packageId, canonicalBase, verboseMessaging);
         }
 
         return cqlProcessor;
+    }
+
+    private List<NpmPackage> cleanPackageList(List<NpmPackage> originalPackageList) {
+        Set<String> pathSet = new HashSet<>();
+        return originalPackageList.stream().filter(e -> pathSet.add(e.getPath()))
+                .collect(Collectors.toList());
     }
 
     private ImplementationGuide loadSourceIG(String igPath) {
@@ -181,16 +214,15 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
                 sourceIg = (ImplementationGuide) org.hl7.fhir.r5.formats.FormatUtilities.loadFile(igPath);
             } catch (IOException | FHIRException e) {
                 try {
-                    VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
+                    var versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
                     sourceIg = (ImplementationGuide) versionConvertor_40_50
                             .convertResource(org.hl7.fhir.r4.formats.FormatUtilities.loadFile(igPath));
                 } catch (IOException | FHIRException ex) {
-                    byte[] src = TextFile.fileToBytes(igPath);
-                    Manager.FhirFormat fmt = org.hl7.fhir.r5.formats.FormatUtilities.determineFormat(src);
+                    var src = TextFile.fileToBytes(igPath);
+                    var fmt = org.hl7.fhir.r5.formats.FormatUtilities.determineFormat(src);
 
-                    org.hl7.fhir.dstu3.formats.ParserBase parser = org.hl7.fhir.dstu3.formats.FormatUtilities
-                            .makeParser(fmt.toString());
-                    VersionConvertor_30_50 versionConvertor_30_50 = new VersionConvertor_30_50(new BaseAdvisor_30_50());
+                    var parser = org.hl7.fhir.dstu3.formats.FormatUtilities.makeParser(fmt.toString());
+                    var versionConvertor_30_50 = new VersionConvertor_30_50(new BaseAdvisor_30_50());
                     sourceIg = (ImplementationGuide) versionConvertor_30_50.convertResource(parser.parse(src));
                 }
             }
@@ -204,15 +236,14 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
     private ImplementationGuide loadSourceIG(String igPath, String specifiedFhirVersion) {
         try {
             if (VersionUtilities.isR3Ver(specifiedFhirVersion)) {
-                byte[] src = TextFile.fileToBytes(igPath);
-                Manager.FhirFormat fmt = org.hl7.fhir.r5.formats.FormatUtilities.determineFormat(src);
-                org.hl7.fhir.dstu3.formats.ParserBase parser = org.hl7.fhir.dstu3.formats.FormatUtilities
-                        .makeParser(fmt.toString());
-                VersionConvertor_30_50 versionConvertor_30_50 = new VersionConvertor_30_50(new BaseAdvisor_30_50());
+                var src = TextFile.fileToBytes(igPath);
+                var fmt = org.hl7.fhir.r5.formats.FormatUtilities.determineFormat(src);
+                var parser = org.hl7.fhir.dstu3.formats.FormatUtilities.makeParser(fmt.toString());
+                var versionConvertor_30_50 = new VersionConvertor_30_50(new BaseAdvisor_30_50());
                 sourceIg = (ImplementationGuide) versionConvertor_30_50.convertResource(parser.parse(src));
             } else if (VersionUtilities.isR4Ver(specifiedFhirVersion)) {
-                org.hl7.fhir.r4.model.Resource res = org.hl7.fhir.r4.formats.FormatUtilities.loadFile(igPath);
-                VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
+                var res = org.hl7.fhir.r4.formats.FormatUtilities.loadFile(igPath);
+                var versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
                 sourceIg = (ImplementationGuide) versionConvertor_40_50.convertResource(res);
             } else if (VersionUtilities.isR5Ver(specifiedFhirVersion)) {
                 sourceIg = (ImplementationGuide) org.hl7.fhir.r5.formats.FormatUtilities.loadFile(igPath);
@@ -220,7 +251,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
                 throw new FHIRException("Unknown Version '" + specifiedFhirVersion + "'");
             }
         } catch (IOException e) {
-            String message = String.format("Exceptions occurred loading IG path: %s", igPath);
+            var message = String.format("Exceptions occurred loading IG path: %s", igPath);
             logMessage(message);
             throw new IGInitializationException(message, e);
         }
@@ -242,7 +273,7 @@ public class BaseProcessor implements IProcessorContext, IWorkerContext.ILogging
     }
 
     @Override
-    public void logDebugMessage(IWorkerContext.ILoggingService.LogCategory category, String msg) {
+    public void logDebugMessage(ILoggingService.LogCategory category, String msg) {
         logger.debug("Category: {} Message: {}", category.name(), msg);
     }
 
