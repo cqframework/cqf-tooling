@@ -144,6 +144,12 @@ public abstract class ClassInfoBuilder {
         if (this.settings.modelPrefix != null && typeName.startsWith(this.settings.modelPrefix)) {
             typeName = typeName.substring(this.settings.modelPrefix.length());
         }
+        else {
+            String modelName = resolveModelName(sd.getUrl());
+            if (modelName != null && typeName.startsWith(modelName)) {
+                typeName = typeName.substring(modelName.length());
+            }
+        }
         typeName = mapTypeName(typeName);
         return typeName;
     }
@@ -1461,7 +1467,7 @@ public abstract class ClassInfoBuilder {
         }
 
         if (baseTypeName != null && !this.typeInfos.containsKey(baseTypeName)) {
-            StructureDefinition baseSd = this.structureDefinitions.get(unQualify(baseTypeName));
+            StructureDefinition baseSd = this.structureDefinitions.get(getTail(baseDefinition));
             buildClassInfo(modelName, baseSd);
         }
 
