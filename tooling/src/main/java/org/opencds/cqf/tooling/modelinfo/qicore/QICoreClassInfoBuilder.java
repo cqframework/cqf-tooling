@@ -115,6 +115,7 @@ public class QICoreClassInfoBuilder extends ClassInfoBuilder {
         this.buildFor("QICore", "qicore-questionnaireresponse"); // v5.0.0
         */
 
+        /*
         // v6.0.0
         this.buildFor("QICore", "qicore-adverseevent");
         this.buildFor("QICore", "qicore-allergyintolerance");
@@ -196,5 +197,73 @@ public class QICoreClassInfoBuilder extends ClassInfoBuilder {
         this.buildFor("QICore", "qicore-task");
         this.buildFor("QICore", "qicore-taskrejected");
         this.buildFor("QICore", "Questionnaire");
+        */
+
+        // v7.0.0
+        this.buildFor("QICore", "qicore-adverseevent");
+        this.buildFor("QICore", "qicore-allergyintolerance");
+        this.buildFor("QICore", "qicore-bodystructure");
+        this.buildFor("QICore", "qicore-claim");
+        this.buildFor("QICore", "qicore-claimresponse");
+        this.buildFor("QICore", "qicore-careplan");
+        this.buildFor("QICore", "qicore-careteam");
+        this.buildFor("QICore", "qicore-communication");
+        this.buildFor("QICore", "qicore-communicationdone");
+        this.buildFor("QICore", "qicore-communicationnotdone");
+        this.buildFor("QICore", "qicore-communicationrequest");
+        this.buildFor("QICore", "qicore-condition-encounter-diagnosis");
+        this.buildFor("QICore", "qicore-condition-problems-health-concerns");
+        this.buildFor("QICore", "qicore-coverage");
+        this.buildFor("QICore", "qicore-device");
+        this.buildFor("QICore", "qicore-devicerequest");
+        this.buildFor("QICore", "qicore-devicerequested");
+        this.buildFor("QICore", "qicore-deviceprohibited");
+        this.buildFor("QICore", "qicore-deviceusestatement");
+        this.buildFor("QICore", "qicore-diagnosticreport-lab");
+        this.buildFor("QICore", "qicore-diagnosticreport-note");
+        this.buildFor("QICore", "qicore-encounter");
+        this.buildFor("QICore", "qicore-familymemberhistory");
+        this.buildFor("QICore", "qicore-flag");
+        this.buildFor("QICore", "qicore-goal");
+        this.buildFor("QICore", "qicore-imagingstudy");
+        this.buildFor("QICore", "qicore-immunization");
+        this.buildFor("QICore", "qicore-immunizationdone");
+        this.buildFor("QICore", "qicore-immunizationnotdone");
+        this.buildFor("QICore", "qicore-immunizationevaluation");
+        this.buildFor("QICore", "qicore-immunizationrecommendation");
+        this.buildFor("QICore", "qicore-location");
+        this.buildFor("QICore", "qicore-medication");
+        this.buildFor("QICore", "qicore-medicationadministration");
+        this.buildFor("QICore", "qicore-medicationadministrationdone");
+        this.buildFor("QICore", "qicore-medicationadministrationnotdone");
+        this.buildFor("QICore", "qicore-medicationdispense");
+        this.buildFor("QICore", "qicore-medicationdispensedone");
+        this.buildFor("QICore", "qicore-medicationdispensedeclined");
+        this.buildFor("QICore", "qicore-medicationrequest");
+        this.buildFor("QICore", "qicore-medicationrequested");
+        this.buildFor("QICore", "qicore-medicationprohibited");
+        this.buildFor("QICore", "qicore-medicationstatement");
+        this.buildFor("QICore", "qicore-nutritionorder");
+        this.buildFor("QICore", "qicore-simple-observation");
+        this.buildFor("QICore", "qicore-nonpatient-observation");
+        this.buildFor("QICore", "qicore-observation-lab");
+        this.buildFor("QICore", "qicore-observation-clinical-result");
+        this.buildFor("QICore", "qicore-observation-screening-assessment");
+        this.buildFor("QICore", "qicore-organization");
+        this.buildFor("QICore", "qicore-patient");
+        this.buildFor("QICore", "qicore-practitioner");
+        this.buildFor("QICore", "qicore-practitionerrole");
+        this.buildFor("QICore", "qicore-procedure");
+        this.buildFor("QICore", "qicore-proceduredone");
+        this.buildFor("QICore", "qicore-procedurenotdone");
+        this.buildFor("QICore", "qicore-questionnaireresponse");
+        this.buildFor("QICore", "qicore-relatedperson");
+        this.buildFor("QICore", "qicore-servicerequest");
+        this.buildFor("QICore", "qicore-servicerequested");
+        this.buildFor("QICore", "qicore-serviceprohibited");
+        this.buildFor("QICore", "qicore-substance");
+        this.buildFor("QICore", "qicore-task");
+        this.buildFor("QICore", "qicore-taskdone");
+        this.buildFor("QICore", "qicore-taskrejected");
     }
 }

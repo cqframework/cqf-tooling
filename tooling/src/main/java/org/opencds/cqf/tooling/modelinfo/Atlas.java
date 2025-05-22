@@ -16,19 +16,7 @@ import com.google.common.io.Files;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CapabilityStatement;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CompartmentDefinition;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.ImplementationGuide;
-import org.hl7.fhir.r4.model.NamingSystem;
-import org.hl7.fhir.r4.model.OperationDefinition;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.ResourceType;
-import org.hl7.fhir.r4.model.SearchParameter;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.tooling.utilities.CanonicalUtils;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -52,6 +40,7 @@ public class Atlas {
         valueSets = new HashMap<>();
         conceptMaps = new HashMap<>();
         namingSystems = new HashMap<>();
+        parameters = new HashMap<>();
     }
 
     private Map<String, Resource> resources;
@@ -115,6 +104,11 @@ public class Atlas {
     private Map<String, NamingSystem> namingSystems;
     public Map<String, NamingSystem> getNamingSystems() {
         return namingSystems;
+    }
+
+    private Map<String, Parameters> parameters;
+    public Map<String, Parameters> getParameters() {
+        return parameters;
     }
 
     public void loadPaths(String basePath, String resourcePaths) {
@@ -310,6 +304,16 @@ public class Atlas {
         }
     }
 
+    private void indexParameters(Parameters parameters) {
+        String id = parameters.getId();
+        if (!this.parameters.containsKey(id)) {
+            this.parameters.put(id, parameters);
+        }
+        else {
+            logger.info("Duplicate Parameters with id {}", id);
+        }
+    }
+
     private void indexResource(IBaseResource resource) {
         if (resource instanceof CapabilityStatement) {
             indexCapabilityStatement((CapabilityStatement)resource);
@@ -340,6 +344,9 @@ public class Atlas {
         }
         else if (resource instanceof NamingSystem) {
             indexNamingSystem((NamingSystem)resource);
+        }
+        else if (resource instanceof Parameters) {
+            indexParameters((Parameters)resource);
         }
         else {
             logger.info("Resource with id {} skipped", resource.getIdElement());
