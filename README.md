@@ -32,7 +32,17 @@ Executable jars are produced by the CI system on Maven Central: [Download execut
 
 This can be run with `java -jar tooling-cli-2.0.0.jar -VsacXlsxToValueSetBatch`
 
-Documentation of the various operations is provided in the [Main](src/main/java/org/opencds/cqf/tooling/Main.java) class.
+### Documentation
+Various operation documentation can be found in the individual operation `README` files.
+- [Bundling](tooling/src/main/java/org/opencds/cqf/tooling/operations/bundle/README.md)
+- [Date Roller](tooling/src/main/java/org/opencds/cqf/tooling/operations/dateroller/README.md)
+- [Library generation and updating](tooling/src/main/java/org/opencds/cqf/tooling/operations/library/README.md)
+- [MAT resource extraction](tooling/src/main/java/org/opencds/cqf/tooling/operations/mat/README.md)
+- [Process Accelerator Kit](tooling/src/main/java/org/opencds/cqf/tooling/operations/acceleratorkit/README.md)
+- [Profile Conformance](tooling/src/main/java/org/opencds/cqf/tooling/operations/validation/README.md)
+- [Valueset generator](tooling/src/main/java/org/opencds/cqf/tooling/operations/valueset/generate/config/README.md)
+- [Valueset $expand](tooling/src/main/java/org/opencds/cqf/tooling/operations/valueset/expansion/README.md)
+
 
 ## Commit Policy
 
