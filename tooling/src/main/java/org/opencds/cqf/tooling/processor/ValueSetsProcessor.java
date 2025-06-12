@@ -1,6 +1,7 @@
 package org.opencds.cqf.tooling.processor;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.tooling.cql.exception.CqlTranslatorException;
 import org.opencds.cqf.tooling.utilities.IOUtils;
@@ -8,8 +9,10 @@ import org.opencds.cqf.tooling.utilities.IOUtils.Encoding;
 import org.opencds.cqf.tooling.utilities.ResourceUtils;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ValueSetsProcessor {
@@ -80,7 +83,19 @@ public class ValueSetsProcessor {
             Map<String, IBaseResource> resources, Encoding encoding, Boolean includeDependencies, Boolean includeVersion) throws CqlTranslatorException {
             Map<String, IBaseResource> dependencies = ResourceUtils.getDepValueSetResources(cqlContentPath, igPath, fhirContext, includeDependencies, includeVersion);
             for (IBaseResource resource : dependencies.values()) {
-                resources.putIfAbsent(resource.getIdElement().getIdPart(), resource);
+                resources.putIfAbsent(resource.fhirType() + '/' + resource.getIdElement().getIdPart(), resource);
             }
+    }
+
+    public static void bundleValueSets(IBaseResource resource, FhirContext fhirContext,
+           Map<String, IBaseResource> resources, Encoding encoding, Boolean includeDependencies) throws CqlTranslatorException {
+        Set<String> missingDependencies = new HashSet<>();
+        Map<String, IBaseResource> dependencies = ResourceUtils.getDepValueSetResources(resource, fhirContext, includeDependencies, missingDependencies);
+        for (IBaseResource dependency : dependencies.values()) {
+            resources.putIfAbsent(resource.fhirType() + '/' + dependency.getIdElement().getIdPart(), resource);
+        }
+        if (missingDependencies.size() > 0) {
+            throw new CqlTranslatorException(missingDependencies.stream().collect(Collectors.toList()), CqlCompilerException.ErrorSeverity.Warning);
+        }
     }
 }
