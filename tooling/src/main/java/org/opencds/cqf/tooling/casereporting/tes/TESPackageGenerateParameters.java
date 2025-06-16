@@ -15,5 +15,5 @@ public class TESPackageGenerateParameters {
     public Set<IOUtils.Encoding> outputFileEncodings; // -encoding (-e)
     public boolean writeConditionGroupers; // -writeconditiongroupers (-wcg)
     public boolean writeReportingSpecificationGroupers; // -writereportingspecificationgroupers (-wrsg)
-    public boolean writeAdditionalContextGroupers; // -writegeneratedreportingspecificationgroupers (-wgrsg)
+    public boolean writeAdditionalContextGroupers; // -writeadditionalcontextgroupers (-wacg)
 }
