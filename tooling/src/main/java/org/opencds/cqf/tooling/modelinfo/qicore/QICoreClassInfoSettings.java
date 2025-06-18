@@ -15,6 +15,7 @@ class QICoreClassInfoSettings extends ClassInfoSettings {
         this.helpersLibraryName = "FHIRHelpers";
         this.useCQLPrimitives = true;
         this.createSliceElements = true;
+        this.flatten = false;
 
         this.codeableTypes = new HashSet<String>() {
             {
@@ -24,85 +25,171 @@ class QICoreClassInfoSettings extends ClassInfoSettings {
             }
         };
 
-        this.urlToModel.put("http://hl7.org/fhir", "QICore");
+        if (this.flatten) {
+            this.urlToModel.put("http://hl7.org/fhir", "QICore");
+        }
 
-        this.primitiveTypeMappings = new HashMap<String, String>() {
-            {
-                put("QICore.base64Binary", "System.String");
-                put("QICore.boolean", "System.Boolean");
-                put("QICore.canonical", "System.String");
-                put("QICore.code", "System.String");
-                put("QICore.date", "System.Date");
-                put("QICore.dateTime", "System.DateTime");
-                put("QICore.decimal", "System.Decimal");
-                put("QICore.id", "System.String");
-                put("QICore.instant", "System.DateTime");
-                put("QICore.integer", "System.Integer");
-                put("QICore.markdown", "System.String");
-                put("QICore.oid", "System.String");
-                put("QICore.positiveInt", "System.Integer");
-                put("QICore.string", "System.String");
-                put("QICore.time", "System.Time");
-                put("QICore.unsignedInt", "System.Integer");
-                put("QICore.uri", "System.String");
-                put("QICore.url", "System.String");
-                put("QICore.uuid", "System.String");
-                put("QICore.xhtml", "System.String");
-            }
-        };
+        if (this.flatten) {
+            this.primitiveTypeMappings = new HashMap<String, String>() {
+                {
+                    put("QICore.base64Binary", "System.String");
+                    put("QICore.boolean", "System.Boolean");
+                    put("QICore.canonical", "System.String");
+                    put("QICore.code", "System.String");
+                    put("QICore.date", "System.Date");
+                    put("QICore.dateTime", "System.DateTime");
+                    put("QICore.decimal", "System.Decimal");
+                    put("QICore.id", "System.String");
+                    put("QICore.instant", "System.DateTime");
+                    put("QICore.integer", "System.Integer");
+                    put("QICore.markdown", "System.String");
+                    put("QICore.oid", "System.String");
+                    put("QICore.positiveInt", "System.Integer");
+                    put("QICore.string", "System.String");
+                    put("QICore.time", "System.Time");
+                    put("QICore.unsignedInt", "System.Integer");
+                    put("QICore.uri", "System.String");
+                    put("QICore.url", "System.String");
+                    put("QICore.uuid", "System.String");
+                    put("QICore.xhtml", "System.String");
+                }
+            };
+        }
+        else {
+            this.primitiveTypeMappings = new HashMap<String, String>() {
+                {
+                    put("FHIR.base64Binary", "System.String");
+                    put("FHIR.boolean", "System.Boolean");
+                    put("FHIR.canonical", "System.String");
+                    put("FHIR.code", "System.String");
+                    put("FHIR.date", "System.Date");
+                    put("FHIR.dateTime", "System.DateTime");
+                    put("FHIR.decimal", "System.Decimal");
+                    put("FHIR.id", "System.String");
+                    put("FHIR.instant", "System.DateTime");
+                    put("FHIR.integer", "System.Integer");
+                    put("FHIR.markdown", "System.String");
+                    put("FHIR.oid", "System.String");
+                    put("FHIR.positiveInt", "System.Integer");
+                    put("FHIR.string", "System.String");
+                    put("FHIR.time", "System.Time");
+                    put("FHIR.unsignedInt", "System.Integer");
+                    put("FHIR.uri", "System.String");
+                    put("FHIR.url", "System.String");
+                    put("FHIR.uuid", "System.String");
+                    put("FHIR.xhtml", "System.String");
+                }
+            };
+        }
 
-        this.cqlTypeMappings = new HashMap<String, String>() {
-            {
-                put("QICore.xsd:base64Binary", "System.String");
-                put("QICore.base64Binary", "System.String");
-                put("QICore.xsd:boolean", "System.Boolean");
-                put("QICore.boolean", "System.Boolean");
-                put("QICore.canonical", "System.String");
-                put("QICore.xsd:token", "System.String");
-                put("QICore.code", "System.String");
-                put("QICore.xsd:gYear OR xsd:gYearMonth OR xsd:date", "System.Date");
-                put("QICore.xsd:date", "System.Date");
-                put("QICore.date", "System.Date");
-                put("QICore.xsd:gYear OR xsd:gYearMonth OR xsd:date OR xsd:dateTime", "System.DateTime");
-                put("QICore.dateTime", "System.DateTime");
-                put("QICore.xsd:decimal OR xsd:double", "System.Decimal");
-                put("QICore.decimal", "System.Decimal");
-                put("QICore.id", "System.String");
-                put("QICore.xsd:dateTime", "System.DateTime");
-                put("QICore.instant", "System.DateTime");
-                put("QICore.xsd:int", "System.Integer");
-                put("QICore.integer", "System.Integer");
-                put("QICore.markdown", "System.String");
-                put("QICore.oid", "System.String");
-                put("QICore.xsd:positiveInteger", "System.Integer");
-                put("QICore.positiveInt", "System.Integer");
-                put("QICore.xsd:string", "System.String");
-                put("QICore.string", "System.String");
-                put("QICore.xsd:time", "System.Time");
-                put("QICore.time", "System.Time");
-                put("QICore.xsd:nonNegativeInteger", "System.Integer");
-                put("QICore.unsignedInt", "System.Integer");
-                put("QICore.xsd:anyURI", "System.String");
-                put("QICore.uri", "System.String");
-                put("QICore.url", "System.String");
-                put("QICore.uuid", "System.String");
-                put("QICore.xhtml:div", "System.String");
-                put("QICore.xhtml", "System.String");
-                put("QICore.Coding", "System.Code");
-                put("QICore.CodeableConcept", "System.Concept");
-                put("QICore.Period", "Interval<System.DateTime>");
-                put("QICore.Range", "Interval<System.Quantity>");
-                put("QICore.Quantity", "System.Quantity");
-                put("QICore.Age", "System.Quantity");
-                put("QICore.Distance", "System.Quantity");
-                put("QICore.SimpleQuantity", "System.Quantity");
-                put("QICore.Duration", "System.Quantity");
-                put("QICore.Count", "System.Quantity");
-                put("QICore.MoneyQuantity", "System.Quantity");
-                put("QICore.Money", "System.Decimal");
-                put("QICore.Ratio", "System.Ratio");
-            }
-        };
+        if (this.flatten) {
+            this.cqlTypeMappings = new HashMap<String, String>() {
+                {
+                    put("QICore.xsd:base64Binary", "System.String");
+                    put("QICore.base64Binary", "System.String");
+                    put("QICore.xsd:boolean", "System.Boolean");
+                    put("QICore.boolean", "System.Boolean");
+                    put("QICore.canonical", "System.String");
+                    put("QICore.xsd:token", "System.String");
+                    put("QICore.code", "System.String");
+                    put("QICore.xsd:gYear OR xsd:gYearMonth OR xsd:date", "System.Date");
+                    put("QICore.xsd:date", "System.Date");
+                    put("QICore.date", "System.Date");
+                    put("QICore.xsd:gYear OR xsd:gYearMonth OR xsd:date OR xsd:dateTime", "System.DateTime");
+                    put("QICore.dateTime", "System.DateTime");
+                    put("QICore.xsd:decimal OR xsd:double", "System.Decimal");
+                    put("QICore.decimal", "System.Decimal");
+                    put("QICore.id", "System.String");
+                    put("QICore.xsd:dateTime", "System.DateTime");
+                    put("QICore.instant", "System.DateTime");
+                    put("QICore.xsd:int", "System.Integer");
+                    put("QICore.integer", "System.Integer");
+                    put("QICore.markdown", "System.String");
+                    put("QICore.oid", "System.String");
+                    put("QICore.xsd:positiveInteger", "System.Integer");
+                    put("QICore.positiveInt", "System.Integer");
+                    put("QICore.xsd:string", "System.String");
+                    put("QICore.string", "System.String");
+                    put("QICore.xsd:time", "System.Time");
+                    put("QICore.time", "System.Time");
+                    put("QICore.xsd:nonNegativeInteger", "System.Integer");
+                    put("QICore.unsignedInt", "System.Integer");
+                    put("QICore.xsd:anyURI", "System.String");
+                    put("QICore.uri", "System.String");
+                    put("QICore.url", "System.String");
+                    put("QICore.uuid", "System.String");
+                    put("QICore.xhtml:div", "System.String");
+                    put("QICore.xhtml", "System.String");
+                    put("QICore.Coding", "System.Code");
+                    put("QICore.CodeableConcept", "System.Concept");
+                    put("QICore.Period", "Interval<System.DateTime>");
+                    put("QICore.Range", "Interval<System.Quantity>");
+                    put("QICore.Quantity", "System.Quantity");
+                    put("QICore.Age", "System.Quantity");
+                    put("QICore.Distance", "System.Quantity");
+                    put("QICore.SimpleQuantity", "System.Quantity");
+                    put("QICore.Duration", "System.Quantity");
+                    put("QICore.Count", "System.Quantity");
+                    put("QICore.MoneyQuantity", "System.Quantity");
+                    put("QICore.Money", "System.Decimal");
+                    put("QICore.Ratio", "System.Ratio");
+                }
+            };
+        }
+        else {
+            this.cqlTypeMappings = new HashMap<String, String>() {
+                {
+                    put("FHIR.xsd:base64Binary", "System.String");
+                    put("FHIR.base64Binary", "System.String");
+                    put("FHIR.xsd:boolean", "System.Boolean");
+                    put("FHIR.boolean", "System.Boolean");
+                    put("FHIR.canonical", "System.String");
+                    put("FHIR.xsd:token", "System.String");
+                    put("FHIR.code", "System.String");
+                    put("FHIR.xsd:gYear OR xsd:gYearMonth OR xsd:date", "System.Date");
+                    put("FHIR.xsd:date", "System.Date");
+                    put("FHIR.date", "System.Date");
+                    put("FHIR.xsd:gYear OR xsd:gYearMonth OR xsd:date OR xsd:dateTime", "System.DateTime");
+                    put("FHIR.dateTime", "System.DateTime");
+                    put("FHIR.xsd:decimal OR xsd:double", "System.Decimal");
+                    put("FHIR.decimal", "System.Decimal");
+                    put("FHIR.id", "System.String");
+                    put("FHIR.xsd:dateTime", "System.DateTime");
+                    put("FHIR.instant", "System.DateTime");
+                    put("FHIR.xsd:int", "System.Integer");
+                    put("FHIR.integer", "System.Integer");
+                    put("FHIR.markdown", "System.String");
+                    put("FHIR.oid", "System.String");
+                    put("FHIR.xsd:positiveInteger", "System.Integer");
+                    put("FHIR.positiveInt", "System.Integer");
+                    put("FHIR.xsd:string", "System.String");
+                    put("FHIR.string", "System.String");
+                    put("FHIR.xsd:time", "System.Time");
+                    put("FHIR.time", "System.Time");
+                    put("FHIR.xsd:nonNegativeInteger", "System.Integer");
+                    put("FHIR.unsignedInt", "System.Integer");
+                    put("FHIR.xsd:anyURI", "System.String");
+                    put("FHIR.uri", "System.String");
+                    put("FHIR.url", "System.String");
+                    put("FHIR.uuid", "System.String");
+                    put("FHIR.xhtml:div", "System.String");
+                    put("FHIR.xhtml", "System.String");
+                    put("FHIR.Coding", "System.Code");
+                    put("FHIR.CodeableConcept", "System.Concept");
+                    put("FHIR.Period", "Interval<System.DateTime>");
+                    put("FHIR.Range", "Interval<System.Quantity>");
+                    put("FHIR.Quantity", "System.Quantity");
+                    put("FHIR.Age", "System.Quantity");
+                    put("FHIR.Distance", "System.Quantity");
+                    put("FHIR.SimpleQuantity", "System.Quantity");
+                    put("FHIR.Duration", "System.Quantity");
+                    put("FHIR.Count", "System.Quantity");
+                    put("FHIR.MoneyQuantity", "System.Quantity");
+                    put("FHIR.Money", "System.Decimal");
+                    put("FHIR.Ratio", "System.Ratio");
+                }
+            };
+        }
 
 /*
         this.typeNameMappings = new HashMap<String, String>() {

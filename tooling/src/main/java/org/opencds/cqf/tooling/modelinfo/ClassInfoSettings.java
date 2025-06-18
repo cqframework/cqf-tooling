@@ -17,6 +17,8 @@ public class ClassInfoSettings {
     public boolean createExtensionElements = false;
     public boolean createReferenceElements = false;
 
+    public boolean flatten = false;
+
     public Set<String> codeableTypes = new HashSet<String>();
     public Map<String, String> primitiveTypeMappings = new HashMap<String, String>();
     public Map<String, String> cqlTypeMappings = new HashMap<String, String>();
